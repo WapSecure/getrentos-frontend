@@ -28,6 +28,7 @@ import { landlordService, type BillingCycle } from '@/services/landlordService';
 import {
   automationService,
   type AutomationRule,
+  type AutomationTrigger,
   type BroadcastAudience,
   type CreateRuleInput,
 } from '@/services/automationService';
@@ -37,10 +38,13 @@ import {
   CADENCE_LABELS,
   CADENCE_OPTIONS,
   MERGE_FIELDS,
+  TRIGGER_LABELS,
+  TRIGGER_OPTIONS,
 } from './constants';
 
 type RuleForm = {
   name: string;
+  trigger: AutomationTrigger;
   audience: BroadcastAudience;
   propertyId: string;
   title: string;
@@ -52,6 +56,7 @@ type RuleForm = {
 
 const emptyForm: RuleForm = {
   name: '',
+  trigger: 'SCHEDULE',
   audience: 'ALL_TENANTS',
   propertyId: '',
   title: '',
@@ -83,16 +88,27 @@ export function AutomationRulesManager() {
 
   const save = useMutation({
     mutationFn: () => {
-      const payload: CreateRuleInput = {
-        name: form.name,
-        audience: form.audience,
-        propertyId: form.audience === 'PROPERTY' ? form.propertyId : undefined,
-        title: form.title,
-        body: form.body,
-        cadence: form.cadence,
-        firstRunAt: form.firstRunAt,
-        enabled: form.enabled,
-      };
+      const isSchedule = form.trigger === 'SCHEDULE';
+      const payload: CreateRuleInput = isSchedule
+        ? {
+            name: form.name,
+            trigger: 'SCHEDULE',
+            audience: form.audience,
+            propertyId: form.audience === 'PROPERTY' ? form.propertyId : undefined,
+            title: form.title,
+            body: form.body,
+            cadence: form.cadence,
+            firstRunAt: form.firstRunAt,
+            enabled: form.enabled,
+          }
+        : {
+            name: form.name,
+            trigger: form.trigger,
+            propertyId: form.propertyId || undefined,
+            title: form.title,
+            body: form.body,
+            enabled: form.enabled,
+          };
       return editingId
         ? unwrap(automationService.updateRule(editingId, payload))
         : unwrap(automationService.createRule(payload));
@@ -145,12 +161,13 @@ export function AutomationRulesManager() {
     setEditingId(r.id);
     setForm({
       name: r.name,
-      audience: r.audience,
+      trigger: r.trigger,
+      audience: r.audience ?? 'ALL_TENANTS',
       propertyId: r.propertyId ?? '',
       title: r.title,
       body: r.body,
-      cadence: r.cadence,
-      firstRunAt: r.nextRunAt.slice(0, 10),
+      cadence: r.cadence ?? 'MONTHLY',
+      firstRunAt: r.nextRunAt ? r.nextRunAt.slice(0, 10) : '',
       enabled: r.enabled,
     });
     setOpen(true);
@@ -160,16 +177,17 @@ export function AutomationRulesManager() {
     form.name.trim() &&
     form.title.trim() &&
     form.body.trim() &&
-    form.firstRunAt &&
-    (form.audience !== 'PROPERTY' || form.propertyId);
+    (form.trigger !== 'SCHEDULE' ||
+      (form.firstRunAt && (form.audience !== 'PROPERTY' || form.propertyId)));
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-foreground">Scheduled rules</h2>
+          <h2 className="text-base font-semibold text-foreground">Automation rules</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send an announcement to a tenant audience automatically, on a recurring schedule.
+            Send an announcement automatically — on a recurring schedule, or when a tenancy event
+            happens (rent due soon, overdue, lease expiring).
           </p>
         </div>
         <Button onClick={openCreate}>New rule</Button>
@@ -182,7 +200,7 @@ export function AutomationRulesManager() {
           <EmptyState
             icon={CalendarClock}
             title="No automation rules yet"
-            description="Create a rule to, say, message all tenants a reminder every month."
+            description="Create a rule to message all tenants monthly, or to chase a tenant automatically when their rent goes overdue."
           />
         </Card>
       ) : (
@@ -193,14 +211,21 @@ export function AutomationRulesManager() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-semibold text-foreground">{r.name}</h3>
-                    <Badge variant="neutral">{AUDIENCE_LABELS[r.audience]}</Badge>
-                    <Badge variant="info">{CADENCE_LABELS[r.cadence]}</Badge>
+                    <Badge variant="info">{TRIGGER_LABELS[r.trigger]}</Badge>
+                    {r.trigger === 'SCHEDULE' && r.audience && (
+                      <Badge variant="neutral">{AUDIENCE_LABELS[r.audience]}</Badge>
+                    )}
+                    {r.trigger === 'SCHEDULE' && r.cadence && (
+                      <Badge variant="neutral">{CADENCE_LABELS[r.cadence]}</Badge>
+                    )}
                     {!r.enabled && <Badge variant="warning">Paused</Badge>}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Next run {formatDate(r.nextRunAt, 'long')}
+                    {r.trigger === 'SCHEDULE'
+                      ? `Next run ${r.nextRunAt ? formatDate(r.nextRunAt, 'long') : '—'}`
+                      : 'Fires automatically for the tenant when it happens'}
                     {r.lastRunAt
-                      ? ` · last sent to ${r.lastRecipientCount ?? 0} on ${formatDate(r.lastRunAt)}`
+                      ? ` · last sent ${r.lastRecipientCount ?? 0} on ${formatDate(r.lastRunAt)}`
                       : ' · not run yet'}
                   </p>
                 </div>
@@ -210,16 +235,18 @@ export function AutomationRulesManager() {
                     onCheckedChange={(enabled) => toggle.mutate({ id: r.id, enabled })}
                     aria-label="Enable rule"
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    rounded="md"
-                    icon={<Play className="h-4 w-4" />}
-                    onClick={() => run.mutate(r.id)}
-                    disabled={run.isPending}
-                  >
-                    Run now
-                  </Button>
+                  {r.trigger === 'SCHEDULE' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      rounded="md"
+                      icon={<Play className="h-4 w-4" />}
+                      onClick={() => run.mutate(r.id)}
+                      disabled={run.isPending}
+                    >
+                      Run now
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -252,7 +279,8 @@ export function AutomationRulesManager() {
             {editingId ? 'Edit rule' : 'New automation rule'}
           </DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            On the schedule you set, this sends the announcement to the chosen audience.
+            On a schedule it broadcasts to an audience; on an event it messages the tenant the event
+            is about.
           </DialogDescription>
           <div className="mt-5 space-y-4">
             <Field label="Rule name">
@@ -262,40 +290,60 @@ export function AutomationRulesManager() {
                 placeholder="e.g. Monthly rent reminder"
               />
             </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Audience">
-                <Select
-                  value={form.audience}
-                  onValueChange={(v) =>
-                    setForm((f) => ({ ...f, audience: v as BroadcastAudience }))
-                  }
-                  options={AUDIENCE_OPTIONS}
-                />
-              </Field>
-              {form.audience === 'PROPERTY' && (
-                <Field label="Property">
+            <Field label="When">
+              <Select
+                value={form.trigger}
+                onValueChange={(v) => setForm((f) => ({ ...f, trigger: v as AutomationTrigger }))}
+                options={TRIGGER_OPTIONS}
+              />
+            </Field>
+            {form.trigger === 'SCHEDULE' ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Audience">
                   <Select
-                    value={form.propertyId}
-                    onValueChange={(propertyId) => setForm((f) => ({ ...f, propertyId }))}
-                    placeholder="Select a property"
-                    options={properties.map((p) => ({ value: p.id, label: p.name }))}
+                    value={form.audience}
+                    onValueChange={(v) =>
+                      setForm((f) => ({ ...f, audience: v as BroadcastAudience }))
+                    }
+                    options={AUDIENCE_OPTIONS}
                   />
                 </Field>
-              )}
-              <Field label="Repeat">
+                {form.audience === 'PROPERTY' && (
+                  <Field label="Property">
+                    <Select
+                      value={form.propertyId}
+                      onValueChange={(propertyId) => setForm((f) => ({ ...f, propertyId }))}
+                      placeholder="Select a property"
+                      options={properties.map((p) => ({ value: p.id, label: p.name }))}
+                    />
+                  </Field>
+                )}
+                <Field label="Repeat">
+                  <Select
+                    value={form.cadence}
+                    onValueChange={(v) => setForm((f) => ({ ...f, cadence: v as BillingCycle }))}
+                    options={CADENCE_OPTIONS}
+                  />
+                </Field>
+                <Field label="First run">
+                  <DatePicker
+                    value={form.firstRunAt}
+                    onChange={(v) => setForm((f) => ({ ...f, firstRunAt: v }))}
+                  />
+                </Field>
+              </div>
+            ) : (
+              <Field label="Property scope" hint="Optional — leave as all for the whole portfolio.">
                 <Select
-                  value={form.cadence}
-                  onValueChange={(v) => setForm((f) => ({ ...f, cadence: v as BillingCycle }))}
-                  options={CADENCE_OPTIONS}
+                  value={form.propertyId}
+                  onValueChange={(propertyId) => setForm((f) => ({ ...f, propertyId }))}
+                  options={[
+                    { value: '', label: 'All properties' },
+                    ...properties.map((p) => ({ value: p.id, label: p.name })),
+                  ]}
                 />
               </Field>
-              <Field label="First run">
-                <DatePicker
-                  value={form.firstRunAt}
-                  onChange={(v) => setForm((f) => ({ ...f, firstRunAt: v }))}
-                />
-              </Field>
-            </div>
+            )}
             <Field label="Title">
               <Input
                 value={form.title}
