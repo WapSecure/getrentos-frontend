@@ -283,7 +283,7 @@ const ClaimForm = () => {
           {resolved && (
             <span className="mt-1 flex items-start gap-1 text-xs text-emerald-700 dark:text-emerald-400">
               <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              {resolved.title} — {resolved.address}, {resolved.city}
+              {resolved.title} · {resolved.city}
             </span>
           )}
           {lookup === 'notfound' && (
