@@ -191,6 +191,7 @@ export const qk = {
   agent: {
     dashboard: ['agent', 'dashboard'] as const,
     profile: ['agent', 'profile'] as const,
+    workOrders: ['agent', 'work-orders'] as const,
     properties: (page = 1, pageSize = 20, search?: string) =>
       ['agent', 'properties', { page, pageSize, search: search ?? null }] as const,
     tasks: (page = 1, pageSize = 20, status?: string, type?: string, search?: string) =>

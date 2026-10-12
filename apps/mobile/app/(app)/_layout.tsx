@@ -26,6 +26,7 @@ export default function AppLayout() {
       <Stack.Screen name="agent-reviews" options={DETAIL_OPTIONS} />
       <Stack.Screen name="agent-trust-profile" options={DETAIL_OPTIONS} />
       <Stack.Screen name="agent-inspections" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="agent-work-orders" options={DETAIL_OPTIONS} />
       <Stack.Screen name="agent-verifications" options={DETAIL_OPTIONS} />
       <Stack.Screen name="agent-sync" options={DETAIL_OPTIONS} />
       <Stack.Screen name="help" options={DETAIL_OPTIONS} />

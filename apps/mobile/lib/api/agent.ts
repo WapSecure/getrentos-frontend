@@ -214,6 +214,36 @@ export interface SubmitVerificationInput {
   notes?: string;
 }
 
+export type AgentWorkOrderStatus =
+  | 'SUBMITTED'
+  | 'ASSIGNED'
+  | 'IN_PROGRESS'
+  | 'RESOLVED'
+  | 'CANCELLED';
+
+export interface AgentWorkOrderPhoto {
+  url: string;
+}
+
+/** An on-site maintenance job an owner assigned to this field agent. */
+export interface AgentWorkOrder {
+  id: string;
+  issueTitle: string;
+  description: string;
+  category: string;
+  priority: string;
+  status: AgentWorkOrderStatus;
+  propertyTitle: string;
+  propertyAddress: string;
+  unitName: string;
+  scheduledFor: string | null;
+  fieldStartedAt: string | null;
+  fieldCompletedAt: string | null;
+  fieldReport: string | null;
+  photos: AgentWorkOrderPhoto[];
+  createdAt: string;
+}
+
 function toQuery(params: Record<string, string | number | undefined>): string {
   const q = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
@@ -271,6 +301,24 @@ export const agentApi = {
 
   removeInspectionPhoto: (photoId: string) =>
     apiFetch<void>(`/agent/inspections/photos/${photoId}`, { method: 'DELETE' }),
+
+  /** On-site maintenance jobs assigned to this field agent. */
+  workOrders: () => apiFetch<AgentWorkOrder[]>('/agent/work-orders'),
+
+  startWorkOrder: (id: string) =>
+    apiFetch<AgentWorkOrder>(`/agent/work-orders/${id}/start`, { method: 'POST' }),
+
+  addWorkOrderPhoto: (id: string, file: PickedFile) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    return apiUpload<AgentWorkOrderPhoto>(`/agent/work-orders/${id}/photos`, form);
+  },
+
+  completeWorkOrder: (id: string, report?: string) =>
+    apiFetch<AgentWorkOrder>(`/agent/work-orders/${id}/complete`, {
+      method: 'POST',
+      body: report ? { report } : {},
+    }),
 
   verifications: (
     page = 1,
