@@ -26,8 +26,8 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-// pnpm's non-hoisted layout: follow symlinks to the real package dirs.
-config.resolver.unstable_enableSymlinks = true;
+// pnpm's non-hoisted layout: Metro follows symlinks to the real package dirs
+// by default now, so there is no flag to set here.
 config.resolver.disableHierarchicalLookup = false;
 
 // Keep the sibling web apps and their build output out of the file map.
