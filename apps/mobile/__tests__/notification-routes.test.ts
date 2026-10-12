@@ -9,6 +9,13 @@ describe('notification routes', () => {
     expect(routeForActionUrl('/renter/nowhere')).toBeNull();
   });
 
+  it('opens each side of a viewing on its own viewings screen', () => {
+    expect(routeForActionUrl('/renter/viewings')).toBe('/(app)/viewings');
+    expect(routeForActionUrl('/buyer/viewings')).toBe('/(app)/buyer-viewings');
+    expect(routeForActionUrl('/landlord/viewing-requests')).toBe('/(app)/landlord-viewings');
+    expect(routeForActionUrl('/owner/viewings')).toBe('/(app)/owner-viewings');
+  });
+
   it('falls back by type when the action has no native screen', () => {
     expect(routeForNotification({ type: 'ESCROW_RELEASED' }, 'buyer')).toBe(
       '/(app)/buyer-transactions'
