@@ -109,6 +109,8 @@ export interface ShortletListing {
   videoUrl?: string;
   /** The uploaded video as an adaptive stream, once encoded. */
   videoStream?: VideoStream;
+  /** The uploaded video was filmed in the app at the property. */
+  videoFilmedOnSite?: boolean;
   tourUrl?: string;
   cancellationPolicy: ShortletCancellationPolicy;
   deposit?: number;
