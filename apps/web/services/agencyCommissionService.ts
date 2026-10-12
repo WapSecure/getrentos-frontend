@@ -139,4 +139,87 @@ export const agencyCommissionService = {
       })
     );
   },
+
+  // --- Per-agent on-platform payouts -------------------------------------------
+
+  /** Firm view: each agent's unpaid share + whether they're ready to be paid. */
+  agentPayable(): Promise<ApiResponse<AgentPayable[]>> {
+    return safeCall(() => authFetch<AgentPayable[]>('/agency/commissions/agent-payouts/payable'));
+  },
+
+  /** Firm action: pay every ready agent their outstanding share. */
+  runAgentPayouts(): Promise<ApiResponse<AgentPayRunResult>> {
+    return safeCall(() =>
+      authFetch<AgentPayRunResult>('/agency/commissions/agent-payouts/run', { method: 'POST' })
+    );
+  },
+
+  /** The signed-in agent's own payout account. */
+  getMyAgentAccount(): Promise<ApiResponse<AgentPayoutAccount>> {
+    return safeCall(() => authFetch<AgentPayoutAccount>('/agency/commissions/agent-payouts/my-account'));
+  },
+
+  saveMyAgentAccount(input: {
+    bankCode: string;
+    accountNumber: string;
+  }): Promise<ApiResponse<AgentPayoutAccount>> {
+    return safeCall(() =>
+      authFetch<AgentPayoutAccount>('/agency/commissions/agent-payouts/my-account', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  myAgentSummary(): Promise<ApiResponse<AgentPayoutSummary>> {
+    return safeCall(() => authFetch<AgentPayoutSummary>('/agency/commissions/agent-payouts/my-summary'));
+  },
+
+  myAgentPayouts(): Promise<ApiResponse<AgentPayout[]>> {
+    return safeCall(() => authFetch<AgentPayout[]>('/agency/commissions/agent-payouts/my-payouts'));
+  },
 };
+
+export interface AgentPayable {
+  agentUserId: string;
+  agentName: string;
+  payable: number;
+  commissions: number;
+  accountSet: boolean;
+  tier: number;
+  ready: boolean;
+}
+
+export interface AgentPayout {
+  id: string;
+  agentUserId: string;
+  amount: number;
+  status: string;
+  commissions: number;
+  failureReason: string | null;
+  paidAt: string | null;
+  createdAt: string;
+}
+
+export interface AgentPayRunResult {
+  paid: AgentPayout[];
+  skipped: { agentUserId: string; agentName: string; payable: number; reason: string }[];
+}
+
+export interface AgentPayoutAccount {
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+  verified: boolean;
+}
+
+export interface AgentPayoutSummary {
+  earned: number;
+  paid: number;
+  pending: number;
+  accountSet: boolean;
+  tier: number;
+  withdrawTierRequired: number;
+  canReceive: boolean;
+}
