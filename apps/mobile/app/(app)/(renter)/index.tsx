@@ -94,7 +94,8 @@ export default function RenterHome() {
   );
 
   const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
-  const identityVerified = kyc.data?.identity?.status === 'APPROVED';
+  // The server's own answer (review or NIN); the old review row only as a fallback.
+  const identityVerified = kyc.data?.identityVerified ?? kyc.data?.identity?.status === 'APPROVED';
   const showVerifyNudge = !!kyc.data && !identityVerified;
 
   const moveInChecklist = useQuery({

@@ -32,6 +32,12 @@ export interface KycStatus {
   trustScore: number;
   /** 0-5 trust tier derived from verification state + score (mirrors backend). */
   tier?: number;
+  /**
+   * Identity verified by any route the server accepts (an approved review or a
+   * passed NIN check). Gate on this: identity.status is only the older review
+   * flow and stays PENDING for someone verified by NIN.
+   */
+  identityVerified?: boolean;
   identity?: IdentityKyc;
   license?: LicenseKyc;
   ownershipProofs?: OwnershipProofKyc[];

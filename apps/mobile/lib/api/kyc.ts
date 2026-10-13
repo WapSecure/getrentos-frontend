@@ -36,6 +36,12 @@ export interface KycStatusResponse {
   verificationStatus: string;
   trustScore: number;
   tier?: number;
+  /**
+   * Identity verified by any route the server accepts (an approved review or a
+   * passed NIN check). Gate on this: identity.status is only the older review
+   * flow and stays PENDING for someone verified by NIN.
+   */
+  identityVerified?: boolean;
   identity?: IdentityKyc;
 }
 
