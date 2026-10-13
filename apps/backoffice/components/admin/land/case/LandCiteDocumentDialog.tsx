@@ -12,10 +12,11 @@ import {
   Input,
   Select,
 } from '@getrentos/ui';
-import type {
-  LandDiligenceCheck,
-  LandDiligenceDocument,
-  LandDiligenceDocumentLinkInput,
+import {
+  citedKeysOf,
+  type LandDiligenceCheck,
+  type LandDiligenceDocument,
+  type LandDiligenceDocumentLinkInput,
 } from '@/types/land';
 import { humaniseEnum } from '@/lib/landDiligence';
 import { LandDocumentPreview } from './shared';
@@ -28,7 +29,7 @@ export interface CiteTarget {
 interface LandCiteDocumentDialogProps {
   target: CiteTarget | null;
   onClose: () => void;
-  /** Documents not yet cited: a document can back one check at a time. */
+  /** Every document on the property; one already cited can back another check. */
   documents: LandDiligenceDocument[];
   checks: LandDiligenceCheck[];
   onSubmit: (input: LandDiligenceDocumentLinkInput) => void;
@@ -56,6 +57,10 @@ export const LandCiteDocumentDialog = ({
   const [checkKey, setCheckKey] = useState(target?.checkKey ?? '');
   const [note, setNote] = useState('');
   const selected = documents.find((document) => document.id === documentId);
+  // A document backs each check once: offer only the pairs not yet cited.
+  const available = documents.filter((document) => !citedKeysOf(document).includes(checkKey));
+  const selectedKeys = selected ? citedKeysOf(selected) : [];
+  const alreadyCited = Boolean(selected) && selectedKeys.includes(checkKey);
 
   return (
     <Dialog open={Boolean(target)} onOpenChange={(open) => !open && !isPending && onClose()}>
@@ -72,8 +77,8 @@ export const LandCiteDocumentDialog = ({
 
             {documents.length === 0 ? (
               <p className="rounded-xl bg-secondary/50 px-3 py-2.5 text-sm text-muted-foreground">
-                Every document on this property is already cited. Stop citing one first, or ask the
-                owner to upload the missing evidence.
+                This property has no documents yet. Ask the owner to upload the missing evidence, or
+                upload what you obtained.
               </p>
             ) : (
               <>
@@ -83,7 +88,10 @@ export const LandCiteDocumentDialog = ({
                     onValueChange={setDocumentId}
                     placeholder="Choose a document"
                     ariaLabel="Document to cite"
-                    options={documents.map((document) => ({
+                    options={(selected && !available.includes(selected)
+                      ? [selected, ...available]
+                      : available
+                    ).map((document) => ({
                       value: document.id,
                       label: `${document.name} · ${humaniseEnum(document.documentType)}`,
                     }))}
@@ -101,10 +109,19 @@ export const LandCiteDocumentDialog = ({
                     ariaLabel="Check this document answers"
                     options={[
                       { value: '', label: 'Not tied to a check' },
-                      ...checks.map((check) => ({ value: check.key, label: check.label })),
+                      ...checks
+                        .filter(
+                          (check) => !selectedKeys.includes(check.key) || check.key === checkKey
+                        )
+                        .map((check) => ({ value: check.key, label: check.label })),
                     ]}
                   />
                 </Field>
+                {alreadyCited && (
+                  <p className="text-xs text-destructive">
+                    This document is already cited on that check. Choose another check.
+                  </p>
+                )}
                 <Field label="Why this document" hint="Optional, kept in the audit trail.">
                   <Input
                     value={note}
@@ -137,7 +154,7 @@ export const LandCiteDocumentDialog = ({
               </Button>
               <Button
                 variant="primary"
-                disabled={!documentId || isPending}
+                disabled={!documentId || alreadyCited || isPending}
                 isLoading={isPending}
                 icon={<Link2 className="h-4 w-4" />}
                 onClick={() =>

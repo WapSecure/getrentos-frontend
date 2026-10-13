@@ -151,9 +151,15 @@ export interface LandDiligenceDocumentLink {
 export interface LandDiligenceDocument extends EvidenceItem {
   /** What the document claims to be, e.g. `SURVEY_PLAN`. */
   documentType: string;
-  /** Set only when the review cites this document. */
+  /** Every check the review cites this document on; one title deed can back several. */
+  links: LandDiligenceDocumentLink[];
+  /** @deprecated The first of `links`. */
   link?: LandDiligenceDocumentLink | null;
 }
+
+/** The checks a document is already cited on, with '' for a citation tied to no check. */
+export const citedKeysOf = (document: LandDiligenceDocument): string[] =>
+  (document.links ?? (document.link ? [document.link] : [])).map((link) => link.checklistKey ?? '');
 
 /**
  * A diligence case with every document on the property, so a reviewer can cite

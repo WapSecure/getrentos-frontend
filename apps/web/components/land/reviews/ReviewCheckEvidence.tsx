@@ -53,10 +53,14 @@ export const ReviewCheckEvidence = ({
   const [removing, setRemoving] = useState<LandReviewDocument | null>(null);
 
   const busy = actions.busyKey === check.key;
-  const cited = documents.filter((document) => document.link?.checklistKey === check.key);
-  // A document backs one check at a time, so only uncited ones can be cited.
-  const citable = documents.filter((document) => !document.link && !document.citedOnOtherCheck);
-  const isMine = (document: LandReviewDocument) => document.link?.linkedByMe === true;
+  // One document can back several checks, so each check reads its own citation.
+  const linkOn = (document: LandReviewDocument) =>
+    (document.links ?? (document.link ? [document.link] : [])).find(
+      (link) => link.checklistKey === check.key
+    );
+  const cited = documents.filter((document) => linkOn(document));
+  const citable = documents.filter((document) => !linkOn(document));
+  const isMine = (document: LandReviewDocument) => linkOn(document)?.linkedByMe === true;
 
   const reset = () => {
     setMode('idle');
@@ -93,38 +97,42 @@ export const ReviewCheckEvidence = ({
         </p>
       ) : (
         <ul className="mt-2 space-y-2">
-          {cited.map((document) => (
-            <li key={document.id} className="flex flex-wrap items-center gap-2 text-sm">
-              <Link2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium text-foreground">{document.name}</span>
-                <span className="block text-xs text-muted-foreground">
-                  {landDocumentTypeLabel(document.documentType)} · cited by{' '}
-                  {document.link?.linkedByName}
-                  {document.link?.linkedAt ? ` on ${formatDate(document.link.linkedAt)}` : ''}
-                  {document.link?.note ? ` · “${document.link.note}”` : ''}
+          {cited.map((document) => {
+            const link = linkOn(document);
+            return (
+              <li key={document.id} className="flex flex-wrap items-center gap-2 text-sm">
+                <Link2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium text-foreground">
+                    {document.name}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    {landDocumentTypeLabel(document.documentType)} · cited by {link?.linkedByName}
+                    {link?.linkedAt ? ` on ${formatDate(link.linkedAt)}` : ''}
+                    {link?.note ? ` · “${link.note}”` : ''}
+                  </span>
                 </span>
-              </span>
-              {document.kind === 'STORED' && document.url && (
-                <DocumentPreviewButton
-                  file={{ url: document.url, name: document.name, mimeType: document.mimeType }}
-                  label="Preview"
-                />
-              )}
-              {isMine(document) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive"
-                  disabled={busy}
-                  onClick={() => setRemoving(document)}
-                  aria-label={`Remove the citation of ${document.name}`}
-                >
-                  Remove
-                </Button>
-              )}
-            </li>
-          ))}
+                {document.kind === 'STORED' && document.url && (
+                  <DocumentPreviewButton
+                    file={{ url: document.url, name: document.name, mimeType: document.mimeType }}
+                    label="Preview"
+                  />
+                )}
+                {isMine(document) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive"
+                    disabled={busy}
+                    onClick={() => setRemoving(document)}
+                    aria-label={`Remove the citation of ${document.name}`}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -145,7 +153,9 @@ export const ReviewCheckEvidence = ({
             disabled={citable.length === 0}
             icon={<Link2 className="h-4 w-4" />}
             title={
-              citable.length === 0 ? 'Every document on the property is already cited' : undefined
+              citable.length === 0
+                ? 'Every document on the property is already cited on this check'
+                : undefined
             }
           >
             Cite a property document

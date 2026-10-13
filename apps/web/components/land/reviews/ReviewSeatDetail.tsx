@@ -109,13 +109,14 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
     'Document cited.'
   );
   const unciteEvidence = evidenceCall(
-    (documentId: string) => unwrap(landReviewerService.uncite(seatId, documentId)),
+    ({ documentId, checklistKey }: { documentId: string; checklistKey: string }) =>
+      unwrap(landReviewerService.uncite(seatId, documentId, checklistKey)),
     'Citation removed.'
   );
   const evidenceFor = (key: string): ReviewEvidenceActions => ({
     upload: (input) => uploadEvidence(key, input),
     cite: (input) => citeEvidence(key, input),
-    uncite: (documentId) => unciteEvidence(key, documentId),
+    uncite: (documentId) => unciteEvidence(key, { documentId, checklistKey: key }),
     busyKey: evidenceKey,
   });
 
