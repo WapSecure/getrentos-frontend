@@ -89,9 +89,14 @@ export const IdentityVerificationSettings = ({
   });
 
   const identity = status?.identity;
-  const config = identity ? statusConfig[identity.status] : undefined;
+  // Verified by NIN counts as approved even while an older document review is
+  // still pending: no point asking for documents again.
+  const verified = status?.identityVerified ?? identity?.status === 'APPROVED';
+  const shownStatus = verified ? 'APPROVED' : identity?.status;
+  const config = shownStatus ? statusConfig[shownStatus] : undefined;
   const canSubmit =
-    !identity || identity.status === 'REJECTED' || identity.status === 'NEEDS_CLARIFICATION';
+    !verified &&
+    (!identity || identity.status === 'REJECTED' || identity.status === 'NEEDS_CLARIFICATION');
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading verification status…</p>;
@@ -109,7 +114,7 @@ export const IdentityVerificationSettings = ({
           <config.icon className={`w-5 h-5 shrink-0 ${config.color}`} />
           <div>
             <p className={`text-sm font-medium ${config.color}`}>{config.label}</p>
-            {identity?.rejectionReason && (
+            {!verified && identity?.rejectionReason && (
               <p className="text-xs text-muted-foreground mt-0.5">{identity.rejectionReason}</p>
             )}
           </div>

@@ -59,9 +59,14 @@ export default function VerifyIdentity() {
 
   const statusQuery = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
   const identity = statusQuery.data?.identity;
-  const meta = identity ? STATUS_META[identity.status as KycStatus] : undefined;
+  // Verified by NIN counts as approved even while an older document review is
+  // still pending: no point asking for documents again.
+  const verified = statusQuery.data?.identityVerified ?? identity?.status === 'APPROVED';
+  const shownStatus = verified ? 'APPROVED' : identity?.status;
+  const meta = shownStatus ? STATUS_META[shownStatus as KycStatus] : undefined;
   const canSubmit =
-    !identity || identity.status === 'REJECTED' || identity.status === 'NEEDS_CLARIFICATION';
+    !verified &&
+    (!identity || identity.status === 'REJECTED' || identity.status === 'NEEDS_CLARIFICATION');
 
   const submitMutation = useMutation({
     mutationFn: () => {
@@ -134,7 +139,7 @@ export default function VerifyIdentity() {
               <Text variant="bodyStrong" style={{ color: colors[meta.fg] }}>
                 {meta.label}
               </Text>
-              {identity?.rejectionReason ? (
+              {!verified && identity?.rejectionReason ? (
                 <Text variant="caption" color="mutedForeground">
                   {identity.rejectionReason}
                 </Text>

@@ -83,7 +83,9 @@ export default function PropertyApplyPage() {
     queryKey: ['kyc-status'],
     queryFn: () => unwrap(kycService.getStatus()),
   });
-  const identityApproved = kycQuery.data?.identity?.status === 'APPROVED';
+  // The server's own answer (review or NIN); the old review row only as a fallback.
+  const identityApproved =
+    kycQuery.data?.identityVerified ?? kycQuery.data?.identity?.status === 'APPROVED';
   const verificationHref = `${ROUTES.RENTER_SETTINGS}?tab=verification`;
 
   const submitMutation = useMutation({
