@@ -87,6 +87,10 @@ export function AgencySetupView() {
         const roles = getStoredUser<{ roles?: string[] }>()?.roles ?? [];
         if (!roles.includes('PROPERTY_MANAGER'))
           updateStoredUser({ roles: [...roles, 'PROPERTY_MANAGER'] });
+        // Requests made before the firm existed were refused; let them re-run.
+        queryClient.removeQueries({
+          predicate: (q) => !(q.queryKey[0] === 'agency' && q.queryKey[1] === 'onboarding'),
+        });
       }
       onSaved(
         next,
