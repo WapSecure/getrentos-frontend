@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   MapPin,
   Bed,
@@ -56,7 +55,6 @@ export const DiscoverPropertyCard = ({
   onApply,
   onOpenTour,
 }: DiscoverPropertyCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
 
   const formatPrice = () => {
@@ -83,14 +81,7 @@ export const DiscoverPropertyCard = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group relative bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300"
-    >
+    <article className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm">
       <div className="relative h-48 bg-muted">
         {property.image && !imageFailed ? (
           // Signed MinIO URLs, so plain <img> rather than next/image.
@@ -111,7 +102,7 @@ export const DiscoverPropertyCard = ({
         <VirtualTourBadge hasTour={Boolean(property.videoTourUrl)} onOpenTour={onOpenTour} />
 
         {property.verified && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full z-10">
+          <div className="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-md bg-success px-2 py-1 text-xs font-medium text-white">
             <Shield className="w-3 h-3" />
             <span>Verified</span>
           </div>
@@ -129,7 +120,7 @@ export const DiscoverPropertyCard = ({
               : `Save ${property.title} to your shortlist`
           }
           title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
-          className="absolute top-3 right-3 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors z-10"
+          className="absolute right-3 top-3 z-10 flex min-h-9 min-w-9 items-center justify-center rounded-lg bg-card/95 text-foreground shadow-sm transition-colors hover:bg-card"
         >
           {isSaved ? (
             <Heart className="w-4 h-4 text-red-500 fill-red-500" />
@@ -138,11 +129,11 @@ export const DiscoverPropertyCard = ({
           )}
         </button>
 
-        <div className="absolute bottom-3 left-3 bg-primary text-primary-foreground px-2 py-1 rounded-lg text-sm font-bold z-10">
+        <div className="absolute bottom-3 left-3 z-10 rounded-md bg-card/95 px-2.5 py-1.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm">
           {formatPrice()}
         </div>
 
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 bg-white/90 dark:bg-gray-800/90 rounded-lg z-10">
+        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 rounded-md bg-card/95 px-2 py-1 text-foreground shadow-sm">
           <Star className="w-3 h-3 fill-primary text-primary" />
           <span className="text-xs font-medium text-foreground">{property.rating}</span>
         </div>
@@ -182,9 +173,9 @@ export const DiscoverPropertyCard = ({
           verifiedBadge={property.landlordVerified || false}
         />
 
-        <div className="flex flex-wrap gap-2 mt-3">
-          <Button size="sm" variant="primary" onClick={onViewDetails} className="flex-1">
-            View Details
+        <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2 border-t border-border pt-4">
+          <Button size="sm" variant="primary" onClick={onViewDetails}>
+            View property
           </Button>
           <Button
             size="sm"
@@ -208,7 +199,7 @@ export const DiscoverPropertyCard = ({
           </Button>
         </div>
 
-        <div className="flex flex-wrap gap-3 mt-2 text-xs border-t border-gray-100 dark:border-gray-800 pt-2">
+        <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
           <CommuteCalculator listingId={property.id} propertyLocation={property.location} />
           {/* The calculator compares against a monthly mortgage payment, so the
               rent is normalised to a month first. Dividing an already-monthly
@@ -220,18 +211,10 @@ export const DiscoverPropertyCard = ({
           <NeighborhoodCompare listingId={property.id} propertyLocation={property.location} />
         </div>
 
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-3"
-          >
-            <Button size="sm" variant="secondary" onClick={onApply} fullWidth>
-              Apply Now
-            </Button>
-          </motion.div>
-        )}
+        <Button size="sm" variant="secondary" onClick={onApply} fullWidth className="mt-3">
+          Apply for this property
+        </Button>
       </div>
-    </motion.div>
+    </article>
   );
 };

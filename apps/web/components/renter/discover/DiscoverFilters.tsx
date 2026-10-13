@@ -63,17 +63,27 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
   };
 
   const hasActiveFilters = Object.values(filters).some((v) => v !== '' && v !== false);
+  const activeFilterCount = Object.values(filters).filter(
+    (value) => value !== '' && value !== false
+  ).length;
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-xs">
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-secondary transition-colors"
+        aria-expanded={isExpanded}
+        aria-controls="property-discovery-filters"
+        className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-secondary/60"
       >
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-500" />
+          <Filter className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium text-foreground">Filters</span>
-          {hasActiveFilters && <span className="w-2 h-2 bg-primary rounded-full" />}
+          {hasActiveFilters && (
+            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-semibold text-foreground">
+              {activeFilterCount}
+            </span>
+          )}
         </div>
         {isExpanded ? (
           <ChevronUp className="w-4 h-4 text-gray-500" />
@@ -83,7 +93,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
       </button>
 
       {isExpanded && (
-        <div className="p-4 border-t border-border">
+        <div id="property-discovery-filters" className="border-t border-border p-4">
           <div className="mb-4 space-y-3">
             {/* Location */}
             <div>
@@ -181,11 +191,11 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
             </label>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
             <Button onClick={handleApply} variant="primary" size="sm">
-              Apply Filters
+              Show results
             </Button>
-            <Button onClick={handleReset} variant="ghost" size="sm">
+            <Button onClick={handleReset} variant="ghost" size="sm" disabled={!hasActiveFilters}>
               Reset
             </Button>
           </div>

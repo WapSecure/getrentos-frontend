@@ -128,7 +128,6 @@ function validateStep(step: number, data: FormState): FieldErrors {
   } else if (step === 1) {
     if (!data.currentAddress.trim()) errors.currentAddress = 'Enter your current address';
   } else if (step === 2) {
-    if (!data.employer.trim()) errors.employer = 'Enter your employer or business name';
     if (!data.monthlyIncome.trim()) errors.monthlyIncome = 'Enter your monthly income';
   } else if (step === 4) {
     if (data.documents.some((d) => d.required && !d.uploaded)) {
@@ -598,8 +597,8 @@ function IncomeStep({
       </Field>
 
       <TextField
-        label={data.employmentStatus === 'Student' ? 'School' : 'Employer'}
-        placeholder="Company name"
+        label={data.employmentStatus === 'Student' ? 'School (optional)' : 'Employer (optional)'}
+        placeholder={data.employmentStatus === 'Student' ? 'School name' : 'Company name'}
         returnKeyType="next"
         value={data.employer}
         onChangeText={(v) => update('employer', v)}
@@ -808,7 +807,7 @@ function DocumentsStep({
                       gap: 5,
                       paddingVertical: 7,
                       paddingHorizontal: 12,
-                      borderRadius: radius.full,
+                      borderRadius: radius.sm,
                       backgroundColor: colors.primary,
                       opacity: uploading ? 0.7 : 1,
                     }}

@@ -179,6 +179,7 @@ export default function PropertyApplyPage() {
               property={property}
               initialData={buildInitialData(property, user)}
               onSubmit={handleSubmit}
+              isSubmitting={submitMutation.isPending}
             />
           </>
         ) : (

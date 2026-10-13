@@ -99,14 +99,14 @@ export default function DiscoverPage() {
   };
 
   const handleCompare = (property: Property) => {
-    if (compareList.some((p) => p.id === property.id)) {
-      setCompareList(compareList.filter((p) => p.id !== property.id));
-    } else if (compareList.length < 4) {
-      setCompareList([...compareList, property]);
-    }
-    if (compareList.length > 0) {
+    setCompareList((current) => {
+      if (current.some((item) => item.id === property.id)) {
+        return current.filter((item) => item.id !== property.id);
+      }
+      if (current.length >= 4) return current;
       setShowCompareDrawer(true);
-    }
+      return [...current, property];
+    });
   };
 
   const handleApplyFilters = (newFilters: Omit<typeof filters, 'search'>) => {
@@ -147,11 +147,11 @@ export default function DiscoverPage() {
         description="Search, compare, and shortlist verified homes that fit your location, lifestyle, and budget."
       />
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <main className="min-w-0 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex-1">
-              <DiscoverSearchBar onSearch={handleSearch} />
+              <DiscoverSearchBar initialQuery={queryFromUrl} onSearch={handleSearch} />
             </div>
             <SavedSearchAlert currentFilters={filters} onApplyFilters={handleApplyFilters} />
           </div>
@@ -161,7 +161,7 @@ export default function DiscoverPage() {
               <DiscoverFilters onApplyFilters={handleApplyFilters} />
             </div>
             <div
-              className="flex items-center gap-1 rounded-xl border border-border/70 bg-secondary/60 p-1"
+              className="flex items-center gap-1 rounded-lg border border-border bg-secondary/60 p-1"
               role="group"
               aria-label="Property results view"
             >
@@ -170,7 +170,7 @@ export default function DiscoverPage() {
                 onClick={() => setViewMode('grid')}
                 aria-label="Show properties as a grid"
                 aria-pressed={viewMode === 'grid'}
-                className={`flex min-h-10 min-w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
+                className={`flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
                   viewMode === 'grid'
                     ? 'bg-card text-primary shadow-sm'
                     : 'text-muted-foreground hover:bg-card/70 hover:text-foreground'
@@ -183,7 +183,7 @@ export default function DiscoverPage() {
                 onClick={() => setViewMode('map')}
                 aria-label="Show properties on a map"
                 aria-pressed={viewMode === 'map'}
-                className={`flex min-h-10 min-w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
+                className={`flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
                   viewMode === 'map'
                     ? 'bg-card text-primary shadow-sm'
                     : 'text-muted-foreground hover:bg-card/70 hover:text-foreground'
@@ -223,14 +223,17 @@ export default function DiscoverPage() {
           ) : (
             <DiscoverMapView filters={filters} />
           )}
-        </div>
+        </main>
 
-        <div className="space-y-6">
+        <aside
+          className="space-y-5 xl:sticky xl:top-24 xl:self-start"
+          aria-label="Your rental search"
+        >
           <RecentlyViewed />
           <DiscoverRecommendations />
           <DiscoverApplicationAssistant />
           <DocumentChecklist />
-        </div>
+        </aside>
       </div>
 
       <DiscoverCompareDrawer

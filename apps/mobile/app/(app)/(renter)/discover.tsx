@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -47,7 +54,7 @@ const MAP_PAGE_SIZE = 100;
 const PAGE_SIZE = 20;
 
 export default function Discover() {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ filters?: string }>();
   const [searchText, setSearchText] = useState('');
@@ -133,7 +140,11 @@ export default function Discover() {
         style={{
           paddingHorizontal: spacing.xl,
           paddingTop: insets.top + spacing.lg,
+          paddingBottom: spacing.md,
           gap: spacing.sm,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+          backgroundColor: colors.background,
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -241,7 +252,7 @@ export default function Discover() {
                   minHeight: 32,
                   paddingVertical: 6,
                   paddingHorizontal: 11,
-                  borderRadius: 999,
+                  borderRadius: radius.sm,
                   backgroundColor: colors.accent,
                 }}
               >
@@ -265,7 +276,7 @@ export default function Discover() {
                 gap: 5,
                 paddingVertical: 6,
                 paddingHorizontal: 11,
-                borderRadius: 999,
+                borderRadius: radius.sm,
                 borderWidth: 1,
                 borderColor: colors.border,
               }}
@@ -346,7 +357,7 @@ export default function Discover() {
                 paddingBottom: spacing.md,
               }}
             >
-              {total} {total === 1 ? 'home' : 'homes'}
+              {total} {total === 1 ? 'home' : 'homes'} found
             </Text>
           }
           ListFooterComponent={
@@ -390,7 +401,7 @@ export default function Discover() {
 }
 
 function FilterButton({ count, onPress }: { count: number; onPress: () => void }) {
-  const { colors } = useTheme();
+  const { colors, radius } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -399,7 +410,7 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
       style={{
         width: 48,
         height: 48,
-        borderRadius: 12,
+        borderRadius: radius.md,
         borderWidth: 1,
         borderColor: count ? colors.primary : colors.border,
         backgroundColor: count ? colors.accent : colors.card,
@@ -443,7 +454,7 @@ function LoadingList() {
     <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md, gap: spacing.lg }}>
       {[0, 1, 2, 3].map((i) => (
         <View key={i} style={{ gap: spacing.sm }}>
-          <Skeleton height={176} radius={radius.lg} />
+          <Skeleton height={176} radius={radius.md} />
           <Skeleton height={16} width="45%" />
           <Skeleton height={13} width="70%" />
         </View>

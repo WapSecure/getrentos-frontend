@@ -56,6 +56,7 @@ interface ApplicationWizardProps {
   property: Property;
   initialData: ApplicationFormData;
   onSubmit: (data: ApplicationFormData) => void;
+  isSubmitting?: boolean;
 }
 
 const steps = [
@@ -75,7 +76,12 @@ const nairaFormatter = new Intl.NumberFormat('en-NG', {
 const inputClass =
   'w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary';
 
-export const ApplicationWizard = ({ property, initialData, onSubmit }: ApplicationWizardProps) => {
+export const ApplicationWizard = ({
+  property,
+  initialData,
+  onSubmit,
+  isSubmitting = false,
+}: ApplicationWizardProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<ApplicationFormData>(initialData);
 
@@ -147,6 +153,7 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
   };
 
   const goNext = () => {
+    if (isSubmitting) return;
     if (stepIndex < steps.length - 1) {
       setStepIndex((i) => i + 1);
     } else {
@@ -157,15 +164,22 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
   const goBack = () => setStepIndex((i) => Math.max(0, i - 1));
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div className="flex border-b border-border overflow-x-auto">
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border bg-muted/30 px-5 py-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Step {stepIndex + 1} of {steps.length}
+        </p>
+        <h2 className="mt-1 text-lg font-semibold text-foreground">{steps[stepIndex].label}</h2>
+      </div>
+      <ol aria-label="Application progress" className="flex overflow-x-auto border-b border-border">
         {steps.map((step, i) => {
           const Icon = step.icon;
           const isActive = i === stepIndex;
           const isDone = i < stepIndex;
           return (
-            <div
+            <li
               key={step.key}
+              aria-current={isActive ? 'step' : undefined}
               className={`flex-1 min-w-27.5 flex items-center gap-2 px-3 py-3 text-xs font-medium border-b-2 transition-colors ${
                 isActive
                   ? 'border-primary text-primary'
@@ -186,10 +200,10 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
                 {isDone ? <Check className="w-3 h-3" /> : <Icon className="w-3 h-3" />}
               </span>
               {step.label}
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ol>
 
       <div className="p-5 space-y-4">
         {stepIndex === 0 && (
@@ -494,12 +508,17 @@ export const ApplicationWizard = ({ property, initialData, onSubmit }: Applicati
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-3 p-4 border-t border-border">
-        <Button variant="ghost" onClick={goBack} disabled={stepIndex === 0}>
+      <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-border bg-card p-4">
+        <Button variant="ghost" onClick={goBack} disabled={stepIndex === 0 || isSubmitting}>
           Back
         </Button>
-        <Button variant="primary" onClick={goNext} disabled={!canAdvance()}>
-          {stepIndex === steps.length - 1 ? 'Submit Application' : 'Continue'}
+        <Button variant="primary" onClick={goNext} disabled={!canAdvance() || isSubmitting}>
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          {stepIndex === steps.length - 1
+            ? isSubmitting
+              ? 'Submitting…'
+              : 'Submit application'
+            : 'Continue'}
         </Button>
       </div>
     </div>
