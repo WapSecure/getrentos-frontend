@@ -39,6 +39,12 @@ export interface BuyerPropertyListing {
   ownerName: string;
   ownerVerified: boolean;
   listedDate: string;
+  /** Signed link to the cover photo. */
+  image?: string;
+  /** Signed link to the seller's video tour (valid for a few hours). */
+  videoTourUrl?: string;
+  /** The tour was filmed in the GetRentos app at the property. */
+  videoTourFilmedOnSite?: boolean;
 }
 
 export interface ViewingRequest {
@@ -97,6 +103,8 @@ export interface BuyerEscrowTransaction {
   offerId: string;
   propertyId: string;
   propertyTitle: string;
+  /** The property's type, e.g. 'LAND' (whose sales carry conveyance steps). */
+  propertyType?: string;
   ownerName: string;
   purchasePrice: number;
   escrowStatus: BuyerEscrowStatus;

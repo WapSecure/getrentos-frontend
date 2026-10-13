@@ -39,7 +39,8 @@ import {
   Tags,
   Zap,
 } from 'lucide-react';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
+import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
 import { ownerService } from '@/services/ownerService';
 import { landlordService } from '@/services/landlordService';
@@ -676,7 +677,13 @@ function CreateListingDialog({
       queryClient.invalidateQueries({ queryKey: shortletKeys.public });
       onCreated();
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => {
+      // The trust-tier gate (publishing a shortlet needs an identity-verified
+      // Tier 2 account) surfaces as an inline verification notice by the
+      // publish button, not a toast — so the host sees exactly what to do.
+      if (reason instanceof VerificationRequiredError) return;
+      setToast({ message: reason.message, variant: 'error' });
+    },
   });
 
   const submit = () => {
@@ -859,6 +866,16 @@ function CreateListingDialog({
               suggestions={mediaSuggestions}
             />
           </div>
+          {create.error ? (
+            <VerificationRequiredNotice
+              error={create.error}
+              href={role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION}
+              verificationHref={
+                role === 'owner' ? ROUTES.OWNER_VERIFICATION : ROUTES.LANDLORD_VERIFICATION
+              }
+              scoreHref={role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : undefined}
+            />
+          ) : null}
           <Button className="w-full" onClick={submit} disabled={create.isPending}>
             {create.isPending ? 'Publishing…' : 'Publish listing'}
           </Button>

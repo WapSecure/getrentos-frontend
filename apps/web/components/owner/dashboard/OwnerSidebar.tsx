@@ -23,11 +23,13 @@ import {
   KeyRound,
   ClipboardCheck,
   PiggyBank,
+  Receipt,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
+import { OWNER_LAND_SALES_ROUTE } from '@/lib/constants/landDeveloperRoutes';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
@@ -51,6 +53,8 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
   { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.land_marketplace', href: ROUTES.OWNER_LAND, icon: MapPinned },
+  // Literal label: plot sales on the owner's estates, apart from whole-parcel sales.
+  { label: 'Plot sales', href: OWNER_LAND_SALES_ROUTE, icon: Receipt },
   { labelKey: 'sidebar.shortlets', href: ROUTES.OWNER_SHORTLETS, icon: BedDouble },
   // Stays the owner booked as a guest, apart from the ones they host above.
   { label: 'My stays', href: ROUTES.OWNER_BOOKINGS, icon: Luggage },
@@ -85,10 +89,10 @@ export const navItems: NavItem[] = [
 
 export const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'Portfolio and listings', items: navItems.slice(1, 6) },
-  { label: 'Sales and investment', items: navItems.slice(6, 15) },
-  { label: 'Communication', items: navItems.slice(15, 18) },
-  { label: 'Trust and account', items: navItems.slice(18) },
+  { label: 'Portfolio and listings', items: navItems.slice(1, 7) },
+  { label: 'Sales and investment', items: navItems.slice(7, 16) },
+  { label: 'Communication', items: navItems.slice(16, 19) },
+  { label: 'Trust and account', items: navItems.slice(19) },
 ];
 
 export const OwnerSidebar = () => {

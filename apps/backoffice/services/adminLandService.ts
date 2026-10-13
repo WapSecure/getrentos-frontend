@@ -3,24 +3,57 @@ import type { ApiResponse } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminLandDiligenceDetail,
+  DischargeLandEncumbranceInput,
+  InviteLandReviewerInput,
+  LandConflict,
+  LandDiligenceCheckInput,
   LandDiligenceDecisionInput,
   LandDiligenceDocumentLinkInput,
   LandDiligenceRecord,
+  LandDocumentUploadInput,
+  LandUploadedDocument,
   LandDiligenceReviewSummary,
   LandDiligenceStatus,
+  LandEncumbrance,
+  LandReviewerSeat,
+  LandRiskAssessment,
+  LandTitleEvent,
+  RecordLandEncumbranceInput,
+  RecordLandTitleEventInput,
+  ResolveLandConflictInput,
 } from '@/types/land';
 
 export interface ListLandDiligenceParams {
   search?: string;
   status?: LandDiligenceStatus;
+  /** `me`: cases assigned to the caller; `unassigned`: unclaimed cases. */
+  assigned?: 'me' | 'unassigned';
+  /** Only cases in review past their SLA. */
+  overdue?: boolean;
+  /** `sla`: oldest-owed first (the work-queue order). */
+  sort?: 'sla' | 'updated';
   page?: number;
   pageSize?: number;
 }
 
+const base = (propertyId: string) => `/admin/land/diligence/${encodeURIComponent(propertyId)}`;
+
+const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
+  safeCall(() =>
+    authFetch<T>(path, {
+      method: 'POST',
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    })
+  );
+
 /**
- * Backoffice-only Land v1 diligence endpoints. The queue carries metadata only;
+ * Backoffice-only Land diligence endpoints. The queue carries metadata only;
  * the detail view returns the property's documents with short-lived signed URLs
  * and the state of each document's link to the review.
+ *
+ * Every decision (approve, reject, clarification, a check) should carry the
+ * case `version` the reviewer loaded as `expectedVersion`: the API answers a
+ * stale one with 409 so two reviewers acting at once cannot both win.
  */
 export const adminLandService = {
   listDiligence(
@@ -29,46 +62,13 @@ export const adminLandService = {
     const query = toQuery({
       search: params.search,
       status: params.status,
+      assigned: params.assigned,
+      overdue: params.overdue ? true : undefined,
+      sort: params.sort,
       page: params.page,
       pageSize: params.pageSize,
     });
     return safeCall(() => authFetch(`/admin/land/diligence${query}`));
-  },
-
-  approveDiligence(
-    propertyId: string,
-    data: Pick<LandDiligenceDecisionInput, 'findings' | 'checklist' | 'expiresAt'> = {}
-  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
-    return safeCall(() =>
-      authFetch(`/admin/land/diligence/${propertyId}/approve`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-    );
-  },
-
-  rejectDiligence(
-    propertyId: string,
-    data: Pick<LandDiligenceDecisionInput, 'reason' | 'checklist'>
-  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
-    return safeCall(() =>
-      authFetch(`/admin/land/diligence/${propertyId}/reject`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-    );
-  },
-
-  requestClarification(
-    propertyId: string,
-    data: Pick<LandDiligenceDecisionInput, 'reason' | 'checklist'>
-  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
-    return safeCall(() =>
-      authFetch(`/admin/land/diligence/${propertyId}/request-clarification`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-    );
   },
 
   /**
@@ -76,7 +76,57 @@ export const adminLandService = {
    * it. Files come back behind short-lived signed URLs.
    */
   getDiligenceDetail(propertyId: string): Promise<ApiResponse<AdminLandDiligenceDetail>> {
-    return safeCall(() => authFetch(`/admin/land/diligence/${propertyId}`));
+    return safeCall(() => authFetch(base(propertyId)));
+  },
+
+  approveDiligence(
+    propertyId: string,
+    data: Pick<
+      LandDiligenceDecisionInput,
+      'findings' | 'checklist' | 'expiresAt' | 'expectedVersion'
+    > = {}
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return post(`${base(propertyId)}/approve`, data);
+  },
+
+  rejectDiligence(
+    propertyId: string,
+    data: Pick<LandDiligenceDecisionInput, 'reason' | 'checklist' | 'expectedVersion'>
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return post(`${base(propertyId)}/reject`, data);
+  },
+
+  requestClarification(
+    propertyId: string,
+    data: Pick<LandDiligenceDecisionInput, 'reason' | 'checklist' | 'expectedVersion'>
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return post(`${base(propertyId)}/request-clarification`, data);
+  },
+
+  /** Assigns the case to a staff member; omitting `assigneeId` claims it for the caller. */
+  assignDiligence(
+    propertyId: string,
+    assigneeId?: string
+  ): Promise<ApiResponse<AdminLandDiligenceDetail>> {
+    return post(`${base(propertyId)}/assign`, assigneeId ? { assigneeId } : {});
+  },
+
+  /**
+   * Records one checklist decision. PASSED on a check that requires a document
+   * needs one cited against its key first; FLAGGED, or NOT_APPLICABLE on a
+   * required check, needs a note.
+   */
+  recordCheck(
+    propertyId: string,
+    key: string,
+    data: LandDiligenceCheckInput
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return safeCall(() =>
+      authFetch(`${base(propertyId)}/checks/${encodeURIComponent(key)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+    );
   },
 
   /**
@@ -88,12 +138,7 @@ export const adminLandService = {
     propertyId: string,
     data: LandDiligenceDocumentLinkInput
   ): Promise<ApiResponse<AdminLandDiligenceDetail>> {
-    return safeCall(() =>
-      authFetch(`/admin/land/diligence/${propertyId}/documents`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-    );
+    return post(`${base(propertyId)}/documents`, data);
   },
 
   /**
@@ -105,9 +150,117 @@ export const adminLandService = {
     documentId: string
   ): Promise<ApiResponse<AdminLandDiligenceDetail>> {
     return safeCall(() =>
-      authFetch(`/admin/land/diligence/${propertyId}/documents/${documentId}`, {
+      authFetch(`${base(propertyId)}/documents/${encodeURIComponent(documentId)}`, {
         method: 'DELETE',
       })
     );
+  },
+
+  /**
+   * Puts staff evidence (e.g. a registry search report) on the property so it
+   * can be cited. Multipart: the browser sets the boundary, so no Content-Type.
+   */
+  uploadDocument(
+    propertyId: string,
+    input: LandDocumentUploadInput
+  ): Promise<ApiResponse<LandUploadedDocument>> {
+    const form = new FormData();
+    form.append('file', input.file);
+    form.append('documentType', input.documentType);
+    return safeCall(() =>
+      authFetch<LandUploadedDocument>(`${base(propertyId)}/documents/upload`, {
+        method: 'POST',
+        body: form,
+      })
+    );
+  },
+
+  // ---- Integrity ----
+
+  listConflicts(propertyId: string): Promise<ApiResponse<LandConflict[]>> {
+    return safeCall(() => authFetch(`${base(propertyId)}/conflicts`));
+  },
+
+  /** Dismiss or confirm a conflict; the resolution applies to both parcels. */
+  resolveConflict(
+    propertyId: string,
+    conflictId: string,
+    data: ResolveLandConflictInput
+  ): Promise<ApiResponse<LandConflict[]>> {
+    return post(`${base(propertyId)}/conflicts/${encodeURIComponent(conflictId)}/resolve`, data);
+  },
+
+  listEncumbrances(propertyId: string): Promise<ApiResponse<LandEncumbrance[]>> {
+    return safeCall(() => authFetch(`${base(propertyId)}/encumbrances`));
+  },
+
+  recordEncumbrance(
+    propertyId: string,
+    data: RecordLandEncumbranceInput
+  ): Promise<ApiResponse<LandEncumbrance[]>> {
+    return post(`${base(propertyId)}/encumbrances`, data);
+  },
+
+  dischargeEncumbrance(
+    propertyId: string,
+    encumbranceId: string,
+    data: DischargeLandEncumbranceInput
+  ): Promise<ApiResponse<LandEncumbrance[]>> {
+    return post(
+      `${base(propertyId)}/encumbrances/${encodeURIComponent(encumbranceId)}/discharge`,
+      data
+    );
+  },
+
+  /** The chain of title, oldest first. */
+  listTitleHistory(propertyId: string): Promise<ApiResponse<LandTitleEvent[]>> {
+    return safeCall(() => authFetch(`${base(propertyId)}/title-history`));
+  },
+
+  addTitleEvent(
+    propertyId: string,
+    data: RecordLandTitleEventInput
+  ): Promise<ApiResponse<LandTitleEvent[]>> {
+    return post(`${base(propertyId)}/title-history`, data);
+  },
+
+  /** Marks an owner-recorded title event as verified. */
+  verifyTitleEvent(propertyId: string, eventId: string): Promise<ApiResponse<LandTitleEvent[]>> {
+    return post(`${base(propertyId)}/title-history/${encodeURIComponent(eventId)}/verify`);
+  },
+
+  // ---- Outside reviewers ----
+
+  listReviewers(propertyId: string): Promise<ApiResponse<LandReviewerSeat[]>> {
+    return safeCall(() => authFetch(`${base(propertyId)}/reviewers`));
+  },
+
+  inviteReviewer(
+    propertyId: string,
+    data: InviteLandReviewerInput
+  ): Promise<ApiResponse<LandReviewerSeat>> {
+    return post(`${base(propertyId)}/reviewers`, data);
+  },
+
+  revokeReviewer(
+    propertyId: string,
+    seatId: string,
+    reason?: string
+  ): Promise<ApiResponse<LandReviewerSeat>> {
+    return post(
+      `${base(propertyId)}/reviewers/${encodeURIComponent(seatId)}/revoke`,
+      reason?.trim() ? { reason: reason.trim() } : {}
+    );
+  },
+
+  // ---- Risk ----
+
+  getRisk(propertyId: string): Promise<ApiResponse<LandRiskAssessment>> {
+    return safeCall(() => authFetch(`${base(propertyId)}/risk`));
+  },
+
+  /** Recomputes and stores the risk score and assurance tier on the case. */
+  refreshRisk(propertyId: string): Promise<ApiResponse<LandRiskAssessment>> {
+    return post(`${base(propertyId)}/risk/refresh`);
   },
 };

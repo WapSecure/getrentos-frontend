@@ -24,6 +24,7 @@ import type {
   EscrowActivityLogEntry,
 } from '@/types/buyer';
 import { ROUTES } from '@/lib/constants/auth';
+import { LandConveyanceEntry } from '@/components/land/buyer/LandConveyanceEntry';
 
 interface BuyerEscrowTransactionDetailModalProps {
   transaction: BuyerEscrowTransaction | null;
@@ -209,6 +210,9 @@ export const BuyerEscrowTransactionDetailModal = ({
                   </div>
                 </div>
               )}
+
+              {/* Land sales only: renders nothing for any other property. */}
+              <LandConveyanceEntry transaction={transaction} />
 
               <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
                 <Lock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, ClipboardCheck, RefreshCw, Search, ShieldCheck } from 'lucide-react';
 import {
   Button,
@@ -9,26 +10,26 @@ import {
   Input,
   Pagination,
   Select,
-  Toast,
-  type ToastVariant,
+  Tabs,
+  TabsList,
+  TabsTrigger,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
-import { adminLandService } from '@/services/adminLandService';
-import type {
-  LandDiligenceDecisionInput,
-  LandDiligenceDocumentLinkInput,
-  LandDiligenceRecord,
-  LandDiligenceStatus,
-} from '@/types/land';
-import { LandDiligenceRecordCard } from '@/components/admin/land/LandDiligenceRecordCard';
-import { LandDiligenceReviewDialog } from '@/components/admin/land/LandDiligenceReviewDialog';
+import { adminLandService, type ListLandDiligenceParams } from '@/services/adminLandService';
+import type { LandDiligenceStatus } from '@/types/land';
+import { landQueryKeys } from '@/lib/landDiligence';
+import {
+  LandDiligenceQueueTable,
+  landCaseHref,
+} from '@/components/admin/land/LandDiligenceQueueTable';
 
 type StatusFilter = 'all' | LandDiligenceStatus;
+type QueueTab = 'all' | 'mine' | 'unassigned' | 'overdue';
+type SortOrder = 'sla' | 'updated';
 
-const PAGE_SIZE = 12;
-const diligenceQueryRoot = ['admin', 'land', 'diligence'] as const;
+const PAGE_SIZE = 20;
 
 const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All statuses' },
@@ -40,17 +41,28 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
   { value: 'EXPIRED', label: 'Expired' },
 ];
 
+const sortOptions: { value: SortOrder; label: string }[] = [
+  { value: 'sla', label: 'SLA: oldest owed first' },
+  { value: 'updated', label: 'Recently updated' },
+];
+
+const tabFilters: Record<QueueTab, Pick<ListLandDiligenceParams, 'assigned' | 'overdue'>> = {
+  all: {},
+  mine: { assigned: 'me' },
+  unassigned: { assigned: 'unassigned' },
+  overdue: { overdue: true },
+};
+
 export default function AdminLandDiligencePage() {
-  const queryClient = useQueryClient();
+  const router = useRouter();
   const user = useAdminUser();
   const canApprove = hasAdminPermission(user?.roles, 'verifications.approve');
-  const canReviewDocuments = hasAdminPermission(user?.roles, 'verifications.review');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [tab, setTab] = useState<QueueTab>('all');
+  const [sort, setSort] = useState<SortOrder>('sla');
   const [page, setPage] = useState(1);
-  const [activeRecord, setActiveRecord] = useState<LandDiligenceRecord | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -60,150 +72,29 @@ export default function AdminLandDiligencePage() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  const queryKey = useMemo(
-    () => [...diligenceQueryRoot, debouncedSearch, status, page, PAGE_SIZE] as const,
-    [debouncedSearch, page, status]
+  const params = useMemo<ListLandDiligenceParams>(
+    () => ({
+      search: debouncedSearch || undefined,
+      status: status === 'all' ? undefined : status,
+      sort,
+      page,
+      pageSize: PAGE_SIZE,
+      ...tabFilters[tab],
+    }),
+    [debouncedSearch, page, sort, status, tab]
   );
+
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
-    queryKey,
-    queryFn: () =>
-      unwrap(
-        adminLandService.listDiligence({
-          search: debouncedSearch || undefined,
-          status: status === 'all' ? undefined : status,
-          page,
-          pageSize: PAGE_SIZE,
-        })
-      ),
+    queryKey: landQueryKeys.queue(params),
+    queryFn: () => unwrap(adminLandService.listDiligence(params)),
   });
   const records = data?.items ?? [];
   const total = data?.total ?? 0;
-
-  /**
-   * Documents live on the detail endpoint, not the queue: the list stays a list
-   * of metadata, and only the case actually open pulls file links down.
-   */
-  const detailQuery = useQuery({
-    queryKey: [...diligenceQueryRoot, 'detail', activeRecord?.propertyId],
-    queryFn: () => unwrap(adminLandService.getDiligenceDetail(activeRecord!.propertyId)),
-    enabled: Boolean(activeRecord),
-  });
-  const documents = detailQuery.data?.documents ?? [];
-
-  const notify = (message: string, variant: ToastVariant) => setToast({ message, variant });
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: diligenceQueryRoot });
-
-  const approveMutation = useMutation({
-    mutationFn: ({
-      propertyId,
-      data: input,
-    }: {
-      propertyId: string;
-      data: Pick<LandDiligenceDecisionInput, 'findings' | 'checklist' | 'expiresAt'>;
-    }) => unwrap(adminLandService.approveDiligence(propertyId, input)),
-    onSuccess: () => {
-      invalidate();
-      setActiveRecord(null);
-      notify(
-        'Land diligence approved. The listing can proceed when all publishing rules are met.',
-        'success'
-      );
-    },
-    onError: (mutationError) =>
-      notify(
-        mutationError instanceof Error
-          ? mutationError.message
-          : 'Unable to approve land diligence.',
-        'error'
-      ),
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: ({
-      propertyId,
-      data: input,
-    }: {
-      propertyId: string;
-      data: Pick<LandDiligenceDecisionInput, 'reason' | 'checklist'>;
-    }) => unwrap(adminLandService.rejectDiligence(propertyId, input)),
-    onSuccess: () => {
-      invalidate();
-      setActiveRecord(null);
-      notify('Land diligence rejected and the owner has been notified.', 'success');
-    },
-    onError: (mutationError) =>
-      notify(
-        mutationError instanceof Error ? mutationError.message : 'Unable to reject land diligence.',
-        'error'
-      ),
-  });
-
-  const clarificationMutation = useMutation({
-    mutationFn: ({
-      propertyId,
-      data: input,
-    }: {
-      propertyId: string;
-      data: Pick<LandDiligenceDecisionInput, 'reason' | 'checklist'>;
-    }) => unwrap(adminLandService.requestClarification(propertyId, input)),
-    onSuccess: () => {
-      invalidate();
-      setActiveRecord(null);
-      notify('Clarification requested from the owner.', 'success');
-    },
-    onError: (mutationError) =>
-      notify(
-        mutationError instanceof Error
-          ? mutationError.message
-          : 'Unable to request clarification for this land record.',
-        'error'
-      ),
-  });
-
-  const linkDocumentMutation = useMutation({
-    mutationFn: ({
-      propertyId,
-      input,
-    }: {
-      propertyId: string;
-      input: LandDiligenceDocumentLinkInput;
-    }) => unwrap(adminLandService.linkDiligenceDocument(propertyId, input)),
-    onSuccess: () => {
-      invalidate();
-      notify('Document cited: this review now records the basis for the decision.', 'success');
-    },
-    onError: (mutationError) =>
-      notify(
-        mutationError instanceof Error
-          ? mutationError.message
-          : 'Unable to cite that document for this review.',
-        'error'
-      ),
-  });
-
-  const unlinkDocumentMutation = useMutation({
-    mutationFn: ({ propertyId, documentId }: { propertyId: string; documentId: string }) =>
-      unwrap(adminLandService.unlinkDiligenceDocument(propertyId, documentId)),
-    onSuccess: () => {
-      invalidate();
-      notify('Document is no longer cited. The owner’s file has not been removed.', 'success');
-    },
-    onError: (mutationError) =>
-      notify(
-        mutationError instanceof Error
-          ? mutationError.message
-          : 'Unable to stop citing that document.',
-        'error'
-      ),
-  });
-
   const errorMessage =
-    error instanceof Error ? error.message : 'Unable to load the diligence queue.';  return (
-    <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
+    error instanceof Error ? error.message : 'Unable to load the diligence queue.';
 
+  return (
+    <>
       <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="rounded-xl bg-accent p-2.5 text-primary">
@@ -212,9 +103,9 @@ export default function AdminLandDiligencePage() {
           <div>
             <h1 className="type-title">Land diligence</h1>
             <p className="mt-1 max-w-2xl text-muted-foreground">
-              Review land titles, survey details, and the documents behind them before a parcel
-              can be verified for sale. Files open through short-lived links, and each decision
-              records the document it rests on.
+              The work queue for land titles, surveys and the evidence behind them. Cases are
+              ordered by when their review is owed; open one to record checks, cite documents and
+              decide.
             </p>
           </div>
         </div>
@@ -234,18 +125,34 @@ export default function AdminLandDiligencePage() {
         <div className="mb-6 flex gap-3 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
           <p>
-            You can review records and request clarification. A staff member with verification
-            approval permission must make the final approve or reject decision.
+            You can review cases, record checks and request clarification. A staff member with
+            verification approval permission must make the final approve or reject decision.
           </p>
         </div>
       )}
+
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          setTab(value as QueueTab);
+          setPage(1);
+        }}
+        className="mb-4"
+      >
+        <TabsList aria-label="Queue view">
+          <TabsTrigger value="all">All cases</TabsTrigger>
+          <TabsTrigger value="mine">My cases</TabsTrigger>
+          <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
+          <TabsTrigger value="overdue">Overdue</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <div className="w-full max-w-lg">
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search parcel, owner, plot, survey, city…"
+            placeholder="Search parcel, owner, plot, estate, city…"
             leadingIcon={<Search className="h-4 w-4" />}
             aria-label="Search land diligence records"
           />
@@ -260,18 +167,19 @@ export default function AdminLandDiligencePage() {
           ariaLabel="Filter diligence status"
           className="w-full sm:w-52"
         />
+        <Select
+          value={sort}
+          onValueChange={(value) => {
+            setSort(value as SortOrder);
+            setPage(1);
+          }}
+          options={sortOptions}
+          ariaLabel="Sort the queue"
+          className="w-full sm:w-60"
+        />
       </div>
 
-      {isLoading ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-72 animate-pulse rounded-2xl border border-border bg-secondary/60"
-            />
-          ))}
-        </div>
-      ) : isError ? (
+      {isError ? (
         <EmptyState
           icon={CircleAlert}
           title="The diligence queue could not be loaded"
@@ -286,28 +194,25 @@ export default function AdminLandDiligencePage() {
             </Button>
           }
         />
-      ) : records.length === 0 ? (
+      ) : !isLoading && records.length === 0 ? (
         <EmptyState
           icon={ClipboardCheck}
-          title="No land diligence records match these filters"
-          description="New land submissions will appear here once an owner completes their parcel profile."
+          title="No land diligence cases match these filters"
+          description="New land submissions appear here once an owner submits their parcel for review."
         />
       ) : (
         <>
-          <div className="mb-3 text-sm text-muted-foreground">
-            Showing {Math.min((page - 1) * PAGE_SIZE + 1, total)}–
-            {Math.min(page * PAGE_SIZE, total)} of {total} record{total === 1 ? '' : 's'}
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {records.map((record, index) => (
-              <LandDiligenceRecordCard
-                key={record.propertyId}
-                record={record}
-                onReview={() => setActiveRecord(record)}
-                delay={Math.min(index * 0.035, 0.2)}
-              />
-            ))}
-          </div>
+          {total > 0 && (
+            <div className="mb-3 text-sm text-muted-foreground">
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, total)}–
+              {Math.min(page * PAGE_SIZE, total)} of {total} case{total === 1 ? '' : 's'}
+            </div>
+          )}
+          <LandDiligenceQueueTable
+            records={records}
+            isLoading={isLoading}
+            onOpen={(record) => router.push(landCaseHref(record.propertyId))}
+          />
         </>
       )}
 
@@ -320,38 +225,6 @@ export default function AdminLandDiligencePage() {
           className="mt-7"
         />
       )}
-
-      <LandDiligenceReviewDialog
-        key={activeRecord?.propertyId ?? 'closed'}
-        record={activeRecord}
-        onClose={() => setActiveRecord(null)}
-        canApprove={canApprove}
-        onApprove={(propertyId, input) => approveMutation.mutate({ propertyId, data: input })}
-        onReject={(propertyId, input) => rejectMutation.mutate({ propertyId, data: input })}
-        onRequestClarification={(propertyId, input) =>
-          clarificationMutation.mutate({ propertyId, data: input })
-        }
-        isApproving={approveMutation.isPending}
-        isRejecting={rejectMutation.isPending}
-        isRequestingClarification={clarificationMutation.isPending}
-        documents={documents}
-        documentsLoading={detailQuery.isLoading}
-        canManageDocuments={canReviewDocuments}
-        onLinkDocument={(input) =>
-          activeRecord &&
-          linkDocumentMutation.mutate({ propertyId: activeRecord.propertyId, input })
-        }
-        onUnlinkDocument={(documentId) =>
-          activeRecord &&
-          unlinkDocumentMutation.mutate({ propertyId: activeRecord.propertyId, documentId })
-        }
-        linkingDocumentId={linkDocumentMutation.variables?.input.documentId ?? null}
-        unlinkingDocumentId={unlinkDocumentMutation.variables?.documentId ?? null}
-        onResolveDocumentUrl={async (documentId) => {
-          const refreshed = await detailQuery.refetch();
-          return refreshed.data?.documents.find((document) => document.id === documentId)?.url ?? null;
-        }}
-      />
     </>
   );
 }

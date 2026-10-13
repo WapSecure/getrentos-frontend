@@ -1,8 +1,22 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useMemo, useSyncExternalStore, type ReactNode } from 'react';
 import { CustodyProvider } from '@/components/agency/CustodyProvider';
 import { CustodyBar } from '@/components/agency/CustodyBar';
+import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar';
+import { STORAGE_KEYS } from '@/lib/constants/auth';
+
+type NavbarUser = { fullName: string; email: string; roles?: string[] };
+
+// The signed-in profile lives in browser storage, outside React: read it during
+// render (as CustodyProvider does) rather than copying it into state from an
+// effect. The raw string is the snapshot so it stays referentially stable.
+const subscribeToStorage = (onChange: () => void) => {
+  window.addEventListener('storage', onChange);
+  return () => window.removeEventListener('storage', onChange);
+};
+const readStoredUserRaw = () =>
+  localStorage.getItem(STORAGE_KEYS.USER) ?? sessionStorage.getItem(STORAGE_KEYS.USER);
 
 /**
  * The agency shell.
@@ -15,11 +29,25 @@ import { CustodyBar } from '@/components/agency/CustodyBar';
  *
  * Mounted once, at the layout, so the selection cannot disagree between two pages
  * and the bar cannot be forgotten by a page that was added later.
+ *
+ * Above it sits the same top bar as the owner workspace a manager works in, so a
+ * firm's staff have their notifications, account menu and sign-out here too.
  */
 export default function AgencyLayout({ children }: { children: ReactNode }) {
+  const raw = useSyncExternalStore(subscribeToStorage, readStoredUserRaw, () => null);
+  const user = useMemo<NavbarUser | null>(() => {
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as NavbarUser;
+    } catch {
+      return null;
+    }
+  }, [raw]);
+
   return (
     <CustodyProvider>
-      <div className="flex min-h-screen flex-col">
+      <LandlordNavbar user={user} />
+      <div className="flex min-h-screen flex-col pt-16">
         <CustodyBar />
         <main className="flex-1">{children}</main>
       </div>
