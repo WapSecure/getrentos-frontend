@@ -48,7 +48,8 @@ export const PurchasePayments = ({
       <h3 className="text-sm font-semibold text-foreground">Released to you</h3>
       {releases.length === 0 ? (
         <p className="mt-2 text-sm text-muted-foreground">
-          Nothing released yet. Escrow pays out as the buyer confirms each delivered step.
+          Nothing released yet. Each step&apos;s share is released as the buyer confirms it was
+          delivered.
         </p>
       ) : (
         <ul className="mt-2 divide-y divide-border/60 rounded-xl border border-border">

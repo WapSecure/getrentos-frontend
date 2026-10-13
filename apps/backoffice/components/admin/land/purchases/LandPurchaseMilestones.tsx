@@ -105,7 +105,7 @@ export const LandPurchaseMilestones = ({
         title="Waive this milestone?"
         description={`"${target?.label ?? ''}" will count as satisfied: later steps may proceed and its ${bpsToPercent(
           target?.releaseBps ?? 0
-        )} share can be released from escrow to the developer. This cannot be undone.`}
+        )} share can be released to the developer. This cannot be undone.`}
         confirmLabel="Waive milestone"
         promptLabel="Reason"
         promptPlaceholder="e.g. Survey already registered under the master title; no separate plan needed"

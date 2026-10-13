@@ -79,9 +79,9 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
 
       <p className="flex gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
         <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
-        Your money stays in escrow until you confirm every required step below, including the deed
-        of assignment and possession on site. Confirm each one only when it has actually happened;
-        dispute it if something is wrong.
+        Your payment is not released to the seller until you confirm every required step below,
+        including the deed of assignment and possession on site. Confirm each one only when it has
+        actually happened; dispute it if something is wrong.
       </p>
 
       {isLoading ? (
@@ -96,14 +96,14 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
         <EmptyState
           icon={ScrollText}
           title="No conveyance steps"
-          description="This transaction is not a land sale, so escrow follows the usual purchase steps."
+          description="This transaction is not a land sale, so payment follows the usual purchase steps."
         />
       ) : (
         <section className="rounded-2xl border border-border bg-card p-5">
           <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
             {outstanding.length === 0
-              ? 'Every required step is confirmed. Escrow can now be released to the seller.'
-              : `${outstanding.length} required step${outstanding.length === 1 ? '' : 's'} before escrow can be released.`}
+              ? 'Every required step is confirmed. Your payment can now be released to the seller.'
+              : `${outstanding.length} required step${outstanding.length === 1 ? '' : 's'} before your payment can be released.`}
           </p>
           <MilestoneTimeline
             milestones={milestones}
