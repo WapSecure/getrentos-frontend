@@ -293,6 +293,8 @@ export interface LandlordPayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  /** Payouts to a recently changed account wait until this time. */
+  payoutHoldUntil?: string | null;
 }
 
 export interface LandlordAutomationSettings {

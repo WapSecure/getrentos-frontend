@@ -8,6 +8,10 @@ import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agencyCommissionService } from '@/services/agencyCommissionService';
+import {
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  PayoutHoldNotice,
+} from '@/components/shared/payouts/PayoutHoldNotice';
 
 /**
  * An agency agent's own side of per-agent payouts: what they've earned from the
@@ -147,6 +151,8 @@ export function AgencyAgentSelfPayout({
             {account.accountName && (
               <p className="text-xs text-muted-foreground">{account.accountName}</p>
             )}
+            <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
+            <p className="mt-2 text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
             <Button variant="secondary" className="mt-3" onClick={() => setEditingAccount(true)}>
               Replace
             </Button>

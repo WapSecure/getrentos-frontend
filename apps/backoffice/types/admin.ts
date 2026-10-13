@@ -51,7 +51,9 @@ export type AdminPermission =
   | 'estate.view'
   | 'estate.moderate'
   | 'subscriptions.view'
-  | 'subscriptions.manage';
+  | 'subscriptions.manage'
+  | 'managed.view'
+  | 'managed.operate';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
