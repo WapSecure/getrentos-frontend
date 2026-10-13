@@ -3,6 +3,7 @@
 import { useMemo, useSyncExternalStore, type ReactNode } from 'react';
 import { CustodyProvider } from '@/components/agency/CustodyProvider';
 import { CustodyBar } from '@/components/agency/CustodyBar';
+import { AgencyVerificationBanner } from '@/components/agency/AgencyVerificationBanner';
 import { LandlordNavbar } from '@/components/landlord/navigation/LandlordNavbar';
 import { STORAGE_KEYS } from '@/lib/constants/auth';
 
@@ -48,6 +49,7 @@ export default function AgencyLayout({ children }: { children: ReactNode }) {
     <CustodyProvider>
       <LandlordNavbar user={user} />
       <div className="flex min-h-screen flex-col pt-16">
+        <AgencyVerificationBanner />
         <CustodyBar />
         <main className="flex-1">{children}</main>
       </div>
