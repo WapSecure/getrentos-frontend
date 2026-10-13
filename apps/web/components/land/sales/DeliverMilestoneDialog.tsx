@@ -98,8 +98,8 @@ export const DeliverMilestoneDialog = ({
           {milestone.label}
         </DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
-          The buyer is asked to confirm this step. Escrow moves only once they do, and they can
-          dispute it if it was not done.
+          The buyer is asked to confirm this step. Its share is released to you only once they do,
+          and they can dispute it if it was not done.
         </DialogDescription>
         <DeliverForm
           key={milestone.key}

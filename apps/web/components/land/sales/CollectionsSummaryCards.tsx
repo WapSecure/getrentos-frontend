@@ -44,7 +44,7 @@ export const CollectionsSummaryCards = ({ layoutId }: { layoutId?: string }) => 
       />
       <StatCard
         icon={Lock}
-        label="Held in escrow"
+        label="Held until confirmed"
         value={data.heldInEscrow}
         isCurrency
         accent="blue"

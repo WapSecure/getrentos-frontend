@@ -246,8 +246,8 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             Buy land with the parcel record in view.
           </h1>
           <p className="mt-3 text-base text-muted-foreground">
-            Every listing here has a verified owner, an approved diligence review, and a live
-            escrow-ready sale flow.
+            Every listing here has a verified owner, an approved diligence review, and a protected
+            sale flow: your payment is released to the seller only once you confirm each step.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link

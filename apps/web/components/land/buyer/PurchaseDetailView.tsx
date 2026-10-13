@@ -256,7 +256,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             <TabsContent value="conveyance" className="mt-4 space-y-4">
               <p className="flex gap-2 rounded-xl bg-info/5 p-3 text-sm text-muted-foreground">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" aria-hidden />
-                Your payments sit in escrow. Each step you confirm releases its share to the
+                GetRentos holds your payments. Each step you confirm releases its share to the
                 developer, never more than you have paid. Confirm in order, and only once you hold
                 the document or have been shown the plot. Allocation, the deed and the survey in
                 your name come after full payment.

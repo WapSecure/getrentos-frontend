@@ -42,10 +42,10 @@ export const LandPurchasePayments = ({
     )}
 
     <h3 className="mb-2 mt-5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-      Escrow releases to the developer
+      Releases to the developer
     </h3>
     {releases.length === 0 ? (
-      <PanelMessage>Nothing has been released from escrow.</PanelMessage>
+      <PanelMessage>Nothing has been released to the developer.</PanelMessage>
     ) : (
       <ul className="divide-y divide-border rounded-xl border border-border">
         {releases.map((release) => (

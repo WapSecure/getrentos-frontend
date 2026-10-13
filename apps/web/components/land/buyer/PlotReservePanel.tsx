@@ -158,7 +158,7 @@ export const PlotReservePanel = ({
         </li>
         <li className="flex gap-2">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden />
-          Payments are held in escrow and released to the developer only as you confirm each
+          GetRentos holds your payments and releases them to the developer only as you confirm each
           conveyance step.
         </li>
       </ul>
