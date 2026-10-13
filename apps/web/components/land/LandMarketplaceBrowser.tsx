@@ -53,6 +53,7 @@ import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import { useAddRole } from '@/hooks/useAddRole';
 import Link from 'next/link';
 import { AssuranceTierBadge } from '@/components/land/market/AssuranceTierBadge';
+import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import type { LandAssuranceTier } from '@/types/land';
 
@@ -100,7 +101,7 @@ const TITLE_TYPE_OPTIONS = [
 const ASSURANCE_OPTIONS = [
   { value: '', label: 'Any assurance' },
   { value: 'STANDARD', label: 'Registry-searched or better' },
-  { value: 'PREMIUM', label: 'Premium verified only' },
+  { value: 'PREMIUM', label: 'Independently reviewed only' },
 ];
 
 /** Square metres; a standard Lagos plot is roughly 450–650 sqm. */
@@ -240,14 +241,15 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         <div className="mb-8 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1.5 text-xs font-semibold text-primary">
             <BadgeCheck className="h-3.5 w-3.5" />
-            Verified land marketplace
+            Reviewed land marketplace
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
             Buy land with the parcel record in view.
           </h1>
           <p className="mt-3 text-base text-muted-foreground">
-            Every listing here has a verified owner, an approved diligence review, and a protected
-            sale flow: your payment is released to the seller only once you confirm each step.
+            Every listing here has a verified owner, a completed diligence review that shows what
+            was and was not checked, and a protected sale flow: your payment is released to the
+            seller only once you confirm each step.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
@@ -521,9 +523,6 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
-                      <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
-                        Verified parcel
-                      </Badge>
                       <AssuranceTierBadge tier={activeListing.diligence?.assuranceTier} />
                     </div>
                   </div>
@@ -533,6 +532,19 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                     </p>
                   )}
                 </div>
+
+                {Boolean(
+                  activeListing.diligence?.labels?.length ||
+                  activeListing.diligence?.notVerified?.length
+                ) && (
+                  <section className="rounded-xl border border-border bg-card p-4">
+                    <h3 className="mb-3 font-medium text-foreground">What was checked</h3>
+                    <TrustLabelsList
+                      labels={activeListing.diligence?.labels}
+                      notVerified={activeListing.diligence?.notVerified}
+                    />
+                  </section>
+                )}
 
                 <section className="rounded-xl border border-border bg-secondary/30 p-4">
                   <h3 className="font-medium text-foreground">Public parcel facts</h3>
@@ -557,7 +569,14 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                       label="Subdivision"
                       value={activeListing.parcel.subdivisionAllowed ? 'Allowed' : 'Not stated'}
                     />
-                    <Fact label="Diligence" value="Verified" />
+                    <Fact
+                      label="Diligence reviewed"
+                      value={
+                        activeListing.diligence?.reviewedAt
+                          ? formatDate(activeListing.diligence.reviewedAt)
+                          : undefined
+                      }
+                    />
                   </div>
                   {(() => {
                     const outline = boundaryCorners(activeListing.parcel.boundaryGeometry);
