@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
+import { LegacyInput, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -37,7 +37,7 @@ export default function OwnerListingsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const listingsQuery = useQuery({
     queryKey: [
       ...ownerKeys.listings,
       {
@@ -57,8 +57,10 @@ export default function OwnerListingsPage() {
         })
       ),
   });
+  const { data, isLoading } = listingsQuery;
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(debouncedSearch || filter !== 'all');
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.listings });
 
@@ -148,6 +150,8 @@ export default function OwnerListingsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -164,22 +168,44 @@ export default function OwnerListingsPage() {
         </div>
       </div>
 
-      {!isLoading && listings.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+      {isLoading ? (
+        <PageLoadingState />
+      ) : listingsQuery.isError ? (
+        <PageErrorState
+          title="Sale listings are unavailable"
+          description="We could not load your sale listings. Please try again."
+          onRetry={() => void listingsQuery.refetch()}
+          isRetrying={listingsQuery.isFetching}
+        />
+      ) : listings.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <Megaphone className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No sale listings yet' : 'No listings match your filters'}
+            {hasActiveFilters ? 'No listings match your filters' : 'No sale listings yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? 'Create a sale listing for one of your verified properties to start reaching buyers.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to your full portfolio.'
+              : 'Create a sale listing for one of your verified properties to start reaching buyers.'}
           </p>
-          {total === 0 && (
+          {!hasActiveFilters ? (
             <Button variant="primary" className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
-              Create Your First Listing
+              Create your first listing
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setDebouncedSearch('');
+                setFilter('all');
+                setPage(1);
+              }}
+            >
+              Clear filters
             </Button>
           )}
         </div>

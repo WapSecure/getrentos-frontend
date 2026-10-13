@@ -140,7 +140,7 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
       <Button
         label="Create listing"
         loading={create.isPending}
-        disabled={!valid}
+        disabled={!valid || create.isPending}
         onPress={() => create.mutate()}
       />
     </View>

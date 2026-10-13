@@ -6,7 +6,7 @@ import { Plus, Megaphone } from 'lucide-react';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
 import { CreateListingModal } from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
-import { Button } from '@getrentos/ui';
+import { Button, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -24,6 +24,8 @@ export default function LandlordListingsPage() {
   const [filter, setFilter] = useState<'all' | ListingStatus>('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
+  const [updatingListingId, setUpdatingListingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const {
     data: listings = [],
@@ -80,7 +82,20 @@ export default function LandlordListingsPage() {
 
   const togglePauseMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.toggleListingPause(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.listings() }),
+    onMutate: (id) => setUpdatingListingId(id),
+    onSuccess: (listing) => {
+      queryClient.invalidateQueries({ queryKey: landlordKeys.listings() });
+      setToast({
+        message: listing.status === 'paused' ? 'Listing paused.' : 'Listing is live again.',
+        variant: 'success',
+      });
+    },
+    onError: (error: Error) =>
+      setToast({
+        message: error.message || 'Could not update this listing.',
+        variant: 'error',
+      }),
+    onSettled: () => setUpdatingListingId(null),
   });
 
   const handlePublish = (data: Omit<Listing, 'id' | 'status' | 'createdAt'>) =>
@@ -145,13 +160,13 @@ export default function LandlordListingsPage() {
           {[0, 1, 2].map((index) => (
             <div
               key={index}
-              className="h-72 animate-pulse rounded-2xl border border-border bg-card"
+              className="h-72 animate-pulse rounded-xl border border-border bg-card"
             />
           ))}
         </div>
       ) : listingsFailed ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <Megaphone className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
@@ -165,27 +180,35 @@ export default function LandlordListingsPage() {
           </Button>
         </div>
       ) : filteredListings.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <Megaphone className="w-8 h-8 text-primary" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No listings found</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            {filter === 'all' ? 'No listings yet' : `No ${filter} listings`}
+          </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Publish a vacant unit to start receiving rental applications.
+            {filter === 'all'
+              ? 'Publish a vacant unit to start receiving rental applications.'
+              : 'Try another status or view all of your listings.'}
           </p>
-          <Button variant="primary" className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
-            Publish Listing
+          <Button
+            variant={filter === 'all' ? 'primary' : 'outline'}
+            className="mt-6"
+            onClick={() => (filter === 'all' ? setIsCreateModalOpen(true) : setFilter('all'))}
+          >
+            {filter === 'all' ? 'Publish listing' : 'View all listings'}
           </Button>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredListings.map((listing, index) => (
+          {filteredListings.map((listing) => (
             <ListingCard
               key={listing.id}
               listing={listing}
-              delay={index * 0.05}
               onTogglePause={handleTogglePause}
               onPreview={setPreviewListing}
+              isUpdating={updatingListingId === listing.id}
             />
           ))}
         </div>
@@ -197,9 +220,14 @@ export default function LandlordListingsPage() {
         vacantUnits={vacantUnits}
         onPublish={handlePublish}
         submitError={publishMutation.error}
+        isSubmitting={publishMutation.isPending}
       />
 
       <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }

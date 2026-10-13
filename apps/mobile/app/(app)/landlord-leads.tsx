@@ -114,7 +114,7 @@ export default function LandlordLeads() {
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={96} radius={radius.lg} />
+            <Skeleton key={i} height={96} radius={radius.md} />
           ))}
         </View>
       ) : (

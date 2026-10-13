@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
+import { Button, LegacyInput, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,7 +32,7 @@ export default function OwnerLeadsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data } = useQuery({
+  const leadsQuery = useQuery({
     queryKey: [
       ...ownerKeys.leads,
       {
@@ -52,8 +52,10 @@ export default function OwnerLeadsPage() {
         })
       ),
   });
+  const { data } = leadsQuery;
   const leads = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(debouncedSearch || filter !== 'all');
 
   const handleMessage = (lead: BuyerLead) => {
     router.push(`${ROUTES.OWNER_MESSAGES}?lead=${lead.id}`);
@@ -94,6 +96,8 @@ export default function OwnerLeadsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -110,19 +114,42 @@ export default function OwnerLeadsPage() {
         </div>
       </div>
 
-      {leads.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+      {leadsQuery.isLoading ? (
+        <PageLoadingState />
+      ) : leadsQuery.isError ? (
+        <PageErrorState
+          title="Buyer leads are unavailable"
+          description="We could not load enquiries for your sale listings. Please try again."
+          onRetry={() => void leadsQuery.refetch()}
+          isRetrying={leadsQuery.isFetching}
+        />
+      ) : leads.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <Users className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No buyer leads yet' : 'No leads match your filters'}
+            {hasActiveFilters ? 'No leads match your filters' : 'No buyer leads yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? 'Inquiries from buyers on your published sale listings will appear here.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to your full pipeline.'
+              : 'Inquiries from buyers on your published sale listings will appear here.'}
           </p>
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setDebouncedSearch('');
+                setFilter('all');
+                setPage(1);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Megaphone,
   MapPin,
@@ -22,12 +21,17 @@ const statusConfig = listingStatusBadges;
 
 interface ListingCardProps {
   listing: Listing;
-  delay?: number;
   onTogglePause: (id: string) => void;
   onPreview: (listing: Listing) => void;
+  isUpdating?: boolean;
 }
 
-export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: ListingCardProps) => {
+export const ListingCard = ({
+  listing,
+  onTogglePause,
+  onPreview,
+  isUpdating = false,
+}: ListingCardProps) => {
   const status = statusConfig[listing.status];
   // Signed URLs expire and can fail, so fall back to the placeholder rather
   // than showing a broken image.
@@ -35,12 +39,7 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
   const showCover = Boolean(listing.coverImage) && !coverFailed;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border overflow-hidden"
-    >
+    <article className="overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm">
       <div className="relative h-32 bg-muted">
         {showCover ? (
           // Signed MinIO URLs, so plain <img> rather than next/image.
@@ -132,17 +131,18 @@ export const ListingCard = ({ listing, delay = 0, onTogglePause, onPreview }: Li
               fullWidth
               className="gap-1.5"
               onClick={() => onTogglePause(listing.id)}
+              disabled={isUpdating}
             >
               {listing.status === 'paused' ? (
                 <Play className="w-3.5 h-3.5" />
               ) : (
                 <Pause className="w-3.5 h-3.5" />
               )}
-              {listing.status === 'paused' ? 'Resume' : 'Pause'}
+              {isUpdating ? 'Updating…' : listing.status === 'paused' ? 'Resume' : 'Pause'}
             </Button>
           )}
         </div>
       </div>
-    </motion.div>
+    </article>
   );
 };

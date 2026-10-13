@@ -116,7 +116,7 @@ export default function LandlordViewings() {
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={120} radius={radius.lg} />
+            <Skeleton key={i} height={120} radius={radius.md} />
           ))}
         </View>
       ) : (

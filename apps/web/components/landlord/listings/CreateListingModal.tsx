@@ -3,7 +3,6 @@
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Zap } from 'lucide-react';
 import { Button, CurrencyInput, DatePicker, Select } from '@getrentos/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
@@ -16,6 +15,7 @@ interface CreateListingModalProps {
   vacantUnits: Unit[];
   onPublish: (listing: Omit<Listing, 'id' | 'status' | 'createdAt'>) => void;
   submitError?: unknown;
+  isSubmitting?: boolean;
 }
 
 const amenityOptions = ['Parking', 'Swimming Pool', 'Security', '24/7 Power', 'Gym', 'Elevator'];
@@ -26,6 +26,7 @@ export const CreateListingModal = ({
   vacantUnits,
   onPublish,
   submitError = null,
+  isSubmitting = false,
 }: CreateListingModalProps) => {
   const [unitId, setUnitId] = useState('');
   const [listingTitle, setListingTitle] = useState('');
@@ -71,6 +72,7 @@ export const CreateListingModal = ({
   };
 
   const handleClose = () => {
+    if (isSubmitting) return;
     reset();
     onClose();
   };
@@ -104,217 +106,228 @@ export const CreateListingModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="font-semibold text-foreground">Publish Listing</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Make a vacant unit available for rent
-                </p>
-              </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+    isOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-listing-title"
+          className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl"
+        >
+          <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
+            <div>
+              <h3 id="create-listing-title" className="font-semibold text-foreground">
+                Publish listing
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Make a vacant unit available for rent
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={isSubmitting}
+              aria-label="Close publish listing form"
+              className="flex min-h-9 min-w-9 items-center justify-center rounded-lg hover:bg-secondary disabled:opacity-50"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {vacantUnits.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No vacant units available to list. Add a property or mark a unit vacant first.
-                </p>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Unit <span className="text-destructive">*</span>
-                    </label>
-                    <Select
-                      value={unitId}
-                      onValueChange={handleUnitChange}
-                      placeholder="Select a vacant unit"
-                      options={vacantUnits.map((unit) => ({
-                        value: unit.id,
-                        label: `${unit.propertyName}: ${unit.unitName}`,
-                      }))}
-                    />
+          <div className="p-4 space-y-4 overflow-y-auto flex-1">
+            {vacantUnits.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No vacant units available to list. Add a property or mark a unit vacant first.
+              </p>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Unit <span className="text-destructive">*</span>
+                  </label>
+                  <Select
+                    value={unitId}
+                    onValueChange={handleUnitChange}
+                    placeholder="Select a vacant unit"
+                    options={vacantUnits.map((unit) => ({
+                      value: unit.id,
+                      label: `${unit.propertyName}: ${unit.unitName}`,
+                    }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Listing Title <span className="text-destructive">*</span>
+                  </label>
+                  <LegacyInput
+                    type="text"
+                    value={listingTitle}
+                    onChange={(e) => setListingTitle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Rent Period <span className="text-destructive">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    {(['year', 'month'] as RentPeriod[]).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setRentPeriod(p)}
+                        className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                          rentPeriod === p
+                            ? 'bg-accent border-primary text-primary'
+                            : 'border-border text-muted-foreground hover:border-muted-foreground/40'
+                        }`}
+                      >
+                        {p === 'year' ? 'Yearly (recommended)' : 'Monthly'}
+                      </button>
+                    ))}
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Most Nigerian landlords let tenants a full year upfront. Choose monthly only for
+                    short-let or month-to-month arrangements.
+                  </p>
+                </div>
 
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Listing Title <span className="text-destructive">*</span>
+                      {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
+                      <span className="text-destructive">*</span>
                     </label>
-                    <LegacyInput
-                      type="text"
-                      value={listingTitle}
-                      onChange={(e) => setListingTitle(e.target.value)}
+                    <CurrencyInput
+                      prefix="₦"
+                      value={askingRent}
+                      onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
                       className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">
-                      Rent Period <span className="text-destructive">*</span>
-                    </label>
-                    <div className="flex gap-2">
-                      {(['year', 'month'] as RentPeriod[]).map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => setRentPeriod(p)}
-                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                            rentPeriod === p
-                              ? 'bg-accent border-primary text-primary'
-                              : 'border-border text-muted-foreground hover:border-muted-foreground/40'
-                          }`}
-                        >
-                          {p === 'year' ? 'Yearly (recommended)' : 'Monthly'}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Most Nigerian landlords let tenants a full year upfront. Choose monthly only
-                      for short-let or month-to-month arrangements.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
-                        <span className="text-destructive">*</span>
-                      </label>
-                      <CurrencyInput
-                        prefix="₦"
-                        value={askingRent}
-                        onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Security Deposit (₦)
-                      </label>
-                      <CurrencyInput
-                        prefix="₦"
-                        value={securityDeposit}
-                        onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
-                        placeholder="Optional"
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  {rentPeriod === 'year' && (
-                    <label className="flex items-start gap-2 text-sm text-foreground p-3 rounded-lg bg-accent border border-primary/20">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={allowsMonthlyPayment}
-                        onChange={(e) => setAllowsMonthlyPayment(e.target.checked)}
-                        className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
-                      />
-                      <span>
-                        <span className="flex items-center gap-1.5 font-medium">
-                          <Zap className="w-3.5 h-3.5 text-primary" />
-                          Allow monthly installments via GetRentos Flex
-                        </span>
-                        <span className="block text-xs text-muted-foreground mt-0.5">
-                          GetRentos pays you the full year upfront; the tenant repays us monthly.
-                          Leave unchecked to require the full year from the tenant directly.
-                        </span>
-                      </span>
-                    </label>
-                  )}
-
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">
-                      Availability Date <span className="text-destructive">*</span>
+                      Security Deposit (₦)
                     </label>
-                    <DatePicker value={availabilityDate} onChange={setAvailabilityDate} />
+                    <CurrencyInput
+                      prefix="₦"
+                      value={securityDeposit}
+                      onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
+                      placeholder="Optional"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1.5">
-                      Amenities
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {amenityOptions.map((amenity) => (
-                        <button
-                          key={amenity}
-                          type="button"
-                          onClick={() => toggleAmenity(amenity)}
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                            amenities.includes(amenity)
-                              ? 'bg-accent border-primary text-primary'
-                              : 'border-border text-muted-foreground hover:border-muted-foreground/40'
-                          }`}
-                        >
-                          {amenity}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-4">
-                    <label className="flex items-center gap-2 text-sm text-foreground">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={allowPets}
-                        onChange={(e) => setAllowPets(e.target.checked)}
-                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                      />
-                      Allow pets
-                    </label>
-                    <label className="flex items-center gap-2 text-sm text-foreground">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={furnished}
-                        onChange={(e) => setFurnished(e.target.checked)}
-                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                      />
-                      Furnished
-                    </label>
-                    <label className="flex items-center gap-2 text-sm text-foreground">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={shortLetEnabled}
-                        onChange={(e) => setShortLetEnabled(e.target.checked)}
-                        className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                      />
-                      Short-let enabled
-                    </label>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {vacantUnits.length > 0 && (
-              <div className="p-4 border-t border-border space-y-3 shrink-0">
-                <VerificationRequiredNotice
-                  error={submitError}
-                  href={ROUTES.LANDLORD_PROPERTIES}
-                  verificationHref={ROUTES.LANDLORD_VERIFICATION}
-                />
-                <div className="flex gap-3">
-                  <Button variant="primary" fullWidth onClick={handlePublish} disabled={!isValid}>
-                    Publish Listing
-                  </Button>
-                  <Button variant="ghost" fullWidth onClick={handleClose}>
-                    Cancel
-                  </Button>
                 </div>
-              </div>
+
+                {rentPeriod === 'year' && (
+                  <label className="flex items-start gap-2 text-sm text-foreground p-3 rounded-lg bg-accent border border-primary/20">
+                    <LegacyInput
+                      type="checkbox"
+                      checked={allowsMonthlyPayment}
+                      onChange={(e) => setAllowsMonthlyPayment(e.target.checked)}
+                      className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
+                    />
+                    <span>
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Zap className="w-3.5 h-3.5 text-primary" />
+                        Allow monthly installments via GetRentos Flex
+                      </span>
+                      <span className="block text-xs text-muted-foreground mt-0.5">
+                        GetRentos pays you the full year upfront; the tenant repays us monthly.
+                        Leave unchecked to require the full year from the tenant directly.
+                      </span>
+                    </span>
+                  </label>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Availability Date <span className="text-destructive">*</span>
+                  </label>
+                  <DatePicker value={availabilityDate} onChange={setAvailabilityDate} />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1.5">
+                    Amenities
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {amenityOptions.map((amenity) => (
+                      <button
+                        key={amenity}
+                        type="button"
+                        onClick={() => toggleAmenity(amenity)}
+                        className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+                          amenities.includes(amenity)
+                            ? 'bg-accent border-primary text-primary'
+                            : 'border-border text-muted-foreground hover:border-muted-foreground/40'
+                        }`}
+                      >
+                        {amenity}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <LegacyInput
+                      type="checkbox"
+                      checked={allowPets}
+                      onChange={(e) => setAllowPets(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    Allow pets
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <LegacyInput
+                      type="checkbox"
+                      checked={furnished}
+                      onChange={(e) => setFurnished(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    Furnished
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <LegacyInput
+                      type="checkbox"
+                      checked={shortLetEnabled}
+                      onChange={(e) => setShortLetEnabled(e.target.checked)}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    Short-let enabled
+                  </label>
+                </div>
+              </>
             )}
-          </motion.div>
+          </div>
+
+          {vacantUnits.length > 0 && (
+            <div className="p-4 border-t border-border space-y-3 shrink-0">
+              <VerificationRequiredNotice
+                error={submitError}
+                href={ROUTES.LANDLORD_PROPERTIES}
+                verificationHref={ROUTES.LANDLORD_VERIFICATION}
+              />
+              <div className="flex gap-3">
+                <Button
+                  variant="primary"
+                  fullWidth
+                  onClick={handlePublish}
+                  disabled={!isValid || isSubmitting}
+                >
+                  {isSubmitting ? 'Publishing…' : 'Publish listing'}
+                </Button>
+                <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+    )
   );
 };

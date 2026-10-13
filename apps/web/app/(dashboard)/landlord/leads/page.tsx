@@ -4,7 +4,15 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, UsersRound, Flame, X } from 'lucide-react';
-import { Button, LegacyInput, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  LegacyInput,
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { LeadCard } from '@/components/landlord/leads/LeadCard';
 import { ConfirmViewingModal } from '@/components/landlord/leads/ConfirmViewingModal';
 import { NudgeModal } from '@/components/landlord/leads/NudgeModal';
@@ -53,11 +61,12 @@ export default function LandlordLeadsPage() {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
       setPage(1);
+      setSelectedLeadIds([]);
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data } = useQuery({
+  const leadsQuery = useQuery({
     queryKey: [
       ...landlordKeys.leads,
       {
@@ -79,8 +88,10 @@ export default function LandlordLeadsPage() {
         })
       ),
   });
+  const { data } = leadsQuery;
   const leads = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(debouncedSearch || filter !== 'all' || staleOnly);
 
   const messageMutation = useMutation({
     mutationFn: (lead: LandlordLead) =>
@@ -163,9 +174,12 @@ export default function LandlordLeadsPage() {
           />
         </div>
         <button
+          type="button"
+          aria-pressed={staleOnly}
           onClick={() => {
             setStaleOnly((current) => !current);
             setPage(1);
+            setSelectedLeadIds([]);
           }}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap border ${
             staleOnly
@@ -183,9 +197,12 @@ export default function LandlordLeadsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
+                setSelectedLeadIds([]);
               }}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
@@ -227,25 +244,47 @@ export default function LandlordLeadsPage() {
         </div>
       )}
 
-      {leads.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+      {leadsQuery.isLoading ? (
+        <PageLoadingState />
+      ) : leadsQuery.isError ? (
+        <PageErrorState
+          title="Leads are unavailable"
+          description="We could not load your rental enquiries. Please try again."
+          onRetry={() => void leadsQuery.refetch()}
+          isRetrying={leadsQuery.isFetching}
+        />
+      ) : leads.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <UsersRound className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0
+            {hasActiveFilters
               ? staleOnly
-                ? 'No cold leads right now'
-                : 'No leads yet'
-              : 'No leads match your filters'}
+                ? 'No cold leads match'
+                : 'No leads match your filters'
+              : 'No leads yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? staleOnly
-                ? "Leads that go quiet for a few days will show up here so you don't lose track of them."
-                : 'Messages, viewing requests, and applications from renters will appear here.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to your full pipeline.'
+              : 'Messages, viewing requests, and applications from renters will appear here.'}
           </p>
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setDebouncedSearch('');
+                setFilter('all');
+                setStaleOnly(false);
+                setPage(1);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -274,7 +313,10 @@ export default function LandlordLeadsPage() {
           page={page}
           pageSize={PAGE_SIZE}
           total={total}
-          onPageChange={setPage}
+          onPageChange={(nextPage) => {
+            setPage(nextPage);
+            setSelectedLeadIds([]);
+          }}
           className="mt-6"
         />
       )}
