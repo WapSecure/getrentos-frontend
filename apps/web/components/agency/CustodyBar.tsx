@@ -7,6 +7,7 @@ import {
   Building2,
   Check,
   ChevronDown,
+  Gauge,
   Coins,
   Loader2,
   Lock,
@@ -102,6 +103,9 @@ export function CustodyBar() {
         <Link href="/agency/team" className="font-medium text-primary hover:underline">
           Team
         </Link>
+        <Link href="/agency/overview" className="font-medium text-primary hover:underline">
+          Firm overview
+        </Link>
       </div>
     );
   }
@@ -192,6 +196,14 @@ export function CustodyBar() {
       >
         <Users className="h-4 w-4" aria-hidden />
         Team
+      </Link>
+
+      <Link
+        href="/agency/overview"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <Gauge className="h-4 w-4" aria-hidden />
+        Overview
       </Link>
 
       <Link
