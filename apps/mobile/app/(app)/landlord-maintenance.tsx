@@ -105,7 +105,7 @@ export default function LandlordMaintenanceScreen() {
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={128} radius={radius.lg} />
+            <Skeleton key={i} height={128} radius={radius.md} />
           ))}
         </View>
       ) : (
@@ -198,13 +198,19 @@ function RequestCard({
         {actionable ? (
           <Pressable
             onPress={onAssign}
+            disabled={busy}
             accessibilityRole="button"
             accessibilityLabel={
               m.vendorName
                 ? `Change vendor for ${m.issueTitle}`
                 : `Assign a vendor to ${m.issueTitle}`
             }
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+              opacity: busy ? 0.5 : 1,
+            }}
           >
             <HardHat size={13} color={colors.primary} />
             <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>

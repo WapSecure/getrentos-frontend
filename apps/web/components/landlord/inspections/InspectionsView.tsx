@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, ClipboardCheck } from 'lucide-react';
-import { Button, Pagination, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  Pagination,
+  PageErrorState,
+  PageLoadingState,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { InspectionCard } from '@/components/landlord/inspections/InspectionCard';
 import { CreateInspectionModal } from '@/components/landlord/inspections/CreateInspectionModal';
 import { InspectionDetailModal } from '@/components/landlord/inspections/InspectionDetailModal';
@@ -41,10 +48,11 @@ export function InspectionsView() {
 
   const status = filter === 'all' ? undefined : filter;
 
-  const { data, isLoading } = useQuery({
+  const inspectionsQuery = useQuery({
     queryKey: [...landlordKeys.inspections({ status }), { page }],
     queryFn: () => unwrap(inspectionService.list({ status, page, pageSize: PAGE_SIZE })),
   });
+  const { data, isLoading } = inspectionsQuery;
   const inspections = data?.items ?? [];
   const total = data?.total ?? 0;
 
@@ -85,6 +93,8 @@ export function InspectionsView() {
         {statusFilters.map((option) => (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={filter === option.value}
             onClick={() => {
               setFilter(option.value);
               setPage(1);
@@ -102,10 +112,24 @@ export function InspectionsView() {
 
       {isLoading ? (
         <PageLoadingState />
+      ) : inspectionsQuery.isError ? (
+        <PageErrorState
+          title="Inspections are unavailable"
+          description="We could not load condition reports. No inspection has been changed."
+          onRetry={() => void inspectionsQuery.refetch()}
+          isRetrying={inspectionsQuery.isFetching}
+        />
       ) : inspections.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
           <ClipboardCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="text-muted-foreground">No inspections yet</p>
+          <p className="font-medium text-foreground">
+            {filter === 'all' ? 'No inspections yet' : `No ${filter.toLowerCase()} inspections`}
+          </p>
+          {filter !== 'all' && (
+            <Button variant="outline" className="mt-5" onClick={() => setFilter('all')}>
+              View all inspections
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

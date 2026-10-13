@@ -116,7 +116,7 @@ export default function AgentWorkOrders() {
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           {[0, 1].map((i) => (
-            <Skeleton key={i} height={140} radius={radius.lg} />
+            <Skeleton key={i} height={140} radius={radius.md} />
           ))}
         </View>
       ) : items.length === 0 ? (
@@ -187,7 +187,8 @@ export default function AgentWorkOrders() {
                     <View style={{ marginTop: spacing.md }}>
                       <Button
                         label="Start"
-                        loading={start.isPending}
+                        loading={start.isPending && start.variables === item.id}
+                        disabled={start.isPending && start.variables === item.id}
                         onPress={() => start.mutate(item.id)}
                       />
                     </View>
@@ -222,16 +223,24 @@ export default function AgentWorkOrders() {
                         onChangeText={setReport}
                         placeholder="e.g. Replaced the washer; tap no longer drips."
                         multiline
+                        editable={!complete.isPending}
                       />
+                      {item.photos.length === 0 ? (
+                        <Text variant="caption" color="mutedForeground">
+                          Add a completion photo when the result can be shown visually.
+                        </Text>
+                      ) : null}
                       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                         <Button
                           label="Report done"
                           loading={complete.isPending}
+                          disabled={complete.isPending || !report.trim()}
                           onPress={() => complete.mutate({ id: item.id, note: report })}
                         />
                         <Button
                           label="Cancel"
                           variant="ghost"
+                          disabled={complete.isPending}
                           onPress={() => {
                             setCompletingId(null);
                             setReport('');

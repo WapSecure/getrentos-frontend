@@ -92,7 +92,7 @@ export default function Maintenance() {
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={110} radius={radius.lg} />
+            <Skeleton key={i} height={110} radius={radius.md} />
           ))}
         </View>
       ) : items.length === 0 ? (
@@ -146,10 +146,17 @@ export default function Maintenance() {
                   {item.status === 'submitted' || item.status === 'assigned' ? (
                     <Pressable
                       onPress={() => confirmCancel(item.id)}
+                      disabled={cancelMutation.isPending}
                       accessibilityRole="button"
                       accessibilityLabel={`Cancel request: ${item.title}`}
                       hitSlop={8}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 36 }}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 5,
+                        minHeight: 36,
+                        opacity: cancelMutation.isPending ? 0.5 : 1,
+                      }}
                     >
                       <Ban size={13} color={colors.mutedForeground} />
                       <Text variant="caption" color="mutedForeground">

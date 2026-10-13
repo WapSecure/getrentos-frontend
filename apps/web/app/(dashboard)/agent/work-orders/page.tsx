@@ -13,6 +13,8 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  PageErrorState,
+  PageLoadingState,
   Textarea,
   Toast,
   type BadgeVariant,
@@ -38,10 +40,11 @@ export default function AgentWorkOrdersPage() {
   const [report, setReport] = useState('');
   const [uploadingId, setUploadingId] = useState<string | null>(null);
 
-  const { data: workOrders = [], isLoading } = useQuery({
+  const workOrdersQuery = useQuery({
     queryKey: KEY,
     queryFn: () => unwrap(agentService.listWorkOrders()),
   });
+  const { data: workOrders = [], isLoading } = workOrdersQuery;
   const invalidate = () => queryClient.invalidateQueries({ queryKey: KEY });
 
   const start = useMutation({
@@ -90,7 +93,14 @@ export default function AgentWorkOrdersPage() {
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary/50" />
+        <PageLoadingState />
+      ) : workOrdersQuery.isError ? (
+        <PageErrorState
+          title="Work orders are unavailable"
+          description="We could not load your assigned maintenance jobs. No work order has been changed."
+          onRetry={() => void workOrdersQuery.refetch()}
+          isRetrying={workOrdersQuery.isFetching}
+        />
       ) : workOrders.length === 0 ? (
         <Card className="p-2">
           <EmptyState
@@ -106,7 +116,7 @@ export default function AgentWorkOrdersPage() {
             const startable = wo.status === 'ASSIGNED' || wo.status === 'SUBMITTED';
             const inProgress = wo.status === 'IN_PROGRESS';
             return (
-              <Card key={wo.id} className="p-5">
+              <Card key={wo.id} className="rounded-xl p-5 shadow-xs">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -130,7 +140,7 @@ export default function AgentWorkOrdersPage() {
                         size="sm"
                         icon={<Play className="h-4 w-4" />}
                         onClick={() => start.mutate(wo.id)}
-                        disabled={start.isPending}
+                        disabled={start.isPending && start.variables === wo.id}
                       >
                         Start
                       </Button>
@@ -202,17 +212,28 @@ export default function AgentWorkOrdersPage() {
                 onChange={(e) => setReport(e.target.value)}
                 rows={4}
                 placeholder="e.g. Replaced the washer; tap no longer drips."
+                disabled={complete.isPending}
               />
             </Field>
+            {completing?.photos.length === 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Add a completion photo before reporting done when the result can be shown visually.
+              </p>
+            )}
           </div>
           <div className="mt-6 flex justify-end gap-3">
-            <Button variant="outline" rounded="md" onClick={() => setCompleting(null)}>
+            <Button
+              variant="outline"
+              rounded="md"
+              onClick={() => setCompleting(null)}
+              disabled={complete.isPending}
+            >
               Cancel
             </Button>
             <Button
               rounded="md"
               onClick={() => completing && complete.mutate({ id: completing.id, note: report })}
-              disabled={complete.isPending}
+              disabled={complete.isPending || !report.trim()}
             >
               {complete.isPending ? 'Saving…' : 'Report done'}
             </Button>

@@ -5,7 +5,6 @@ import { LegacyInput } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Search, Wrench } from 'lucide-react';
 import { MaintenanceCard } from './MaintenanceCard';
 import { MaintenanceDetailsModal } from './MaintenanceDetailsModal';
@@ -15,7 +14,7 @@ import type { MaintenanceRequest } from '@/types/maintenance';
 interface MaintenanceListProps {
   requests: MaintenanceRequest[];
   onUpdateStatus: (id: string, status: MaintenanceRequest['status']) => void;
-  onRateVendor: (id: string, rating: number) => void;
+  onRateVendor: (id: string, rating: number) => Promise<boolean>;
 }
 
 const statusOptions = [
@@ -68,11 +67,13 @@ export const MaintenanceList = ({
     setShowRatingModal(true);
   };
 
-  const handleSubmitRating = (rating: number) => {
+  const handleSubmitRating = async (rating: number) => {
     if (ratingRequestId) {
-      onRateVendor(ratingRequestId, rating);
-      setShowRatingModal(false);
-      setRatingRequestId(null);
+      const saved = await onRateVendor(ratingRequestId, rating);
+      if (saved) {
+        setShowRatingModal(false);
+        setRatingRequestId(null);
+      }
     }
   };
 
@@ -141,20 +142,15 @@ export const MaintenanceList = ({
               </p>
             </div>
           ) : (
-            filteredRequests.map((request, index) => (
-              <motion.div
-                key={request.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
+            filteredRequests.map((request) => (
+              <div key={request.id}>
                 <MaintenanceCard
                   request={request}
                   onViewDetails={() => handleViewDetails(request)}
                   onRateVendor={handleRateVendor}
                   onUpdateStatus={onUpdateStatus}
                 />
-              </motion.div>
+              </div>
             ))
           )}
         </div>

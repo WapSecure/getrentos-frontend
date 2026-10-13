@@ -12,13 +12,22 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
 
 export default function MaintenancePage() {
   const router = useRouter();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+  const [requestsError, setRequestsError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
@@ -52,13 +61,17 @@ export default function MaintenancePage() {
 
   useEffect(() => {
     const loadMaintenanceRequests = async () => {
+      setIsLoadingRequests(true);
+      setRequestsError(false);
       const res = await renterService.listMaintenanceRequests({ page, pageSize: PAGE_SIZE });
       if (res.success && res.data) {
         setRequests(res.data.items ?? []);
         setTotal(res.data.total ?? 0);
       } else {
+        setRequestsError(true);
         showToast(res.message || 'Unable to load maintenance requests.', 'error');
       }
+      setIsLoadingRequests(false);
     };
     loadMaintenanceRequests();
 
@@ -96,7 +109,7 @@ export default function MaintenancePage() {
       }
     };
     loadLandlordContact();
-  }, [page, showToast]);
+  }, [page, reloadKey, showToast]);
 
   const handleReportIssue = async (
     data: CreateMaintenanceRequestInput,
@@ -137,8 +150,10 @@ export default function MaintenancePage() {
       const updated = res.data;
       setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
       showToast('Thanks for rating the vendor.', 'success');
+      return true;
     } else {
       showToast(res.message || 'Unable to submit your vendor rating.', 'error');
+      return false;
     }
   };
 
@@ -156,12 +171,12 @@ export default function MaintenancePage() {
   // Scheduled maintenance is derived from real requests that are still active
   // (submitted / assigned / in progress): no fabricated entries.
   const scheduledMaintenance = requests
-    .filter((r) => r.status !== 'resolved' && r.status !== 'cancelled')
+    .filter((r) => r.scheduledFor && r.status !== 'resolved' && r.status !== 'cancelled')
     .map((r) => ({
       id: r.id,
       title: r.title,
       description: r.description,
-      scheduledDate: r.updatedAt,
+      scheduledDate: r.scheduledFor as string,
       estimatedDuration: r.slaResponseTime
         ? `${Math.max(1, Math.round(r.slaResponseTime / 60))} hour(s)`
         : 'As scheduled',
@@ -196,31 +211,42 @@ export default function MaintenancePage() {
         />
       </div>
 
-      <MaintenanceStats requests={requests} />
+      {!isLoadingRequests && !requestsError && <MaintenanceStats requests={requests} />}
 
-      <div className="grid lg:grid-cols-3 gap-6 mt-6">
-        <div className="lg:col-span-2 space-y-6">
-          <MaintenanceList
-            requests={requests}
-            onUpdateStatus={handleUpdateStatus}
-            onRateVendor={handleRateVendor}
-          />
+      {isLoadingRequests ? (
+        <PageLoadingState />
+      ) : requestsError ? (
+        <PageErrorState
+          title="Maintenance requests are unavailable"
+          description="We could not load your reported issues. No request has been changed."
+          onRetry={() => setReloadKey((value) => value + 1)}
+          isRetrying={isLoadingRequests}
+        />
+      ) : (
+        <div className="grid lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2 space-y-6">
+            <MaintenanceList
+              requests={requests}
+              onUpdateStatus={handleUpdateStatus}
+              onRateVendor={handleRateVendor}
+            />
+          </div>
+          <div className="space-y-6">
+            <QuickReport onQuickReport={handleReportIssue} />
+            <MaintenanceAnalytics requests={requests} />
+            <MaintenanceChecklist />
+            <ScheduledMaintenance
+              schedules={scheduledMaintenance}
+              onSchedule={() => setShowReportModal(true)}
+            />
+            <EmergencyContact
+              contacts={emergencyContacts}
+              onCall={handleCall}
+              onMessage={handleMessage}
+            />
+          </div>
         </div>
-        <div className="space-y-6">
-          <QuickReport onQuickReport={handleReportIssue} />
-          <MaintenanceAnalytics requests={requests} />
-          <MaintenanceChecklist />
-          <ScheduledMaintenance
-            schedules={scheduledMaintenance}
-            onSchedule={() => setShowReportModal(true)}
-          />
-          <EmergencyContact
-            contacts={emergencyContacts}
-            onCall={handleCall}
-            onMessage={handleMessage}
-          />
-        </div>
-      </div>
+      )}
 
       <ReportMaintenanceModal
         isOpen={showReportModal}

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   UserCog,
   CheckCircle2,
@@ -31,7 +30,6 @@ const categoryIcons: Record<MaintenanceCategory, React.ElementType> = {
 
 interface MaintenanceRequestCardProps {
   request: LandlordMaintenanceRequest;
-  delay?: number;
   onAssignVendor: (request: LandlordMaintenanceRequest) => void;
   onScheduleVisit: (request: LandlordMaintenanceRequest) => void;
   onRateVendor: (id: string, rating: number) => void;
@@ -44,7 +42,6 @@ interface MaintenanceRequestCardProps {
 
 export const MaintenanceRequestCard = ({
   request,
-  delay = 0,
   onAssignVendor,
   onScheduleVisit,
   onRateVendor,
@@ -62,12 +59,7 @@ export const MaintenanceRequestCard = ({
   const isBusy = isMarkingResolved || isEscalating;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
-    >
+    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2 rounded-lg bg-secondary shrink-0">
@@ -184,6 +176,6 @@ export const MaintenanceRequestCard = ({
           </Button>
         </div>
       )}
-    </motion.div>
+    </article>
   );
 };
