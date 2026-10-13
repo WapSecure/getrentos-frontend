@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { ProfileSettings } from '@/components/renter/settings/ProfileSettings';
 import { AccountSettings } from '@/components/renter/settings/AccountSettings';
 import { NotificationSettings } from '@/components/renter/settings/NotificationSettings';
-import { WhatsAppSettings } from '@/components/renter/settings/WhatsAppSettings';
 import { PrivacySettings } from '@/components/renter/settings/PrivacySettings';
 import { SecuritySettings } from '@/components/renter/settings/SecuritySettings';
 import { PaymentSettings } from '@/components/renter/settings/PaymentSettings';
@@ -27,7 +26,6 @@ import {
   Globe,
   Download,
   Trash2,
-  MessageCircle,
 } from 'lucide-react';
 import { RenterPageHeader } from '@/components/renter/shared/RenterPageHeader';
 
@@ -36,7 +34,6 @@ type SettingsTab =
   | 'account'
   | 'verification'
   | 'notifications'
-  | 'whatsapp'
   | 'privacy'
   | 'security'
   | 'payments'
@@ -50,7 +47,6 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'account', label: 'Account', icon: Settings },
   { id: 'verification', label: 'Verification', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
   { id: 'privacy', label: 'Privacy', icon: Shield },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'payments', label: 'Payments', icon: CreditCard },
@@ -78,8 +74,6 @@ export default function SettingsPage() {
         );
       case 'notifications':
         return <NotificationSettings />;
-      case 'whatsapp':
-        return <WhatsAppSettings />;
       case 'privacy':
         return <PrivacySettings />;
       case 'security':

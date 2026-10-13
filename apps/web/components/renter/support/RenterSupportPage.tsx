@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, LifeBuoy, MessageCircle, Send } from 'lucide-react';
-import { Button, Select } from '@getrentos/ui';
+import { Button, PageErrorState, PageLoadingState, Select, Toast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
@@ -35,16 +35,18 @@ export const RenterSupportPage = () => {
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('payments');
   const [draft, setDraft] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ['renter', 'support'] });
   };
   useRealtimeEvent('support:update', invalidateAll);
 
-  const { data: threads = [] } = useQuery({
+  const threadsQuery = useQuery({
     queryKey: renterKeys.supportThreads,
     queryFn: () => unwrap(renterService.listSupportThreads()),
   });
+  const threads = useMemo(() => threadsQuery.data ?? [], [threadsQuery.data]);
 
   const activeThread = useMemo(
     () =>
@@ -55,42 +57,62 @@ export const RenterSupportPage = () => {
     [threads, selectedId]
   );
 
-  const { data: messages = [] } = useQuery({
+  const messagesQuery = useQuery({
     queryKey: renterKeys.supportMessages(activeThread?.id ?? ''),
     queryFn: () => unwrap(renterService.getSupportThreadMessages(activeThread!.id)),
     enabled: !!activeThread,
   });
+  const messages = messagesQuery.data ?? [];
 
   const createThread = useMutation({
-    mutationFn: () => renterService.createSupportThread({ subject: subject.trim(), category }),
-    onSuccess: (res) => {
-      const thread = res.data as SupportThread | undefined;
-      if (thread) {
-        setSelectedId(thread.id);
-        setComposing(false);
-        setSubject('');
-      }
+    mutationFn: () =>
+      unwrap(renterService.createSupportThread({ subject: subject.trim(), category })),
+    onSuccess: (thread: SupportThread) => {
+      setSelectedId(thread.id);
+      setComposing(false);
+      setSubject('');
       invalidateAll();
     },
+    onError: (error: Error) =>
+      setErrorMessage(error.message || 'Your support conversation could not be started.'),
   });
 
   const sendMessage = useMutation({
-    mutationFn: (text: string) => renterService.sendSupportMessage(activeThread!.id, text),
+    mutationFn: (text: string) => unwrap(renterService.sendSupportMessage(activeThread!.id, text)),
     onSuccess: () => {
       setDraft('');
       invalidateAll();
     },
+    onError: (error: Error) =>
+      setErrorMessage(error.message || 'Your message could not be sent. Your draft is unchanged.'),
   });
 
   const resolveThread = useMutation({
-    mutationFn: () => renterService.resolveSupportThread(activeThread!.id),
+    mutationFn: () => unwrap(renterService.resolveSupportThread(activeThread!.id)),
     onSuccess: invalidateAll,
+    onError: (error: Error) =>
+      setErrorMessage(error.message || 'This conversation could not be marked as resolved.'),
   });
 
   const canSend = activeThread && draft.trim().length > 0 && !sendMessage.isPending;
 
+  if (threadsQuery.isLoading) return <PageLoadingState />;
+  if (threadsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Support is unavailable"
+        description="We could not load your support conversations."
+        onRetry={() => void threadsQuery.refetch()}
+        isRetrying={threadsQuery.isFetching}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
       <div>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
           <LifeBuoy className="h-3 w-3" />
@@ -238,7 +260,26 @@ export const RenterSupportPage = () => {
               </div>
 
               <div className="flex-1 space-y-3 overflow-y-auto p-4">
-                {messages.length === 0 && (
+                {messagesQuery.isLoading && (
+                  <p className="text-sm text-muted-foreground">Loading conversation…</p>
+                )}
+                {messagesQuery.isError && (
+                  <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3">
+                    <p className="text-sm text-destructive">
+                      This conversation could not be loaded.
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => void messagesQuery.refetch()}
+                      className="mt-1"
+                    >
+                      Try again
+                    </Button>
+                  </div>
+                )}
+                {!messagesQuery.isLoading && !messagesQuery.isError && messages.length === 0 && (
                   <p className="text-sm text-muted-foreground">No messages yet.</p>
                 )}
                 {messages.map((m) => (

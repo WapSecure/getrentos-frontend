@@ -13,7 +13,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
@@ -29,6 +29,7 @@ export default function NotificationsPage() {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterRead, setFilterRead] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const invalidateNotifications = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
@@ -41,21 +42,25 @@ export default function NotificationsPage() {
   const markAsReadMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),
     onSuccess: invalidateNotifications,
+    onError: () => setErrorMessage('The notification could not be marked as read.'),
   });
 
   const markAllAsReadMutation = useMutation({
     mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
     onSuccess: invalidateNotifications,
+    onError: () => setErrorMessage('Notifications could not be marked as read.'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.deleteNotification(id)),
     onSuccess: invalidateNotifications,
+    onError: () => setErrorMessage('The notification could not be deleted.'),
   });
 
   const clearAllMutation = useMutation({
     mutationFn: () => unwrap(renterService.clearAllNotifications()),
     onSuccess: invalidateNotifications,
+    onError: () => setErrorMessage('Notifications could not be cleared.'),
   });
 
   const handleMarkAsRead = (id: string) => markAsReadMutation.mutate(id);
@@ -90,6 +95,9 @@ export default function NotificationsPage() {
 
   return (
     <>
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
       <NotificationsHeader
         unreadCount={unreadCount}
         totalCount={notifications.length}

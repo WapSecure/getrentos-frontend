@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Building2, Wallet, Plus, Trash2 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -10,10 +11,12 @@ import { ROUTES } from '@/lib/constants/auth';
 
 export const PaymentSettings = () => {
   const queryClient = useQueryClient();
-  const { data: methods = [] } = useQuery({
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const methodsQuery = useQuery({
     queryKey: renterKeys.paymentMethods,
     queryFn: () => unwrap(renterService.listPaymentMethods()),
   });
+  const methods = methodsQuery.data ?? [];
 
   const invalidateMethods = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.paymentMethods });
@@ -21,18 +24,34 @@ export const PaymentSettings = () => {
   const setDefaultMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
     onSuccess: invalidateMethods,
+    onError: () => setErrorMessage('The default payment method could not be updated.'),
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
     onSuccess: invalidateMethods,
+    onError: () => setErrorMessage('The payment method could not be removed.'),
   });
 
   const handleSetDefault = (id: string) => setDefaultMutation.mutate(id);
   const handleRemove = (id: string) => removeMutation.mutate(id);
 
+  if (methodsQuery.isLoading) return <PageLoadingState />;
+  if (methodsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Payment methods are unavailable"
+        onRetry={() => void methodsQuery.refetch()}
+        isRetrying={methodsQuery.isFetching}
+      />
+    );
+  }
+
   return (
     <div>
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Payment Settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage your payment methods and billing information
@@ -63,7 +82,12 @@ export const PaymentSettings = () => {
               </div>
               <div className="flex gap-2">
                 {!method.isDefault && (
-                  <Button variant="ghost" size="sm" onClick={() => handleSetDefault(method.id)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSetDefault(method.id)}
+                    disabled={setDefaultMutation.isPending}
+                  >
                     Set Default
                   </Button>
                 )}
@@ -72,6 +96,8 @@ export const PaymentSettings = () => {
                   size="sm"
                   className="text-red-500 hover:text-red-700"
                   onClick={() => handleRemove(method.id)}
+                  disabled={removeMutation.isPending}
+                  aria-label={`Remove ${method.name}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

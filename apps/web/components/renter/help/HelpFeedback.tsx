@@ -14,6 +14,7 @@ export const HelpFeedback = () => {
   const [hoverRating, setHoverRating] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const submitMutation = useMutation({
     mutationFn: (data: { rating?: number; message: string }) =>
@@ -23,10 +24,13 @@ export const HelpFeedback = () => {
       setRating(0);
       setFeedback('');
     },
+    onError: (error: Error) =>
+      setErrorMessage(error.message || 'Your feedback could not be sent. Please try again.'),
   });
 
   const handleSubmit = () => {
     if (rating > 0) {
+      setErrorMessage(null);
       submitMutation.mutate({ rating, message: feedback.trim() || 'No additional feedback' });
     }
   };
@@ -56,6 +60,7 @@ export const HelpFeedback = () => {
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
+                type="button"
                 key={star}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
@@ -74,6 +79,8 @@ export const HelpFeedback = () => {
           </div>
         </div>
 
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">Your Feedback</label>
           <Textarea
@@ -89,11 +96,12 @@ export const HelpFeedback = () => {
           variant="primary"
           fullWidth
           onClick={handleSubmit}
-          disabled={rating === 0}
+          disabled={rating === 0 || submitMutation.isPending}
+          isLoading={submitMutation.isPending}
           className="gap-2"
         >
           <Send className="w-4 h-4" />
-          Submit Feedback
+          {submitMutation.isPending ? 'Sending feedback' : 'Submit Feedback'}
         </Button>
       </div>
     </div>

@@ -8,7 +8,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
-type ExportType = 'pdf' | 'csv';
+type ExportType = 'print' | 'csv';
 
 const buildSectionsHtml = (data: Record<string, unknown>): string =>
   Object.entries(data)
@@ -31,8 +31,9 @@ const buildSectionsHtml = (data: Record<string, unknown>): string =>
     .join('');
 
 export const DataExport = () => {
-  const [exportType, setExportType] = useState<ExportType>('pdf');
+  const [exportType, setExportType] = useState<ExportType>('print');
   const [completed, setCompleted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const exportMutation = useMutation({
     mutationFn: () => unwrap(renterService.exportData()),
@@ -59,9 +60,14 @@ export const DataExport = () => {
       setCompleted(true);
       setTimeout(() => setCompleted(false), 3000);
     },
+    onError: (error: Error) =>
+      setErrorMessage(error.message || 'Your data could not be exported. Please try again.'),
   });
 
-  const handleExport = () => exportMutation.mutate();
+  const handleExport = () => {
+    setErrorMessage(null);
+    exportMutation.mutate();
+  };
 
   return (
     <div>
@@ -75,17 +81,19 @@ export const DataExport = () => {
           <h3 className="font-medium text-foreground mb-2">Export Format</h3>
           <div className="flex gap-3">
             <button
-              onClick={() => setExportType('pdf')}
+              type="button"
+              onClick={() => setExportType('print')}
               className={`flex-1 p-3 rounded-lg border transition-colors ${
-                exportType === 'pdf'
+                exportType === 'print'
                   ? 'border-primary bg-accent'
                   : 'border-border hover:border-gray-300'
               }`}
             >
               <FileText className="w-5 h-5 mx-auto mb-1 text-gray-500" />
-              <p className="text-xs text-muted-foreground">PDF</p>
+              <p className="text-xs text-muted-foreground">Print or save as PDF</p>
             </button>
             <button
+              type="button"
               onClick={() => setExportType('csv')}
               className={`flex-1 p-3 rounded-lg border transition-colors ${
                 exportType === 'csv'
@@ -98,6 +106,8 @@ export const DataExport = () => {
             </button>
           </div>
         </div>
+
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
         <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
           <div className="flex items-start gap-2">

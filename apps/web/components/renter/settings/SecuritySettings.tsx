@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, Fingerprint, X } from 'lucide-react';
+import { Shield, X } from 'lucide-react';
 import { Button, Toast, ToastVariant } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -20,21 +20,6 @@ export const SecuritySettings = () => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  // Biometric remains a client-side preference (device-level toggle).
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const { data: prefs } = useQuery({
-    queryKey: renterKeys.settingsPreferences,
-    queryFn: () => unwrap(renterService.getSettingsPreferences()),
-  });
-
-  useEffect(() => {
-    const saved = (prefs?.security ?? {}) as { biometricEnabled?: boolean };
-    if (typeof saved.biometricEnabled === 'boolean') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setBiometricEnabled(saved.biometricEnabled);
-    }
-  }, [prefs]);
-
   const { data: twoFactor } = useQuery({
     queryKey: renterKeys.twoFactor,
     queryFn: () => unwrap(renterService.getTwoFactorStatus()),
@@ -49,17 +34,6 @@ export const SecuritySettings = () => {
     setEnroll(null);
     setCode('');
   };
-
-  const saveBiometric = useMutation({
-    mutationFn: () =>
-      unwrap(renterService.updateSettingsPreferences({ security: { biometricEnabled } })),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.settingsPreferences });
-      setToast({ message: 'Security settings saved', variant: 'success' });
-    },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'Failed to save security settings', variant: 'error' }),
-  });
 
   const enrollMutation = useMutation({
     mutationFn: () => unwrap(renterService.enrollTwoFactor()),
@@ -238,44 +212,6 @@ export const SecuritySettings = () => {
             </div>
           )}
         </div>
-
-        {/* Biometric Authentication */}
-        <div className="p-4 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20">
-                <Fingerprint className="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <h3 className="font-medium text-foreground">Biometric Authentication</h3>
-                <p className="text-sm text-muted-foreground">Use fingerprint or face recognition</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setBiometricEnabled((prev) => !prev)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                biometricEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-              aria-label="Toggle biometric authentication"
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  biometricEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-
-        <Button
-          variant="primary"
-          className="w-full"
-          onClick={() => saveBiometric.mutate()}
-          isLoading={saveBiometric.isPending}
-          disabled={saveBiometric.isPending}
-        >
-          Save Security Settings
-        </Button>
       </div>
     </div>
   );
