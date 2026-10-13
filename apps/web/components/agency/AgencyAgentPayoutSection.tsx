@@ -113,6 +113,8 @@ export function AgencyAgentPayoutSection({
                         <Badge variant="success">Ready</Badge>
                       ) : !p.accountSet ? (
                         <Badge variant="neutral">No payout account</Badge>
+                      ) : p.payoutHeldUntil ? (
+                        <Badge variant="warning">Account changed · on hold</Badge>
                       ) : (
                         <Badge variant="warning">Needs ID tier {requiredTier}</Badge>
                       )}

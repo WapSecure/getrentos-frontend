@@ -14,6 +14,10 @@ import {
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agencyCommissionService } from '@/services/agencyCommissionService';
+import {
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  PayoutHoldNotice,
+} from '@/components/shared/payouts/PayoutHoldNotice';
 
 const PAYOUT_STATUS: Record<string, { label: string; variant: BadgeVariant }> = {
   PENDING: { label: 'Processing', variant: 'info' },
@@ -110,6 +114,8 @@ export function AgencyPayoutSection({
               {account.accountName && (
                 <p className="text-xs text-muted-foreground">{account.accountName}</p>
               )}
+              <PayoutHoldNotice holdUntil={account.payoutHoldUntil} />
+              <p className="mt-2 text-xs text-muted-foreground">{PAYOUT_CHANGE_COOLDOWN_HINT}</p>
               <Button variant="secondary" className="mt-3" onClick={() => setEditingAccount(true)}>
                 Replace
               </Button>
