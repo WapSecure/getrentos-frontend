@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   ClipboardCheck,
   UserCheck,
@@ -35,10 +34,16 @@ interface TaskCardProps {
   onStart: () => void;
   onComplete: () => void;
   onCancel: () => void;
-  delay?: number;
+  isUpdating?: boolean;
 }
 
-export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: TaskCardProps) => {
+export const TaskCard = ({
+  task,
+  onStart,
+  onComplete,
+  onCancel,
+  isUpdating = false,
+}: TaskCardProps) => {
   const type = typeConfig[task.type];
   const TypeIcon = type.icon;
   const status = taskStatusBadges[task.status];
@@ -47,12 +52,7 @@ export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: Tas
     task.status === 'assigned' || task.status === 'in_progress' || task.status === 'overdue';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
-    >
+    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2.5 rounded-xl bg-accent shrink-0">
@@ -91,24 +91,41 @@ export const TaskCard = ({ task, onStart, onComplete, onCancel, delay = 0 }: Tas
             size="sm"
             className="gap-1.5 text-red-600 dark:text-red-400"
             onClick={onCancel}
+            disabled={isUpdating}
           >
             <XCircle className="w-3.5 h-3.5" />
             Cancel
           </Button>
           <div className="flex-1" />
           {task.status !== 'in_progress' ? (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={onStart}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={onStart}
+              disabled={isUpdating}
+            >
               <PlayCircle className="w-3.5 h-3.5" />
               Start
             </Button>
           ) : (
-            <Button variant="primary" size="sm" className="gap-1.5" onClick={onComplete}>
+            <Button
+              variant="primary"
+              size="sm"
+              className="gap-1.5"
+              onClick={onComplete}
+              disabled={isUpdating}
+            >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Complete
+              {task.type === 'inspection' || task.type === 'verification'
+                ? 'Continue work'
+                : isUpdating
+                  ? 'Updating…'
+                  : 'Complete'}
             </Button>
           )}
         </div>
       )}
-    </motion.div>
+    </article>
   );
 };

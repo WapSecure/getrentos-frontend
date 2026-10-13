@@ -22,6 +22,7 @@ interface ScheduleViewingModalProps {
   onClose: () => void;
   defaultLeadId?: string;
   onSubmit: (appointment: CreateViewingInput) => void;
+  isSubmitting?: boolean;
 }
 
 const LEAD_SELECTOR_PAGE_SIZE = 10;
@@ -31,6 +32,7 @@ export const ScheduleViewingModal = ({
   onClose,
   defaultLeadId,
   onSubmit,
+  isSubmitting = false,
 }: ScheduleViewingModalProps) => {
   const [leadId, setLeadId] = useState(defaultLeadId || '');
   const [leadSearch, setLeadSearch] = useState('');
@@ -175,17 +177,22 @@ export const ScheduleViewingModal = ({
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" onClick={handleClose} className="flex-1">
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                className="flex-1"
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 className="flex-1 gap-1.5"
                 onClick={handleSubmit}
-                disabled={!selectedLead?.listingId || !date || !time}
+                disabled={!selectedLead?.listingId || !date || !time || isSubmitting}
               >
                 <CalendarClock className="w-4 h-4" />
-                Schedule
+                {isSubmitting ? 'Scheduling…' : 'Schedule'}
               </Button>
             </div>
           </motion.div>

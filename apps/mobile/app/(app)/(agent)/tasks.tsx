@@ -77,7 +77,7 @@ export default function AgentTasks() {
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
           {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.lg} />
+            <Skeleton key={i} height={90} radius={radius.md} />
           ))}
         </View>
       ) : items.length === 0 ? (

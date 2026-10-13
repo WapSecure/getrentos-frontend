@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Building2, Home, MessageSquare } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
@@ -24,20 +23,14 @@ const statusConfig: Record<RealtorClient['status'], { label: string; className: 
 interface ClientCardProps {
   client: RealtorClient;
   onMessage: () => void;
-  delay?: number;
 }
 
-export const ClientCard = ({ client, onMessage, delay = 0 }: ClientCardProps) => {
+export const ClientCard = ({ client, onMessage }: ClientCardProps) => {
   const status = statusConfig[client.status];
   const RoleIcon = client.role === 'owner' ? Building2 : Home;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
-    >
+    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
@@ -75,6 +68,6 @@ export const ClientCard = ({ client, onMessage, delay = 0 }: ClientCardProps) =>
           Message
         </Button>
       </div>
-    </motion.div>
+    </article>
   );
 };

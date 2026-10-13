@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { MessageSquare, CalendarClock, Handshake, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
@@ -35,7 +34,7 @@ const stageConfig: Record<LeadStage, { label: string; className: string }> = {
 
 interface LeadCardProps {
   lead: RealtorLead;
-  delay?: number;
+  isUpdating?: boolean;
   onMessage: () => void;
   onScheduleViewing: () => void;
   onConvertToOffer: () => void;
@@ -45,7 +44,7 @@ interface LeadCardProps {
 
 export const LeadCard = ({
   lead,
-  delay = 0,
+  isUpdating = false,
   onMessage,
   onScheduleViewing,
   onConvertToOffer,
@@ -56,12 +55,7 @@ export const LeadCard = ({
   const isClosed = lead.stage === 'closed_won' || lead.stage === 'closed_lost';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
-    >
+    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
@@ -121,6 +115,7 @@ export const LeadCard = ({
               className="px-2.5 text-red-500"
               title="Mark Closed Lost"
               onClick={onCloseLost}
+              disabled={isUpdating}
             >
               <XCircle className="w-4 h-4" />
             </Button>
@@ -130,6 +125,7 @@ export const LeadCard = ({
               className="px-2.5 text-green-500"
               title="Mark Closed Won"
               onClick={onCloseWon}
+              disabled={isUpdating}
             >
               <CheckCircle2 className="w-4 h-4" />
             </Button>
@@ -143,6 +139,6 @@ export const LeadCard = ({
           </>
         )}
       </div>
-    </motion.div>
+    </article>
   );
 };

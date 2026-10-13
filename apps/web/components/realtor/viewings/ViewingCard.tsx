@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Clock, CalendarClock, CheckCircle2, XCircle, Check, X } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
@@ -37,7 +36,7 @@ interface ViewingCardProps {
   onConfirm: () => void;
   onComplete: () => void;
   onCancel: () => void;
-  delay?: number;
+  isUpdating?: boolean;
 }
 
 export const ViewingCard = ({
@@ -45,18 +44,13 @@ export const ViewingCard = ({
   onConfirm,
   onComplete,
   onCancel,
-  delay = 0,
+  isUpdating = false,
 }: ViewingCardProps) => {
   const status = statusConfig[viewing.status];
   const StatusIcon = status.icon;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
-    >
+    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-semibold text-foreground truncate">{viewing.listingTitle}</h3>
@@ -81,25 +75,38 @@ export const ViewingCard = ({
             size="sm"
             className="gap-1.5 text-red-600 dark:text-red-400"
             onClick={onCancel}
+            disabled={isUpdating}
           >
             <X className="w-3.5 h-3.5" />
             Cancel
           </Button>
           <div className="flex-1" />
           {viewing.status === 'pending' && (
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={onConfirm}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={onConfirm}
+              disabled={isUpdating}
+            >
               <Check className="w-3.5 h-3.5" />
               Confirm
             </Button>
           )}
           {viewing.status === 'confirmed' && (
-            <Button variant="primary" size="sm" className="gap-1.5" onClick={onComplete}>
+            <Button
+              variant="primary"
+              size="sm"
+              className="gap-1.5"
+              onClick={onComplete}
+              disabled={isUpdating}
+            >
               <CheckCircle2 className="w-3.5 h-3.5" />
               Mark Completed
             </Button>
           )}
         </div>
       )}
-    </motion.div>
+    </article>
   );
 };

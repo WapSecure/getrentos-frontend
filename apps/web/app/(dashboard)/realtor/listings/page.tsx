@@ -9,7 +9,14 @@ import { Plus, Search, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
-import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -35,7 +42,7 @@ export default function RealtorListingsPage() {
       : filter === 'pending_approval'
         ? 'PENDING_VERIFICATION'
         : (filter.toUpperCase() as 'DRAFT' | 'PUBLISHED' | 'PAUSED' | 'CLOSED');
-  const { data, isLoading } = useQuery({
+  const listingsQuery = useQuery({
     queryKey: [
       ...realtorKeys.listings,
       { page, pageSize: PAGE_SIZE, search: searchQuery.trim() || undefined, status: listingStatus },
@@ -52,8 +59,10 @@ export default function RealtorListingsPage() {
       return { ...result, items: result.items.map(mapRealtorListing) };
     },
   });
+  const { data, isLoading } = listingsQuery;
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(searchQuery.trim() || filter !== 'all');
   const createListing = useMutation({
     mutationFn: (listing: CreateRealtorListingInput) =>
       unwrap(
@@ -137,6 +146,8 @@ export default function RealtorListingsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -154,35 +165,51 @@ export default function RealtorListingsPage() {
       </div>
 
       {isLoading ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
-          Loading listings…
-        </div>
+        <PageLoadingState />
+      ) : listingsQuery.isError ? (
+        <PageErrorState
+          title="Listings are unavailable"
+          description="We could not load the listings you manage. Please try again."
+          onRetry={() => void listingsQuery.refetch()}
+          isRetrying={listingsQuery.isFetching}
+        />
       ) : listings.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <Megaphone className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No listings yet' : 'No listings match your filters'}
+            {hasActiveFilters ? 'No listings match your filters' : 'No listings yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? 'Add a listing on behalf of one of your clients to get started.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to all managed listings.'
+              : 'Add a listing on behalf of one of your clients to get started.'}
           </p>
-          {total === 0 && (
+          {!hasActiveFilters ? (
             <Button variant="primary" className="mt-6" onClick={openCreateModal}>
-              Add Your First Listing
+              Add your first listing
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setFilter('all');
+                setPage(1);
+              }}
+            >
+              Clear filters
             </Button>
           )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {listings.map((listing, index) => (
+          {listings.map((listing) => (
             <RealtorListingCard
               key={listing.id}
               listing={listing}
-              delay={index * 0.05}
               onClick={() => setPreviewListing(listing)}
             />
           ))}
@@ -205,6 +232,7 @@ export default function RealtorListingsPage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreate}
         error={createListing.error}
+        isSubmitting={createListing.isPending}
       />
 
       <RealtorListingPreviewModal

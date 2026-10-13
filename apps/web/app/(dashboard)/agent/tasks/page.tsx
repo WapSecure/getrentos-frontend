@@ -7,7 +7,7 @@ import { LegacySelect } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, ClipboardList } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Button, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';
@@ -28,7 +28,7 @@ export default function AgentTasksPage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
-  const { data: tasksData, error } = useQuery({
+  const tasksQuery = useQuery({
     queryKey: [
       ...agentKeys.tasks,
       { search: searchQuery, status: statusFilter, type: typeFilter, page, pageSize: PAGE_SIZE },
@@ -44,8 +44,10 @@ export default function AgentTasksPage() {
         })
       ),
   });
+  const { data: tasksData } = tasksQuery;
   const tasks = tasksData?.items ?? [];
   const total = tasksData?.total ?? 0;
+  const hasActiveFilters = Boolean(searchQuery || statusFilter !== 'all' || typeFilter !== 'all');
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -69,11 +71,12 @@ export default function AgentTasksPage() {
   };
 
   const handleComplete = (task: AgentTask) => {
-    updateStatus.mutate({ taskId: task.id, status: 'completed' });
     if (task.type === 'inspection') {
       router.push(`${ROUTES.AGENT_INSPECTIONS}?task=${task.id}`);
     } else if (task.type === 'verification') {
       router.push(`${ROUTES.AGENT_VERIFICATIONS}?task=${task.id}`);
+    } else {
+      updateStatus.mutate({ taskId: task.id, status: 'completed' });
     }
   };
 
@@ -102,11 +105,6 @@ export default function AgentTasksPage() {
         </p>
       </div>
 
-      {error && (
-        <p className="mb-4 text-sm text-red-600" role="alert">
-          Unable to load tasks. Please refresh and try again.
-        </p>
-      )}
       {updateStatus.error && (
         <p className="mb-4 text-sm text-red-600" role="alert">
           Unable to update that task. Please try again.
@@ -147,6 +145,8 @@ export default function AgentTasksPage() {
         {statusOptions.map((option) => (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={statusFilter === option.value}
             onClick={() => {
               setStatusFilter(option.value);
               setPage(1);
@@ -162,30 +162,53 @@ export default function AgentTasksPage() {
         ))}
       </div>
 
-      {tasks.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+      {tasksQuery.isLoading ? (
+        <PageLoadingState />
+      ) : tasksQuery.isError ? (
+        <PageErrorState
+          title="Tasks are unavailable"
+          description="We could not load your field assignments. Please try again."
+          onRetry={() => void tasksQuery.refetch()}
+          isRetrying={tasksQuery.isFetching}
+        />
+      ) : tasks.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <ClipboardList className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No tasks yet' : 'No tasks match your filters'}
+            {hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? 'Tasks assigned to you will appear here.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to all assignments.'
+              : 'Tasks assigned to you will appear here.'}
           </p>
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setStatusFilter('all');
+                setTypeFilter('all');
+                setPage(1);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {tasks.map((task, index) => (
+          {tasks.map((task) => (
             <TaskCard
               key={task.id}
               task={task}
-              delay={index * 0.05}
               onStart={() => handleStart(task)}
               onComplete={() => handleComplete(task)}
               onCancel={() => updateStatus.mutate({ taskId: task.id, status: 'cancelled' })}
+              isUpdating={updateStatus.isPending && updateStatus.variables?.taskId === task.id}
             />
           ))}
         </div>

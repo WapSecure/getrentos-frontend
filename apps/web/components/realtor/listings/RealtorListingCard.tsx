@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   MapPin,
   Megaphone,
@@ -48,20 +47,17 @@ const statusConfig: Record<
 interface RealtorListingCardProps {
   listing: RealtorListing;
   onClick?: () => void;
-  delay?: number;
 }
 
-export const RealtorListingCard = ({ listing, onClick, delay = 0 }: RealtorListingCardProps) => {
+export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps) => {
   const status = statusConfig[listing.status];
   const StatusIcon = status.icon;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
+    <button
+      type="button"
       onClick={onClick}
-      className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group w-full overflow-hidden rounded-xl border border-border bg-card text-left shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm"
     >
       <div className="relative h-40 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
@@ -106,6 +102,6 @@ export const RealtorListingCard = ({ listing, onClick, delay = 0 }: RealtorListi
           )}
         </div>
       </div>
-    </motion.div>
+    </button>
   );
 };

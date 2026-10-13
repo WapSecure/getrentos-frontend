@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Wallet, Clock, CheckCircle2, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
-import { Button, Pagination } from '@getrentos/ui';
+import { Button, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
@@ -44,16 +44,18 @@ const SIDE_LABEL: Record<CommissionSide, string> = {
 export default function RealtorCommissionsPage() {
   const [page, setPage] = useState(1);
   const { isPro, isLoading: isPlanLoading } = usePlanTier();
-  const { data, isLoading } = useQuery({
+  const commissionsQuery = useQuery({
     queryKey: [...realtorKeys.commissions, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(realtorService.getCommissions({ page, pageSize: PAGE_SIZE })),
     enabled: isPro,
   });
-  const { data: summary } = useQuery({
+  const { data, isLoading } = commissionsQuery;
+  const summaryQuery = useQuery({
     queryKey: [...realtorKeys.commissions, 'summary'],
     queryFn: () => unwrap(realtorService.getCommissionsSummary()),
     enabled: isPro,
   });
+  const { data: summary } = summaryQuery;
   const commissions = data?.items ?? [];
   const total = data?.total ?? 0;
   const [exported, setExported] = useState(false);
@@ -129,7 +131,21 @@ export default function RealtorCommissionsPage() {
   } as const;
 
   if (isPlanLoading || (isPro && isLoading)) {
-    return <div className="p-10 text-center text-muted-foreground">Loading commissions…</div>;
+    return <PageLoadingState />;
+  }
+
+  if (isPro && (commissionsQuery.isError || summaryQuery.isError)) {
+    return (
+      <PageErrorState
+        title="Commission records are unavailable"
+        description="We could not load your earnings and payout totals. No balances have been changed."
+        onRetry={() => {
+          void commissionsQuery.refetch();
+          void summaryQuery.refetch();
+        }}
+        isRetrying={commissionsQuery.isFetching || summaryQuery.isFetching}
+      />
+    );
   }
 
   return (
@@ -161,8 +177,11 @@ export default function RealtorCommissionsPage() {
           {stats.map((stat) => {
             const colors = colorClasses[stat.color as keyof typeof colorClasses];
             return (
-              <div key={stat.label} className="rounded-2xl bg-card border border-border p-4">
-                <div className={`inline-flex p-2.5 rounded-xl ${colors.bg} mb-3`}>
+              <div
+                key={stat.label}
+                className="rounded-xl border border-border bg-card p-4 shadow-xs"
+              >
+                <div className={`mb-3 inline-flex rounded-lg p-2.5 ${colors.bg}`}>
                   <stat.icon className={`w-5 h-5 ${colors.icon}`} />
                 </div>
                 <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
@@ -174,7 +193,7 @@ export default function RealtorCommissionsPage() {
 
         <RealtorPayoutSection />
 
-        <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
           <div className="px-5 pt-5">
             <h3 className="text-sm font-semibold text-foreground">Earned commission</h3>
           </div>

@@ -16,6 +16,8 @@ import {
   DialogTitle,
   Field,
   Input,
+  PageErrorState,
+  PageLoadingState,
   Pagination,
   Toast,
   type ToastVariant,
@@ -58,7 +60,7 @@ export default function RealtorLeadsPage() {
   }>({});
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const leadStatus = filter === 'all' ? undefined : LEAD_STAGE_TO_API_STATUS[filter];
-  const { data, isLoading } = useQuery({
+  const leadsQuery = useQuery({
     queryKey: [
       ...realtorKeys.leads,
       { page, pageSize: PAGE_SIZE, search: searchQuery.trim() || undefined, status: leadStatus },
@@ -75,8 +77,10 @@ export default function RealtorLeadsPage() {
       return { ...result, items: result.items.map(mapRealtorLead) };
     },
   });
+  const { data, isLoading } = leadsQuery;
   const leads = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(searchQuery.trim() || filter !== 'all');
   const queryClient = useQueryClient();
   const updateLead = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'CLOSED' | 'LOST' }) =>
@@ -195,6 +199,8 @@ export default function RealtorLeadsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -212,35 +218,53 @@ export default function RealtorLeadsPage() {
       </div>
 
       {isLoading ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
-          Loading leads…
-        </div>
+        <PageLoadingState />
+      ) : leadsQuery.isError ? (
+        <PageErrorState
+          title="Leads are unavailable"
+          description="We could not load your buyer and renter enquiries. Please try again."
+          onRetry={() => void leadsQuery.refetch()}
+          isRetrying={leadsQuery.isFetching}
+        />
       ) : leads.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <UserPlus className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No leads yet' : 'No leads match your filters'}
+            {hasActiveFilters ? 'No leads match your filters' : 'No leads yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? 'Inquiries from buyers and renters on your published listings will appear here.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to your full pipeline.'
+              : 'Inquiries from buyers and renters on your published listings will appear here.'}
           </p>
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setFilter('all');
+                setPage(1);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {leads.map((lead, index) => (
+          {leads.map((lead) => (
             <LeadCard
               key={lead.id}
               lead={lead}
-              delay={index * 0.05}
               onMessage={() => router.push(`${ROUTES.REALTOR_MESSAGES}?lead=${lead.id}`)}
               onScheduleViewing={() => router.push(`${ROUTES.REALTOR_VIEWINGS}?lead=${lead.id}`)}
               onConvertToOffer={() => router.push(`${ROUTES.REALTOR_OFFERS}?lead=${lead.id}`)}
               onCloseWon={() => updateLead.mutate({ id: lead.id, status: 'CLOSED' })}
               onCloseLost={() => updateLead.mutate({ id: lead.id, status: 'LOST' })}
+              isUpdating={updateLead.isPending && updateLead.variables?.id === lead.id}
             />
           ))}
         </div>
@@ -339,7 +363,7 @@ export default function RealtorLeadsPage() {
             <Button
               fullWidth
               isLoading={createLead.isPending}
-              disabled={!newLead.fullName.trim()}
+              disabled={!newLead.fullName.trim() || createLead.isPending}
               onClick={handleCreateLead}
             >
               Create lead

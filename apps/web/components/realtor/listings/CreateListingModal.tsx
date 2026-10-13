@@ -32,6 +32,7 @@ interface CreateListingModalProps {
   onSubmit: (listing: CreateRealtorListingInput) => void;
   /** Caught error from the parent's create mutation: renders a trust upsell when it's a verification/tier gate. */
   error?: unknown;
+  isSubmitting?: boolean;
 }
 
 const SELECTOR_PAGE_SIZE = 10;
@@ -41,6 +42,7 @@ export const CreateListingModal = ({
   onClose,
   onSubmit,
   error,
+  isSubmitting = false,
 }: CreateListingModalProps) => {
   const [clientId, setClientId] = useState('');
   const [propertyId, setPropertyId] = useState('');
@@ -292,11 +294,15 @@ export const CreateListingModal = ({
                     className="gap-1.5"
                     onClick={handleSubmit}
                     disabled={
-                      !selectedClient || !selectedProperty || !title || !(Number(price) >= 1)
+                      !selectedClient ||
+                      !selectedProperty ||
+                      !title ||
+                      !(Number(price) >= 1) ||
+                      isSubmitting
                     }
                   >
                     <Check className="w-3.5 h-3.5" />
-                    Create draft
+                    {isSubmitting ? 'Creating…' : 'Create draft'}
                   </Button>
                 </div>
               </div>

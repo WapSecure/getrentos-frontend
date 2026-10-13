@@ -8,7 +8,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Users } from 'lucide-react';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
-import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import type { ClientRole } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
 import { unwrap } from '@/lib/apiHelpers';
@@ -32,7 +39,7 @@ export default function RealtorClientsPage() {
   const planGate = usePlanGateModal();
   const clientRole =
     filter === 'owner' ? 'PROPERTY_OWNER' : filter === 'landlord' ? 'LANDLORD' : undefined;
-  const { data, isLoading } = useQuery({
+  const clientsQuery = useQuery({
     queryKey: [
       ...realtorKeys.clients,
       { page, pageSize: PAGE_SIZE, search: searchQuery.trim() || undefined, role: clientRole },
@@ -49,8 +56,10 @@ export default function RealtorClientsPage() {
       return { ...result, items: result.items.map(mapRealtorClient) };
     },
   });
+  const { data, isLoading } = clientsQuery;
   const clients = data?.items ?? [];
   const total = data?.total ?? 0;
+  const hasActiveFilters = Boolean(searchQuery.trim() || filter !== 'all');
   const inviteClient = useMutation({
     mutationFn: (email: string) => unwrap(realtorService.inviteClient(email)),
     onSuccess: () => {
@@ -114,6 +123,8 @@ export default function RealtorClientsPage() {
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -131,35 +142,51 @@ export default function RealtorClientsPage() {
       </div>
 
       {isLoading ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
-          Loading clients…
-        </div>
+        <PageLoadingState />
+      ) : clientsQuery.isError ? (
+        <PageErrorState
+          title="Clients are unavailable"
+          description="We could not load the people you represent. Please try again."
+          onRetry={() => void clientsQuery.refetch()}
+          isRetrying={clientsQuery.isFetching}
+        />
       ) : clients.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
             <Users className="w-8 h-8 text-primary" />
           </div>
           <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No clients yet' : 'No clients match your filters'}
+            {hasActiveFilters ? 'No clients match your filters' : 'No clients yet'}
           </h3>
           <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
-              ? 'Add an owner or landlord client to start representing their properties.'
-              : 'Try adjusting your search or filter.'}
+            {hasActiveFilters
+              ? 'Clear the current filters to return to all clients.'
+              : 'Add an owner or landlord client to start representing their properties.'}
           </p>
-          {total === 0 && (
+          {!hasActiveFilters ? (
             <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
-              Add Your First Client
+              Add your first client
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="mt-6"
+              onClick={() => {
+                setSearchQuery('');
+                setFilter('all');
+                setPage(1);
+              }}
+            >
+              Clear filters
             </Button>
           )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {clients.map((client, index) => (
+          {clients.map((client) => (
             <ClientCard
               key={client.id}
               client={client}
-              delay={index * 0.05}
               onMessage={() => router.push(`${ROUTES.REALTOR_MESSAGES}?client=${client.id}`)}
             />
           ))}
