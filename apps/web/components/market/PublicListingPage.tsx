@@ -107,7 +107,8 @@ export async function PublicListingPage({
               <div className="flex flex-wrap items-center gap-2">
                 {listing.verified && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-                    <BadgeCheck className="h-3.5 w-3.5" /> Verified
+                    <BadgeCheck className="h-3.5 w-3.5" />{' '}
+                    {market === 'land' ? 'Ownership verified' : 'Verified'}
                   </span>
                 )}
               </div>

@@ -17,6 +17,7 @@ import {
 } from '@/types/land';
 import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';
 import { AssuranceTierBadge } from './AssuranceTierBadge';
+import { TrustLabelsList } from './TrustLabelsList';
 import { PricePositionBar } from './PricePositionBar';
 
 /**
@@ -44,7 +45,15 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   if (comparables.isLoading && listing.isLoading) {
     return <div className="mt-12 h-48 animate-pulse rounded-3xl bg-secondary" aria-busy="true" />;
   }
-  if (!tier && (!data || (items.length === 0 && data.subjectPercentile === undefined))) return null;
+  const labels = listing.data?.diligence?.labels ?? [];
+  const notVerified = listing.data?.diligence?.notVerified ?? [];
+  const hasChecks = labels.length > 0 || notVerified.length > 0;
+  if (
+    !tier &&
+    !hasChecks &&
+    (!data || (items.length === 0 && data.subjectPercentile === undefined))
+  )
+    return null;
 
   const insightsHref = listing.data
     ? `${LAND_BUYER_ROUTES.MARKET_INSIGHTS}?state=${encodeURIComponent(listing.data.state)}&city=${encodeURIComponent(listing.data.city)}`
@@ -66,17 +75,24 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <div className="space-y-5">
-          {tier && (
+          {(tier || hasChecks) && (
             <div className="rounded-2xl border border-border bg-card p-5">
               <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <ShieldCheck className="h-4 w-4 text-success" aria-hidden /> Assurance
+                <ShieldCheck className="h-4 w-4 text-success" aria-hidden /> What was checked
               </p>
-              <div className="mt-2">
-                <AssuranceTierBadge tier={tier} />
+              {tier && (
+                <>
+                  <div className="mt-2">
+                    <AssuranceTierBadge tier={tier} />
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {LAND_ASSURANCE_TIER_LABELS[tier]}: {LAND_ASSURANCE_TIER_DESCRIPTIONS[tier]}
+                  </p>
+                </>
+              )}
+              <div className="mt-4">
+                <TrustLabelsList labels={labels} notVerified={notVerified} />
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {LAND_ASSURANCE_TIER_LABELS[tier]}: {LAND_ASSURANCE_TIER_DESCRIPTIONS[tier]}
-              </p>
             </div>
           )}
           {data?.subjectPercentile !== undefined && (

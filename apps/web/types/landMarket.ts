@@ -78,7 +78,7 @@ export interface LandComparables {
 export const LAND_ASSURANCE_TIER_ORDER: LandAssuranceTier[] = ['BASIC', 'STANDARD', 'PREMIUM'];
 
 export const LAND_ASSURANCE_TIER_DESCRIPTIONS: Record<LandAssuranceTier, string> = {
-  BASIC: 'Ownership and diligence verified by GetRentos.',
-  STANDARD: 'Verified, with a registry search on the title.',
-  PREMIUM: 'Registry-searched and reviewed by an independent professional.',
+  BASIC: 'GetRentos reviewed the ownership documents and the diligence checklist.',
+  STANDARD: 'Includes an official registry search on the title.',
+  PREMIUM: 'Registry-searched, with checks by an independent professional.',
 };

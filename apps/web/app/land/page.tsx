@@ -4,13 +4,13 @@ import { Navigation } from '@/components/layout/Navigation';
 import { LandMarketplaceBrowser } from '@/components/land/LandMarketplaceBrowser';
 
 export const metadata: Metadata = {
-  title: 'Land: Verified Land Listings',
+  title: 'Land: Reviewed Land Listings',
   description:
-    'Browse verified land listings with title deed verification and GetRentos Payment Protection.',
+    'Browse land listings with a dated diligence review that shows what was checked, and payments held until you confirm each step.',
   alternates: { canonical: '/land' },
   openGraph: {
-    title: 'Land: Verified Land Listings',
-    description: 'Browse verified land listings with title deed verification on GetRentos.',
+    title: 'Land: Reviewed Land Listings',
+    description: 'Browse land listings with a dated, scoped diligence review on GetRentos.',
     url: '/land',
     type: 'website',
   },
