@@ -4,7 +4,11 @@ import { useState } from 'react';
 import { CheckCircle2, ClipboardList, FileCheck2, FileWarning, Link2, Pencil } from 'lucide-react';
 import { Badge, Button, Input, Select, type BadgeVariant } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
-import type { LandDiligenceCheck, LandDiligenceChecklistStatus } from '@/types/land';
+import type {
+  LandDiligenceCheck,
+  LandDiligenceChecklistStatus,
+  LandPolicyPack,
+} from '@/types/land';
 import { checkDecisionProblem } from '@/lib/landDiligence';
 import { LandCaseSection, PanelMessage } from './shared';
 
@@ -31,6 +35,9 @@ interface LandChecksPanelProps {
   /** Resolves true once saved, so a refused decision keeps the reviewer's draft. */
   onSave: (key: string, status: LandDiligenceChecklistStatus, note: string) => Promise<boolean>;
   onCite: (checkKey: string) => void;
+  /** Checklist version and the state pack behind it, for the reviewer's context. */
+  templateVersion?: string | null;
+  policyPack?: LandPolicyPack | null;
 }
 
 /**
@@ -46,6 +53,8 @@ export const LandChecksPanel = ({
   savingKey,
   onSave,
   onCite,
+  templateVersion,
+  policyPack,
 }: LandChecksPanelProps) => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [draftStatus, setDraftStatus] = useState<LandDiligenceChecklistStatus>('PENDING');
@@ -72,6 +81,23 @@ export const LandChecksPanel = ({
           : undefined
       }
     >
+      {(policyPack || templateVersion) && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          {policyPack ? (
+            <>
+              <Badge variant={policyPack.status === 'APPROVED' ? 'info' : 'warning'}>
+                {policyPack.state} rules
+                {policyPack.status === 'APPROVED' ? '' : ' · draft, pending counsel review'}
+              </Badge>
+              <span className="font-mono">{templateVersion}</span>
+            </>
+          ) : (
+            <span>
+              National checklist <span className="font-mono">{templateVersion}</span>
+            </span>
+          )}
+        </div>
+      )}
       {!editable && checks.length > 0 && (
         <p className="mb-3 text-xs text-muted-foreground">
           Checks can only be changed while the case is in review or awaiting the owner.

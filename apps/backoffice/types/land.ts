@@ -88,6 +88,10 @@ export interface LandDiligenceReviewSummary {
   /** 0-100, higher is riskier. */
   riskScore?: number | null;
   assuranceTier?: LandAssuranceTier | string | null;
+  /** Checklist version the case was seeded from, e.g. `ng-2026.10+ng-lagos-2026.10-draft`. */
+  templateVersion?: string | null;
+  /** The state policy pack behind the checklist, when one applied. */
+  policyPack?: LandPolicyPack | null;
   findings?: string | null;
   /** A structured, server-sanitised checklist. It deliberately has no file URLs. */
   checklist?: LandDiligenceChecklistItem[] | null;
@@ -388,4 +392,13 @@ export interface LandRiskAssessment {
   };
   /** What is currently stored on the case, which may lag a just-changed input. */
   stored: { riskScore: number | null; assuranceTier: LandAssuranceTier | null };
+}
+
+/** A state's adjustments to the national checklist (blueprint §4.3). */
+export interface LandPolicyPack {
+  id: string;
+  version: string;
+  state: string;
+  /** DRAFT_PENDING_COUNSEL: the state's rules are not yet approved by counsel. */
+  status: 'DRAFT_PENDING_COUNSEL' | 'APPROVED' | string;
 }
