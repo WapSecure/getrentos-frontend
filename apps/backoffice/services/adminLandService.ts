@@ -142,15 +142,20 @@ export const adminLandService = {
   },
 
   /**
-   * Stops citing a document. The owner's file is left untouched — only the
-   * review's reliance on it is withdrawn.
+   * Stops citing a document on one check. The owner's file is left untouched —
+   * only the review's reliance on it is withdrawn. `checklistKey` names the
+   * check (null: the citation tied to no check); leave it out to remove the
+   * document's only citation.
    */
   unlinkDiligenceDocument(
     propertyId: string,
-    documentId: string
+    documentId: string,
+    checklistKey?: string | null
   ): Promise<ApiResponse<AdminLandDiligenceDetail>> {
+    const query =
+      checklistKey === undefined ? '' : `?checklistKey=${encodeURIComponent(checklistKey ?? '')}`;
     return safeCall(() =>
-      authFetch(`${base(propertyId)}/documents/${encodeURIComponent(documentId)}`, {
+      authFetch(`${base(propertyId)}/documents/${encodeURIComponent(documentId)}${query}`, {
         method: 'DELETE',
       })
     );

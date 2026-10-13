@@ -9,6 +9,7 @@ import type {
   AdminLandDiligenceDetail,
   LandDiligenceCheckInput,
   LandDiligenceDocument,
+  LandDiligenceDocumentLink,
   LandDiligenceDocumentLinkInput,
 } from '@/types/land';
 import { LandChecksPanel } from './LandChecksPanel';
@@ -37,7 +38,10 @@ export const LandEvidenceSection = ({
   const invalidate = useInvalidateLandCase();
   const checks = detail.diligence.checks ?? [];
   const [citeTarget, setCiteTarget] = useState<CiteTarget | null>(null);
-  const [stopCiting, setStopCiting] = useState<LandDiligenceDocument | null>(null);
+  const [stopCiting, setStopCiting] = useState<{
+    document: LandDiligenceDocument;
+    link: LandDiligenceDocumentLink;
+  } | null>(null);
   const [uploadTarget, setUploadTarget] = useState<{ checkKey?: string } | null>(null);
 
   const recordCheck = useMutation({
@@ -97,8 +101,13 @@ export const LandEvidenceSection = ({
   });
 
   const unlink = useMutation({
-    mutationFn: (documentId: string) =>
-      unwrap(adminLandService.unlinkDiligenceDocument(propertyId, documentId)),
+    mutationFn: ({
+      documentId,
+      checklistKey,
+    }: {
+      documentId: string;
+      checklistKey: string | null;
+    }) => unwrap(adminLandService.unlinkDiligenceDocument(propertyId, documentId, checklistKey)),
     onSuccess: () => {
       invalidate();
       onSuccess('Document is no longer cited. The owner’s file has not been removed.');
@@ -136,9 +145,13 @@ export const LandEvidenceSection = ({
         checks={checks}
         canReview={canReview}
         onCite={(documentId) => setCiteTarget({ documentId })}
-        onStopCiting={setStopCiting}
+        onStopCiting={(document, link) => setStopCiting({ document, link })}
         onUpload={() => setUploadTarget({})}
-        unlinkingId={unlink.isPending ? (unlink.variables ?? null) : null}
+        unlinkingId={
+          unlink.isPending && unlink.variables
+            ? `${unlink.variables.documentId}:${unlink.variables.checklistKey ?? ''}`
+            : null
+        }
         onResolveUrl={onResolveUrl}
       />
 
@@ -146,7 +159,7 @@ export const LandEvidenceSection = ({
         key={citeTarget ? `${citeTarget.documentId ?? ''}:${citeTarget.checkKey ?? ''}` : 'closed'}
         target={citeTarget}
         onClose={() => setCiteTarget(null)}
-        documents={detail.documents.filter((document) => !document.link)}
+        documents={detail.documents}
         checks={checks}
         onSubmit={(input) => link.mutate(input)}
         isPending={link.isPending}
@@ -174,15 +187,24 @@ export const LandEvidenceSection = ({
         open={Boolean(stopCiting)}
         onOpenChange={(open) => !open && setStopCiting(null)}
         title="Stop citing this document?"
-        description={`${stopCiting?.name ?? 'This document'} will no longer back ${
-          stopCiting?.link?.checklistKey
-            ? `the "${stopCiting.link.checklistKey}" check`
+        description={`${stopCiting?.document.name ?? 'This document'} will no longer back ${
+          stopCiting?.link.checklistKey
+            ? `the "${
+                checks.find((check) => check.key === stopCiting.link.checklistKey)?.label ??
+                stopCiting.link.checklistKey
+              }" check`
             : 'the review'
-        }. A passed check that needs evidence will then block approval until another document is cited.`}
+        }. Any other checks it is cited on keep it. A passed check that needs evidence will then block approval until another document is cited.`}
         confirmLabel="Stop citing"
         isLoading={unlink.isPending}
         onConfirm={async () => {
-          if (stopCiting) await unlink.mutateAsync(stopCiting.id).catch(() => undefined);
+          if (stopCiting)
+            await unlink
+              .mutateAsync({
+                documentId: stopCiting.document.id,
+                checklistKey: stopCiting.link.checklistKey ?? null,
+              })
+              .catch(() => undefined);
         }}
       />
     </>
