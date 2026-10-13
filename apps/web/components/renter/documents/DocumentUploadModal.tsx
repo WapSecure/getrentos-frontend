@@ -14,7 +14,7 @@ import { FilePreviewDialog } from '@getrentos/ui';
 interface DocumentUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: UploadData) => Promise<void> | void;
+  onSubmit: (data: UploadData) => Promise<boolean>;
 }
 
 interface UploadData {
@@ -110,9 +110,13 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
         .map((t: string) => t.trim())
         .filter(Boolean),
     };
-    await onSubmit(uploadData);
-    setProgress(100);
+    const uploaded = await onSubmit(uploadData);
     setIsUploading(false);
+    if (!uploaded) {
+      setProgress(0);
+      return;
+    }
+    setProgress(100);
     onClose();
     setFile(null);
     setName('');
@@ -143,7 +147,13 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     Upload a new document to your vault
                   </p>
                 </div>
-                <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isUploading}
+                  aria-label="Close upload dialog"
+                  className="p-1 rounded-lg hover:bg-gray-100"
+                >
                   <X className="w-4 h-4" />
                 </button>
               </div>

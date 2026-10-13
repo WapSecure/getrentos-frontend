@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
 
-import { useState, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Send, Paperclip } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { MessageAttachments } from './MessageAttachments';
@@ -17,24 +17,37 @@ interface Attachment {
 }
 
 interface MessageInputProps {
-  onSend: (text: string, files?: File[]) => void;
+  onSend: (text: string, files?: File[]) => Promise<boolean>;
 }
 
 export const MessageInput = ({ onSend }: MessageInputProps) => {
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const previewAttachments: Attachment[] = files.map((file) => ({
-    name: file.name,
-    type: file.type,
-    size: file.size.toString(),
-    url: URL.createObjectURL(file),
-  }));
+  const previewAttachments: Attachment[] = useMemo(
+    () =>
+      files.map((file) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size.toString(),
+        url: URL.createObjectURL(file),
+      })),
+    [files]
+  );
 
-  const handleSend = () => {
-    if (message.trim() || files.length > 0) {
-      onSend(message, files);
+  useEffect(
+    () => () => previewAttachments.forEach((attachment) => URL.revokeObjectURL(attachment.url)),
+    [previewAttachments]
+  );
+
+  const handleSend = async () => {
+    if ((message.trim() || files.length > 0) && !isSending) {
+      setIsSending(true);
+      const sent = await onSend(message, files);
+      setIsSending(false);
+      if (!sent) return;
       setMessage('');
       setFiles([]);
     }
@@ -43,7 +56,7 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      void handleSend();
     }
   };
 
@@ -98,14 +111,18 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
             accept="image/*,.pdf,.doc,.docx"
           />
           <button
+            type="button"
             onClick={() => fileInputRef.current?.click()}
+            disabled={isSending}
+            aria-label="Attach files"
             className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <Paperclip className="w-4 h-4 text-gray-500" />
           </button>
           <Button
-            onClick={handleSend}
-            disabled={!message.trim() && files.length === 0}
+            onClick={() => void handleSend()}
+            disabled={isSending || (!message.trim() && files.length === 0)}
+            aria-label={isSending ? 'Sending message' : 'Send message'}
             variant="primary"
             className="p-2.5 rounded-xl"
           >

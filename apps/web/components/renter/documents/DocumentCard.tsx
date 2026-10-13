@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { DocumentPreviewModal } from './DocumentPreviewModal';
-import { DocumentShareModal } from './DocumentShareModal';
 
 interface Document {
   id: string;
@@ -83,7 +82,6 @@ export const DocumentCard = ({
 }: DocumentCardProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
 
   const TypeIcon = typeIcons[document.type as keyof typeof typeIcons]?.icon || FileText;
   const typeColor = typeIcons[document.type as keyof typeof typeIcons]?.color || 'text-gray-500';
@@ -97,7 +95,7 @@ export const DocumentCard = ({
   };
 
   const handleShareClick = () => {
-    setShowShareModal(true);
+    onShare(document.id);
     setShowMenu(false);
   };
 
@@ -223,13 +221,6 @@ export const DocumentCard = ({
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           document={document}
-        />
-        <DocumentShareModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          documentId={document.id}
-          documentName={document.name}
-          onShare={() => onShare(document.id)}
         />
       </>
     );
@@ -368,13 +359,6 @@ export const DocumentCard = ({
         isOpen={showPreview}
         onClose={() => setShowPreview(false)}
         document={document}
-      />
-      <DocumentShareModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        documentId={document.id}
-        documentName={document.name}
-        onShare={() => onShare(document.id)}
       />
     </>
   );

@@ -10,7 +10,6 @@ import { MessageSearch } from '@/components/renter/messages/MessageSearch';
 import { QuickReplies } from '@/components/renter/messages/QuickReplies';
 import { MessageTemplates } from '@/components/renter/messages/MessageTemplates';
 import { MessageFilters } from '@/components/renter/messages/MessageFilters';
-import { MessageLabels } from '@/components/renter/messages/MessageLabels';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
 import { MessageCircle } from 'lucide-react';
 import { Conversation, Message, FilterState } from '@/types/messages';
@@ -50,7 +49,6 @@ export default function MessagesPage() {
     conversations.find((c) => c.id === selectedConversationId) ?? conversations[0] ?? null;
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
-  const [selectedLabel, setSelectedLabel] = useState<string>('all');
 
   const invalidateConversations = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.conversations });
@@ -121,38 +119,53 @@ export default function MessagesPage() {
     mutationFn: (conversationId: string) =>
       unwrap(renterService.markConversationRead(conversationId)),
     onSuccess: invalidateConversations,
+    onError: () =>
+      setToast({ message: 'Could not mark this conversation as read.', variant: 'error' }),
   });
 
   const pinMutation = useMutation({
     mutationFn: (conversationId: string) =>
       unwrap(renterService.togglePinConversation(conversationId)),
     onSuccess: invalidateConversations,
+    onError: () =>
+      setToast({ message: 'Could not update the pinned conversation.', variant: 'error' }),
   });
 
   const archiveMutation = useMutation({
     mutationFn: (conversationId: string) =>
       unwrap(renterService.toggleArchiveConversation(conversationId)),
     onSuccess: invalidateConversations,
+    onError: () =>
+      setToast({ message: 'Could not update the archived conversation.', variant: 'error' }),
   });
 
   const addReminderMutation = useMutation({
     mutationFn: (reminderData: { message: string; date: string; time: string }) =>
       unwrap(renterService.createReminder(reminderData)),
     onSuccess: invalidateReminders,
+    onError: () => setToast({ message: 'Could not save the reminder.', variant: 'error' }),
   });
 
   const toggleReminderMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.toggleReminder(id)),
     onSuccess: invalidateReminders,
+    onError: () => setToast({ message: 'Could not update the reminder.', variant: 'error' }),
   });
 
   const deleteReminderMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.deleteReminder(id)),
     onSuccess: invalidateReminders,
+    onError: () => setToast({ message: 'Could not delete the reminder.', variant: 'error' }),
   });
 
-  const handleSendMessage = (conversationId: string, text: string, files?: File[]) =>
-    sendMessageMutation.mutate({ conversationId, text, files });
+  const handleSendMessage = async (conversationId: string, text: string, files?: File[]) => {
+    try {
+      await sendMessageMutation.mutateAsync({ conversationId, text, files });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleSelectConversation = (conversation: Conversation) => {
     setSelectedConversationId(conversation.id);
@@ -184,14 +197,6 @@ export default function MessagesPage() {
     setFilterType(filters.type);
   };
 
-  const getConversationLabelIds = (conv: Conversation): string[] => {
-    const ids: string[] = [];
-    if (conv.propertyName?.includes('Loft')) ids.push('1');
-    if ((conv.messages ?? []).some((m) => m.text.toLowerCase().includes('lease'))) ids.push('2');
-    if ((conv.messages ?? []).some((m) => /maintenance|repair/i.test(m.text))) ids.push('3');
-    return ids;
-  };
-
   const filteredConversations = conversations.filter((conv) => {
     const matchesSearch =
       conv.participantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -203,32 +208,8 @@ export default function MessagesPage() {
       (filterType === 'unread' && conv.unreadCount > 0) ||
       (filterType === 'read' && conv.unreadCount === 0);
 
-    const matchesLabel =
-      selectedLabel === 'all' || getConversationLabelIds(conv).includes(selectedLabel);
-
-    return matchesSearch && matchesType && matchesLabel;
+    return matchesSearch && matchesType;
   });
-
-  const labels = [
-    {
-      id: '1',
-      name: 'Property Inquiries',
-      color: 'bg-blue-100',
-      count: conversations.filter((c) => getConversationLabelIds(c).includes('1')).length,
-    },
-    {
-      id: '2',
-      name: 'Lease Discussions',
-      color: 'bg-green-100',
-      count: conversations.filter((c) => getConversationLabelIds(c).includes('2')).length,
-    },
-    {
-      id: '3',
-      name: 'Maintenance',
-      color: 'bg-yellow-100',
-      count: conversations.filter((c) => getConversationLabelIds(c).includes('3')).length,
-    },
-  ];
 
   if (conversationsQuery.isLoading || remindersQuery.isLoading) {
     return <PageLoadingState />;
@@ -260,11 +241,6 @@ export default function MessagesPage() {
             unreadCount={conversations.reduce((sum, c) => sum + c.unreadCount, 0)}
             totalCount={conversations.length}
           />
-          <MessageLabels
-            labels={labels}
-            onSelectLabel={setSelectedLabel}
-            selectedLabel={selectedLabel}
-          />
           <MessageConversationList
             conversations={filteredConversations}
             selectedId={selectedConversation?.id || null}
@@ -275,14 +251,14 @@ export default function MessagesPage() {
           <MessageTemplates
             onSelectTemplate={(content) => {
               if (selectedConversation) {
-                handleSendMessage(selectedConversation.id, content);
+                void handleSendMessage(selectedConversation.id, content);
               }
             }}
           />
           <QuickReplies
             onSelectReply={(reply) => {
               if (selectedConversation) {
-                handleSendMessage(selectedConversation.id, reply);
+                void handleSendMessage(selectedConversation.id, reply);
               }
             }}
           />

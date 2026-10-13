@@ -8,9 +8,7 @@ import { NotificationsList } from '@/components/renter/notifications/Notificatio
 import { NotificationFilters } from '@/components/renter/notifications/NotificationFilters';
 import { NotificationPreferences } from '@/components/renter/notifications/NotificationPreferences';
 import { NotificationAnalytics } from '@/components/renter/notifications/NotificationAnalytics';
-import { DoNotDisturb } from '@/components/renter/notifications/DoNotDisturb';
 import { NotificationSearch } from '@/components/renter/notifications/NotificationSearch';
-import { NotificationSound } from '@/components/renter/notifications/NotificationSound';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -122,8 +120,6 @@ export default function NotificationsPage() {
         <div className="space-y-6">
           <NotificationPreferences />
           <NotificationAnalytics notifications={notifications} />
-          <NotificationSound />
-          <DoNotDisturb />
         </div>
       </div>
 

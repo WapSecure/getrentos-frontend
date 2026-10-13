@@ -1,15 +1,14 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { Phone, Video, MoreVertical, Home } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Home } from 'lucide-react';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { Conversation } from '@/types/messages';
 
 interface MessageThreadProps {
   conversation: Conversation;
-  onSendMessage: (conversationId: string, text: string, files?: File[]) => void;
+  onSendMessage: (conversationId: string, text: string, files?: File[]) => Promise<boolean>;
   currentUser: { id?: string; fullName: string } | null;
 }
 
@@ -26,8 +25,9 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
 
   const handleSend = (text: string, files?: File[]) => {
     if (text.trim() || (files && files.length > 0)) {
-      onSendMessage(conversation.id, text, files);
+      return onSendMessage(conversation.id, text, files);
     }
+    return Promise.resolve(false);
   };
 
   const getInitials = (name: string) => {
@@ -41,36 +41,23 @@ export const MessageThread = ({ conversation, onSendMessage, currentUser }: Mess
 
   return (
     <div className="bg-card rounded-xl border border-border flex flex-col h-[calc(100vh-300px)] min-h-[500px]">
-      <div className="p-4 border-b border-border flex justify-between items-center">
+      <div className="p-4 border-b border-border flex items-center">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
             {getInitials(conversation.participantName)}
           </div>
           <div>
             <h3 className="font-semibold text-foreground">{conversation.participantName}</h3>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
               <span className="capitalize">{conversation.participantRole}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                Online
-              </span>
-              <span>•</span>
-              <Home className="w-3 h-3" />
-              <span>{conversation.propertyName}</span>
+              {conversation.propertyName && (
+                <span className="flex items-center gap-1">
+                  <Home className="h-3 w-3" aria-hidden="true" />
+                  {conversation.propertyName}
+                </span>
+              )}
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="px-2">
-            <Phone className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="sm" className="px-2">
-            <Video className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="sm" className="px-2">
-            <MoreVertical className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 

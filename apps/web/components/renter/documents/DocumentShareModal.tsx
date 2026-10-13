@@ -2,43 +2,34 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Copy, Check, Clock, Shield } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface DocumentShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  documentId: string;
   documentName: string;
-  onShare: (email: string) => void;
+  onShare: (email: string) => Promise<boolean>;
 }
 
 export const DocumentShareModal = ({
   isOpen,
   onClose,
-  documentId,
   documentName,
   onShare,
 }: DocumentShareModalProps) => {
-  const [copied, setCopied] = useState(false);
   const [shareEmail, setShareEmail] = useState('');
-  const shareLink = `https://getrentos.com/share/${documentId}`;
-  const [expiryDays, setExpiryDays] = useState(7);
+  const [isSharing, setIsSharing] = useState(false);
   const [lastSharedWith, setLastSharedWith] = useState<string | null>(null);
 
-  const handleCopyLink = async () => {
-    await navigator.clipboard.writeText(shareLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!shareEmail.trim()) return;
-    onShare(shareEmail.trim());
+    setIsSharing(true);
+    const shared = await onShare(shareEmail.trim());
+    setIsSharing(false);
+    if (!shared) return;
     setLastSharedWith(shareEmail.trim());
     setShareEmail('');
     setTimeout(() => setLastSharedWith(null), 3000);
@@ -59,7 +50,13 @@ export const DocumentShareModal = ({
                 <h3 className="font-semibold text-foreground">Share Document</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{documentName}</p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSharing}
+                aria-label="Close share dialog"
+                className="p-1 rounded-lg hover:bg-gray-100"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -78,8 +75,13 @@ export const DocumentShareModal = ({
                     placeholder="Enter email address"
                     className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <Button size="sm" onClick={handleShare} disabled={!shareEmail.trim()}>
-                    Share
+                  <Button
+                    size="sm"
+                    onClick={() => void handleShare()}
+                    disabled={!shareEmail.trim() || isSharing}
+                    isLoading={isSharing}
+                  >
+                    {isSharing ? 'Sharing' : 'Share'}
                   </Button>
                 </div>
                 {lastSharedWith && (
@@ -88,53 +90,6 @@ export const DocumentShareModal = ({
                     Shared with {lastSharedWith}
                   </p>
                 )}
-              </div>
-
-              {/* Share Link */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Shareable link
-                </label>
-                <div className="flex gap-2">
-                  <div className="flex-1 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-sm text-muted-foreground truncate">
-                    {shareLink}
-                  </div>
-                  <Button variant="outline" onClick={handleCopyLink} className="gap-2">
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copied ? 'Copied!' : 'Copy'}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Link Settings */}
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium text-foreground">Link settings</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Expires after</span>
-                  <LegacySelect
-                    value={expiryDays}
-                    onChange={(e) => setExpiryDays(Number(e.target.value))}
-                    className="px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value={1}>1 day</option>
-                    <option value={7}>7 days</option>
-                    <option value={30}>30 days</option>
-                    <option value={90}>90 days</option>
-                  </LegacySelect>
-                </div>
-              </div>
-
-              {/* Security Note */}
-              <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-2">
-                  <Shield className="w-4 h-4 text-blue-600 mt-0.5" />
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
-                    Link is secure and encrypted. Only people with the link can access.
-                  </p>
-                </div>
               </div>
 
               <Button variant="primary" fullWidth onClick={onClose}>

@@ -1,21 +1,17 @@
 'use client';
 
-import { Trash2, Share2, Download, X } from 'lucide-react';
+import { Trash2, X } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 
 interface DocumentBulkActionsProps {
   selectedCount: number;
   onDelete: () => void;
-  onShare: () => void;
-  onDownload: () => void;
   onClearSelection: () => void;
 }
 
 export const DocumentBulkActions = ({
   selectedCount,
   onDelete,
-  onShare,
-  onDownload,
   onClearSelection,
 }: DocumentBulkActionsProps) => {
   return (
@@ -27,24 +23,6 @@ export const DocumentBulkActions = ({
           <X className="w-4 h-4" />
         </Button>
         <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onDownload}
-          className="p-1.5"
-          title="Download selected"
-        >
-          <Download className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onShare}
-          className="p-1.5"
-          title="Share selected"
-        >
-          <Share2 className="w-4 h-4" />
-        </Button>
         <Button
           variant="ghost"
           size="sm"

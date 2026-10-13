@@ -67,6 +67,7 @@ export const DocumentsView = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sharingDocumentId, setSharingDocumentId] = useState<string | null>(null);
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   const invalidateDocuments = () => {
     queryClient.invalidateQueries({ queryKey: renterKeys.documents });
@@ -88,6 +89,7 @@ export const DocumentsView = () => {
       setSelectedDocuments((prev) => prev.filter((sid) => sid !== id));
       if (documents.length === 1 && page > 1) setPage((current) => current - 1);
     },
+    onError: () => setErrorToast('The document could not be deleted.'),
   });
 
   const bulkDeleteMutation = useMutation({
@@ -104,11 +106,13 @@ export const DocumentsView = () => {
         setPage((current) => current - 1);
       }
     },
+    onError: () => setErrorToast('The selected documents could not be deleted.'),
   });
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.toggleDocumentFavorite(id)),
     onSuccess: invalidateDocuments,
+    onError: () => setErrorToast('The favorite status could not be updated.'),
   });
 
   const shareMutation = useMutation({
@@ -117,7 +121,15 @@ export const DocumentsView = () => {
     onSuccess: invalidateDocuments,
   });
 
-  const handleUpload = (data: UploadData) => uploadMutation.mutate(data);
+  const handleUpload = async (data: UploadData) => {
+    try {
+      await uploadMutation.mutateAsync(data);
+      return true;
+    } catch (error) {
+      setErrorToast(error instanceof Error ? error.message : 'The document could not be uploaded.');
+      return false;
+    }
+  };
   const handleDelete = (id: string) => deleteMutation.mutate(id);
   const handleBulkDelete = () => bulkDeleteMutation.mutate(selectedDocuments);
   const handleToggleFavorite = (id: string) => toggleFavoriteMutation.mutate(id);
@@ -126,18 +138,24 @@ export const DocumentsView = () => {
     setSharingDocumentId(id);
   };
 
-  const handleConfirmShare = (email: string) => {
-    if (!sharingDocumentId) return;
-    shareMutation.mutate({ id: sharingDocumentId, email });
+  const handleConfirmShare = async (email: string) => {
+    if (!sharingDocumentId) return false;
+    try {
+      await shareMutation.mutateAsync({ id: sharingDocumentId, email });
+      return true;
+    } catch (error) {
+      setErrorToast(error instanceof Error ? error.message : 'The document could not be shared.');
+      return false;
+    }
   };
 
   const handleDownload = async (id: string) => {
     const res = await renterService.getDocumentDownloadUrl(id);
     if (res.success && res.data) {
       window.open(res.data.url, '_blank', 'noopener,noreferrer');
-      setDownloadToast(`${res.data.name} downloaded`);
+      setDownloadToast(`${res.data.name} opened`);
       window.setTimeout(() => setDownloadToast(null), 3000);
-    }
+    } else setErrorToast(res.error || 'The document could not be opened.');
   };
 
   const handleSelectDocument = (id: string) => {
@@ -242,18 +260,6 @@ export const DocumentsView = () => {
         <DocumentBulkActions
           selectedCount={selectedDocuments.length}
           onDelete={handleBulkDelete}
-          onShare={() => {
-            setDownloadToast(
-              `Share links copied for ${selectedDocuments.length} document${selectedDocuments.length === 1 ? '' : 's'}`
-            );
-            window.setTimeout(() => setDownloadToast(null), 3000);
-          }}
-          onDownload={() => {
-            setDownloadToast(
-              `${selectedDocuments.length} document${selectedDocuments.length === 1 ? '' : 's'} downloaded`
-            );
-            window.setTimeout(() => setDownloadToast(null), 3000);
-          }}
           onClearSelection={() => setSelectedDocuments([])}
         />
       )}
@@ -267,13 +273,15 @@ export const DocumentsView = () => {
       <DocumentShareModal
         isOpen={!!sharingDocumentId}
         onClose={() => setSharingDocumentId(null)}
-        documentId={sharingDocumentId || ''}
         documentName={documents.find((d) => d.id === sharingDocumentId)?.name || ''}
         onShare={handleConfirmShare}
       />
 
       {downloadToast && (
         <Toast message={downloadToast} variant="success" onClose={() => setDownloadToast(null)} />
+      )}
+      {errorToast && (
+        <Toast message={errorToast} variant="error" onClose={() => setErrorToast(null)} />
       )}
     </>
   );
