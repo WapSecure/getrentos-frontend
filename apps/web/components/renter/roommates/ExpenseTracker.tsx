@@ -27,7 +27,7 @@ interface Roommate {
 interface ExpenseTrackerProps {
   expenses: Expense[];
   roommates: Roommate[];
-  onAddExpense: (expense: Expense) => void;
+  onAddExpense: (expense: Expense) => Promise<void>;
 }
 
 const categoryColors: Record<string, string> = {
@@ -67,6 +67,8 @@ const formatDate = (dateString: string) => {
 export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTrackerProps) => {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [newExpense, setNewExpense] = useState<NewExpense>({
     description: '',
     amount: '',
@@ -75,7 +77,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
     category: 'other',
   });
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!newExpense.description || !newExpense.amount || !newExpense.paidBy) return;
     const expense: Expense = {
       id: `exp_${Date.now()}`,
@@ -87,15 +89,23 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
       date: new Date().toISOString(),
       category: newExpense.category,
     };
-    onAddExpense(expense);
-    setNewExpense({
-      description: '',
-      amount: '',
-      paidBy: '',
-      splitAmong: [],
-      category: 'other',
-    });
-    setShowAddExpense(false);
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      await onAddExpense(expense);
+      setNewExpense({
+        description: '',
+        amount: '',
+        paidBy: '',
+        splitAmong: [],
+        category: 'other',
+      });
+      setShowAddExpense(false);
+    } catch {
+      setErrorMessage('The expense could not be saved. Your details are unchanged.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCategoryChange = (value: string): CategoryType => {
@@ -179,11 +189,15 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                 ))}
               </LegacySelect>
               <div className="flex gap-2">
+                {errorMessage && <p className="w-full text-sm text-destructive">{errorMessage}</p>}
                 <Button
                   size="sm"
                   variant="primary"
-                  onClick={handleAddExpense}
-                  disabled={!newExpense.description || !newExpense.amount || !newExpense.paidBy}
+                  onClick={() => void handleAddExpense()}
+                  disabled={
+                    !newExpense.description || !newExpense.amount || !newExpense.paidBy || isSaving
+                  }
+                  isLoading={isSaving}
                 >
                   Add Expense
                 </Button>

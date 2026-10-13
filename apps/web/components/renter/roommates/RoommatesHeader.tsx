@@ -1,33 +1,26 @@
 'use client';
 
-import { Users, UserPlus, FileText } from 'lucide-react';
+import { Users, UserPlus } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface RoommatesHeaderProps {
   roommateCount: number;
   onInvite: () => void;
-  onAgreement: () => void;
 }
 
-export const RoommatesHeader = ({ roommateCount, onInvite, onAgreement }: RoommatesHeaderProps) => {
+export const RoommatesHeader = ({ roommateCount, onInvite }: RoommatesHeaderProps) => {
   return (
     <RenterPageHeader
       eyebrow="Shared living"
       icon={Users}
       title="Roommates"
-      description="Coordinate your household, shared expenses, agreements, and responsibilities."
+      description="Coordinate your household, shared expenses, and responsibilities."
       actions={
-        <>
-          <Button variant="outline" className="gap-2" size="sm" onClick={onAgreement}>
-            <FileText className="h-4 w-4" aria-hidden="true" />
-            Roommate agreement
-          </Button>
-          <Button variant="primary" className="gap-2" size="sm" onClick={onInvite}>
-            <UserPlus className="h-4 w-4" aria-hidden="true" />
-            Invite roommate
-          </Button>
-        </>
+        <Button variant="primary" className="gap-2" size="sm" onClick={onInvite}>
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          Invite roommate
+        </Button>
       }
     >
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">

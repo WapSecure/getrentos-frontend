@@ -17,7 +17,7 @@ export const ExportSavedProperties = ({
   onClose,
   properties,
 }: ExportSavedPropertiesProps) => {
-  const [exporting, setExporting] = useState<'csv' | 'pdf' | null>(null);
+  const [exporting, setExporting] = useState<'csv' | 'print' | null>(null);
 
   const formatPrice = (price: number, period: string) => {
     const formatter = new Intl.NumberFormat('en-NG', {
@@ -62,8 +62,8 @@ export const ExportSavedProperties = ({
     finishExport();
   };
 
-  const exportToPDF = () => {
-    setExporting('pdf');
+  const openPrintView = () => {
+    setExporting('print');
     const rows = properties
       .map(
         (property) =>
@@ -94,13 +94,19 @@ export const ExportSavedProperties = ({
                   {properties.length} properties on this page to export
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close export dialog"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-3">
               <button
+                type="button"
                 onClick={exportToCSV}
                 disabled={exporting !== null}
                 className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
@@ -122,7 +128,8 @@ export const ExportSavedProperties = ({
               </button>
 
               <button
-                onClick={exportToPDF}
+                type="button"
+                onClick={openPrintView}
                 disabled={exporting !== null}
                 className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
               >
@@ -131,11 +138,11 @@ export const ExportSavedProperties = ({
                     <FileText className="w-5 h-5 text-red-600" />
                   </div>
                   <div className="text-left">
-                    <p className="font-medium text-foreground">Export as PDF</p>
-                    <p className="text-xs text-gray-500">Download as printable document</p>
+                    <p className="font-medium text-foreground">Print or save as PDF</p>
+                    <p className="text-xs text-gray-500">Open the browser print dialog</p>
                   </div>
                 </div>
-                {exporting === 'pdf' ? (
+                {exporting === 'print' ? (
                   <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <Download className="w-5 h-5 text-gray-400" />

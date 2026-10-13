@@ -34,15 +34,15 @@ export default function DiscoverPage() {
   const [compareList, setCompareList] = useState<Property[]>([]);
   const [showCompareDrawer, setShowCompareDrawer] = useState(false);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const [filterOptions, setFilterOptions] = useState({
-    location: '',
-    minPrice: '',
-    maxPrice: '',
-    bedrooms: '',
-    bathrooms: '',
-    propertyType: '',
-    verifiedOnly: false,
-  });
+  const [filterOptions, setFilterOptions] = useState(() => ({
+    location: searchParams.get('location')?.trim() ?? '',
+    minPrice: searchParams.get('minPrice')?.trim() ?? '',
+    maxPrice: searchParams.get('maxPrice')?.trim() ?? '',
+    bedrooms: searchParams.get('bedrooms')?.trim() ?? '',
+    bathrooms: searchParams.get('bathrooms')?.trim() ?? '',
+    propertyType: searchParams.get('propertyType')?.trim() ?? '',
+    verifiedOnly: searchParams.get('verifiedOnly') === 'true',
+  }));
   // Typed explicitly (not inferred) so `estate` stays OPTIONAL: the filter panel and
   // the saved-search helpers build filter objects without it, and a required key
   // would make every one of them a type error.

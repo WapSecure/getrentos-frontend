@@ -7,12 +7,11 @@ import { CalendarView } from '@/components/renter/calendar/CalendarView';
 import { CalendarStats } from '@/components/renter/calendar/CalendarStats';
 import { CalendarEventList } from '@/components/renter/calendar/CalendarEventList';
 import { CalendarEventModal } from '@/components/renter/calendar/CalendarEventModal';
-import { CalendarSync } from '@/components/renter/calendar/CalendarSync';
 import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/types/calendar';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
 
 export default function CalendarPage() {
   const queryClient = useQueryClient();
@@ -25,6 +24,7 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const invalidateEvents = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.calendarEvents });
@@ -32,17 +32,20 @@ export default function CalendarPage() {
   const createEventMutation = useMutation({
     mutationFn: (data: CalendarEventFormData) => unwrap(renterService.createCalendarEvent(data)),
     onSuccess: invalidateEvents,
+    onError: () => setErrorMessage('The event could not be created.'),
   });
 
   const updateEventMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CalendarEvent> }) =>
       unwrap(renterService.updateCalendarEvent(id, updates)),
     onSuccess: invalidateEvents,
+    onError: () => setErrorMessage('The event could not be updated.'),
   });
 
   const deleteEventMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.deleteCalendarEvent(id)),
     onSuccess: invalidateEvents,
+    onError: () => setErrorMessage('The event could not be deleted.'),
   });
 
   const handleUpdateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
@@ -88,6 +91,9 @@ export default function CalendarPage() {
 
   return (
     <>
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
       <CalendarHeader
         currentDate={currentDate}
         setCurrentDate={setCurrentDate}
@@ -107,14 +113,13 @@ export default function CalendarPage() {
             onEventClick={openEditEventModal}
           />
         </div>
-        <div className="space-y-6">
+        <div>
           <CalendarEventList
             events={events}
             onUpdateEvent={handleUpdateEvent}
             onDeleteEvent={handleDeleteEvent}
             onEditEvent={openEditEventModal}
           />
-          <CalendarSync />
         </div>
       </div>
 

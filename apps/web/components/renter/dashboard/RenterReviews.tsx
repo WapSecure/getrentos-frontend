@@ -204,6 +204,7 @@ export const RenterReviews = () => {
               <div className="flex justify-center gap-2 mb-4">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
+                    type="button"
                     key={star}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
@@ -228,14 +229,20 @@ export const RenterReviews = () => {
               />
 
               <div className="flex gap-3">
-                <Button variant="outline" fullWidth onClick={() => setShowReviewModal(false)}>
+                <Button
+                  variant="outline"
+                  fullWidth
+                  onClick={() => setShowReviewModal(false)}
+                  disabled={submitMutation.isPending}
+                >
                   Cancel
                 </Button>
                 <Button
                   variant="primary"
                   fullWidth
                   onClick={handleSubmitReview}
-                  disabled={rating === 0}
+                  disabled={rating === 0 || submitMutation.isPending}
+                  isLoading={submitMutation.isPending}
                 >
                   Submit Review
                 </Button>

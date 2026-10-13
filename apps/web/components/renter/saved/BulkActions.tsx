@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, Share2, BookmarkPlus, X } from 'lucide-react';
+import { Trash2, BookmarkPlus, X } from 'lucide-react';
 
 interface BulkActionsWishlist {
   id: string;
@@ -15,7 +15,6 @@ interface BulkActionsProps {
   onSelectAll: () => void;
   onClearSelection: () => void;
   onDeleteSelected: () => void;
-  onShareSelected: () => void;
   onMoveToWishlist: (wishlistId: string) => void;
 }
 
@@ -26,7 +25,6 @@ export const BulkActions = ({
   onSelectAll,
   onClearSelection,
   onDeleteSelected,
-  onShareSelected,
   onMoveToWishlist,
 }: BulkActionsProps) => {
   const [showWishlistMenu, setShowWishlistMenu] = useState(false);
@@ -51,13 +49,6 @@ export const BulkActions = ({
           title="Delete selected"
         >
           <Trash2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onShareSelected}
-          className="p-1.5 rounded-lg hover:bg-secondary text-gray-500 transition-colors"
-          title="Share selected"
-        >
-          <Share2 className="w-4 h-4" />
         </button>
         <div className="relative">
           <button

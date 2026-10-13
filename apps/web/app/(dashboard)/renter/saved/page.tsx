@@ -28,7 +28,7 @@ export default function SavedPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed'>('all');
   const [selectedSavedListings, setSelectedSavedListings] = useState<Record<string, string>>({});
   const [showExportModal, setShowExportModal] = useState(false);
-  const [shareToast, setShareToast] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const savedListingParams = {
     page,
@@ -73,6 +73,7 @@ export default function SavedPage() {
       });
       if (savedProperties.length === 1 && page > 1) setPage((current) => current - 1);
     },
+    onError: () => setErrorMessage('The property could not be removed from your saved list.'),
   });
 
   const moveMutation = useMutation({
@@ -92,6 +93,7 @@ export default function SavedPage() {
         return next;
       });
     },
+    onError: () => setErrorMessage('The property could not be moved to that wishlist.'),
   });
 
   const handleRemoveProperty = (propertyId: string) => unsaveMutation.mutate(propertyId);
@@ -134,18 +136,10 @@ export default function SavedPage() {
         setPage((current) => current - 1);
       }
     },
+    onError: () => setErrorMessage('The selected properties could not be removed.'),
   });
 
   const handleDeleteSelected = () => bulkUnsaveMutation.mutate(selectedProperties);
-
-  const handleShareSelected = () => {
-    setShareToast(
-      `Share link copied for ${selectedProperties.length} propert${
-        selectedProperties.length === 1 ? 'y' : 'ies'
-      }`
-    );
-    window.setTimeout(() => setShareToast(null), 3000);
-  };
 
   const handleBulkMoveToWishlist = (wishlistId: string) => {
     Object.entries(selectedSavedListings).forEach(([propertyId, savedListingId]) =>
@@ -232,8 +226,8 @@ export default function SavedPage() {
         </div>
       </div>
 
-      {shareToast && (
-        <Toast message={shareToast} variant="success" onClose={() => setShareToast(null)} />
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
       )}
 
       <BulkActions
@@ -243,7 +237,6 @@ export default function SavedPage() {
         onSelectAll={handleSelectAll}
         onClearSelection={handleClearSelection}
         onDeleteSelected={handleDeleteSelected}
-        onShareSelected={handleShareSelected}
         onMoveToWishlist={handleBulkMoveToWishlist}
       />
 

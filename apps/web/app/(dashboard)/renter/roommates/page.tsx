@@ -10,16 +10,15 @@ import { RentSplitCalculator } from '@/components/renter/roommates/RentSplitCalc
 import { ExpenseTracker } from '@/components/renter/roommates/ExpenseTracker';
 import { RoommateTasks } from '@/components/renter/roommates/RoommateTasks';
 import { InviteRoommateModal } from '@/components/renter/roommates/InviteRoommateModal';
-import { RoommateAgreementModal } from '@/components/renter/roommates/RoommateAgreementModal';
 import { renterService, type RoommateExpense as Expense } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
 
 export default function RoommatesPage() {
   const queryClient = useQueryClient();
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [showAgreementModal, setShowAgreementModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const roommatesQuery = useQuery({
     queryKey: renterKeys.roommates,
@@ -48,28 +47,33 @@ export default function RoommatesPage() {
       invalidateInvites();
       invalidateRoommates();
     },
+    onError: () => setErrorMessage('The invitation could not be accepted.'),
   });
 
   const declineInviteMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.declineRoommateInvite(id)),
     onSuccess: invalidateInvites,
+    onError: () => setErrorMessage('The invitation could not be declined.'),
   });
 
   const inviteMutation = useMutation({
     mutationFn: (data: { email: string; message: string }) =>
       unwrap(renterService.inviteRoommate(data.email, data.message)),
     onSuccess: invalidateRoommates,
+    onError: () => setErrorMessage('The roommate invitation could not be sent.'),
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removeRoommate(id)),
     onSuccess: invalidateRoommates,
+    onError: () => setErrorMessage('The roommate could not be removed.'),
   });
 
   const updateShareMutation = useMutation({
     mutationFn: ({ id, percentage }: { id: string; percentage: number }) =>
       unwrap(renterService.updateRoommateShare(id, percentage)),
     onSuccess: invalidateRoommates,
+    onError: () => setErrorMessage('The rent share could not be updated.'),
   });
 
   const addExpenseMutation = useMutation({
@@ -84,18 +88,21 @@ export default function RoommatesPage() {
         })
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: renterKeys.roommateExpenses }),
+    onError: () => setErrorMessage('The shared expense could not be added.'),
   });
 
   const completeTaskMutation = useMutation({
     mutationFn: ({ roommateId, task }: { roommateId: string; task: string }) =>
       unwrap(renterService.completeRoommateTask(roommateId, task)),
     onSuccess: invalidateRoommates,
+    onError: () => setErrorMessage('The task could not be completed.'),
   });
 
   const addTaskMutation = useMutation({
     mutationFn: ({ roommateId, task }: { roommateId: string; task: string }) =>
       unwrap(renterService.addRoommateTask(roommateId, task)),
     onSuccess: invalidateRoommates,
+    onError: () => setErrorMessage('The task could not be added.'),
   });
 
   const handleInvite = (data: { email: string; message: string }) =>
@@ -103,7 +110,8 @@ export default function RoommatesPage() {
   const handleRemoveRoommate = (id: string) => removeMutation.mutate(id);
   const handleUpdateShare = (id: string, percentage: number) =>
     updateShareMutation.mutate({ id, percentage });
-  const handleAddExpense = (expense: Expense) => addExpenseMutation.mutate(expense);
+  const handleAddExpense = (expense: Expense) =>
+    addExpenseMutation.mutateAsync(expense).then(() => undefined);
   const handleAddTask = (roommateId: string, task: string) =>
     addTaskMutation.mutateAsync({ roommateId, task }).then(() => undefined);
   const handleCompleteTask = (roommateId: string, task: string) =>
@@ -111,18 +119,20 @@ export default function RoommatesPage() {
   const handleAcceptInvite = (id: string) => acceptInviteMutation.mutateAsync(id);
   const handleDeclineInvite = (id: string) => declineInviteMutation.mutateAsync(id);
 
-  if (roommatesQuery.isLoading || expensesQuery.isLoading) {
+  if (roommatesQuery.isLoading || invitesQuery.isLoading || expensesQuery.isLoading) {
     return <PageLoadingState />;
   }
 
-  if (roommatesQuery.isError || expensesQuery.isError) {
-    const isRetrying = roommatesQuery.isFetching || expensesQuery.isFetching;
+  if (roommatesQuery.isError || invitesQuery.isError || expensesQuery.isError) {
+    const isRetrying =
+      roommatesQuery.isFetching || invitesQuery.isFetching || expensesQuery.isFetching;
     return (
       <PageErrorState
         title="Roommate details are unavailable"
         description="We could not load your household tasks and shared expenses. Please try again."
         onRetry={() => {
           void roommatesQuery.refetch();
+          void invitesQuery.refetch();
           void expensesQuery.refetch();
         }}
         isRetrying={isRetrying}
@@ -132,11 +142,10 @@ export default function RoommatesPage() {
 
   return (
     <>
-      <RoommatesHeader
-        roommateCount={roommates.length}
-        onInvite={() => setShowInviteModal(true)}
-        onAgreement={() => setShowAgreementModal(true)}
-      />
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
+      <RoommatesHeader roommateCount={roommates.length} onInvite={() => setShowInviteModal(true)} />
 
       <RoommateInvitesCard
         invites={invites}
@@ -173,12 +182,6 @@ export default function RoommatesPage() {
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         onInvite={handleInvite}
-      />
-
-      <RoommateAgreementModal
-        isOpen={showAgreementModal}
-        onClose={() => setShowAgreementModal(false)}
-        roommates={roommates}
       />
     </>
   );

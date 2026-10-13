@@ -21,7 +21,7 @@ import type {
 interface CalendarEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (event: CalendarEventFormData) => void;
+  onSave: (event: CalendarEventFormData) => Promise<void>;
   event?: CalendarEvent | null;
 }
 
@@ -58,11 +58,21 @@ const getInitialFormData = (event?: CalendarEvent | null): CalendarEventFormData
 
 export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarEventModalProps) => {
   const [formData, setFormData] = useState<CalendarEventFormData>(() => getInitialFormData(event));
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.title || !formData.date) return;
-    onSave(formData);
-    onClose();
+    setIsSaving(true);
+    setErrorMessage(null);
+    try {
+      await onSave(formData);
+      onClose();
+    } catch {
+      setErrorMessage(`The event could not be ${event ? 'updated' : 'created'}.`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -84,7 +94,13 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   {event ? 'Update event details' : 'Create a new event'}
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSaving}
+                aria-label="Close event dialog"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -162,6 +178,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                 <div className="flex gap-2 flex-wrap">
                   {colors.map((color) => (
                     <button
+                      type="button"
                       key={color}
                       onClick={() => setFormData({ ...formData, color })}
                       className={`w-8 h-8 rounded-full border-2 transition-all ${
@@ -205,15 +222,17 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
+              {errorMessage && <p className="w-full text-sm text-destructive">{errorMessage}</p>}
               <Button
                 variant="primary"
                 fullWidth
-                onClick={handleSubmit}
-                disabled={!formData.title || !formData.date}
+                onClick={() => void handleSubmit()}
+                disabled={!formData.title || !formData.date || isSaving}
+                isLoading={isSaving}
               >
                 {event ? 'Update Event' : 'Add Event'}
               </Button>
-              <Button variant="ghost" fullWidth onClick={onClose}>
+              <Button variant="ghost" fullWidth onClick={onClose} disabled={isSaving}>
                 Cancel
               </Button>
             </div>

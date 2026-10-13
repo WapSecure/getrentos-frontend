@@ -36,6 +36,17 @@ export const SavedSearchesList = () => {
     }
   };
 
+  const runSearch = (search: SavedSearch) => {
+    const params = new URLSearchParams();
+    if (search.filters.location) params.set('location', search.filters.location);
+    if (search.filters.bedrooms) params.set('bedrooms', String(search.filters.bedrooms));
+    if (search.filters.maxPrice) params.set('maxPrice', String(search.filters.maxPrice));
+    if (search.filters.propertyType) params.set('propertyType', search.filters.propertyType);
+    if (search.filters.verifiedOnly) params.set('verifiedOnly', 'true');
+    const query = params.toString();
+    router.push(query ? `${ROUTES.RENTER_DISCOVER}?${query}` : ROUTES.RENTER_DISCOVER);
+  };
+
   if (savedSearches.length === 0) {
     return (
       <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -145,7 +156,7 @@ export const SavedSearchesList = () => {
                       variant="outline"
                       fullWidth
                       className="gap-1"
-                      onClick={() => router.push(ROUTES.RENTER_DISCOVER)}
+                      onClick={() => runSearch(search)}
                     >
                       <Search className="w-3 h-3" />
                       Run Search Again
