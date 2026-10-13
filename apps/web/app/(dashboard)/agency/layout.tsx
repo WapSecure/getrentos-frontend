@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useSyncExternalStore, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import { CustodyProvider } from '@/components/agency/CustodyProvider';
 import { CustodyBar } from '@/components/agency/CustodyBar';
 import { AgencyVerificationBanner } from '@/components/agency/AgencyVerificationBanner';
@@ -34,7 +35,12 @@ const readStoredUserRaw = () =>
  * Above it sits the same top bar as the owner workspace a manager works in, so a
  * firm's staff have their notifications, account menu and sign-out here too.
  */
+/** Pages for joining or setting up a firm: no client is in play, so no custody bar. */
+const OUTSIDE_CUSTODY = ['/agency/setup', '/agency/join'];
+
 export default function AgencyLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const outsideCustody = OUTSIDE_CUSTODY.some((p) => pathname?.startsWith(p));
   const raw = useSyncExternalStore(subscribeToStorage, readStoredUserRaw, () => null);
   const user = useMemo<NavbarUser | null>(() => {
     if (!raw) return null;
@@ -50,7 +56,7 @@ export default function AgencyLayout({ children }: { children: ReactNode }) {
       <LandlordNavbar user={user} />
       <div className="flex min-h-screen flex-col pt-16">
         <AgencyVerificationBanner />
-        <CustodyBar />
+        {!outsideCustody && <CustodyBar />}
         <main className="flex-1">{children}</main>
       </div>
     </CustodyProvider>
