@@ -77,6 +77,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.approve',
   },
   {
+    label: 'Agencies',
+    href: '/admin/agencies',
+    icon: Briefcase,
+    permission: 'verifications.review',
+  },
+  {
     label: 'GetRentos Managed',
     href: '/admin/managed-mandates',
     icon: Sparkles,

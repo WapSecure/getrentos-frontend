@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { Briefcase, Loader2, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { BACKEND_ROLE_TO_ID, ROLES } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
@@ -68,6 +69,25 @@ export const AddRoleDialog = ({
                 </span>
               </button>
             ))
+          )}
+          {!held.has('manager') && (
+            // A firm is not a role you add: it is a business GetRentos verifies,
+            // so it has its own setup rather than a one-tap switch.
+            <Link
+              href="/agency/setup"
+              onClick={onClose}
+              className="flex w-full items-start gap-3 rounded-xl border border-dashed border-border p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary"
+            >
+              <Briefcase className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <span>
+                <span className="block text-sm font-medium text-foreground">
+                  Run a property management firm
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  Manage properties for owners. Set up your firm and get it verified.
+                </span>
+              </span>
+            </Link>
           )}
           {addRole.error && (
             <p role="alert" className="text-sm text-destructive">
