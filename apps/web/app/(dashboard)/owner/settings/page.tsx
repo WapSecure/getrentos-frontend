@@ -2,6 +2,7 @@
 
 import { useOwnerUser } from '../layout';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { User, Bell, Landmark, SlidersHorizontal } from 'lucide-react';
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
@@ -19,7 +20,11 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
 
 export default function OwnerSettingsPage() {
   const user = useOwnerUser();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+  // Deep link (e.g. ?tab=payouts from a land sale awaiting a payout account).
+  const requested = useSearchParams().get('tab');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
+    tabs.some((tab) => tab.id === requested) ? (requested as SettingsTab) : 'profile'
+  );
 
   const renderContent = () => {
     switch (activeTab) {

@@ -73,6 +73,24 @@ export const adminLandPurchaseService = {
     return safeCall(() => authFetch(`${base(purchaseId)}/refund/retry`, { method: 'POST' }));
   },
 
+  /** Approves a large release for payout to the developer's bank (`escrow.approve`). */
+  approvePayout(purchaseId: string, releaseId: string): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() =>
+      authFetch(`${base(purchaseId)}/releases/${encodeURIComponent(releaseId)}/approve-payout`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  /** Queues a failed developer payout again (`escrow.approve`). */
+  retryPayout(purchaseId: string, releaseId: string): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() =>
+      authFetch(`${base(purchaseId)}/releases/${encodeURIComponent(releaseId)}/retry-payout`, {
+        method: 'POST',
+      })
+    );
+  },
+
   /** Records naira returned to the buyer outside the gateway (`escrow.approve`). */
   settleRefund(
     purchaseId: string,

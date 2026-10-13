@@ -75,6 +75,21 @@ export default function AdminLandPurchaseDetailPage() {
     onError: (error) => reportError(error, 'Could not record the settlement.'),
   });
 
+  const approvePayout = useMutation({
+    mutationFn: (releaseId: string) =>
+      unwrap(adminLandPurchaseService.approvePayout(purchaseId, releaseId)),
+    onSuccess: (updated) =>
+      applyUpdate(updated, 'Payout approved; it goes to the developer on the next payout run.'),
+    onError: (error) => reportError(error, 'Could not approve that payout.'),
+  });
+
+  const retryPayout = useMutation({
+    mutationFn: (releaseId: string) =>
+      unwrap(adminLandPurchaseService.retryPayout(purchaseId, releaseId)),
+    onSuccess: (updated) => applyUpdate(updated, 'Payout queued again.'),
+    onError: (error) => reportError(error, 'Could not retry that payout.'),
+  });
+
   const waiveMilestone = useMutation({
     mutationFn: ({ milestoneKey, reason }: { milestoneKey: string; reason: string }) =>
       unwrap(adminLandPurchaseService.waiveMilestone(purchaseId, milestoneKey, reason)),
@@ -246,7 +261,20 @@ export default function AdminLandPurchaseDetailPage() {
             isWaiving={waiveMilestone.isPending}
             onWaive={(milestoneKey, reason) => waiveMilestone.mutateAsync({ milestoneKey, reason })}
           />
-          <LandPurchasePayments payments={purchase.payments} releases={purchase.releases} />
+          <LandPurchasePayments
+            payments={purchase.payments}
+            releases={purchase.releases}
+            canAct={canWaiveLateFee}
+            busyReleaseId={
+              approvePayout.isPending
+                ? (approvePayout.variables ?? null)
+                : retryPayout.isPending
+                  ? (retryPayout.variables ?? null)
+                  : null
+            }
+            onApprove={(releaseId) => approvePayout.mutate(releaseId)}
+            onRetry={(releaseId) => retryPayout.mutate(releaseId)}
+          />
         </div>
       </div>
     </>

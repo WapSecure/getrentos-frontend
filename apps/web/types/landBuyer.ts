@@ -178,7 +178,18 @@ export interface LandEscrowRelease {
   amount: number;
   reason: string;
   createdAt: string;
+  /** Where the payout of this release to the developer's bank stands. */
+  payoutStatus?: LandReleasePayoutStatus;
+  paidAt?: string;
+  approvedAt?: string;
 }
+
+export type LandReleasePayoutStatus =
+  | 'AWAITING_APPROVAL'
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'PAID'
+  | 'FAILED';
 
 export interface LandNextDue {
   installmentId: string;
