@@ -74,17 +74,21 @@ export interface LandReviewDocument {
   uploadedAt: string;
   urlExpiresInSeconds?: number | null;
   documentType: string;
-  /** Set only when the document is cited against one of this seat's checks. */
-  link?: {
-    linkedByName: string;
-    /** You made this citation, so you may remove it. */
-    linkedByMe?: boolean;
-    linkedAt: string;
-    checklistKey?: string | null;
-    note?: string | null;
-  } | null;
-  /** Already cited on a check outside your seat, so it cannot be cited again. */
+  /** Its citations on this seat's checks; one document can back several. */
+  links: LandReviewDocumentLink[];
+  /** @deprecated The first of `links`. */
+  link?: LandReviewDocumentLink | null;
+  /** Also cited on a check outside your seat. You can still cite it on yours. */
   citedOnOtherCheck?: boolean;
+}
+
+export interface LandReviewDocumentLink {
+  linkedByName: string;
+  /** You made this citation, so you may remove it. */
+  linkedByMe?: boolean;
+  linkedAt: string;
+  checklistKey?: string | null;
+  note?: string | null;
 }
 
 export interface LandReviewCase extends MyLandReviewSummary {

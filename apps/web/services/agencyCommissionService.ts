@@ -50,6 +50,7 @@ export interface AgencyPayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  payoutHoldUntil?: string | null;
 }
 
 export interface AgencyPayoutSummary {
@@ -191,6 +192,8 @@ export interface AgentPayable {
   commissions: number;
   accountSet: boolean;
   tier: number;
+  /** Set while the agent's recently changed account is in its payout cooldown. */
+  payoutHeldUntil?: string | null;
   ready: boolean;
 }
 
@@ -216,6 +219,7 @@ export interface AgentPayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  payoutHoldUntil?: string | null;
 }
 
 export interface AgentPayoutSummary {

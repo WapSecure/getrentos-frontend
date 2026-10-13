@@ -69,11 +69,12 @@ export const landReviewerService = {
       })
     ),
 
-  /** Withdraws one of the reviewer's own citations (403 for anyone else's). */
-  uncite: (seatId: string, documentId: string) =>
+  /** Withdraws one of the reviewer's own citations on a check (403 for anyone else's). */
+  uncite: (seatId: string, documentId: string, checklistKey: string) =>
     safeCall(() =>
-      authFetch<LandReviewCase>(`${seatPath(seatId)}/citations/${encodeURIComponent(documentId)}`, {
-        method: 'DELETE',
-      })
+      authFetch<LandReviewCase>(
+        `${seatPath(seatId)}/citations/${encodeURIComponent(documentId)}?checklistKey=${encodeURIComponent(checklistKey)}`,
+        { method: 'DELETE' }
+      )
     ),
 };

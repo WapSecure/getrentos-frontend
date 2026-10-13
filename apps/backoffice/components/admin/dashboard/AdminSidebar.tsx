@@ -31,6 +31,7 @@ import {
   Sparkles,
   Handshake,
   FileSignature,
+  CircleAlert,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -79,12 +80,18 @@ const navItems: NavItem[] = [
     label: 'GetRentos Managed',
     href: '/admin/managed-mandates',
     icon: Sparkles,
-    permission: 'verifications.approve',
+    permission: 'managed.view',
   },
   {
     label: 'Partner Commercials',
     href: '/admin/partner-commercials',
     icon: Handshake,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Unmatched Payments',
+    href: '/admin/unmatched-payments',
+    icon: CircleAlert,
     permission: 'rentfinance.view',
   },
   {
@@ -246,7 +253,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   // The managed queues drive a "work waiting" badge. Only fetched for staff who
   // can act on them, and polled gently so the badge stays roughly current
   // without the sidebar hammering the API.
-  const canSeeManaged = hasAdminPermission(roles, 'verifications.approve');
+  const canSeeManaged = hasAdminPermission(roles, 'managed.view');
   const queueCounts = useQuery({
     queryKey: ['admin', 'managed-queue-counts'],
     queryFn: () => unwrap(adminManagedService.queueCounts()),

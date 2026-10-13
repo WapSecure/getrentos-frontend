@@ -6,6 +6,10 @@ import { SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
+import {
+  PAYOUT_CHANGE_COOLDOWN_HINT,
+  PayoutHoldNotice,
+} from '@/components/shared/payouts/PayoutHoldNotice';
 
 export const PayoutSettings = () => {
   const [bankCode, setBankCode] = useState('');
@@ -14,6 +18,7 @@ export const PayoutSettings = () => {
   const [savedAccountNumber, setSavedAccountNumber] = useState('');
   const [savedAccountName, setSavedAccountName] = useState('');
   const [verified, setVerified] = useState(false);
+  const [holdUntil, setHoldUntil] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<unknown>(null);
 
   useEffect(() => {
@@ -24,6 +29,7 @@ export const PayoutSettings = () => {
         setSavedAccountNumber(response.data.accountNumber);
         setSavedAccountName(response.data.accountName);
         setVerified(response.data.verified);
+        setHoldUntil(response.data.payoutHoldUntil ?? null);
       }
     };
 
@@ -41,6 +47,7 @@ export const PayoutSettings = () => {
       setSavedAccountNumber(response.data.accountNumber);
       setSavedAccountName(response.data.accountName);
       setVerified(response.data.verified);
+      setHoldUntil(response.data.payoutHoldUntil ?? null);
       setBankCode('');
       setAccountNumber('');
     } else {
@@ -64,7 +71,9 @@ export const PayoutSettings = () => {
             <div className="flex items-center gap-2 mt-2">
               <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
               <p className="text-xs text-green-700 dark:text-green-400">
-                Bank account verified and active for payouts
+                {holdUntil
+                  ? 'Bank account verified'
+                  : 'Bank account verified and active for payouts'}
               </p>
             </div>
           ) : (
@@ -72,8 +81,9 @@ export const PayoutSettings = () => {
               Not yet verified: save it again to resolve it against your bank.
             </p>
           )}
+          <PayoutHoldNotice holdUntil={holdUntil} />
           <p className="mt-2 text-xs text-muted-foreground">
-            To change it, enter new details below and save.
+            To change it, enter new details below and save. {PAYOUT_CHANGE_COOLDOWN_HINT}
           </p>
         </div>
       )}

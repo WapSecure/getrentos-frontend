@@ -19,6 +19,8 @@ import { formatDate, unwrap } from '@getrentos/shared';
 
 import { adminManagedService, type ManagedMandate } from '@/services/adminManagedService';
 import { adminService } from '@/services/adminService';
+import { useAdminUser } from '../layout';
+import { hasAdminPermission } from '@/lib/adminAccess';
 
 const TIER_LABEL: Record<string, string> = {
   COLLECT_ONLY: 'Collect (5%)',
@@ -635,6 +637,8 @@ const TerminationRequests = () => {
 
 export default function AdminManagedMandatesPage() {
   const queryClient = useQueryClient();
+  const user = useAdminUser();
+  const canOperate = hasAdminPermission(user?.roles, 'managed.operate');
   const pending = useQuery({
     queryKey: ['admin', 'managed-mandates'],
     queryFn: () => unwrap(adminManagedService.listPending()),
@@ -752,10 +756,17 @@ export default function AdminManagedMandatesPage() {
           GetRentos Managed
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Turn on owner opt-ins and manage live engagements, including assignment, activation and
-          reassignment a portfolio manager, one at a time or several at once.
+          Turn on owner opt-ins and manage live engagements, including assigning, activating and
+          reassigning a portfolio manager, one at a time or several at once.
         </p>
       </div>
+
+      {!canOperate && (
+        <div className="mb-4 rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">
+          You can view managed engagements. Activating, reassigning, suspending or ending them needs
+          the Managed operations permission (Super Admin or Backoffice Admin).
+        </div>
+      )}
 
       <Tabs value={mode} onValueChange={(v) => setMode(v as 'pending' | 'active' | 'requests')}>
         <TabsList className="mb-4">

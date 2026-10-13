@@ -34,6 +34,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'estate.moderate',
   'subscriptions.view',
   'subscriptions.manage',
+  'managed.view',
+  'managed.operate',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<
@@ -129,6 +131,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'estate.view',
       'subscriptions.view',
       'subscriptions.manage',
+      'managed.view',
     ],
   },
   compliance_manager: {
@@ -154,6 +157,7 @@ export const ADMIN_ROLE_DETAILS: Record<
       'estate.view',
       'estate.moderate',
       'subscriptions.view',
+      'managed.view',
     ],
   },
   support_agent: {
