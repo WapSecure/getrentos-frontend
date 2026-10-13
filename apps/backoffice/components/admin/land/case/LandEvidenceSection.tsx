@@ -119,6 +119,8 @@ export const LandEvidenceSection = ({
     <>
       <LandChecksPanel
         checks={checks}
+        templateVersion={detail.diligence.templateVersion}
+        policyPack={detail.diligence.policyPack}
         editable={EDITABLE_STATUSES.has(String(detail.diligence.status))}
         canReview={canReview}
         savingKey={recordCheck.isPending ? (recordCheck.variables?.key ?? null) : null}
