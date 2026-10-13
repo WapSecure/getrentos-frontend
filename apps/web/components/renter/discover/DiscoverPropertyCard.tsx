@@ -2,22 +2,12 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Heart,
-  Star,
-  GitCompare,
-  Calendar,
-  Home,
-  Shield,
-} from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Star, GitCompare, Calendar, Home } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Property } from '@/types/renter';
 import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';
+import { TrustChainBadge } from './features/TrustChainBadge';
 import { LandlordMetrics } from './features/LandlordMetrics';
 import { CommuteCalculator } from './features/CommuteCalculator';
 import { RentVsBuyCalculator } from './features/RentVsBuyCalculator';
@@ -110,12 +100,7 @@ export const DiscoverPropertyCard = ({
 
         <VirtualTourBadge hasTour={Boolean(property.videoTourUrl)} onOpenTour={onOpenTour} />
 
-        {property.verified && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full z-10">
-            <Shield className="w-3 h-3" />
-            <span>Verified</span>
-          </div>
-        )}
+        <TrustChainBadge chain={property.trustChain} fallbackVerified={property.verified} />
 
         <button
           onClick={handleSaveClick}
