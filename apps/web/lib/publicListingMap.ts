@@ -14,6 +14,10 @@
  * drift into two subtly different pages.
  */
 
+// Type-only import: erased at build, so it adds no runtime code and keeps this
+// module server-safe (see the no-runtime-imports note above).
+import type { PropertyTrustChain } from '@/types/renter';
+
 export const PUBLIC_MARKET_PAGE_SIZE = 12;
 
 export interface PublicListingCard {
@@ -22,6 +26,8 @@ export interface PublicListingCard {
   price: number;
   /** Rentals only — a sale price has no period. */
   priceUnit?: 'month' | 'year';
+  /** Rentals only — the four-link trust chain for the card badge. */
+  trustChain?: PropertyTrustChain;
   location: string;
   propertyType?: string;
   bedrooms?: number;
@@ -61,6 +67,7 @@ export interface RentApiItem {
   title: string;
   price: number;
   period?: 'month' | 'year';
+  trustChain?: PropertyTrustChain;
   location: string;
   propertyType?: string;
   bedrooms?: number;
@@ -106,6 +113,7 @@ export const rentToCard = (item: RentApiItem): PublicListingCard => ({
   bathrooms: item.bathrooms,
   size: item.size,
   verified: Boolean(item.verified),
+  trustChain: item.trustChain,
   image: item.image || undefined,
 });
 

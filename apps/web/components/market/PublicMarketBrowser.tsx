@@ -89,10 +89,17 @@ const ListingCard = ({
         <Link href={href} tabIndex={-1} aria-hidden="true">
           {mapMedia(listing)}
         </Link>
-        {listing.verified && (
-          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-md">
+        {(listing.trustChain || listing.verified) && (
+          <span
+            title={listing.trustChain?.steps
+              .map((s) => `${s.met ? '✓' : '○'} ${s.label}`)
+              .join('\n')}
+            className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+          >
             <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            Verified listing
+            {listing.trustChain && listing.trustChain.metCount < listing.trustChain.totalCount
+              ? `${listing.trustChain.metCount}/${listing.trustChain.totalCount} trust checks`
+              : 'Verified listing'}
           </span>
         )}
         <SaveListingButton

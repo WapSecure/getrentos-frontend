@@ -2,11 +2,13 @@ import { Shield, ShieldCheck } from 'lucide-react';
 import type { PropertyTrustChain } from '@/types/renter';
 
 /**
- * Compact trust-chain badge for a browse card — the teaser for the full chain
+ * Compact trust-chain badge for a listing card — the teaser for the full chain
  * on the property detail page. Shows "Verified" when every link holds, or an
  * "N/4 trust" count otherwise, with the per-link status in the hover title.
+ * Shared across the renter browse, public market and microsite cards.
  *
- * Falls back to the legacy single "Verified" pill (property.isVerified) when the
+ * Absolutely positioned (top-left of the card image), so its parent needs a
+ * positioning context. Falls back to the legacy single "Verified" pill when the
  * payload carries no chain, so older listings are unaffected.
  */
 export const TrustChainBadge = ({

@@ -1,3 +1,5 @@
+import type { PropertyTrustChain } from './renter';
+
 export interface MicrositeProfile {
   slug: string;
   landlordId: string;
@@ -21,4 +23,6 @@ export interface MicrositeListing {
   bedrooms: number;
   bathrooms: number;
   image: string;
+  verified?: boolean;
+  trustChain?: PropertyTrustChain;
 }

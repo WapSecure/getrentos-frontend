@@ -6,7 +6,7 @@ import { Button } from '@getrentos/ui';
 import { Property } from '@/types/renter';
 import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';
-import { TrustChainBadge } from './features/TrustChainBadge';
+import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import { LandlordMetrics } from './features/LandlordMetrics';
 import { CommuteCalculator } from './features/CommuteCalculator';
 import { RentVsBuyCalculator } from './features/RentVsBuyCalculator';

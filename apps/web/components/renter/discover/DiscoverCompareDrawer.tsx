@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Bed, Bath, Square, MapPin, Star, Shield, GitCompare } from 'lucide-react';
+import { X, Bed, Bath, Square, MapPin, Star, Shield, ShieldCheck, GitCompare } from 'lucide-react';
 import { Property } from '@/types/renter';
 
 interface DiscoverCompareDrawerProps {
@@ -173,6 +173,30 @@ export const DiscoverCompareDrawer = ({
                               </span>
                             ) : (
                               <span className="text-gray-400">No</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                      <tr>
+                        <td className="py-3 px-4 text-sm text-muted-foreground">Trust chain</td>
+                        {properties.map((property) => (
+                          <td key={property.id} className="py-3 px-4">
+                            {property.trustChain ? (
+                              <span
+                                title={property.trustChain.steps
+                                  .map((s) => `${s.met ? '✓' : '○'} ${s.label}`)
+                                  .join('\n')}
+                                className={`inline-flex items-center gap-1 ${
+                                  property.trustChain.metCount === property.trustChain.totalCount
+                                    ? 'text-green-600'
+                                    : 'text-muted-foreground'
+                                }`}
+                              >
+                                <ShieldCheck className="w-4 h-4" />
+                                {property.trustChain.metCount}/{property.trustChain.totalCount}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">—</span>
                             )}
                           </td>
                         ))}

@@ -12,6 +12,7 @@ import { unwrap, isAuthenticated, getStoredUser } from '@/lib/apiHelpers';
 import { formatCurrency, getInitials } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import type { MicrositeProfile } from '@/types/microsite';
+import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 
 const PAGE_SIZE = 12;
 
@@ -158,6 +159,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
                     className="object-cover"
                     loading="lazy"
                   />
+                  <TrustChainBadge chain={listing.trustChain} fallbackVerified={listing.verified} />
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-foreground truncate">{listing.title}</h3>
