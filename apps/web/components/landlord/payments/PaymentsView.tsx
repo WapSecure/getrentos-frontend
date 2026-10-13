@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
+import { LegacyInput, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -38,7 +38,7 @@ export function PaymentsView() {
   const [filter, setFilter] = useState<'all' | RentPaymentStatus>('all');
   const [selectedPayment, setSelectedPayment] = useState<RentPayment | null>(null);
 
-  const { data } = useQuery({
+  const paymentsQuery = useQuery({
     queryKey: [
       ...landlordKeys.payments(),
       { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
@@ -52,16 +52,18 @@ export function PaymentsView() {
         })
       ),
   });
+  const { data } = paymentsQuery;
   // Memoised so the filter below has a stable dependency. A bare `?? []` fallback
   // is a new array on every render, which made `filteredPayments` recompute every
   // render: the cost the memo existed to avoid.
   const payments = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
 
-  const { data: stats = EMPTY_STATS } = useQuery({
+  const statsQuery = useQuery({
     queryKey: landlordKeys.rentCollectionStats,
     queryFn: () => unwrap(landlordService.getRentCollectionStats()),
   });
+  const stats = statsQuery.data ?? EMPTY_STATS;
 
   const { totalCollected, outstandingBalance, escrowPending, upcomingPayments } = stats;
 
@@ -85,12 +87,14 @@ export function PaymentsView() {
         </p>
       </div>
 
-      <RentCollectionStats
-        totalCollected={totalCollected}
-        outstandingBalance={outstandingBalance}
-        escrowPending={escrowPending}
-        upcomingPayments={upcomingPayments}
-      />
+      {!statsQuery.isLoading && !statsQuery.isError && (
+        <RentCollectionStats
+          totalCollected={totalCollected}
+          outstandingBalance={outstandingBalance}
+          escrowPending={escrowPending}
+          upcomingPayments={upcomingPayments}
+        />
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
@@ -99,7 +103,7 @@ export function PaymentsView() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tenants or properties..."
+            placeholder="Search this page by tenant or property..."
             className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
@@ -107,6 +111,8 @@ export function PaymentsView() {
           {statusFilters.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -123,7 +129,21 @@ export function PaymentsView() {
         </div>
       </div>
 
-      <PaymentsTable payments={filteredPayments} onViewDetails={setSelectedPayment} />
+      {paymentsQuery.isLoading || statsQuery.isLoading ? (
+        <PageLoadingState />
+      ) : paymentsQuery.isError || statsQuery.isError ? (
+        <PageErrorState
+          title="Payment records are unavailable"
+          description="We could not load your collections and balances. No figures have been changed."
+          onRetry={() => {
+            void paymentsQuery.refetch();
+            void statsQuery.refetch();
+          }}
+          isRetrying={paymentsQuery.isFetching || statsQuery.isFetching}
+        />
+      ) : (
+        <PaymentsTable payments={filteredPayments} onViewDetails={setSelectedPayment} />
+      )}
 
       {total > 0 && (
         <Pagination

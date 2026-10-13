@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, PiggyBank } from 'lucide-react';
-import { Button, Pagination, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  Pagination,
+  PageErrorState,
+  PageLoadingState,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { DepositCard } from '@/components/landlord/deposits/DepositCard';
 import { RecordDepositModal } from '@/components/landlord/deposits/RecordDepositModal';
 import { DepositDetailModal } from '@/components/landlord/deposits/DepositDetailModal';
@@ -40,10 +47,11 @@ export function DepositsView() {
 
   const status = filter === 'all' ? undefined : filter;
 
-  const { data, isLoading } = useQuery({
+  const depositsQuery = useQuery({
     queryKey: [...landlordKeys.deposits({ status }), { page }],
     queryFn: () => unwrap(depositService.list({ status, page, pageSize: PAGE_SIZE })),
   });
+  const { data, isLoading } = depositsQuery;
   const deposits = data?.items ?? [];
   const total = data?.total ?? 0;
 
@@ -88,6 +96,8 @@ export function DepositsView() {
         {statusFilters.map((option) => (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={filter === option.value}
             onClick={() => {
               setFilter(option.value);
               setPage(1);
@@ -105,10 +115,24 @@ export function DepositsView() {
 
       {isLoading ? (
         <PageLoadingState />
+      ) : depositsQuery.isError ? (
+        <PageErrorState
+          title="Deposits are unavailable"
+          description="We could not load held and returned deposits. No deposit has been changed."
+          onRetry={() => void depositsQuery.refetch()}
+          isRetrying={depositsQuery.isFetching}
+        />
       ) : deposits.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
           <PiggyBank className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="text-muted-foreground">No deposits yet</p>
+          <p className="font-medium text-foreground">
+            {filter === 'all' ? 'No deposits yet' : `No ${filter.toLowerCase()} deposits`}
+          </p>
+          {filter !== 'all' && (
+            <Button variant="outline" className="mt-5" onClick={() => setFilter('all')}>
+              View all deposits
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

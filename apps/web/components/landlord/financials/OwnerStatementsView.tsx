@@ -13,6 +13,8 @@ import {
   EmptyState,
   Field,
   DatePicker,
+  PageErrorState,
+  PageLoadingState,
   Pagination,
   Select,
   Toast,
@@ -55,14 +57,15 @@ export function OwnerStatementsView() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<GenerateForm>(initialForm);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const { isPro } = usePlanTier();
+  const { isPro, isLoading: isPlanLoading } = usePlanTier();
   const planGate = usePlanGateModal();
 
-  const { data } = useQuery({
+  const statementsQuery = useQuery({
     queryKey: [...landlordKeys.ownerStatements, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listOwnerStatements({ page, pageSize: PAGE_SIZE })),
     enabled: isPro,
   });
+  const { data } = statementsQuery;
   const statements = data?.items ?? [];
   const total = data?.total ?? 0;
 
@@ -279,8 +282,17 @@ export function OwnerStatementsView() {
         title="Owner statements is a Pro feature"
         description="Upgrade to Pro to generate per-period income, expense, and management-fee breakdowns to share with property owners."
       >
-        {statements.length === 0 ? (
-          <div className="bg-card rounded-2xl border border-border p-12">
+        {isPlanLoading || (isPro && statementsQuery.isLoading) ? (
+          <PageLoadingState />
+        ) : isPro && statementsQuery.isError ? (
+          <PageErrorState
+            title="Owner statements are unavailable"
+            description="We could not load statement or payout records. No balances have been changed."
+            onRetry={() => void statementsQuery.refetch()}
+            isRetrying={statementsQuery.isFetching}
+          />
+        ) : statements.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-12">
             <EmptyState
               icon={FileBarChart}
               title="No statements yet"
@@ -288,7 +300,7 @@ export function OwnerStatementsView() {
             />
           </div>
         ) : (
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
             {statements.map((statement: OwnerStatement) => (
               <button
                 key={statement.id}

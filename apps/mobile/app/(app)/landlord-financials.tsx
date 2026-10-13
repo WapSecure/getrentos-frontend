@@ -70,8 +70,13 @@ export default function LandlordFinancials() {
         }
       />
 
-      {stats.isError ? (
-        <ErrorState onRetry={() => stats.refetch()} />
+      {stats.isError || chart.isError ? (
+        <ErrorState
+          onRetry={() => {
+            stats.refetch();
+            chart.refetch();
+          }}
+        />
       ) : (
         <ScrollView
           contentContainerStyle={{

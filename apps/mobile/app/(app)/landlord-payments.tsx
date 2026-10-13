@@ -67,8 +67,14 @@ export default function LandlordPayments() {
         />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
+      {query.isError || stats.isError || arrears.isError ? (
+        <ErrorState
+          onRetry={() => {
+            query.refetch();
+            stats.refetch();
+            arrears.refetch();
+          }}
+        />
       ) : (
         <FlashList
           data={items}
@@ -95,7 +101,7 @@ export default function LandlordPayments() {
                     alignItems: 'center',
                     gap: spacing.sm,
                     padding: spacing.lg,
-                    borderRadius: radius.lg,
+                    borderRadius: radius.md,
                     backgroundColor: colors.destructive + '14',
                   }}
                 >
@@ -133,7 +139,7 @@ export default function LandlordPayments() {
             query.isLoading ? (
               <View style={{ gap: spacing.sm }}>
                 {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} height={88} radius={radius.lg} />
+                  <Skeleton key={i} height={88} radius={radius.md} />
                 ))}
               </View>
             ) : (

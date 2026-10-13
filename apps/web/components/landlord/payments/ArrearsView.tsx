@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
-import { Badge, EmptyState, Pagination } from '@getrentos/ui';
+import { Badge, EmptyState, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -25,7 +25,7 @@ const ladderStage = (days: number): { label: string; variant: 'warning' | 'dange
 
 export function ArrearsView() {
   const [page, setPage] = useState(1);
-  const { data } = useQuery({
+  const arrearsQuery = useQuery({
     queryKey: [
       ...landlordKeys.payments('overdue'),
       { page, pageSize: PAGE_SIZE, sort: 'due_date_asc' },
@@ -40,13 +40,15 @@ export function ArrearsView() {
         })
       ),
   });
+  const { data } = arrearsQuery;
   const payments = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  const { data: summary } = useQuery({
+  const summaryQuery = useQuery({
     queryKey: landlordKeys.arrearsSummary,
     queryFn: () => unwrap(landlordService.getArrearsSummary()),
   });
+  const { data: summary } = summaryQuery;
   const totalOverdue = summary?.totalOverdue ?? 0;
   const overdueCount = summary?.overdueCount ?? total;
 
@@ -59,18 +61,34 @@ export function ArrearsView() {
         </p>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-5 mb-6 flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">Total in arrears</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalOverdue)}</p>
+      {!summaryQuery.isLoading && !summaryQuery.isError && (
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-xs">
+          <div>
+            <p className="text-sm text-muted-foreground">Total in arrears</p>
+            <p className="text-2xl font-bold text-foreground mt-1">
+              {formatCurrency(totalOverdue)}
+            </p>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {overdueCount} payment{overdueCount === 1 ? '' : 's'} overdue
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {overdueCount} payment{overdueCount === 1 ? '' : 's'} overdue
-        </p>
-      </div>
+      )}
 
-      {payments.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
+      {arrearsQuery.isLoading || summaryQuery.isLoading ? (
+        <PageLoadingState />
+      ) : arrearsQuery.isError || summaryQuery.isError ? (
+        <PageErrorState
+          title="Arrears are unavailable"
+          description="We could not load overdue balances. No tenant status has been changed."
+          onRetry={() => {
+            void arrearsQuery.refetch();
+            void summaryQuery.refetch();
+          }}
+          isRetrying={arrearsQuery.isFetching || summaryQuery.isFetching}
+        />
+      ) : payments.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card p-12">
           <EmptyState
             icon={AlertTriangle}
             title="Nothing in arrears"
@@ -78,7 +96,7 @@ export function ArrearsView() {
           />
         </div>
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
           {payments.map((payment) => {
             const overdueDays = daysOverdue(payment.dueDate);
             const stage = ladderStage(overdueDays);

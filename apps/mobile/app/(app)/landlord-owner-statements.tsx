@@ -46,9 +46,15 @@ export default function LandlordOwnerStatements() {
     mutationFn: (id: string) => landlordApi.issueOwnerStatement(id),
     onMutate: (id) => setBusyId(id),
     onSettled: () => setBusyId(null),
-    onSuccess: () => {
+    onSuccess: (result) => {
       invalidate();
-      toast.show('Statement issued.', 'success');
+      if (result.payoutStatus === 'failed') {
+        toast.show('Statement issued, but the payout failed. You can retry it here.', 'error');
+      } else if (result.payoutStatus === 'pending' || result.payoutStatus === 'processing') {
+        toast.show('Statement issued. The payout is pending bank confirmation.', 'success');
+      } else {
+        toast.show('Statement issued and paid out.', 'success');
+      }
     },
     onError: (e) => fail(e, 'Could not issue that statement.'),
   });
@@ -57,9 +63,15 @@ export default function LandlordOwnerStatements() {
     mutationFn: (id: string) => landlordApi.retryPayout(id),
     onMutate: (id) => setBusyId(id),
     onSettled: () => setBusyId(null),
-    onSuccess: () => {
+    onSuccess: (result) => {
       invalidate();
-      toast.show('Payout retried.', 'success');
+      if (result.payoutStatus === 'paid') {
+        toast.show('Payout succeeded.', 'success');
+      } else if (result.payoutStatus === 'pending' || result.payoutStatus === 'processing') {
+        toast.show('Payout sent again and is awaiting bank confirmation.', 'success');
+      } else {
+        toast.show('The payout failed again. Check the payout account and retry.', 'error');
+      }
     },
     onError: (e) => fail(e, 'Could not retry that payout.'),
   });
@@ -111,7 +123,7 @@ export default function LandlordOwnerStatements() {
             query.isLoading ? (
               <View style={{ gap: spacing.sm }}>
                 {[0, 1].map((i) => (
-                  <Skeleton key={i} height={160} radius={radius.lg} />
+                  <Skeleton key={i} height={160} radius={radius.md} />
                 ))}
               </View>
             ) : (
