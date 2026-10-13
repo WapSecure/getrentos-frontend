@@ -44,7 +44,10 @@ export function AgencyOverviewView() {
           {d ? d.firmName : 'Firm overview'}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          How the firm’s book is doing across every property you manage.
+          How the firm’s book is doing across every property you manage.{' '}
+          <Link href="/agency/import" className="text-primary hover:underline">
+            Import units from a CSV
+          </Link>
         </p>
       </div>
 
@@ -86,8 +89,7 @@ export function AgencyOverviewView() {
                 {formatCurrency(d.arrears.total)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {d.arrears.charges} unpaid {d.arrears.charges === 1 ? 'charge' : 'charges'} past
-                their due date
+                {d.arrears.charges} unpaid {d.arrears.charges === 1 ? 'charge' : 'charges'} past due
               </p>
               <Aging aging={d.arrears.aging} total={d.arrears.total} />
             </Card>
