@@ -99,6 +99,9 @@ export function CustodyBar() {
         <Link href="/agency/mandates" className="font-medium text-primary hover:underline">
           Manage mandates
         </Link>
+        <Link href="/agency/team" className="font-medium text-primary hover:underline">
+          Team
+        </Link>
       </div>
     );
   }
@@ -181,6 +184,14 @@ export function CustodyBar() {
       >
         <UserCheck className="h-4 w-4" aria-hidden />
         Realtor access
+      </Link>
+
+      <Link
+        href="/agency/team"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <Users className="h-4 w-4" aria-hidden />
+        Team
       </Link>
 
       <Link
