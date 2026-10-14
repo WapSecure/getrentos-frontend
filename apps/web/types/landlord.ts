@@ -300,6 +300,11 @@ export interface RentPayment {
   category?: string;
   /** True when a late fee has already been raised against this (rent) charge. */
   lateFeeApplied?: boolean;
+  /** The period billed, when the charge came from a rent schedule. */
+  periodStart?: string;
+  periodEnd?: string;
+  /** Invoice breakdown: rent plus recurring extras. */
+  lines?: { category: string; label: string; amount: number }[];
 }
 
 export interface Vendor {
@@ -537,4 +542,32 @@ export interface PortfolioSummary {
 export interface PortfolioAnalytics {
   summary: PortfolioSummary;
   properties: PropertyPerformance[];
+}
+
+/** A lease's recurring rent: each later period invoiced `leadDays` before it is due. */
+export interface RentScheduleItem {
+  id?: string;
+  category: 'SERVICE_CHARGE' | 'LEVY';
+  label: string;
+  amount: number;
+}
+
+export interface RentSchedule {
+  id: string;
+  leaseId: string;
+  cycle: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
+  amount: number;
+  nextDueDate: string;
+  leadDays: number;
+  status: 'ACTIVE' | 'PAUSED' | 'ENDED';
+  nextIssueDate: string;
+  leaseEnd: string;
+  items: RentScheduleItem[];
+  nextInvoiceTotal: number;
+}
+
+export interface RentScheduleInput {
+  amount?: number;
+  leadDays?: number;
+  items?: RentScheduleItem[];
 }

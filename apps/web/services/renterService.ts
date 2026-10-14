@@ -188,6 +188,11 @@ export interface Payment {
   authorizationUrl?: string;
   /** Gateway reference for the payment currently being processed. */
   reference?: string;
+  /** The period billed, when the charge came from a rent schedule. */
+  periodStart?: string;
+  periodEnd?: string;
+  /** Invoice breakdown: rent plus recurring extras. */
+  lines?: { category: string; label: string; amount: number }[];
 }
 
 export interface Receipt {

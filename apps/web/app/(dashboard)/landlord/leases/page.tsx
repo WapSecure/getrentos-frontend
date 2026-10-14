@@ -6,6 +6,7 @@ import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
+import { RentScheduleModal } from '@/components/landlord/leases/RentScheduleModal';
 import { SignLeaseModal } from '@/components/landlord/leases/SignLeaseModal';
 import { Button, Pagination, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
@@ -30,6 +31,7 @@ export default function LandlordLeasesPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
+  const [billingLease, setBillingLease] = useState<Lease | null>(null);
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading: isLoadingLeases } = useQuery({
@@ -220,6 +222,7 @@ export default function LandlordLeasesPage() {
               onSendLease={handleSendLease}
               onRequestRenewal={setRenewingLease}
               onSignLease={setSigningLease}
+              onOpenSchedule={setBillingLease}
             />
           ))}
         </div>
@@ -240,6 +243,12 @@ export default function LandlordLeasesPage() {
         onClose={() => setIsCreateModalOpen(false)}
         vacantUnits={vacantUnits}
         onSave={handleCreateLease}
+      />
+
+      <RentScheduleModal
+        key={billingLease?.id ?? 'none-billing'}
+        lease={billingLease}
+        onClose={() => setBillingLease(null)}
       />
 
       <RenewalOfferModal

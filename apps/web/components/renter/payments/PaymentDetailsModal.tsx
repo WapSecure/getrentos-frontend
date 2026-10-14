@@ -17,6 +17,7 @@ import {
 import { NairaSign } from '@getrentos/ui/NairaSign';
 import { Button } from '@getrentos/ui';
 import { escrowStatusBadges } from '@/lib/statusBadge';
+import { InvoiceLines, type InvoiceLine } from '@/components/shared/InvoiceLines';
 
 interface Payment {
   id: string;
@@ -29,6 +30,9 @@ interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  periodStart?: string;
+  periodEnd?: string;
+  lines?: InvoiceLine[];
 }
 
 interface PaymentDetailsModalProps {
@@ -117,6 +121,12 @@ export const PaymentDetailsModal = ({
                   {statusConfig.label}
                 </div>
               </div>
+
+              <InvoiceLines
+                lines={payment.lines}
+                periodStart={payment.periodStart}
+                periodEnd={payment.periodEnd}
+              />
 
               {/* Details Grid */}
               <div className="grid grid-cols-2 gap-3">
