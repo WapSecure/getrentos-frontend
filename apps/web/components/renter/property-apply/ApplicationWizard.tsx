@@ -7,7 +7,7 @@ import { Textarea } from '@getrentos/ui';
 import { LegacySelect } from '@getrentos/ui';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Check,
   Upload,
@@ -23,7 +23,8 @@ import { Button } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
-import { renterService } from '@/services/renterService';
+import { renterService, type RenterDocument } from '@/services/renterService';
+import { renterKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
 
 /** A line of help under a document, where the name alone doesn't say what to bring. */
@@ -114,6 +115,25 @@ export const ApplicationWizard = ({
 
   const removeDocument = (name: string) =>
     setDocument(name, { uploaded: false, documentId: undefined, url: undefined });
+
+  // Files already in the renter's document library can be attached instead of
+  // uploaded again: the server accepts any document the applicant owns. Newest
+  // first, so a same-named match is the most recent copy; expired ones are left out.
+  const library = useQuery({
+    queryKey: [...renterKeys.documents, 'application-library'],
+    queryFn: () =>
+      unwrap(renterService.listDocuments({ pageSize: 100, sortBy: 'date', sortOrder: 'desc' })),
+  });
+  const libraryDocs = (library.data?.items ?? []).filter((d) => d.status !== 'expired');
+  const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+  const attachLibraryDoc = (name: string, file: RenterDocument) =>
+    setDocument(name, { uploaded: true, documentId: file.id, url: file.url });
+  const savedMatches = data.documents
+    .filter((doc) => !doc.uploaded)
+    .map((doc) => ({ doc, file: libraryDocs.find((d) => sameName(d.name, doc.name)) }))
+    .filter((m): m is { doc: ApplicationDocument; file: RenterDocument } => !!m.file);
+  const attachSavedMatches = () =>
+    savedMatches.forEach(({ doc, file }) => attachLibraryDoc(doc.name, file));
 
   // A usable phone number: allows +, spaces, dashes and parentheses, but must
   // carry at least 10 actual digits so free text like "abc" cannot advance.
@@ -366,8 +386,21 @@ export const ApplicationWizard = ({
         {stepIndex === 2 && (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground mb-2">
-              Upload the documents your landlord requires to review your application.
+              Upload the documents your landlord requires to review your application, or use ones
+              already in your documents.
             </p>
+            {savedMatches.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <p className="text-sm text-foreground">
+                  {savedMatches.length === 1
+                    ? `Your ${savedMatches[0].doc.name} is already in your documents.`
+                    : `${savedMatches.length} of these are already in your documents.`}
+                </p>
+                <Button size="sm" variant="outline" onClick={attachSavedMatches}>
+                  Use saved {savedMatches.length === 1 ? 'document' : 'documents'}
+                </Button>
+              </div>
+            )}
             {data.documents.map((doc) => {
               const isUploading =
                 uploadMutation.isPending && uploadMutation.variables?.doc.name === doc.name;
@@ -390,7 +423,7 @@ export const ApplicationWizard = ({
                       <span className="text-xs text-red-500 shrink-0">Required</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex flex-wrap items-center justify-end gap-1 shrink-0">
                     {doc.uploaded ? (
                       <>
                         {doc.url && (
@@ -415,31 +448,59 @@ export const ApplicationWizard = ({
                         </button>
                       </>
                     ) : (
-                      <label
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
-                          isUploading
-                            ? 'bg-secondary text-muted-foreground cursor-wait'
-                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                        }`}
-                      >
-                        {isUploading ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Upload className="w-3.5 h-3.5" />
+                      <>
+                        {libraryDocs.length > 0 && (
+                          <select
+                            aria-label={`Use a saved document for ${doc.name}`}
+                            value=""
+                            disabled={isUploading}
+                            onChange={(e) => {
+                              const file = libraryDocs.find((d) => d.id === e.target.value);
+                              if (file) attachLibraryDoc(doc.name, file);
+                            }}
+                            className="max-w-[11rem] rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground"
+                          >
+                            <option value="">From your documents…</option>
+                            {[...libraryDocs]
+                              .sort(
+                                (a, b) =>
+                                  Number(sameName(b.name, doc.name)) -
+                                  Number(sameName(a.name, doc.name))
+                              )
+                              .map((file) => (
+                                <option key={file.id} value={file.id}>
+                                  {file.name} ·{' '}
+                                  {new Date(file.uploadedAt).toLocaleDateString('en-NG')}
+                                </option>
+                              ))}
+                          </select>
                         )}
-                        {isUploading ? 'Uploading…' : 'Upload'}
-                        <input
-                          type="file"
-                          className="hidden"
-                          disabled={isUploading}
-                          accept=".pdf,.jpg,.jpeg,.png,.webp"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            e.target.value = '';
-                            if (file) uploadMutation.mutate({ doc, file });
-                          }}
-                        />
-                      </label>
+                        <label
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+                            isUploading
+                              ? 'bg-secondary text-muted-foreground cursor-wait'
+                              : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                          }`}
+                        >
+                          {isUploading ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Upload className="w-3.5 h-3.5" />
+                          )}
+                          {isUploading ? 'Uploading…' : 'Upload'}
+                          <input
+                            type="file"
+                            className="hidden"
+                            disabled={isUploading}
+                            accept=".pdf,.jpg,.jpeg,.png,.webp"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              e.target.value = '';
+                              if (file) uploadMutation.mutate({ doc, file });
+                            }}
+                          />
+                        </label>
+                      </>
                     )}
                   </div>
                 </div>
@@ -478,7 +539,7 @@ export const ApplicationWizard = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Employer</span>
-                <span className="text-foreground font-medium">{data.employer}</span>
+                <span className="text-foreground font-medium">{data.employer || 'Not given'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Monthly income</span>
