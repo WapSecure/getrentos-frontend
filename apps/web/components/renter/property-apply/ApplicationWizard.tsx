@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput, NumberInput } from '@getrentos/ui';
+import { CurrencyInput, LegacyInput } from '@getrentos/ui';
 
 import { Textarea } from '@getrentos/ui';
 
@@ -287,11 +287,13 @@ export const ApplicationWizard = ({
               </LegacySelect>
             </Field>
             <Field label="Monthly income (₦)">
-              <NumberInput
+              {/* Shown as 1,200,000 while typing; the form keeps the plain number. */}
+              <CurrencyInput
+                prefix="₦"
                 value={data.monthlyIncome}
-                onValueChange={(v) => update('monthlyIncome', v)}
+                onValueChange={(v) => update('monthlyIncome', v ? String(v) : '')}
                 className={inputClass}
-                placeholder="e.g. 600000"
+                placeholder="e.g. 600,000"
               />
               {incomeBelowRent && (
                 <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-500">

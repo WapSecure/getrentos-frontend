@@ -118,9 +118,16 @@ export const DiscoverPropertyCard = ({
           {formatPrice()}
         </div>
 
+        {/* No reviews yet reads as "New", not as a zero-star home. */}
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1 rounded-md bg-card/95 px-2 py-1 text-foreground shadow-sm">
-          <Star className="w-3 h-3 fill-primary text-primary" />
-          <span className="text-xs font-medium text-foreground">{property.rating}</span>
+          {property.rating > 0 ? (
+            <>
+              <Star className="w-3 h-3 fill-primary text-primary" />
+              <span className="text-xs font-medium text-foreground">{property.rating}</span>
+            </>
+          ) : (
+            <span className="text-xs font-medium text-foreground">New</span>
+          )}
         </div>
       </div>
 

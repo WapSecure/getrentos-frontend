@@ -49,10 +49,17 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
             {property.landlordVerified && <Shield className="w-4 h-4 text-green-500 shrink-0" />}
           </div>
           <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-            <Star className="w-3 h-3 fill-primary text-primary" />
-            <span>
-              {property.landlordRating ?? property.rating} ({property.landlordReviews ?? 0} reviews)
-            </span>
+            {property.landlordReviews ? (
+              <>
+                <Star className="w-3 h-3 fill-primary text-primary" />
+                <span>
+                  {property.landlordRating ?? property.rating} ({property.landlordReviews}{' '}
+                  {property.landlordReviews === 1 ? 'review' : 'reviews'})
+                </span>
+              </>
+            ) : (
+              <span>No reviews yet</span>
+            )}
           </div>
         </div>
       </div>

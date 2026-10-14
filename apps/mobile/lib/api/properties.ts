@@ -26,6 +26,8 @@ export interface RenterProperty {
   size: number;
   rating: number;
   verified: boolean;
+  /** The four-link trust chain (owner, ownership, property, payment); see trustChainLabel. */
+  trustChain?: { steps: { id: string; label: string; met: boolean; detail: string }[] };
   score?: number;
   image: string;
   /** Signed URLs for the full gallery (cover first). */

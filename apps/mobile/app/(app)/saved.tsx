@@ -23,6 +23,7 @@ import { WishlistManageSheet } from '@/components/property/WishlistManageSheet';
 import { MoveToWishlistSheet } from '@/components/property/MoveToWishlistSheet';
 import { RecentlyViewedStrip } from '@/components/property/RecentlyViewedStrip';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { withTrustLabel } from '@/lib/trustLabel';
 
 export default function Saved() {
   const { colors, spacing } = useTheme();
@@ -54,7 +55,7 @@ export default function Saved() {
     ({ item }: { item: SavedProperty }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md, gap: spacing.xs }}>
         <PropertyCard
-          property={item}
+          property={withTrustLabel(item)}
           layout="row"
           saved
           onToggleSave={toggle}
