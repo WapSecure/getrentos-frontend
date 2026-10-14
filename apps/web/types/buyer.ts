@@ -71,6 +71,8 @@ export interface BuyerOffer {
   financingType: FinancingType;
   depositAmount?: number;
   message?: string;
+  /** Land only: keys of the not-verified checks the buyer accepted when offering. */
+  acknowledgedNotVerified?: string[];
   status: BuyerOfferStatus;
   submittedAt: string;
 }

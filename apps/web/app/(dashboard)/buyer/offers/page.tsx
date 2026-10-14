@@ -59,6 +59,7 @@ function BuyerOffersPageContent() {
       depositAmount?: number;
       financingType?: string;
       message?: string;
+      acknowledgedNotVerified?: string[];
     }) => unwrap(buyerService.createOffer(data)),
     onSuccess: () => {
       invalidate();
@@ -97,6 +98,7 @@ function BuyerOffersPageContent() {
         depositAmount: offerData.depositAmount,
         financingType: offerData.financingType,
         message: offerData.message,
+        acknowledgedNotVerified: offerData.acknowledgedNotVerified,
       });
       return true;
     } catch {

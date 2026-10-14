@@ -1,3 +1,5 @@
+import type { LandNotVerifiedItem, LandTrustLabel } from './land';
+
 /**
  * Developer estate (layout) sales as the buyer and the public see them.
  *
@@ -106,6 +108,10 @@ export interface PublicLandLayoutSummary {
 
 export interface PublicLandLayoutDetail extends PublicLandLayoutSummary {
   reservationHoldHours: number;
+  /** The master parcel's scoped trust labels. */
+  labels?: LandTrustLabel[];
+  /** Checks not verified on the master parcel; the buyer accepts these to purchase. */
+  notVerified?: LandNotVerifiedItem[];
   plots: LandPlot[];
   paymentPlans: PublicLandPaymentPlan[];
 }
