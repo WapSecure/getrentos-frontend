@@ -15,15 +15,14 @@ import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerPropertyListing, ListingPropertyType } from '@/types/buyer';
 import { ROUTES } from '@/lib/constants/auth';
 import { PROPERTY_TYPE_OPTIONS, toApiPropertyType } from '@/lib/propertyTypes';
-
-const SAVED_PROPERTIES_KEY = 'buyer_saved_properties';
+import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
 
 type SortOrder = 'default' | 'price_asc' | 'price_desc';
 
 export default function BuyerDiscoverPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | ListingPropertyType>('all');
@@ -43,11 +42,18 @@ export default function BuyerDiscoverPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data } = useQuery({
+  const listingsQuery = useQuery({
     queryKey: [
       'buyer',
       'listings',
-      { search: debouncedSearch, type: typeFilter, sort: sortOrder, estate: estateFromUrl, page, pageSize: PAGE_SIZE },
+      {
+        search: debouncedSearch,
+        type: typeFilter,
+        sort: sortOrder,
+        estate: estateFromUrl,
+        page,
+        pageSize: PAGE_SIZE,
+      },
     ],
     queryFn: () =>
       unwrap(
@@ -61,16 +67,24 @@ export default function BuyerDiscoverPage() {
         })
       ),
   });
+  const data = listingsQuery.data;
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
+  const savedQuery = useQuery({
+    queryKey: [...buyerKeys.saved, { page: 1, pageSize: 100 }],
+    queryFn: () => unwrap(buyerService.listSaved({ page: 1, pageSize: 100 })),
+  });
+  const savedIds = (savedQuery.data?.items ?? []).map((property) => property.id);
 
   const saveMutation = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.saveListing(listingId)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
+    onError: () => setErrorMessage('The property could not be saved.'),
   });
   const unsaveMutation = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.unsaveListing(listingId)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
+    onError: () => setErrorMessage('The property could not be removed from your saved list.'),
   });
 
   useEffect(() => {
@@ -82,27 +96,29 @@ export default function BuyerDiscoverPage() {
   }, [searchParams]);
   const [activeListing, setActiveListing] = useState<BuyerPropertyListing | null>(null);
 
-  useEffect(() => {
-    const storedSaved = localStorage.getItem(SAVED_PROPERTIES_KEY);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setSavedIds(storedSaved ? JSON.parse(storedSaved) : []);
-  }, []);
-
   const toggleSave = (propertyId: string) => {
     const isSaved = savedIds.includes(propertyId);
-    setSavedIds((prev) => {
-      const next = prev.includes(propertyId)
-        ? prev.filter((id) => id !== propertyId)
-        : [...prev, propertyId];
-      localStorage.setItem(SAVED_PROPERTIES_KEY, JSON.stringify(next));
-      return next;
-    });
     if (isSaved) {
       unsaveMutation.mutate(propertyId);
     } else {
       saveMutation.mutate(propertyId);
     }
   };
+
+  if (listingsQuery.isLoading || savedQuery.isLoading) return <PageLoadingState />;
+  if (listingsQuery.isError || savedQuery.isError) {
+    return (
+      <PageErrorState
+        title="Properties are unavailable"
+        description="We could not load listings and your saved-property state safely."
+        onRetry={() => {
+          void listingsQuery.refetch();
+          void savedQuery.refetch();
+        }}
+        isRetrying={listingsQuery.isFetching || savedQuery.isFetching}
+      />
+    );
+  }
 
   const typeFilters: { value: 'all' | ListingPropertyType; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -111,6 +127,9 @@ export default function BuyerDiscoverPage() {
 
   return (
     <>
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Discover Properties</h1>
         <p className="text-muted-foreground mt-1">

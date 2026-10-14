@@ -15,7 +15,7 @@ interface MakeOfferModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultPropertyId?: string;
-  onSubmit: (offer: Omit<BuyerOffer, 'id' | 'status' | 'submittedAt'>) => void;
+  onSubmit: (offer: Omit<BuyerOffer, 'id' | 'status' | 'submittedAt'>) => Promise<boolean>;
 }
 
 const financingOptions: { value: FinancingType; label: string }[] = [
@@ -41,6 +41,8 @@ export const MakeOfferModal = ({
   const [financingType, setFinancingType] = useState<FinancingType>('cash');
   const [depositAmount, setDepositAmount] = useState('');
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: listingsPage, isLoading: isListingsLoading } = useQuery({
     queryKey: [
@@ -80,9 +82,11 @@ export const MakeOfferModal = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedListing) return;
-    onSubmit({
+    setIsSubmitting(true);
+    setSubmitError(null);
+    const submitted = await onSubmit({
       propertyId: selectedListing.id,
       propertyTitle: selectedListing.title,
       ownerName: selectedListing.ownerName,
@@ -92,6 +96,11 @@ export const MakeOfferModal = ({
       depositAmount: depositAmount ? Number(depositAmount) : undefined,
       message: message || undefined,
     });
+    setIsSubmitting(false);
+    if (!submitted) {
+      setSubmitError('Your offer could not be submitted. Your details are unchanged.');
+      return;
+    }
     handleClose();
   };
 
@@ -107,7 +116,13 @@ export const MakeOfferModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Make an Offer</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                aria-label="Close offer dialog"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -214,14 +229,21 @@ export const MakeOfferModal = ({
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" onClick={handleClose} className="flex-1">
+              {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                className="flex-1"
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 className="flex-1 gap-1.5"
-                onClick={handleSubmit}
-                disabled={!propertyId || !offerAmount}
+                onClick={() => void handleSubmit()}
+                disabled={!propertyId || !offerAmount || isSubmitting}
+                isLoading={isSubmitting}
               >
                 <Send className="w-3.5 h-3.5" />
                 Submit Offer

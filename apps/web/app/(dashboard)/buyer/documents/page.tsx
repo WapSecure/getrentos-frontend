@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
 import { Button, Pagination } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
-import { DocumentRowActions } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -54,7 +53,7 @@ export default function BuyerDocumentsPage() {
 
   const uploadMutation = useMutation({
     mutationFn: (data: UploadedDocumentData) =>
-      buyerService.uploadDocument(data.file, data.name, data.category),
+      unwrap(buyerService.uploadDocument(data.file, data.name, data.category)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.documents }),
   });
 
@@ -153,7 +152,6 @@ export default function BuyerDocumentsPage() {
                     title="View document"
                   />
                 )}
-                <DocumentRowActions showShare={false} />
               </div>
             </div>
           ))}

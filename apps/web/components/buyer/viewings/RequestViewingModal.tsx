@@ -25,7 +25,7 @@ interface RequestViewingModalProps {
     time: string,
     notes: string,
     mode: 'IN_PERSON' | 'VIDEO'
-  ) => void;
+  ) => Promise<boolean>;
 }
 
 const LISTING_PAGE_SIZE = 10;
@@ -46,6 +46,8 @@ export const RequestViewingModal = ({
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
   const [mode, setMode] = useState<'IN_PERSON' | 'VIDEO'>('IN_PERSON');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   // Video viewings are offered only once the call service is set up.
   const { data: videoCalls } = useQuery({
     ...videoCallAvailabilityQuery,
@@ -92,9 +94,16 @@ export const RequestViewingModal = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedListing) return;
-    onSubmit(propertyId, date, time, notes, canVideo ? mode : 'IN_PERSON');
+    setIsSubmitting(true);
+    setSubmitError(null);
+    const submitted = await onSubmit(propertyId, date, time, notes, canVideo ? mode : 'IN_PERSON');
+    setIsSubmitting(false);
+    if (!submitted) {
+      setSubmitError('Your viewing request could not be submitted. Your details are unchanged.');
+      return;
+    }
     handleClose();
   };
 
@@ -110,7 +119,13 @@ export const RequestViewingModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">Request Viewing</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                aria-label="Close viewing request"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -210,14 +225,21 @@ export const RequestViewingModal = ({
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" onClick={handleClose} className="flex-1">
+              {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
+              <Button
+                variant="ghost"
+                onClick={handleClose}
+                className="flex-1"
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 className="flex-1 gap-1.5"
-                onClick={handleSubmit}
-                disabled={!selectedListing || !date || !time}
+                onClick={() => void handleSubmit()}
+                disabled={!selectedListing || !date || !time || isSubmitting}
+                isLoading={isSubmitting}
               >
                 <CalendarClock className="w-4 h-4" />
                 Request

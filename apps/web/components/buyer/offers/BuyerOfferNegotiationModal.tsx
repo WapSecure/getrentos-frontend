@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Check, XCircle, RefreshCcw, Send } from 'lucide-react';
+import { X, Check, XCircle, RefreshCcw } from 'lucide-react';
 import { Button, CurrencyInput } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferMessage } from '@/types/buyer';
@@ -13,10 +13,9 @@ interface BuyerOfferNegotiationModalProps {
   offer: BuyerOffer | null;
   messages: BuyerOfferMessage[];
   onClose: () => void;
-  onAcceptCounter: (offerId: string) => void;
-  onWithdraw: (offerId: string) => void;
-  onCounter: (offerId: string, amount: number, note: string) => void;
-  onSendMessage: (offerId: string, text: string) => void;
+  onAcceptCounter: (offerId: string) => Promise<boolean>;
+  onWithdraw: (offerId: string) => Promise<boolean>;
+  onCounter: (offerId: string, amount: number, note: string) => Promise<boolean>;
 }
 
 export const BuyerOfferNegotiationModal = ({
@@ -26,12 +25,12 @@ export const BuyerOfferNegotiationModal = ({
   onAcceptCounter,
   onWithdraw,
   onCounter,
-  onSendMessage,
 }: BuyerOfferNegotiationModalProps) => {
   const [isCountering, setIsCountering] = useState(false);
   const [counterAmount, setCounterAmount] = useState('');
   const [counterNote, setCounterNote] = useState('');
-  const [messageText, setMessageText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!offer) return null;
 
@@ -43,21 +42,29 @@ export const BuyerOfferNegotiationModal = ({
     setIsCountering(false);
     setCounterAmount('');
     setCounterNote('');
-    setMessageText('');
     onClose();
   };
 
-  const handleSubmitCounter = () => {
-    onCounter(offer.id, Number(counterAmount) || 0, counterNote);
+  const handleSubmitCounter = async () => {
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const submitted = await onCounter(offer.id, Number(counterAmount) || 0, counterNote);
+    setIsSubmitting(false);
+    if (!submitted) {
+      setErrorMessage('The counter offer could not be submitted.');
+      return;
+    }
     setIsCountering(false);
     setCounterAmount('');
     setCounterNote('');
   };
 
-  const handleSendMessage = () => {
-    if (!messageText.trim()) return;
-    onSendMessage(offer.id, messageText);
-    setMessageText('');
+  const runAction = async (action: () => Promise<boolean>, failureMessage: string) => {
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const completed = await action();
+    setIsSubmitting(false);
+    if (!completed) setErrorMessage(failureMessage);
   };
 
   return (
@@ -75,7 +82,13 @@ export const BuyerOfferNegotiationModal = ({
                 <h3 className="font-semibold text-foreground">{offer.propertyTitle}</h3>
                 <p className="text-xs text-muted-foreground">Owner: {offer.ownerName}</p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                aria-label="Close offer details"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -157,12 +170,14 @@ export const BuyerOfferNegotiationModal = ({
                   <Button
                     variant="primary"
                     className="flex-1"
-                    onClick={handleSubmitCounter}
-                    disabled={!counterAmount}
+                    onClick={() => void handleSubmitCounter()}
+                    disabled={!counterAmount || isSubmitting}
+                    isLoading={isSubmitting}
                   >
                     Send Counter
                   </Button>
                 </div>
+                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
               </div>
             ) : (
               <div className="p-4 border-t border-border shrink-0 space-y-3">
@@ -171,7 +186,13 @@ export const BuyerOfferNegotiationModal = ({
                     <Button
                       variant="ghost"
                       className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
-                      onClick={() => onWithdraw(offer.id)}
+                      onClick={() =>
+                        void runAction(
+                          () => onWithdraw(offer.id),
+                          'The offer could not be withdrawn.'
+                        )
+                      }
+                      disabled={isSubmitting}
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       Withdraw
@@ -188,7 +209,13 @@ export const BuyerOfferNegotiationModal = ({
                       <Button
                         variant="primary"
                         className="flex-1 gap-1.5"
-                        onClick={() => onAcceptCounter(offer.id)}
+                        onClick={() =>
+                          void runAction(
+                            () => onAcceptCounter(offer.id),
+                            'The counter offer could not be accepted.'
+                          )
+                        }
+                        disabled={isSubmitting}
                       >
                         <Check className="w-3.5 h-3.5" />
                         Accept
@@ -196,23 +223,7 @@ export const BuyerOfferNegotiationModal = ({
                     )}
                   </div>
                 )}
-                <div className="flex gap-2">
-                  <LegacyInput
-                    type="text"
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Send a message..."
-                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <Button
-                    variant="secondary"
-                    onClick={handleSendMessage}
-                    disabled={!messageText.trim()}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
+                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
               </div>
             )}
           </motion.div>

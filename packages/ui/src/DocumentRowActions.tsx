@@ -34,7 +34,7 @@ export const DocumentRowActions = ({
 
   return (
     <div className={cn('flex gap-1 flex-shrink-0', className)}>
-      {showShare && (
+      {showShare && onShare && (
         <button
           onClick={handleShare}
           title={sharing ? 'Link copied' : 'Share securely'}
@@ -48,18 +48,20 @@ export const DocumentRowActions = ({
           {sharing ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
         </button>
       )}
-      <button
-        onClick={handleDownload}
-        title={downloading ? 'Downloaded' : 'Download'}
-        className={cn(
-          'p-1.5 rounded-lg transition-colors',
-          downloading
-            ? 'text-green-600 dark:text-green-400'
-            : 'text-muted-foreground hover:text-primary hover:bg-secondary'
-        )}
-      >
-        {downloading ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-      </button>
+      {onDownload && (
+        <button
+          onClick={handleDownload}
+          title={downloading ? 'Downloaded' : 'Download'}
+          className={cn(
+            'p-1.5 rounded-lg transition-colors',
+            downloading
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-muted-foreground hover:text-primary hover:bg-secondary'
+          )}
+        >
+          {downloading ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+        </button>
+      )}
     </div>
   );
 };

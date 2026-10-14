@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
-import { Button, Pagination } from '@getrentos/ui';
+import { Button, PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -17,11 +17,13 @@ function BuyerViewingsPageContent() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { data: viewingsData, isLoading } = useQuery({
+  const viewingsQuery = useQuery({
     queryKey: [...buyerKeys.viewings, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(buyerService.listViewings({ page, pageSize: PAGE_SIZE })),
   });
+  const viewingsData = viewingsQuery.data;
   const requests = viewingsData?.items ?? [];
   const total = viewingsData?.total ?? 0;
 
@@ -35,42 +37,62 @@ function BuyerViewingsPageContent() {
       mode: 'IN_PERSON' | 'VIDEO';
     }) => unwrap(buyerService.requestViewing(data)),
     onSuccess: invalidate,
+    onError: () => setErrorMessage('The viewing request could not be submitted.'),
   });
 
   const cancelMutation = useMutation({
     mutationFn: (id: string) => unwrap(buyerService.updateViewing(id, { status: 'CANCELLED' })),
     onSuccess: invalidate,
+    onError: () => setErrorMessage('The viewing request could not be cancelled.'),
   });
 
   const [isModalOpen, setIsModalOpen] = useState(!!defaultPropertyId);
 
-  const handleSubmit = (
+  const handleSubmit = async (
     propertyId: string,
     date: string,
     time: string,
     notes: string,
     mode: 'IN_PERSON' | 'VIDEO'
   ) => {
-    createMutation.mutate({
-      listingId: propertyId,
-      scheduledAt: new Date(`${date}T${time}`).toISOString(),
-      notes: notes || undefined,
-      mode,
-    });
-    setIsModalOpen(false);
+    try {
+      await createMutation.mutateAsync({
+        listingId: propertyId,
+        scheduledAt: new Date(`${date}T${time}`).toISOString(),
+        notes: notes || undefined,
+        mode,
+      });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleCancel = (requestId: string) => {
     cancelMutation.mutate(requestId);
   };
 
+  if (viewingsQuery.isLoading) return <PageLoadingState />;
+  if (viewingsQuery.isError) {
+    return (
+      <PageErrorState
+        title="Viewing requests are unavailable"
+        onRetry={() => void viewingsQuery.refetch()}
+        isRetrying={viewingsQuery.isFetching}
+      />
+    );
+  }
+
   return (
     <>
+      {errorMessage && (
+        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Viewing Requests</h1>
           <p className="text-muted-foreground mt-1">
-            {isLoading ? 'Loading…' : `${total} request${total === 1 ? '' : 's'}`}
+            {total} request{total === 1 ? '' : 's'}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
@@ -79,7 +101,7 @@ function BuyerViewingsPageContent() {
         </Button>
       </div>
 
-      {!isLoading && requests.length === 0 ? (
+      {requests.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
             <CalendarClock className="w-8 h-8 text-primary" />

@@ -79,7 +79,6 @@ function BuyerOffersPageContent() {
     onSuccess: (_result, offerId) => invalidate(offerId),
   });
 
-  const [pendingMessages, setPendingMessages] = useState<Record<string, BuyerOfferMessage[]>>({});
   const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(!!defaultPropertyId);
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
@@ -90,105 +89,61 @@ function BuyerOffersPageContent() {
     enabled: !!activeOfferId,
   });
 
-  const appendMessage = (offerId: string, message: BuyerOfferMessage) => {
-    setPendingMessages((prev) => ({
-      ...prev,
-      [offerId]: [...(prev[offerId] || []), message],
-    }));
-  };
-
-  const handleMakeOffer = (offerData: Omit<BuyerOffer, 'id' | 'status' | 'submittedAt'>) => {
-    createMutation.mutate({
-      listingId: offerData.propertyId,
-      amount: offerData.offerAmount,
-      // Omitting this used to be invisible: the field is optional, so the
-      // backend quietly fell back to its 10% default and the buyer's figure
-      // never reached the offer.
-      depositAmount: offerData.depositAmount,
-      financingType: offerData.financingType,
-      message: offerData.message,
-    });
-  };
-
-  const handleAcceptCounter = (offerId: string) => {
-    acceptMutation.mutate(offerId);
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'accepted',
-      text: 'Counter offer accepted',
-      timestamp: new Date().toISOString(),
-    });
-  };
-
-  const handleWithdraw = (offerId: string) => {
-    withdrawMutation.mutate(offerId);
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'rejected',
-      text: 'Offer withdrawn',
-      timestamp: new Date().toISOString(),
-    });
-  };
-
-  const handleCounter = (offerId: string, amount: number, note: string) => {
-    counterMutation.mutate({ offerId, amount, note });
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'counter',
-      amount,
-      text: 'Countered with',
-      timestamp: new Date().toISOString(),
-    });
-    if (note.trim()) {
-      appendMessage(offerId, {
-        id: `sys_${Date.now() + 1}`,
-        offerId,
-        senderId: 'buyer',
-        senderName: 'You',
-        type: 'message',
-        text: note,
-        timestamp: new Date().toISOString(),
+  const handleMakeOffer = async (offerData: Omit<BuyerOffer, 'id' | 'status' | 'submittedAt'>) => {
+    try {
+      await createMutation.mutateAsync({
+        listingId: offerData.propertyId,
+        amount: offerData.offerAmount,
+        depositAmount: offerData.depositAmount,
+        financingType: offerData.financingType,
+        message: offerData.message,
       });
+      return true;
+    } catch {
+      return false;
     }
   };
 
-  const handleSendMessage = (offerId: string, text: string) => {
-    appendMessage(offerId, {
-      id: `msg_${Date.now()}`,
-      offerId,
-      senderId: 'buyer',
-      senderName: 'You',
-      type: 'message',
-      text,
-      timestamp: new Date().toISOString(),
-    });
+  const handleAcceptCounter = async (offerId: string) => {
+    try {
+      await acceptMutation.mutateAsync(offerId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleWithdraw = async (offerId: string) => {
+    try {
+      await withdrawMutation.mutateAsync(offerId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCounter = async (offerId: string, amount: number, note: string) => {
+    try {
+      await counterMutation.mutateAsync({ offerId, amount, note });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
 
   const messages: BuyerOfferMessage[] = activeOfferId
-    ? [
-        ...thread.map((m) => ({
-          id: m.id,
-          offerId: m.offerId,
-          senderId: (m.senderId === 'buyer' ? 'buyer' : 'owner') as 'buyer' | 'owner',
-          senderName: m.senderName,
-          type: m.type as BuyerOfferMessage['type'],
-          amount: m.amount,
-          text: m.text ?? '',
-          timestamp: m.timestamp,
-        })),
-        ...(pendingMessages[activeOfferId] || []),
-      ]
+    ? thread.map((m) => ({
+        id: m.id,
+        offerId: m.offerId,
+        senderId: (m.senderId === 'buyer' ? 'buyer' : 'owner') as 'buyer' | 'owner',
+        senderName: m.senderName,
+        type: m.type as BuyerOfferMessage['type'],
+        amount: m.amount,
+        text: m.text ?? '',
+        timestamp: m.timestamp,
+      }))
     : [];
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
@@ -314,7 +269,6 @@ function BuyerOffersPageContent() {
         onAcceptCounter={handleAcceptCounter}
         onWithdraw={handleWithdraw}
         onCounter={handleCounter}
-        onSendMessage={handleSendMessage}
       />
     </>
   );
