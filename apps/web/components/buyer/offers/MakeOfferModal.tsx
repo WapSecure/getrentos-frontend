@@ -10,6 +10,10 @@ import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
+import { isLandPropertyType } from '@/lib/propertyTypes';
+import { landKeys } from '@/lib/queryKeys';
+import { landService } from '@/services/landService';
+import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
@@ -43,6 +47,7 @@ export const MakeOfferModal = ({
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [acceptedRisks, setAcceptedRisks] = useState(false);
 
   const { data: listingsPage, isLoading: isListingsLoading } = useQuery({
     queryKey: [
@@ -70,7 +75,20 @@ export const MakeOfferModal = ({
     listings.find((listing) => listing.id === propertyId) ??
     (defaultListing?.id === propertyId ? defaultListing : undefined);
 
+  // Land: the buyer must accept what was not verified on the parcel (US-03).
+  const isLand = isLandPropertyType(selectedListing?.propertyType);
+  const landListing = useQuery({
+    queryKey: [...landKeys.publicListing(selectedListing?.id ?? '')],
+    queryFn: () => unwrap(landService.getPublicListing(selectedListing!.id)),
+    enabled: isOpen && isLand && Boolean(selectedListing),
+    retry: false,
+  });
+  const notVerified = isLand ? (landListing.data?.diligence?.notVerified ?? []) : [];
+  const needsAcceptance =
+    isLand && (landListing.isLoading || (notVerified.length > 0 && !acceptedRisks));
+
   const handleClose = () => {
+    setAcceptedRisks(false);
     setPropertyId(defaultPropertyId || '');
     setListingSearch('');
     setListingPage(1);
@@ -95,6 +113,7 @@ export const MakeOfferModal = ({
       financingType,
       depositAmount: depositAmount ? Number(depositAmount) : undefined,
       message: message || undefined,
+      ...(isLand ? { acknowledgedNotVerified: notVerified.map((item) => item.key) } : {}),
     });
     setIsSubmitting(false);
     if (!submitted) {
@@ -228,6 +247,26 @@ export const MakeOfferModal = ({
               </div>
             </div>
 
+            {isLand && notVerified.length > 0 && (
+              <div className="mx-4 mb-3 rounded-xl border border-warning/40 bg-warning/5 p-3">
+                <p className="text-sm font-semibold text-foreground">
+                  What was not verified on this land
+                </p>
+                <div className="mt-2">
+                  <TrustLabelsList notVerified={notVerified} />
+                </div>
+                <label className="mt-2 flex cursor-pointer items-start gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4"
+                    checked={acceptedRisks}
+                    onChange={(event) => setAcceptedRisks(event.target.checked)}
+                  />
+                  <span>I have read what was not verified and accept it before offering.</span>
+                </label>
+              </div>
+            )}
+
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
               {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
               <Button
@@ -242,7 +281,7 @@ export const MakeOfferModal = ({
                 variant="primary"
                 className="flex-1 gap-1.5"
                 onClick={() => void handleSubmit()}
-                disabled={!propertyId || !offerAmount || isSubmitting}
+                disabled={!propertyId || !offerAmount || needsAcceptance || isSubmitting}
                 isLoading={isSubmitting}
               >
                 <Send className="w-3.5 h-3.5" />

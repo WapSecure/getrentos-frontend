@@ -10,6 +10,7 @@ import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { landBuyerService, landLayoutService } from '@/services/landBuyerService';
 import type { LandReservation } from '@/types/landBuyer';
+import { TrustLabelsList } from '../market/TrustLabelsList';
 import { PaymentPlanCard } from './PaymentPlanCard';
 import { countdownTo, plotLabel, quotePlot } from './landSaleLogic';
 
@@ -28,6 +29,7 @@ export const StartPurchaseDialog = ({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [planId, setPlanId] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const layout = useQuery({
@@ -37,9 +39,19 @@ export const StartPurchaseDialog = ({
   });
   const plans = (layout.data?.paymentPlans ?? []).filter((p) => p.active);
   const chosen = plans.find((p) => p.id === planId) ?? null;
+  // What was not verified on the estate's land: the buyer must accept it (US-03).
+  const notVerified = layout.data?.notVerified ?? [];
+  const needsAcceptance = notVerified.length > 0 && !accepted;
 
   const start = useMutation({
-    mutationFn: () => unwrap(landBuyerService.startPurchase(reservation!.id, chosen!.id)),
+    mutationFn: () =>
+      unwrap(
+        landBuyerService.startPurchase(
+          reservation!.id,
+          chosen!.id,
+          notVerified.map((item) => item.key)
+        )
+      ),
     onSuccess: (purchase) => {
       queryClient.invalidateQueries({ queryKey: buyerLandKeys.all });
       router.push(LAND_BUYER_ROUTES.purchase(purchase.id));
@@ -49,6 +61,7 @@ export const StartPurchaseDialog = ({
 
   const close = () => {
     setPlanId(null);
+    setAccepted(false);
     setError(null);
     onClose();
   };
@@ -108,6 +121,29 @@ export const StartPurchaseDialog = ({
               </fieldset>
             )}
 
+            {notVerified.length > 0 && (
+              <section className="mt-5 rounded-2xl border border-warning/40 bg-warning/5 p-4">
+                <h3 className="text-sm font-semibold text-foreground">
+                  Before you commit: what was not verified on this land
+                </h3>
+                <div className="mt-3">
+                  <TrustLabelsList notVerified={notVerified} />
+                </div>
+                <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4"
+                    checked={accepted}
+                    onChange={(event) => setAccepted(event.target.checked)}
+                  />
+                  <span>
+                    I have read what was not verified and accept it. I understand I can have my own
+                    lawyer check these before I pay.
+                  </span>
+                </label>
+              </section>
+            )}
+
             {error && (
               <p className="mt-3 text-sm text-destructive" role="alert">
                 {error}
@@ -123,7 +159,7 @@ export const StartPurchaseDialog = ({
                   setError(null);
                   start.mutate();
                 }}
-                disabled={!chosen || start.isPending}
+                disabled={!chosen || needsAcceptance || start.isPending}
                 isLoading={start.isPending}
               >
                 {chosen

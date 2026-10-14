@@ -62,8 +62,15 @@ export const landBuyerService = {
     safeCall(() => post<LandReservation>(`/buyer/land/reservations/${reservationId}/cancel`)),
 
   // ---- Purchases ----
-  startPurchase: (reservationId: string, planId: string) =>
-    safeCall(() => post<LandPurchaseDetail>('/buyer/land/purchases', { reservationId, planId })),
+  /** `acknowledgedNotVerified`: keys of the estate land's not-verified checks the buyer accepts. */
+  startPurchase: (reservationId: string, planId: string, acknowledgedNotVerified: string[] = []) =>
+    safeCall(() =>
+      post<LandPurchaseDetail>('/buyer/land/purchases', {
+        reservationId,
+        planId,
+        acknowledgedNotVerified,
+      })
+    ),
 
   listPurchases: (params: BuyerLandPurchaseListParams = {}) =>
     safeCall(() =>

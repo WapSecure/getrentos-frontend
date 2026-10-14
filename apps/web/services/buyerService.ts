@@ -269,6 +269,7 @@ export const buyerService = {
     depositAmount?: number;
     financingType?: string;
     message?: string;
+    acknowledgedNotVerified?: string[];
   }) => safeCall(() => authFetch('/buyer/offers', { method: 'POST', body: JSON.stringify(data) })),
   withdrawOffer: (id: string) =>
     safeCall(() => authFetch(`/buyer/offers/${id}/withdraw`, { method: 'POST' })),
