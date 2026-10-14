@@ -39,6 +39,7 @@ import { formatCurrency } from '@/lib/format';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
 import { SaveListingButton } from './SaveListingButton';
 import { ListingComparisonDialog } from './ListingComparisonDialog';
+import { trustChainLabel } from '@getrentos/shared';
 
 // Shared with the server component that pre-renders the first page, so the two
 // cannot ask for different page sizes.
@@ -97,9 +98,7 @@ const ListingCard = ({
             className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/40 bg-black/65 px-3 py-1.5 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
           >
             <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            {listing.trustChain && listing.trustChain.metCount < listing.trustChain.totalCount
-              ? `${listing.trustChain.metCount}/${listing.trustChain.totalCount} trust checks`
-              : 'Verified listing'}
+            {listing.trustChain ? trustChainLabel(listing.trustChain).label : 'Verified listing'}
           </span>
         )}
         <SaveListingButton

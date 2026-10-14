@@ -40,6 +40,7 @@ import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import { trustChainLabel } from '@getrentos/shared';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -165,12 +166,32 @@ export default function PropertyDetailPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-2xl font-bold text-foreground">{property.title}</h1>
-                  {property.verified && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
-                      <Shield className="w-3 h-3" />
-                      Verified
-                    </span>
-                  )}
+                  {property.trustChain?.steps.length
+                    ? // The chain's own words, not a blanket tick: "Verified" next to
+                      // a panel saying ownership isn't confirmed read as a contradiction.
+                      (() => {
+                        const { label, tone } = trustChainLabel(property.trustChain);
+                        return (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full ${
+                              tone === 'verified'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-secondary text-foreground border border-border'
+                            }`}
+                          >
+                            <Shield
+                              className={`w-3 h-3 ${tone === 'verified' ? '' : 'text-green-600'}`}
+                            />
+                            {label}
+                          </span>
+                        );
+                      })()
+                    : property.verified && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                          <Shield className="w-3 h-3" />
+                          Verified
+                        </span>
+                      )}
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground mt-1">
                   <MapPin className="w-4 h-4" />
@@ -187,8 +208,14 @@ export default function PropertyDetailPage() {
                   </p>
                 )}
                 <div className="flex items-center justify-end gap-1 mt-1">
-                  <Star className="w-4 h-4 fill-primary text-primary" />
-                  <span className="text-sm text-foreground">{property.rating}</span>
+                  {property.rating > 0 ? (
+                    <>
+                      <Star className="w-4 h-4 fill-primary text-primary" />
+                      <span className="text-sm text-foreground">{property.rating}</span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No reviews yet</span>
+                  )}
                 </div>
               </div>
             </div>

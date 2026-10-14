@@ -48,6 +48,7 @@ import {
 } from '@/lib/api/properties';
 import { formatNaira } from '@/lib/format';
 import { track } from '@/lib/analytics';
+import { withTrustLabel } from '@/lib/trustLabel';
 
 const MAP_PAGE_SIZE = 100;
 
@@ -123,7 +124,7 @@ export default function Discover() {
     ({ item }: { item: RenterProperty }) => (
       <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
         <PropertyCard
-          property={item}
+          property={withTrustLabel(item)}
           saved={savedIds.has(item.id)}
           onToggleSave={toggle}
           onPress={(id) => router.push(`/(app)/property/${id}`)}

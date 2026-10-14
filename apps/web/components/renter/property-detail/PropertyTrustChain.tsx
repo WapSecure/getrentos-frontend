@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, FileCheck, Home, ShieldCheck, UserCheck, type LucideIcon } from 'lucide-react';
+import { trustChainLabel } from '@getrentos/shared';
 import type { Property, PropertyTrustStepId } from '@/types/renter';
 
 /**
@@ -29,9 +30,7 @@ export const PropertyTrustChain = ({ property }: { property: Property }) => {
           <ShieldCheck className="w-4 h-4 text-green-600" aria-hidden />
           Trust &amp; safety
         </h3>
-        <span className="text-xs text-muted-foreground">
-          {chain.metCount}/{chain.totalCount} checks
-        </span>
+        <span className="text-xs text-muted-foreground">{trustChainLabel(chain).label}</span>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
         How GetRentos has checked this home and protects your money.

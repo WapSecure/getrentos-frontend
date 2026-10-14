@@ -9,6 +9,8 @@ import {
   ShieldCheck,
   Heart,
   Columns3,
+  Clock,
+  ImageOff,
 } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -27,6 +29,12 @@ export interface PropertyCardData {
   size?: number;
   image?: string | null;
   verified?: boolean;
+  /**
+   * Where the listing's verification stands, in words ("Fully verified",
+   * "Verified · ownership pending", "Verification in progress"). Shown in place
+   * of the plain "Verified" chip when present.
+   */
+  trustLabel?: { label: string; tone: 'verified' | 'partial' | 'pending' };
   /** Match/quality score 0–100, shown as a ring when present. */
   score?: number | null;
   /** One short secondary fact, e.g. "600 sqm · C of O" or "Instant book". */
@@ -54,7 +62,7 @@ export function describeProperty(p: PropertyCardData): string {
     p.size ? `${p.size} square metres` : null,
     p.tag,
     p.score != null ? `${Math.round(p.score)} percent match` : null,
-    p.verified ? 'Verified' : null,
+    p.trustLabel ? p.trustLabel.label : p.verified ? 'Verified' : null,
     ...(p.badges ?? []),
   ]
     .filter(Boolean)
@@ -155,17 +163,62 @@ function PropertyCardBase({
         backgroundColor: colors.secondary,
       }}
     >
-      <Image
-        source={property.image ? { uri: property.image } : undefined}
-        placeholder={{ blurhash: BLURHASH }}
-        contentFit="cover"
-        cachePolicy="memory-disk"
-        transition={200}
-        recyclingKey={property.id}
-        accessible={false}
-        style={StyleSheet.absoluteFill}
-      />
-      {property.verified ? (
+      {property.image ? (
+        <Image
+          source={{ uri: property.image }}
+          placeholder={{ blurhash: BLURHASH }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={200}
+          recyclingKey={property.id}
+          accessible={false}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : (
+        // No photo: a quiet themed tile, not the light blur placeholder, which
+        // glared as a pale block in dark mode.
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { alignItems: 'center', justifyContent: 'center', gap: 6 },
+          ]}
+        >
+          <ImageOff size={row ? 20 : 26} color={colors.mutedForeground} />
+          {!row ? (
+            <Text variant="caption" color="mutedForeground">
+              No photo yet
+            </Text>
+          ) : null}
+        </View>
+      )}
+      {property.trustLabel ? (
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor:
+                property.trustLabel.tone === 'verified' ? colors.success : 'rgba(9,32,66,0.78)',
+              maxWidth: row ? 108 : '72%',
+            },
+          ]}
+        >
+          {property.trustLabel.tone === 'pending' ? (
+            <Clock size={12} color={colors.primaryForeground} />
+          ) : (
+            <ShieldCheck
+              size={12}
+              color={property.trustLabel.tone === 'partial' ? '#4ade80' : colors.primaryForeground}
+            />
+          )}
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            style={{ color: colors.primaryForeground, fontWeight: '700', flexShrink: 1 }}
+          >
+            {property.trustLabel.label}
+          </Text>
+        </View>
+      ) : property.verified ? (
         <View style={[styles.badge, { backgroundColor: 'rgba(9,32,66,0.72)' }]}>
           <ShieldCheck size={12} color={colors.primaryForeground} />
           <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '700' }}>

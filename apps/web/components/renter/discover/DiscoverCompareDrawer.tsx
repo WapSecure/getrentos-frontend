@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bed, Bath, Square, MapPin, Star, Shield, ShieldCheck, GitCompare } from 'lucide-react';
 import { Property } from '@/types/renter';
+import { trustChainLabel } from '@getrentos/shared';
 
 interface DiscoverCompareDrawerProps {
   isOpen: boolean;
@@ -187,13 +188,13 @@ export const DiscoverCompareDrawer = ({
                                   .map((s) => `${s.met ? '✓' : '○'} ${s.label}`)
                                   .join('\n')}
                                 className={`inline-flex items-center gap-1 ${
-                                  property.trustChain.metCount === property.trustChain.totalCount
+                                  trustChainLabel(property.trustChain).tone === 'verified'
                                     ? 'text-green-600'
                                     : 'text-muted-foreground'
                                 }`}
                               >
                                 <ShieldCheck className="w-4 h-4" />
-                                {property.trustChain.metCount}/{property.trustChain.totalCount}
+                                {trustChainLabel(property.trustChain).label}
                               </span>
                             ) : (
                               <span className="text-gray-400">—</span>

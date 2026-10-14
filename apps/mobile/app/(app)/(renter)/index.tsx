@@ -55,6 +55,8 @@ import { notificationsApi } from '@/lib/api/notifications';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
+import { withTrustLabel } from '@/lib/trustLabel';
+import { trustChainLabel } from '@getrentos/shared';
 
 interface Metric {
   key: keyof RenterDashboardStats;
@@ -322,7 +324,7 @@ export default function RenterHome() {
             {rest.map((item) => (
               <View key={item.id} style={{ width: CARD_WIDTH, marginRight: spacing.md }}>
                 <PropertyCard
-                  property={item}
+                  property={withTrustLabel(item)}
                   saved={savedIds.has(item.id)}
                   onToggleSave={toggle}
                   onPress={(id) => router.push(`/(app)/property/${id}`)}
@@ -348,6 +350,9 @@ function HeroCard({
   onToggleSave: (id: string) => void;
 }) {
   const { colors, radius } = useTheme();
+  // The same words as every other card: "Verified · ownership pending", not a blanket tick.
+  const trust = property.trustChain?.steps.length ? trustChainLabel(property.trustChain) : null;
+  const badgeText = trust ? trust.label : property.verified ? 'Verified' : null;
   return (
     <View
       style={{
@@ -360,7 +365,7 @@ function HeroCard({
       <Pressable
         onPress={() => router.push(`/(app)/property/${property.id}`)}
         accessibilityRole="button"
-        accessibilityLabel={describeProperty(property)}
+        accessibilityLabel={describeProperty(withTrustLabel(property))}
         style={{
           flex: 1,
         }}
@@ -390,7 +395,7 @@ function HeroCard({
             justifyContent: 'space-between',
           }}
         >
-          {property.verified ? (
+          {badgeText ? (
             <View
               style={{
                 flexDirection: 'row',
@@ -399,15 +404,20 @@ function HeroCard({
                 paddingVertical: 6,
                 paddingHorizontal: 10,
                 borderRadius: radius.full,
-                backgroundColor: 'rgba(9,32,66,0.72)',
+                backgroundColor: trust?.tone === 'verified' ? colors.success : 'rgba(9,32,66,0.72)',
+                flexShrink: 1,
               }}
             >
-              <ShieldCheck size={12} color={colors.primaryForeground} />
+              <ShieldCheck
+                size={12}
+                color={trust?.tone === 'partial' ? '#4ade80' : colors.primaryForeground}
+              />
               <Text
                 variant="caption"
-                style={{ color: colors.primaryForeground, fontWeight: '700' }}
+                numberOfLines={1}
+                style={{ color: colors.primaryForeground, fontWeight: '700', flexShrink: 1 }}
               >
-                Verified
+                {badgeText}
               </Text>
             </View>
           ) : (

@@ -49,6 +49,7 @@ import { PropertyGallery, toGallery } from '@/components/property/PropertyGaller
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
+import { trustChainLabel } from '@getrentos/shared';
 
 export default function PropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -111,7 +112,20 @@ export default function PropertyDetail() {
               <View style={{ gap: 6 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
                   <Price amount={p.price} period={p.period} variant="title" />
-                  {p.verified ? <Badge label="Verified" tone="success" /> : null}
+                  {p.trustChain?.steps.length ? (
+                    <Badge
+                      label={trustChainLabel(p.trustChain).label}
+                      tone={
+                        trustChainLabel(p.trustChain).tone === 'verified'
+                          ? 'success'
+                          : trustChainLabel(p.trustChain).tone === 'partial'
+                            ? 'info'
+                            : 'warning'
+                      }
+                    />
+                  ) : p.verified ? (
+                    <Badge label="Verified" tone="success" />
+                  ) : null}
                 </View>
                 <Text variant="heading" accessibilityRole="header">
                   {p.title}

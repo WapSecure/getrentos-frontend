@@ -6,3 +6,4 @@ export * from './mapTiles';
 export * from './parcelBoundary';
 export * from './videoCall';
 export * from './videoLimits';
+export * from './trustLabel';
