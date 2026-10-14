@@ -154,18 +154,31 @@ export default function LandlordLeasesPage() {
     },
   });
 
-  const handleCreateLease = (
+  const handleCreateLease = async (
     data: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>,
     sendImmediately: boolean
-  ) => createLeaseMutation.mutate({ data, sendImmediately });
+  ) => {
+    try {
+      await createLeaseMutation.mutateAsync({ data, sendImmediately });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const handleSendLease = (id: string) => sendLeaseMutation.mutate(id);
 
   const handleSignLease = (id: string, signatureData: string) =>
     signLeaseMutation.mutate({ id, signatureData });
 
-  const handleSendRenewalOffer = (leaseId: string, newRent: number, newEndDate: string) =>
-    renewLeaseMutation.mutate({ leaseId, newRent, newEndDate });
+  const handleSendRenewalOffer = async (leaseId: string, newRent: number, newEndDate: string) => {
+    try {
+      await renewLeaseMutation.mutateAsync({ leaseId, newRent, newEndDate });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <>

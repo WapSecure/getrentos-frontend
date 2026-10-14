@@ -12,7 +12,7 @@ import type { Lease, RentIncreaseCheck } from '@/types/landlord';
 interface RenewalOfferModalProps {
   lease: Lease | null;
   onClose: () => void;
-  onSend: (leaseId: string, newRent: number, newEndDate: string) => void;
+  onSend: (leaseId: string, newRent: number, newEndDate: string) => Promise<boolean>;
 }
 
 const addOneYear = (dateString: string) => {
@@ -29,6 +29,8 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
   const [check, setCheck] = useState<{ rentAmount: string; result: RentIncreaseCheck } | null>(
     null
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!lease || !newRent) return;
@@ -48,6 +50,17 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
   const increasePct = newRent
     ? (((Number(newRent) - lease.rentAmount) / lease.rentAmount) * 100).toFixed(1)
     : '0';
+
+  const handleSend = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const succeeded = await onSend(lease.id, Number(newRent), newEndDate);
+    setIsSubmitting(false);
+    if (!succeeded) {
+      setErrorMessage('The renewal offer could not be sent. Your changes are unchanged.');
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -120,20 +133,25 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" fullWidth onClick={onClose}>
+              <Button variant="ghost" fullWidth disabled={isSubmitting} onClick={onClose}>
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 fullWidth
                 className="gap-1.5"
-                onClick={() => onSend(lease.id, Number(newRent), newEndDate)}
-                disabled={!newRent || !newEndDate}
+                onClick={() => void handleSend()}
+                disabled={!newRent || !newEndDate || isSubmitting}
               >
                 <RefreshCcw className="w-3.5 h-3.5" />
-                Send Offer
+                {isSubmitting ? 'Sending…' : 'Send Offer'}
               </Button>
             </div>
+            {errorMessage && (
+              <p className="px-4 pb-4 text-sm text-destructive" role="alert">
+                {errorMessage}
+              </p>
+            )}
           </motion.div>
         </div>
       )}

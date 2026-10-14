@@ -18,7 +18,7 @@ interface CreateLeaseModalProps {
   onSave: (
     lease: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>,
     sendImmediately: boolean
-  ) => void;
+  ) => Promise<boolean>;
 }
 
 export const CreateLeaseModal = ({
@@ -33,6 +33,8 @@ export const CreateLeaseModal = ({
   const [leaseEnd, setLeaseEnd] = useState('');
   const [rentAmount, setRentAmount] = useState('');
   const [securityDeposit, setSecurityDeposit] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const selectedUnit = useMemo(
     () => vacantUnits.find((u) => u.id === unitId),
@@ -66,6 +68,7 @@ export const CreateLeaseModal = ({
     setLeaseEnd('');
     setRentAmount('');
     setSecurityDeposit('');
+    setErrorMessage(null);
   };
 
   const handleClose = () => {
@@ -100,10 +103,21 @@ export const CreateLeaseModal = ({
     };
   };
 
-  const handleSave = (sendImmediately: boolean) => {
+  const handleSave = async (sendImmediately: boolean) => {
     const lease = buildLease();
-    if (!lease) return;
-    onSave(lease, sendImmediately);
+    if (!lease || isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const succeeded = await onSave(lease, sendImmediately);
+    setIsSubmitting(false);
+    if (!succeeded) {
+      setErrorMessage(
+        sendImmediately
+          ? 'The lease could not be created and sent. Please review the details and try again.'
+          : 'The lease draft could not be saved. Please review the details and try again.'
+      );
+      return;
+    }
     handleClose();
   };
 
@@ -229,20 +243,25 @@ export const CreateLeaseModal = ({
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={() => handleSave(false)}
-                  disabled={!isValid}
+                  onClick={() => void handleSave(false)}
+                  disabled={!isValid || isSubmitting}
                 >
-                  Save Draft
+                  {isSubmitting ? 'Saving…' : 'Save Draft'}
                 </Button>
                 <Button
                   variant="primary"
                   fullWidth
-                  onClick={() => handleSave(true)}
-                  disabled={!isValid}
+                  onClick={() => void handleSave(true)}
+                  disabled={!isValid || isSubmitting}
                 >
-                  Send Lease
+                  {isSubmitting ? 'Sending…' : 'Send Lease'}
                 </Button>
               </div>
+            )}
+            {errorMessage && (
+              <p className="px-4 pb-4 text-sm text-destructive" role="alert">
+                {errorMessage}
+              </p>
             )}
           </motion.div>
         </div>
