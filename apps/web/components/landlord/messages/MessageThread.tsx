@@ -2,8 +2,8 @@
 
 import { LegacyInput } from '@getrentos/ui';
 
-import { useRef, useState } from 'react';
-import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { useState } from 'react';
+import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 
@@ -19,7 +19,7 @@ interface MessageThreadProps {
   contactName: string;
   contactRole: string;
   messages: ThreadMessage[];
-  onSend: (text: string) => void;
+  onSend: (text: string) => Promise<boolean>;
 }
 
 export const MessageThread = ({
@@ -29,23 +29,20 @@ export const MessageThread = ({
   onSend,
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSend = () => {
-    if (!draft.trim()) return;
-    onSend(draft.trim());
-    setDraft('');
-  };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setDraft((prev) =>
-        prev ? `${prev} \ud83d\udcce ${file.name}` : `\ud83d\udcce ${file.name}`
-      );
+  const handleSend = async () => {
+    if (!draft.trim() || isSending) return;
+    setIsSending(true);
+    setErrorMessage(null);
+    const sent = await onSend(draft.trim());
+    setIsSending(false);
+    if (!sent) {
+      setErrorMessage('Your message could not be sent. Your draft is unchanged.');
+      return;
     }
-    e.target.value = '';
+    setDraft('');
   };
 
   return (
@@ -104,29 +101,27 @@ export const MessageThread = ({
         )}
       </div>
 
-      <div className="p-3 border-t border-border flex items-center gap-2">
-        <LegacyInput ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
-        >
-          <Paperclip className="w-4 h-4" />
-        </button>
-        <LegacyInput
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type a message..."
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!draft.trim()}
-          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+      <div className="border-t border-border p-3">
+        {errorMessage && <p className="mb-2 text-xs text-destructive">{errorMessage}</p>}
+        <div className="flex items-center gap-2">
+          <LegacyInput
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
+            placeholder="Type a message..."
+            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="button"
+            onClick={() => void handleSend()}
+            disabled={!draft.trim() || isSending}
+            aria-label={isSending ? 'Sending message' : 'Send message'}
+            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

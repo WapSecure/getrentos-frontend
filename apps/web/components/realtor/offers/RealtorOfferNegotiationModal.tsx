@@ -13,7 +13,7 @@ interface RealtorOfferNegotiationModalProps {
   offer: RealtorOffer | null;
   messages: OfferThreadMessage[];
   onClose: () => void;
-  onCounter: (offerId: string, amount: number, note: string) => void;
+  onCounter: (offerId: string, amount: number, note: string) => Promise<boolean>;
 }
 
 export const RealtorOfferNegotiationModal = ({
@@ -25,6 +25,8 @@ export const RealtorOfferNegotiationModal = ({
   const [isCountering, setIsCountering] = useState(false);
   const [counterAmount, setCounterAmount] = useState('');
   const [counterNote, setCounterNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!offer) return null;
 
@@ -35,11 +37,20 @@ export const RealtorOfferNegotiationModal = ({
     setIsCountering(false);
     setCounterAmount('');
     setCounterNote('');
+    setErrorMessage(null);
     onClose();
   };
 
-  const handleSubmitCounter = () => {
-    onCounter(offer.id, Number(counterAmount) || 0, counterNote);
+  const handleSubmitCounter = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const succeeded = await onCounter(offer.id, Number(counterAmount) || 0, counterNote);
+    setIsSubmitting(false);
+    if (!succeeded) {
+      setErrorMessage('The counteroffer could not be sent. Please try again.');
+      return;
+    }
     setIsCountering(false);
     setCounterAmount('');
     setCounterNote('');
@@ -50,6 +61,9 @@ export const RealtorOfferNegotiationModal = ({
       {offer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="realtor-offer-title"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -57,12 +71,19 @@ export const RealtorOfferNegotiationModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <div>
-                <h3 className="font-semibold text-foreground">{offer.listingTitle}</h3>
+                <h3 id="realtor-offer-title" className="font-semibold text-foreground">
+                  {offer.listingTitle}
+                </h3>
                 <p className="text-xs text-muted-foreground">
                   {offer.leadName} → {offer.clientName}
                 </p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={handleClose}
+                aria-label="Close offer"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -151,18 +172,24 @@ export const RealtorOfferNegotiationModal = ({
                   />
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="ghost" className="flex-1" onClick={() => setIsCountering(false)}>
+                  <Button
+                    variant="ghost"
+                    className="flex-1"
+                    disabled={isSubmitting}
+                    onClick={() => setIsCountering(false)}
+                  >
                     Cancel
                   </Button>
                   <Button
                     variant="primary"
                     className="flex-1"
-                    onClick={handleSubmitCounter}
-                    disabled={!counterAmount}
+                    onClick={() => void handleSubmitCounter()}
+                    disabled={!counterAmount || isSubmitting}
                   >
-                    Send Counter
+                    {isSubmitting ? 'Sending…' : 'Send Counter'}
                   </Button>
                 </div>
+                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
               </div>
             ) : (
               <div className="p-4 border-t border-border shrink-0 space-y-3">
@@ -171,7 +198,10 @@ export const RealtorOfferNegotiationModal = ({
                     <Button
                       variant="outline"
                       className="flex-1 gap-1.5"
-                      onClick={() => setIsCountering(true)}
+                      onClick={() => {
+                        setErrorMessage(null);
+                        setIsCountering(true);
+                      }}
                     >
                       <RefreshCcw className="w-3.5 h-3.5" />
                       Counter

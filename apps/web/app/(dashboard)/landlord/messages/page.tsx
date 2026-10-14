@@ -87,14 +87,15 @@ export default function LandlordMessagesPage() {
   useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
   const handleSend = async (text: string) => {
-    if (!activeId) return;
+    if (!activeId) return false;
     const response = await landlordService.sendConversationMessage(activeId, text);
-    if (!response.success || !response.data) return;
+    if (!response.success || !response.data) return false;
     setMessagePage(1);
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: landlordKeys.conversationMessages(activeId) }),
       queryClient.invalidateQueries({ queryKey: landlordKeys.conversations }),
     ]);
+    return true;
   };
 
   return (

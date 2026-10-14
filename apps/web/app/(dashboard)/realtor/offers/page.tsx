@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Handshake } from 'lucide-react';
 import { RealtorOfferCard } from '@/components/realtor/offers/RealtorOfferCard';
 import { RealtorOfferNegotiationModal } from '@/components/realtor/offers/RealtorOfferNegotiationModal';
-import type { RealtorOfferStatus, OfferThreadMessage } from '@/types/realtor';
+import type { RealtorOfferStatus } from '@/types/realtor';
 import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -29,7 +29,6 @@ const OFFER_STATUS_TO_API_STATUS: Record<
 };
 
 export default function RealtorOffersPage() {
-  const [messagesByOffer, setMessagesByOffer] = useState<Record<string, OfferThreadMessage[]>>({});
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
@@ -67,47 +66,16 @@ export default function RealtorOffersPage() {
       }),
   });
 
-  const appendMessage = (offerId: string, message: OfferThreadMessage) => {
-    setMessagesByOffer((prev) => ({
-      ...prev,
-      [offerId]: [...(prev[offerId] || []), message],
-    }));
-  };
-
-  const handleCounter = (offerId: string, amount: number, note: string) => {
-    counterOffer.mutate({ id: offerId, amount, message: note || undefined });
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'realtor',
-      senderName: 'You',
-      type: 'counter',
-      amount,
-      text: 'Countered with',
-      timestamp: new Date().toISOString(),
-    });
-    if (note.trim()) {
-      appendMessage(offerId, {
-        id: `sys_${Date.now() + 1}`,
-        offerId,
-        senderId: 'realtor',
-        senderName: 'You',
-        type: 'message',
-        text: note,
-        timestamp: new Date().toISOString(),
-      });
+  const handleCounter = async (offerId: string, amount: number, note: string) => {
+    try {
+      await counterOffer.mutateAsync({ id: offerId, amount, message: note || undefined });
+      return true;
+    } catch {
+      return false;
     }
   };
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
-
-  const openOffer = (offerId: string) => {
-    const offer = offers.find((o) => o.id === offerId);
-    if (offer && !messagesByOffer[offerId]) {
-      setMessagesByOffer((prev) => ({ ...prev, [offerId]: offer.thread }));
-    }
-    setActiveOfferId(offerId);
-  };
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -186,7 +154,7 @@ export default function RealtorOffersPage() {
               key={offer.id}
               offer={offer}
               delay={index * 0.05}
-              onClick={() => openOffer(offer.id)}
+              onClick={() => setActiveOfferId(offer.id)}
             />
           ))}
         </div>
@@ -204,7 +172,7 @@ export default function RealtorOffersPage() {
 
       <RealtorOfferNegotiationModal
         offer={activeOffer}
-        messages={activeOfferId ? messagesByOffer[activeOfferId] || [] : []}
+        messages={activeOffer?.thread ?? []}
         onClose={() => setActiveOfferId(null)}
         onCounter={handleCounter}
       />
