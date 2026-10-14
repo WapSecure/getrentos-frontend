@@ -103,9 +103,14 @@ export default function OwnerMessagesPage() {
   // Opened from a message notification.
   useOpenConversationFromUrl(data !== undefined, handleSelect);
 
-  const handleSend = (text: string) => {
-    if (!activeId) return;
-    sendMutation.mutate({ conversationId: activeId, text });
+  const handleSend = async (text: string) => {
+    if (!activeId) return false;
+    try {
+      await sendMutation.mutateAsync({ conversationId: activeId, text });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const filteredConversations = conversations.map(toConversation);

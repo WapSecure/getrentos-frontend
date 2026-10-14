@@ -20,7 +20,6 @@ const PAGE_SIZE = 10;
 
 export default function OwnerOffersPage() {
   const queryClient = useQueryClient();
-  const [pendingMessages, setPendingMessages] = useState<Record<string, OfferMessage[]>>({});
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -84,92 +83,46 @@ export default function OwnerOffersPage() {
     onSuccess: (_result, { offerId }) => invalidate(offerId),
   });
 
-  const appendMessage = (offerId: string, message: OfferMessage) => {
-    setPendingMessages((prev) => ({
-      ...prev,
-      [offerId]: [...(prev[offerId] || []), message],
-    }));
-  };
-
-  const handleAccept = (offerId: string) => {
-    acceptMutation.mutate(offerId);
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'owner',
-      senderName: 'You',
-      type: 'accepted',
-      text: 'Offer accepted',
-      timestamp: new Date().toISOString(),
-    });
-  };
-
-  const handleReject = (offerId: string) => {
-    rejectMutation.mutate(offerId);
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'owner',
-      senderName: 'You',
-      type: 'rejected',
-      text: 'Offer rejected',
-      timestamp: new Date().toISOString(),
-    });
-  };
-
-  const handleCounter = (offerId: string, amount: number, note: string) => {
-    counterMutation.mutate({ offerId, amount, note });
-    appendMessage(offerId, {
-      id: `sys_${Date.now()}`,
-      offerId,
-      senderId: 'owner',
-      senderName: 'You',
-      type: 'counter',
-      amount,
-      text: 'Countered with',
-      timestamp: new Date().toISOString(),
-    });
-    if (note.trim()) {
-      appendMessage(offerId, {
-        id: `sys_${Date.now() + 1}`,
-        offerId,
-        senderId: 'owner',
-        senderName: 'You',
-        type: 'message',
-        text: note,
-        timestamp: new Date().toISOString(),
-      });
+  const handleAccept = async (offerId: string) => {
+    try {
+      await acceptMutation.mutateAsync(offerId);
+      return true;
+    } catch {
+      return false;
     }
   };
 
-  const handleSendMessage = (offerId: string, text: string) => {
-    appendMessage(offerId, {
-      id: `msg_${Date.now()}`,
-      offerId,
-      senderId: 'owner',
-      senderName: 'You',
-      type: 'message',
-      text,
-      timestamp: new Date().toISOString(),
-    });
+  const handleReject = async (offerId: string) => {
+    try {
+      await rejectMutation.mutateAsync(offerId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCounter = async (offerId: string, amount: number, note: string) => {
+    try {
+      await counterMutation.mutateAsync({ offerId, amount, note });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
 
   const messages: OfferMessage[] = activeOfferId
-    ? [
-        ...thread.map((m) => ({
-          id: m.id,
-          offerId: m.offerId,
-          senderId: (m.senderId === 'owner' ? 'owner' : 'buyer') as 'owner' | 'buyer',
-          senderName: m.senderName,
-          type: m.type as OfferMessage['type'],
-          amount: m.amount,
-          text: m.text ?? '',
-          timestamp: m.timestamp,
-        })),
-        ...(pendingMessages[activeOfferId] || []),
-      ]
+    ? thread.map((m) => ({
+        id: m.id,
+        offerId: m.offerId,
+        senderId: (m.senderId === 'owner' ? 'owner' : 'buyer') as 'owner' | 'buyer',
+        senderName: m.senderName,
+        type: m.type as OfferMessage['type'],
+        amount: m.amount,
+        text: m.text ?? '',
+        timestamp: m.timestamp,
+      }))
     : [];
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
@@ -281,7 +234,6 @@ export default function OwnerOffersPage() {
         onAccept={handleAccept}
         onReject={handleReject}
         onCounter={handleCounter}
-        onSendMessage={handleSendMessage}
       />
     </>
   );

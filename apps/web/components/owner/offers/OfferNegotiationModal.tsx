@@ -4,7 +4,7 @@ import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X, Check, XCircle, RefreshCcw, Send } from 'lucide-react';
+import { X, Check, XCircle, RefreshCcw } from 'lucide-react';
 import { Button, CurrencyInput } from '@getrentos/ui';
 import { formatCurrency, getInitials } from '@/lib/format';
 import type { SaleOffer, OfferMessage } from '@/types/owner';
@@ -13,10 +13,9 @@ interface OfferNegotiationModalProps {
   offer: SaleOffer | null;
   messages: OfferMessage[];
   onClose: () => void;
-  onAccept: (offerId: string) => void;
-  onReject: (offerId: string) => void;
-  onCounter: (offerId: string, amount: number, note: string) => void;
-  onSendMessage: (offerId: string, text: string) => void;
+  onAccept: (offerId: string) => Promise<boolean>;
+  onReject: (offerId: string) => Promise<boolean>;
+  onCounter: (offerId: string, amount: number, note: string) => Promise<boolean>;
 }
 
 export const OfferNegotiationModal = ({
@@ -26,12 +25,12 @@ export const OfferNegotiationModal = ({
   onAccept,
   onReject,
   onCounter,
-  onSendMessage,
 }: OfferNegotiationModalProps) => {
   const [isCountering, setIsCountering] = useState(false);
   const [counterAmount, setCounterAmount] = useState('');
   const [counterNote, setCounterNote] = useState('');
-  const [messageText, setMessageText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!offer) return null;
 
@@ -46,21 +45,36 @@ export const OfferNegotiationModal = ({
     setIsCountering(false);
     setCounterAmount('');
     setCounterNote('');
-    setMessageText('');
+    setErrorMessage(null);
     onClose();
   };
 
-  const handleSubmitCounter = () => {
-    onCounter(offer.id, Number(counterAmount) || 0, counterNote);
+  const handleSubmitCounter = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const succeeded = await onCounter(offer.id, Number(counterAmount) || 0, counterNote);
+    setIsSubmitting(false);
+    if (!succeeded) {
+      setErrorMessage('The counteroffer could not be sent. Please try again.');
+      return;
+    }
     setIsCountering(false);
     setCounterAmount('');
     setCounterNote('');
   };
 
-  const handleSendMessage = () => {
-    if (!messageText.trim()) return;
-    onSendMessage(offer.id, messageText);
-    setMessageText('');
+  const runAction = async (action: 'accept' | 'reject') => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const succeeded = await (action === 'accept' ? onAccept(offer.id) : onReject(offer.id));
+    setIsSubmitting(false);
+    if (!succeeded) {
+      setErrorMessage(
+        `The offer could not be ${action === 'accept' ? 'accepted' : 'rejected'}. Please try again.`
+      );
+    }
   };
 
   return (
@@ -68,6 +82,9 @@ export const OfferNegotiationModal = ({
       {offer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="offer-negotiation-title"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -79,11 +96,18 @@ export const OfferNegotiationModal = ({
                   {getInitials(offer.buyerName)}
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">{offer.buyerName}</h3>
+                  <h3 id="offer-negotiation-title" className="font-semibold text-foreground">
+                    {offer.buyerName}
+                  </h3>
                   <p className="text-xs text-muted-foreground">{offer.propertyName}</p>
                 </div>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                type="button"
+                onClick={handleClose}
+                aria-label="Close offer"
+                className="p-1 rounded-lg hover:bg-secondary"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -165,12 +189,13 @@ export const OfferNegotiationModal = ({
                   <Button
                     variant="primary"
                     className="flex-1"
-                    onClick={handleSubmitCounter}
-                    disabled={!counterAmount}
+                    onClick={() => void handleSubmitCounter()}
+                    disabled={!counterAmount || isSubmitting}
                   >
-                    Send Counter
+                    {isSubmitting ? 'Sending…' : 'Send Counter'}
                   </Button>
                 </div>
+                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
               </div>
             ) : (
               <div className="p-4 border-t border-border shrink-0 space-y-3">
@@ -179,7 +204,11 @@ export const OfferNegotiationModal = ({
                     <Button
                       variant="outline"
                       className="flex-1 gap-1.5"
-                      onClick={() => setIsCountering(true)}
+                      onClick={() => {
+                        setErrorMessage(null);
+                        setIsCountering(true);
+                      }}
+                      disabled={isSubmitting}
                     >
                       <RefreshCcw className="w-3.5 h-3.5" />
                       Counter
@@ -187,7 +216,8 @@ export const OfferNegotiationModal = ({
                     <Button
                       variant="ghost"
                       className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
-                      onClick={() => onReject(offer.id)}
+                      onClick={() => void runAction('reject')}
+                      disabled={isSubmitting}
                     >
                       <XCircle className="w-3.5 h-3.5" />
                       Reject
@@ -195,30 +225,15 @@ export const OfferNegotiationModal = ({
                     <Button
                       variant="primary"
                       className="flex-1 gap-1.5"
-                      onClick={() => onAccept(offer.id)}
+                      onClick={() => void runAction('accept')}
+                      disabled={isSubmitting}
                     >
                       <Check className="w-3.5 h-3.5" />
                       Accept
                     </Button>
                   </div>
                 )}
-                <div className="flex gap-2">
-                  <LegacyInput
-                    type="text"
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Send a message..."
-                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <Button
-                    variant="secondary"
-                    onClick={handleSendMessage}
-                    disabled={!messageText.trim()}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </div>
+                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
               </div>
             )}
           </motion.div>
