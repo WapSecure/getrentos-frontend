@@ -20,6 +20,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
+import { useLandAvailability } from '@/hooks/useLandAvailability';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 
 interface NavItem {
@@ -55,18 +56,24 @@ export const navGroups = [
   { label: 'Trust and account', items: navItems.slice(11) },
 ];
 
+const MARKETPLACE_ONLY = new Set<string>([ROUTES.BUYER_LAND, LAND_BUYER_ROUTES.HUB]);
+
 export const BuyerSidebar = () => {
   const { t } = useLanguage();
+  const land = useLandAvailability();
   return (
     <GroupedSidebar
       ariaLabel="Buyer navigation"
       dashboardHref={ROUTES.BUYER_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
-        items: group.items.map((item) => ({
-          ...item,
-          label: item.labelKey ? t(item.labelKey) : item.label,
-        })),
+        items: group.items
+          // Land links only while the land marketplace is open (LAND_MODE).
+          .filter((item) => land.marketplace || !MARKETPLACE_ONLY.has(item.href))
+          .map((item) => ({
+            ...item,
+            label: item.labelKey ? t(item.labelKey) : item.label,
+          })),
       }))}
     />
   );
