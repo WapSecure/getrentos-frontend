@@ -30,6 +30,7 @@ import type { TranslationKey } from '@/lib/i18n/translations';
 import { ROUTES } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { OWNER_LAND_SALES_ROUTE } from '@/lib/constants/landDeveloperRoutes';
+import { useLandAvailability } from '@/hooks/useLandAvailability';
 import { GroupedSidebar } from '@/components/shared/dashboard/GroupedSidebar';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
@@ -48,6 +49,7 @@ interface NavItem {
  * on this sidebar: fixed here alongside the new Analytics gate.
  */
 const PRO_GATED_ROUTES = new Set<string>([ROUTES.OWNER_ANALYTICS, ROUTES.OWNER_HOME_MANAGEMENT]);
+const LAND_ROUTES = new Set<string>([ROUTES.OWNER_LAND, OWNER_LAND_SALES_ROUTE]);
 
 export const navItems: NavItem[] = [
   { labelKey: 'sidebar.dashboard', href: ROUTES.OWNER_DASHBOARD, icon: LayoutDashboard },
@@ -96,6 +98,7 @@ export const navGroups = [
 ];
 
 export const OwnerSidebar = () => {
+  const land = useLandAvailability();
   const { t } = useLanguage();
   const { isPro } = usePlanTier();
   return (
@@ -104,11 +107,14 @@ export const OwnerSidebar = () => {
       dashboardHref={ROUTES.OWNER_DASHBOARD}
       groups={navGroups.map((group) => ({
         ...group,
-        items: group.items.map((item) => ({
-          ...item,
-          label: item.labelKey ? t(item.labelKey) : item.label,
-          locked: !isPro && PRO_GATED_ROUTES.has(item.href),
-        })),
+        items: group.items
+          // Land links only while owners can use land (LAND_MODE).
+          .filter((item) => land.owners || !LAND_ROUTES.has(item.href))
+          .map((item) => ({
+            ...item,
+            label: item.labelKey ? t(item.labelKey) : item.label,
+            locked: !isPro && PRO_GATED_ROUTES.has(item.href),
+          })),
       }))}
     />
   );

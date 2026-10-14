@@ -15,6 +15,7 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
 import { useAuthStore } from '@/lib/store/authStore';
+import { useLandAvailability } from '@/hooks/useLandAvailability';
 
 interface NavLink {
   label: string;
@@ -55,6 +56,11 @@ const linkActive = 'text-primary';
 const isCurrent = (pathname: string, href: string) => !href.includes('#') && pathname === href;
 
 export const Navigation = () => {
+  const land = useLandAvailability();
+  // Land drops out of the menus while its marketplace is closed (LAND_MODE).
+  const marketplaceLinks = land.marketplace
+    ? MARKETPLACE_LINKS
+    : MARKETPLACE_LINKS.filter((link) => link.href !== ROUTES.LAND_MARKETPLACE);
   const router = useRouter();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -84,7 +90,7 @@ export const Navigation = () => {
     router.push(ROUTES.HOME);
   };
 
-  const marketplaceActive = MARKETPLACE_LINKS.some((link) => isCurrent(pathname, link.href));
+  const marketplaceActive = marketplaceLinks.some((link) => isCurrent(pathname, link.href));
   const closeMenu = () => setIsMobileMenuOpen(false);
 
   return (
@@ -116,7 +122,7 @@ export const Navigation = () => {
                   />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-60">
-                  {MARKETPLACE_LINKS.map((link) => (
+                  {marketplaceLinks.map((link) => (
                     <DropdownMenuItem key={link.href} asChild>
                       <Link
                         href={link.href}
@@ -198,7 +204,7 @@ export const Navigation = () => {
             <p className="px-4 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Marketplaces
             </p>
-            {MARKETPLACE_LINKS.map((link) => (
+            {marketplaceLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
