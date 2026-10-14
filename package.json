@@ -17,6 +17,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
+    "preflight:feature": "node scripts/repo-preflight.mjs feature",
+    "validate:dev-sync": "node scripts/repo-preflight.mjs dev-sync",
     "clean": "pnpm -r clean",
     "prepare": "husky"
   },
