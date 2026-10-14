@@ -61,19 +61,27 @@ function AgentVerificationsPageContent() {
       queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
       queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
     },
-    onError: (_error, visit) =>
-      agentOfflineQueue.enqueue('verification', {
-        taskId: visit.taskId,
-        subjectName: visit.subjectName,
-        subjectType: API_SUBJECT_TYPES[visit.subjectType],
-        idVerified: visit.idVerified,
-        addressConfirmed: visit.addressConfirmed,
-        notes: visit.notes || undefined,
-      }),
   });
 
-  const handleSubmit = (data: Omit<VerificationVisit, 'id' | 'syncStatus'>) => {
-    submitVerification.mutate(data);
+  const handleSubmit = async (data: Omit<VerificationVisit, 'id' | 'syncStatus'>) => {
+    try {
+      await submitVerification.mutateAsync(data);
+      return true;
+    } catch {
+      try {
+        agentOfflineQueue.enqueue('verification', {
+          taskId: data.taskId,
+          subjectName: data.subjectName,
+          subjectType: API_SUBJECT_TYPES[data.subjectType],
+          idVerified: data.idVerified,
+          addressConfirmed: data.addressConfirmed,
+          notes: data.notes || undefined,
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
   };
 
   return (
@@ -91,7 +99,7 @@ function AgentVerificationsPageContent() {
         </Button>
       </div>
 
-      {(error || submitVerification.error) && (
+      {error && (
         <p className="mb-4 text-sm text-red-600" role="alert">
           Unable to save verification changes. Please try again.
         </p>

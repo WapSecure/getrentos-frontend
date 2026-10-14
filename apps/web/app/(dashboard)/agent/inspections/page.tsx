@@ -51,19 +51,29 @@ function AgentInspectionsPageContent() {
       queryClient.invalidateQueries({ queryKey: agentKeys.tasks });
       queryClient.invalidateQueries({ queryKey: agentKeys.dashboard });
     },
-    onError: (_error, inspection) =>
-      agentOfflineQueue.enqueue('inspection', {
-        taskId: inspection.taskId,
-        scheduledAt: inspection.scheduledDate,
-        type: inspection.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
-        rooms: inspection.rooms,
-        clientName: inspection.clientName,
-        overallCondition: inspection.overallCondition,
-      }),
   });
 
-  const handleSubmit = (data: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) => {
-    submitInspection.mutate(data);
+  const handleSubmit = async (
+    data: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>
+  ) => {
+    try {
+      await submitInspection.mutateAsync(data);
+      return true;
+    } catch {
+      try {
+        agentOfflineQueue.enqueue('inspection', {
+          taskId: data.taskId,
+          scheduledAt: data.scheduledDate,
+          type: data.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
+          rooms: data.rooms,
+          clientName: data.clientName,
+          overallCondition: data.overallCondition,
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
   };
 
   const handleSync = () => {
@@ -87,7 +97,7 @@ function AgentInspectionsPageContent() {
         </Button>
       </div>
 
-      {(error || submitInspection.error) && (
+      {error && (
         <p className="mb-4 text-sm text-red-600" role="alert">
           Unable to save inspection changes. Please try again.
         </p>

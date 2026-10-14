@@ -22,7 +22,9 @@ interface NewInspectionModalProps {
   onClose: () => void;
   tasks: AgentTask[];
   defaultTaskId?: string;
-  onSubmit: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) => void;
+  onSubmit: (
+    inspection: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>
+  ) => Promise<boolean>;
 }
 
 const conditionOptions: RoomCondition[] = ['excellent', 'good', 'fair', 'poor'];
@@ -50,6 +52,8 @@ export const NewInspectionModal = ({
   const [photos, setPhotos] = useState<InspectionPhoto[]>([]);
   const [uploadingRoom, setUploadingRoom] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const selectedTask = tasks.find((t) => t.id === taskId);
 
@@ -61,6 +65,7 @@ export const NewInspectionModal = ({
     setPhotos([]);
     setUploadingRoom(null);
     setPhotoError(null);
+    setSubmitError(null);
     onClose();
   };
 
@@ -106,9 +111,11 @@ export const NewInspectionModal = ({
   const addRoom = () => setRooms((prev) => [...prev, { ...emptyRoom }]);
   const removeRoom = (index: number) => setRooms((prev) => prev.filter((_, i) => i !== index));
 
-  const handleSubmit = () => {
-    if (!selectedTask) return;
-    onSubmit({
+  const handleSubmit = async () => {
+    if (!selectedTask || isSubmitting) return;
+    setIsSubmitting(true);
+    setSubmitError(null);
+    const stored = await onSubmit({
       taskId: selectedTask.id,
       propertyAddress: selectedTask.propertyAddress,
       clientName: clientName || selectedTask.assignedBy,
@@ -124,6 +131,11 @@ export const NewInspectionModal = ({
         rooms.find((r) => r.condition === 'fair')?.condition ||
         'good',
     });
+    setIsSubmitting(false);
+    if (!stored) {
+      setSubmitError('The inspection could not be saved or queued. Your entry is unchanged.');
+      return;
+    }
     handleClose();
   };
 
@@ -293,12 +305,17 @@ export const NewInspectionModal = ({
                 variant="primary"
                 fullWidth
                 className="gap-1.5"
-                onClick={handleSubmit}
-                disabled={!canSubmit}
+                onClick={() => void handleSubmit()}
+                disabled={!canSubmit || isSubmitting}
               >
                 <Check className="w-4 h-4" />
-                Save Inspection
+                {isSubmitting ? 'Saving…' : 'Save Inspection'}
               </Button>
+              {submitError && (
+                <p className="mt-2 text-xs text-destructive" role="alert">
+                  {submitError}
+                </p>
+              )}
             </div>
           </motion.div>
         </div>

@@ -19,7 +19,7 @@ interface MessageThreadProps {
   contactName: string;
   contactRole: string;
   messages: ThreadMessage[];
-  onSend: (text: string, files: File[]) => void;
+  onSend: (text: string, files: File[]) => Promise<boolean>;
 }
 
 export const MessageThread = ({
@@ -30,10 +30,21 @@ export const MessageThread = ({
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [isSending, setIsSending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSend = () => {
-    if (!draft.trim() && files.length === 0) return;
-    onSend(draft.trim(), files);
+  const handleSend = async () => {
+    if ((!draft.trim() && files.length === 0) || isSending) return;
+    setIsSending(true);
+    setErrorMessage(null);
+    const stored = await onSend(draft.trim(), files);
+    setIsSending(false);
+    if (!stored) {
+      setErrorMessage(
+        'The message could not be sent or saved for syncing. Your draft is unchanged.'
+      );
+      return;
+    }
     setDraft('');
     setFiles([]);
   };
@@ -99,29 +110,37 @@ export const MessageThread = ({
         )}
       </div>
 
-      <div className="p-3 border-t border-border flex items-center gap-2">
-        <LegacyInput ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
-        >
-          <Paperclip className="w-4 h-4" />
-        </button>
-        <LegacyInput
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type a message..."
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          onClick={handleSend}
-          disabled={!draft.trim() && files.length === 0}
-          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+      <div className="border-t border-border p-3">
+        {errorMessage && <p className="mb-2 text-xs text-destructive">{errorMessage}</p>}
+        <div className="flex items-center gap-2">
+          <LegacyInput ref={fileInputRef} type="file" className="hidden" onChange={handleAttach} />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isSending}
+            aria-label="Attach a file"
+            className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
+          <LegacyInput
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
+            placeholder="Type a message..."
+            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="button"
+            onClick={() => void handleSend()}
+            disabled={isSending || (!draft.trim() && files.length === 0)}
+            aria-label={isSending ? 'Saving message' : 'Send message'}
+            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -17,7 +17,7 @@ interface NewVerificationModalProps {
   onClose: () => void;
   tasks: AgentTask[];
   defaultTaskId?: string;
-  onSubmit: (visit: Omit<VerificationVisit, 'id' | 'syncStatus'>) => void;
+  onSubmit: (visit: Omit<VerificationVisit, 'id' | 'syncStatus'>) => Promise<boolean>;
 }
 
 export const NewVerificationModal = ({
@@ -33,6 +33,8 @@ export const NewVerificationModal = ({
   const [idVerified, setIdVerified] = useState(false);
   const [addressConfirmed, setAddressConfirmed] = useState(false);
   const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const selectedTask = tasks.find((t) => t.id === taskId);
 
@@ -43,12 +45,15 @@ export const NewVerificationModal = ({
     setIdVerified(false);
     setAddressConfirmed(false);
     setNotes('');
+    setErrorMessage(null);
     onClose();
   };
 
-  const handleSubmit = () => {
-    if (!selectedTask) return;
-    onSubmit({
+  const handleSubmit = async () => {
+    if (!selectedTask || isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    const stored = await onSubmit({
       taskId: selectedTask.id,
       subjectName,
       subjectType,
@@ -59,6 +64,11 @@ export const NewVerificationModal = ({
       addressConfirmed,
       notes,
     });
+    setIsSubmitting(false);
+    if (!stored) {
+      setErrorMessage('The verification could not be saved or queued. Your entry is unchanged.');
+      return;
+    }
     handleClose();
   };
 
@@ -172,12 +182,17 @@ export const NewVerificationModal = ({
                 variant="primary"
                 fullWidth
                 className="gap-1.5"
-                onClick={handleSubmit}
-                disabled={!taskId || !subjectName}
+                onClick={() => void handleSubmit()}
+                disabled={!taskId || !subjectName || isSubmitting}
               >
                 <Check className="w-4 h-4" />
-                Save Verification
+                {isSubmitting ? 'Saving…' : 'Save Verification'}
               </Button>
+              {errorMessage && (
+                <p className="mt-2 text-xs text-destructive" role="alert">
+                  {errorMessage}
+                </p>
+              )}
             </div>
           </motion.div>
         </div>

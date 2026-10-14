@@ -90,16 +90,6 @@ export default function AgentMessagesPage() {
       });
       queryClient.invalidateQueries({ queryKey: agentKeys.conversations });
     },
-    onError: (_error, payload) => {
-      if (!activeId) return;
-      if (payload.files.length)
-        void enqueueAgentBinaryOperation(
-          'message',
-          { id: activeId, text: payload.text },
-          payload.files
-        );
-      else agentOfflineQueue.enqueue('message', { id: activeId, text: payload.text, files: [] });
-    },
   });
 
   const handleSelect = (id: string) => {
@@ -109,9 +99,23 @@ export default function AgentMessagesPage() {
   // Opened from a message notification.
   useOpenConversationFromUrl(conversationsData !== undefined, handleSelect);
 
-  const handleSend = (text: string, files: File[]) => {
-    if (!activeId) return;
-    send.mutate({ text, files });
+  const handleSend = async (text: string, files: File[]) => {
+    if (!activeId) return false;
+    try {
+      await send.mutateAsync({ text, files });
+      return true;
+    } catch {
+      try {
+        if (files.length) {
+          await enqueueAgentBinaryOperation('message', { id: activeId, text }, files);
+        } else {
+          agentOfflineQueue.enqueue('message', { id: activeId, text, files: [] });
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    }
   };
 
   const activeConversation = conversations.find((c) => c.id === activeId);
