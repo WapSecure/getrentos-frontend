@@ -13,6 +13,8 @@ import type {
   Vendor,
   LandlordMaintenanceRequest,
   RentIncreaseCheck,
+  RentSchedule,
+  RentScheduleInput,
   TenancyStanding,
   LandlordLead,
   LandlordViewingRequest,
@@ -608,6 +610,53 @@ export const landlordService = {
         method: 'PATCH',
         body: JSON.stringify({ rentAmount, leaseEnd }),
       })
+    );
+  },
+
+  async getRentSchedule(leaseId: string): Promise<ApiResponse<RentSchedule>> {
+    return safeCall(() => authFetch(`/landlord/leases/${leaseId}/rent-schedule`));
+  },
+
+  async startRentSchedule(
+    leaseId: string,
+    input: RentScheduleInput
+  ): Promise<ApiResponse<RentSchedule>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${leaseId}/rent-schedule`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  async updateRentSchedule(
+    leaseId: string,
+    input: RentScheduleInput
+  ): Promise<ApiResponse<RentSchedule>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${leaseId}/rent-schedule`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  async setRentSchedulePaused(
+    leaseId: string,
+    paused: boolean
+  ): Promise<ApiResponse<RentSchedule>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${leaseId}/rent-schedule/${paused ? 'pause' : 'resume'}`, {
+        method: 'POST',
+      })
+    );
+  },
+
+  async issueNextRentInvoice(
+    leaseId: string
+  ): Promise<ApiResponse<{ rentPaymentId: string; amount: number; dueDate: string }>> {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${leaseId}/rent-schedule/issue-next`, { method: 'POST' })
     );
   },
 

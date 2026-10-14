@@ -21,6 +21,9 @@ interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  periodStart?: string;
+  periodEnd?: string;
+  lines?: { category: string; label: string; amount: number }[];
 }
 
 interface PaymentsListProps {

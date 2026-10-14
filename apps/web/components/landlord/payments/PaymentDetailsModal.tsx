@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { RentPayment, EscrowStatus } from '@/types/landlord';
+import { InvoiceLines } from '@/components/shared/InvoiceLines';
 
 interface PaymentDetailsModalProps {
   payment: RentPayment | null;
@@ -56,6 +57,12 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                   {payment.paidDate ? ` • Paid ${formatDate(payment.paidDate)}` : ''}
                 </p>
               </div>
+
+              <InvoiceLines
+                lines={payment.lines}
+                periodStart={payment.periodStart}
+                periodEnd={payment.periodEnd}
+              />
 
               {payment.escrowStatus === 'frozen' ? (
                 <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">

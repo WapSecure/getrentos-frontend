@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, Download, FileCheck, PenLine, RefreshCcw, Send } from 'lucide-react';
+import { CalendarClock, Clock, Download, FileCheck, PenLine, RefreshCcw, Send } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useState } from 'react';
@@ -21,6 +21,7 @@ interface LeaseCardProps {
   onSendLease: (id: string) => void;
   onRequestRenewal: (lease: Lease) => void;
   onSignLease: (lease: Lease) => void;
+  onOpenSchedule?: (lease: Lease) => void;
 }
 
 export const LeaseCard = ({
@@ -29,6 +30,7 @@ export const LeaseCard = ({
   onSendLease,
   onRequestRenewal,
   onSignLease,
+  onOpenSchedule,
 }: LeaseCardProps) => {
   const status = leaseStatusBadges[lease.status];
   const remainingDays = daysUntil(lease.leaseEnd);
@@ -165,6 +167,18 @@ export const LeaseCard = ({
               <Download className="w-3.5 h-3.5" />
               {downloading ? 'Downloading…' : 'Download'}
             </Button>
+            {onOpenSchedule && (
+              <Button
+                variant="outline"
+                size="sm"
+                fullWidth
+                className="gap-1.5"
+                onClick={() => onOpenSchedule(lease)}
+              >
+                <CalendarClock className="w-3.5 h-3.5" />
+                Billing
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
