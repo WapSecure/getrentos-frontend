@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { Building2, CheckCircle2, Circle, Sparkles } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -29,7 +30,7 @@ const TIER_LABEL: Record<string, string> = {
 };
 
 const STATUS_META: Record<string, { label: string; variant: BadgeVariant }> = {
-  PENDING_OWNER: { label: 'Opted in', variant: 'warning' },
+  PENDING_OWNER: { label: 'Accepted by owner', variant: 'warning' },
   PENDING_OPS: { label: 'Signed, awaiting ops', variant: 'warning' },
 };
 
@@ -75,6 +76,8 @@ const ManagedMandateCard = ({
     onError: (err: Error) => setError(err.message || 'Could not activate the engagement.'),
   });
 
+  const checklist = mandate.activationChecklist ?? [];
+  const ready = checklist.every((c) => c.done);
   const status = STATUS_META[mandate.status] ?? {
     label: mandate.status,
     variant: 'neutral' as const,
@@ -98,7 +101,7 @@ const ManagedMandateCard = ({
             <h3 className="font-semibold text-foreground">{mandate.propertyTitle ?? 'Property'}</h3>
             <p className="mt-0.5 text-sm text-muted-foreground">
               Owner: <span className="text-foreground">{mandate.ownerName ?? 'unknown'}</span> ·
-              opted in {formatDate(mandate.createdAt)}
+              accepted {formatDate(mandate.createdAt)}
             </p>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {mandate.servicingTier ? TIER_LABEL[mandate.servicingTier] : 'GetRentos Managed'}
@@ -107,6 +110,40 @@ const ManagedMandateCard = ({
         </div>
         <Badge variant={status.variant}>{status.label}</Badge>
       </div>
+
+      {checklist.length > 0 && (
+        <div className="mt-4 border-t border-border pt-4">
+          <p className="text-sm font-medium text-foreground">
+            Activation checklist{' '}
+            <span className="text-muted-foreground">
+              ({checklist.filter((c) => c.done).length}/{checklist.length})
+            </span>
+          </p>
+          <ul className="mt-2 space-y-1">
+            {checklist.map((c) => (
+              <li key={c.key} className="flex items-start gap-2 text-sm">
+                {c.done ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
+                ) : (
+                  <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                )}
+                <span className={c.done ? 'text-foreground' : 'text-muted-foreground'}>
+                  {c.label}
+                  {!c.done && c.detail && <span className="block text-xs">{c.detail}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {!ready && (
+            <Link
+              href="/admin/managed-intakes"
+              className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+            >
+              Complete it in Managed intake →
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -135,7 +172,7 @@ const ManagedMandateCard = ({
         </div>
         <Button
           isLoading={activate.isPending}
-          disabled={!managerUserId}
+          disabled={!managerUserId || !ready}
           onClick={() => activate.mutate()}
         >
           Assign &amp; activate
@@ -764,8 +801,8 @@ export default function AdminManagedMandatesPage() {
           GetRentos Managed
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Turn on owner opt-ins and manage live engagements, including assigning, activating and
-          reassigning a portfolio manager, one at a time or several at once.
+          Activate accepted engagements and manage live engagements, including assigning, activating
+          and reassigning a portfolio manager, one at a time or several at once.
         </p>
       </div>
 
@@ -802,7 +839,7 @@ export default function AdminManagedMandatesPage() {
         <EmptyState
           icon={Sparkles}
           title="Nothing waiting"
-          description="No GetRentos Managed opt-ins need activating right now."
+          description="No accepted GetRentos Managed engagements need activating right now."
         />
       ) : (
         <>
@@ -811,7 +848,7 @@ export default function AdminManagedMandatesPage() {
             <Tabs value={view} onValueChange={(v) => setView(v as View)}>
               <TabsList>
                 <TabsTrigger value="all">All ({counts.all})</TabsTrigger>
-                <TabsTrigger value="PENDING_OWNER">Opted in ({counts.PENDING_OWNER})</TabsTrigger>
+                <TabsTrigger value="PENDING_OWNER">Accepted ({counts.PENDING_OWNER})</TabsTrigger>
                 <TabsTrigger value="PENDING_OPS">Awaiting ops ({counts.PENDING_OPS})</TabsTrigger>
                 <TabsTrigger value="stale">Stale ({counts.stale})</TabsTrigger>
               </TabsList>
@@ -911,7 +948,7 @@ export default function AdminManagedMandatesPage() {
             <EmptyState
               icon={Sparkles}
               title="Nothing in this view"
-              description="No opt-ins match the current filters."
+              description="No engagements match the current filters."
             />
           ) : (
             <div className="space-y-3">
