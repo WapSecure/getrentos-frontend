@@ -55,6 +55,68 @@ export interface RequestTransferInput {
   acknowledgeOpenItems?: boolean;
 }
 
+export type DepositTreatment = 'HANDED_TO_INCOMING' | 'RETURNED_TO_TENANT' | 'PAID_TO_GETRENTOS';
+
+export interface HandoverSnapshot {
+  asOf: string;
+  property: { id: string; name: string; address: string };
+  outgoing: string | null;
+  incoming: string;
+  leases: {
+    leaseId: string;
+    unit: string;
+    tenant: string;
+    rent: number;
+    rentPeriod: string | null;
+    start: string;
+    end: string;
+    arrears: number;
+    heldForOwner: number;
+    credit: number;
+    deposit: { id: string; amount: number; status: string; heldByGetRentos: boolean } | null;
+  }[];
+  totals: {
+    arrears: number;
+    heldForOwner: number;
+    credit: number;
+    depositsWithGetRentos: number;
+    depositsOutside: number;
+  };
+  ownerMoney: { heldByGetRentos: number; heldByOutgoingFirm: number | null };
+  openWork: { id: string; category: string; description: string; status: string }[];
+  documents: { id: string; type: string; name: string | null }[];
+  inspections: { id: string; type: string; status: string; date: string | null }[];
+  openItems: TransferOpenItem[];
+}
+
+export interface Handover {
+  transferId: string;
+  status: ManagementTransfer['status'];
+  required: { outgoing: boolean; incoming: boolean };
+  viewer?: { isOwner: boolean; isOutgoing: boolean; isIncoming: boolean };
+  pack: {
+    hash: string;
+    generatedAt: string;
+    snapshot: HandoverSnapshot;
+    depositAttestations:
+      | {
+          depositHoldId: string;
+          amount: number;
+          treatment: DepositTreatment;
+          note: string | null;
+        }[]
+      | null;
+    keysDeclaration: string | null;
+    outgoingSignedAt: string | null;
+    ownerSignedAt: string | null;
+    incomingSignedAt: string | null;
+    disputeReason: string | null;
+    disputedAt: string | null;
+    disputeResolution: string | null;
+    resolvedAt: string | null;
+  } | null;
+}
+
 export const managementTransferService = {
   preview: (propertyId: string): Promise<ApiResponse<TransferPreview>> =>
     safeCall(() =>
@@ -74,6 +136,38 @@ export const managementTransferService = {
     safeCall(() => authFetch<ManagementTransfer[]>('/management-transfers')),
   managing: (): Promise<ApiResponse<ManagementTransfer[]>> =>
     safeCall(() => authFetch<ManagementTransfer[]>('/management-transfers/managing')),
+  handover: (id: string): Promise<ApiResponse<Handover>> =>
+    safeCall(() => authFetch<Handover>(`/management-transfers/${id}/handover`)),
+  exportHandover: (id: string): Promise<ApiResponse<unknown>> =>
+    safeCall(() => authFetch<unknown>(`/management-transfers/${id}/handover/export`)),
+  signOutgoing: (
+    id: string,
+    input: {
+      hash: string;
+      keysDeclaration: string;
+      deposits: { depositHoldId: string; treatment: DepositTreatment; note?: string }[];
+    }
+  ): Promise<ApiResponse<Handover>> =>
+    safeCall(() =>
+      authFetch<Handover>(`/management-transfers/${id}/handover/sign-outgoing`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    ),
+  sign: (id: string, side: 'owner' | 'incoming', hash: string): Promise<ApiResponse<Handover>> =>
+    safeCall(() =>
+      authFetch<Handover>(`/management-transfers/${id}/handover/sign-${side}`, {
+        method: 'POST',
+        body: JSON.stringify({ hash }),
+      })
+    ),
+  dispute: (id: string, reason: string): Promise<ApiResponse<Handover>> =>
+    safeCall(() =>
+      authFetch<Handover>(`/management-transfers/${id}/handover/dispute`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    ),
   cancel: (id: string): Promise<ApiResponse<ManagementTransfer>> =>
     safeCall(() =>
       authFetch<ManagementTransfer>(`/management-transfers/${id}/cancel`, { method: 'POST' })

@@ -14,6 +14,7 @@ import {
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
+import { HandoverPanel } from './HandoverPanel';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import {
   adminManagementTransfersService,
@@ -127,6 +128,9 @@ export default function ManagerChangesPage() {
                     )}
                   </div>
                 </div>
+                {['SWITCHED', 'DISPUTED', 'COMPLETED'].includes(t.status) && (
+                  <HandoverPanel transferId={t.id} canOperate={canOperate} />
+                )}
                 {t.switchLog.length > 0 && (
                   <ul className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
                     {t.switchLog.map((l) => (
