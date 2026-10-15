@@ -208,6 +208,8 @@ export interface LandNextDue {
 }
 
 export interface LandPurchaseSummary {
+  /** The master land property the estate sits on. */
+  propertyId?: string;
   id: string;
   reference: string;
   status: LandPurchaseStatus;

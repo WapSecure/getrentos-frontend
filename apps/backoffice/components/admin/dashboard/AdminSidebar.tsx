@@ -133,6 +133,12 @@ const navItems: NavItem[] = [
     permission: 'sales.view',
   },
   {
+    label: 'Land Disputes',
+    href: '/admin/land/disputes',
+    icon: Gavel,
+    permission: 'verifications.review',
+  },
+  {
     label: 'Shortlets',
     href: ROUTES.ADMIN_SHORTLETS,
     icon: BedDouble,

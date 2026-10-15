@@ -9,6 +9,8 @@ import { LandAvailabilityGate } from '@/components/land/availability/LandAvailab
 /** Public land pages follow the marketplace; the reviewer's desk follows owner onboarding. */
 export default function LandLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  // A party to a land dispute must always reach the case, whatever LAND_MODE says.
+  if (pathname?.startsWith('/land/disputes')) return <>{children}</>;
   const audience = pathname?.startsWith('/land/reviews') ? 'owners' : 'marketplace';
   return (
     <LandAvailabilityGate
