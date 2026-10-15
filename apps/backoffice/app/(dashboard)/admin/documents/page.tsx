@@ -85,7 +85,9 @@ export default function AdminDocumentsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'documents'] }),
   });
 
-  const handleUpload = (data: UploadedDocumentData) => uploadMutation.mutate(data);
+  const handleUpload = async (data: UploadedDocumentData) => {
+    await uploadMutation.mutateAsync(data);
+  };
 
   const handleDownload = async (id: string) => {
     const response = await adminService.getDocumentDownloadUrl(id);

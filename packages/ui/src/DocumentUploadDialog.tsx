@@ -64,7 +64,8 @@ export const DocumentUploadDialog = ({
   };
 
   const handleClose = (next: boolean) => {
-    if (!isUploading) reset();
+    if (isUploading) return;
+    reset();
     onOpenChange(next);
   };
 

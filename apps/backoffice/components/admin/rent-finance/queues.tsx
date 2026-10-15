@@ -168,7 +168,6 @@ export function PaymentsQueue() {
     if (!pendingAction || processingKey) return;
     const { type, payment } = pendingAction;
     const actionKey = `${type}:${payment.id}`;
-    setPendingAction(null);
     setProcessingKey(actionKey);
     try {
       if (type === 'release') {
@@ -183,6 +182,8 @@ export function PaymentsQueue() {
         flag: `Payment for ${payment.propertyTitle} was moved to manual review.`,
         clear: `Manual review was cleared for ${payment.propertyTitle}.`,
       }[type];
+      setPendingAction(null);
+      setReason('');
       setToast({ message: successMessage, variant: 'success' });
       await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
     } catch (error) {
@@ -329,7 +330,7 @@ export function PaymentsQueue() {
       <ConfirmDialog
         open={pendingAction !== null}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !processingKey) {
             setPendingAction(null);
             setReason('');
           }
@@ -337,6 +338,7 @@ export function PaymentsQueue() {
         title={actionCopy?.title ?? 'Confirm finance action'}
         description={actionCopy?.description ?? ''}
         confirmLabel={actionCopy?.label ?? 'Confirm'}
+        isLoading={processingKey !== null}
         onConfirm={() => void executeAction()}
         promptLabel={actionCopy?.promptLabel}
         promptPlaceholder={actionCopy?.promptPlaceholder}
@@ -426,7 +428,6 @@ export function StatementsQueue() {
     if (!pendingAction || processingKey) return;
     const { type, statement } = pendingAction;
     const actionKey = `${type}:${statement.id}`;
-    setPendingAction(null);
     setProcessingKey(actionKey);
     try {
       if (type === 'issue') {
@@ -434,6 +435,7 @@ export function StatementsQueue() {
       } else {
         await unwrap(adminRentFinanceService.retryStatementPayout(statement.id));
       }
+      setPendingAction(null);
       setToast({
         message:
           type === 'issue'
@@ -562,10 +564,11 @@ export function StatementsQueue() {
       <RentFinanceQueuePage config={config} />
       <ConfirmDialog
         open={pendingAction !== null}
-        onOpenChange={(open) => !open && setPendingAction(null)}
+        onOpenChange={(open) => !open && !processingKey && setPendingAction(null)}
         title={actionCopy?.title ?? 'Confirm finance action'}
         description={actionCopy?.description ?? ''}
         confirmLabel={actionCopy?.label ?? 'Confirm'}
+        isLoading={processingKey !== null}
         onConfirm={() => void executeAction()}
       />
       {generating && (
@@ -670,7 +673,6 @@ export function PayoutAccountsQueue() {
     if (!pendingAction || processingKey) return;
     const { type, account } = pendingAction;
     const actionKey = `${type}:${account.id}`;
-    setPendingAction(null);
     setProcessingKey(actionKey);
     try {
       if (type === 'block') {
@@ -678,6 +680,8 @@ export function PayoutAccountsQueue() {
       } else {
         await unwrap(adminRentFinanceService.unblockPayoutAccount(account.id, reason.trim()));
       }
+      setPendingAction(null);
+      setReason('');
       setToast({
         message:
           type === 'block'
@@ -795,7 +799,7 @@ export function PayoutAccountsQueue() {
       <ConfirmDialog
         open={pendingAction !== null}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !processingKey) {
             setPendingAction(null);
             setReason('');
           }
@@ -803,6 +807,7 @@ export function PayoutAccountsQueue() {
         title={actionCopy?.title ?? 'Confirm finance action'}
         description={actionCopy?.description ?? ''}
         confirmLabel={actionCopy?.label ?? 'Confirm'}
+        isLoading={processingKey !== null}
         onConfirm={() => void executeAction()}
         promptLabel="Administrative reason"
         promptValue={reason}
