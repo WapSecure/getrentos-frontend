@@ -154,9 +154,12 @@ export const CancelPurchaseCard = ({
   const [reason, setReason] = useState('');
   if (!CANCELLABLE_PURCHASE_STATUSES.includes(purchase.status)) return null;
   const preview = refundPreview(purchase);
+  // A failed condition precedent is the contract's own exit: everything back.
+  const inFull = Boolean(purchase.canCancelInFull);
 
-  const description =
-    preview.principalPaid > 0
+  const description = inFull
+    ? `A condition of this purchase was not met, so you receive everything you have paid (${formatCurrency(purchase.amountPaid)}), late fees included, with no cancellation charge. The plot goes back on sale and this cannot be undone.`
+    : preview.principalPaid > 0
       ? `You have paid ${formatCurrency(preview.principalPaid)} towards the price. The plan keeps ${bpsToPercent(preview.chargeBps)} (${formatCurrency(preview.charge)}) as a forfeiture charge, so about ${formatCurrency(preview.refund)} would be refunded${preview.lateFeesPaid > 0 ? `; the ${formatCurrency(preview.lateFeesPaid)} paid in late fees is not refundable` : ''}. The plot goes back on sale and this cannot be undone.`
       : 'Nothing has been paid yet, so nothing is forfeited. The plot goes back on sale and this cannot be undone.';
 
@@ -168,12 +171,22 @@ export const CancelPurchaseCard = ({
       <h2 id="cancel-heading" className="font-semibold text-foreground">
         Cancel purchase
       </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Refund if you cancel now:{' '}
-        <span className="font-semibold text-foreground">{formatCurrency(preview.refund)}</span>
-        {preview.charge > 0 && <> after a {formatCurrency(preview.charge)} forfeiture</>}. Late fees
-        are not refunded.
-      </p>
+      {inFull ? (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Refund if you cancel now:{' '}
+          <span className="font-semibold text-foreground">
+            {formatCurrency(purchase.amountPaid)}
+          </span>
+          , everything you paid, because a condition was not met.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Refund if you cancel now:{' '}
+          <span className="font-semibold text-foreground">{formatCurrency(preview.refund)}</span>
+          {preview.charge > 0 && <> after a {formatCurrency(preview.charge)} forfeiture</>}. Late
+          fees are not refunded.
+        </p>
+      )}
       <Button
         className="mt-3"
         variant="outline"

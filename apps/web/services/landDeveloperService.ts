@@ -159,6 +159,19 @@ export const landDeveloperService = {
       )
     ),
 
+  /** Mark a condition precedent met (layout approval, plot identified on site). */
+  deliverCondition: (
+    purchaseId: string,
+    key: string,
+    input: { note?: string; documentId?: string }
+  ) =>
+    safeCall(() =>
+      authFetch<LandPurchaseDetail>(
+        `/owner/land/purchases/${purchaseId}/conditions/${encodeURIComponent(key)}/deliver`,
+        json('POST', input)
+      )
+    ),
+
   deliverPurchaseMilestone: (purchaseId: string, key: string, input: LandMilestoneDeliverInput) =>
     safeCall(() =>
       authFetch<LandPurchaseDetail>(

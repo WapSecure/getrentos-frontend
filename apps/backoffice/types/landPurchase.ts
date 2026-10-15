@@ -133,7 +133,33 @@ export type LandReleasePayoutStatus =
   | 'PAID'
   | 'FAILED';
 
+/** A condition precedent on a plot purchase (blueprint §9.3). */
+export interface LandClosingCondition {
+  key: string;
+  label: string;
+  status: 'PENDING' | 'DELIVERED' | 'SATISFIED' | 'WAIVED' | 'FAILED';
+  deadline?: string;
+  failed: boolean;
+  basis?: string;
+  remedy: string;
+  deliveredByDeveloper: boolean;
+  deliveredAt?: string;
+  deliveredNote?: string;
+  decidedAt?: string;
+  note?: string;
+}
+
+export interface LandClosingChecklistItem {
+  key: string;
+  label: string;
+  state: 'DONE' | 'OPEN' | 'BLOCKED';
+  detail?: string;
+}
+
 export interface LandPurchaseDetail extends LandPurchaseSummary {
+  conditions?: LandClosingCondition[];
+  closingChecklist?: LandClosingChecklistItem[];
+  canCancelInFull?: boolean;
   terms: LandPurchaseTerms;
   feeBreakdown: {
     documentationFee: number;

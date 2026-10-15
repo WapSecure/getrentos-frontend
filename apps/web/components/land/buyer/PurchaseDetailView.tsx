@@ -23,6 +23,7 @@ import {
   summariseSchedule,
 } from './landSaleLogic';
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
+import { ConditionsPanel } from '../closing/ConditionsPanel';
 
 type ToastState = { message: string; variant: 'success' | 'error' | 'info' } | null;
 
@@ -120,6 +121,19 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
     onSettled: () => setMilestoneKey(null),
   });
 
+  const [conditionKey, setConditionKey] = useState<string | null>(null);
+  const settleCondition = useMutation({
+    mutationFn: ({ key, how }: { key: string; how: 'confirm' | 'waive' }) =>
+      unwrap(landBuyerService.settleCondition(purchaseId, key, how)),
+    onMutate: ({ key }) => setConditionKey(key),
+    onSuccess: (next, { how }) => {
+      settle(next);
+      notify(how === 'confirm' ? 'Condition confirmed.' : 'Condition waived.', 'success');
+    },
+    onError: (reason: Error) => notify(reason.message, 'error'),
+    onSettled: () => setConditionKey(null),
+  });
+
   const cancel = useMutation({
     mutationFn: (reason: string) => unwrap(landBuyerService.cancelPurchase(purchaseId, reason)),
     onSuccess: (next) => {
@@ -209,6 +223,15 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           {bpsToPercent(purchase.terms.revocationChargeBps)}.
         </p>
       )}
+      {purchase.canCancelInFull && (
+        <p
+          role="alert"
+          className="rounded-xl border border-warning/40 bg-warning/5 p-4 text-sm text-foreground"
+        >
+          A condition of this purchase was not met. You may cancel and receive everything you have
+          paid, with no cancellation charge, or keep the purchase. See the Conditions tab.
+        </p>
+      )}
       {ended && (
         <p className="rounded-xl border border-border bg-secondary/40 p-4 text-sm text-foreground">
           {purchase.status === 'REVOKED'
@@ -264,6 +287,9 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           <Tabs defaultValue="schedule">
             <TabsList>
               <TabsTrigger value="schedule">Schedule</TabsTrigger>
+              {(purchase.conditions?.length ?? 0) > 0 && (
+                <TabsTrigger value="conditions">Conditions</TabsTrigger>
+              )}
               <TabsTrigger value="conveyance">Conveyance</TabsTrigger>
               <TabsTrigger value="statement">Statement</TabsTrigger>
             </TabsList>
@@ -274,6 +300,16 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
                 {bpsToPercent(purchase.terms.lateFeeBps)} late fee. Default after{' '}
                 {purchase.terms.defaultAfterDays} days overdue.
               </p>
+            </TabsContent>
+            <TabsContent value="conditions" className="mt-4">
+              <ConditionsPanel
+                conditions={purchase.conditions ?? []}
+                checklist={purchase.closingChecklist}
+                role="buyer"
+                busyKey={conditionKey}
+                onConfirm={(key) => settleCondition.mutate({ key, how: 'confirm' })}
+                onWaive={(key) => settleCondition.mutate({ key, how: 'waive' })}
+              />
             </TabsContent>
             <TabsContent value="conveyance" className="mt-4 space-y-4">
               <p className="flex gap-2 rounded-xl bg-info/5 p-3 text-sm text-muted-foreground">

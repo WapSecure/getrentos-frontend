@@ -23,6 +23,7 @@ import { LandPurchasePayments } from '@/components/admin/land/purchases/LandPurc
 import { LandPurchaseSchedule } from '@/components/admin/land/purchases/LandPurchaseSchedule';
 import { LandPurchaseStatusBadge } from '@/components/admin/land/purchases/LandPurchaseStatusBadge';
 import { LandRefundPanel } from '@/components/admin/land/purchases/LandRefundPanel';
+import { LandPurchaseConditions } from '@/components/admin/land/purchases/LandPurchaseConditions';
 
 const ENDED = new Set(['REVOKED', 'CANCELLED', 'COMPLETED']);
 
@@ -73,6 +74,26 @@ export default function AdminLandPurchaseDetailPage() {
       unwrap(adminLandPurchaseService.settleRefund(purchaseId, amount, note)),
     onSuccess: (updated) => applyUpdate(updated, 'Manual refund recorded; the buyer was notified.'),
     onError: (error) => reportError(error, 'Could not record the settlement.'),
+  });
+
+  const decideCondition = useMutation({
+    mutationFn: ({
+      key,
+      status,
+      note,
+    }: {
+      key: string;
+      status: 'SATISFIED' | 'FAILED';
+      note: string;
+    }) => unwrap(adminLandPurchaseService.decideCondition(purchaseId, key, status, note)),
+    onSuccess: (updated, { status }) =>
+      applyUpdate(
+        updated,
+        status === 'SATISFIED'
+          ? 'Condition marked met.'
+          : 'Condition marked not met; the buyer may cancel in full.'
+      ),
+    onError: (error) => reportError(error, 'Could not record that decision.'),
   });
 
   const approvePayout = useMutation({
@@ -205,6 +226,14 @@ export default function AdminLandPurchaseDetailPage() {
             onSettle={(amount, note) => settleRefund.mutateAsync({ amount, note })}
           />
         )}
+
+        <LandPurchaseConditions
+          conditions={purchase.conditions ?? []}
+          checklist={purchase.closingChecklist}
+          canDecide={canWaiveMilestone}
+          busyKey={decideCondition.isPending ? (decideCondition.variables?.key ?? null) : null}
+          onDecide={(key, status, note) => decideCondition.mutate({ key, status, note })}
+        />
 
         <LandCaseSection title="Contract">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
