@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
@@ -120,6 +121,17 @@ export const StartPurchaseDialog = ({
                 ))}
               </fieldset>
             )}
+
+            <p className="mt-4 text-sm">
+              <Link
+                href={`/land/dossier/estate/${reservation.layoutId}?plot=${reservation.plotId}${chosen ? `&plan=${chosen.id}` : ''}`}
+                target="_blank"
+                className="font-medium text-primary hover:underline"
+              >
+                Read the decision dossier and all-in cost
+              </Link>{' '}
+              <span className="text-muted-foreground">(opens in a new tab)</span>
+            </p>
 
             {notVerified.length > 0 && (
               <section className="mt-5 rounded-2xl border border-warning/40 bg-warning/5 p-4">
