@@ -33,6 +33,7 @@ import {
   FileSignature,
   CircleAlert,
   RotateCcw,
+  BookOpenCheck,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -105,6 +106,12 @@ const navItems: NavItem[] = [
     label: 'Credit Refunds',
     href: '/admin/credit-refunds',
     icon: RotateCcw,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Rent Journal',
+    href: '/admin/rent-journal',
+    icon: BookOpenCheck,
     permission: 'rentfinance.view',
   },
   {
