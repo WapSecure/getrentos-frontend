@@ -36,7 +36,7 @@ interface DisputeCaseModalProps {
   onReopen: (id: string) => void;
   onEscalate: (id: string) => void;
   onResolve: (id: string, resolution: string | undefined, outcome: DisputeResolveOutcome) => void;
-  onSendMessage: (id: string, text: string) => void;
+  onSendMessage: (id: string, text: string) => Promise<boolean>;
   /** Uploads the file as this case's evidence. Gated by `canAttachEvidence`. */
   onAttachEvidence?: (id: string, file: File, note?: string) => void;
   /**
@@ -78,6 +78,7 @@ export const DisputeCaseModal = ({
   const [messageText, setMessageText] = useState('');
   const [resolutionText, setResolutionText] = useState('');
   const [outcome, setOutcome] = useState<DisputeResolveOutcome>('none');
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   if (!dispute) return null;
 
@@ -96,9 +97,14 @@ export const DisputeCaseModal = ({
       ]
     : [{ value: 'none', label: 'No money move (escrow not frozen)' }];
 
-  const handleSend = () => {
-    if (!messageText.trim()) return;
-    onSendMessage(dispute.id, messageText);
+  const handleSend = async () => {
+    if (!messageText.trim() || isSendingMessage) return;
+    setMessageError(null);
+    const sent = await onSendMessage(dispute.id, messageText.trim());
+    if (!sent) {
+      setMessageError('The message could not be sent. Your draft is unchanged.');
+      return;
+    }
     setMessageText('');
   };
 
@@ -375,22 +381,25 @@ export const DisputeCaseModal = ({
               </div>
             </div>
           )}
-          <div className="flex gap-2">
-            <LegacyInput
-              type="text"
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Send a message to both parties..."
-              className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <Button
-              variant="secondary"
-              onClick={handleSend}
-              disabled={!messageText.trim() || isSendingMessage}
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+          <div>
+            {messageError && <p className="mb-2 text-xs text-destructive">{messageError}</p>}
+            <div className="flex gap-2">
+              <LegacyInput
+                type="text"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
+                placeholder="Send a message to both parties..."
+                className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <Button
+                variant="secondary"
+                onClick={() => void handleSend()}
+                disabled={!messageText.trim() || isSendingMessage}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

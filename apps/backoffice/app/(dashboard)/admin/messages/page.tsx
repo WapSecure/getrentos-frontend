@@ -94,9 +94,14 @@ export default function AdminMessagesPage() {
     markReadMutation.mutate(id);
   };
 
-  const handleSend = (text: string) => {
-    if (!activeId) return;
-    sendMutation.mutate({ id: activeId, text });
+  const handleSend = async (text: string) => {
+    if (!activeId) return false;
+    try {
+      await sendMutation.mutateAsync({ id: activeId, text });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const activeConversation = conversations.find((c) => c.id === activeId);

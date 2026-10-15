@@ -19,7 +19,7 @@ interface MessageThreadProps {
   contactName: string;
   contactRole: string;
   messages: ThreadMessage[];
-  onSend: (text: string) => void;
+  onSend: (text: string) => Promise<boolean>;
   status?: string;
   category?: string | null;
   source?: string | null;
@@ -49,11 +49,17 @@ export const MessageThread = ({
   onRetry,
 }: MessageThreadProps) => {
   const [draft, setDraft] = useState('');
+  const [sendError, setSendError] = useState<string | null>(null);
   const isResolved = status === 'RESOLVED';
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!draft.trim() || sending || isResolved || loading || error) return;
-    onSend(draft.trim());
+    setSendError(null);
+    const sent = await onSend(draft.trim());
+    if (!sent) {
+      setSendError('The message could not be sent. Your draft is unchanged.');
+      return;
+    }
     setDraft('');
   };
 
@@ -160,28 +166,31 @@ export const MessageThread = ({
         )}
       </div>
 
-      <div className="p-3 border-t border-border flex items-center gap-2">
-        <LegacyInput
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSend();
-          }}
-          placeholder={isResolved ? 'This conversation is resolved' : 'Type a message...'}
-          aria-label="Message"
-          disabled={isResolved || sending || loading || error}
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!draft.trim() || sending || isResolved || loading || error}
-          aria-label={sending ? 'Sending message' : 'Send message'}
-          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-        >
-          <Send className={`w-4 h-4 ${sending ? 'animate-pulse' : ''}`} aria-hidden="true" />
-        </button>
+      <div className="border-t border-border p-3">
+        {sendError && <p className="mb-2 text-xs text-destructive">{sendError}</p>}
+        <div className="flex items-center gap-2">
+          <LegacyInput
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) void handleSend();
+            }}
+            placeholder={isResolved ? 'This conversation is resolved' : 'Type a message...'}
+            aria-label="Message"
+            disabled={isResolved || sending || loading || error}
+            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <button
+            type="button"
+            onClick={() => void handleSend()}
+            disabled={!draft.trim() || sending || isResolved || loading || error}
+            aria-label={sending ? 'Sending message' : 'Send message'}
+            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+          >
+            <Send className={`w-4 h-4 ${sending ? 'animate-pulse' : ''}`} aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </div>
   );

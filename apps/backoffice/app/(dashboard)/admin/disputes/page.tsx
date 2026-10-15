@@ -157,7 +157,14 @@ export default function AdminDisputesPage() {
   const handleStartReview = (id: string) => reviewMutation.mutate(id);
   const handleReopen = (id: string) => reopenMutation.mutate(id);
   const handleEscalate = (id: string) => escalateMutation.mutate(id);
-  const handleSendMessage = (id: string, text: string) => sendMessageMutation.mutate({ id, text });
+  const handleSendMessage = async (id: string, text: string) => {
+    try {
+      await sendMessageMutation.mutateAsync({ id, text });
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   const attachEvidenceMutation = useMutation({
     meta: { showGlobalError: true },
