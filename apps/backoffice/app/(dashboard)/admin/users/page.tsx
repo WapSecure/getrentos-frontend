@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
-import { ConfirmDialog, DataTable, PageErrorState, type Column } from '@getrentos/ui';
+import { ConfirmDialog, DataTable, PageErrorState, Toast, type Column } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
@@ -55,6 +55,7 @@ export default function AdminUsersPage() {
     user: PlatformUser;
     status: Exclude<UserAccountStatus, 'pending'>;
   } | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,10 +90,14 @@ export default function AdminUsersPage() {
   const changeStatusMutation = useMutation({
     mutationFn: ({ userId, status }: { userId: string; status: UserAccountStatus }) =>
       unwrap(adminService.updateUserStatus(userId, status)),
+    onMutate: () => setActionError(null),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      setPendingStatus(null);
       setActiveUser(null);
     },
+    onError: (error) =>
+      setActionError(error instanceof Error ? error.message : 'Could not update account status.'),
   });
 
   const handleChangeStatus = (userId: string, status: UserAccountStatus) => {
@@ -104,10 +109,13 @@ export default function AdminUsersPage() {
   const changeSubscriptionMutation = useMutation({
     mutationFn: ({ userId, tier }: { userId: string; tier: PlanTier }) =>
       unwrap(adminService.updateUserSubscription(userId, tier)),
+    onMutate: () => setActionError(null),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setActiveUser(updated);
     },
+    onError: (error) =>
+      setActionError(error instanceof Error ? error.message : 'Could not update the subscription.'),
   });
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
@@ -304,6 +312,7 @@ export default function AdminUsersPage() {
               ? 'Suspend account'
               : 'Reactivate account'
         }
+        isLoading={changeStatusMutation.isPending}
         onConfirm={() => {
           if (pendingStatus) {
             changeStatusMutation.mutate({
@@ -313,6 +322,9 @@ export default function AdminUsersPage() {
           }
         }}
       />
+      {actionError && (
+        <Toast message={actionError} variant="error" onClose={() => setActionError(null)} />
+      )}
     </>
   );
 }

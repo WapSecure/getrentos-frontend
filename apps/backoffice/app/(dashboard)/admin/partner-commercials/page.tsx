@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   NumberInput,
   PageErrorState,
@@ -25,6 +26,7 @@ export default function PartnerCommercialsPage() {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [payoutTarget, setPayoutTarget] = useState<PartnerCommercialRow | null>(null);
 
   const {
     data: partners = [],
@@ -50,6 +52,7 @@ export default function PartnerCommercialsPage() {
     mutationFn: (organizationId: string) =>
       unwrap(adminPartnerCommercialsService.requestPayout(organizationId)),
     onSuccess: (p) => {
+      setPayoutTarget(null);
       queryClient.invalidateQueries({ queryKey: KEY });
       setToast({
         message:
@@ -140,7 +143,7 @@ export default function PartnerCommercialsPage() {
                         size="sm"
                         variant="outline"
                         disabled={payout.isPending}
-                        onClick={() => payout.mutate(p.organizationId)}
+                        onClick={() => setPayoutTarget(p)}
                       >
                         Pay out {formatCurrency(p.earnedPartnerShare)}
                       </Button>
@@ -156,6 +159,19 @@ export default function PartnerCommercialsPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <ConfirmDialog
+        open={payoutTarget !== null}
+        onOpenChange={(open) => !open && setPayoutTarget(null)}
+        title="Pay this partner?"
+        description={
+          payoutTarget
+            ? `${formatCurrency(payoutTarget.earnedPartnerShare)} in accrued earnings will be sent to ${payoutTarget.name}. The server will exclude statements already included in another payout.`
+            : ''
+        }
+        confirmLabel="Send payout"
+        isLoading={payout.isPending}
+        onConfirm={() => payoutTarget && payout.mutate(payoutTarget.organizationId)}
+      />
     </div>
   );
 }
