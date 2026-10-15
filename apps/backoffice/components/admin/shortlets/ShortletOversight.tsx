@@ -590,6 +590,8 @@ export const ShortletOversight = () => {
           : adminShortletService.escalateDispute(activeDispute!.id)
       ),
     onSuccess: (_, input) => {
+      setPendingDisputeAction(null);
+      setDisputeResolution('');
       setActiveDispute(null);
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'disputes'] });
       setToast({
@@ -617,6 +619,7 @@ export const ShortletOversight = () => {
                 : adminShortletService.approveListing(input.listingId)
       ),
     onSuccess: (_, input) => {
+      setPendingModeration(null);
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets'] });
       const messages: Record<string, string> = {
         pause: 'Listing paused. It no longer appears publicly.',
@@ -1292,6 +1295,7 @@ export const ShortletOversight = () => {
             : 'This moves the dispute to the escalated queue for higher-level review.'
         }
         confirmLabel={pendingDisputeAction === 'resolve' ? 'Resolve dispute' : 'Escalate'}
+        isLoading={disputeAction.isPending}
         onConfirm={() => {
           if (pendingDisputeAction) {
             disputeAction.mutate({
@@ -1335,6 +1339,7 @@ export const ShortletOversight = () => {
             : ''
         }
         confirmLabel="Retry payout"
+        isLoading={retryPayout.isPending}
         onConfirm={() => pendingRetry && retryPayout.mutate(pendingRetry.id)}
       />
 
@@ -1348,6 +1353,7 @@ export const ShortletOversight = () => {
             : ''
         }
         confirmLabel="Initiate payout"
+        isLoading={requestHostPayout.isPending}
         onConfirm={() => pendingHostPayout && requestHostPayout.mutate(pendingHostPayout.hostId)}
       />
 
@@ -1386,6 +1392,7 @@ export const ShortletOversight = () => {
               }[pendingIntervention.action]
             : 'Confirm'
         }
+        isLoading={interveneBooking.isPending}
         onConfirm={() => {
           if (pendingIntervention) {
             interveneBooking.mutate({
@@ -1406,6 +1413,7 @@ export const ShortletOversight = () => {
             : ''
         }
         confirmLabel="Remove review"
+        isLoading={removeReview.isPending}
         onConfirm={() => {
           if (pendingRemoval) {
             removeReview.mutate({

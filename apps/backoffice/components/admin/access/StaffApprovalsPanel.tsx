@@ -51,7 +51,6 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
     },
     onError: (err) => {
       notify(err instanceof Error ? err.message : 'Failed to approve this request.', 'error');
-      setApproveTarget(null);
     },
   });
 
@@ -225,6 +224,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
             : ''
         }
         confirmLabel="Approve access"
+        isLoading={approveMutation.isPending}
         onConfirm={() => approveTarget && approveMutation.mutate(approveTarget.id)}
       />
     </section>
