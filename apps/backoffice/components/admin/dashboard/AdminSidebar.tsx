@@ -34,6 +34,7 @@ import {
   CircleAlert,
   RotateCcw,
   BookOpenCheck,
+  GitCompareArrows,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -118,6 +119,18 @@ const navItems: NavItem[] = [
     label: 'Rent Journal',
     href: '/admin/rent-journal',
     icon: BookOpenCheck,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Rent Reconciliation',
+    href: '/admin/rent-reconciliation',
+    icon: GitCompareArrows,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Payout Runs',
+    href: '/admin/payout-runs',
+    icon: Landmark,
     permission: 'rentfinance.view',
   },
   {
