@@ -20,6 +20,8 @@ export interface AdminHandover {
   status: AdminManagementTransfer['status'];
   required: { outgoing: boolean; incoming: boolean };
   viewer?: { isOwner: boolean; isOutgoing: boolean; isIncoming: boolean };
+  /** Where each attested deposit stands now (the pack itself is frozen). */
+  depositsNow?: { id: string; heldByGetRentos: boolean; status: string }[];
   pack: {
     hash: string;
     snapshot: {
@@ -54,6 +56,13 @@ export interface AdminHandover {
 export const adminManagementTransfersService = {
   handover: (id: string): Promise<ApiResponse<AdminHandover>> =>
     safeCall(() => authFetch<AdminHandover>(`/management-transfers/${id}/handover`)),
+  confirmDeposit: (id: string, depositHoldId: string): Promise<ApiResponse<AdminHandover>> =>
+    safeCall(() =>
+      authFetch<AdminHandover>(
+        `/admin/management-transfers/${id}/handover/deposits/${depositHoldId}/received`,
+        { method: 'POST' }
+      )
+    ),
   resolve: (id: string, resolution: string): Promise<ApiResponse<AdminHandover>> =>
     safeCall(() =>
       authFetch<AdminHandover>(`/admin/management-transfers/${id}/handover/resolve`, {
