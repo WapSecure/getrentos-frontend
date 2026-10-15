@@ -257,7 +257,15 @@ export default function ResidentVisitorPasses() {
       <DenyWalkInSheet
         pass={denying}
         onClose={() => setDenying(null)}
-        onSubmit={(reason) => denying && deny.mutate({ passId: denying.id, reason })}
+        onSubmit={async (reason) => {
+          if (!denying) return false;
+          try {
+            await deny.mutateAsync({ passId: denying.id, reason });
+            return true;
+          } catch {
+            return false;
+          }
+        }}
         submitting={deny.isPending}
       />
     </View>
@@ -280,7 +288,7 @@ function DenyWalkInSheet({
 }: {
   pass: VisitorPass | null;
   onClose: () => void;
-  onSubmit: (reason?: string) => void;
+  onSubmit: (reason?: string) => Promise<boolean>;
   submitting: boolean;
 }) {
   const { spacing } = useTheme();
@@ -298,8 +306,9 @@ function DenyWalkInSheet({
             fullWidth
             loading={submitting}
             onPress={() => {
-              onSubmit(reason.trim() || undefined);
-              setReason('');
+              void onSubmit(reason.trim() || undefined).then((saved) => {
+                if (saved) setReason('');
+              });
             }}
           />
           <Button

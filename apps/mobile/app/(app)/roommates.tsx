@@ -390,7 +390,15 @@ export default function Roommates() {
         open={!!assigningTo}
         onClose={() => setAssigningTo(null)}
         roommate={assigningTo}
-        onSubmit={(task) => addTaskMutation.mutate({ id: assigningTo!.id, task })}
+        onSubmit={async (task) => {
+          if (!assigningTo) return false;
+          try {
+            await addTaskMutation.mutateAsync({ id: assigningTo.id, task });
+            return true;
+          } catch {
+            return false;
+          }
+        }}
         submitting={addTaskMutation.isPending}
       />
 

@@ -8,7 +8,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   roommate: Roommate | null;
-  onSubmit: (task: string) => void;
+  onSubmit: (task: string) => Promise<boolean>;
   submitting: boolean;
 }
 
@@ -39,16 +39,16 @@ function AssignTaskForm({
   submitting,
 }: {
   roommate: Roommate;
-  onSubmit: (task: string) => void;
+  onSubmit: (task: string) => Promise<boolean>;
   onClose: () => void;
   submitting: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();
   const [task, setTask] = useState('');
 
-  const submit = () => {
-    onSubmit(task.trim());
-    onClose();
+  const submit = async () => {
+    const saved = await onSubmit(task.trim());
+    if (saved) onClose();
   };
 
   return (
@@ -87,7 +87,12 @@ function AssignTaskForm({
         ))}
       </View>
 
-      <Button label="Assign task" loading={submitting} disabled={!task.trim()} onPress={submit} />
+      <Button
+        label="Assign task"
+        loading={submitting}
+        disabled={!task.trim() || submitting}
+        onPress={() => void submit()}
+      />
     </View>
   );
 }
