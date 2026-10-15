@@ -1,4 +1,5 @@
 import { env } from '../env';
+import { attachQueuedWebFiles } from './webFormFiles';
 import {
   clearStepUpToken,
   currentStepUpToken,
@@ -233,6 +234,8 @@ export async function apiFetchOrNull<T>(path: string, options: ApiRequest = {}):
 }
 
 export async function apiUpload<T>(path: string, form: FormData, _retry = false): Promise<T> {
+  // Web build: turn the picked files into real File parts (see webFormFiles).
+  await attachQueuedWebFiles(form);
   const token = hooks.getAccessToken();
 
   const res = await send(

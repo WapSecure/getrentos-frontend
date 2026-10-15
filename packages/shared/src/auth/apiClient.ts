@@ -235,10 +235,27 @@ export async function refreshSession(): Promise<boolean> {
         return false;
       }
 
+      // The refresh cookie is shared by every app on this host, so it can belong
+      // to someone else: whoever last signed in, in another tab or on another
+      // port. Keeping our stored profile on their token showed one person's name
+      // over another's session (and their role's pages refused it). End the
+      // session instead, so the right person signs in again.
+      const storedUser = getStoredUser<Record<string, unknown>>();
+      const refreshedUserId = tokenSubject(data.accessToken);
+      if (
+        storedUser &&
+        typeof storedUser.id === 'string' &&
+        refreshedUserId &&
+        storedUser.id !== refreshedUserId
+      ) {
+        clearAuthSession();
+        markSessionExpired();
+        return false;
+      }
+
       // remember-me sessions live in localStorage; ephemeral ones in sessionStorage.
       const rememberMe = !!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const user =
-        getStoredUser<Record<string, unknown>>() ?? (await fetchSessionProfile(data.accessToken));
+      const user = storedUser ?? (await fetchSessionProfile(data.accessToken));
       saveAuthSession({ accessToken: data.accessToken, user }, rememberMe);
       return true;
     } catch {
@@ -308,6 +325,22 @@ export async function logoutSession(): Promise<void> {
       if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(SESSION_EXPIRED_KEY);
     }
   }
+}
+
+/** Reads a JWT's payload (base64url). Returns null when unreadable. */
+function tokenPayload(token: string): Record<string, unknown> | null {
+  try {
+    const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '=')));
+  } catch {
+    return null;
+  }
+}
+
+/** The user a JWT was issued to (its `sub`), or null when unreadable. */
+export function tokenSubject(token: string): string | null {
+  const sub = tokenPayload(token)?.sub;
+  return typeof sub === 'string' ? sub : null;
 }
 
 /** Decodes a JWT's exp claim (seconds). Returns null when unreadable. */
