@@ -17,6 +17,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
+import { AppealControl } from '@/components/shared/trust/AppealControl';
 import {
   AUTHORITY_RELATIONSHIPS,
   AUTHORITY_RELATIONSHIP_LABELS,
@@ -177,7 +178,7 @@ const ManagedPropertyCard = ({
 );
 
 const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
-  <div className="flex items-center justify-between gap-3 bg-card rounded-xl border border-border px-4 py-3">
+  <div className="flex items-start justify-between gap-3 bg-card rounded-xl border border-border px-4 py-3">
     <div className="min-w-0">
       <p className="text-sm text-foreground truncate">
         {AUTHORITY_RELATIONSHIP_LABELS[claim.relationship as AuthorityRelationship] ??
@@ -188,6 +189,9 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
       </p>
       {claim.decisionNote && (
         <p className="text-xs text-muted-foreground mt-1">Officer: {claim.decisionNote}</p>
+      )}
+      {claim.status === 'REJECTED' && (
+        <AppealControl targetType="PROPERTY_AUTHORITY" targetId={claim.id} subject="this claim" />
       )}
     </div>
     <div className="shrink-0">{statusBadge(claim.status)}</div>

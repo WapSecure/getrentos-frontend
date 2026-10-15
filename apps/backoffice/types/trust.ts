@@ -113,3 +113,23 @@ export interface TierGrant {
   /** Whether this grant is the one the tier resolver currently counts. */
   effective: boolean;
 }
+
+/** Trust appeal (TG-06) — a subject contesting a rejected trust decision. */
+export type TrustAppealTargetType = 'PROPERTY_AUTHORITY' | 'TRUST_VERIFICATION';
+export type TrustAppealStatus = 'OPEN' | 'UNDER_REVIEW' | 'UPHELD' | 'OVERTURNED' | 'CLOSED';
+export type TrustAppealDecision = 'UPHELD' | 'OVERTURNED';
+
+export interface TrustAppeal {
+  id: string;
+  subjectUserId: string;
+  targetType: TrustAppealTargetType;
+  targetId: string;
+  originalDeciderId?: string | null;
+  reason: string;
+  status: TrustAppealStatus;
+  reviewerId?: string | null;
+  resolution?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string | null;
+}
