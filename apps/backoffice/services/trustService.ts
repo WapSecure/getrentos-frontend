@@ -4,6 +4,8 @@ import type {
   Paginated,
   TierGrant,
   TierGrantState,
+  TrustAppeal,
+  TrustAppealDecision,
   TrustReviewCaseDetail,
   TrustReviewCaseSummary,
   TrustReviewDecision,
@@ -124,6 +126,31 @@ export const trustService = {
       authFetch<TierGrant>(`/admin/trust/tier-grants/${userId}/revoke`, {
         method: 'POST',
         body: JSON.stringify({ reason }),
+      })
+    );
+  },
+
+  /**
+   * Trust appeals (TG-06). A subject contests a rejected property-authority claim
+   * or a failed verification; the queue is everything still awaiting a decision.
+   * The resolver must not be the original decision-maker — enforced server-side,
+   * the UI surfaces the resulting error. Overturning reopens the target.
+   */
+  async listAppeals(): Promise<ApiResponse<TrustAppeal[]>> {
+    return safeCall(() => authFetch<TrustAppeal[]>('/admin/trust/appeals'));
+  },
+
+  async resolveAppeal(
+    id: string,
+    input: { decision: TrustAppealDecision; resolution?: string }
+  ): Promise<ApiResponse<TrustAppeal>> {
+    return safeCall(() =>
+      authFetch<TrustAppeal>(`/admin/trust/appeals/${id}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({
+          decision: input.decision,
+          ...(input.resolution ? { resolution: input.resolution } : {}),
+        }),
       })
     );
   },

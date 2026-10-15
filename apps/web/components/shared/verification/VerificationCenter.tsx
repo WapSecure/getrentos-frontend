@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { Button, Input, Select } from '@getrentos/ui';
 import { cn, unwrap } from '@/lib/apiHelpers';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
+import { AppealControl } from '@/components/shared/trust/AppealControl';
 import { kycService } from '@/services/kycService';
 import {
   trustService,
@@ -917,9 +918,17 @@ export const VerificationCenter = ({
             )}
 
             {verification.decision === 'REJECT' && (
-              <p className="mt-3 text-sm text-red-600 dark:text-red-400">
-                This verification was rejected. Contact support if you believe this is a mistake.
-              </p>
+              <div className="mt-3">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  This verification was rejected. If you believe this is a mistake, you can appeal
+                  it for a fresh review.
+                </p>
+                <AppealControl
+                  targetType="TRUST_VERIFICATION"
+                  targetId={verification.id}
+                  subject="this verification"
+                />
+              </div>
             )}
           </>
         ) : (

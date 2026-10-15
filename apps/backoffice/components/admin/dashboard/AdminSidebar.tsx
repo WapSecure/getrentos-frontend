@@ -72,6 +72,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.approve',
   },
   {
+    label: 'Trust Appeals',
+    href: '/admin/trust/appeals',
+    icon: Gavel,
+    permission: 'verifications.review',
+  },
+  {
     label: 'Property Authorities',
     href: '/admin/property-authorities',
     icon: Building2,
@@ -246,11 +252,11 @@ const navItems: NavItem[] = [
 
 const navGroups = [
   { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'People and trust', items: navItems.slice(1, 5) },
-  { label: 'Marketplace operations', items: navItems.slice(5, 15) },
-  { label: 'Risk and finance', items: navItems.slice(15, 19) },
-  { label: 'Support and insights', items: navItems.slice(19, 22) },
-  { label: 'Platform administration', items: navItems.slice(22) },
+  { label: 'People and trust', items: navItems.slice(1, 6) },
+  { label: 'Marketplace operations', items: navItems.slice(6, 16) },
+  { label: 'Risk and finance', items: navItems.slice(16, 20) },
+  { label: 'Support and insights', items: navItems.slice(20, 23) },
+  { label: 'Platform administration', items: navItems.slice(23) },
 ];
 
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
