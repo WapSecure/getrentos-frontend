@@ -15,6 +15,7 @@ import type {
   RentIncreaseCheck,
   RentSchedule,
   RentScheduleInput,
+  LeaseRentAccount,
   TenancyStanding,
   LandlordLead,
   LandlordViewingRequest,
@@ -650,6 +651,10 @@ export const landlordService = {
         method: 'POST',
       })
     );
+  },
+
+  async getRentAccount(leaseId: string): Promise<ApiResponse<LeaseRentAccount>> {
+    return safeCall(() => authFetch(`/landlord/leases/${leaseId}/rent-account`));
   },
 
   async issueNextRentInvoice(

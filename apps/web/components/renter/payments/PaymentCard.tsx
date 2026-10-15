@@ -18,6 +18,7 @@ interface Payment {
   id: string;
   propertyName: string;
   amount: number;
+  amountPaid?: number;
   date: string;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
   method: 'card' | 'bank_transfer' | 'wallet';
@@ -155,7 +156,14 @@ export const PaymentCard = ({
         <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-lg font-bold text-primary">{formatCurrency(payment.amount)}</p>
-            <p className="text-xs text-gray-500">{formatDate(payment.date)}</p>
+            {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 ? (
+              <p className="text-xs text-success">
+                {formatCurrency(payment.amountPaid ?? 0)} paid ·{' '}
+                {formatCurrency(payment.amount - (payment.amountPaid ?? 0))} left
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500">{formatDate(payment.date)}</p>
+            )}
           </div>
 
           <div className="flex items-center gap-1">

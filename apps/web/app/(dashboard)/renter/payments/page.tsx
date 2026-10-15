@@ -8,6 +8,8 @@ import { PaymentsList } from '@/components/renter/payments/PaymentsList';
 import { PaymentSchedule } from '@/components/renter/payments/PaymentSchedule';
 import { PaymentMethods } from '@/components/renter/payments/PaymentMethods';
 import { AutoPaySetup } from '@/components/renter/payments/AutoPaySetup';
+import { PayAmountDialog } from '@/components/renter/payments/PayAmountDialog';
+import { RentAccountCard } from '@/components/renter/payments/RentAccountCard';
 import { PaymentAnalytics } from '@/components/renter/payments/PaymentAnalytics';
 import { PaymentReceiptsGallery } from '@/components/renter/payments/PaymentReceiptsGallery';
 import { PaymentNotifications } from '@/components/renter/payments/PaymentNotifications';
@@ -56,6 +58,7 @@ export default function PaymentsPage() {
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
   const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
   const [simCheckout, setSimCheckout] = useState<{ amount: number; run: () => void } | null>(null);
+  const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
   const renterUser = useRenterUser();
   const [bulkPayingIds, setBulkPayingIds] = useState<string[]>([]);
 
@@ -88,8 +91,15 @@ export default function PaymentsPage() {
   };
 
   const payNowMutation = useMutation({
-    mutationFn: ({ paymentId, method }: { paymentId: string; method?: string }) =>
-      unwrap(renterService.payNow(paymentId, method)),
+    mutationFn: ({
+      paymentId,
+      method,
+      amount,
+    }: {
+      paymentId: string;
+      method?: string;
+      amount?: number;
+    }) => unwrap(renterService.payNow(paymentId, method, amount)),
     onSuccess: (updated) => {
       if (updated.authorizationUrl) {
         // Real gateway flow: the payment is PROCESSING until checkout
@@ -99,10 +109,15 @@ export default function PaymentsPage() {
       }
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       queryClient.invalidateQueries({ queryKey: renterKeys.receipts });
+      queryClient.invalidateQueries({ queryKey: ['renter', 'rent-accounts'] });
+      const left = updated.outstanding ?? 0;
       pushNotification({
         type: 'success',
         title: 'Payment Successful',
-        message: `Rent payment of ₦${updated.amount.toLocaleString()} for ${updated.propertyName} was successful.`,
+        message:
+          left > 0
+            ? `Payment received for ${updated.propertyName}. ₦${left.toLocaleString()} is still owed on this charge.`
+            : `Rent for ${updated.propertyName} is paid in full.`,
       });
     },
     onError: (error: Error) => {
@@ -125,21 +140,29 @@ export default function PaymentsPage() {
     return { ...p, method };
   });
 
+  const owedOn = (p: { amount: number; amountPaid?: number }) => p.amount - (p.amountPaid ?? 0);
+
+  // Paying opens a choice of paying in full or in part.
   const handlePayNow = (paymentId: string) => {
     if (bulkPayingIds.length > 0) return;
+    setPayingPaymentId(paymentId);
+  };
+
+  const payChosen = (paymentId: string, amount: number | undefined) => {
     const payment = payments.find((p) => p.id === paymentId);
     if (!payment) return;
-    const run = () => payNowMutation.mutate({ paymentId, method: payment.method });
+    const run = () => payNowMutation.mutate({ paymentId, method: payment.method, amount });
     // Dev: show a simulated Paystack checkout before settling. In production (or
     // with real keys) this is off, so the backend's real gateway redirect runs.
-    if (shouldSimulatePaystack()) setSimCheckout({ amount: payment.amount, run });
+    if (shouldSimulatePaystack()) setSimCheckout({ amount: amount ?? owedOn(payment), run });
     else run();
   };
+  const payingPayment = payments.find((p) => p.id === payingPaymentId) ?? null;
 
   const payablePayments = payments.filter(
     (payment) => payment.status === 'pending' || payment.status === 'overdue'
   );
-  const payableTotal = payablePayments.reduce((sum, payment) => sum + payment.amount, 0);
+  const payableTotal = payablePayments.reduce((sum, payment) => sum + owedOn(payment), 0);
 
   const handlePayAll = async () => {
     const paymentIds = payablePayments.map((payment) => payment.id);
@@ -356,6 +379,7 @@ export default function PaymentsPage() {
             onRemove={handleRemovePaymentMethod}
             onAdd={handleAddPaymentMethod}
           />
+          <RentAccountCard />
           <AutoPaySetup />
           <PaymentAnalytics payments={payments} />
         </div>
@@ -386,6 +410,16 @@ export default function PaymentsPage() {
             void handlePayAll();
           }
         }}
+      />
+
+      <PayAmountDialog
+        payment={
+          payingPayment
+            ? { propertyName: payingPayment.propertyName, owed: owedOn(payingPayment) }
+            : null
+        }
+        onClose={() => setPayingPaymentId(null)}
+        onPay={(amount) => payingPaymentId && payChosen(payingPaymentId, amount)}
       />
 
       <PaystackCheckoutSimulator

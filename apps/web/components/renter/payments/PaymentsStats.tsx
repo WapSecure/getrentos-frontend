@@ -6,6 +6,7 @@ import { CheckCircle, Clock, AlertCircle, Shield } from 'lucide-react';
 interface Payment {
   id: string;
   amount: number;
+  amountPaid?: number;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
 }
@@ -15,17 +16,17 @@ interface PaymentsStatsProps {
 }
 
 export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
-  const totalPaid = payments
-    .filter((p) => p.status === 'paid')
-    .reduce((sum, p) => sum + p.amount, 0);
+  // Part-payments count as paid; what is pending or overdue is only what is left.
+  const paidOf = (p: Payment) => (p.status === 'paid' ? p.amount : (p.amountPaid ?? 0));
+  const totalPaid = payments.reduce((sum, p) => sum + paidOf(p), 0);
 
   const pendingAmount = payments
     .filter((p) => p.status === 'pending' || p.status === 'processing')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .reduce((sum, p) => sum + p.amount - paidOf(p), 0);
 
   const overdueAmount = payments
     .filter((p) => p.status === 'overdue')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .reduce((sum, p) => sum + p.amount - paidOf(p), 0);
 
   // Escrow holds money that has actually been received. An unpaid charge is
   // 'not_funded', so the outstanding balance can never be reported as funds

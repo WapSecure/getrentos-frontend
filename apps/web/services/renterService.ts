@@ -188,11 +188,33 @@ export interface Payment {
   authorizationUrl?: string;
   /** Gateway reference for the payment currently being processed. */
   reference?: string;
+  /** Naira paid against this charge so far (part-payments and credit). */
+  amountPaid?: number;
+  /** Naira still owed on this charge. */
+  outstanding?: number;
   /** The period billed, when the charge came from a rent schedule. */
   periodStart?: string;
   periodEnd?: string;
   /** Invoice breakdown: rent plus recurring extras. */
   lines?: { category: string; label: string; amount: number }[];
+}
+
+/** Money paid into a lease's rent account, where it went, and credit held. */
+export interface RentAccount {
+  leaseId: string;
+  propertyName: string;
+  unitName: string;
+  creditBalance: number;
+  receipts: {
+    id: string;
+    reference: string;
+    amount: number;
+    method: string | null;
+    receivedAt: string;
+    allocations: { rentPaymentId: string; dueDate: string; amount: number }[];
+    toCredit: number;
+  }[];
+  creditApplied: { rentPaymentId: string; dueDate: string; amount: number; appliedAt: string }[];
 }
 
 export interface Receipt {
@@ -1139,13 +1161,18 @@ export const renterService = {
     );
   },
 
-  async payNow(paymentId: string, method?: string): Promise<ApiResponse<Payment>> {
+  /** `amount` (naira) pays part of the charge, or ahead; omitted, it pays what is owed. */
+  async payNow(paymentId: string, method?: string, amount?: number): Promise<ApiResponse<Payment>> {
     return safeCall(() =>
       authFetch(`/renter/payments/${paymentId}/pay`, {
         method: 'POST',
-        body: JSON.stringify({ method }),
+        body: JSON.stringify(amount ? { method, amount } : { method }),
       })
     );
+  },
+
+  async listRentAccounts(): Promise<ApiResponse<RentAccount[]>> {
+    return safeCall(() => authFetch('/renter/payments/account'));
   },
 
   async disputePayment(paymentId: string, reason: string): Promise<ApiResponse<Payment>> {
