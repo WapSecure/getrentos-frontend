@@ -24,6 +24,7 @@ import {
 } from './landSaleLogic';
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
+import { PerfectionPanel } from '../closing/PerfectionPanel';
 
 type ToastState = { message: string; variant: 'success' | 'error' | 'info' } | null;
 
@@ -291,6 +292,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
                 <TabsTrigger value="conditions">Conditions</TabsTrigger>
               )}
               <TabsTrigger value="conveyance">Conveyance</TabsTrigger>
+              {purchase.perfection && <TabsTrigger value="title">Title</TabsTrigger>}
               <TabsTrigger value="statement">Statement</TabsTrigger>
             </TabsList>
             <TabsContent value="schedule" className="mt-4">
@@ -328,6 +330,11 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
                 onDispute={(key, reason) => disputeStep.mutateAsync({ key, reason })}
               />
             </TabsContent>
+            {purchase.perfection && (
+              <TabsContent value="title" className="mt-4">
+                <PerfectionPanel perfection={purchase.perfection} role="buyer" />
+              </TabsContent>
+            )}
             <TabsContent value="statement" className="mt-4">
               <PurchaseStatement purchaseId={purchase.id} />
             </TabsContent>

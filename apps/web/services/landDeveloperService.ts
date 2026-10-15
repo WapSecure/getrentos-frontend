@@ -159,6 +159,19 @@ export const landDeveloperService = {
       )
     ),
 
+  /** Record title perfection progress: submitted, or approved with a reference. */
+  updatePerfectionStep: (
+    purchaseId: string,
+    key: string,
+    input: { status: 'SUBMITTED' | 'APPROVED'; reference?: string; note?: string }
+  ) =>
+    safeCall(() =>
+      authFetch<LandPurchaseDetail>(
+        `/owner/land/purchases/${purchaseId}/perfection/steps/${encodeURIComponent(key)}`,
+        json('POST', input)
+      )
+    ),
+
   /** Mark a condition precedent met (layout approval, plot identified on site). */
   deliverCondition: (
     purchaseId: string,

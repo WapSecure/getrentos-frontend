@@ -156,7 +156,44 @@ export interface LandClosingChecklistItem {
   detail?: string;
 }
 
+export interface LandPerfectionStep {
+  key: string;
+  label: string;
+  owner: string;
+  status: 'NOT_STARTED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'NOT_APPLICABLE';
+  dueDate?: string;
+  submittedAt?: string;
+  submissionReference?: string;
+  approvedAt?: string;
+  approvalReference?: string;
+  note?: string;
+  escalationLevel: number;
+}
+
+export interface LandPerfection {
+  status: 'OPEN' | 'EXCEPTION' | 'PERFECTED';
+  professionalName?: string;
+  professionalFirm?: string;
+  professionalContact?: string;
+  openedAt: string;
+  perfectedAt?: string;
+  finalInstrumentReference?: string;
+  legalReview?: string;
+  steps: LandPerfectionStep[];
+  blockers: string[];
+}
+
+export interface LandPerfectionQueueItem {
+  purchaseId: string;
+  reference: string;
+  status: 'OPEN' | 'EXCEPTION';
+  professionalName?: string;
+  lateSteps: number;
+  openedAt: string;
+}
+
 export interface LandPurchaseDetail extends LandPurchaseSummary {
+  perfection?: LandPerfection | null;
   conditions?: LandClosingCondition[];
   closingChecklist?: LandClosingChecklistItem[];
   canCancelInFull?: boolean;

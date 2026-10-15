@@ -36,6 +36,7 @@ import {
   BookOpenCheck,
   ArrowRightLeft,
   GitCompareArrows,
+  FileCheck2,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -150,6 +151,12 @@ const navItems: NavItem[] = [
     label: 'Land Purchases',
     href: '/admin/land/purchases',
     icon: FileSignature,
+    permission: 'sales.view',
+  },
+  {
+    label: 'Title Perfection',
+    href: '/admin/land/perfection',
+    icon: FileCheck2,
     permission: 'sales.view',
   },
   {

@@ -25,6 +25,7 @@ import { MilestoneList, type MilestoneDeliverability } from './MilestoneList';
 import { PurchasePayments } from './PurchasePayments';
 import { useOwnerLayouts } from './useOwnerLayouts';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
+import { PerfectionPanel } from '../closing/PerfectionPanel';
 
 const DELIVERABLE = new Set(['ACTIVE', 'PAID_IN_FULL', 'DEFAULTED']);
 
@@ -80,6 +81,29 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
     queryClient.setQueryData(landDeveloperKeys.purchase(purchaseId), detail);
     queryClient.invalidateQueries({ queryKey: landDeveloperKeys.purchases, exact: false });
   };
+
+  const updatePerfection = useMutation({
+    mutationFn: ({
+      key,
+      status,
+      reference,
+    }: {
+      key: string;
+      status: 'SUBMITTED' | 'APPROVED';
+      reference: string;
+    }) =>
+      unwrap(
+        landDeveloperService.updatePerfectionStep(purchaseId, key, {
+          status,
+          ...(reference ? { reference } : {}),
+        })
+      ),
+    onSuccess: (detail, { status }) => {
+      applyDetail(detail);
+      notify(status === 'SUBMITTED' ? 'Submission recorded.' : 'Approval recorded.', 'success');
+    },
+    onError: (reason: Error) => notify(reason.message, 'error'),
+  });
 
   const deliverCondition = useMutation({
     mutationFn: ({ key, note }: { key: string; note: string }) =>
@@ -301,6 +325,21 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             showRelease
           />
         </Section>
+
+        {data.perfection && (
+          <Section title="Title perfection">
+            <PerfectionPanel
+              perfection={data.perfection}
+              role="developer"
+              busyKey={
+                updatePerfection.isPending ? (updatePerfection.variables?.key ?? null) : null
+              }
+              onUpdate={(key, status, reference) =>
+                updatePerfection.mutate({ key, status, reference })
+              }
+            />
+          </Section>
+        )}
 
         <Section title="Installment schedule">
           <InstallmentSchedule installments={data.installments} />

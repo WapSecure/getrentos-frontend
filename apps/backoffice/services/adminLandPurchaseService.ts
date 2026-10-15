@@ -5,6 +5,8 @@ import type {
   LandPurchaseDetail,
   LandPurchaseStatus,
   LandPurchaseSummary,
+  LandPerfectionQueueItem,
+  LandPerfectionStep,
 } from '@/types/landPurchase';
 
 export interface ListAdminLandPurchasesParams {
@@ -71,6 +73,49 @@ export const adminLandPurchaseService = {
   /** Sends a failed refund, or one waiting on finance, through the gateway again (`escrow.approve`). */
   retryRefund(purchaseId: string): Promise<ApiResponse<LandPurchaseDetail>> {
     return safeCall(() => authFetch(`${base(purchaseId)}/refund/retry`, { method: 'POST' }));
+  },
+
+  // ---- Title perfection (§9.5) ----
+
+  perfectionQueue(): Promise<ApiResponse<LandPerfectionQueueItem[]>> {
+    return safeCall(() => authFetch('/admin/land/purchases/perfection'));
+  },
+  openPerfection(purchaseId: string): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() => authFetch(`${base(purchaseId)}/perfection/open`, { method: 'POST' }));
+  },
+  assignPerfectionProfessional(
+    purchaseId: string,
+    input: { name: string; firm?: string; contact?: string }
+  ): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() =>
+      authFetch(`${base(purchaseId)}/perfection/professional`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+  updatePerfectionStep(
+    purchaseId: string,
+    key: string,
+    input: { status: LandPerfectionStep['status']; reference?: string; note?: string }
+  ): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() =>
+      authFetch(`${base(purchaseId)}/perfection/steps/${encodeURIComponent(key)}`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+  completePerfection(
+    purchaseId: string,
+    input: { finalInstrumentReference: string; legalReview: string }
+  ): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() =>
+      authFetch(`${base(purchaseId)}/perfection/complete`, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
   },
 
   /** Decides a condition precedent: met, or not met (`verifications.approve`). */

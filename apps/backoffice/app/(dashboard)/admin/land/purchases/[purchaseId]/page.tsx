@@ -24,6 +24,7 @@ import { LandPurchaseSchedule } from '@/components/admin/land/purchases/LandPurc
 import { LandPurchaseStatusBadge } from '@/components/admin/land/purchases/LandPurchaseStatusBadge';
 import { LandRefundPanel } from '@/components/admin/land/purchases/LandRefundPanel';
 import { LandPurchaseConditions } from '@/components/admin/land/purchases/LandPurchaseConditions';
+import { LandPerfectionPanel } from '@/components/admin/land/purchases/LandPerfectionPanel';
 
 const ENDED = new Set(['REVOKED', 'CANCELLED', 'COMPLETED']);
 
@@ -74,6 +75,12 @@ export default function AdminLandPurchaseDetailPage() {
       unwrap(adminLandPurchaseService.settleRefund(purchaseId, amount, note)),
     onSuccess: (updated) => applyUpdate(updated, 'Manual refund recorded; the buyer was notified.'),
     onError: (error) => reportError(error, 'Could not record the settlement.'),
+  });
+
+  const perfectionAction = useMutation({
+    mutationFn: (action: () => Promise<LandPurchaseDetail>) => action(),
+    onSuccess: (updated) => applyUpdate(updated, 'Title perfection updated.'),
+    onError: (error) => reportError(error, 'Could not update title perfection.'),
   });
 
   const decideCondition = useMutation({
@@ -233,6 +240,38 @@ export default function AdminLandPurchaseDetailPage() {
           canDecide={canWaiveMilestone}
           busyKey={decideCondition.isPending ? (decideCondition.variables?.key ?? null) : null}
           onDecide={(key, status, note) => decideCondition.mutate({ key, status, note })}
+        />
+
+        <LandPerfectionPanel
+          perfection={purchase.perfection}
+          canAct={canWaiveMilestone}
+          busy={perfectionAction.isPending}
+          onOpen={() =>
+            perfectionAction.mutate(() =>
+              unwrap(adminLandPurchaseService.openPerfection(purchaseId))
+            )
+          }
+          onAssign={(input) =>
+            perfectionAction.mutate(() =>
+              unwrap(adminLandPurchaseService.assignPerfectionProfessional(purchaseId, input))
+            )
+          }
+          onStep={(key, status, reference, note) =>
+            perfectionAction.mutate(() =>
+              unwrap(
+                adminLandPurchaseService.updatePerfectionStep(purchaseId, key, {
+                  status,
+                  ...(reference ? { reference } : {}),
+                  ...(note ? { note } : {}),
+                })
+              )
+            )
+          }
+          onComplete={(input) =>
+            perfectionAction.mutate(() =>
+              unwrap(adminLandPurchaseService.completePerfection(purchaseId, input))
+            )
+          }
         />
 
         <LandCaseSection title="Contract">
