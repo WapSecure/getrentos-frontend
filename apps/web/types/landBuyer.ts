@@ -1,3 +1,4 @@
+import type { LandClosingFields } from './landClosing';
 import type { LandNotVerifiedItem, LandTrustLabel } from './land';
 
 /**
@@ -262,7 +263,7 @@ export interface LandPurchaseTerms {
   revocationChargeBps: number;
 }
 
-export interface LandPurchaseDetail extends LandPurchaseSummary {
+export interface LandPurchaseDetail extends LandPurchaseSummary, LandClosingFields {
   terms: LandPurchaseTerms;
   feeBreakdown: LandLayoutFees;
   revocationReason?: string;

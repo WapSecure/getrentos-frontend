@@ -1,3 +1,5 @@
+import type { LandClosingFields } from './landClosing';
+
 /**
  * Developer estate inventory, plot sales and conveyance, as the owner API
  * returns them (src/modules/land/dto/land-sales-response.dto.ts,
@@ -273,7 +275,7 @@ export type LandReleasePayoutStatus =
   | 'PAID'
   | 'FAILED';
 
-export interface LandPurchaseDetail extends LandPurchaseSummary {
+export interface LandPurchaseDetail extends LandPurchaseSummary, LandClosingFields {
   terms: LandPaymentPlanTerms;
   feeBreakdown: LandLayoutFees;
   revocationReason?: string;

@@ -24,6 +24,7 @@ import { InstallmentSchedule } from './InstallmentSchedule';
 import { MilestoneList, type MilestoneDeliverability } from './MilestoneList';
 import { PurchasePayments } from './PurchasePayments';
 import { useOwnerLayouts } from './useOwnerLayouts';
+import { ConditionsPanel } from '../closing/ConditionsPanel';
 
 const DELIVERABLE = new Set(['ACTIVE', 'PAID_IN_FULL', 'DEFAULTED']);
 
@@ -79,6 +80,16 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
     queryClient.setQueryData(landDeveloperKeys.purchase(purchaseId), detail);
     queryClient.invalidateQueries({ queryKey: landDeveloperKeys.purchases, exact: false });
   };
+
+  const deliverCondition = useMutation({
+    mutationFn: ({ key, note }: { key: string; note: string }) =>
+      unwrap(landDeveloperService.deliverCondition(purchaseId, key, note ? { note } : {})),
+    onSuccess: (detail) => {
+      applyDetail(detail);
+      notify('Condition marked met. The buyer has been asked to confirm it.', 'success');
+    },
+    onError: (reason: Error) => notify(reason.message, 'error'),
+  });
 
   const deliver = useMutation({
     mutationFn: ({
@@ -264,6 +275,23 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             {data.terms.defaultAfterDays} days.
           </p>
         </Section>
+
+        {(data.conditions?.length ?? 0) > 0 && (
+          <Section title="Conditions precedent">
+            <ConditionsPanel
+              conditions={data.conditions ?? []}
+              checklist={data.closingChecklist}
+              role="developer"
+              busyKey={
+                deliverCondition.isPending ? (deliverCondition.variables?.key ?? null) : null
+              }
+              onDeliver={(key, note) => deliverCondition.mutate({ key, note })}
+            />
+            <p className="mt-3 text-xs text-muted-foreground">
+              Nothing is released to you while a condition is open or not met.
+            </p>
+          </Section>
+        )}
 
         <Section title="Conveyance">
           <MilestoneList

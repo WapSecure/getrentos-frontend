@@ -73,6 +73,21 @@ export const adminLandPurchaseService = {
     return safeCall(() => authFetch(`${base(purchaseId)}/refund/retry`, { method: 'POST' }));
   },
 
+  /** Decides a condition precedent: met, or not met (`verifications.approve`). */
+  decideCondition(
+    purchaseId: string,
+    key: string,
+    status: 'SATISFIED' | 'FAILED',
+    note: string
+  ): Promise<ApiResponse<LandPurchaseDetail>> {
+    return safeCall(() =>
+      authFetch(`${base(purchaseId)}/conditions/${encodeURIComponent(key)}/decide`, {
+        method: 'POST',
+        body: JSON.stringify({ status, note: note.trim() }),
+      })
+    );
+  },
+
   /** Approves a large release for payout to the developer's bank (`escrow.approve`). */
   approvePayout(purchaseId: string, releaseId: string): Promise<ApiResponse<LandPurchaseDetail>> {
     return safeCall(() =>

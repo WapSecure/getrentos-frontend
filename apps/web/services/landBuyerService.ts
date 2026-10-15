@@ -106,6 +106,14 @@ export const landBuyerService = {
       )
     ),
 
+  /** Accept a condition the developer delivered, or give one up (waive). */
+  settleCondition: (purchaseId: string, key: string, how: 'confirm' | 'waive') =>
+    safeCall(() =>
+      post<LandPurchaseDetail>(
+        `/buyer/land/purchases/${purchaseId}/conditions/${encodeURIComponent(key)}/${how}`
+      )
+    ),
+
   confirmMilestone: (purchaseId: string, key: string) =>
     safeCall(() =>
       post<LandPurchaseDetail>(
