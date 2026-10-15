@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   PageErrorState,
   Tabs,
@@ -58,6 +59,7 @@ export default function CreditRefundsPage() {
   const [filter, setFilter] = useState<Filter>('ATTENTION');
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [retryTarget, setRetryTarget] = useState<CreditRefund | null>(null);
 
   const query = useQuery({
     queryKey: ['admin', 'credit-refunds'],
@@ -68,7 +70,10 @@ export default function CreditRefundsPage() {
     mutationFn: ({ leaseId, reason }: { leaseId: string; reason: string }) =>
       unwrap(adminCreditRefundsService.refund(leaseId, reason)),
     onSuccess: (r, { leaseId }) => {
-      setNotes((n) => ({ ...n, [leaseId]: '' }));
+      if (r.status === 'REFUNDED') {
+        setNotes((n) => ({ ...n, [leaseId]: '' }));
+        setRetryTarget(null);
+      }
       queryClient.invalidateQueries({ queryKey: ['admin', 'credit-refunds'] });
       setToast({
         message:
@@ -175,9 +180,7 @@ export default function CreditRefundsPage() {
                     <Button
                       variant="primary"
                       disabled={(notes[r.leaseId] ?? '').trim().length < 10 || retry.isPending}
-                      onClick={() =>
-                        retry.mutate({ leaseId: r.leaseId, reason: notes[r.leaseId].trim() })
-                      }
+                      onClick={() => setRetryTarget(r)}
                     >
                       Retry refund
                     </Button>
@@ -192,6 +195,25 @@ export default function CreditRefundsPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <ConfirmDialog
+        open={retryTarget !== null}
+        onOpenChange={(open) => !open && !retry.isPending && setRetryTarget(null)}
+        title="Retry this credit refund?"
+        description={
+          retryTarget
+            ? `${formatCurrency(Math.max(0, retryTarget.amount - retryTarget.refundedAmount))} still owed to ${retryTarget.tenantName} will be retried against the original payment source. Already refunded lines will not be sent again.`
+            : ''
+        }
+        confirmLabel="Retry refund"
+        isLoading={retry.isPending}
+        onConfirm={() => {
+          if (!retryTarget) return;
+          retry.mutate({
+            leaseId: retryTarget.leaseId,
+            reason: (notes[retryTarget.leaseId] ?? '').trim(),
+          });
+        }}
+      />
     </>
   );
 }
