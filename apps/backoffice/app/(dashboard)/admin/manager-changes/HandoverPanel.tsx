@@ -47,6 +47,12 @@ export function HandoverPanel({
     onSuccess: refresh,
     onError: fail,
   });
+  const confirmDeposit = useMutation({
+    mutationFn: (depositHoldId: string) =>
+      unwrap(adminManagementTransfersService.confirmDeposit(transferId, depositHoldId)),
+    onSuccess: refresh,
+    onError: fail,
+  });
   const h = q.data;
   const pack = h?.pack;
   const outside = (pack?.snapshot.leases ?? []).flatMap((l) =>
@@ -93,12 +99,32 @@ export function HandoverPanel({
         {row('Owner acknowledges', pack.ownerSignedAt)}
         {row(`${pack.snapshot.incoming} accepts`, pack.incomingSignedAt, h.required.incoming)}
       </ul>
-      {pack.depositAttestations?.map((a) => (
-        <p key={a.depositHoldId} className="text-xs text-muted-foreground">
-          Deposit {formatCurrency(a.amount)}: {a.treatment.replace(/_/g, ' ').toLowerCase()}
-          {a.note ? ` (${a.note})` : ''}
-        </p>
-      ))}
+      {pack.depositAttestations?.map((a) => {
+        const now = h.depositsNow?.find((d) => d.id === a.depositHoldId);
+        const awaiting = a.treatment === 'PAID_TO_GETRENTOS' && now && !now.heldByGetRentos;
+        return (
+          <div
+            key={a.depositHoldId}
+            className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+          >
+            <span>
+              Deposit {formatCurrency(a.amount)}: {a.treatment.replace(/_/g, ' ').toLowerCase()}
+              {a.note ? ` (${a.note})` : ''}
+              {a.treatment === 'PAID_TO_GETRENTOS' && now?.heldByGetRentos ? ' · received' : ''}
+            </span>
+            {awaiting && canOperate && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={confirmDeposit.isPending}
+                onClick={() => confirmDeposit.mutate(a.depositHoldId)}
+              >
+                Confirm received
+              </Button>
+            )}
+          </div>
+        );
+      })}
       {pack.keysDeclaration && (
         <p className="text-xs text-muted-foreground">Keys: {pack.keysDeclaration}</p>
       )}
