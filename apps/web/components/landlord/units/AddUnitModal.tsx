@@ -15,7 +15,9 @@ interface AddUnitModalProps {
   onClose: () => void;
   properties: Property[];
   defaultPropertyId?: string;
-  onSave: (unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => void;
+  onSave: (
+    unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
+  ) => Promise<boolean>;
 }
 
 export const AddUnitModal = ({
@@ -31,6 +33,7 @@ export const AddUnitModal = ({
   const [bathrooms, setBathrooms] = useState('1');
   const [askingRent, setAskingRent] = useState('');
   const [askingRentPeriod, setAskingRentPeriod] = useState<'year' | 'month'>('year');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const propertyId = properties.some((p) => p.id === selectedPropertyId)
     ? selectedPropertyId
@@ -46,10 +49,11 @@ export const AddUnitModal = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const property = properties.find((p) => p.id === propertyId);
-    if (!property || !unitName.trim()) return;
-    onSave({
+    if (!property || !unitName.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    const saved = await onSave({
       propertyId,
       propertyName: property.name,
       unitName: unitName.trim(),
@@ -58,7 +62,8 @@ export const AddUnitModal = ({
       askingRent: askingRent ? Number(askingRent) : undefined,
       askingRentPeriod,
     });
-    handleClose();
+    setIsSubmitting(false);
+    if (saved) handleClose();
   };
 
   const isValid = propertyId && unitName.trim();
@@ -168,10 +173,16 @@ export const AddUnitModal = ({
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="primary" fullWidth onClick={handleSubmit} disabled={!isValid}>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => void handleSubmit()}
+                disabled={!isValid || isSubmitting}
+                isLoading={isSubmitting}
+              >
                 Add Unit
               </Button>
-              <Button variant="ghost" fullWidth onClick={handleClose}>
+              <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
                 Cancel
               </Button>
             </div>

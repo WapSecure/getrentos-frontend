@@ -148,8 +148,16 @@ function LandlordUnitsPageContent() {
   const handleAssignTenant = (unitId: string, tenantName: string) =>
     assignTenantMutation.mutateAsync({ unitId, tenantName }).then(() => undefined);
 
-  const handleAddUnit = (data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) =>
-    addUnitMutation.mutate(data);
+  const handleAddUnit = async (
+    data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
+  ) => {
+    try {
+      await addUnitMutation.mutateAsync(data);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   // Single-unit charging: available on every plan, unlike the bulk variant.
   const chargeUnitMutation = useMutation({

@@ -9,7 +9,7 @@ import { Button } from '@getrentos/ui';
 interface DisputePaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (reason: string) => void;
+  onSubmit: (reason: string) => Promise<void>;
 }
 
 export const DisputePaymentDialog = ({
@@ -18,17 +18,26 @@ export const DisputePaymentDialog = ({
   onSubmit,
 }: DisputePaymentDialogProps) => {
   const [reason, setReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleClose = (next: boolean) => {
+    if (isSubmitting) return;
     if (!next) setReason('');
     onOpenChange(next);
   };
 
-  const handleSubmit = () => {
-    if (!reason.trim()) return;
-    onSubmit(reason.trim());
-    setReason('');
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    if (!reason.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmit(reason.trim());
+      setReason('');
+      onOpenChange(false);
+    } catch {
+      // The parent displays the server error; keep the reason available for retry.
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -56,7 +65,13 @@ export const DisputePaymentDialog = ({
             />
           </div>
 
-          <Button variant="primary" fullWidth onClick={handleSubmit} disabled={!reason.trim()}>
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={() => void handleSubmit()}
+            disabled={!reason.trim() || isSubmitting}
+            isLoading={isSubmitting}
+          >
             Submit Dispute
           </Button>
         </div>

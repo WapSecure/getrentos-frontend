@@ -21,7 +21,7 @@ interface ScheduleViewingModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultLeadId?: string;
-  onSubmit: (appointment: CreateViewingInput) => void;
+  onSubmit: (appointment: CreateViewingInput) => Promise<boolean>;
   isSubmitting?: boolean;
 }
 
@@ -88,9 +88,9 @@ export const ScheduleViewingModal = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedLead?.listingId) return;
-    onSubmit({
+    const scheduled = await onSubmit({
       leadId,
       leadName: selectedLead.leadName,
       listingId: selectedLead.listingId,
@@ -99,7 +99,7 @@ export const ScheduleViewingModal = ({
       scheduledTime: time,
       notes: notes || undefined,
     });
-    handleClose();
+    if (scheduled) handleClose();
   };
 
   return (
@@ -188,7 +188,7 @@ export const ScheduleViewingModal = ({
               <Button
                 variant="primary"
                 className="flex-1 gap-1.5"
-                onClick={handleSubmit}
+                onClick={() => void handleSubmit()}
                 disabled={!selectedLead?.listingId || !date || !time || isSubmitting}
               >
                 <CalendarClock className="w-4 h-4" />
