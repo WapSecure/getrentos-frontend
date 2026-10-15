@@ -254,6 +254,8 @@ const ActiveEngagements = ({
       setError(err.message || 'Could not raise termination requests.');
     },
   });
+  const actionPending =
+    reassign.isPending || suspend.isPending || resume.isPending || requestEnd.isPending;
 
   if (active.isError) {
     return (
@@ -315,7 +317,7 @@ const ActiveEngagements = ({
             </div>
             <Button
               isLoading={reassign.isPending}
-              disabled={!newManager || selectedVisible.length === 0}
+              disabled={!newManager || selectedVisible.length === 0 || actionPending}
               onClick={() => reassign.mutate()}
             >
               Reassign {selectedVisible.length || ''}
@@ -336,12 +338,17 @@ const ActiveEngagements = ({
             <Button
               variant="outline"
               isLoading={suspend.isPending}
-              disabled={pauseReason.trim().length < 10}
+              disabled={pauseReason.trim().length < 10 || actionPending}
               onClick={() => suspend.mutate()}
             >
               Pause {selectedVisible.length}
             </Button>
-            <Button variant="outline" isLoading={resume.isPending} onClick={() => resume.mutate()}>
+            <Button
+              variant="outline"
+              isLoading={resume.isPending}
+              disabled={actionPending}
+              onClick={() => resume.mutate()}
+            >
               Resume {selectedVisible.length}
             </Button>
           </div>
@@ -361,7 +368,7 @@ const ActiveEngagements = ({
             <Button
               variant="danger"
               isLoading={requestEnd.isPending}
-              disabled={endReason.trim().length < 10}
+              disabled={endReason.trim().length < 10 || actionPending}
               onClick={() => requestEnd.mutate()}
             >
               Request end {selectedVisible.length}
@@ -737,6 +744,7 @@ export default function AdminManagedMandatesPage() {
       setBulkError(err.message || 'Could not refuse the selected engagements.');
     },
   });
+  const bulkActionPending = bulkActivate.isPending || bulkReject.isPending;
 
   const counts = useMemo(
     () => ({
@@ -867,7 +875,7 @@ export default function AdminManagedMandatesPage() {
                 </div>
                 <Button
                   isLoading={bulkActivate.isPending}
-                  disabled={!bulkManager || selectedVisible.length === 0}
+                  disabled={!bulkManager || selectedVisible.length === 0 || bulkActionPending}
                   onClick={() => bulkActivate.mutate()}
                 >
                   Assign &amp; activate {selectedVisible.length || ''}
@@ -888,7 +896,7 @@ export default function AdminManagedMandatesPage() {
                 <Button
                   variant="outline"
                   isLoading={bulkReject.isPending}
-                  disabled={bulkReason.trim().length < 10}
+                  disabled={bulkReason.trim().length < 10 || bulkActionPending}
                   onClick={() => bulkReject.mutate()}
                 >
                   Refuse {selectedVisible.length}

@@ -55,6 +55,10 @@ export default function AdminUsersPage() {
     user: PlatformUser;
     status: Exclude<UserAccountStatus, 'pending'>;
   } | null>(null);
+  const [pendingSubscription, setPendingSubscription] = useState<{
+    user: PlatformUser;
+    tier: PlanTier;
+  } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -112,6 +116,7 @@ export default function AdminUsersPage() {
     onMutate: () => setActionError(null),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      setPendingSubscription(null);
       setActiveUser(updated);
     },
     onError: (error) =>
@@ -282,7 +287,12 @@ export default function AdminUsersPage() {
         onChangeStatus={handleChangeStatus}
         isChangingStatus={changeStatusMutation.isPending}
         pendingStatus={changeStatusMutation.variables?.status}
-        onChangeSubscription={(userId, tier) => changeSubscriptionMutation.mutate({ userId, tier })}
+        onChangeSubscription={(userId, tier) => {
+          const user = users.find((item) => item.id === userId) ?? activeUser;
+          if (user && !changeSubscriptionMutation.isPending) {
+            setPendingSubscription({ user, tier });
+          }
+        }}
         isChangingSubscription={changeSubscriptionMutation.isPending}
       />
 
@@ -318,6 +328,26 @@ export default function AdminUsersPage() {
             changeStatusMutation.mutate({
               userId: pendingStatus.user.id,
               status: pendingStatus.status,
+            });
+          }
+        }}
+      />
+      <ConfirmDialog
+        open={pendingSubscription !== null}
+        onOpenChange={(open) => !open && setPendingSubscription(null)}
+        title={pendingSubscription?.tier === 'PRO' ? 'Upgrade this account?' : 'Remove Pro access?'}
+        description={
+          pendingSubscription
+            ? `${pendingSubscription.user.fullName}'s plan will change from ${pendingSubscription.user.planTier === 'PRO' ? 'Pro' : 'Free'} to ${pendingSubscription.tier === 'PRO' ? 'Pro' : 'Free'}. This changes their product entitlements immediately.`
+            : ''
+        }
+        confirmLabel={pendingSubscription?.tier === 'PRO' ? 'Upgrade to Pro' : 'Move to Free'}
+        isLoading={changeSubscriptionMutation.isPending}
+        onConfirm={() => {
+          if (pendingSubscription) {
+            changeSubscriptionMutation.mutate({
+              userId: pendingSubscription.user.id,
+              tier: pendingSubscription.tier,
             });
           }
         }}
