@@ -588,4 +588,13 @@ export interface LeaseRentAccount {
     toCredit: number;
   }[];
   creditApplied: { rentPaymentId: string; dueDate: string; amount: number; appliedAt: string }[];
+  /** Credit paid back to the tenant, the way it was paid. */
+  refunds?: {
+    id: string;
+    amount: number;
+    refundedAmount: number;
+    status: 'PROCESSING' | 'REFUNDED' | 'PARTLY_REFUNDED' | 'FAILED';
+    requestedAs: 'TENANT' | 'MANAGER' | 'ADMIN';
+    createdAt: string;
+  }[];
 }

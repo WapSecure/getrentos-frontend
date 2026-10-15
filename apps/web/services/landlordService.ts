@@ -657,6 +657,26 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/leases/${leaseId}/rent-account`));
   },
 
+  /** Refund the tenant's credit, back the way they paid it. */
+  async refundTenantCredit(
+    leaseId: string,
+    reason?: string
+  ): Promise<
+    ApiResponse<{
+      amount: number;
+      refundedAmount: number;
+      status: string;
+      lastError: string | null;
+    }>
+  > {
+    return safeCall(() =>
+      authFetch(`/landlord/leases/${leaseId}/rent-account/refund`, {
+        method: 'POST',
+        body: JSON.stringify(reason ? { reason } : {}),
+      })
+    );
+  },
+
   async issueNextRentInvoice(
     leaseId: string
   ): Promise<ApiResponse<{ rentPaymentId: string; amount: number; dueDate: string }>> {

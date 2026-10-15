@@ -215,6 +215,23 @@ export interface RentAccount {
     toCredit: number;
   }[];
   creditApplied: { rentPaymentId: string; dueDate: string; amount: number; appliedAt: string }[];
+  /** Credit paid back to the tenant, the way it was paid. */
+  refunds?: {
+    id: string;
+    amount: number;
+    refundedAmount: number;
+    status: 'PROCESSING' | 'REFUNDED' | 'PARTLY_REFUNDED' | 'FAILED';
+    requestedAs: 'TENANT' | 'MANAGER' | 'ADMIN';
+    createdAt: string;
+  }[];
+}
+
+export interface CreditRefundResult {
+  id: string;
+  amount: number;
+  refundedAmount: number;
+  status: 'PROCESSING' | 'REFUNDED' | 'PARTLY_REFUNDED' | 'FAILED';
+  lastError: string | null;
 }
 
 export interface Receipt {
@@ -1173,6 +1190,13 @@ export const renterService = {
 
   async listRentAccounts(): Promise<ApiResponse<RentAccount[]>> {
     return safeCall(() => authFetch('/renter/payments/account'));
+  },
+
+  /** Refund my credit on a lease, back to the card or account I paid with. */
+  async refundCredit(leaseId: string): Promise<ApiResponse<CreditRefundResult>> {
+    return safeCall(() =>
+      authFetch(`/renter/payments/account/${leaseId}/refund`, { method: 'POST' })
+    );
   },
 
   async disputePayment(paymentId: string, reason: string): Promise<ApiResponse<Payment>> {
