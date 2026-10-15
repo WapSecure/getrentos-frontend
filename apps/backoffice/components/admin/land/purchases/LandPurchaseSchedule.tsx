@@ -115,7 +115,14 @@ export const LandPurchaseSchedule = ({
         promptMinLength={MIN_REASON}
         isLoading={isWaiving}
         onConfirm={async () => {
-          if (target) await onWaive(target.id, reason).catch(() => undefined);
+          if (!target) return;
+          try {
+            await onWaive(target.id, reason);
+            setTarget(null);
+            setReason('');
+          } catch {
+            // The parent reports the server error; keep the decision and reason for retry.
+          }
         }}
       />
     </LandCaseSection>

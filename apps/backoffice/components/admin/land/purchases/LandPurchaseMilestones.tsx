@@ -115,7 +115,14 @@ export const LandPurchaseMilestones = ({
         promptMinLength={MIN_REASON}
         isLoading={isWaiving}
         onConfirm={async () => {
-          if (target) await onWaive(target.key, reason).catch(() => undefined);
+          if (!target) return;
+          try {
+            await onWaive(target.key, reason);
+            setTarget(null);
+            setReason('');
+          } catch {
+            // The parent reports the server error; keep the decision and reason for retry.
+          }
         }}
       />
     </LandCaseSection>

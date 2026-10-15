@@ -83,7 +83,6 @@ export default function AdminAccessPage() {
     },
     onError: (err) => {
       notify(err instanceof Error ? err.message : 'Failed to update role.', 'error');
-      setRoleTarget(null);
     },
   });
 
@@ -96,7 +95,6 @@ export default function AdminAccessPage() {
       notify('Staff status updated.', 'success');
     },
     onError: (err) => {
-      setStatusTarget(null);
       notify(err instanceof Error ? err.message : 'Failed to update status.', 'error');
     },
   });
@@ -333,6 +331,7 @@ export default function AdminAccessPage() {
             : `${statusTarget?.member.legalName} will regain access to the platform.`
         }
         confirmLabel={statusTarget?.status === 'suspended' ? 'Suspend' : 'Activate'}
+        isLoading={statusMutation.isPending}
         onConfirm={() =>
           statusTarget &&
           statusMutation.mutate({ id: statusTarget.member.id, status: statusTarget.status })
@@ -348,6 +347,7 @@ export default function AdminAccessPage() {
             : ''
         }
         confirmLabel="Change role"
+        isLoading={updateRoleMutation.isPending}
         onConfirm={() =>
           roleTarget &&
           updateRoleMutation.mutate({ id: roleTarget.member.id, role: roleTarget.role })

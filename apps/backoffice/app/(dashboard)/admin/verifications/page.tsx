@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
-import { ConfirmDialog, EmptyState, PageErrorState } from '@getrentos/ui';
+import { ConfirmDialog, EmptyState, PageErrorState, Toast } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -33,6 +33,7 @@ export default function AdminVerificationsPage() {
   const [page, setPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -69,24 +70,35 @@ export default function AdminVerificationsPage() {
 
   const closeModalAndRefresh = () => {
     invalidateRequests();
+    setShowApproveConfirm(false);
     setActiveRequest(null);
   };
 
+  const reportActionError = (error: unknown, fallback: string) =>
+    setActionError(error instanceof Error ? error.message : fallback);
+
   const approveMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.approveVerification(id)),
+    onMutate: () => setActionError(null),
     onSuccess: closeModalAndRefresh,
+    onError: (error) => reportActionError(error, 'Could not approve this verification.'),
   });
 
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       unwrap(adminService.rejectVerification(id, reason)),
+    onMutate: () => setActionError(null),
     onSuccess: closeModalAndRefresh,
+    onError: (error) => reportActionError(error, 'Could not reject this verification.'),
   });
 
   const requestClarificationMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       unwrap(adminService.requestVerificationClarification(id, reason)),
+    onMutate: () => setActionError(null),
     onSuccess: closeModalAndRefresh,
+    onError: (error) =>
+      reportActionError(error, 'Could not request clarification for this verification.'),
   });
 
   const handleApprove = () => setShowApproveConfirm(true);
@@ -232,8 +244,12 @@ export default function AdminVerificationsPage() {
             : ''
         }
         confirmLabel="Approve verification"
+        isLoading={approveMutation.isPending}
         onConfirm={() => activeRequest && approveMutation.mutate(activeRequest.id)}
       />
+      {actionError && (
+        <Toast message={actionError} variant="error" onClose={() => setActionError(null)} />
+      )}
     </>
   );
 }
