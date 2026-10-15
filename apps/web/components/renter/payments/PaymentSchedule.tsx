@@ -8,6 +8,7 @@ interface Payment {
   id: string;
   propertyName: string;
   amount: number;
+  amountPaid?: number;
   date: string;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
   dueDate: string;
@@ -118,7 +119,7 @@ export const PaymentSchedule = ({
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-xs text-gray-500">Due {formatDate(payment.dueDate)}</span>
                   <span className="text-xs font-semibold text-primary">
-                    {formatCurrency(payment.amount)}
+                    {formatCurrency(payment.amount - (payment.amountPaid ?? 0))}
                   </span>
                 </div>
               </div>

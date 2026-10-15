@@ -56,6 +56,13 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                   Due {formatDate(payment.dueDate)}
                   {payment.paidDate ? ` • Paid ${formatDate(payment.paidDate)}` : ''}
                 </p>
+                {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 && (
+                  <p className="text-xs text-success mt-1">
+                    {formatCurrency(payment.amountPaid ?? 0)} received ·{' '}
+                    {formatCurrency(payment.amount - (payment.amountPaid ?? 0))} still owed. It is
+                    paid out once the charge is paid in full.
+                  </p>
+                )}
               </div>
 
               <InvoiceLines

@@ -300,6 +300,8 @@ export interface RentPayment {
   category?: string;
   /** True when a late fee has already been raised against this (rent) charge. */
   lateFeeApplied?: boolean;
+  /** Naira received so far; less than `amount` while part-paid. */
+  amountPaid?: number;
   /** The period billed, when the charge came from a rent schedule. */
   periodStart?: string;
   periodEnd?: string;
@@ -570,4 +572,20 @@ export interface RentScheduleInput {
   amount?: number;
   leadDays?: number;
   items?: RentScheduleItem[];
+}
+
+/** Money paid into a lease's rent account and the tenant's credit. */
+export interface LeaseRentAccount {
+  leaseId: string;
+  creditBalance: number;
+  receipts: {
+    id: string;
+    reference: string;
+    amount: number;
+    method: string | null;
+    receivedAt: string;
+    allocations: { rentPaymentId: string; dueDate: string; amount: number }[];
+    toCredit: number;
+  }[];
+  creditApplied: { rentPaymentId: string; dueDate: string; amount: number; appliedAt: string }[];
 }

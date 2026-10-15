@@ -7,6 +7,7 @@ import { NairaSign } from '@getrentos/ui/NairaSign';
 interface Payment {
   id: string;
   amount: number;
+  amountPaid?: number;
   date: string;
   status: 'paid' | 'pending' | 'overdue' | 'processing';
 }
@@ -17,8 +18,12 @@ interface PaymentAnalyticsProps {
 
 export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
   const paidPayments = payments.filter((p) => p.status === 'paid');
-  const totalPaid = paidPayments.reduce((sum, p) => sum + p.amount, 0);
-  const averagePayment = paidPayments.length > 0 ? totalPaid / paidPayments.length : 0;
+  const paidInFull = paidPayments.reduce((sum, p) => sum + p.amount, 0);
+  // Matches the overview: part-payments on charges not yet cleared count as paid.
+  const totalPaid =
+    paidInFull +
+    payments.filter((p) => p.status !== 'paid').reduce((sum, p) => sum + (p.amountPaid ?? 0), 0);
+  const averagePayment = paidPayments.length > 0 ? paidInFull / paidPayments.length : 0;
 
   const paidMonths = new Set(
     paidPayments
@@ -30,7 +35,7 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
       })
       .filter((month): month is string => month !== null)
   );
-  const monthlyAverage = paidMonths.size > 0 ? totalPaid / paidMonths.size : 0;
+  const monthlyAverage = paidMonths.size > 0 ? paidInFull / paidMonths.size : 0;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {

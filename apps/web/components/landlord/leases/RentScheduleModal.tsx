@@ -47,6 +47,16 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
     },
   });
 
+  const account = useQuery({
+    queryKey: ['landlord', 'rent-account', leaseId],
+    enabled: Boolean(lease),
+    queryFn: async () => {
+      const res = await landlordService.getRentAccount(leaseId);
+      if (!res.success) throw new Error(res.message || 'Payments could not be loaded.');
+      return res.data!;
+    },
+  });
+
   const [amount, setAmount] = useState('');
   const [leadDays, setLeadDays] = useState('');
   const [items, setItems] = useState<RentScheduleItem[]>([]);
@@ -207,6 +217,45 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                       period&apos;s invoice for you, before it falls due, until the lease ends.
                     </p>
                   )}
+
+                  {account.data &&
+                    (account.data.creditBalance > 0 || account.data.receipts.length > 0) && (
+                      <div className="rounded-lg border border-border p-3 text-sm space-y-1.5">
+                        <p className="font-medium text-foreground">Payments received</p>
+                        {account.data.creditBalance > 0 && (
+                          <p className="text-xs text-success">
+                            Tenant credit {formatCurrency(account.data.creditBalance)}: it pays the
+                            next invoice automatically.
+                          </p>
+                        )}
+                        <ul className="space-y-1">
+                          {account.data.receipts.slice(0, 4).map((r) => (
+                            <li key={r.id} className="flex justify-between gap-2 text-xs">
+                              <span className="text-muted-foreground">
+                                {formatDate(r.receivedAt)}
+                                {r.toCredit > 0 ? ` · ${formatCurrency(r.toCredit)} to credit` : ''}
+                              </span>
+                              <span className="text-foreground tabular-nums">
+                                {formatCurrency(r.amount)}
+                              </span>
+                            </li>
+                          ))}
+                          {(account.data.creditApplied ?? []).slice(0, 3).map((c) => (
+                            <li
+                              key={`${c.rentPaymentId}-${c.appliedAt}`}
+                              className="flex justify-between gap-2 text-xs"
+                            >
+                              <span className="text-muted-foreground">
+                                Credit used on rent due {formatDate(c.dueDate)}
+                              </span>
+                              <span className="text-success tabular-nums">
+                                {formatCurrency(c.amount)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
                   {s?.status !== 'ENDED' && (
                     <>

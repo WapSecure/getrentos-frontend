@@ -114,7 +114,12 @@ export function ArrearsView() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-sm font-semibold text-foreground">
-                    {formatCurrency(payment.amount)}
+                    {formatCurrency(payment.amount - (payment.amountPaid ?? 0))}
+                    {(payment.amountPaid ?? 0) > 0 && (
+                      <span className="block text-xs font-normal text-muted-foreground">
+                        of {formatCurrency(payment.amount)}
+                      </span>
+                    )}
                   </span>
                   {payment.lateFeeApplied && <Badge variant="neutral">Late fee added</Badge>}
                   {isLateFee ? (
