@@ -7,6 +7,7 @@ import { CalendarClock, Pause, Play, Plus, Receipt, Trash2, X } from 'lucide-rea
 import { Button, CurrencyInput, Input } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
+import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
 import type { Lease, RentSchedule, RentScheduleItem } from '@/types/landlord';
 
 interface RentScheduleModalProps {
@@ -54,6 +55,27 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
       const res = await landlordService.getRentAccount(leaseId);
       if (!res.success) throw new Error(res.message || 'Payments could not be loaded.');
       return res.data!;
+    },
+  });
+
+  // Two-step: the first click asks, the second refunds.
+  const [confirmRefund, setConfirmRefund] = useState(false);
+  const refundCredit = useMutation({
+    mutationFn: async () => {
+      const res = await landlordService.refundTenantCredit(leaseId);
+      if (!res.success) throw new Error(res.message || 'The refund could not be made.');
+      return res.data!;
+    },
+    onSuccess: (r) => {
+      setConfirmRefund(false);
+      setNotice(
+        r.status === 'REFUNDED'
+          ? `${formatCurrency(r.refundedAmount)} refunded to the tenant, back the way they paid.`
+          : r.refundedAmount > 0
+            ? `${formatCurrency(r.refundedAmount)} refunded; the rest could not be and stays as credit.`
+            : 'The refund could not be made; the credit is unchanged. GetRentos finance sees failed refunds and follows up.'
+      );
+      account.refetch();
     },
   });
 
@@ -127,7 +149,9 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
     },
   });
 
-  const error = [save.error, togglePause.error, issueNow.error].find(Boolean) as Error | undefined;
+  const error = [save.error, togglePause.error, issueNow.error, refundCredit.error].find(
+    Boolean
+  ) as Error | undefined;
   const s = schedule.data;
   const busy = save.isPending || togglePause.isPending || issueNow.isPending;
 
@@ -223,10 +247,48 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                       <div className="rounded-lg border border-border p-3 text-sm space-y-1.5">
                         <p className="font-medium text-foreground">Payments received</p>
                         {account.data.creditBalance > 0 && (
-                          <p className="text-xs text-success">
-                            Tenant credit {formatCurrency(account.data.creditBalance)}: it pays the
-                            next invoice automatically.
-                          </p>
+                          <div className="text-xs text-success space-y-1.5">
+                            <p>
+                              Tenant credit {formatCurrency(account.data.creditBalance)}: it pays
+                              the next invoice automatically.
+                            </p>
+                            {confirmRefund ? (
+                              <div className="rounded-md bg-secondary/60 p-2 text-muted-foreground">
+                                <p>
+                                  Anything the tenant owes is paid from the credit first; the rest
+                                  goes back to the card or account they paid with.
+                                </p>
+                                <div className="mt-1.5 flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="primary"
+                                    disabled={refundCredit.isPending}
+                                    onClick={() => refundCredit.mutate()}
+                                  >
+                                    {refundCredit.isPending ? 'Refunding…' : 'Yes, refund it'}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setConfirmRefund(false)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setNotice(null);
+                                  setConfirmRefund(true);
+                                }}
+                              >
+                                Refund credit to tenant
+                              </Button>
+                            )}
+                          </div>
                         )}
                         <ul className="space-y-1">
                           {account.data.receipts.slice(0, 4).map((r) => (
@@ -254,6 +316,7 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                             </li>
                           ))}
                         </ul>
+                        <CreditRefundHistory refunds={account.data.refunds} />
                       </div>
                     )}
 

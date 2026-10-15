@@ -32,6 +32,7 @@ import {
   Handshake,
   FileSignature,
   CircleAlert,
+  RotateCcw,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -98,6 +99,12 @@ const navItems: NavItem[] = [
     label: 'Unmatched Payments',
     href: '/admin/unmatched-payments',
     icon: CircleAlert,
+    permission: 'rentfinance.view',
+  },
+  {
+    label: 'Credit Refunds',
+    href: '/admin/credit-refunds',
+    icon: RotateCcw,
     permission: 'rentfinance.view',
   },
   {
