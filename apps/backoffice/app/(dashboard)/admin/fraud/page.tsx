@@ -87,6 +87,7 @@ export default function AdminFraudPage() {
   });
 
   const createMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: (params: {
       subjectUserId: string;
       reason: string;
@@ -161,11 +162,11 @@ export default function AdminFraudPage() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Fraud &amp; Risk Review</h1>
-            <p className="text-muted-foreground mt-1">
-              {flaggedCountError
-                ? 'Flagged-alert count temporarily unavailable'
-                : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
-            </p>
+          <p className="text-muted-foreground mt-1">
+            {flaggedCountError
+              ? 'Flagged-alert count temporarily unavailable'
+              : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
+          </p>
         </div>
         <Button className="gap-1.5 shrink-0" onClick={() => setShowCreate(true)}>
           <Plus className="w-4 h-4" />
@@ -259,7 +260,14 @@ export default function AdminFraudPage() {
       <NewFraudAlertModal
         open={showCreate}
         onClose={() => setShowCreate(false)}
-        onCreate={(params) => createMutation.mutate(params)}
+        onCreate={async (params) => {
+          try {
+            await createMutation.mutateAsync(params);
+            return true;
+          } catch {
+            return false;
+          }
+        }}
         isCreating={createMutation.isPending}
       />
 

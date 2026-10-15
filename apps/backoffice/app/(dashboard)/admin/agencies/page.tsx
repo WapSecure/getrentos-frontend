@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   PageErrorState,
   Tabs,
@@ -53,6 +54,10 @@ export default function AdminAgenciesPage() {
   const [filter, setFilter] = useState<Filter>('SUBMITTED');
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    agency: AdminAgency;
+    action: 'APPROVE' | 'REJECT' | 'SUSPENDED' | 'ACTIVE';
+  } | null>(null);
 
   const query = useQuery({
     queryKey: ['admin', 'agencies', filter],
@@ -67,6 +72,7 @@ export default function AdminAgenciesPage() {
     mutationFn: ({ id, decision }: { id: string; decision: 'APPROVE' | 'REJECT' }) =>
       unwrap(adminAgencyService.decide(id, decision, notes[id]?.trim() || undefined)),
     onSuccess: (_r, { id, decision }) => {
+      setPendingAction(null);
       setNotes((n) => ({ ...n, [id]: '' }));
       refresh();
       setToast({
@@ -81,6 +87,7 @@ export default function AdminAgenciesPage() {
     mutationFn: ({ id, status }: { id: string; status: 'SUSPENDED' | 'ACTIVE' }) =>
       unwrap(adminAgencyService.setStatus(id, status, notes[id]?.trim() ?? '')),
     onSuccess: (_r, { id, status }) => {
+      setPendingAction(null);
       setNotes((n) => ({ ...n, [id]: '' }));
       refresh();
       setToast({
@@ -101,6 +108,7 @@ export default function AdminAgenciesPage() {
   };
 
   const items = query.data ?? [];
+  const actionPending = decide.isPending || setStatus.isPending;
 
   return (
     <>
@@ -218,19 +226,15 @@ export default function AdminAgenciesPage() {
                       {reviewable && (
                         <>
                           <Button
-                            onClick={() =>
-                              decide.mutate({ id: a.organizationId, decision: 'APPROVE' })
-                            }
-                            disabled={decide.isPending}
+                            onClick={() => setPendingAction({ agency: a, action: 'APPROVE' })}
+                            disabled={actionPending}
                           >
                             Verify firm
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() =>
-                              decide.mutate({ id: a.organizationId, decision: 'REJECT' })
-                            }
-                            disabled={decide.isPending || note.trim().length < 10}
+                            onClick={() => setPendingAction({ agency: a, action: 'REJECT' })}
+                            disabled={actionPending || note.trim().length < 10}
                           >
                             Send back
                           </Button>
@@ -239,10 +243,8 @@ export default function AdminAgenciesPage() {
                       {a.status === 'ACTIVE' && (
                         <Button
                           variant="outline"
-                          onClick={() =>
-                            setStatus.mutate({ id: a.organizationId, status: 'SUSPENDED' })
-                          }
-                          disabled={setStatus.isPending || note.trim().length < 10}
+                          onClick={() => setPendingAction({ agency: a, action: 'SUSPENDED' })}
+                          disabled={actionPending || note.trim().length < 10}
                         >
                           Suspend
                         </Button>
@@ -250,10 +252,8 @@ export default function AdminAgenciesPage() {
                       {a.status === 'SUSPENDED' && (
                         <Button
                           variant="outline"
-                          onClick={() =>
-                            setStatus.mutate({ id: a.organizationId, status: 'ACTIVE' })
-                          }
-                          disabled={setStatus.isPending || note.trim().length < 10}
+                          onClick={() => setPendingAction({ agency: a, action: 'ACTIVE' })}
+                          disabled={actionPending || note.trim().length < 10}
                         >
                           Restore
                         </Button>
@@ -270,6 +270,56 @@ export default function AdminAgenciesPage() {
       {toast && (
         <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => !open && !actionPending && setPendingAction(null)}
+        title={
+          pendingAction?.action === 'APPROVE'
+            ? 'Verify this firm?'
+            : pendingAction?.action === 'REJECT'
+              ? 'Send this verification back?'
+              : pendingAction?.action === 'SUSPENDED'
+                ? 'Suspend this firm?'
+                : 'Restore this firm?'
+        }
+        description={
+          pendingAction
+            ? `${pendingAction.agency.name} will be ${
+                pendingAction.action === 'APPROVE'
+                  ? 'verified and allowed to receive payouts and appear to owners'
+                  : pendingAction.action === 'REJECT'
+                    ? 'returned for corrected registration information'
+                    : pendingAction.action === 'SUSPENDED'
+                      ? 'suspended from active platform operations'
+                      : 'restored to active platform operations'
+              }. The decision and note are recorded in the audit trail.`
+            : ''
+        }
+        confirmLabel={
+          pendingAction?.action === 'APPROVE'
+            ? 'Verify firm'
+            : pendingAction?.action === 'REJECT'
+              ? 'Send back'
+              : pendingAction?.action === 'SUSPENDED'
+                ? 'Suspend firm'
+                : 'Restore firm'
+        }
+        isLoading={actionPending}
+        onConfirm={() => {
+          if (!pendingAction) return;
+          if (pendingAction.action === 'APPROVE' || pendingAction.action === 'REJECT') {
+            decide.mutate({
+              id: pendingAction.agency.organizationId,
+              decision: pendingAction.action,
+            });
+          } else {
+            setStatus.mutate({
+              id: pendingAction.agency.organizationId,
+              status: pendingAction.action,
+            });
+          }
+        }}
+      />
     </>
   );
 }

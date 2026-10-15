@@ -21,7 +21,7 @@ interface NewFraudAlertModalProps {
     severity: FraudAlertSeverity;
     relatedEntityType?: string;
     relatedEntityId?: string;
-  }) => void;
+  }) => Promise<boolean>;
   isCreating?: boolean;
 }
 
@@ -49,16 +49,16 @@ export const NewFraudAlertModal = ({
     onClose();
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!canSubmit) return;
-    onCreate({
+    const created = await onCreate({
       subjectUserId: subjectUserId.trim(),
       reason: reason.trim(),
       severity,
       ...(relatedEntityType.trim() ? { relatedEntityType: relatedEntityType.trim() } : {}),
       ...(relatedEntityId.trim() ? { relatedEntityId: relatedEntityId.trim() } : {}),
     });
-    handleClose();
+    if (created) handleClose();
   };
 
   return (
@@ -124,7 +124,11 @@ export const NewFraudAlertModal = ({
           <Button variant="outline" onClick={handleClose} disabled={isCreating}>
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={!canSubmit || isCreating} isLoading={isCreating}>
+          <Button
+            onClick={() => void handleCreate()}
+            disabled={!canSubmit || isCreating}
+            isLoading={isCreating}
+          >
             <ShieldPlus className="w-4 h-4" />
             Flag alert
           </Button>
