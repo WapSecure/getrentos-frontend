@@ -27,6 +27,7 @@ import {
   type LandReviewUploadInput,
 } from '@/types/landReviewer';
 import type { ReviewEvidenceActions } from './ReviewCheckEvidence';
+import { ConflictDeclarationCard } from './ConflictDeclarationCard';
 import { ReviewCheckRow } from './ReviewCheckRow';
 import { ReviewDocuments } from './ReviewDocuments';
 import { pendingChecks } from './reviewRules';
@@ -120,6 +121,25 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
     busyKey: evidenceKey,
   });
 
+  const declare = useMutation({
+    mutationFn: (v: { declaration: 'NONE' | 'DECLARED'; note?: string }) =>
+      unwrap(landReviewerService.declareConflict(seatId, v.declaration, v.note)),
+    onSuccess: (next, v) => {
+      if (v.declaration === 'DECLARED') {
+        // The seat is withdrawn; reload what the API still shows of it.
+        queryClient.invalidateQueries({ queryKey: landReviewKeys.all });
+        setToast({
+          message: 'Conflict recorded. You have stepped aside from this case.',
+          variant: 'success',
+        });
+        return;
+      }
+      store(next);
+      setToast({ message: 'Declaration recorded. Your checks are open.', variant: 'success' });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+  });
+
   const submit = useMutation({
     mutationFn: () => unwrap(landReviewerService.submitReport(seatId, report)),
     onSuccess: (next) => {
@@ -144,7 +164,9 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
     );
   }
 
-  const active = data.seatStatus === 'ACTIVE';
+  const undeclared = data.seatStatus === 'ACTIVE' && data.conflictDeclaration === null;
+  // Nothing on the case can be worked until the conflict declaration is made.
+  const active = data.seatStatus === 'ACTIVE' && !undeclared;
   const pending = pendingChecks(data.checks);
   const corners = boundaryCorners(data.parcel.boundaryGeometry);
   const reportLength = report.trim().length;
@@ -164,7 +186,7 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
           <Badge variant="info">{LAND_REVIEWER_ROLE_LABELS[data.role]}</Badge>
           <Badge
             variant={
-              active
+              active || undeclared
                 ? data.overdue
                   ? 'danger'
                   : 'warning'
@@ -173,7 +195,7 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
                   : 'neutral'
             }
           >
-            {active
+            {active || undeclared
               ? data.overdue
                 ? 'Overdue'
                 : 'In progress'
@@ -202,6 +224,13 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
         )}
       </header>
 
+      {undeclared && (
+        <ConflictDeclarationCard
+          isSaving={declare.isPending}
+          onDeclare={(declaration, note) => declare.mutate({ declaration, note })}
+        />
+      )}
+
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 space-y-8">
           <section aria-labelledby="checks-heading" className="space-y-3">
@@ -210,9 +239,11 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
                 Your checks
               </h2>
               <p className="text-sm text-muted-foreground">
-                {active
-                  ? `${data.checks.length - pending.length} of ${data.checks.length} decided. Your notes are visible to GetRentos reviewers, not to the owner or buyers.`
-                  : 'Decisions are closed on this seat.'}
+                {undeclared
+                  ? 'Make your conflict declaration above to open your checks.'
+                  : active
+                    ? `${data.checks.length - pending.length} of ${data.checks.length} decided. Your notes are visible to GetRentos reviewers, not to the owner or buyers.`
+                    : 'Decisions are closed on this seat.'}
               </p>
             </div>
             <ul className="space-y-3">
@@ -241,7 +272,9 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
             <h2 id="report-heading" className="text-lg font-semibold text-foreground">
               Final report
             </h2>
-            {active ? (
+            {undeclared ? (
+              <p className="text-sm text-muted-foreground">Opens after your declaration.</p>
+            ) : active ? (
               <form
                 className="space-y-3"
                 onSubmit={(e) => {

@@ -93,6 +93,8 @@ export interface LandReviewDocumentLink {
 
 export interface LandReviewCase extends MyLandReviewSummary {
   seatStatus: LandReviewerSeatStatus;
+  /** NONE once you declared no conflict; null until you declare (work is locked until then). */
+  conflictDeclaration: 'NONE' | 'DECLARED' | null;
   /** Send back as expectedVersion with a decision. */
   caseVersion: number;
   parcel: LandReviewParcel;

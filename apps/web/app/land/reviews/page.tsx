@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { ReviewSeatList } from '@/components/land/reviews/ReviewSeatList';
+import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 
 export default function LandReviewsPage() {
   return (
@@ -9,6 +11,12 @@ export default function LandReviewsPage() {
           Cases GetRentos has engaged you on. Decide each check assigned to you, then file your
           report.
         </p>
+        <Link
+          href={LAND_BUYER_ROUTES.ACCREDITATION}
+          className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+        >
+          Your accreditation
+        </Link>
       </div>
       <ReviewSeatList />
     </div>

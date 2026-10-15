@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Fingerprint,
   Gavel,
+  BadgeCheck,
   AlertTriangle,
   Landmark,
   ScrollText,
@@ -163,6 +164,12 @@ const navItems: NavItem[] = [
     label: 'Land Disputes',
     href: '/admin/land/disputes',
     icon: Gavel,
+    permission: 'verifications.review',
+  },
+  {
+    label: 'Land Professionals',
+    href: '/admin/land/professionals',
+    icon: BadgeCheck,
     permission: 'verifications.review',
   },
   {

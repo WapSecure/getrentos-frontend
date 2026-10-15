@@ -36,6 +36,15 @@ export const landReviewerService = {
       )
     ),
 
+  /** Required once before any work; DECLARED withdraws the seat. */
+  declareConflict: (seatId: string, declaration: 'NONE' | 'DECLARED', note?: string) =>
+    safeCall(() =>
+      authFetch<LandReviewCase>(`${seatPath(seatId)}/conflict`, {
+        method: 'POST',
+        body: JSON.stringify({ declaration, ...(note?.trim() ? { note: note.trim() } : {}) }),
+      })
+    ),
+
   submitReport: (seatId: string, report: string) =>
     safeCall(() =>
       authFetch<LandReviewCase>(`/land/reviews/${encodeURIComponent(seatId)}/report`, {
