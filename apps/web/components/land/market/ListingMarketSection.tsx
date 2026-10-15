@@ -75,6 +75,12 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
           >
             <BarChart3 className="h-4 w-4" aria-hidden /> Land prices in this area
           </Link>
+          <Link
+            href={`/land/dossier/listing/${listingId}`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            Decision dossier and all-in cost
+          </Link>
           {listing.data && (
             <button
               type="button"
