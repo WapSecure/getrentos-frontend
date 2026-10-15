@@ -26,7 +26,38 @@ export interface LandClosingChecklistItem {
   detail?: string;
 }
 
+/** A title perfection step (§9.5): submission and approval are separate. */
+export interface LandPerfectionStep {
+  key: string;
+  label: string;
+  owner: 'DEVELOPER' | 'BUYER_LAWYER' | 'GETRENTOS';
+  status: 'NOT_STARTED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'NOT_APPLICABLE';
+  dueDate?: string;
+  submittedAt?: string;
+  submissionReference?: string;
+  approvedAt?: string;
+  approvalReference?: string;
+  documentId?: string;
+  note?: string;
+  /** 0 on time, 1 late, 2 escalated to staff. */
+  escalationLevel: number;
+}
+
+export interface LandPerfection {
+  status: 'OPEN' | 'EXCEPTION' | 'PERFECTED';
+  professionalName?: string;
+  professionalFirm?: string;
+  professionalContact?: string;
+  openedAt: string;
+  perfectedAt?: string;
+  finalInstrumentReference?: string;
+  legalReview?: string;
+  steps: LandPerfectionStep[];
+  blockers: string[];
+}
+
 export interface LandClosingFields {
+  perfection?: LandPerfection | null;
   conditions?: LandClosingCondition[];
   closingChecklist?: LandClosingChecklistItem[];
   /** A failed condition lets the buyer cancel with everything paid refunded. */
