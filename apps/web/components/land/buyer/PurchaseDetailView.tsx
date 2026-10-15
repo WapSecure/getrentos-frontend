@@ -22,6 +22,7 @@ import {
   plotLabel,
   summariseSchedule,
 } from './landSaleLogic';
+import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 
 type ToastState = { message: string; variant: 'success' | 'error' | 'info' } | null;
 
@@ -60,6 +61,7 @@ const refundSentence = (purchase: {
 export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   const queryClient = useQueryClient();
   const [toast, setToast] = useState<ToastState>(null);
+  const [reporting, setReporting] = useState(false);
   const notify = (message: string, variant: 'success' | 'error' | 'info') =>
     setToast({ message, variant });
 
@@ -173,8 +175,28 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             {purchase.startedAt ? ` · started ${formatDate(purchase.startedAt)}` : ''}
           </p>
         </div>
-        <PurchaseStatusBadge status={purchase.status} />
+        <div className="flex flex-col items-end gap-2">
+          <PurchaseStatusBadge status={purchase.status} />
+          {purchase.propertyId && (
+            <button
+              type="button"
+              onClick={() => setReporting(true)}
+              className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Report a problem
+            </button>
+          )}
+        </div>
       </header>
+      {purchase.propertyId && (
+        <ReportLandProblemDialog
+          open={reporting}
+          onClose={() => setReporting(false)}
+          propertyId={purchase.propertyId}
+          purchaseId={purchase.id}
+          landTitle={`${plotLabel(purchase)} · ${purchase.layoutName}`}
+        />
+      )}
 
       {purchase.status === 'DEFAULTED' && (
         <p

@@ -18,6 +18,9 @@ export const landQueryKeys = {
   purchasesRoot: ['admin', 'land', 'purchases'] as const,
   purchases: (params: object) => ['admin', 'land', 'purchases', 'list', params] as const,
   purchase: (purchaseId: string) => ['admin', 'land', 'purchases', 'detail', purchaseId] as const,
+  disputesRoot: ['admin', 'land', 'disputes'] as const,
+  disputes: (params: object) => ['admin', 'land', 'disputes', 'list', params] as const,
+  dispute: (disputeId: string) => ['admin', 'land', 'disputes', 'detail', disputeId] as const,
 };
 
 /** `sentence-case` for enum values: `GOVERNORS_CONSENT` → "Governors consent". */

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, MapPin, ShieldCheck } from 'lucide-react';
@@ -19,6 +20,7 @@ import { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@/types/landMarket';
 import { AssuranceTierBadge } from './AssuranceTierBadge';
 import { TrustLabelsList } from './TrustLabelsList';
 import { PricePositionBar } from './PricePositionBar';
+import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 
 /**
  * Market context under a public land listing: its assurance tier, where its
@@ -27,6 +29,7 @@ import { PricePositionBar } from './PricePositionBar';
  * rather than breaking the listing page.
  */
 export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
+  const [reporting, setReporting] = useState(false);
   const listing = useQuery({
     queryKey: landKeys.publicListing(listingId),
     queryFn: () => unwrap(landService.getPublicListing(listingId)),
@@ -65,13 +68,32 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
         <h2 id="land-market" className="text-xl font-semibold tracking-tight text-foreground">
           How this parcel compares
         </h2>
-        <Link
-          href={insightsHref}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-        >
-          <BarChart3 className="h-4 w-4" aria-hidden /> Land prices in this area
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={insightsHref}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <BarChart3 className="h-4 w-4" aria-hidden /> Land prices in this area
+          </Link>
+          {listing.data && (
+            <button
+              type="button"
+              onClick={() => setReporting(true)}
+              className="text-sm font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Report a problem with this land
+            </button>
+          )}
+        </div>
       </div>
+      {listing.data && (
+        <ReportLandProblemDialog
+          open={reporting}
+          onClose={() => setReporting(false)}
+          propertyId={listing.data.propertyId}
+          landTitle={listing.data.title}
+        />
+      )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <div className="space-y-5">

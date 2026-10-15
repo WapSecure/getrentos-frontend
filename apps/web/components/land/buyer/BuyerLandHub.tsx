@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@getrentos/ui';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, Gavel } from 'lucide-react';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { PurchasesList } from './PurchasesList';
 import { ReservationsList } from './ReservationsList';
@@ -24,13 +24,18 @@ export const BuyerLandHub = () => {
             Plots you are holding and the estate plots you are paying for.
           </p>
         </div>
-        <Button
-          href={LAND_BUYER_ROUTES.LAYOUTS}
-          variant="outline"
-          icon={<LayoutGrid className="h-4 w-4" />}
-        >
-          Browse estates
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button href="/land/disputes" variant="ghost" icon={<Gavel className="h-4 w-4" />}>
+            Disputes
+          </Button>
+          <Button
+            href={LAND_BUYER_ROUTES.LAYOUTS}
+            variant="outline"
+            icon={<LayoutGrid className="h-4 w-4" />}
+          >
+            Browse estates
+          </Button>
+        </div>
       </div>
 
       <Tabs

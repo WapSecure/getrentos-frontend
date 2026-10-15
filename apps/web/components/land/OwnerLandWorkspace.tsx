@@ -4,7 +4,16 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
-import { ArrowRight, FileSearch, MapPin, Plus, Receipt, Ruler, ShieldCheck } from 'lucide-react';
+import {
+  ArrowRight,
+  FileSearch,
+  MapPin,
+  Plus,
+  Receipt,
+  Ruler,
+  ShieldCheck,
+  Gavel,
+} from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -159,6 +168,14 @@ export const OwnerLandWorkspace = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            href="/land/disputes"
+            variant="ghost"
+            rounded="lg"
+            icon={<Gavel className="h-4 w-4" />}
+          >
+            Disputes
+          </Button>
           <Button
             href={LAND_DEVELOPER_ROUTES.purchases()}
             variant="outline"
