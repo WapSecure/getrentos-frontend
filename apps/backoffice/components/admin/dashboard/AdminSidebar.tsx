@@ -30,6 +30,7 @@ import {
   Warehouse,
   CreditCard,
   Sparkles,
+  ClipboardCheck,
   Handshake,
   FileSignature,
   CircleAlert,
@@ -98,6 +99,12 @@ const navItems: NavItem[] = [
     label: 'GetRentos Managed',
     href: '/admin/managed-mandates',
     icon: Sparkles,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Managed Intake',
+    href: '/admin/managed-intakes',
+    icon: ClipboardCheck,
     permission: 'managed.view',
   },
   {

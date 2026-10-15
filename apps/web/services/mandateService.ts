@@ -245,18 +245,6 @@ export function managedBreakFee(id: string): Promise<ApiResponse<ManagedBreakFee
   return safeCall(() => authFetch<ManagedBreakFee>(`/management-mandates/${id}/break-fee`));
 }
 
-export function optIntoManaged(
-  propertyId: string,
-  tier: ServicingTier
-): Promise<ApiResponse<ManagementMandateDto>> {
-  return safeCall(() =>
-    authFetch<ManagementMandateDto>('/management-mandates/managed', {
-      method: 'POST',
-      body: JSON.stringify({ propertyId, tier }),
-    })
-  );
-}
-
 export function forProperty(propertyId: string): Promise<ApiResponse<ManagementMandateDto[]>> {
   return safeCall(() =>
     authFetch<ManagementMandateDto[]>(`/management-mandates/property/${propertyId}`)
