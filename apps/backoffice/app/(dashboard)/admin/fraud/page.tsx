@@ -67,6 +67,7 @@ export default function AdminFraudPage() {
   const total = data?.total ?? 0;
 
   const updateStatusMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({ id, status }: { id: string; status: FraudAlertStatus }) =>
       unwrap(adminService.updateFraudAlertStatus(id, status)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'fraudAlerts'] }),
@@ -99,12 +100,14 @@ export default function AdminFraudPage() {
   });
 
   const severityMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({ id, severity }: { id: string; severity: FraudAlertSeverity }) =>
       unwrap(adminService.updateFraudAlertSeverity(id, severity)),
     onSuccess: invalidateFraudAlerts,
   });
 
   const reopenMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: (id: string) => unwrap(adminService.reopenFraudAlert(id)),
     onSuccess: invalidateFraudAlerts,
   });

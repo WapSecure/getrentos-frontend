@@ -87,6 +87,7 @@ export default function AdminDisputesPage() {
     queryClient.invalidateQueries({ queryKey: ['admin', 'disputes'] });
 
   const resolveMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({
       id,
       resolution,
@@ -103,16 +104,19 @@ export default function AdminDisputesPage() {
   });
 
   const reviewMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: (id: string) => unwrap(adminService.startDisputeReview(id)),
     onSuccess: invalidateDisputes,
   });
 
   const reopenMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: (id: string) => unwrap(adminService.reopenDispute(id)),
     onSuccess: invalidateDisputes,
   });
 
   const escalateMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: (id: string) => unwrap(adminService.escalateDispute(id)),
     onSuccess: () => {
       invalidateDisputes();

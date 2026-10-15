@@ -115,6 +115,12 @@ export default function PropertyAuthoritiesPage() {
   // number-only check quietly dropped it, granting a mandate with no expiry.
   const expiryDays = Number.parseInt(String(expiresInDays), 10);
   const hasExpiry = Number.isSafeInteger(expiryDays) && expiryDays > 0;
+  const reportMutationError = (mutationError: unknown) =>
+    setError(
+      mutationError instanceof Error
+        ? mutationError.message
+        : 'The decision could not be recorded. Your inputs have been preserved.'
+    );
 
   // One mutation per action keeps the pending state (and the disabled logic that
   // reads it) independent, which matters when an officer acts on several claims
@@ -129,18 +135,21 @@ export default function PropertyAuthoritiesPage() {
         ...(note.trim() ? { note: note.trim() } : {}),
       }),
     onSuccess: (response, claim) => settle('approve', response, claim),
+    onError: reportMutationError,
   });
 
   const reject = useMutation({
     mutationFn: (claim: PropertyAuthorityClaim) =>
       propertyAuthorityService.reject(claim.id, reason.trim()),
     onSuccess: (response, claim) => settle('reject', response, claim),
+    onError: reportMutationError,
   });
 
   const revoke = useMutation({
     mutationFn: (claim: PropertyAuthorityClaim) =>
       propertyAuthorityService.revoke(claim.id, reason.trim()),
     onSuccess: (response, claim) => settle('revoke', response, claim),
+    onError: reportMutationError,
   });
 
   const busy = approve.isPending || reject.isPending || revoke.isPending;
