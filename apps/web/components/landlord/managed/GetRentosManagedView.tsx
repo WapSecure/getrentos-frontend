@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -228,6 +230,14 @@ export const GetRentosManagedView = () => {
         <p className="mt-1 text-muted-foreground">
           Two ways to hand over the day-to-day. Either way, GetRentos holds the money and keeps the
           record, so the property&rsquo;s history stays with you.
+        </p>
+        <p className="mt-2 text-sm">
+          <Link
+            href="/landlord/change-manager"
+            className="font-medium text-primary hover:underline"
+          >
+            Already managed and want to move to someone else? Change manager →
+          </Link>
         </p>
       </div>
 

@@ -34,6 +34,7 @@ import {
   CircleAlert,
   RotateCcw,
   BookOpenCheck,
+  ArrowRightLeft,
   GitCompareArrows,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
@@ -95,6 +96,12 @@ const navItems: NavItem[] = [
     label: 'GetRentos Managed',
     href: '/admin/managed-mandates',
     icon: Sparkles,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Manager Changes',
+    href: '/admin/manager-changes',
+    icon: ArrowRightLeft,
     permission: 'managed.view',
   },
   {
