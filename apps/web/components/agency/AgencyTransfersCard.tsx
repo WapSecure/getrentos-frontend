@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRightLeft } from 'lucide-react';
 import { Badge, Card } from '@getrentos/ui';
@@ -46,6 +47,14 @@ export function AgencyTransfersCard() {
                   </p>
                 )}
             </div>
+            {t.status === 'SWITCHED' && (
+              <Link
+                href={`/agency/handover/${t.id}`}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Handover
+              </Link>
+            )}
             <Badge variant={t.status === 'OPEN' ? 'info' : 'success'}>
               {t.status === 'OPEN' ? 'Scheduled' : 'Taken effect'}
             </Badge>

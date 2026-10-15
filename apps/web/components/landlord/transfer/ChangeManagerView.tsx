@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRightLeft, CalendarClock, CheckCircle2, TriangleAlert } from 'lucide-react';
 import { Badge, Button, Card, DatePicker, Textarea } from '@getrentos/ui';
@@ -378,6 +379,14 @@ export function ChangeManagerView() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={STATUS[t.status].variant}>{STATUS[t.status].label}</Badge>
+                    {t.status !== 'OPEN' && t.status !== 'CANCELLED' && (
+                      <Link
+                        href={`/landlord/change-manager/${t.id}`}
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        Handover
+                      </Link>
+                    )}
                     {t.status === 'OPEN' && (
                       <Button
                         size="sm"
