@@ -52,6 +52,12 @@ export interface PropertyAuthorityDto {
   justCreated?: boolean;
   /** Whether the publication gate would count this claim right now. */
   effective: boolean;
+  /** Officer-approved but held for co-owner quorum: not all co-owners have countersigned. */
+  awaitingCountersign?: boolean;
+  /** How many of the required co-owner countersignatures are in. */
+  countersignApproved?: number;
+  /** How many co-owner countersignatures this mandate needs (unanimous). */
+  countersignRequired?: number;
 }
 
 /** The property behind a reference code, for confirming a claim before filing it. */
@@ -98,6 +104,37 @@ export const propertyAuthorityService = {
   /** Properties the signed-in user may act for. */
   async managed(): Promise<ApiResponse<ManagedPropertyDto[]>> {
     return safeCall(() => authFetch<ManagedPropertyDto[]>('/property-authorities/managed'));
+  },
+
+  /**
+   * Agent/manager mandates on the caller's co-owned properties that are
+   * officer-approved but still need this co-owner to countersign (co-owner
+   * quorum is unanimous).
+   */
+  async awaitingCountersignature(): Promise<ApiResponse<PropertyAuthorityDto[]>> {
+    return safeCall(() =>
+      authFetch<PropertyAuthorityDto[]>('/property-authorities/awaiting-countersignature')
+    );
+  },
+
+  /** Countersign a pending mandate as a co-owner. */
+  async countersign(id: string): Promise<ApiResponse<PropertyAuthorityDto>> {
+    return safeCall(() =>
+      authFetch<PropertyAuthorityDto>(`/property-authorities/${id}/countersign`, { method: 'POST' })
+    );
+  },
+
+  /** Decline to countersign — one decline rejects the whole mandate (unanimous). */
+  async declineCountersign(
+    id: string,
+    reason?: string
+  ): Promise<ApiResponse<PropertyAuthorityDto>> {
+    return safeCall(() =>
+      authFetch<PropertyAuthorityDto>(`/property-authorities/${id}/countersign/decline`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      })
+    );
   },
 
   /**

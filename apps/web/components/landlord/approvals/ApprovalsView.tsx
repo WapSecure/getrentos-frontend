@@ -20,6 +20,7 @@ import {
   type SpendApprovalStatus,
 } from '@/services/spendApprovalService';
 import { SpendCapSettings } from './SpendCapSettings';
+import { MandateCountersignSection } from '@/components/shared/authority/MandateCountersignSection';
 import { unwrap } from '@/lib/apiHelpers';
 
 const STATUS_VARIANT: Record<SpendApprovalStatus, BadgeVariant> = {
@@ -94,6 +95,8 @@ export function ApprovalsView() {
           Spend your manager wants to make above your approval limit.
         </p>
       </div>
+
+      <MandateCountersignSection />
 
       <SpendCapSettings onToast={setToast} />
 
