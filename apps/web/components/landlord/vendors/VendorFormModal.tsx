@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import type { Vendor, VendorInput } from '@/types/landlord';
+import type { Vendor, VendorInput, BusinessRegistrationType } from '@/types/landlord';
+import { BUSINESS_TYPE_LABELS } from '@/services/agencyOnboardingService';
 
 interface VendorFormModalProps {
   isOpen: boolean;
@@ -53,6 +54,10 @@ const VendorForm = ({
   const [name, setName] = useState(vendor?.name ?? '');
   const [serviceType, setServiceType] = useState(vendor?.serviceType ?? serviceTypes[0]);
   const [phone, setPhone] = useState(vendor?.phone ?? '');
+  const [registrationNumber, setRegistrationNumber] = useState(vendor?.registrationNumber ?? '');
+  const [businessType, setBusinessType] = useState<BusinessRegistrationType | ''>(
+    vendor?.businessType ?? ''
+  );
   // A vendor added before this list existed may carry a type that is not in it.
   const options = serviceTypes.includes(serviceType)
     ? serviceTypes
@@ -64,7 +69,13 @@ const VendorForm = ({
 
   const handleSubmit = () => {
     if (!isValid) return;
-    onSave({ name: name.trim(), serviceType, phone: phone.trim() });
+    onSave({
+      name: name.trim(),
+      serviceType,
+      phone: phone.trim(),
+      registrationNumber: registrationNumber.trim() || undefined,
+      businessType: businessType || undefined,
+    });
     handleClose();
   };
 
@@ -122,6 +133,40 @@ const VendorForm = ({
               className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              CAC number <span className="text-muted-foreground font-normal">(optional)</span>
+            </label>
+            <LegacyInput
+              type="text"
+              value={registrationNumber}
+              onChange={(e) => setRegistrationNumber(e.target.value)}
+              placeholder="e.g. RC1234567"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              For a registered business, so we can verify its payout account.
+            </p>
+          </div>
+          {registrationNumber.trim() && (
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Registration type
+              </label>
+              <LegacySelect
+                value={businessType}
+                onChange={(e) => setBusinessType(e.target.value as BusinessRegistrationType | '')}
+                className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">Select a type…</option>
+                {(Object.keys(BUSINESS_TYPE_LABELS) as BusinessRegistrationType[]).map((t) => (
+                  <option key={t} value={t}>
+                    {BUSINESS_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </LegacySelect>
+            </div>
+          )}
         </div>
 
         <div className="p-4 border-t border-border flex gap-3">

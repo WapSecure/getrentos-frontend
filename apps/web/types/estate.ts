@@ -228,6 +228,9 @@ export interface EstatePayoutAccount {
   accountNumber: string;
   accountName: string;
   verified: boolean;
+  /** CAC registration number + class of the estate's organisation, if given. */
+  registrationNumber?: string | null;
+  businessType?: 'BUSINESS_NAME' | 'LIMITED_COMPANY' | 'INCORPORATED_TRUSTEES' | null;
 }
 
 /**

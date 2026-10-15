@@ -309,11 +309,20 @@ export interface RentPayment {
   lines?: { category: string; label: string; amount: number }[];
 }
 
+/** CAC registration class — mirrors the backend AgencyBusinessType enum. */
+export type BusinessRegistrationType =
+  | 'BUSINESS_NAME'
+  | 'LIMITED_COMPANY'
+  | 'INCORPORATED_TRUSTEES';
+
 export interface Vendor {
   id: string;
   name: string;
   serviceType: string;
   phone: string;
+  /** CAC registration number + class, when the vendor is a registered business. */
+  registrationNumber?: string | null;
+  businessType?: BusinessRegistrationType | null;
   /** Inactive vendors keep their history but cannot be given new work. */
   isActive: boolean;
   /** Mean of the rated jobs — 0 while `ratingCount` is 0, so check the count before showing stars. */
@@ -329,7 +338,10 @@ export interface Vendor {
 }
 
 /** What a landlord types when adding or editing a vendor. */
-export type VendorInput = Pick<Vendor, 'name' | 'serviceType' | 'phone'>;
+export type VendorInput = Pick<
+  Vendor,
+  'name' | 'serviceType' | 'phone' | 'registrationNumber' | 'businessType'
+>;
 
 export interface VendorJob {
   id: string;
