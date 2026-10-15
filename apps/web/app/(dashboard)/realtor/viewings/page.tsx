@@ -76,8 +76,13 @@ function RealtorViewingsPageContent() {
       }),
   });
 
-  const handleSubmit = (appointment: CreateViewingInput) => {
-    createViewing.mutate(appointment);
+  const handleSubmit = async (appointment: CreateViewingInput) => {
+    try {
+      await createViewing.mutateAsync(appointment);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   return (
