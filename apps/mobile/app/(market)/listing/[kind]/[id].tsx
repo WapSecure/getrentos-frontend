@@ -183,7 +183,20 @@ function Body({ listing: p }: { listing: MarketDetail }) {
       <View style={{ gap: spacing.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Badge label={MARKET_LABEL[p.kind]} tone="neutral" />
-          {p.verified ? <Badge label="Verified" tone="success" /> : null}
+          {p.trustLabel ? (
+            <Badge
+              label={p.trustLabel.label}
+              tone={
+                p.trustLabel.tone === 'verified'
+                  ? 'success'
+                  : p.trustLabel.tone === 'partial'
+                    ? 'info'
+                    : 'warning'
+              }
+            />
+          ) : p.verified ? (
+            <Badge label="Verified" tone="success" />
+          ) : null}
         </View>
         <Text variant="title" accessibilityRole="header">
           {p.title}

@@ -2,6 +2,7 @@ import { apiFetch } from './client';
 import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
+import { trustChainLabel, type TrustChainLike, type TrustLabelTone } from '@getrentos/shared';
 
 /**
  * The public marketplace: what anyone can browse without an account, mirroring
@@ -43,6 +44,8 @@ export interface MarketCard {
   size?: number;
   image?: string;
   verified: boolean;
+  /** Where verification stands, in words (rent and sale): see trustChainLabel. */
+  trustLabel?: { label: string; tone: TrustLabelTone };
   /** A short secondary fact for the card, e.g. "600 sqm · C of O". */
   highlight?: string;
   /** Trust signals shown over the photo, e.g. "Inspected", "Fair price". */
@@ -154,6 +157,7 @@ export const MARKET_SORT_LABEL: Record<MarketSort, string> = {
 /* ------------------------------- API DTOs ------------------------------- */
 
 interface RentalDto {
+  trustChain?: TrustChainLike;
   id: string;
   title: string;
   location: string;
@@ -184,6 +188,7 @@ interface RentalDto {
 }
 
 interface SaleDto {
+  trustChain?: TrustChainLike;
   id: string;
   title: string;
   price: number;
@@ -237,6 +242,10 @@ const humanise = (value?: string) =>
         .replace(/^\w/, (c) => c.toUpperCase())
     : undefined;
 
+/** The plain-words trust label when the listing carries its trust chain. */
+const labelFor = (chain?: TrustChainLike) =>
+  chain?.steps.length ? trustChainLabel(chain) : undefined;
+
 const rentToCard = (r: RentalDto): MarketCard => ({
   id: r.id,
   kind: 'rent',
@@ -249,6 +258,7 @@ const rentToCard = (r: RentalDto): MarketCard => ({
   size: positive(r.size),
   image: r.image || undefined,
   verified: !!r.verified,
+  trustLabel: labelFor(r.trustChain),
 });
 
 const saleToCard = (s: SaleDto): MarketCard => ({
@@ -261,6 +271,7 @@ const saleToCard = (s: SaleDto): MarketCard => ({
   bathrooms: positive(s.bathrooms),
   image: s.coverImageUrl || s.images?.[0] || undefined,
   verified: !!s.isVerified,
+  trustLabel: labelFor(s.trustChain),
   highlight: humanise(s.propertyType),
 });
 

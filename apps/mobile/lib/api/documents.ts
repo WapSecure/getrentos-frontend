@@ -1,4 +1,6 @@
+import { Platform } from 'react-native';
 import { apiFetch, apiUpload } from './client';
+import { queueWebFile } from './webFormFiles';
 import type { Paginated } from './properties';
 
 export interface RenterDocument {
@@ -39,10 +41,16 @@ export interface PickedFile {
 
 /** React Native's `fetch` accepts `{ uri, name, type }` for a file part — the DOM `FormData` types don't know that shape. */
 export function appendFile(form: FormData, field: string, file: PickedFile) {
+  const type = file.mimeType || 'application/octet-stream';
+  if (Platform.OS === 'web') {
+    // A browser FormData would send this object as the text "[object Object]".
+    queueWebFile(form, { field, uri: file.uri, name: file.name, type });
+    return;
+  }
   form.append(field, {
     uri: file.uri,
     name: file.name,
-    type: file.mimeType || 'application/octet-stream',
+    type,
   } as unknown as Blob);
 }
 
