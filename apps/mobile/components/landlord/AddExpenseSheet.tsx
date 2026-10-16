@@ -26,15 +26,26 @@ interface Props {
 }
 
 export function AddExpenseSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Log an expense">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Log an expense">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <AddExpenseForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <AddExpenseForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function AddExpenseForm({ onClose }: { onClose: () => void }) {
+function AddExpenseForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -59,6 +70,7 @@ function AddExpenseForm({ onClose }: { onClose: () => void }) {
         incurredAt,
         note: note.trim() || undefined,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'expenses'] });
       qc.invalidateQueries({ queryKey: ['landlord', 'financials'] });
@@ -67,6 +79,7 @@ function AddExpenseForm({ onClose }: { onClose: () => void }) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not log that expense.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const items = properties.data?.items ?? [];
@@ -85,8 +98,9 @@ function AddExpenseForm({ onClose }: { onClose: () => void }) {
               <Pressable
                 key={p.id}
                 onPress={() => setPropertyId(p.id)}
+                disabled={mutation.isPending}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, disabled: mutation.isPending }}
                 style={{
                   paddingHorizontal: spacing.md,
                   paddingVertical: 8,
@@ -120,8 +134,9 @@ function AddExpenseForm({ onClose }: { onClose: () => void }) {
               <Pressable
                 key={c}
                 onPress={() => setCategory(c)}
+                disabled={mutation.isPending}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, disabled: mutation.isPending }}
                 style={{
                   paddingHorizontal: spacing.md,
                   paddingVertical: 8,
@@ -149,21 +164,28 @@ function AddExpenseForm({ onClose }: { onClose: () => void }) {
         keyboardType="number-pad"
         value={amount}
         onChangeText={(v) => setAmount(v.replace(/\D/g, ''))}
+        editable={!mutation.isPending}
       />
 
-      <DateField label="Date incurred" value={incurredAt} onChange={setIncurredAt} />
+      <DateField
+        label="Date incurred"
+        value={incurredAt}
+        onChange={setIncurredAt}
+        disabled={mutation.isPending}
+      />
 
       <TextField
         label="Note (optional)"
         placeholder="e.g. Replaced the kitchen tap"
         value={note}
         onChangeText={setNote}
+        editable={!mutation.isPending}
       />
 
       <Button
         label="Log expense"
         loading={mutation.isPending}
-        disabled={!valid}
+        disabled={mutation.isPending || !valid}
         onPress={() => mutation.mutate()}
       />
     </View>

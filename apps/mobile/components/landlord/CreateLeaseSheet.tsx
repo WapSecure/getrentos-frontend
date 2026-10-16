@@ -23,10 +23,15 @@ interface Props {
 }
 
 export function CreateLeaseSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="New lease">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="New lease">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <CreateLeaseForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <CreateLeaseForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
@@ -39,7 +44,13 @@ function yearAfter(iso: string): string {
   return toISODate(new Date(y + 1, m - 1, d));
 }
 
-function CreateLeaseForm({ onClose }: { onClose: () => void }) {
+function CreateLeaseForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -74,6 +85,7 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
         securityDeposit: deposit ? Number(deposit) : undefined,
         sendImmediately: sendNow,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       toast.show(sendNow ? 'Lease sent to the tenant.' : 'Lease saved as a draft.', 'success');
@@ -81,6 +93,7 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not create that lease.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const valid =
@@ -96,6 +109,7 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
           options={units.map((u) => ({ value: u.id, label: `${u.propertyName} · ${u.unitName}` }))}
           value={unitId}
           onChange={chooseUnit}
+          disabled={create.isPending}
           emptyText="No vacant units to lease right now."
         />
       )}
@@ -105,6 +119,7 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
         placeholder="e.g. Amaka Obi"
         value={tenantName}
         onChangeText={setTenantName}
+        editable={!create.isPending}
       />
 
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
@@ -117,10 +132,17 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
               // Keep the term sensible when the start moves past the end.
               if (leaseEnd <= v) setLeaseEnd(yearAfter(v));
             }}
+            disabled={create.isPending}
           />
         </View>
         <View style={{ flex: 1 }}>
-          <DateField label="Ends" value={leaseEnd} onChange={setLeaseEnd} min={leaseStart} />
+          <DateField
+            label="Ends"
+            value={leaseEnd}
+            onChange={setLeaseEnd}
+            min={leaseStart}
+            disabled={create.isPending}
+          />
         </View>
       </View>
 
@@ -129,12 +151,14 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
         keyboardType="number-pad"
         value={rent}
         onChangeText={(v) => setRent(digits(v))}
+        editable={!create.isPending}
       />
       <TextField
         label="Security deposit (₦, optional)"
         keyboardType="number-pad"
         value={deposit}
         onChangeText={(v) => setDeposit(digits(v))}
+        editable={!create.isPending}
       />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -144,13 +168,18 @@ function CreateLeaseForm({ onClose }: { onClose: () => void }) {
             Off saves a draft you can send later.
           </Text>
         </View>
-        <Switch value={sendNow} onValueChange={setSendNow} accessibilityLabel="Send now" />
+        <Switch
+          value={sendNow}
+          onValueChange={setSendNow}
+          disabled={create.isPending}
+          accessibilityLabel="Send now"
+        />
       </View>
 
       <Button
         label={sendNow ? 'Create and send' : 'Save draft'}
         loading={create.isPending}
-        disabled={!valid}
+        disabled={create.isPending || !valid}
         onPress={() => create.mutate()}
       />
     </View>
