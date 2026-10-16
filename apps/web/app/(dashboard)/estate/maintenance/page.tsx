@@ -60,6 +60,7 @@ export default function EstateMaintenancePage() {
   });
 
   const closeMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({
       id,
       action,

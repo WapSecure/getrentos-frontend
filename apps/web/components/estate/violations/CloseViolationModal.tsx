@@ -23,6 +23,7 @@ export const CloseViolationModal = ({
   const [resolutionNotes, setResolutionNotes] = useState('');
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setResolutionNotes('');
     onClose();
   };
@@ -41,7 +42,11 @@ export const CloseViolationModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">{title}</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+              <button
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="p-1 rounded-lg hover:bg-secondary disabled:opacity-50"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -53,6 +58,7 @@ export const CloseViolationModal = ({
               <textarea
                 value={resolutionNotes}
                 onChange={(e) => setResolutionNotes(e.target.value)}
+                disabled={isSubmitting}
                 rows={3}
                 placeholder="How this was handled…"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
@@ -60,7 +66,7 @@ export const CloseViolationModal = ({
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
+              <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
                 Cancel
               </Button>
               <Button

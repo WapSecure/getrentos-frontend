@@ -75,6 +75,7 @@ export default function EstateViolationsPage() {
   });
 
   const closeMutation = useMutation({
+    meta: { showGlobalError: true },
     mutationFn: ({
       id,
       action,
