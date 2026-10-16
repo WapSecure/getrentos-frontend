@@ -17,9 +17,9 @@ interface Note {
 interface ApplicationNotesProps {
   applicationId: string;
   notes: Note[];
-  onAddNote: (content: string) => void;
+  onAddNote: (content: string) => Promise<boolean>;
   onDeleteNote: (id: string) => void;
-  onEditNote: (id: string, content: string) => void;
+  onEditNote: (id: string, content: string) => Promise<boolean>;
 }
 
 export const ApplicationNotes = ({
@@ -32,12 +32,21 @@ export const ApplicationNotes = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [content, setContent] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleAddNote = () => {
-    if (!content.trim()) return;
-    onAddNote(content);
-    setContent('');
-    setIsAdding(false);
+  const handleAddNote = async () => {
+    if (!content.trim() || isSaving) return;
+    setIsSaving(true);
+    setSaveError(null);
+    const saved = await onAddNote(content.trim());
+    setIsSaving(false);
+    if (saved) {
+      setContent('');
+      setIsAdding(false);
+    } else {
+      setSaveError('The note could not be saved. Your draft is unchanged.');
+    }
   };
 
   const handleEditNote = (id: string) => {
@@ -48,11 +57,18 @@ export const ApplicationNotes = ({
     }
   };
 
-  const handleSaveEdit = (id: string) => {
-    if (!editContent.trim()) return;
-    onEditNote(id, editContent);
-    setEditingId(null);
-    setEditContent('');
+  const handleSaveEdit = async (id: string) => {
+    if (!editContent.trim() || isSaving) return;
+    setIsSaving(true);
+    setSaveError(null);
+    const saved = await onEditNote(id, editContent.trim());
+    setIsSaving(false);
+    if (saved) {
+      setEditingId(null);
+      setEditContent('');
+    } else {
+      setSaveError('The note could not be updated. Your changes are unchanged.');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -92,7 +108,12 @@ export const ApplicationNotes = ({
             className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
           <div className="flex gap-2 mt-2">
-            <Button size="sm" onClick={handleAddNote} disabled={!content.trim()}>
+            <Button
+              size="sm"
+              onClick={() => void handleAddNote()}
+              disabled={!content.trim() || isSaving}
+              isLoading={isSaving}
+            >
               Save
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
@@ -101,6 +122,8 @@ export const ApplicationNotes = ({
           </div>
         </motion.div>
       )}
+
+      {saveError && <p className="text-sm text-destructive">{saveError}</p>}
 
       {/* Notes List */}
       <div className="space-y-2">
@@ -126,8 +149,9 @@ export const ApplicationNotes = ({
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    onClick={() => handleSaveEdit(note.id)}
-                    disabled={!editContent.trim()}
+                    onClick={() => void handleSaveEdit(note.id)}
+                    disabled={!editContent.trim() || isSaving}
+                    isLoading={isSaving}
                   >
                     Save
                   </Button>
