@@ -342,7 +342,14 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
                 canRaise={detail.status === 'ISSUED'}
                 isRaising={raiseDispute.isPending}
                 isWithdrawing={withdrawDispute.isPending}
-                onRaise={(lineId, reason) => raiseDispute.mutate({ lineId, reason })}
+                onRaise={async (lineId, reason) => {
+                  try {
+                    await raiseDispute.mutateAsync({ lineId, reason });
+                    return true;
+                  } catch {
+                    return false;
+                  }
+                }}
                 onWithdraw={(disputeId) => withdrawDispute.mutate(disputeId)}
               />
 
