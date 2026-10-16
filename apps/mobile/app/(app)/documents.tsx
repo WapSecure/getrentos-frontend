@@ -243,6 +243,7 @@ export default function Documents() {
       <Sheet
         open={!!sharingId}
         onClose={() => {
+          if (shareMutation.isPending) return;
           setSharingId(null);
           setShareEmail('');
         }}
@@ -256,11 +257,12 @@ export default function Documents() {
             keyboardType="email-address"
             value={shareEmail}
             onChangeText={setShareEmail}
+            editable={!shareMutation.isPending}
           />
           <Button
             label="Share"
             loading={shareMutation.isPending}
-            disabled={!shareEmail.trim()}
+            disabled={shareMutation.isPending || !shareEmail.trim()}
             onPress={() =>
               sharingId && shareMutation.mutate({ id: sharingId, email: shareEmail.trim() })
             }

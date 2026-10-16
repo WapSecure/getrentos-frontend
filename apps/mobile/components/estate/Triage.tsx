@@ -215,7 +215,7 @@ export function CloseSheet({
   return (
     <Sheet
       open={open}
-      onClose={onClose}
+      onClose={busy ? () => undefined : onClose}
       title={how === 'resolve' ? `Resolve this ${what}` : `Dismiss this ${what}`}
     >
       {open ? <CloseForm how={how} what={what} busy={busy} onConfirm={onConfirm} /> : null}
@@ -243,6 +243,7 @@ function CloseForm({
         label={dismissing ? 'Why it’s being dismissed' : 'What was done (optional)'}
         value={notes}
         onChangeText={setNotes}
+        editable={!busy}
         multiline
         maxLength={2000}
         autoFocus
@@ -256,7 +257,7 @@ function CloseForm({
         label={dismissing ? 'Dismiss' : 'Mark resolved'}
         variant={dismissing ? 'destructive' : 'primary'}
         // Dismissing without a reason leaves nothing to answer "why was this ignored?".
-        disabled={dismissing && notes.trim().length < 3}
+        disabled={busy || (dismissing && notes.trim().length < 3)}
         loading={busy}
         onPress={() => onConfirm(notes.trim())}
       />
