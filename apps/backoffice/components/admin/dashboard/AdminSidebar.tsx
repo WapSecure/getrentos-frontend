@@ -31,6 +31,7 @@ import {
   CreditCard,
   Sparkles,
   ClipboardCheck,
+  Navigation,
   Handshake,
   FileSignature,
   CircleAlert,
@@ -105,6 +106,12 @@ const navItems: NavItem[] = [
     label: 'Managed Intake',
     href: '/admin/managed-intakes',
     icon: ClipboardCheck,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Field Operations',
+    href: '/admin/field-operations',
+    icon: Navigation,
     permission: 'managed.view',
   },
   {

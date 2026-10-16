@@ -65,6 +65,14 @@ export interface ManagedIntake {
   findings: string | null;
   eligible: boolean | null;
   recommendedTier: ManagedServicingTier | null;
+  /** The latest field visit for the assessment, with its proof of presence. */
+  visit: {
+    id: string;
+    status: FieldVisitStatus;
+    checkedInAt: string | null;
+    distanceM: number | null;
+    withinRange: boolean | null;
+  } | null;
   proposal: {
     tier: ManagedServicingTier;
     tierName: string;
@@ -335,3 +343,99 @@ export interface BulkApproveTerminationResult {
   approved: number;
   skipped: { id: string; reason: string }[];
 }
+
+export type FieldVisitStatus = 'SCHEDULED' | 'CHECKED_IN' | 'DONE' | 'CANCELLED';
+
+/** One trip by a field agent to a property. */
+export interface FieldVisit {
+  id: string;
+  kind: 'ASSESSMENT' | 'INSPECTION';
+  status: FieldVisitStatus;
+  overdue: boolean;
+  escalatedAt: string | null;
+  propertyId: string;
+  propertyTitle: string;
+  propertyAddress: string;
+  propertyHasPin: boolean;
+  intakeId: string | null;
+  assigneeUserId: string;
+  assigneeName: string | null;
+  scheduledFor: string;
+  purpose: string | null;
+  checkedInAt: string | null;
+  checkInDistanceM: number | null;
+  checkInAccuracyM: number | null;
+  checkInWithinRange: boolean | null;
+  completedAt: string | null;
+  outcomeNote: string | null;
+  cancelReason: string | null;
+}
+
+export interface FieldAgent {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  active: boolean;
+  states: string[];
+  areas: string[];
+  maxOpenVisits: number;
+  openVisits: number;
+}
+
+/** A field agent ranked for a property: covering it and with room come first. */
+export interface FieldAgentCandidate {
+  userId: string;
+  name: string | null;
+  covers: boolean;
+  openVisits: number;
+  maxOpenVisits: number;
+  atCapacity: boolean;
+}
+
+export const adminFieldService = {
+  agents(): Promise<ApiResponse<FieldAgent[]>> {
+    return safeCall(() => authFetch<FieldAgent[]>('/admin/field-operations/agents'));
+  },
+  saveAgent(
+    userId: string,
+    input: { states: string[]; areas: string[]; maxOpenVisits: number; active: boolean }
+  ): Promise<ApiResponse<FieldAgent>> {
+    return safeCall(() =>
+      authFetch<FieldAgent>(`/admin/field-operations/agents/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+  suggest(propertyId: string): Promise<ApiResponse<FieldAgentCandidate[]>> {
+    return safeCall(() =>
+      authFetch<FieldAgentCandidate[]>(`/admin/field-operations/suggest?propertyId=${propertyId}`)
+    );
+  },
+  visits(view: 'open' | 'overdue' | 'done'): Promise<ApiResponse<FieldVisit[]>> {
+    return safeCall(() => authFetch<FieldVisit[]>(`/admin/field-operations/visits?view=${view}`));
+  },
+  mine(): Promise<ApiResponse<FieldVisit[]>> {
+    return safeCall(() => authFetch<FieldVisit[]>('/admin/field-operations/visits/mine'));
+  },
+  scheduleInspection(input: {
+    propertyId: string;
+    assigneeUserId: string;
+    scheduledFor: string;
+    purpose: string;
+  }) {
+    return post<FieldVisit>('/admin/field-operations/visits', input);
+  },
+  checkIn(id: string, input: { lat: number; lng: number; accuracyM: number }) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/check-in`, input);
+  },
+  complete(id: string, outcomeNote: string) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/complete`, { outcomeNote });
+  },
+  reassign(id: string, assigneeUserId: string) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/reassign`, { assigneeUserId });
+  },
+  cancel(id: string, reason: string) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/cancel`, { reason });
+  },
+};
