@@ -18,7 +18,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+import { formatCurrency, formatDate, recentMonthOptions, unwrap } from '@getrentos/shared';
 
 import {
   adminManagedPnlService,
@@ -46,20 +46,6 @@ const GROUP_LABEL: Record<PnlGroupBy, string> = {
   manager: 'Portfolio manager',
   tier: 'Package',
   region: 'Region',
-};
-
-/** The last 18 months as YYYY-MM, newest first, in Lagos time. */
-const recentMonths = () => {
-  const now = new Date(Date.now() + 3_600_000);
-  const out: { value: string; label: string }[] = [];
-  for (let i = 0; i < 18; i += 1) {
-    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
-    out.push({
-      value: `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`,
-      label: d.toLocaleDateString('en-NG', { month: 'long', year: 'numeric', timeZone: 'UTC' }),
-    });
-  }
-  return out;
 };
 
 const money = (n: number) => (n < 0 ? `−${formatCurrency(-n)}` : formatCurrency(n));
@@ -237,7 +223,7 @@ export default function ManagedPnlPage() {
   const user = useAdminUser();
   const canOperate = hasAdminPermission(user?.roles, 'managed.operate');
   const queryClient = useQueryClient();
-  const months = useMemo(() => recentMonths(), []);
+  const months = useMemo(() => recentMonthOptions(), []);
   const [from, setFrom] = useState(months[2].value);
   const [to, setTo] = useState(months[0].value);
   const [groupBy, setGroupBy] = useState<PnlGroupBy>('property');
