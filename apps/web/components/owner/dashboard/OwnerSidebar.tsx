@@ -22,6 +22,7 @@ import {
   Luggage,
   KeyRound,
   History,
+  MessageSquareText,
   ClipboardCheck,
   PiggyBank,
   Receipt,
@@ -81,6 +82,7 @@ export const navItems: NavItem[] = [
   // owner, so this is not phrased as one of the owner's own properties.
   { label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
   { labelKey: 'sidebar.activity', href: ROUTES.OWNER_ACTIVITY, icon: History },
+  { labelKey: 'sidebar.queries', href: ROUTES.OWNER_QUERIES, icon: MessageSquareText },
   {
     label: 'Estate requests',
     href: ESTATE_MARKETPLACE_ROUTES.OWNER_ESTATE_AGREEMENTS,

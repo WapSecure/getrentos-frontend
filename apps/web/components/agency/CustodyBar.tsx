@@ -16,6 +16,7 @@ import {
   UserRound,
   Users,
   Wrench,
+  MessageSquareText,
 } from 'lucide-react';
 import { useCustody } from './CustodyProvider';
 import {
@@ -164,6 +165,14 @@ export function CustodyBar() {
       >
         <Wrench className="h-4 w-4" aria-hidden />
         Home management
+      </Link>
+
+      <Link
+        href="/agency/queries"
+        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+      >
+        <MessageSquareText className="h-4 w-4" aria-hidden />
+        Owner questions
       </Link>
 
       <Link
