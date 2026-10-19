@@ -20,15 +20,27 @@ interface Props {
 }
 
 export function LeaseTerminationSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Request lease termination">
+    <Sheet
+      open={open}
+      onClose={submitting ? () => undefined : onClose}
+      title="Request lease termination"
+    >
       {/* Remount on each open so the form always starts blank. */}
-      <LeaseTerminationForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <LeaseTerminationForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function LeaseTerminationForm({ onClose }: Omit<Props, 'open'>) {
+function LeaseTerminationForm({
+  onClose,
+  onSubmittingChange,
+}: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
   const { spacing } = useTheme();
   const toast = useToast();
   const [noticeDate, setNoticeDate] = useState('');
@@ -36,12 +48,14 @@ function LeaseTerminationForm({ onClose }: Omit<Props, 'open'>) {
 
   const mutation = useMutation({
     mutationFn: () => leaseApi.requestTermination(noticeDate.trim(), reason.trim()),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       toast.show('Termination request sent to your landlord.', 'success');
       onClose();
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not send the request.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -55,6 +69,7 @@ function LeaseTerminationForm({ onClose }: Omit<Props, 'open'>) {
         value={noticeDate}
         onChange={setNoticeDate}
         min={toISODate(new Date())}
+        disabled={mutation.isPending}
       />
       <TextField
         label="Reason"
@@ -63,6 +78,7 @@ function LeaseTerminationForm({ onClose }: Omit<Props, 'open'>) {
         numberOfLines={3}
         value={reason}
         onChangeText={setReason}
+        editable={!mutation.isPending}
       />
       <Text variant="caption" color="warning">
         Check your lease agreement for notice-period and penalty terms before submitting.
@@ -71,7 +87,7 @@ function LeaseTerminationForm({ onClose }: Omit<Props, 'open'>) {
         label="Send request"
         variant="destructive"
         loading={mutation.isPending}
-        disabled={!noticeDate.trim() || !reason.trim()}
+        disabled={mutation.isPending || !noticeDate.trim() || !reason.trim()}
         onPress={() => mutation.mutate()}
       />
     </View>

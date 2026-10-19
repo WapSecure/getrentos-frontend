@@ -23,15 +23,26 @@ const SERVICE_TYPES = [
 ];
 
 export function AddVendorSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Add a vendor">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Add a vendor">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <AddVendorForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <AddVendorForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function AddVendorForm({ onClose }: { onClose: () => void }) {
+function AddVendorForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -47,6 +58,7 @@ function AddVendorForm({ onClose }: { onClose: () => void }) {
         serviceType: serviceType.trim(),
         phone: phone.trim(),
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'vendors'] });
       toast.show('Vendor added.', 'success');
@@ -54,6 +66,7 @@ function AddVendorForm({ onClose }: { onClose: () => void }) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not add that vendor.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const valid = name.trim() && serviceType.trim() && phone.trim();
@@ -69,6 +82,7 @@ function AddVendorForm({ onClose }: { onClose: () => void }) {
         placeholder="e.g. Tunde Plumbing Works"
         value={name}
         onChangeText={setName}
+        editable={!mutation.isPending}
       />
 
       <View style={{ gap: spacing.sm }}>
@@ -77,14 +91,17 @@ function AddVendorForm({ onClose }: { onClose: () => void }) {
           placeholder="e.g. Plumbing"
           value={serviceType}
           onChangeText={setServiceType}
+          editable={!mutation.isPending}
         />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {SERVICE_TYPES.map((t) => (
             <Pressable
               key={t}
               onPress={() => setServiceType(t)}
+              disabled={mutation.isPending}
               accessibilityRole="button"
               accessibilityLabel={`Use ${t}`}
+              accessibilityState={{ disabled: mutation.isPending }}
               style={{
                 paddingHorizontal: spacing.md,
                 paddingVertical: 7,
@@ -107,12 +124,13 @@ function AddVendorForm({ onClose }: { onClose: () => void }) {
         keyboardType="phone-pad"
         value={phone}
         onChangeText={setPhone}
+        editable={!mutation.isPending}
       />
 
       <Button
         label="Add vendor"
         loading={mutation.isPending}
-        disabled={!valid}
+        disabled={mutation.isPending || !valid}
         onPress={() => mutation.mutate()}
       />
     </View>

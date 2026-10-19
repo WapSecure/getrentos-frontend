@@ -37,14 +37,29 @@ const fail = (toast: ReturnType<typeof useToast>, e: unknown, fallback: string) 
 /* ------------------------------ eviction ------------------------------- */
 
 export function OpenEvictionSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Open an eviction case">
-      <OpenEvictionForm key={open ? 'open' : 'closed'} onClose={onClose} />
+    <Sheet
+      open={open}
+      onClose={submitting ? () => undefined : onClose}
+      title="Open an eviction case"
+    >
+      <OpenEvictionForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function OpenEvictionForm({ onClose }: { onClose: () => void }) {
+function OpenEvictionForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -59,12 +74,14 @@ function OpenEvictionForm({ onClose }: { onClose: () => void }) {
 
   const start = useMutation({
     mutationFn: () => landlordApi.initiateEviction(leaseId!, reason.trim()),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'evictions'] });
       toast.show('Case opened. Issue a notice when you are ready.', 'success');
       onClose();
     },
     onError: (e) => fail(toast, e, 'Could not open that case.'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -83,6 +100,7 @@ function OpenEvictionForm({ onClose }: { onClose: () => void }) {
           }))}
           value={leaseId}
           onChange={setLeaseId}
+          disabled={start.isPending}
           emptyText="No active tenancies."
         />
       )}
@@ -93,12 +111,13 @@ function OpenEvictionForm({ onClose }: { onClose: () => void }) {
         numberOfLines={3}
         value={reason}
         onChangeText={setReason}
+        editable={!start.isPending}
       />
       <Button
         label="Open case"
         variant="destructive"
         loading={start.isPending}
-        disabled={!leaseId || !reason.trim()}
+        disabled={start.isPending || !leaseId || !reason.trim()}
         onPress={() => start.mutate()}
       />
     </View>
@@ -108,14 +127,25 @@ function OpenEvictionForm({ onClose }: { onClose: () => void }) {
 /* ------------------------------ document ------------------------------- */
 
 export function UploadDocumentSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Upload a document">
-      <UploadDocumentForm key={open ? 'open' : 'closed'} onClose={onClose} />
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Upload a document">
+      <UploadDocumentForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function UploadDocumentForm({ onClose }: { onClose: () => void }) {
+function UploadDocumentForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -133,12 +163,14 @@ function UploadDocumentForm({ onClose }: { onClose: () => void }) {
 
   const upload = useMutation({
     mutationFn: () => landlordApi.uploadDocument(file!, name.trim(), category),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'documents'] });
       toast.show('Document uploaded.', 'success');
       onClose();
     },
     onError: (e) => fail(toast, e, 'Could not upload that document.'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -147,6 +179,7 @@ function UploadDocumentForm({ onClose }: { onClose: () => void }) {
         label={file ? 'Choose a different file' : 'Choose a file'}
         variant="outline"
         onPress={choose}
+        disabled={upload.isPending}
         icon={<FileText size={16} color={colors.primary} />}
       />
       {file ? (
@@ -162,17 +195,18 @@ function UploadDocumentForm({ onClose }: { onClose: () => void }) {
           </Text>
         </View>
       ) : null}
-      <TextField label="Name" value={name} onChangeText={setName} />
+      <TextField label="Name" value={name} onChangeText={setName} editable={!upload.isPending} />
       <ChipSelect
         label="Category"
         options={DOCUMENT_CATEGORIES.map((c) => ({ value: c, label: DOCUMENT_CATEGORY_LABEL[c] }))}
         value={category}
         onChange={setCategory}
+        disabled={upload.isPending}
       />
       <Button
         label="Upload"
         loading={upload.isPending}
-        disabled={!file || !name.trim()}
+        disabled={upload.isPending || !file || !name.trim()}
         onPress={() => upload.mutate()}
       />
     </View>
@@ -182,14 +216,29 @@ function UploadDocumentForm({ onClose }: { onClose: () => void }) {
 /* --------------------------- owner statement --------------------------- */
 
 export function GenerateStatementSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Generate a statement">
-      <GenerateStatementForm key={open ? 'open' : 'closed'} onClose={onClose} />
+    <Sheet
+      open={open}
+      onClose={submitting ? () => undefined : onClose}
+      title="Generate a statement"
+    >
+      <GenerateStatementForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function GenerateStatementForm({ onClose }: { onClose: () => void }) {
+function GenerateStatementForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -205,28 +254,41 @@ function GenerateStatementForm({ onClose }: { onClose: () => void }) {
 
   const generate = useMutation({
     mutationFn: () => landlordApi.generateOwnerStatement({ periodStart, periodEnd }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'owner-statements'] });
       toast.show('Statement generated as a draft.', 'success');
       onClose();
     },
     onError: (e) => fail(toast, e, 'Could not generate that statement.'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
     <View style={{ gap: spacing.lg }}>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>
-          <DateField label="From" value={periodStart} onChange={setPeriodStart} />
+          <DateField
+            label="From"
+            value={periodStart}
+            onChange={setPeriodStart}
+            disabled={generate.isPending}
+          />
         </View>
         <View style={{ flex: 1 }}>
-          <DateField label="To" value={periodEnd} onChange={setPeriodEnd} min={periodStart} />
+          <DateField
+            label="To"
+            value={periodEnd}
+            onChange={setPeriodEnd}
+            min={periodStart}
+            disabled={generate.isPending}
+          />
         </View>
       </View>
       <Button
         label="Generate"
         loading={generate.isPending}
-        disabled={!periodStart || periodEnd < periodStart}
+        disabled={generate.isPending || !periodStart || periodEnd < periodStart}
         onPress={() => generate.mutate()}
       />
     </View>
