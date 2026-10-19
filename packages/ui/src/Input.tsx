@@ -2,38 +2,78 @@
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@getrentos/shared';
+import { controlShell, innerInputClass, type ControlSize } from './controlStyles';
+import { useFieldControl } from './fieldContext';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   leadingIcon?: ReactNode;
   trailingIcon?: ReactNode;
   /** Styles for the native input rather than its visual shell. */
   inputClassName?: string;
+  /** Marks the control invalid. Inside a Field, its `error` does this for you. */
+  invalid?: boolean;
+  controlSize?: ControlSize;
 }
 
+/**
+ * Single-line text input. Inside a `Field` it takes its id, description and
+ * invalid state from the field; outside one, pass `id` / `invalid` yourself.
+ */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, inputClassName, leadingIcon, trailingIcon, disabled, ...props }, ref) => (
-    <span
-      className={cn(
-        'group flex min-h-11 w-full items-center gap-2 rounded-lg border border-border bg-card px-3.5 transition-[border-color,background-color,box-shadow] duration-150',
-        'hover:border-foreground/20',
-        'focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/12',
-        disabled && 'cursor-not-allowed bg-secondary/60 opacity-60 hover:border-border',
-        className
-      )}
-    >
-      {leadingIcon && <span className="shrink-0 text-muted-foreground">{leadingIcon}</span>}
-      <input
-        ref={ref}
-        disabled={disabled}
+  (
+    {
+      className,
+      inputClassName,
+      leadingIcon,
+      trailingIcon,
+      disabled,
+      readOnly,
+      invalid,
+      controlSize,
+      id,
+      required,
+      'aria-describedby': describedBy,
+      'aria-invalid': ariaInvalid,
+      ...props
+    },
+    ref
+  ) => {
+    const field = useFieldControl({
+      id,
+      invalid,
+      required,
+      'aria-describedby': describedBy,
+      'aria-invalid': ariaInvalid,
+    });
+    return (
+      <span
         className={cn(
-          'min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:shadow-none',
-          inputClassName
+          'group flex items-center gap-2',
+          controlShell({
+            size: controlSize,
+            invalid: field.invalid,
+            disabled,
+            readOnly,
+            wraps: true,
+          }),
+          className
         )}
-        {...props}
-      />
-      {trailingIcon && <span className="shrink-0 text-muted-foreground">{trailingIcon}</span>}
-    </span>
-  )
+      >
+        {leadingIcon && <span className="shrink-0 text-muted-foreground">{leadingIcon}</span>}
+        <input
+          ref={ref}
+          id={field.id}
+          disabled={disabled}
+          readOnly={readOnly}
+          required={required}
+          {...field.ariaProps}
+          className={cn(innerInputClass, inputClassName)}
+          {...props}
+        />
+        {trailingIcon && <span className="shrink-0 text-muted-foreground">{trailingIcon}</span>}
+      </span>
+    );
+  }
 );
 
 Input.displayName = 'Input';

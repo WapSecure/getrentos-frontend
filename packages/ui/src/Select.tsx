@@ -1,9 +1,11 @@
 'use client';
 
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
-import { Check, ChevronDown, Search } from 'lucide-react';
+import { Check, ChevronDown, Search, X } from 'lucide-react';
 import { cn } from '@getrentos/shared';
+import { controlShell, type ControlSize } from './controlStyles';
+import { useFieldControl } from './fieldContext';
 
 export interface SelectOption {
   value: string;
@@ -23,6 +25,15 @@ interface SelectProps {
   className?: string;
   searchable?: boolean;
   searchPlaceholder?: string;
+  /** Id for the trigger; inside a Field the field supplies it. */
+  id?: string;
+  invalid?: boolean;
+  required?: boolean;
+  /** Show a clear button once something is chosen; clearing calls onValueChange(''). */
+  clearable?: boolean;
+  /** Shown when a search matches nothing. */
+  emptyText?: string;
+  controlSize?: ControlSize;
 }
 
 export function Select({
@@ -35,7 +46,15 @@ export function Select({
   className,
   searchable = true,
   searchPlaceholder = 'Search options…',
+  id,
+  invalid,
+  required,
+  clearable = false,
+  emptyText = 'No matching options',
+  controlSize,
 }: SelectProps) {
+  const field = useFieldControl({ id, invalid, required });
+  const listRef = useRef<HTMLDivElement>(null);
   const selected = useMemo(
     () => options.find((option) => option.value === value),
     [options, value]
@@ -56,7 +75,46 @@ export function Select({
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
     if (!nextOpen) setQuery('');
-    if (nextOpen && searchable) window.setTimeout(() => searchRef.current?.focus(), 0);
+    if (nextOpen) {
+      window.setTimeout(() => {
+        if (searchable) searchRef.current?.focus();
+        else
+          focusOption(
+            Math.max(
+              0,
+              visibleOptions.findIndex((o) => o.value === value)
+            )
+          );
+      }, 0);
+    }
+  };
+
+  const optionButtons = () =>
+    Array.from(
+      listRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]:not(:disabled)') ?? []
+    );
+  const focusOption = (index: number) => {
+    const buttons = optionButtons();
+    if (buttons.length) buttons[(index + buttons.length) % buttons.length].focus();
+  };
+  // Arrow keys move through the options; Home/End jump; Up from the first returns to search.
+  const onListKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const buttons = optionButtons();
+    const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusOption(current + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      if (current <= 0 && searchable) searchRef.current?.focus();
+      else focusOption(current - 1);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      focusOption(0);
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      focusOption(buttons.length - 1);
+    }
   };
 
   return (
@@ -64,21 +122,51 @@ export function Select({
       <RadixPopover.Trigger asChild>
         <button
           type="button"
+          id={field.id}
           aria-label={ariaLabel}
           aria-haspopup="listbox"
           aria-expanded={open}
+          {...field.ariaProps}
           disabled={disabled}
+          onKeyDown={(event) => {
+            if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+              event.preventDefault();
+              handleOpenChange(true);
+            }
+          }}
           className={cn(
-            'flex min-h-11 w-full items-center justify-between gap-2 rounded-lg border border-border bg-card px-3.5 text-left text-sm text-foreground outline-none transition-[border-color,background-color,box-shadow] duration-150',
-            'hover:border-foreground/20',
-            'focus:border-primary focus:ring-4 focus:ring-primary/12 data-[placeholder]:text-muted-foreground disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60 disabled:hover:border-border',
+            'flex items-center justify-between gap-2 text-left',
+            controlShell({ size: controlSize, invalid: field.invalid, disabled }),
             className
           )}
         >
-          <span className={selected ? undefined : 'text-muted-foreground'}>
+          <span className={cn('min-w-0 truncate', !selected && 'text-muted-foreground')}>
             {selected?.label ?? placeholder}
           </span>
-          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="flex shrink-0 items-center gap-1">
+            {clearable && selected && !disabled && (
+              <span
+                role="button"
+                tabIndex={-1}
+                aria-label="Clear selection"
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onValueChange('');
+                }}
+                className="rounded p-0.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+            )}
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted-foreground transition-transform duration-150',
+                open && 'rotate-180'
+              )}
+              aria-hidden="true"
+            />
+          </span>
         </button>
       </RadixPopover.Trigger>
       <RadixPopover.Portal>
@@ -98,13 +186,33 @@ export function Select({
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    focusOption(0);
+                  } else if (
+                    event.key === 'Enter' &&
+                    visibleOptions.length === 1 &&
+                    !visibleOptions[0].disabled
+                  ) {
+                    event.preventDefault();
+                    onValueChange(visibleOptions[0].value);
+                    handleOpenChange(false);
+                  }
+                }}
                 placeholder={searchPlaceholder}
                 aria-label={`Search ${ariaLabel ?? 'options'}`}
                 className="min-h-9 w-full rounded-lg border border-border bg-background py-1.5 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/15"
               />
             </div>
           )}
-          <div role="listbox" aria-label={ariaLabel} className="max-h-64 overflow-y-auto">
+          <div
+            ref={listRef}
+            role="listbox"
+            aria-label={ariaLabel}
+            onKeyDown={onListKeyDown}
+            className="max-h-64 overflow-y-auto overscroll-contain"
+          >
             {visibleOptions.map((option) => (
               <button
                 key={option.value}
@@ -131,7 +239,7 @@ export function Select({
             ))}
             {visibleOptions.length === 0 && (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground" role="status">
-                No matching options
+                {emptyText}
               </p>
             )}
           </div>

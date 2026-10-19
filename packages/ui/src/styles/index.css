@@ -25,16 +25,19 @@
   --primary: #175cd3;
   --primary-hover: #1849a9;
   --primary-foreground: #ffffff;
-  --destructive: #dc2626;
+  /* Status colours match packages/tokens: each passes WCAG AA as text on
+     white and on its own -subtle background. */
+  --destructive: #c81e1e;
   --destructive-foreground: #ffffff;
   --info: #175cd3;
-  --success: #16a34a;
-  --warning: #c2650b;
-  --purple: #7c5cd6;
+  --success: #0b7a3e;
+  --warning: #99500a;
+  --purple: #6840c2;
   --info-subtle: #edf3fc;
   --success-subtle: #e7f7ef;
   --warning-subtle: #fdf1e3;
   --purple-subtle: #f3eefb;
+  --destructive-subtle: #fdecec;
   --radius: 0.625rem;
   /* Layered, soft elevation shadows — premium “hairline + float” depth. */
   --shadow-xs: 0 1px 2px rgb(22 27 34 / 0.05);
@@ -71,6 +74,7 @@
   --success-subtle: #0e2b1c;
   --warning-subtle: #2e1f0a;
   --purple-subtle: #251a3f;
+  --destructive-subtle: #3a1517;
   --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.35);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px -1px rgb(0 0 0 / 0.45);
   --shadow-md: 0 2px 8px -2px rgb(0 0 0 / 0.4), 0 16px 32px -8px rgb(0 0 0 / 0.55);
@@ -105,6 +109,7 @@
   --color-success-subtle: var(--success-subtle);
   --color-warning-subtle: var(--warning-subtle);
   --color-purple-subtle: var(--purple-subtle);
+  --color-destructive-subtle: var(--destructive-subtle);
   --color-ring: var(--ring);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);

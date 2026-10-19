@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { format, parse } from 'date-fns';
 import { cn } from '@getrentos/shared';
+import { controlShell, type ControlSize } from './controlStyles';
+import { useFieldControl } from './fieldContext';
 
 interface TimePickerProps {
   value?: string;
@@ -18,6 +20,12 @@ interface TimePickerProps {
   maxHour?: number;
   disabled?: boolean;
   className?: string;
+  /** Trigger id; inside a Field the field supplies it. */
+  id?: string;
+  invalid?: boolean;
+  required?: boolean;
+  ariaLabel?: string;
+  controlSize?: ControlSize;
 }
 
 const buildTimeOptions = (step: number, minHour: number, maxHour: number) => {
@@ -43,16 +51,46 @@ export const TimePicker = ({
   maxHour = 24,
   disabled,
   className,
+  id,
+  invalid,
+  required,
+  ariaLabel,
+  controlSize,
 }: TimePickerProps) => {
+  const field = useFieldControl({ id, invalid, required });
   const [open, setOpen] = useState(false);
   const [options] = useState(() => buildTimeOptions(step, minHour, maxHour));
-  const selectedRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
+  // Open on the chosen time (or the first slot) with focus on it, so arrows work at once.
   useEffect(() => {
-    if (open) {
-      selectedRef.current?.scrollIntoView({ block: 'center' });
-    }
+    if (!open) return;
+    const frame = requestAnimationFrame(() => {
+      const list = listRef.current;
+      const target =
+        list?.querySelector<HTMLButtonElement>('[aria-selected="true"]') ??
+        list?.querySelector<HTMLButtonElement>('[role="option"]');
+      target?.scrollIntoView({ block: 'center' });
+      target?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [open]);
+
+  const onListKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      listRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? []
+    );
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    let next = -1;
+    if (event.key === 'ArrowDown') next = Math.min(items.length - 1, index + 1);
+    else if (event.key === 'ArrowUp') next = Math.max(0, index - 1);
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = items.length - 1;
+    if (next < 0) return;
+    event.preventDefault();
+    items[next]?.focus();
+    items[next]?.scrollIntoView({ block: 'nearest' });
+  };
 
   const selectedLabel = value ? format(parse(value, 'HH:mm', new Date()), 'h:mm a') : null;
 
@@ -66,18 +104,33 @@ export const TimePicker = ({
       <RadixPopover.Trigger asChild>
         <button
           type="button"
+          id={field.id}
           disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={ariaLabel ? `${ariaLabel}: ${selectedLabel ?? placeholder}` : undefined}
+          onKeyDown={(event) => {
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+              event.preventDefault();
+              setOpen(true);
+            }
+          }}
+          {...field.ariaProps}
           className={cn(
-            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 text-left text-sm outline-none transition-[border-color,background-color,box-shadow] duration-150',
-            'hover:border-foreground/20',
-            'focus:border-primary focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60 disabled:hover:border-border',
+            'flex items-center justify-between gap-2 text-left',
+            controlShell({ size: controlSize, invalid: field.invalid, disabled }),
             className
           )}
         >
-          <span className={selectedLabel ? 'text-foreground' : 'text-muted-foreground'}>
+          <span
+            className={cn(
+              'truncate tabular-nums',
+              selectedLabel ? 'text-foreground' : 'text-muted-foreground'
+            )}
+          >
             {selectedLabel ?? placeholder}
           </span>
-          <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+          <Clock className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </button>
       </RadixPopover.Trigger>
 
@@ -95,7 +148,7 @@ export const TimePicker = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.12 }}
-                className="z-[70] w-52 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none"
+                className="z-[70] w-52 overflow-hidden rounded-2xl border border-border bg-card shadow-lg focus:outline-none"
               >
                 <div className="border-b border-border bg-secondary/55 px-3 py-2.5">
                   <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
@@ -103,22 +156,30 @@ export const TimePicker = ({
                   </p>
                   <p
                     aria-live="polite"
-                    className="mt-0.5 text-lg font-semibold tracking-[-0.03em] text-foreground"
+                    className="mt-0.5 text-lg font-semibold tabular-nums tracking-[-0.03em] text-foreground"
                   >
                     {selectedLabel ?? placeholder}
                   </p>
                 </div>
-                <div className="max-h-56 overflow-y-auto p-1.5">
+                <div
+                  ref={listRef}
+                  role="listbox"
+                  aria-label={ariaLabel ?? 'Times'}
+                  onKeyDown={onListKeyDown}
+                  className="max-h-56 overflow-y-auto overscroll-contain p-1.5"
+                >
                   {options.map((option) => {
                     const isSelected = option.value === value;
                     return (
                       <button
                         key={option.value}
-                        ref={isSelected ? selectedRef : undefined}
                         type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        tabIndex={-1}
                         onClick={() => handleSelect(option.value)}
                         className={cn(
-                          'w-full rounded-lg px-3 py-2 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary',
+                          'w-full rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                           isSelected
                             ? 'bg-primary text-primary-foreground font-medium'
                             : 'text-foreground hover:bg-secondary'
