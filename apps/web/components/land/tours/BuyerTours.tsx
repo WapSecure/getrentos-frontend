@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, EmptyState, Input, PageErrorState, Textarea, Toast } from '@getrentos/ui';
-import { Star, Video } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';
 import type { LandSiteTour } from '@/types/landSiteTour';
+import { StarRating } from '@/components/landlord/vendors/StarRating';
 import { TourCard } from './TourCard';
 
 type Notify = (message: string, variant?: 'success' | 'error') => void;
@@ -18,7 +19,11 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
   const [mode, setMode] = useState<'none' | 'other' | 'cancel' | 'rate'>('none');
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
-  const done = (message: string) => () => {
+  // Each call answers with the updated tour: show it at once, then refresh.
+  const done = (message: string) => (updated: LandSiteTour) => {
+    queryClient.setQueryData<LandSiteTour[]>(landSiteTourKeys.buyer, (list) =>
+      list?.map((t) => (t.id === updated.id ? updated : t))
+    );
     void queryClient.invalidateQueries({ queryKey: landSiteTourKeys.buyer });
     setMode('none');
     setText('');
@@ -105,24 +110,7 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
         </div>
       ) : mode === 'rate' ? (
         <div className="space-y-2">
-          <div className="flex gap-1" role="radiogroup" aria-label="Rating">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                type="button"
-                role="radio"
-                aria-checked={rating === n}
-                aria-label={`${n} star${n === 1 ? '' : 's'}`}
-                onClick={() => setRating(n)}
-                className="rounded p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <Star
-                  className={`h-5 w-5 ${n <= rating ? 'fill-warning text-warning' : 'text-muted-foreground'}`}
-                  aria-hidden
-                />
-              </button>
-            ))}
-          </div>
+          <StarRating value={rating} onRate={setRating} size="md" label="Your rating" />
           <Textarea
             rows={2}
             maxLength={2000}
@@ -156,6 +144,11 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
             >
               The seller did not join
             </Button>
+          )}
+          {tour.status === 'COMPLETED' && tour.buyerRating && (
+            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              You rated it <StarRating value={tour.buyerRating} label="Your rating" />
+            </span>
           )}
           {tour.status === 'COMPLETED' && !tour.buyerRating && (
             <Button size="sm" variant="outline" onClick={() => setMode('rate')}>

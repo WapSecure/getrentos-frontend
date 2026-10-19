@@ -10,8 +10,8 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
-  Input,
   Select,
+  DatePicker,
 } from '@getrentos/ui';
 import {
   LAND_REVIEWER_ROLES,
@@ -89,12 +89,7 @@ export const LandInviteReviewerDialog = ({
                 />
               </Field>
               <Field label="Report due" hint="Optional.">
-                <Input
-                  type="date"
-                  value={dueAt}
-                  min={minDate}
-                  onChange={(event) => setDueAt(event.target.value)}
-                />
+                <DatePicker value={dueAt} onChange={(next) => setDueAt(next)} min={minDate} />
               </Field>
             </div>
             <Field

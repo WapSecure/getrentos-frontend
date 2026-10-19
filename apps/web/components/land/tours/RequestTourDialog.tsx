@@ -10,7 +10,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Input,
+  Field,
   Select,
   Textarea,
 } from '@getrentos/ui';
@@ -23,6 +23,27 @@ import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourSe
 import { LAND_TOUR_DISCLAIMER } from '@/types/landSiteTour';
 
 export const BUYER_TOURS_ROUTE = '/buyer/land/tours';
+
+/** Every IANA zone the browser knows, for the shared searchable Select. */
+const TIME_ZONE_OPTIONS = (() => {
+  try {
+    const zones = (
+      Intl as unknown as { supportedValuesOf?: (key: string) => string[] }
+    ).supportedValuesOf?.('timeZone');
+    if (zones?.length)
+      return zones.map((zone) => ({ value: zone, label: zone.replace(/_/g, ' ') }));
+  } catch {
+    // Older browsers: fall back to a short list.
+  }
+  return [
+    'Africa/Lagos',
+    'Europe/London',
+    'America/New_York',
+    'America/Toronto',
+    'America/Chicago',
+    'Asia/Dubai',
+  ].map((zone) => ({ value: zone, label: zone.replace(/_/g, ' ') }));
+})();
 
 const browserZone = () => {
   try {
@@ -100,24 +121,19 @@ export const RequestTourDialog = ({
             your own time zone and pick one.
           </DialogDescription>
         </div>
-        <div className="space-y-1.5">
-          <label htmlFor="tour-zone" className="text-sm font-medium text-foreground">
-            Your time zone
-          </label>
-          <Input
-            id="tour-zone"
+        <Field
+          label="Your time zone"
+          hint="Detected from your browser. Change it if you are booking for another place."
+        >
+          <Select
             value={timeZone}
-            maxLength={64}
-            onChange={(e) => setTimeZone(e.target.value)}
+            onValueChange={setTimeZone}
+            ariaLabel="Your time zone"
+            searchPlaceholder="Search a city or region"
+            options={TIME_ZONE_OPTIONS}
           />
-          <p className="text-xs text-muted-foreground">
-            Detected from your browser, e.g. Europe/London or America/Toronto.
-          </p>
-        </div>
-        <div className="space-y-1.5">
-          <label htmlFor="tour-times" className="text-sm font-medium text-foreground">
-            When suits you (optional)
-          </label>
+        </Field>
+        <Field label="When suits you (optional)" htmlFor="tour-times">
           <Textarea
             id="tour-times"
             rows={2}
@@ -126,12 +142,9 @@ export const RequestTourDialog = ({
             onChange={(e) => setPreferredTimes(e.target.value)}
             placeholder="e.g. weekday mornings my time, or Saturday"
           />
-        </div>
+        </Field>
         {attendees.length > 0 && (
-          <div className="space-y-1.5">
-            <span className="text-sm font-medium text-foreground">
-              Invite a representative (optional)
-            </span>
+          <Field label="Invite a representative (optional)">
             <Select
               value={attendee}
               onValueChange={setAttendee}
@@ -139,7 +152,7 @@ export const RequestTourDialog = ({
               placeholder="No one"
               options={attendees.map((a) => ({ value: a.id, label: a.name ?? a.email ?? a.id }))}
             />
-          </div>
+          </Field>
         )}
         <label className="flex items-start gap-2 rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
           <Checkbox

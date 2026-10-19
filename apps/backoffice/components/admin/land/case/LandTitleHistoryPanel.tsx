@@ -16,6 +16,7 @@ import {
   Input,
   Select,
   Textarea,
+  DatePicker,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminLandService } from '@/services/adminLandService';
@@ -206,17 +207,15 @@ export const LandTitleHistoryPanel = ({
                   />
                 </Field>
                 <Field label="Occurred on" required>
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={form.occurredAt}
-                    onChange={(e) => set({ occurredAt: e.target.value })}
+                    onChange={(next) => set({ occurredAt: next })}
                   />
                 </Field>
                 <Field label="Registered on">
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={form.registeredAt}
-                    onChange={(e) => set({ registeredAt: e.target.value })}
+                    onChange={(next) => set({ registeredAt: next })}
                   />
                 </Field>
               </div>

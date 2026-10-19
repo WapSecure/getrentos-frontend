@@ -15,6 +15,7 @@ import {
   Input,
   Select,
   Textarea,
+  DatePicker,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminLandService } from '@/services/adminLandService';
@@ -220,11 +221,7 @@ export const LandEncumbrancesPanel = ({
                   />
                 </Field>
                 <Field label="Noted on" hint="Defaults to today.">
-                  <Input
-                    type="date"
-                    value={form.notedAt}
-                    onChange={(e) => set({ notedAt: e.target.value })}
-                  />
+                  <DatePicker value={form.notedAt} onChange={(next) => set({ notedAt: next })} />
                 </Field>
               </div>
               <Field label="Description">

@@ -5,7 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  Card,
   Checkbox,
+  Field,
   Input,
   PageErrorState,
   Select,
@@ -43,67 +45,69 @@ const AppointmentRow = ({
   const [reason, setReason] = useState('');
   const live = appointment.status === 'INVITED' || appointment.status === 'ACTIVE';
   return (
-    <li className="rounded-2xl border border-border bg-card p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-medium text-foreground">{appointment.name ?? appointment.email}</p>
-          <p className="text-xs text-muted-foreground">
-            {REPRESENTATIVE_RELATIONSHIP_LABELS[appointment.relationship]} · {appointment.email}
-          </p>
-        </div>
-        <Badge
-          variant={
-            appointment.status === 'ACTIVE'
-              ? 'success'
-              : appointment.status === 'INVITED'
-                ? 'warning'
-                : 'neutral'
-          }
-        >
-          {REPRESENTATIVE_STATUS_LABELS[appointment.status]}
-        </Badge>
-      </div>
-      <ul className="mt-2 list-inside list-disc text-sm text-muted-foreground">
-        {appointment.scopes.map((scope) => (
-          <li key={scope}>{REPRESENTATIVE_SCOPE_LABELS[scope]}</li>
-        ))}
-      </ul>
-      {appointment.endedAt && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          Ended {formatDate(appointment.endedAt)}
-          {appointment.endedReason ? `: ${appointment.endedReason}` : ''}
-        </p>
-      )}
-      {live &&
-        (ending ? (
-          <div className="mt-3 space-y-2">
-            <Input
-              value={reason}
-              maxLength={500}
-              onChange={(e) => setReason(e.target.value)}
-              aria-label="Why you are ending this appointment"
-              placeholder="Why you are ending this appointment"
-            />
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="danger"
-                disabled={reason.trim().length < 3 || busy}
-                isLoading={busy}
-                onClick={() => onRevoke(reason)}
-              >
-                End appointment
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEnding(false)}>
-                Cancel
-              </Button>
-            </div>
+    <li>
+      <Card className="p-4">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="font-medium text-foreground">{appointment.name ?? appointment.email}</p>
+            <p className="text-xs text-muted-foreground">
+              {REPRESENTATIVE_RELATIONSHIP_LABELS[appointment.relationship]} · {appointment.email}
+            </p>
           </div>
-        ) : (
-          <Button size="sm" variant="ghost" className="mt-2" onClick={() => setEnding(true)}>
-            End appointment
-          </Button>
-        ))}
+          <Badge
+            variant={
+              appointment.status === 'ACTIVE'
+                ? 'success'
+                : appointment.status === 'INVITED'
+                  ? 'warning'
+                  : 'neutral'
+            }
+          >
+            {REPRESENTATIVE_STATUS_LABELS[appointment.status]}
+          </Badge>
+        </div>
+        <ul className="mt-2 list-inside list-disc text-sm text-muted-foreground">
+          {appointment.scopes.map((scope) => (
+            <li key={scope}>{REPRESENTATIVE_SCOPE_LABELS[scope]}</li>
+          ))}
+        </ul>
+        {appointment.endedAt && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Ended {formatDate(appointment.endedAt)}
+            {appointment.endedReason ? `: ${appointment.endedReason}` : ''}
+          </p>
+        )}
+        {live &&
+          (ending ? (
+            <div className="mt-3 space-y-2">
+              <Input
+                value={reason}
+                maxLength={500}
+                onChange={(e) => setReason(e.target.value)}
+                aria-label="Why you are ending this appointment"
+                placeholder="Why you are ending this appointment"
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="danger"
+                  disabled={reason.trim().length < 3 || busy}
+                  isLoading={busy}
+                  onClick={() => onRevoke(reason)}
+                >
+                  End appointment
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEnding(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button size="sm" variant="ghost" className="mt-2" onClick={() => setEnding(true)}>
+              End appointment
+            </Button>
+          ))}
+      </Card>
     </li>
   );
 };
@@ -163,80 +167,77 @@ export const RepresentativesManager = () => {
 
   return (
     <div className="space-y-8">
-      <section
-        aria-labelledby="appoint-heading"
-        className="rounded-2xl border border-border bg-card p-5"
-      >
-        <h2 id="appoint-heading" className="flex items-center gap-2 font-semibold text-foreground">
-          <UserPlus className="h-4 w-4 text-primary" aria-hidden /> Appoint someone
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          They need a GetRentos account, and must verify their identity before they can approve
-          payments. They accept the appointment themselves.
-        </p>
-        <form
-          className="mt-4 grid gap-4 sm:grid-cols-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (canSubmit) appoint.mutate();
-          }}
-        >
-          <div className="space-y-1.5">
-            <label htmlFor="rep-email" className="text-sm font-medium text-foreground">
-              Their email on GetRentos
-            </label>
-            <Input
-              id="rep-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-sm font-medium text-foreground">Who they are to you</span>
-            <Select
-              value={relationship}
-              onValueChange={(v) => setRelationship(v as RepresentativeRelationship)}
-              ariaLabel="Relationship"
-              placeholder="Choose"
-              options={Object.entries(REPRESENTATIVE_RELATIONSHIP_LABELS).map(([value, label]) => ({
-                value,
-                label,
-              }))}
-            />
-          </div>
-          <fieldset className="space-y-2 sm:col-span-2">
-            <legend className="text-sm font-medium text-foreground">They may</legend>
-            {SCOPES.map((scope) => (
-              <label key={scope} className="flex items-center gap-2 text-sm text-foreground">
-                <Checkbox
-                  checked={scopes.includes(scope)}
-                  onCheckedChange={(on) => toggle(scope, on)}
-                  aria-label={REPRESENTATIVE_SCOPE_LABELS[scope]}
-                />
-                {REPRESENTATIVE_SCOPE_LABELS[scope]}
-              </label>
-            ))}
-          </fieldset>
-          <div className="space-y-1.5 sm:col-span-2">
-            <label htmlFor="rep-note" className="text-sm font-medium text-foreground">
-              Note to them (optional)
-            </label>
-            <Textarea
-              id="rep-note"
-              rows={2}
-              maxLength={500}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <Button type="submit" disabled={!canSubmit} isLoading={appoint.isPending}>
-              Send invitation
-            </Button>
-          </div>
-        </form>
-      </section>
+      <Card className="p-5">
+        <section aria-labelledby="appoint-heading">
+          <h2
+            id="appoint-heading"
+            className="flex items-center gap-2 font-semibold text-foreground"
+          >
+            <UserPlus className="h-4 w-4 text-primary" aria-hidden /> Appoint someone
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            They need a GetRentos account, and must verify their identity before they can approve
+            payments. They accept the appointment themselves.
+          </p>
+          <form
+            className="mt-4 grid gap-4 sm:grid-cols-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (canSubmit) appoint.mutate();
+            }}
+          >
+            <Field label="Their email on GetRentos" htmlFor="rep-email">
+              <Input
+                id="rep-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Field>
+            <Field label="Who they are to you">
+              <Select
+                value={relationship}
+                onValueChange={(v) => setRelationship(v as RepresentativeRelationship)}
+                ariaLabel="Relationship"
+                placeholder="Choose"
+                options={Object.entries(REPRESENTATIVE_RELATIONSHIP_LABELS).map(
+                  ([value, label]) => ({
+                    value,
+                    label,
+                  })
+                )}
+              />
+            </Field>
+            <fieldset className="space-y-2 sm:col-span-2">
+              <legend className="text-sm font-medium text-foreground">They may</legend>
+              {SCOPES.map((scope) => (
+                <label key={scope} className="flex items-center gap-2 text-sm text-foreground">
+                  <Checkbox
+                    checked={scopes.includes(scope)}
+                    onCheckedChange={(on) => toggle(scope, on)}
+                    aria-label={REPRESENTATIVE_SCOPE_LABELS[scope]}
+                  />
+                  {REPRESENTATIVE_SCOPE_LABELS[scope]}
+                </label>
+              ))}
+            </fieldset>
+            <Field label="Note to them (optional)" htmlFor="rep-note" className="sm:col-span-2">
+              <Textarea
+                id="rep-note"
+                rows={2}
+                maxLength={500}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <Button type="submit" disabled={!canSubmit} isLoading={appoint.isPending}>
+                Send invitation
+              </Button>
+            </div>
+          </form>
+        </section>
+      </Card>
 
       <section aria-labelledby="reps-heading" className="space-y-3">
         <h2 id="reps-heading" className="text-lg font-semibold text-foreground">

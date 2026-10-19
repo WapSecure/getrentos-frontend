@@ -10,8 +10,8 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
-  Input,
   Textarea,
+  DatePicker,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminLandService } from '@/services/adminLandService';
@@ -207,11 +207,10 @@ export const LandDecisionBar = ({
                   </Field>
                   {!isFirstOfTwo && (
                     <Field label="Verification expiry" hint="Optional; defaults to one year.">
-                      <Input
-                        type="date"
+                      <DatePicker
                         value={expiresAt}
+                        onChange={(next) => setExpiresAt(next)}
                         min={minDate}
-                        onChange={(event) => setExpiresAt(event.target.value)}
                       />
                     </Field>
                   )}

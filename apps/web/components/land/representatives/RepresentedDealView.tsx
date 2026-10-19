@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, ConfirmDialog, PageErrorState, Toast } from '@getrentos/ui';
+import { Badge, Button, Card, ConfirmDialog, PageErrorState, Toast } from '@getrentos/ui';
 import { ArrowLeft } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { LAND_MILESTONE_STATUS_LABELS, type LandMilestone } from '@/types/landBuyer';
@@ -100,29 +100,31 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
           const canApprove =
             iApprove && m.status === 'DELIVERED' && !(awaiting?.representativeApproved ?? false);
           return (
-            <li key={m.id} className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-medium text-foreground">{m.label}</p>
-                <Badge
-                  variant={
-                    m.status === 'CONFIRMED' || m.status === 'WAIVED' ? 'success' : 'neutral'
-                  }
-                >
-                  {LAND_MILESTONE_STATUS_LABELS[m.status]}
-                </Badge>
-              </div>
-              {m.note && <p className="mt-1 text-sm text-muted-foreground">Seller: “{m.note}”</p>}
-              {awaiting && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {awaiting.buyerApproved ? 'The buyer approved' : 'Waiting for the buyer'} ·{' '}
-                  {awaiting.representativeApproved ? 'you approved' : 'waiting for you'}
-                </p>
-              )}
-              {canApprove && (
-                <Button size="sm" className="mt-2" onClick={() => setApproving(m)}>
-                  Approve this step
-                </Button>
-              )}
+            <li key={m.id}>
+              <Card className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-medium text-foreground">{m.label}</p>
+                  <Badge
+                    variant={
+                      m.status === 'CONFIRMED' || m.status === 'WAIVED' ? 'success' : 'neutral'
+                    }
+                  >
+                    {LAND_MILESTONE_STATUS_LABELS[m.status]}
+                  </Badge>
+                </div>
+                {m.note && <p className="mt-1 text-sm text-muted-foreground">Seller: “{m.note}”</p>}
+                {awaiting && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {awaiting.buyerApproved ? 'The buyer approved' : 'Waiting for the buyer'} ·{' '}
+                    {awaiting.representativeApproved ? 'you approved' : 'waiting for you'}
+                  </p>
+                )}
+                {canApprove && (
+                  <Button size="sm" className="mt-2" onClick={() => setApproving(m)}>
+                    Approve this step
+                  </Button>
+                )}
+              </Card>
             </li>
           );
         })}

@@ -11,6 +11,8 @@ import {
   Field,
   Input,
   Select,
+  DocumentUpload,
+  type PendingUpload,
 } from '@getrentos/ui';
 import { humaniseEnum } from '@/lib/landDiligence';
 import { LAND_DOCUMENT_TYPES, type LandDiligenceCheck, type LandDocumentType } from '@/types/land';
@@ -69,7 +71,8 @@ export const LandUploadDocumentDialog = ({
 }: LandUploadDocumentDialogProps) => {
   const id = useId();
   const [documentType, setDocumentType] = useState<LandDocumentType | ''>('');
-  const [file, setFile] = useState<File | null>(null);
+  const [uploads, setUploads] = useState<PendingUpload[]>([]);
+  const file = uploads[0]?.file ?? null;
   const [checkKey, setCheckKey] = useState(target?.checkKey ?? '');
   const [note, setNote] = useState('');
   const problem = fileProblem(file);
@@ -116,13 +119,13 @@ export const LandUploadDocumentDialog = ({
               hint={FILE_HINT}
               error={problem ?? undefined}
             >
-              <input
-                id={`${id}-file`}
-                type="file"
+              <DocumentUpload
+                value={uploads}
+                onChange={setUploads}
                 accept={ACCEPT}
+                multiple={false}
+                maxSizeMB={20}
                 disabled={isPending}
-                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                className="block w-full min-w-0 text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground hover:file:bg-secondary"
               />
             </Field>
             <Field
