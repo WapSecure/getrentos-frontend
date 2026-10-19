@@ -30,6 +30,8 @@ export const landQueryKeys = {
   watchInspection: (id: string) => ['admin', 'land', 'watch', 'inspection', id] as const,
   watchIncidents: ['admin', 'land', 'watch', 'incidents'] as const,
   watchSubscriptions: ['admin', 'land', 'watch', 'subscriptions'] as const,
+  fraudRoot: ['admin', 'land', 'fraud'] as const,
+  fraudParcel: (propertyId: string) => ['admin', 'land', 'fraud', propertyId] as const,
 };
 
 /** `sentence-case` for enum values: `GOVERNORS_CONSENT` → "Governors consent". */
