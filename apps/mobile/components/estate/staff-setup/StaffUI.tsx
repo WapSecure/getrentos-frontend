@@ -121,6 +121,7 @@ function AddGatemanForm({
       </Text>
       <TextField
         label="Their GetRentos email"
+        required
         value={email}
         onChangeText={setEmail}
         placeholder="gateman@example.com"

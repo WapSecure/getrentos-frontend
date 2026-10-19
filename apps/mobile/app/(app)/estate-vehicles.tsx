@@ -2,7 +2,13 @@ import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Car, Plus, Settings2 } from 'lucide-react-native';
@@ -66,6 +72,7 @@ export default function EstateVehicles() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<VehicleLog[]>(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
@@ -311,6 +318,7 @@ function LogVehicleForm({ estateId, onDone }: { estateId: string; onDone: () => 
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Registration"
+        required
         value={plate}
         onChangeText={(v) => setPlate(v.toUpperCase())}
         autoCapitalize="characters"

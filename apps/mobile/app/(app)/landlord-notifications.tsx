@@ -1,5 +1,5 @@
 import { router, type Href } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
@@ -9,11 +9,10 @@ import {
   UserPlus,
   Wrench,
 } from 'lucide-react-native';
-import { useToast } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { routeForNotification } from '@/lib/notificationRoutes';
 import { landlordApi, type LandlordNotification } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { NotificationsInbox } from '@/components/notifications/NotificationsInbox';
 
 /**
@@ -31,37 +30,34 @@ function iconFor(type: string) {
 }
 
 export default function LandlordNotifications() {
-  const qc = useQueryClient();
-  const toast = useToast();
-
   const query = useQuery({
     queryKey: qk.landlord.notifications,
     queryFn: landlordApi.notifications,
   });
 
-  const readOne = useMutation({
+  // Reading is instant; a refused change is rolled back with a toast.
+  const readOne = useOptimisticMutation({
     mutationFn: (id: string) => landlordApi.markNotificationRead(id),
-    onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: qk.landlord.notifications });
-      const previous = qc.getQueryData<LandlordNotification[]>(qk.landlord.notifications);
-      qc.setQueryData<LandlordNotification[]>(qk.landlord.notifications, (old) =>
-        old?.map((n) => (n.id === id ? { ...n, read: true } : n))
-      );
-      return { previous };
-    },
-    onError: (_e, _id, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.landlord.notifications, ctx.previous);
-    },
+    patches: (id) => [
+      {
+        queryKey: qk.landlord.notifications,
+        update: (old) =>
+          (old as LandlordNotification[]).map((n) => (n.id === id ? { ...n, read: true } : n)),
+      },
+    ],
+    errorMessage: 'Could not mark that as read.',
   });
 
-  const readAll = useMutation({
-    mutationFn: landlordApi.markAllNotificationsRead,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.landlord.notifications });
-      toast.show('All caught up.', 'success');
-    },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not mark those as read.', 'error'),
+  const readAll = useOptimisticMutation({
+    mutationFn: () => landlordApi.markAllNotificationsRead(),
+    patches: () => [
+      {
+        queryKey: qk.landlord.notifications,
+        update: (old) => (old as LandlordNotification[]).map((n) => ({ ...n, read: true })),
+      },
+    ],
+    successMessage: 'All caught up.',
+    errorMessage: 'Could not mark those as read.',
   });
 
   return (
@@ -69,7 +65,7 @@ export default function LandlordNotifications() {
       eyebrow="Renting"
       items={query.data ?? []}
       loading={query.isPending}
-      error={query.isError}
+      error={query.isError && !query.data}
       refreshing={query.isRefetching}
       onRefresh={() => query.refetch()}
       onOpen={(n) => {

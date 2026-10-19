@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -28,6 +28,7 @@ import {
 } from '@getrentos/ui-native';
 import { routeForActionUrl } from '@/lib/notificationRoutes';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { notificationsApi, type RenterNotification } from '@/lib/api/notifications';
 import type { NotificationCategory } from '@/lib/api/notificationPreferences';
 import { ApiError } from '@/lib/api/client';
@@ -54,7 +55,9 @@ export default function Notifications() {
   const query = useQuery({
     queryKey: qk.renter.notifications(page, PAGE_SIZE),
     queryFn: () => notificationsApi.list(page, PAGE_SIZE),
+    placeholderData: keepPreviousData,
   });
+  const listKey = qk.renter.notifications(page, PAGE_SIZE);
 
   const items = useMemo(() => query.data?.items ?? [], [query.data]);
   const unread = useMemo(() => items.filter((n) => !n.read).length, [items]);
@@ -63,40 +66,52 @@ export default function Notifications() {
     qc.invalidateQueries({ queryKey: ['renter', 'notifications'] });
   }, [qc]);
 
-  const readOne = useMutation({
+  // Read, read-all and remove show at once and roll back with a toast if the server refuses.
+  type Page = { items: RenterNotification[] };
+  const readOne = useOptimisticMutation({
     mutationFn: (id: string) => notificationsApi.markRead(id),
-    onMutate: async (id) => {
-      const key = qk.renter.notifications(page, PAGE_SIZE);
-      await qc.cancelQueries({ queryKey: key });
-      const previous = qc.getQueryData<{ items: RenterNotification[] }>(key);
-      if (previous) {
-        qc.setQueryData(key, {
-          ...previous,
-          items: previous.items.map((n) => (n.id === id ? { ...n, read: true } : n)),
-        });
-      }
-      return { previous, key };
-    },
-    onError: (_e, _id, ctx) => {
-      if (ctx?.previous) qc.setQueryData(ctx.key, ctx.previous);
-    },
+    patches: (id) => [
+      {
+        queryKey: listKey,
+        update: (old) => ({
+          ...(old as Page),
+          items: (old as Page).items.map((n) => (n.id === id ? { ...n, read: true } : n)),
+        }),
+      },
+    ],
+    invalidate: [['renter', 'notifications']],
+    errorMessage: 'Could not mark that as read.',
   });
 
-  const readAll = useMutation({
-    mutationFn: notificationsApi.markAllRead,
-    onSuccess: () => {
-      invalidate();
-      toast.show('All caught up.', 'success');
-    },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not mark those as read.', 'error'),
+  const readAll = useOptimisticMutation<void, void>({
+    mutationFn: () => notificationsApi.markAllRead(),
+    patches: () => [
+      {
+        queryKey: listKey,
+        update: (old) => ({
+          ...(old as Page),
+          items: (old as Page).items.map((n) => ({ ...n, read: true })),
+        }),
+      },
+    ],
+    invalidate: [['renter', 'notifications']],
+    errorMessage: 'Could not mark those as read.',
+    successMessage: 'All caught up.',
   });
 
-  const removeOne = useMutation({
+  const removeOne = useOptimisticMutation({
     mutationFn: (id: string) => notificationsApi.remove(id),
-    onSuccess: invalidate,
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not remove that.', 'error'),
+    patches: (id) => [
+      {
+        queryKey: listKey,
+        update: (old) => ({
+          ...(old as Page),
+          items: (old as Page).items.filter((n) => n.id !== id),
+        }),
+      },
+    ],
+    invalidate: [['renter', 'notifications']],
+    errorMessage: 'Could not remove that.',
   });
 
   const clearAll = useMutation({
@@ -270,14 +285,17 @@ export default function Notifications() {
         </View>
       ) : null}
 
-      {query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} height={92} radius={radius.lg} />
-          ))}
-        </View>
-      ) : query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
+      {/* Cached notifications stay on screen if a refresh fails. */}
+      {query.data === undefined ? (
+        query.isError ? (
+          <ErrorState onRetry={() => query.refetch()} />
+        ) : (
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} height={92} radius={radius.lg} />
+            ))}
+          </View>
+        )
       ) : (
         <FlashList
           data={items}

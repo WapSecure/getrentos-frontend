@@ -33,14 +33,14 @@ export default function BuyerProfileScreen() {
         onBack={() => router.back()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        <ProfileForm data={query.data} />
+      ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={220} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <ProfileForm data={query.data} />
+        <ErrorState onRetry={() => query.refetch()} />
       )}
     </View>
   );
@@ -88,8 +88,13 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
       </View>
 
       <Card elevated style={{ gap: spacing.md }}>
-        <TextField label="Full name" value={legalName} onChangeText={setLegalName} />
-        <TextField label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <TextField label="Full name" value={legalName} onChangeText={setLegalName} required />
+        <TextField
+          label="Phone"
+          value={phone}
+          onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
+          keyboardType="phone-pad"
+        />
       </Card>
 
       <Button

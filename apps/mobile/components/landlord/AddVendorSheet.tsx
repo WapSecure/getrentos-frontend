@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
@@ -43,7 +43,7 @@ function AddVendorForm({
   onClose: () => void;
   onSubmittingChange: (submitting: boolean) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -83,6 +83,7 @@ function AddVendorForm({
         value={name}
         onChangeText={setName}
         editable={!mutation.isPending}
+        required
       />
 
       <View style={{ gap: spacing.sm }}>
@@ -92,28 +93,17 @@ function AddVendorForm({
           value={serviceType}
           onChangeText={setServiceType}
           editable={!mutation.isPending}
+          required
         />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {SERVICE_TYPES.map((t) => (
-            <Pressable
+            <Chip
               key={t}
+              label={t}
+              size="sm"
               onPress={() => setServiceType(t)}
               disabled={mutation.isPending}
-              accessibilityRole="button"
-              accessibilityLabel={`Use ${t}`}
-              accessibilityState={{ disabled: mutation.isPending }}
-              style={{
-                paddingHorizontal: spacing.md,
-                paddingVertical: 7,
-                borderRadius: radius.full,
-                borderWidth: 1,
-                borderColor: colors.border,
-              }}
-            >
-              <Text variant="caption" color="mutedForeground">
-                {t}
-              </Text>
-            </Pressable>
+            />
           ))}
         </View>
       </View>
@@ -123,8 +113,9 @@ function AddVendorForm({
         placeholder="+234 801 234 5678"
         keyboardType="phone-pad"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
         editable={!mutation.isPending}
+        required
       />
 
       <Button

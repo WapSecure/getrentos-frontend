@@ -1,25 +1,20 @@
 import { useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Switch,
-  View,
-} from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, Search } from 'lucide-react-native';
+import { Search } from 'lucide-react-native';
 import {
   Button,
   Card,
+  Checkbox,
   Chip,
   DateField,
   FormAlert,
+  NumberField,
   SegmentedControl,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   toISODate,
@@ -71,6 +66,7 @@ export default function EstateCharge() {
     queryFn: () =>
       estateManagerApi.households(estateId, { status: 'ACTIVE', search: term || undefined }),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const activeTotal = useQuery({
     queryKey: qk.estateManager.households(estateId, '', 'ACTIVE'),
@@ -156,11 +152,13 @@ export default function EstateCharge() {
         />
 
         <Card elevated style={{ gap: spacing.md }}>
-          <TextField
-            label="Amount per household (₦)"
-            keyboardType="number-pad"
-            value={n ? n.toLocaleString('en-NG') : ''}
-            onChangeText={setAmount}
+          <NumberField
+            label="Amount per household"
+            required
+            currency
+            value={amount}
+            onValueChange={setAmount}
+            placeholder="0"
             autoFocus
           />
           <View style={{ gap: spacing.sm }}>
@@ -200,22 +198,12 @@ export default function EstateCharge() {
         </Card>
 
         <Card elevated style={{ gap: spacing.md }}>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 44 }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">Repeat this charge</Text>
-              <Text variant="caption" color="mutedForeground">
-                The next one is raised automatically
-              </Text>
-            </View>
-            <Switch
-              value={recurring}
-              onValueChange={setRecurring}
-              accessibilityLabel="Repeat this charge"
-              trackColor={{ true: colors.primary, false: colors.border }}
-            />
-          </View>
+          <SwitchRow
+            label="Repeat this charge"
+            description="The next one is raised automatically"
+            value={recurring}
+            onValueChange={setRecurring}
+          />
           {recurring ? (
             <SegmentedControl
               accessibilityLabel="How often"
@@ -280,42 +268,22 @@ export default function EstateCharge() {
                   {active.data.items.slice(0, 12).map((h) => {
                     const on = h.id in chosen;
                     return (
-                      <Pressable
+                      <Checkbox
                         key={h.id}
-                        onPress={() => toggle(h.id, h.unitLabel)}
-                        accessibilityRole="checkbox"
-                        accessibilityState={{ checked: on }}
+                        checked={on}
+                        onChange={() => toggle(h.id, h.unitLabel)}
                         accessibilityLabel={`${h.unitLabel}, ${h.residentName}`}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: spacing.md,
-                          minHeight: 48,
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: 22,
-                            height: 22,
-                            borderRadius: 6,
-                            borderWidth: 1.5,
-                            borderColor: on ? colors.primary : colors.border,
-                            backgroundColor: on ? colors.primary : 'transparent',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {on ? <Check size={14} color={colors.primaryForeground} /> : null}
-                        </View>
-                        <View style={{ flex: 1 }}>
-                          <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
-                            {h.unitLabel}
-                          </Text>
-                          <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                            {h.residentName}
-                          </Text>
-                        </View>
-                      </Pressable>
+                        label={
+                          <>
+                            <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
+                              {h.unitLabel}
+                            </Text>
+                            <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                              {h.residentName}
+                            </Text>
+                          </>
+                        }
+                      />
                     );
                   })}
                   {active.data.total > 12 ? (

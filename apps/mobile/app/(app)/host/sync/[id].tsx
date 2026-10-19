@@ -300,10 +300,17 @@ function AddFeed({ listingId, onDone }: { listingId: string; onDone: () => void 
           ))}
         </View>
         {source === 'Other' ? (
-          <TextField label="Site name" value={name} onChangeText={setName} maxLength={60} />
+          <TextField
+            label="Site name"
+            required
+            value={name}
+            onChangeText={setName}
+            maxLength={60}
+          />
         ) : null}
         <TextField
           label="Calendar link (.ics)"
+          required
           value={url}
           onChangeText={setUrl}
           autoCapitalize="none"

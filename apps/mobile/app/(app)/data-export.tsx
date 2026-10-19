@@ -64,7 +64,7 @@ export default function DataExport() {
         onBack={() => router.back()}
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>
@@ -79,7 +79,7 @@ export default function DataExport() {
             </Text>
           </Card>
 
-          {query.isFetching ? (
+          {query.isFetching && !query.data ? (
             <View style={{ gap: spacing.md }}>
               <Skeleton height={140} radius={16} />
             </View>

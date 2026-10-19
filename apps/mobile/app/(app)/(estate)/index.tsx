@@ -19,6 +19,7 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  LinkButton,
   Price,
   PressableScale,
   Screen,
@@ -225,7 +226,7 @@ export default function EstateHome() {
           </View>
           {stats.isPending ? (
             <Skeleton height={30} width="55%" />
-          ) : stats.isError ? (
+          ) : !stats.data ? (
             <Text variant="callout" color="mutedForeground">
               Couldn’t load the totals. Pull down to retry.
             </Text>
@@ -297,15 +298,7 @@ export default function EstateHome() {
             <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
               Nothing posted yet.
             </Text>
-            <Text
-              variant="callout"
-              color="primary"
-              style={{ fontWeight: '700' }}
-              onPress={() => setSheet('announce')}
-              accessibilityRole="button"
-            >
-              Post one
-            </Text>
+            <LinkButton label="Post one" onPress={() => setSheet('announce')} />
           </Card>
         )}
       </View>

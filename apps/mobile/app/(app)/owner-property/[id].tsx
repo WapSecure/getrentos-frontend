@@ -11,6 +11,7 @@ import {
   ErrorState,
   FormAlert,
   LinkButton,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -450,11 +451,12 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
   return (
     <View style={{ gap: spacing.lg }}>
       <TextField label="Listing title" value={title} onChangeText={setTitle} maxLength={120} />
-      <TextField
-        label="Asking price (₦)"
-        keyboardType="number-pad"
-        value={value ? value.toLocaleString('en-NG') : ''}
-        onChangeText={setPrice}
+      <NumberField
+        label="Asking price"
+        currency
+        required
+        value={price}
+        onValueChange={setPrice}
         hint="Buyers can offer above or below this."
       />
       {m && m.comparables.length >= 3 && m.suggested > 0 ? (

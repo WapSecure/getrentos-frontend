@@ -19,10 +19,10 @@ import {
   Divider,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -119,9 +119,14 @@ export default function HostEarnings() {
                       {account.data.accountNumber} · {account.data.accountName}
                     </Text>
                   </>
+                ) : account.isPending ? (
+                  <View style={{ gap: 6 }}>
+                    <Skeleton height={14} width="50%" />
+                    <Skeleton height={11} width="70%" />
+                  </View>
                 ) : (
                   <Text variant="callout" color="mutedForeground">
-                    {account.isPending ? 'Loading…' : 'No account yet. Add one to withdraw.'}
+                    No account yet. Add one to withdraw.
                   </Text>
                 )}
               </View>
@@ -500,19 +505,21 @@ function AccountForm({ onDone }: { onDone: () => void }) {
           />
         </View>
         {other ? (
-          <TextField
+          <NumberField
             label="Bank code"
-            keyboardType="number-pad"
+            required
+            code
             value={bankCode}
-            onChangeText={(v) => setBankCode(v.replace(/\D/g, ''))}
+            onValueChange={setBankCode}
             maxLength={6}
           />
         ) : null}
-        <TextField
+        <NumberField
           label="Account number"
-          keyboardType="number-pad"
+          required
+          code
           value={accountNumber}
-          onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
+          onValueChange={setAccountNumber}
           maxLength={10}
         />
         {save.error ? (

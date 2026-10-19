@@ -1,10 +1,19 @@
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertTriangle, ChevronLeft, Plus, X } from 'lucide-react-native';
-import { Button, Card, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Card,
+  Chip,
+  SwitchRow,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   maintenanceApi,
@@ -97,25 +106,13 @@ export default function ReportMaintenance() {
         }}
       >
         <Card elevated>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 }}>
-              <AlertTriangle size={17} color={colors.destructive} />
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyStrong">This is an emergency</Text>
-                <Text variant="caption" color="mutedForeground">
-                  Fire, gas leak, or a life-threatening issue
-                </Text>
-              </View>
-            </View>
-            <Switch
-              value={isEmergency}
-              onValueChange={setIsEmergency}
-              trackColor={{ true: colors.destructive, false: colors.secondary }}
-              thumbColor={colors.card}
-            />
-          </View>
+          <SwitchRow
+            label="This is an emergency"
+            description="Fire, gas leak, or a life-threatening issue"
+            icon={<AlertTriangle size={17} color={colors.destructive} />}
+            value={isEmergency}
+            onValueChange={setIsEmergency}
+          />
           {isEmergency ? (
             <Text variant="caption" color="destructive" style={{ marginTop: spacing.sm }}>
               For a life-threatening emergency, call your local emergency services first. This
@@ -126,6 +123,7 @@ export default function ReportMaintenance() {
 
         <TextField
           label="What's wrong?"
+          required
           placeholder="e.g. Kitchen tap won't stop leaking"
           value={title}
           onChangeText={setTitle}
@@ -167,6 +165,7 @@ export default function ReportMaintenance() {
 
         <TextField
           label="Describe the issue"
+          required
           placeholder="What's happening, and since when?"
           multiline
           numberOfLines={4}

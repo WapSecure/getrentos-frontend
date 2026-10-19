@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Linking, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Download, FileText, Plus } from 'lucide-react-native';
 import {
   Card,
+  Chip,
   EmptyState,
   ErrorState,
   IconButton,
@@ -41,6 +42,7 @@ export default function LandlordDocuments() {
   const query = useQuery({
     queryKey: qk.landlord.documents(1, 20, search || undefined, category),
     queryFn: () => landlordApi.documents(1, 20, search || undefined, category),
+    placeholderData: keepPreviousData,
   });
 
   const open = async (doc: LandlordDocument) => {
@@ -81,34 +83,20 @@ export default function LandlordDocuments() {
           {DOCUMENT_CATEGORIES.map((c) => {
             const selected = c === category;
             return (
-              <Pressable
+              <Chip
                 key={c}
                 // Tapping the active chip clears it, so there is always a way back to all.
                 onPress={() => setCategory(selected ? undefined : c)}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 7,
-                  borderRadius: radius.full,
-                  borderWidth: 1.5,
-                  borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary + '14' : 'transparent',
-                }}
-              >
-                <Text
-                  variant="caption"
-                  style={{ color: selected ? colors.primary : colors.mutedForeground }}
-                >
-                  {DOCUMENT_CATEGORY_LABEL[c]}
-                </Text>
-              </Pressable>
+                selected={selected}
+                label={DOCUMENT_CATEGORY_LABEL[c]}
+                size="sm"
+              />
             );
           })}
         </View>
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList

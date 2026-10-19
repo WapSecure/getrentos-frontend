@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,9 +7,14 @@ import { Check, ChevronLeft, Plus, Trash2, Users, X } from 'lucide-react-native'
 import {
   Avatar,
   Badge,
+  Button,
   Card,
+  Checkbox,
   Divider,
   EmptyState,
+  ErrorState,
+  IconButton,
+  LinkButton,
   Price,
   Skeleton,
   Text,
@@ -17,6 +22,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import {
   roommatesApi,
   EXPENSE_CATEGORY_LABEL,
@@ -90,11 +96,21 @@ export default function Roommates() {
       toast.show(err instanceof ApiError ? err.message : 'Could not add that task.', 'error'),
   });
 
-  const completeTaskMutation = useMutation({
+  // Ticking a task off removes it at once; it comes back if the server says no.
+  const completeTaskMutation = useOptimisticMutation({
     mutationFn: ({ id, task }: { id: string; task: string }) => roommatesApi.completeTask(id, task),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.roommates }),
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update that task.', 'error'),
+    patches: ({ id, task }) => [
+      {
+        queryKey: qk.renter.roommates,
+        update: (old) =>
+          (old as Roommate[]).map((r) =>
+            r.id === id
+              ? { ...r, responsibilities: r.responsibilities.filter((t) => t !== task) }
+              : r
+          ),
+      },
+    ],
+    errorMessage: 'Could not update that task.',
   });
 
   const confirmRemove = (r: Roommate) => {
@@ -125,33 +141,20 @@ export default function Roommates() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
+        <IconButton
+          variant="ghost"
           accessibilityLabel="Back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
+          icon={<ChevronLeft size={24} color={colors.foreground} />}
+          onPress={() => router.back()}
+        />
         <Text variant="title" style={{ flex: 1 }}>
           Roommates
         </Text>
-        <Pressable
-          onPress={() => setInviteOpen(true)}
-          accessibilityRole="button"
+        <IconButton
           accessibilityLabel="Invite a roommate"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
+          icon={<Plus size={20} color={colors.primary} />}
+          onPress={() => setInviteOpen(true)}
+        />
       </View>
 
       {isLoading ? (
@@ -160,6 +163,8 @@ export default function Roommates() {
             <Skeleton key={i} height={90} radius={radius.lg} />
           ))}
         </View>
+      ) : roommatesQuery.isError && !roommatesQuery.data ? (
+        <ErrorState onRetry={refetchAll} />
       ) : (
         <ScrollView
           contentContainerStyle={{
@@ -185,44 +190,23 @@ export default function Roommates() {
                     {inv.email}
                   </Text>
                   <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm }}>
-                    <Pressable
+                    <Button
+                      label="Decline"
+                      size="sm"
+                      variant="outline"
+                      fullWidth={false}
+                      icon={<X size={14} color={colors.mutedForeground} />}
+                      loading={declineMutation.isPending && declineMutation.variables === inv.id}
                       onPress={() => declineMutation.mutate(inv.id)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 4,
-                        paddingVertical: 6,
-                        paddingHorizontal: 12,
-                        borderRadius: 999,
-                        borderWidth: 1,
-                        borderColor: colors.border,
-                      }}
-                    >
-                      <X size={13} color={colors.mutedForeground} />
-                      <Text variant="caption" color="mutedForeground">
-                        Decline
-                      </Text>
-                    </Pressable>
-                    <Pressable
+                    />
+                    <Button
+                      label="Accept"
+                      size="sm"
+                      fullWidth={false}
+                      icon={<Check size={14} color={colors.primaryForeground} />}
+                      loading={acceptMutation.isPending && acceptMutation.variables === inv.id}
                       onPress={() => acceptMutation.mutate(inv.id)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 4,
-                        paddingVertical: 6,
-                        paddingHorizontal: 12,
-                        borderRadius: 999,
-                        backgroundColor: colors.primary,
-                      }}
-                    >
-                      <Check size={13} color={colors.primaryForeground} />
-                      <Text
-                        variant="caption"
-                        style={{ color: colors.primaryForeground, fontWeight: '600' }}
-                      >
-                        Accept
-                      </Text>
-                    </Pressable>
+                    />
                   </View>
                 </Card>
               ))}
@@ -279,55 +263,32 @@ export default function Roommates() {
 
                   <View style={{ marginTop: spacing.sm, gap: spacing.xs }}>
                     {r.responsibilities.map((task) => (
-                      <Pressable
+                      <Checkbox
                         key={task}
-                        onPress={() => completeTaskMutation.mutate({ id: r.id, task })}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                      >
-                        <View
-                          style={{
-                            width: 16,
-                            height: 16,
-                            borderRadius: 4,
-                            borderWidth: 1.5,
-                            borderColor: colors.border,
-                          }}
-                        />
-                        <Text variant="caption" color="mutedForeground">
-                          {task}
-                        </Text>
-                      </Pressable>
+                        checked={false}
+                        onChange={() => completeTaskMutation.mutate({ id: r.id, task })}
+                        label={task}
+                        accessibilityLabel={`Mark “${task}” done`}
+                      />
                     ))}
 
-                    <Pressable
-                      onPress={() => setAssigningTo(r)}
-                      accessibilityRole="button"
+                    <LinkButton
+                      label="Assign a task"
+                      icon={<Plus size={14} color={colors.primary} />}
                       accessibilityLabel={`Assign a task to ${r.name}`}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                    >
-                      <Plus size={14} color={colors.primary} />
-                      <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-                        Assign a task
-                      </Text>
-                    </Pressable>
+                      onPress={() => setAssigningTo(r)}
+                      style={{ alignSelf: 'flex-start' }}
+                    />
                   </View>
 
-                  <Pressable
+                  <LinkButton
+                    label="Remove"
+                    tone="destructive"
+                    icon={<Trash2 size={13} color={colors.destructive} />}
+                    accessibilityLabel={`Remove ${r.name}`}
                     onPress={() => confirmRemove(r)}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 5,
-                      marginTop: spacing.sm,
-                      alignSelf: 'flex-start',
-                    }}
-                    hitSlop={8}
-                  >
-                    <Trash2 size={13} color={colors.destructive} />
-                    <Text variant="caption" color="destructive">
-                      Remove
-                    </Text>
-                  </Pressable>
+                    style={{ alignSelf: 'flex-start' }}
+                  />
                 </Card>
               ))
             )}
@@ -342,11 +303,11 @@ export default function Roommates() {
               }}
             >
               <Text variant="heading">Shared expenses</Text>
-              <Pressable onPress={() => setExpenseOpen(true)} hitSlop={8}>
-                <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-                  Add
-                </Text>
-              </Pressable>
+              <LinkButton
+                label="Add"
+                accessibilityHint="Log a shared expense"
+                onPress={() => setExpenseOpen(true)}
+              />
             </View>
             {!expensesQuery.data?.length ? (
               <Text variant="callout" color="mutedForeground">

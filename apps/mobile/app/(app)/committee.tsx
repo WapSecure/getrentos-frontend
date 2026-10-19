@@ -8,7 +8,7 @@ import {
   Badge,
   type BadgeTone,
   Card,
-  EmptyState,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -71,13 +71,22 @@ export default function ResidentCommittee() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <BackHeader title="Committee" />
       <Screen>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={64} radius={16} />
-            <Skeleton height={64} radius={16} />
-          </View>
-        ) : query.data && query.data.length > 0 ? (
-          query.data.map((m) => (
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.md }}>
+              <Skeleton height={64} radius={16} />
+              <Skeleton height={64} radius={16} />
+            </View>
+          }
+          isEmpty={!query.data?.length}
+          empty={{
+            icon: <Landmark size={34} color={colors.mutedForeground} />,
+            title: 'No committee yet',
+            description: "Your estate manager hasn't appointed a committee.",
+          }}
+        >
+          {query.data?.map((m) => (
             <Card key={m.id} elevated>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
                 <Avatar name={m.residentName} size={40} />
@@ -90,14 +99,8 @@ export default function ResidentCommittee() {
                 <Badge label={TITLE_LABEL[m.title]} tone={TITLE_TONE[m.title]} />
               </View>
             </Card>
-          ))
-        ) : (
-          <EmptyState
-            icon={<Landmark size={34} color={colors.mutedForeground} />}
-            title="No committee yet"
-            description="Your estate manager hasn't appointed a committee."
-          />
-        )}
+          ))}
+        </QueryState>
       </Screen>
     </View>
   );

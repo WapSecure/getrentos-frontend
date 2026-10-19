@@ -9,9 +9,9 @@ import {
   type BadgeTone,
   Button,
   Card,
-  EmptyState,
+  ListSkeleton,
+  QueryState,
   Screen,
-  Skeleton,
   Text,
   useTheme,
   useToast,
@@ -30,7 +30,7 @@ const TYPE_LABEL: Record<GovernanceRecordType, string> = {
 };
 
 export default function ResidentGovernance() {
-  const { colors, spacing } = useTheme();
+  const { colors } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [signTarget, setSignTarget] = useState<GovernanceRecord | null>(null);
@@ -61,20 +61,21 @@ export default function ResidentGovernance() {
         onBack={() => router.back()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={100} radius={16} />
-            <Skeleton height={100} radius={16} />
-          </View>
-        ) : records.length > 0 ? (
-          records.map((r) => <RecordCard key={r.id} record={r} onSign={() => setSignTarget(r)} />)
-        ) : (
-          <EmptyState
-            icon={<BookOpen size={34} color={colors.mutedForeground} />}
-            title="No governance documents"
-            description="Bylaws and meeting minutes your estate manager publishes will show up here."
-          />
-        )}
+        <QueryState
+          query={query}
+          skeleton={<ListSkeleton variant="card" rows={2} height={100} />}
+          isEmpty={records.length === 0}
+          empty={{
+            icon: <BookOpen size={34} color={colors.mutedForeground} />,
+            title: 'No governance documents',
+            description:
+              'Bylaws and meeting minutes your estate manager publishes will show up here.',
+          }}
+        >
+          {records.map((r) => (
+            <RecordCard key={r.id} record={r} onSign={() => setSignTarget(r)} />
+          ))}
+        </QueryState>
       </Screen>
 
       <SignSheet
@@ -196,7 +197,8 @@ function SignForm({
       </Text>
       <SignaturePad onChange={setSignature} />
       <Button
-        label={submitting ? 'Signing…' : 'Confirm Signature'}
+        label="Confirm Signature"
+        loadingLabel="Signing…"
         disabled={!signature}
         loading={submitting}
         fullWidth

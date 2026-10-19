@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Check, RotateCcw } from 'lucide-react-native';
 import { Button, Card, ErrorState, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
@@ -13,8 +13,9 @@ import {
   leadStage,
   realtorApi,
   type LeadStatus,
+  type RealtorLead as Lead,
 } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { formatDate, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -28,7 +29,6 @@ export default function RealtorLead() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
   const toast = useToast();
   const [booking, setBooking] = useState(false);
 
@@ -39,11 +39,20 @@ export default function RealtorLead() {
   });
   const theirs = viewings.data?.items.filter((v) => v.lead?.id === id) ?? [];
 
-  const move = useMutation({
+  // A stage change is the realtor's own bookkeeping, so it shows at once and
+  // rolls back with a toast if the server refuses it.
+  const move = useOptimisticMutation({
     mutationFn: (status: LeadStatus) => realtorApi.updateLead(id, status),
+    patches: (status) => [
+      {
+        queryKey: qk.realtor.lead(id),
+        update: (old) => ({ ...(old as Lead), status }),
+      },
+    ],
+    invalidate: [['realtor']],
+    errorMessage: 'Could not update.',
     onSuccess: (_l, status) => {
       void haptics.success();
-      qc.invalidateQueries({ queryKey: ['realtor'] });
       toast.show(
         status === 'CLOSED'
           ? 'Marked as won. Nice work.'
@@ -53,7 +62,6 @@ export default function RealtorLead() {
         'success'
       );
     },
-    onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Could not update.', 'error'),
   });
 
   const l = lead.data;
@@ -154,7 +162,6 @@ export default function RealtorLead() {
                   <Button
                     label={next.label}
                     icon={<Check size={16} color={colors.primaryForeground} />}
-                    loading={move.isPending && move.variables === next.to}
                     onPress={() => move.mutate(next.to)}
                   />
                 ) : null}
@@ -184,7 +191,6 @@ export default function RealtorLead() {
                 label="Reopen lead"
                 variant="secondary"
                 icon={<RotateCcw size={16} color={colors.foreground} />}
-                loading={move.isPending}
                 onPress={() => move.mutate('CONTACTED')}
               />
             )}

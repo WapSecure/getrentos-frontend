@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RotateCcw, Send, Wallet, Plus } from 'lucide-react-native';
 import {
   Badge,
+  Button,
   Card,
   Divider,
   EmptyState,
@@ -94,7 +95,7 @@ export default function LandlordOwnerStatements() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList
@@ -153,7 +154,7 @@ function StatementCard({
   onIssue: () => void;
   onRetry: () => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
 
   return (
     <Card padding={spacing.lg} style={{ marginBottom: spacing.sm }}>
@@ -189,34 +190,23 @@ function StatementCard({
         ) : null}
 
         {s.status === 'draft' || s.payoutStatus === 'failed' ? (
-          <Pressable
+          <Button
+            label={s.payoutStatus === 'failed' ? 'Retry payout' : 'Issue statement'}
             onPress={s.payoutStatus === 'failed' ? onRetry : onIssue}
-            disabled={busy}
-            accessibilityRole="button"
+            loading={busy}
+            size="sm"
             accessibilityLabel={
               s.payoutStatus === 'failed' ? 'Retry payout' : 'Issue this statement'
             }
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              paddingVertical: spacing.md,
-              borderRadius: radius.md,
-              backgroundColor: colors.primary,
-              opacity: busy ? 0.5 : 1,
-              marginTop: 2,
-            }}
-          >
-            {s.payoutStatus === 'failed' ? (
-              <RotateCcw size={14} color={colors.primaryForeground} />
-            ) : (
-              <Send size={14} color={colors.primaryForeground} />
-            )}
-            <Text variant="caption" style={{ color: colors.primaryForeground, fontWeight: '600' }}>
-              {s.payoutStatus === 'failed' ? 'Retry payout' : 'Issue statement'}
-            </Text>
-          </Pressable>
+            icon={
+              s.payoutStatus === 'failed' ? (
+                <RotateCcw size={14} color={colors.primaryForeground} />
+              ) : (
+                <Send size={14} color={colors.primaryForeground} />
+              )
+            }
+            style={{ marginTop: 2 }}
+          />
         ) : null}
       </View>
     </Card>

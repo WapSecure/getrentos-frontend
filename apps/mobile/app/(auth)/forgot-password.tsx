@@ -223,7 +223,10 @@ export default function ForgotPassword() {
             returnKeyType="send"
             value={identifier}
             onChangeText={(v) => {
-              setIdentifier(v);
+              // A phone number keeps only digits and a leading '+'.
+              setIdentifier(
+                method === 'email' ? v : v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '')
+              );
               if (error) setError(null);
             }}
             onSubmitEditing={sendCode}

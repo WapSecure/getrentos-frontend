@@ -87,7 +87,7 @@ export default function BuyerDocuments() {
         />
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -107,7 +107,11 @@ export default function BuyerDocuments() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: BuyerDocument }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => openDocument(item)}>
+              <Pressable
+                onPress={() => openDocument(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${item.name}`}
+              >
                 <Card elevated>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
                     <FileText size={18} color={colors.mutedForeground} style={{ marginTop: 2 }} />
@@ -127,6 +131,8 @@ export default function BuyerDocuments() {
                     </View>
                     <Pressable
                       onPress={() => confirmRemove(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${item.name}`}
                       hitSlop={8}
                       style={{ padding: 4 }}
                     >

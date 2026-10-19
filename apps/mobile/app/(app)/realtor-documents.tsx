@@ -254,7 +254,13 @@ function UploadForm({
           {file ? file.name : 'Choose a file (up to 20 MB)'}
         </Text>
       </Pressable>
-      <TextField label="Name" value={name} onChangeText={setName} editable={!upload.isPending} />
+      <TextField
+        label="Name"
+        required
+        value={name}
+        onChangeText={setName}
+        editable={!upload.isPending}
+      />
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Type</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>

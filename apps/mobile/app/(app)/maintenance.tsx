@@ -10,7 +10,8 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
+  IconButton,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -121,32 +122,31 @@ export default function ResidentMaintenance() {
       <BackHeader
         title="Maintenance"
         action={
-          <Pressable
+          <IconButton
             onPress={() => setReportOpen(true)}
-            accessibilityRole="button"
             accessibilityLabel="Report an issue"
-            hitSlop={10}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: colors.accent,
-            }}
-          >
-            <Plus size={18} color={colors.primary} />
-          </Pressable>
+            icon={<Plus size={20} color={colors.primary} />}
+          />
         }
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={100} radius={16} />
-            <Skeleton height={100} radius={16} />
-          </View>
-        ) : tickets.length > 0 ? (
-          tickets.map((t) => (
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.md }}>
+              <Skeleton height={100} radius={radius.lg} />
+              <Skeleton height={100} radius={radius.lg} />
+            </View>
+          }
+          isEmpty={tickets.length === 0}
+          empty={{
+            icon: <Wrench size={34} color={colors.mutedForeground} />,
+            title: 'No maintenance tickets',
+            description: 'Report an issue and your estate manager will be notified.',
+            action: <Button label="Report Issue" onPress={() => setReportOpen(true)} />,
+          }}
+        >
+          {tickets.map((t) => (
             <Card key={t.id} elevated>
               <View style={{ flexDirection: 'row', gap: spacing.md }}>
                 {t.photoUrl ? (
@@ -198,15 +198,8 @@ export default function ResidentMaintenance() {
                 </Text>
               ) : null}
             </Card>
-          ))
-        ) : (
-          <EmptyState
-            icon={<Wrench size={34} color={colors.mutedForeground} />}
-            title="No maintenance tickets"
-            description="Report an issue and your estate manager will be notified."
-            action={<Button label="Report Issue" onPress={() => setReportOpen(true)} />}
-          />
-        )}
+          ))}
+        </QueryState>
       </Screen>
 
       <ReportSheet
@@ -267,16 +260,16 @@ function ReportForm({
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <Field label="What's wrong?">
-        <TextField
-          placeholder="Describe the issue"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={4}
-          editable={!submitting}
-        />
-      </Field>
+      <TextField
+        label="What's wrong?"
+        required
+        placeholder="Describe the issue"
+        value={description}
+        onChangeText={setDescription}
+        multiline
+        numberOfLines={4}
+        editable={!submitting}
+      />
       <Field label="Category (optional)">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {CATEGORIES.map((c) => (
@@ -315,22 +308,12 @@ function ReportForm({
                 backgroundColor: colors.secondary,
               }}
             />
-            <Pressable
+            <IconButton
               onPress={() => setPhoto(null)}
               disabled={submitting}
-              accessibilityRole="button"
               accessibilityLabel="Remove photo"
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colors.secondary,
-              }}
-            >
-              <X size={16} color={colors.foreground} />
-            </Pressable>
+              icon={<X size={16} color={colors.foreground} />}
+            />
           </View>
         ) : (
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
@@ -356,8 +339,8 @@ function ReportForm({
         )}
       </Field>
       <Button
-        label={submitting ? 'Submitting…' : 'Submit Report'}
-        disabled={submitting || !canSubmit}
+        label="Submit Report"
+        disabled={!canSubmit}
         loading={submitting}
         fullWidth
         onPress={() =>

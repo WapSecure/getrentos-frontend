@@ -79,6 +79,7 @@ function LeaseTerminationForm({
         value={reason}
         onChangeText={setReason}
         editable={!mutation.isPending}
+        required
       />
       <Text variant="caption" color="warning">
         Check your lease agreement for notice-period and penalty terms before submitting.

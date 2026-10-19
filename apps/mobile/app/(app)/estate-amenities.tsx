@@ -339,6 +339,7 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Name"
+        required
         value={name}
         onChangeText={setName}
         maxLength={80}

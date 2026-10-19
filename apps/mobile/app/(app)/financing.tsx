@@ -60,7 +60,7 @@ export default function Financing() {
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           <Skeleton height={180} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>
@@ -187,6 +187,9 @@ function ApplyPanel({ rentAmount, onClose }: { rentAmount: number; onClose: () =
             <Pressable
               key={m}
               onPress={() => setMonths(m)}
+              accessibilityRole="radio"
+              accessibilityLabel={`${m} months, ${feePercent}% fee`}
+              accessibilityState={{ checked: selected }}
               style={({ pressed }) => ({
                 flexDirection: 'row',
                 alignItems: 'center',

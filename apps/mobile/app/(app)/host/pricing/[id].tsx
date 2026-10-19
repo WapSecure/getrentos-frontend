@@ -12,6 +12,7 @@ import {
   EmptyState,
   FormAlert,
   IconButton,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -369,7 +370,7 @@ function SeasonForm({
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
-        <TextField label="Name" value={name} onChangeText={setName} maxLength={60} />
+        <TextField label="Name" required value={name} onChangeText={setName} maxLength={60} />
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
             <DateField
@@ -384,11 +385,12 @@ function SeasonForm({
           </View>
         </View>
         {l.pricingMode === 'PER_NIGHT' ? (
-          <TextField
-            label="Nightly rate (₦)"
-            keyboardType="number-pad"
-            value={value ? value.toLocaleString('en-NG') : ''}
-            onChangeText={setRate}
+          <NumberField
+            label="Nightly rate"
+            optional
+            currency
+            value={rate}
+            onValueChange={setRate}
             hint={
               l.nightlyRate
                 ? `Your usual rate is ₦${l.nightlyRate.toLocaleString('en-NG')}. Blank keeps it.`

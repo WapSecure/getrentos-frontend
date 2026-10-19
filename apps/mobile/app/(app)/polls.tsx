@@ -6,6 +6,7 @@ import {
   Badge,
   Card,
   EmptyState,
+  ErrorState,
   Screen,
   Skeleton,
   Text,
@@ -51,6 +52,9 @@ function PollCard({
               key={opt.id}
               disabled={!canVote || voting}
               onPress={() => onVote(opt.id)}
+              accessibilityRole="radio"
+              accessibilityLabel={canVote ? opt.label : `${opt.label}, ${pct}%`}
+              accessibilityState={{ checked: mine, disabled: !canVote || voting }}
               style={{
                 borderRadius: radius.md,
                 borderWidth: 1,
@@ -134,6 +138,8 @@ export default function ResidentPolls() {
             <Skeleton height={140} radius={16} />
             <Skeleton height={140} radius={16} />
           </View>
+        ) : query.isError && !query.data ? (
+          <ErrorState onRetry={() => query.refetch()} />
         ) : query.data && query.data.length > 0 ? (
           query.data.map((poll) => (
             <PollCard

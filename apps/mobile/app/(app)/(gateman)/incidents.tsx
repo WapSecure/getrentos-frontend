@@ -164,6 +164,7 @@ export default function GatemanIncidents() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Panic alert"
+        accessibilityState={{ disabled: panic.isPending, busy: panic.isPending }}
         disabled={panic.isPending}
         onPress={() => panic.mutate()}
         style={{
@@ -231,6 +232,7 @@ export default function GatemanIncidents() {
 
         <TextField
           label="Description"
+          required
           value={description}
           onChangeText={setDescription}
           placeholder="What happened, where, and who's involved…"
@@ -288,7 +290,8 @@ export default function GatemanIncidents() {
         </View>
 
         <Button
-          label={report.isPending ? 'Reporting…' : 'Report Incident'}
+          label="Report Incident"
+          loadingLabel="Reporting…"
           loading={report.isPending}
           fullWidth
           disabled={!description.trim()}

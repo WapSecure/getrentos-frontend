@@ -19,6 +19,7 @@ import {
   Card,
   Chip,
   ErrorState,
+  NumberField,
   Skeleton,
   Text,
   TextField,
@@ -313,24 +314,15 @@ function ReportForm({
         </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
-            <TextField
-              label="Beacons on survey"
-              value={expected}
-              onChangeText={setExpected}
-              keyboardType="number-pad"
-            />
+            <NumberField label="Beacons on survey" value={expected} onValueChange={setExpected} />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField
-              label="Beacons found"
-              value={found}
-              onChangeText={setFound}
-              keyboardType="number-pad"
-            />
+            <NumberField label="Beacons found" value={found} onValueChange={setFound} />
           </View>
         </View>
         <TextField
           label="What you found"
+          required
           value={summary}
           onChangeText={setSummary}
           multiline

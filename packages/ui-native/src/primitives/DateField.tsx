@@ -35,6 +35,8 @@ export interface DateFieldProps {
   max?: string;
   error?: string | null;
   hint?: string;
+  /** Adds an asterisk to the label and tells screen readers the field is required. */
+  required?: boolean;
   disabled?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -81,6 +83,7 @@ export function DateField({
   value,
   onChange,
   label,
+  required,
   placeholder = 'Select date',
   min,
   max,
@@ -138,13 +141,18 @@ export function DateField({
           style={{ marginLeft: 4, fontWeight: '600' }}
         >
           {label}
+          {required ? (
+            <Text variant="callout" color="destructive">
+              {' *'}
+            </Text>
+          ) : null}
         </Text>
       ) : null}
 
       <Pressable
         onPress={openPicker}
         accessibilityRole="button"
-        accessibilityLabel={label ?? placeholder}
+        accessibilityLabel={required && label ? `${label}, required` : (label ?? placeholder)}
         accessibilityHint={error ? `Error: ${error}` : hint}
         accessibilityState={{ disabled }}
         aria-invalid={!!error}

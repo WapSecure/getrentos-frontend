@@ -349,9 +349,11 @@ function AgentTaskForm({ rep, onDone }: { rep: Representative; onDone: () => voi
               onPress={() => setPropertyId(p.id)}
             />
           ))
+        ) : properties.isPending ? (
+          [0, 1, 2].map((i) => <Skeleton key={i} height={32} width={96} radius={16} />)
         ) : (
           <Text variant="caption" color="mutedForeground">
-            {properties.isPending ? 'Loading…' : 'No properties to choose from.'}
+            No properties to choose from.
           </Text>
         )}
       </View>
@@ -367,7 +369,7 @@ function AgentTaskForm({ rep, onDone }: { rep: Representative; onDone: () => voi
           />
         ))}
       </View>
-      <TextField label="What should they do?" value={title} onChangeText={setTitle} />
+      <TextField label="What should they do?" required value={title} onChangeText={setTitle} />
       <TextField label="Notes (optional)" value={notes} onChangeText={setNotes} multiline />
       <Text variant="bodyStrong">Priority</Text>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>

@@ -81,7 +81,7 @@ export default function BuyerOffers() {
         </ScrollView>
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>

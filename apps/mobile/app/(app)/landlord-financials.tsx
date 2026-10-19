@@ -70,7 +70,7 @@ export default function LandlordFinancials() {
         }
       />
 
-      {stats.isError || chart.isError ? (
+      {(stats.isError && !stats.data) || (chart.isError && !chart.data) ? (
         <ErrorState
           onRetry={() => {
             stats.refetch();

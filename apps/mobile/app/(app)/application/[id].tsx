@@ -92,13 +92,15 @@ export default function ApplicationDetail() {
         </View>
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
-          {query.isError ? (
-            <ErrorState onRetry={() => query.refetch()} />
-          ) : !query.data ? (
-            <View style={{ gap: spacing.md }}>
-              <Skeleton height={24} width="60%" />
-              <Skeleton height={80} />
-            </View>
+          {!query.data ? (
+            query.isError ? (
+              <ErrorState onRetry={() => query.refetch()} />
+            ) : (
+              <View style={{ gap: spacing.md }}>
+                <Skeleton height={24} width="60%" />
+                <Skeleton height={80} />
+              </View>
+            )
           ) : !app ? (
             <Text variant="body" color="mutedForeground">
               This application could not be found.

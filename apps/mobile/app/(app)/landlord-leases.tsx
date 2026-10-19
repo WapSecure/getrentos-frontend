@@ -101,7 +101,7 @@ export default function LandlordLeases() {
         />
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
@@ -284,33 +284,10 @@ function LeaseAction({
 }
 
 function SignatureChip({ label, signed }: { label: string; signed: boolean }) {
-  const { colors, spacing, radius } = useTheme();
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
-        paddingHorizontal: spacing.md,
-        paddingVertical: 5,
-        borderRadius: radius.full,
-        backgroundColor: signed ? colors.success + '1f' : colors.secondary,
-      }}
-    >
-      <View
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: signed ? colors.success : colors.mutedForeground,
-        }}
-      />
-      <Text
-        variant="caption"
-        style={{ fontSize: 11, color: signed ? colors.success : colors.mutedForeground }}
-      >
-        {label} {signed ? 'signed' : 'pending'}
-      </Text>
-    </View>
+    <Badge
+      label={`${label} ${signed ? 'signed' : 'pending'}`}
+      tone={signed ? 'success' : 'neutral'}
+    />
   );
 }

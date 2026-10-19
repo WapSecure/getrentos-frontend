@@ -37,7 +37,7 @@ export default function BuyerReviews() {
         onBack={() => router.back()}
       />
 
-      {listQuery.isError ? (
+      {listQuery.isError && !listQuery.data ? (
         <ErrorState onRetry={() => listQuery.refetch()} />
       ) : listQuery.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

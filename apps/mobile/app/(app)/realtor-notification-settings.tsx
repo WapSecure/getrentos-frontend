@@ -1,4 +1,4 @@
-import { ScrollView, Switch, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import {
   Divider,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -89,50 +90,20 @@ export default function RealtorNotificationSettings() {
               return (
                 <View key={p.id}>
                   {i ? <Divider /> : null}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: spacing.md,
-                      padding: spacing.lg,
-                      minHeight: 64,
-                    }}
-                  >
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong">{copy.label}</Text>
-                      {copy.hint ? (
-                        <Text variant="caption" color="mutedForeground">
-                          {copy.hint}
-                        </Text>
-                      ) : null}
-                    </View>
-                    <Switch
-                      value={p.push}
-                      onValueChange={(v) => set(p.id, 'push', v)}
-                      accessibilityLabel={`${copy.label} push alerts`}
-                      trackColor={{ true: colors.primary, false: colors.border }}
-                    />
-                  </View>
+                  <SwitchRow
+                    label={copy.label}
+                    description={copy.hint || undefined}
+                    value={p.push}
+                    onValueChange={(v) => set(p.id, 'push', v)}
+                    style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
+                  />
                   {categorySendsEmail(p.id) ? (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing.md,
-                        paddingHorizontal: spacing.lg,
-                        paddingBottom: spacing.lg,
-                      }}
-                    >
-                      <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                        Also by email
-                      </Text>
-                      <Switch
-                        value={p.email}
-                        onValueChange={(v) => set(p.id, 'email', v)}
-                        accessibilityLabel={`${copy.label} by email`}
-                        trackColor={{ true: colors.primary, false: colors.border }}
-                      />
-                    </View>
+                    <SwitchRow
+                      label="Also by email"
+                      value={p.email}
+                      onValueChange={(v) => set(p.id, 'email', v)}
+                      style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.md }}
+                    />
                   ) : null}
                 </View>
               );

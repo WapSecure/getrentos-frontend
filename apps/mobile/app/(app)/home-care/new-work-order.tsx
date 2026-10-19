@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Switch, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,8 +9,10 @@ import {
   Chip,
   DateField,
   FormAlert,
+  NumberField,
   SegmentedControl,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   toISODate,
@@ -184,7 +186,13 @@ export default function NewWorkOrder() {
         </Section>
 
         <Section title="What’s wrong">
-          <TextField label="In a few words" value={title} onChangeText={setTitle} maxLength={120} />
+          <TextField
+            label="In a few words"
+            required
+            value={title}
+            onChangeText={setTitle}
+            maxLength={120}
+          />
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
             {CATEGORIES.map((c) => (
               <Chip
@@ -198,6 +206,7 @@ export default function NewWorkOrder() {
           </View>
           <TextField
             label="Details"
+            required
             value={description}
             onChangeText={setDescription}
             multiline
@@ -206,21 +215,12 @@ export default function NewWorkOrder() {
         </Section>
 
         <Section title="How urgent">
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View style={{ flex: 1 }}>
-              <Text variant="body">Emergency</Text>
-              <Text variant="caption" color="mutedForeground">
-                Burst pipe, no power, broken lock. Sets urgent priority and escalates if nobody
-                responds.
-              </Text>
-            </View>
-            <Switch
-              value={emergency}
-              onValueChange={setEmergency}
-              accessibilityLabel="Emergency"
-              trackColor={{ true: colors.destructive, false: colors.border }}
-            />
-          </View>
+          <SwitchRow
+            label="Emergency"
+            description="Burst pipe, no power, broken lock. Sets urgent priority and escalates if nobody responds."
+            value={emergency}
+            onValueChange={setEmergency}
+          />
           {!emergency ? (
             <SegmentedControl
               accessibilityLabel="Priority"
@@ -238,31 +238,19 @@ export default function NewWorkOrder() {
         </Section>
 
         <Section title="Budget & vendor">
-          <TextField
-            label="Estimated cost (₦, optional)"
-            keyboardType="number-pad"
-            value={
-              Number(cost.replace(/\D/g, ''))
-                ? Number(cost.replace(/\D/g, '')).toLocaleString('en-NG')
-                : ''
-            }
-            onChangeText={setCost}
+          <NumberField
+            label="Estimated cost"
+            optional
+            currency
+            value={cost}
+            onValueChange={setCost}
           />
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View style={{ flex: 1 }}>
-              <Text variant="body">Needs spend approval</Text>
-              <Text variant="caption" color="mutedForeground">
-                Work can’t start until you approve a budget or a vendor’s quote. Good for bigger
-                jobs.
-              </Text>
-            </View>
-            <Switch
-              value={approval}
-              onValueChange={setApproval}
-              accessibilityLabel="Needs spend approval"
-              trackColor={{ true: colors.primary, false: colors.border }}
-            />
-          </View>
+          <SwitchRow
+            label="Needs spend approval"
+            description="Work can’t start until you approve a budget or a vendor’s quote. Good for bigger jobs."
+            value={approval}
+            onValueChange={setApproval}
+          />
           <VendorPicker value={vendorId} onChange={setVendorId} optional />
         </Section>
 

@@ -10,6 +10,7 @@ import {
   Chip,
   EmptyState,
   FormAlert,
+  NumberField,
   SegmentedControl,
   Skeleton,
   Text,
@@ -223,12 +224,13 @@ function Form({ listing: l }: { listing: HostListing }) {
             ))}
           </View>
           {f.internet && f.internet !== 'NONE' ? (
-            <TextField
-              label="Usual speed (Mbps)"
-              keyboardType="number-pad"
+            <NumberField
+              label="Usual speed"
+              optional
+              unit="Mbps"
               value={f.speed}
-              onChangeText={(speed) => set({ speed: speed.replace(/\D/g, '') })}
-              hint="Optional. Remote workers look for this."
+              onValueChange={(speed) => set({ speed })}
+              hint="Remote workers look for this."
             />
           ) : null}
         </Section>

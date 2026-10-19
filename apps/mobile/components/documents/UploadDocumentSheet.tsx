@@ -106,6 +106,7 @@ function UploadDocumentForm({
 
       <TextField
         label="Name"
+        required
         placeholder="e.g. Tenancy agreement"
         value={name}
         onChangeText={setName}

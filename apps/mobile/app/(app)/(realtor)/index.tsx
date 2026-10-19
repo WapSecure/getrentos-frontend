@@ -19,6 +19,7 @@ import {
   Card,
   ErrorState,
   IconButton,
+  LinkButton,
   Price,
   PressableScale,
   Screen,
@@ -264,15 +265,7 @@ export default function RealtorHome() {
             <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
               No viewings today.
             </Text>
-            <Text
-              variant="callout"
-              color="primary"
-              style={{ fontWeight: '700' }}
-              onPress={() => setSheet('viewing')}
-              accessibilityRole="button"
-            >
-              Book one
-            </Text>
+            <LinkButton label="Book one" onPress={() => setSheet('viewing')} />
           </Card>
         )}
       </View>

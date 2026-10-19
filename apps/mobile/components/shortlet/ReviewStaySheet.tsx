@@ -86,7 +86,8 @@ function ReviewForm({
       </View>
 
       <TextField
-        label="Comment (optional)"
+        label="Comment"
+        optional
         value={comment}
         onChangeText={setComment}
         multiline

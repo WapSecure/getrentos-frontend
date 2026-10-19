@@ -387,7 +387,8 @@ export default function GatemanCheckIn() {
     );
   }
 
-  if (isError) {
+  // A failed refresh with a posting already known leaves the console working.
+  if (isError && !estate) {
     return (
       <Screen refreshing={isRefetching} onRefresh={refetch}>
         <ErrorState
@@ -552,7 +553,8 @@ export default function GatemanCheckIn() {
             onComplete={submit}
           />
           <Button
-            label={verify.isPending ? 'Checking…' : 'Check In'}
+            label="Check In"
+            loadingLabel="Checking…"
             loading={verify.isPending}
             fullWidth
             disabled={pin.length !== 6}
@@ -686,7 +688,8 @@ export default function GatemanCheckIn() {
                   </Text>
                 ))}
                 <Button
-                  label={sending ? 'Sending…' : 'Send now'}
+                  label="Send now"
+                  loadingLabel="Sending…"
                   variant="outline"
                   size="sm"
                   fullWidth={false}
@@ -754,7 +757,7 @@ export default function GatemanCheckIn() {
                   <Button
                     label="Admit"
                     fullWidth
-                    loading={admit.isPending}
+                    loading={admit.isPending && admit.variables?.pass.id === pass.id}
                     onPress={() => admit.mutate({ pass })}
                   />
                 </View>
@@ -782,7 +785,7 @@ export default function GatemanCheckIn() {
                     variant="outline"
                     size="sm"
                     fullWidth={false}
-                    loading={cancelWalkIn.isPending}
+                    loading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
                     onPress={() => cancelWalkIn.mutate(pass)}
                   />
                 </View>
@@ -829,7 +832,7 @@ export default function GatemanCheckIn() {
                     variant="outline"
                     size="sm"
                     fullWidth={false}
-                    loading={checkOut.isPending}
+                    loading={checkOut.isPending && checkOut.variables?.id === pass.id}
                     onPress={() => checkOut.mutate(pass)}
                   />
                 </View>

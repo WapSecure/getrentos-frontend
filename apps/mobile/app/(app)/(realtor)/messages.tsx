@@ -12,6 +12,7 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
+  ListSkeleton,
   Skeleton,
   Text,
   TextField,
@@ -219,7 +220,8 @@ function ClientPicker({ onDone }: { onDone: () => void }) {
     },
   });
   const active = clients.data?.items.filter((c) => c.status === 'ACTIVE') ?? [];
-  if (clients.isPending) return <Skeleton height={120} />;
+  if (clients.isError && !clients.data) return <ErrorState onRetry={() => clients.refetch()} />;
+  if (clients.isPending) return <ListSkeleton rows={3} />;
   if (!active.length)
     return (
       <View style={{ gap: spacing.md }}>

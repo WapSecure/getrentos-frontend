@@ -93,11 +93,13 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
           label="Full name"
           value={legalName}
           onChangeText={setLegalName}
+          required
           autoComplete="name"
           textContentType="name"
         />
         <TextField
-          label="Company (optional)"
+          label="Company"
+          optional
           value={companyName}
           onChangeText={setCompanyName}
           textContentType="organizationName"
@@ -106,7 +108,7 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
           <TextField
             label="Phone number"
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
             keyboardType="phone-pad"
             autoComplete="tel"
             textContentType="telephoneNumber"

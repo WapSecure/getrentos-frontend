@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Clock, MapPin, Repeat, Siren } from 'lucide-react-native';
 import {
@@ -80,6 +80,7 @@ export default function EstateDwell() {
     queryFn: () => estateGateApi.authorisationDwell(estateId, { from, sort }),
     enabled: !!estateId && !locked,
     retry: retryUnlessPlanGate,
+    placeholderData: keepPreviousData,
   });
   const refusal = planRefusal(board.error) ?? planRefusal(report.error);
 

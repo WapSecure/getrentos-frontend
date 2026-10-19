@@ -168,6 +168,7 @@ function CreatePropertyForm({
         value={name}
         onChangeText={setName}
         editable={!create.isPending}
+        required
       />
 
       <ChipSelect
@@ -184,6 +185,7 @@ function CreatePropertyForm({
         value={address}
         onChangeText={setAddress}
         editable={!create.isPending}
+        required
       />
 
       <LocationFields

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { ChipSelect } from '@/components/landlord/ChipSelect';
 import {
   landlordApi,
   PROPERTY_TYPES,
@@ -47,7 +48,7 @@ function EditForm({
   onClose: () => void;
   onSubmittingChange: (submitting: boolean) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -96,48 +97,28 @@ function EditForm({
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <TextField label="Name" value={name} onChangeText={setName} editable={!save.isPending} />
+      <TextField
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        editable={!save.isPending}
+        required
+      />
 
-      <View style={{ gap: spacing.sm }}>
-        <Text variant="callout" color="mutedForeground" style={{ marginLeft: 4 }}>
-          Type
-        </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {PROPERTY_TYPES.map((t) => {
-            const selected = t === type;
-            return (
-              <Pressable
-                key={t}
-                onPress={() => setType(t)}
-                disabled={save.isPending}
-                accessibilityRole="button"
-                accessibilityState={{ selected, disabled: save.isPending }}
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 8,
-                  borderRadius: radius.full,
-                  borderWidth: 1.5,
-                  borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary + '14' : 'transparent',
-                }}
-              >
-                <Text
-                  variant="caption"
-                  style={{ color: selected ? colors.primary : colors.mutedForeground }}
-                >
-                  {PROPERTY_TYPE_LABEL[t]}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
+      <ChipSelect
+        label="Type"
+        options={PROPERTY_TYPES.map((t) => ({ value: t, label: PROPERTY_TYPE_LABEL[t] }))}
+        value={type}
+        onChange={setType}
+        disabled={save.isPending}
+      />
 
       <TextField
         label="Address"
         value={address}
         onChangeText={setAddress}
         editable={!save.isPending}
+        required
       />
 
       <LocationFields

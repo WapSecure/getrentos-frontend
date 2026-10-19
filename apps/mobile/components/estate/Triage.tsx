@@ -241,6 +241,7 @@ function CloseForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label={dismissing ? 'Why it’s being dismissed' : 'What was done (optional)'}
+        required={dismissing}
         value={notes}
         onChangeText={setNotes}
         editable={!busy}

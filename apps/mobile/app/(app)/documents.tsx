@@ -19,6 +19,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { documentsApi, type RenterDocument } from '@/lib/api/documents';
 import { UploadDocumentSheet } from '@/components/documents/UploadDocumentSheet';
 import { Sheet } from '@/components/Sheet';
@@ -47,19 +48,23 @@ export default function Documents() {
   });
   const items = listQuery.data?.items ?? [];
 
-  const favoriteMutation = useMutation({
+  // The star fills at once; a refusal puts it back with a toast.
+  const favoriteMutation = useOptimisticMutation({
     mutationFn: (id: string) => documentsApi.toggleFavorite(id),
-    onSuccess: (updated) => {
-      qc.setQueryData<typeof listQuery.data>(qk.renter.documents, (old) =>
-        old ? { ...old, items: old.items.map((d) => (d.id === updated.id ? updated : d)) } : old
-      );
-      qc.invalidateQueries({ queryKey: qk.renter.documentSummary });
-    },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not update this document.',
-        'error'
-      ),
+    patches: (id) => [
+      {
+        queryKey: qk.renter.documents,
+        update: (old) => {
+          const list = old as NonNullable<typeof listQuery.data>;
+          return {
+            ...list,
+            items: list.items.map((d) => (d.id === id ? { ...d, isFavorite: !d.isFavorite } : d)),
+          };
+        },
+      },
+    ],
+    invalidate: [qk.renter.documentSummary],
+    errorMessage: 'Could not update this document.',
   });
 
   const shareMutation = useMutation({
@@ -138,7 +143,7 @@ export default function Documents() {
         </View>
       ) : null}
 
-      {listQuery.isError ? (
+      {listQuery.isError && !listQuery.data ? (
         <ErrorState onRetry={() => listQuery.refetch()} />
       ) : listQuery.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -160,6 +165,8 @@ export default function Documents() {
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
               <Card elevated>
                 <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Open ${item.name}`}
                   onPress={async () => {
                     try {
                       const { url } = await documentsApi.getDownloadUrl(item.id);
@@ -188,6 +195,9 @@ export default function Documents() {
                 <View style={{ flexDirection: 'row', gap: spacing.lg, marginTop: spacing.md }}>
                   <Pressable
                     onPress={() => favoriteMutation.mutate(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={item.isFavorite ? 'Remove from favorites' : 'Favorite'}
+                    accessibilityState={{ selected: item.isFavorite }}
                     hitSlop={8}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                   >
@@ -202,6 +212,8 @@ export default function Documents() {
                   </Pressable>
                   <Pressable
                     onPress={() => setSharingId(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Share ${item.name}`}
                     hitSlop={8}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                   >
@@ -212,6 +224,8 @@ export default function Documents() {
                   </Pressable>
                   <Pressable
                     onPress={() => confirmDelete(item.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete ${item.name}`}
                     hitSlop={8}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                   >
@@ -252,6 +266,7 @@ export default function Documents() {
         <View style={{ gap: spacing.lg }}>
           <TextField
             label="Email address"
+            required
             placeholder="landlord@example.com"
             autoCapitalize="none"
             keyboardType="email-address"
@@ -300,7 +315,7 @@ function SummaryTile({
         backgroundColor: colors.card,
       }}
     >
-      <Text variant="title" style={{ fontSize: 20, color }}>
+      <Text variant="heading" style={{ fontWeight: '800', color }}>
         {value}
       </Text>
       <Text variant="caption" color="mutedForeground">

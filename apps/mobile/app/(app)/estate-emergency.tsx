@@ -160,6 +160,7 @@ function DeclareForm({ estateId, households }: { estateId: string; households: n
       </View>
       <TextField
         label="What’s happening"
+        required
         value={description}
         onChangeText={setDescription}
         multiline
@@ -534,6 +535,7 @@ function NoteForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label={label}
+        required={required}
         value={note}
         onChangeText={setNote}
         multiline

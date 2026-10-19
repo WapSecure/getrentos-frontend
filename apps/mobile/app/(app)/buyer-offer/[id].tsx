@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Divider,
+  ErrorState,
   Price,
   Skeleton,
   Text,
@@ -100,7 +101,9 @@ export default function BuyerOfferDetail() {
         <Text variant="title">Offer</Text>
       </View>
 
-      {!offer ? (
+      {offersQuery.isError && !offer ? (
+        <ErrorState onRetry={() => offersQuery.refetch()} />
+      ) : !offer ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           <Skeleton height={140} radius={radius.lg} />
         </View>

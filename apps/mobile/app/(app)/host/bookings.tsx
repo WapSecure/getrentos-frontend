@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarDays } from 'lucide-react-native';
@@ -31,13 +31,15 @@ export default function HostBookings() {
     queryFn: ({ pageParam }) => hostShortletsApi.bookings(view, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    // The last tab's stays stay put while the next tab loads.
+    placeholderData: keepPreviousData,
   });
   const items = query.data?.pages.flatMap((p) => p.items) ?? [];
   const meta = VIEWS.find((v) => v.value === view)!;
 
   const refresh = (
     <RefreshControl
-      refreshing={query.isRefetching && !query.isFetchingNextPage}
+      refreshing={query.isRefetching && !query.isFetchingNextPage && !query.isPlaceholderData}
       onRefresh={() => query.refetch()}
       tintColor={colors.mutedForeground}
     />

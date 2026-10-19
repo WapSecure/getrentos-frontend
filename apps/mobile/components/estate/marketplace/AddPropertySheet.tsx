@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search } from 'lucide-react-native';
 import { Button, Skeleton, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { StatusPill } from '@/components/host/HostUI';
@@ -50,6 +50,7 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
     queryKey: marketplaceKeys.candidates(estateId, term),
     queryFn: () => estateMarketplaceApi.candidates(estateId, term),
     enabled: !!estateId && searching,
+    placeholderData: keepPreviousData,
   });
 
   const request = useMutation({
@@ -85,7 +86,7 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
 
       {!searching ? null : candidates.isPending ? (
         <Skeleton height={120} radius={radius.md} />
-      ) : candidates.isError ? (
+      ) : candidates.isError && !candidates.data ? (
         <Text variant="callout" color="mutedForeground">
           Couldn’t search just now. Pull down on the marketplace and try again.
         </Text>

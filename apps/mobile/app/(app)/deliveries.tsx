@@ -145,7 +145,7 @@ export default function ResidentDeliveries() {
                       variant="ghost"
                       size="sm"
                       fullWidth={false}
-                      loading={withdraw.isPending}
+                      loading={withdraw.isPending && withdraw.variables === row.id}
                       onPress={() => withdraw.mutate(row.id)}
                     />
                   ) : null}
@@ -328,6 +328,7 @@ function DeclareDeliverySheet({ open, onClose }: { open: boolean; onClose: () =>
         <View style={{ gap: spacing.lg }}>
           <TextField
             label="Who is bringing it?"
+            required
             value={courier}
             onChangeText={setCourier}
             placeholder="e.g. Amazon, DHL"
@@ -343,7 +344,8 @@ function DeclareDeliverySheet({ open, onClose }: { open: boolean; onClose: () =>
             The code works for 2 days, or until you withdraw it, and it only works once.
           </Text>
           <Button
-            label={declare.isPending ? 'Getting code…' : 'Get code'}
+            label="Get code"
+            loadingLabel="Getting code…"
             loading={declare.isPending}
             fullWidth
             disabled={courier.trim().length === 0}

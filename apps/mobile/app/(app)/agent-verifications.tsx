@@ -5,16 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCheck, CheckCircle, XCircle } from 'lucide-react-native';
-import {
-  Badge,
-  Card,
-  Chip,
-  EmptyState,
-  ErrorState,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,
@@ -105,31 +96,34 @@ export default function AgentVerifications() {
         </ScrollView>
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={110} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<BadgeCheck size={34} color={colors.mutedForeground} />}
-          title="No verifications"
-          description={
-            subjectType
-              ? 'No verifications match this filter.'
-              : 'Verification visits you submit will appear here.'
-          }
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={110} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <BadgeCheck size={34} color={colors.mutedForeground} />,
+          title: 'No verifications',
+          description: subjectType
+            ? 'No verifications match this filter.'
+            : 'Verification visits you submit will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: AgentVerification }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/agent-task/${item.taskId}`)}>
+              <Pressable
+                onPress={() => router.push(`/(app)/agent-task/${item.taskId}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.subjectName}, ${SUBJECT_LABEL[item.subjectType]} verification`}
+              >
                 <Card elevated>
                   <View
                     style={{
@@ -169,7 +163,7 @@ export default function AgentVerifications() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

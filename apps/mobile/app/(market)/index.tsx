@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import {
   BedDouble,
@@ -26,6 +26,7 @@ import {
   EmptyState,
   ErrorState,
   IconButton,
+  ListSkeleton,
   PropertyCard,
   Skeleton,
   Text,
@@ -309,6 +310,7 @@ function Listings({
     queryFn: ({ pageParam }) => publicMarketApi.list(kind, filters, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
 
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
@@ -549,9 +551,12 @@ function Listings({
         }
         ListFooterComponent={
           query.isFetchingNextPage ? (
-            <View style={{ paddingVertical: spacing.xl }}>
-              <ActivityIndicator color={colors.mutedForeground} accessibilityLabel="Loading more" />
-            </View>
+            <ListSkeleton
+              variant="card"
+              rows={1}
+              height={176}
+              style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
+            />
           ) : (
             <View style={{ height: 120 }} />
           )
@@ -638,6 +643,7 @@ function EstatesDirectory({
     queryFn: ({ pageParam }) => publicMarketApi.estates(search || undefined, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
 

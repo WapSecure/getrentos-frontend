@@ -247,7 +247,7 @@ export default function EstateHousehold() {
               </Text>
               {dues.isPending ? (
                 <Skeleton height={100} radius={radius.lg} />
-              ) : dues.isError ? (
+              ) : dues.isError && !dues.data ? (
                 <ErrorState onRetry={() => dues.refetch()} />
               ) : !list.length ? (
                 <Text variant="callout" color="mutedForeground">

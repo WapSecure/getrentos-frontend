@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Video } from 'lucide-react-native';
@@ -12,8 +12,8 @@ import {
   Chip,
   DateField,
   EmptyState,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   TimeField,
@@ -55,6 +55,7 @@ export default function OwnerViewings() {
   const query = useQuery({
     queryKey: qk.owner.viewings(status),
     queryFn: () => ownerApi.viewings(status),
+    placeholderData: keepPreviousData,
   });
   const items = query.data?.items ?? [];
 
@@ -116,15 +117,16 @@ export default function OwnerViewings() {
         </View>
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={120} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={120} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(v) => v.id}
@@ -170,7 +172,7 @@ export default function OwnerViewings() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={!!rescheduling} onClose={() => setRescheduling(null)} title="Offer another time">
         {rescheduling ? (

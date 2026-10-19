@@ -9,6 +9,7 @@ import {
   Card,
   Chip,
   FormAlert,
+  NumberField,
   Text,
   TextField,
   useTheme,
@@ -143,6 +144,7 @@ export default function EstateSetup() {
         <Card elevated style={{ gap: spacing.md }}>
           <TextField
             label="Estate name"
+            required
             value={draft.name}
             onChangeText={set('name')}
             placeholder="e.g. Sunrise Gardens Estate"
@@ -152,6 +154,7 @@ export default function EstateSetup() {
           />
           <TextField
             label="Address"
+            required
             value={draft.address}
             onChangeText={set('address')}
             placeholder="e.g. 1 Garden Close"
@@ -170,6 +173,7 @@ export default function EstateSetup() {
           <View style={{ gap: spacing.sm }}>
             <TextField
               label="City or town"
+              required
               value={draft.city}
               onChangeText={set('city')}
               placeholder={cities[0] ? `e.g. ${cities[0]}` : 'e.g. Lekki'}
@@ -191,11 +195,10 @@ export default function EstateSetup() {
               </View>
             ) : null}
           </View>
-          <TextField
+          <NumberField
             label="Number of gates (optional)"
             value={draft.gateCount}
-            onChangeText={(v) => set('gateCount')(v.replace(/[^0-9]/g, ''))}
-            keyboardType="number-pad"
+            onValueChange={set('gateCount')}
             maxLength={2}
             hint={`How many entrances the estate has, from 1 to ${MAX_GATES}.`}
             error={errors.gateCount}

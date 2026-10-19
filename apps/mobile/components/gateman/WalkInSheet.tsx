@@ -195,7 +195,8 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
           ) : (
             <>
               <Button
-                label={request.isPending ? 'Asking…' : 'Ask for approval'}
+                label="Ask for approval"
+                loadingLabel="Asking…"
                 loading={request.isPending}
                 fullWidth
                 disabled={!canSubmit}
@@ -264,6 +265,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
 
         <TextField
           label="Visitor name"
+          required
           value={visitorName}
           onChangeText={setVisitorName}
           placeholder="e.g. Tola Ade"
@@ -272,7 +274,7 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
         <TextField
           label="Visitor phone"
           value={visitorPhone}
-          onChangeText={setVisitorPhone}
+          onChangeText={(v) => setVisitorPhone(v.replace(/(?!^\+)\D/g, ''))}
           placeholder="0803…"
           keyboardType="phone-pad"
           hint="Optional"
@@ -311,7 +313,8 @@ export function WalkInSheet({ open, onClose, estateId, gateId, onRaised }: WalkI
             knowing before a household is asked. */}
         <View style={{ gap: spacing.xs }}>
           <Button
-            label={check.isPending ? 'Checking…' : 'Check the watch list'}
+            label="Check the watch list"
+            loadingLabel="Checking…"
             variant="outline"
             loading={check.isPending}
             fullWidth

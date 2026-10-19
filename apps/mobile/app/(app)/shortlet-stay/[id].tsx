@@ -22,11 +22,12 @@ import {
 import {
   Button,
   Card,
+  DetailSkeleton,
   Divider,
   EmptyState,
+  ErrorState,
   PressableScale,
   Price,
-  Skeleton,
   Text,
   useTheme,
   useToast,
@@ -63,7 +64,7 @@ type SheetName = 'message' | 'dispute' | 'review' | null;
 /** One booked stay, from the guest's side: where it stands, how to get in, the money. */
 export default function StayDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -122,10 +123,9 @@ export default function StayDetail() {
       >
         <DetailHeader eyebrow="Your stay" title="Stay" onBack={() => router.back()} />
         {stays.isPending ? (
-          <>
-            <Skeleton height={120} radius={radius.lg} />
-            <Skeleton height={200} radius={radius.lg} />
-          </>
+          <DetailSkeleton />
+        ) : stays.isError && !stays.data ? (
+          <ErrorState onRetry={() => stays.refetch()} />
         ) : (
           <EmptyState
             title="Stay not found"

@@ -6,7 +6,6 @@ import {
   RefreshControl,
   ScrollView,
   Share,
-  Switch,
   View,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -21,6 +20,7 @@ import {
   ErrorState,
   FormAlert,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -239,22 +239,19 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
         </View>
       </Pressable>
 
-      <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Globe size={20} color={enabled ? colors.success : colors.mutedForeground} />
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Publish the page</Text>
-          <Text variant="caption" color="mutedForeground">
-            {enabled ? 'Live: anyone with the link can see it' : 'Draft: hidden from the public'}
-          </Text>
-        </View>
-        <Switch
+      <Card elevated>
+        <SwitchRow
+          icon={<Globe size={20} color={enabled ? colors.success : colors.mutedForeground} />}
+          label="Publish the page"
+          description={
+            enabled ? 'Live: anyone with the link can see it' : 'Draft: hidden from the public'
+          }
           value={enabled}
           disabled={publish.isPending}
           onValueChange={(v) => {
             setEnabled(v);
             publish.mutate(v);
           }}
-          accessibilityLabel="Publish the microsite"
         />
       </Card>
 
@@ -311,7 +308,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
         multiline
         maxLength={MICROSITE_BIO_MAX}
         placeholder="What it’s like to live here: security, amenities, the community…"
-        hint={`${bio.length} / ${MICROSITE_BIO_MAX}`}
+        showCount
       />
       {save.error ? (
         <FormAlert message={errorText(save.error, 'Could not save these changes.')} />

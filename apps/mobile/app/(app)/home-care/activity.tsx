@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { History } from 'lucide-react-native';
-import { EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { EmptyState, ErrorState, ListSkeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type TimelineEvent } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -25,7 +25,7 @@ const dayLabel = (key: string) => {
 
 /** Everything that happened across the homes, newest first, grouped by day. */
 export default function Activity() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const query = useQuery({
     queryKey: qk.homeCare.timeline,
@@ -60,7 +60,7 @@ export default function Activity() {
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isPending ? (
         <View style={{ paddingHorizontal: spacing.xl }}>
-          <Skeleton height={240} radius={radius.lg} />
+          <ListSkeleton rows={5} />
         </View>
       ) : (
         <SectionList

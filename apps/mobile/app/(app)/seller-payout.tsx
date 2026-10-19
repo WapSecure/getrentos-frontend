@@ -11,10 +11,10 @@ import {
   Chip,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -182,21 +182,23 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
         />
       </View>
       {other ? (
-        <TextField
+        <NumberField
           label="Bank code"
           value={bankCode}
-          onChangeText={(v) => setBankCode(v.replace(/\D/g, ''))}
-          keyboardType="number-pad"
+          onValueChange={setBankCode}
+          code
           maxLength={6}
+          required
           hint="Your bank’s code, e.g. 058 for GTBank"
         />
       ) : null}
-      <TextField
+      <NumberField
         label="Account number"
         value={accountNumber}
-        onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
-        keyboardType="number-pad"
+        onValueChange={setAccountNumber}
+        code
         maxLength={10}
+        required
       />
       {save.error ? (
         <FormAlert

@@ -46,7 +46,7 @@ export default function Inspections() {
         onBack={() => router.back()}
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -66,7 +66,12 @@ export default function Inspections() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Inspection }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => setSelected(item)}>
+              <Pressable
+                onPress={() => setSelected(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`${INSPECTION_TYPE_LABEL[item.type]} inspection, ${item.property.title}, ${item.acknowledgedAt ? 'Reviewed' : 'Needs review'}`}
+                accessibilityHint="Opens the report"
+              >
                 <Card elevated>
                   <View
                     style={{

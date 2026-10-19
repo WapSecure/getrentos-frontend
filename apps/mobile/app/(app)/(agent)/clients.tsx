@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,8 +8,8 @@ import {
   Avatar,
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
+  IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -58,39 +58,30 @@ export default function AgentClients() {
           subtitle="Authorized property relationships"
           style={{ flex: 1 }}
         />
-        <Pressable
+        <IconButton
           onPress={() => setInviteOpen(true)}
-          accessibilityRole="button"
           accessibilityLabel="Invite a client"
-          hitSlop={10}
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: colors.primary,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Plus size={18} color={colors.primaryForeground} />
-        </Pressable>
+          icon={<Plus size={18} color={colors.primaryForeground} />}
+          style={{ backgroundColor: colors.primary, borderColor: colors.primary }}
+        />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Users size={34} color={colors.mutedForeground} />}
-          title="No clients yet"
-          description="Invite a landlord or property owner to authorize you as their field agent."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={90} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Users size={34} color={colors.mutedForeground} />,
+          title: 'No clients yet',
+          description: 'Invite a landlord or property owner to authorize you as their field agent.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -131,7 +122,7 @@ export default function AgentClients() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <InviteClientSheet open={inviteOpen} onClose={() => setInviteOpen(false)} />
     </View>

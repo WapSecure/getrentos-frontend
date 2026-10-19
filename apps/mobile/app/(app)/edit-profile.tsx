@@ -7,6 +7,7 @@ import { Camera } from 'lucide-react-native';
 import {
   Avatar,
   Button,
+  ErrorState,
   LinkButton,
   Skeleton,
   Text,
@@ -48,7 +49,9 @@ export default function EditProfile() {
         />
       </View>
 
-      {!query.data ? (
+      {!query.data && query.isError ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : !query.data ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={80} width={80} radius={40} />
           <Skeleton height={44} />
@@ -164,6 +167,7 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
 
       <TextField
         label="Full name"
+        required
         value={fullName}
         onChangeText={setFullName}
         returnKeyType="next"
@@ -178,7 +182,8 @@ function ProfileForm({ profile }: { profile: RenterProfile }) {
         ref={phoneRef}
         label="Phone"
         value={phone}
-        onChangeText={setPhone}
+        // Digits and a leading '+' only.
+        onChangeText={(t) => setPhone(t.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
         keyboardType="phone-pad"
         returnKeyType="next"
         onSubmitEditing={() => locationRef.current?.focus()}

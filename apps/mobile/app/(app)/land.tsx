@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { ChevronLeft, LandPlot, Search, ShieldCheck } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import {
   Chip,
   EmptyState,
   ErrorState,
+  ListSkeleton,
   Price,
   Skeleton,
   Text,
@@ -56,6 +57,7 @@ export default function LandMarketplace() {
     queryFn: ({ pageParam }) => landApi.list(filters, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
 
   const items = query.data?.pages.flatMap((p) => p.items) ?? [];
@@ -122,7 +124,12 @@ export default function LandMarketplace() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: LandListing }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/land-listing/${item.id}`)}>
+              <Pressable
+                onPress={() => router.push(`/(app)/land-listing/${item.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${[item.title, item.address, item.city].filter(Boolean).join(', ')}, ${Math.round(item.price).toLocaleString('en-NG')} naira`}
+                accessibilityHint="Opens land details"
+              >
                 <Card elevated>
                   <View style={{ gap: 4 }}>
                     <Text variant="bodyStrong" numberOfLines={1}>
@@ -183,9 +190,12 @@ export default function LandMarketplace() {
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <View style={{ paddingVertical: spacing.xl }}>
-                <ActivityIndicator color={colors.mutedForeground} />
-              </View>
+              <ListSkeleton
+                variant="card"
+                rows={1}
+                height={150}
+                style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
+              />
             ) : (
               <View style={{ height: insets.bottom + spacing['3xl'] }} />
             )

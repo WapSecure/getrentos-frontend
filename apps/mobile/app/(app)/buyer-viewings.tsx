@@ -8,8 +8,7 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -81,21 +80,22 @@ export default function BuyerViewings() {
         />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={100} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Calendar size={34} color={colors.mutedForeground} />}
-          title="No viewings requested"
-          description="Request a viewing from a listing to see it here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={100} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Calendar size={34} color={colors.mutedForeground} />,
+          title: 'No viewings requested',
+          description: 'Request a viewing from a listing to see it here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -146,7 +146,7 @@ export default function BuyerViewings() {
                     variant="outline"
                     size="sm"
                     style={{ marginTop: spacing.md }}
-                    loading={cancelMutation.isPending}
+                    loading={cancelMutation.isPending && cancelMutation.variables === item.id}
                     onPress={() => confirmCancel(item)}
                   />
                 ) : null}
@@ -165,7 +165,7 @@ export default function BuyerViewings() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

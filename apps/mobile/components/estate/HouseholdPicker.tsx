@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Check, Search } from 'lucide-react-native';
 import { Skeleton, Text, TextField, useTheme } from '@getrentos/ui-native';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -27,6 +27,7 @@ export function HouseholdPicker({
     queryFn: () =>
       estateManagerApi.households(estateId, { status: 'ACTIVE', search: term || undefined }),
     enabled: !!estateId && !value,
+    placeholderData: keepPreviousData,
   });
 
   if (value) {

@@ -213,6 +213,7 @@ function RecordForm({ estateId, onDone }: { estateId: string; onDone: () => void
       </View>
       <TextField
         label="What happened"
+        required
         value={description}
         onChangeText={setDescription}
         multiline

@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   ErrorState,
+  NumberField,
   Skeleton,
   Text,
   TextField,
@@ -38,14 +39,14 @@ export default function BuyerPaymentMethod() {
         onBack={() => router.back()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        <PaymentMethodForm data={query.data} />
+      ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={200} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <PaymentMethodForm data={query.data} />
+        <ErrorState onRetry={() => query.refetch()} />
       )}
     </View>
   );
@@ -109,14 +110,21 @@ function PaymentMethodForm({ data }: { data: BuyerPaymentMethodData }) {
       ) : null}
 
       <Card elevated style={{ gap: spacing.md }}>
-        <TextField label="Bank name" value={bankName} onChangeText={setBankName} />
-        <TextField
+        <TextField label="Bank name" value={bankName} onChangeText={setBankName} required />
+        <NumberField
           label="Account number"
           value={accountNumber}
-          onChangeText={setAccountNumber}
-          keyboardType="number-pad"
+          onValueChange={setAccountNumber}
+          code
+          maxLength={10}
+          required
         />
-        <TextField label="Account name" value={accountName} onChangeText={setAccountName} />
+        <TextField
+          label="Account name"
+          value={accountName}
+          onChangeText={setAccountName}
+          required
+        />
       </Card>
 
       <Button

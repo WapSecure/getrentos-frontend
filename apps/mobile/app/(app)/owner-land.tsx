@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,7 +13,9 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
+  NumberField,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -229,11 +231,12 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
   return (
     <View style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <TextField
+        <NumberField
           label="Area"
           value={area}
-          onChangeText={setArea}
-          keyboardType="decimal-pad"
+          onValueChange={setArea}
+          decimals={2}
+          required
           containerStyle={{ flex: 1 }}
         />
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 4 }}>
@@ -287,17 +290,7 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
       />
       <TextField label="Survey plan number" value={surveyNumber} onChangeText={setSurveyNumber} />
       <TextField label="Zoning (e.g. residential)" value={zoning} onChangeText={setZoning} />
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 44 }}>
-        <Text variant="callout" style={{ flex: 1 }}>
-          Has road access
-        </Text>
-        <Switch
-          value={roadAccess}
-          onValueChange={setRoadAccess}
-          accessibilityLabel="Has road access"
-          trackColor={{ true: colors.primary, false: colors.border }}
-        />
-      </View>
+      <SwitchRow label="Has road access" value={roadAccess} onValueChange={setRoadAccess} />
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Plot outline</Text>
         <Text variant="caption" color="mutedForeground">

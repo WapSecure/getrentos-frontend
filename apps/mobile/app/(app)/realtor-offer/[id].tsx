@@ -10,6 +10,7 @@ import {
   EmptyState,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -187,11 +188,13 @@ function CounterForm({
       <Text variant="bodyStrong" accessibilityRole="header">
         Counter
       </Text>
-      <TextField
-        label="Your counter (₦)"
-        keyboardType="number-pad"
-        value={n ? n.toLocaleString('en-NG') : ''}
-        onChangeText={setAmount}
+      <NumberField
+        label="Your counter"
+        currency
+        required
+        placeholder="0"
+        value={amount}
+        onValueChange={setAmount}
         hint={
           n && asking
             ? (vsAsking(n, asking) ?? undefined)

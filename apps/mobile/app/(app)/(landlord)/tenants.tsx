@@ -55,7 +55,7 @@ export default function LandlordTenants() {
         />
       </View>
 
-      {query.isError && items.length === 0 ? (
+      {query.isError && !query.data ? (
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={

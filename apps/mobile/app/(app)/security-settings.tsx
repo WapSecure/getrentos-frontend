@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, Switch, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,10 +19,11 @@ import {
   Card,
   Divider,
   ErrorState,
+  NumberField,
   PasswordField,
   Skeleton,
+  SwitchRow,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -85,7 +86,7 @@ export default function SecuritySettings() {
 
 /** Face ID / fingerprint before the app opens: on this phone only. */
 function AppLockSection() {
-  const { colors, spacing } = useTheme();
+  const { colors } = useTheme();
   const toast = useToast();
   const { enabled, setEnabled } = useAppLockEnabled();
   const [support, setSupport] = useState<BiometricSupport | null>(null);
@@ -108,24 +109,18 @@ function AppLockSection() {
 
   return (
     <Card elevated>
-      <SectionHeader
+      <SwitchRow
         icon={<ScanFace size={16} color={colors.primary} />}
-        title={`${support.label.charAt(0).toUpperCase()}${support.label.slice(1)} lock`}
-      />
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-          {support.available
+        label={`${support.label.charAt(0).toUpperCase()}${support.label.slice(1)} lock`}
+        description={
+          support.available
             ? `Ask for ${support.label} when GetRentos opens, or after a minute away.`
-            : `Set up ${support.label} or a screen lock in your phone's settings to use this.`}
-        </Text>
-        <Switch
-          value={!!enabled}
-          disabled={!support.available}
-          onValueChange={toggle}
-          accessibilityLabel={`${support.label} lock`}
-          trackColor={{ true: colors.primary, false: colors.border }}
-        />
-      </View>
+            : `Set up ${support.label} or a screen lock in your phone's settings to use this.`
+        }
+        value={!!enabled}
+        disabled={!support.available}
+        onValueChange={toggle}
+      />
     </Card>
   );
 }
@@ -222,12 +217,13 @@ function PhoneVerificationSection({ overview }: { overview: SecurityOverview }) 
       </View>
       {!overview.phoneVerified && reference ? (
         <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-          <TextField
+          <NumberField
+            code
             label="6-digit code"
             value={otp}
-            onChangeText={setOtp}
-            keyboardType="number-pad"
+            onValueChange={setOtp}
             maxLength={6}
+            textContentType="oneTimeCode"
           />
           <Button
             label="Confirm code"
@@ -301,12 +297,13 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
             <Text variant="caption" color="mutedForeground">
               Enter your current authenticator code to turn off 2FA.
             </Text>
-            <TextField
+            <NumberField
+              code
               label="6-digit code"
               value={disableToken}
-              onChangeText={setDisableToken}
-              keyboardType="number-pad"
+              onValueChange={setDisableToken}
               maxLength={6}
+              textContentType="oneTimeCode"
             />
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <Button
@@ -346,12 +343,13 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
           <View style={{ alignItems: 'center' }}>
             <Image source={{ uri: enrollment.qrDataUrl }} style={{ width: 160, height: 160 }} />
           </View>
-          <TextField
+          <NumberField
+            code
             label="6-digit code"
             value={token}
-            onChangeText={setToken}
-            keyboardType="number-pad"
+            onValueChange={setToken}
             maxLength={6}
+            textContentType="oneTimeCode"
           />
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Button
@@ -449,7 +447,11 @@ function SocialOnlyNote() {
 function DataExportSection() {
   const { colors, spacing } = useTheme();
   return (
-    <Pressable onPress={() => router.push('/(app)/data-export')}>
+    <Pressable
+      onPress={() => router.push('/(app)/data-export')}
+      accessibilityRole="button"
+      accessibilityLabel="Export your data"
+    >
       <Card elevated>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Database size={16} color={colors.primary} />

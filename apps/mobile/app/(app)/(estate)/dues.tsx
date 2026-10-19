@@ -1,7 +1,12 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, SlidersHorizontal, WalletCards } from 'lucide-react-native';
@@ -12,9 +17,9 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
+  NumberField,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -59,6 +64,7 @@ export default function EstateDues() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<Due[]>(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const total = query.data?.pages[0]?.total ?? 0;
@@ -237,11 +243,11 @@ function LateFeeForm({ estate, onDone }: { estate: ManagedEstate; onDone: () => 
   });
   return (
     <View style={{ gap: spacing.md }}>
-      <TextField
-        label="Late fee (₦)"
-        keyboardType="number-pad"
-        value={amount ? amount.toLocaleString('en-NG') : ''}
-        onChangeText={setFee}
+      <NumberField
+        label="Late fee"
+        currency
+        value={fee}
+        onValueChange={setFee}
         placeholder="0"
         hint="Added once when a due becomes late. Leave empty for no late fee."
       />

@@ -57,7 +57,7 @@ export default function Referrals() {
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           <Skeleton height={180} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>
@@ -100,12 +100,14 @@ export default function Referrals() {
                 borderColor: colors.border,
               }}
             >
-              <Text variant="title" style={{ fontSize: 22, letterSpacing: 2 }}>
+              <Text variant="heading" style={{ fontWeight: '800', letterSpacing: 2 }}>
                 {query.data.code}
               </Text>
               <Pressable
                 onPress={share}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                accessibilityRole="button"
+                accessibilityLabel="Share your referral code"
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}
                 hitSlop={8}
               >
                 <Share2 size={16} color={colors.primary} />
@@ -174,7 +176,7 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
   return (
     <Card elevated style={{ flex: 1 }}>
       {icon}
-      <Text variant="title" style={{ fontSize: 20, marginTop: spacing.sm }}>
+      <Text variant="heading" style={{ fontWeight: '800', marginTop: spacing.sm }}>
         {value}
       </Text>
       <Text variant="caption" color="mutedForeground">

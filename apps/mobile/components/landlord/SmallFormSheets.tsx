@@ -10,6 +10,7 @@ import { FileText } from 'lucide-react-native';
 import {
   Button,
   DateField,
+  NumberField,
   Skeleton,
   Text,
   TextField,
@@ -112,6 +113,7 @@ function OpenEvictionForm({
         value={reason}
         onChangeText={setReason}
         editable={!start.isPending}
+        required
       />
       <Button
         label="Open case"
@@ -195,7 +197,13 @@ function UploadDocumentForm({
           </Text>
         </View>
       ) : null}
-      <TextField label="Name" value={name} onChangeText={setName} editable={!upload.isPending} />
+      <TextField
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        editable={!upload.isPending}
+        required
+      />
       <ChipSelect
         label="Category"
         options={DOCUMENT_CATEGORIES.map((c) => ({ value: c, label: DOCUMENT_CATEGORY_LABEL[c] }))}
@@ -396,14 +404,27 @@ function ManagementFeeFields({
         onChange={setType}
         disabled={save.isPending}
       />
-      <TextField
-        label={type === 'PERCENTAGE' ? 'Percent (0–100)' : 'Amount (₦)'}
-        keyboardType="decimal-pad"
-        value={value}
-        onChangeText={(v) => setValue(v.replace(/[^\d.]/g, ''))}
-        editable={!save.isPending}
-        error={value !== '' && !valid ? 'A percentage cannot exceed 100.' : null}
-      />
+      {type === 'PERCENTAGE' ? (
+        <NumberField
+          label="Percent (0–100)"
+          decimals={2}
+          unit="%"
+          value={value}
+          onValueChange={setValue}
+          editable={!save.isPending}
+          error={value !== '' && !valid ? 'A percentage cannot exceed 100.' : null}
+          required
+        />
+      ) : (
+        <NumberField
+          currency
+          label="Amount"
+          value={value}
+          onValueChange={setValue}
+          editable={!save.isPending}
+          required
+        />
+      )}
       <Button
         label="Save fee"
         loading={save.isPending}

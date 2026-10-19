@@ -119,7 +119,9 @@ export default function Billing() {
         <Text variant="heading" accessibilityRole="header">
           Receipts
         </Text>
-        {invoices.isPending ? (
+        {invoices.isError && !invoices.data ? (
+          <ErrorState onRetry={() => invoices.refetch()} />
+        ) : invoices.isPending ? (
           <Skeleton height={64} radius={radius.lg} />
         ) : !invoices.data?.items.length ? (
           <Text variant="callout" color="mutedForeground">

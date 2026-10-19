@@ -148,7 +148,7 @@ function BookForm({
           <Skeleton height={18} width="50%" />
           <Skeleton height={26} width="100%" />
         </View>
-      ) : quote.isError ? (
+      ) : quote.isError && !q ? (
         <FormAlert tone="error" message="We couldn't price these dates. Check your connection." />
       ) : unavailable ? (
         <FormAlert

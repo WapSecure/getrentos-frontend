@@ -66,7 +66,7 @@ export default function GatemanExpected() {
             <Skeleton height={72} radius={12} />
             <Skeleton height={120} radius={12} />
           </View>
-        ) : boardQuery.isError ? (
+        ) : boardQuery.isError && !board ? (
           <ErrorState
             title="Could not read the board"
             description="This does not affect visitor access. Check visitors in by their pass as usual."

@@ -80,6 +80,7 @@ function DisputePaymentForm({
         value={reason}
         onChangeText={setReason}
         editable={!mutation.isPending}
+        required
       />
       <Button
         label="Submit dispute"

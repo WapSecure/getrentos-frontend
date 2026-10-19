@@ -96,19 +96,19 @@ export default function MyStays() {
                 accessibilityLabel="Messages with hosts"
                 onPress={() => router.push('/(app)/shortlet-messages')}
                 icon={<MessageSquare size={19} color={colors.foreground} />}
-                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+                variant="ghost"
               />
               <IconButton
                 accessibilityLabel="Disputes and deposit claims"
                 onPress={() => router.push('/(app)/shortlet-disputes')}
                 icon={<Gavel size={19} color={colors.foreground} />}
-                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+                variant="ghost"
               />
               <IconButton
                 accessibilityLabel="Wishlist"
                 onPress={() => router.push('/(app)/shortlet-wishlist')}
                 icon={<Heart size={19} color={colors.foreground} />}
-                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+                variant="ghost"
               />
             </View>
           }

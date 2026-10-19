@@ -108,7 +108,7 @@ export default function LandlordListings() {
             marginBottom: spacing.sm,
             padding: spacing.md,
             borderRadius: radius.md,
-            backgroundColor: colors.warning + '1f',
+            backgroundColor: colors.warningSubtle,
           }}
         >
           <ShieldAlert size={16} color={colors.warning} />
@@ -118,7 +118,7 @@ export default function LandlordListings() {
         </Pressable>
       ) : null}
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>

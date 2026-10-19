@@ -119,6 +119,7 @@ export function WatchlistBlockedNotice({
         <View style={{ gap: spacing.xs }}>
           <TextField
             label="Why are you admitting them?"
+            required
             value={reason}
             onChangeText={setReason}
             placeholder="e.g. Plate differs by one letter, driver is a different man"
@@ -134,7 +135,8 @@ export function WatchlistBlockedNotice({
             </Text>
           ) : null}
           <Button
-            label={isOverriding ? 'Admitting…' : 'Admit anyway'}
+            label="Admit anyway"
+            loadingLabel="Admitting…"
             loading={isOverriding}
             fullWidth
             disabled={!canOverride}

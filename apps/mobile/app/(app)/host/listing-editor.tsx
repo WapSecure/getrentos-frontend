@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,9 +10,12 @@ import {
   Chip,
   EmptyState,
   FormAlert,
+  NumberField,
   Progress,
+  RadioGroup,
   SegmentedControl,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   TimeField,
@@ -92,8 +95,6 @@ const fromListing = (l: HostListing): Draft => ({
 });
 
 const naira = (v: string) => Number(v.replace(/\D/g, '')) || 0;
-const show = (v: string) => (naira(v) ? naira(v).toLocaleString('en-NG') : '');
-
 const STEPS = ['Home', 'The stay', 'Price', 'Review'] as const;
 
 /**
@@ -357,15 +358,15 @@ function StayStep({ d, patch }: { d: Draft; patch: (p: Partial<Draft>) => void }
       <Card elevated style={{ gap: spacing.md }}>
         <SwitchRow
           label="Instant booking"
-          hint="Guests book without waiting for you. Listings with it get more bookings."
+          description="Guests book without waiting for you. Listings with it get more bookings."
           value={d.instantBooking}
-          onChange={(instantBooking) => patch({ instantBooking })}
+          onValueChange={(instantBooking) => patch({ instantBooking })}
         />
         <SwitchRow
           label="Furnished and ready"
-          hint="Beds, linen and kitchen basics are in place."
+          description="Beds, linen and kitchen basics are in place."
           value={d.furnished}
-          onChange={(furnished) => patch({ furnished })}
+          onValueChange={(furnished) => patch({ furnished })}
         />
       </Card>
       <View style={{ gap: spacing.sm }}>
@@ -411,28 +412,31 @@ function PriceStep({ d, patch }: { d: Draft; patch: (p: Partial<Draft>) => void 
           { value: 'FLAT_STAY', label: 'Flat per stay' },
         ]}
       />
-      <TextField
-        label={perNight ? 'Nightly rate (₦)' : 'Price per stay (₦)'}
-        keyboardType="number-pad"
-        value={show(d.rate)}
-        onChangeText={(rate) => patch({ rate })}
+      <NumberField
+        label={perNight ? 'Nightly rate' : 'Price per stay'}
+        required
+        currency
+        value={d.rate}
+        onValueChange={(rate) => patch({ rate })}
       />
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <View style={{ flex: 1 }}>
-          <TextField
-            label="Cleaning fee (₦)"
-            keyboardType="number-pad"
-            value={show(d.cleaning)}
-            onChangeText={(cleaning) => patch({ cleaning })}
-            hint="Optional, once per stay"
+          <NumberField
+            label="Cleaning fee"
+            optional
+            currency
+            value={d.cleaning}
+            onValueChange={(cleaning) => patch({ cleaning })}
+            hint="Once per stay"
           />
         </View>
         <View style={{ flex: 1 }}>
-          <TextField
-            label="Deposit (₦)"
-            keyboardType="number-pad"
-            value={show(d.deposit)}
-            onChangeText={(deposit) => patch({ deposit })}
+          <NumberField
+            label="Deposit"
+            optional
+            currency
+            value={d.deposit}
+            onValueChange={(deposit) => patch({ deposit })}
             hint="Refunded after check-out"
           />
         </View>
@@ -458,18 +462,20 @@ function PriceStep({ d, patch }: { d: Draft; patch: (p: Partial<Draft>) => void 
             : `Every stay is ₦${sample.toLocaleString('en-NG')} before fees and tax.`}
         </Text>
       ) : null}
-      <View style={{ gap: spacing.sm }}>
-        <Text variant="bodyStrong">Cancellation policy</Text>
-        {CANCELLATION_POLICIES.map((p) => (
-          <PolicyOption
-            key={p.value}
-            label={p.label}
-            hint={p.hint}
-            selected={d.policy === p.value}
-            onPress={() => patch({ policy: p.value })}
-          />
-        ))}
-      </View>
+      <RadioGroup
+        variant="card"
+        label="Cancellation policy"
+        value={d.policy}
+        onChange={(policy) => {
+          void haptics.tap();
+          patch({ policy });
+        }}
+        options={CANCELLATION_POLICIES.map((p) => ({
+          value: p.value,
+          label: p.label,
+          description: p.hint,
+        }))}
+      />
     </View>
   );
 }
@@ -614,80 +620,5 @@ function EditForm({ listing }: { listing: HostListing }) {
         />
       </View>
     </KeyboardAvoidingView>
-  );
-}
-
-/* --------------------------------- pieces --------------------------------- */
-
-function SwitchRow({
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  const { colors, spacing } = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 }}>
-      <View style={{ flex: 1 }}>
-        <Text variant="body">{label}</Text>
-        <Text variant="caption" color="mutedForeground">
-          {hint}
-        </Text>
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        accessibilityLabel={label}
-        trackColor={{ true: colors.primary, false: colors.border }}
-      />
-    </View>
-  );
-}
-
-function PolicyOption({
-  label,
-  hint,
-  selected,
-  onPress,
-}: {
-  label: string;
-  hint: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const { colors, spacing, radius } = useTheme();
-  return (
-    <Pressable
-      onPress={() => {
-        void haptics.tap();
-        onPress();
-      }}
-      accessibilityRole="radio"
-      accessibilityState={{ checked: selected }}
-      accessibilityLabel={`${label}. ${hint}`}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-        padding: spacing.md,
-        borderRadius: radius.lg,
-        borderWidth: selected ? 2 : 1,
-        borderColor: selected ? colors.primary : colors.border,
-        backgroundColor: colors.card,
-      }}
-    >
-      <View style={{ flex: 1 }}>
-        <Text variant="bodyStrong">{label}</Text>
-        <Text variant="caption" color="mutedForeground">
-          {hint}
-        </Text>
-      </View>
-      {selected ? <Check size={18} color={colors.primary} /> : null}
-    </Pressable>
   );
 }

@@ -95,7 +95,7 @@ export default function BuyerSaved() {
         />
       </View>
 
-      {isError ? (
+      {isError && items.length === 0 ? (
         <ErrorState onRetry={() => refetch()} />
       ) : isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

@@ -14,10 +14,10 @@ import {
   Badge,
   Button,
   Card,
+  DetailSkeleton,
   Divider,
   ErrorState,
   Price,
-  Skeleton,
   Text,
   useTheme,
   useToast,
@@ -67,7 +67,7 @@ function Fact({ label, value }: { label: string; value?: string | null }) {
 
 export default function LandListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
 
   const query = useQuery({ queryKey: qk.land.detail(id), queryFn: () => landApi.get(id) });
@@ -119,12 +119,10 @@ export default function LandListingDetail() {
         </Text>
       </View>
 
-      {query.isError ? (
+      {query.isError && !listing ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : !listing ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={200} radius={radius.lg} />
-        </View>
+        <DetailSkeleton style={{ paddingHorizontal: spacing.xl }} />
       ) : (
         <>
           <ScrollView
@@ -335,10 +333,11 @@ export default function LandListingDetail() {
                   />
                 </View>
                 <Button
-                  label={ask.isPending ? 'Opening chat…' : 'Ask the seller a question'}
+                  label="Ask the seller a question"
+                  loadingLabel="Opening chat…"
                   variant="ghost"
                   icon={<MessageCircle size={16} color={colors.foreground} />}
-                  disabled={ask.isPending}
+                  loading={ask.isPending}
                   onPress={() => ask.mutate(listing.id)}
                 />
               </>
@@ -349,8 +348,9 @@ export default function LandListingDetail() {
                   account to go ahead.
                 </Text>
                 <Button
-                  label={addBuyer.isPending ? 'Adding…' : 'Add a buyer account'}
-                  disabled={addBuyer.isPending}
+                  label="Add a buyer account"
+                  loadingLabel="Adding…"
+                  loading={addBuyer.isPending}
                   onPress={() => addBuyer.mutate()}
                 />
               </>

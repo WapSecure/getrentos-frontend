@@ -79,7 +79,7 @@ export default function AgentInspections() {
         </ScrollView>
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -103,7 +103,12 @@ export default function AgentInspections() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: AgentInspection }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/agent-task/${item.taskId}`)}>
+              <Pressable
+                onPress={() => router.push(`/(app)/agent-task/${item.taskId}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.property?.title ?? 'Property'}, ${TYPE_LABEL[item.type] ?? item.type}, ${item.status === 'DRAFT' ? 'Draft' : 'Submitted'}`}
+                accessibilityHint="Opens the task"
+              >
                 <Card elevated>
                   <View
                     style={{

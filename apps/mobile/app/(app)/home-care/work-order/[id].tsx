@@ -18,6 +18,7 @@ import {
   Divider,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -439,11 +440,12 @@ function ApproveForm({ w, onDone }: { w: WorkOrder; onDone: (n: WorkOrder) => vo
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
-        <TextField
-          label="Approved budget (₦)"
-          keyboardType="number-pad"
-          value={value ? value.toLocaleString('en-NG') : ''}
-          onChangeText={setAmount}
+        <NumberField
+          label="Approved budget"
+          required
+          currency
+          value={amount}
+          onValueChange={setAmount}
           hint="The vendor’s invoice can’t go above this."
         />
         {approve.error ? <FormAlert message={err(approve.error, 'Could not approve.')} /> : null}
@@ -481,16 +483,18 @@ function ResolveForm({ w, onDone }: { w: WorkOrder; onDone: (n: WorkOrder) => vo
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
         {needsCost ? (
-          <TextField
-            label="What it cost (₦)"
-            keyboardType="number-pad"
-            value={value ? value.toLocaleString('en-NG') : ''}
-            onChangeText={setCost}
+          <NumberField
+            label="What it cost"
+            required
+            currency
+            value={cost}
+            onValueChange={setCost}
             hint="Needed so the vendor’s invoice can be checked against it."
           />
         ) : null}
         <TextField
-          label="What was done (optional)"
+          label="What was done"
+          optional
           value={note}
           onChangeText={setNote}
           multiline

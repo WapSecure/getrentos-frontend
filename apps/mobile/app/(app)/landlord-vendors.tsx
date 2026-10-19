@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
+import { Alert, Linking, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -65,7 +65,7 @@ export default function LandlordVendors() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList
@@ -150,23 +150,17 @@ function VendorRow({
           </View>
         </View>
 
-        <Pressable
+        <IconButton
           onPress={onCall}
-          accessibilityRole="button"
           accessibilityLabel={`Call ${v.name}`}
-          hitSlop={8}
-        >
-          <Phone size={17} color={colors.primary} />
-        </Pressable>
+          icon={<Phone size={17} color={colors.primary} />}
+        />
 
-        <Pressable
+        <IconButton
           onPress={onRemove}
-          accessibilityRole="button"
           accessibilityLabel={`Remove ${v.name}`}
-          hitSlop={8}
-        >
-          <Trash2 size={16} color={colors.mutedForeground} />
-        </Pressable>
+          icon={<Trash2 size={16} color={colors.mutedForeground} />}
+        />
       </View>
     </Card>
   );

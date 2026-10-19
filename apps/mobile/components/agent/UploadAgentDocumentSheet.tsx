@@ -76,6 +76,7 @@ function UploadForm({
         onPress={pick}
         disabled={mutation.isPending}
         accessibilityRole="button"
+        accessibilityLabel={file ? `Selected file ${file.name}. Choose another` : 'Choose a file'}
         accessibilityState={{ disabled: mutation.isPending }}
         style={{
           flexDirection: 'row',
@@ -99,7 +100,13 @@ function UploadForm({
         </Text>
       </Pressable>
 
-      <TextField label="Name" value={name} onChangeText={setName} editable={!mutation.isPending} />
+      <TextField
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        required
+        editable={!mutation.isPending}
+      />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Category</Text>

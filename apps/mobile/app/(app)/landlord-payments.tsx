@@ -67,7 +67,9 @@ export default function LandlordPayments() {
         />
       </View>
 
-      {query.isError || stats.isError || arrears.isError ? (
+      {(query.isError && !query.data) ||
+      (stats.isError && !stats.data) ||
+      (arrears.isError && !arrears.data) ? (
         <ErrorState
           onRetry={() => {
             query.refetch();
@@ -102,7 +104,7 @@ export default function LandlordPayments() {
                     gap: spacing.sm,
                     padding: spacing.lg,
                     borderRadius: radius.md,
-                    backgroundColor: colors.destructive + '14',
+                    backgroundColor: colors.destructiveSubtle,
                   }}
                 >
                   <MessageSquareWarning size={17} color={colors.destructive} />

@@ -78,7 +78,7 @@ export default function AgentTaskDetail() {
         <Text variant="title">Task</Text>
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>

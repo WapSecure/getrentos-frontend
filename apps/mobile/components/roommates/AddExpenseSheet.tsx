@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Chip,
+  NumberField,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import {
@@ -87,21 +95,24 @@ function AddExpenseForm({
     <View style={{ gap: spacing.lg }}>
       <TextField
         label="What was it for?"
+        required
         placeholder="e.g. Groceries"
         value={description}
         onChangeText={setDescription}
         editable={!mutation.isPending}
       />
-      <TextField
-        label="Amount (₦)"
+      <NumberField
+        label="Amount"
+        required
+        currency
         placeholder="0"
-        keyboardType="numeric"
         value={amount}
-        onChangeText={setAmount}
+        onValueChange={setAmount}
         editable={!mutation.isPending}
       />
       <TextField
         label="Paid by"
+        required
         placeholder="Name"
         value={paidBy}
         onChangeText={setPaidBy}

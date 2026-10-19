@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { Button, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { View } from 'react-native';
+import { Button, Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import type { Roommate } from '@/lib/api/roommates';
 
@@ -43,7 +43,7 @@ function AssignTaskForm({
   onClose: () => void;
   submitting: boolean;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const [task, setTask] = useState('');
 
   const submit = async () => {
@@ -60,6 +60,7 @@ function AssignTaskForm({
 
       <TextField
         label="Task"
+        required
         placeholder="e.g. Kitchen on weekends"
         value={task}
         onChangeText={setTask}
@@ -67,23 +68,7 @@ function AssignTaskForm({
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
         {SUGGESTIONS.map((s) => (
-          <Pressable
-            key={s}
-            onPress={() => setTask(s)}
-            accessibilityRole="button"
-            accessibilityLabel={`Use ${s}`}
-            style={{
-              paddingHorizontal: spacing.md,
-              paddingVertical: 7,
-              borderRadius: radius.full,
-              borderWidth: 1,
-              borderColor: colors.border,
-            }}
-          >
-            <Text variant="caption" color="mutedForeground">
-              {s}
-            </Text>
-          </Pressable>
+          <Chip key={s} label={s} size="sm" selected={task === s} onPress={() => setTask(s)} />
         ))}
       </View>
 

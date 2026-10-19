@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   ErrorState,
+  LinkButton,
   Skeleton,
   Text,
   TextField,
@@ -151,6 +152,7 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
       <Card elevated style={{ gap: spacing.md }}>
         <TextField
           label="Full name"
+          required
           value={fullName}
           onChangeText={setFullName}
           autoComplete="name"
@@ -166,7 +168,8 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
         <TextField
           label="Phone number"
           value={phone}
-          onChangeText={setPhone}
+          // Digits and one leading "+" only.
+          onChangeText={(v) => setPhone(v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
           keyboardType="phone-pad"
           autoComplete="tel"
           textContentType="telephoneNumber"
@@ -182,15 +185,12 @@ function ProfileForm({ initial }: { initial: RealtorProfile }) {
           Sign-in email
         </Text>
         <Text variant="bodyStrong">{initial.email || '—'}</Text>
-        <Text
-          variant="caption"
-          color="primary"
-          style={{ fontWeight: '700' }}
-          onPress={() => router.push('/(app)/security-settings')}
+        <LinkButton
+          label="Change it in Security"
           accessibilityRole="link"
-        >
-          Change it in Security
-        </Text>
+          onPress={() => router.push('/(app)/security-settings')}
+          style={{ alignSelf: 'flex-start' }}
+        />
       </Card>
       <Button
         label="Save profile"

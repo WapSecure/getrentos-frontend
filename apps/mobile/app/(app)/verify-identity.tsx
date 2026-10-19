@@ -183,7 +183,8 @@ export default function VerifyIdentity() {
             />
 
             <Button
-              label={submitMutation.isPending ? 'Submitting…' : 'Submit for verification'}
+              label="Submit for verification"
+              loadingLabel="Submitting…"
               disabled={!document}
               loading={submitMutation.isPending}
               onPress={() => submitMutation.mutate()}
@@ -216,6 +217,8 @@ function PickerRow({
       </Text>
       <Pressable
         onPress={file ? undefined : onPick}
+        accessibilityRole={file ? undefined : 'button'}
+        accessibilityLabel={file ? `${label}: ${file.name}` : `${label}: tap to add`}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -237,7 +240,12 @@ function PickerRow({
           {file ? file.name : `Tap to add`}
         </Text>
         {file ? (
-          <Pressable onPress={onClear} hitSlop={8}>
+          <Pressable
+            onPress={onClear}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`Remove ${label.toLowerCase()}`}
+          >
             <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
               Remove
             </Text>

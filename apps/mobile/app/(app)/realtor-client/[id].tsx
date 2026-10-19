@@ -1,10 +1,11 @@
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Building2, MapPin, MessageCircle, Plus } from 'lucide-react-native';
 import {
   Avatar,
+  Badge,
   Button,
   Card,
   EmptyState,
@@ -112,10 +113,10 @@ export default function RealtorClientDetail() {
             <Text variant="heading" accessibilityRole="header">
               Properties you handle
             </Text>
-            {properties.isPending ? (
-              <Skeleton height={72} radius={radius.lg} />
-            ) : properties.isError ? (
+            {properties.isError && !properties.data ? (
               <ErrorState onRetry={() => properties.refetch()} />
+            ) : properties.isLoading ? (
+              <Skeleton height={72} radius={radius.lg} />
             ) : !properties.data?.items.length ? (
               <FormAlert
                 tone="info"
@@ -143,32 +144,22 @@ export default function RealtorClientDetail() {
                       </View>
                     </View>
                     {listed ? (
-                      <Text variant="caption" color="mutedForeground">
-                        Listed
-                      </Text>
+                      <Badge label="Listed" />
                     ) : (
-                      <Pressable
+                      <Button
+                        label="List it"
+                        variant="ghost"
+                        size="sm"
+                        fullWidth={false}
+                        icon={<Plus size={16} color={colors.primary} />}
+                        accessibilityLabel={`List ${p.title}`}
                         onPress={() =>
                           router.push({
                             pathname: '/(app)/realtor-new-listing',
                             params: { relationshipId: c.id, propertyId: p.id },
                           })
                         }
-                        accessibilityRole="button"
-                        accessibilityLabel={`List ${p.title}`}
-                        hitSlop={8}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 4,
-                          minHeight: 44,
-                        }}
-                      >
-                        <Plus size={16} color={colors.primary} />
-                        <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                          List it
-                        </Text>
-                      </Pressable>
+                      />
                     )}
                   </Card>
                 );

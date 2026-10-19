@@ -6,7 +6,7 @@ import {
   Badge,
   type BadgeTone,
   Card,
-  EmptyState,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -55,13 +55,22 @@ export default function ResidentViolations() {
         onBack={() => router.back()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={90} radius={16} />
-            <Skeleton height={90} radius={16} />
-          </View>
-        ) : query.data && query.data.length > 0 ? (
-          query.data.map((v) => (
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.md }}>
+              <Skeleton height={90} radius={16} />
+              <Skeleton height={90} radius={16} />
+            </View>
+          }
+          isEmpty={!query.data?.length}
+          empty={{
+            icon: <TriangleAlert size={34} color={colors.mutedForeground} />,
+            title: 'No violations',
+            description: 'Your household has a clean record.',
+          }}
+        >
+          {query.data?.map((v) => (
             <Card key={v.id} elevated>
               <View
                 style={{
@@ -85,14 +94,8 @@ export default function ResidentViolations() {
                 Reported {formatDate(v.createdAt, 'short')}
               </Text>
             </Card>
-          ))
-        ) : (
-          <EmptyState
-            icon={<TriangleAlert size={34} color={colors.mutedForeground} />}
-            title="No violations"
-            description="Your household has a clean record."
-          />
-        )}
+          ))}
+        </QueryState>
       </Screen>
     </View>
   );

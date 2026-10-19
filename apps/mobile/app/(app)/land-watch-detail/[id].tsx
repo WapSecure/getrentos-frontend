@@ -265,6 +265,7 @@ function IncidentForm({ id, onDone }: { id: string; onDone: () => void }) {
           value={description}
           onChangeText={setDescription}
           multiline
+          required
           hint={description.trim().length < 10 ? 'At least 10 characters' : undefined}
           error={
             submit.error

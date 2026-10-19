@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import {
   Divider,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -51,21 +52,21 @@ export default function PrivacySettings() {
         onBack={() => router.back()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        /* Mounted only once the stored bag has arrived, so the form can seed its
+           own state from props instead of syncing it in an effect. */
+        <PrivacyForm
+          initialPrivacy={{ ...DEFAULT_PRIVACY, ...(query.data.privacy ?? {}) }}
+          initialShareTenancyStanding={query.data.shareTenancyStanding === true}
+        />
+      ) : query.isError ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
           {[0, 1].map((i) => (
             <Skeleton key={i} height={140} radius={radius.lg} />
           ))}
         </View>
-      ) : query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
-        /* Mounted only once the stored bag has arrived, so the form can seed its
-           own state from props instead of syncing it in an effect. */
-        <PrivacyForm
-          initialPrivacy={{ ...DEFAULT_PRIVACY, ...(query.data?.privacy ?? {}) }}
-          initialShareTenancyStanding={query.data?.shareTenancyStanding === true}
-        />
       )}
     </View>
   );
@@ -125,8 +126,8 @@ function PrivacyForm({
               <Pressable
                 key={v.id}
                 onPress={() => setPrivacy((p) => ({ ...p, profileVisibility: v.id }))}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selected }}
                 style={{
                   flex: 1,
                   alignItems: 'center',
@@ -162,26 +163,13 @@ function PrivacyForm({
           {TOGGLES.map((t, i) => (
             <View key={t.key}>
               {i > 0 ? <Divider /> : null}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.md,
-                  padding: spacing.lg,
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text variant="bodyStrong">{t.title}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {t.description}
-                  </Text>
-                </View>
-                <Switch
-                  value={privacy[t.key] === true}
-                  onValueChange={(value) => setPrivacy((p) => ({ ...p, [t.key]: value }))}
-                  accessibilityLabel={t.title}
-                />
-              </View>
+              <SwitchRow
+                label={t.title}
+                description={t.description}
+                value={privacy[t.key] === true}
+                onValueChange={(value) => setPrivacy((p) => ({ ...p, [t.key]: value }))}
+                style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
+              />
             </View>
           ))}
         </Card>
@@ -198,22 +186,15 @@ function PrivacyForm({
           Tenancy standing
         </Text>
         <Card padding={spacing.lg}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">Share with future landlords</Text>
-              <Text variant="caption" color="mutedForeground">
-                Lets a new landlord see your payment record, which can strengthen an application.
-              </Text>
-            </View>
-            <Switch
-              value={shareTenancyStanding}
-              onValueChange={(value) => {
-                setShareTenancyStanding(value);
-                saveTenancyStanding.mutate(value);
-              }}
-              accessibilityLabel="Share tenancy standing with future landlords"
-            />
-          </View>
+          <SwitchRow
+            label="Share with future landlords"
+            description="Lets a new landlord see your payment record, which can strengthen an application."
+            value={shareTenancyStanding}
+            onValueChange={(value) => {
+              setShareTenancyStanding(value);
+              saveTenancyStanding.mutate(value);
+            }}
+          />
         </Card>
       </View>
     </ScrollView>

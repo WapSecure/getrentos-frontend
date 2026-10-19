@@ -4,10 +4,9 @@ import { Megaphone } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
+  ListSkeleton,
+  QueryState,
   Screen,
-  Skeleton,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
@@ -31,16 +30,17 @@ export default function ResidentAnnouncements() {
         subtitle="Official updates from your estate team"
       />
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ gap: spacing.md }}>
-          <Skeleton height={84} radius={16} />
-          <Skeleton height={84} radius={16} />
-          <Skeleton height={84} radius={16} />
-        </View>
-      ) : query.data && query.data.items.length > 0 ? (
-        query.data.items.map((a) => (
+      <QueryState
+        query={query}
+        skeleton={<ListSkeleton variant="card" rows={3} height={84} />}
+        isEmpty={!query.data?.items.length}
+        empty={{
+          icon: <Megaphone size={34} color={colors.mutedForeground} />,
+          title: 'No announcements yet',
+          description: "Your estate manager's updates will show up here.",
+        }}
+      >
+        {query.data?.items.map((a) => (
           <Card key={a.id} elevated>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
               <View style={{ flex: 1, gap: 4 }}>
@@ -55,14 +55,8 @@ export default function ResidentAnnouncements() {
               {a.priority === 'urgent' ? <Badge label="Urgent" tone="danger" /> : null}
             </View>
           </Card>
-        ))
-      ) : (
-        <EmptyState
-          icon={<Megaphone size={34} color={colors.mutedForeground} />}
-          title="No announcements yet"
-          description="Your estate manager's updates will show up here."
-        />
-      )}
+        ))}
+      </QueryState>
     </Screen>
   );
 }

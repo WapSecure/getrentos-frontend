@@ -182,7 +182,7 @@ export default function ResidentVisitorPasses() {
                       label="Let them in"
                       fullWidth
                       style={{ flex: 1 }}
-                      loading={approve.isPending}
+                      loading={approve.isPending && approve.variables === pass.id}
                       onPress={() => approve.mutate(pass.id)}
                     />
                     <Button
@@ -230,7 +230,7 @@ export default function ResidentVisitorPasses() {
                   variant="outline"
                   size="sm"
                   fullWidth={false}
-                  loading={revoke.isPending}
+                  loading={revoke.isPending && revoke.variables === pass.id}
                   onPress={() => revoke.mutate(pass.id)}
                   style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
                 />
@@ -387,31 +387,29 @@ function IssuePassForm({
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <Field label="Visitor name">
-        <TextField
-          placeholder="e.g. Tunde Adekunle"
-          value={visitorName}
-          onChangeText={setVisitorName}
-          editable={!submitting}
-        />
-      </Field>
-      <Field label="Phone (optional)">
-        <TextField
-          placeholder="e.g. 08012345678"
-          keyboardType="phone-pad"
-          value={visitorPhone}
-          onChangeText={setVisitorPhone}
-          editable={!submitting}
-        />
-      </Field>
-      <Field label="Purpose (optional)">
-        <TextField
-          placeholder="e.g. Family visit"
-          value={purpose}
-          onChangeText={setPurpose}
-          editable={!submitting}
-        />
-      </Field>
+      <TextField
+        label="Visitor name"
+        required
+        placeholder="e.g. Tunde Adekunle"
+        value={visitorName}
+        onChangeText={setVisitorName}
+        editable={!submitting}
+      />
+      <TextField
+        label="Phone (optional)"
+        placeholder="e.g. 08012345678"
+        keyboardType="phone-pad"
+        value={visitorPhone}
+        onChangeText={(v) => setVisitorPhone(v.replace(/(?!^\+)\D/g, ''))}
+        editable={!submitting}
+      />
+      <TextField
+        label="Purpose (optional)"
+        placeholder="e.g. Family visit"
+        value={purpose}
+        onChangeText={setPurpose}
+        editable={!submitting}
+      />
       <Field label="Expires (defaults to 24 hours)">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {EXPIRY_PRESETS.map((p) => (
@@ -426,7 +424,8 @@ function IssuePassForm({
         </View>
       </Field>
       <Button
-        label={submitting ? 'Issuing…' : 'Issue Pass'}
+        label="Issue Pass"
+        loadingLabel="Issuing…"
         disabled={submitting || !canSubmit}
         loading={submitting}
         fullWidth

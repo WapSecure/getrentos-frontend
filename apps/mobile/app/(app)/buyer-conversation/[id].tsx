@@ -1,10 +1,12 @@
 import { Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Pin } from 'lucide-react-native';
 import { useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { buyerMessagesApi } from '@/lib/api/buyerMessages';
+import { buyerMessagesApi, type BuyerConversation } from '@/lib/api/buyerMessages';
+import type { Paginated } from '@/lib/api/buyer';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { roleLabel } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { MessageThread } from '@/components/messages/MessageThread';
@@ -13,7 +15,6 @@ export default function BuyerConversationThread() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useAuth();
   const { colors } = useTheme();
-  const qc = useQueryClient();
 
   const conversations = useQuery({
     queryKey: qk.buyer.conversations,
@@ -22,9 +23,22 @@ export default function BuyerConversationThread() {
   const conversation = conversations.data?.items.find((c) => c.id === id);
   const pinned = !!conversation?.isPinned;
 
-  const pin = useMutation({
+  // The pin flips at once and goes back if the server refuses.
+  const pin = useOptimisticMutation({
     mutationFn: () => buyerMessagesApi.togglePinned(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.buyer.conversations }),
+    patches: () => [
+      {
+        queryKey: qk.buyer.conversations,
+        update: (old) => {
+          const page = old as Paginated<BuyerConversation>;
+          return {
+            ...page,
+            items: page.items.map((c) => (c.id === id ? { ...c, isPinned: !c.isPinned } : c)),
+          };
+        },
+      },
+    ],
+    errorMessage: 'Could not update the pin. Please try again.',
   });
 
   return (

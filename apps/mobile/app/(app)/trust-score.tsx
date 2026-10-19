@@ -77,7 +77,7 @@ export default function TrustScore() {
           <Skeleton height={120} radius={16} />
           <Skeleton height={200} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>

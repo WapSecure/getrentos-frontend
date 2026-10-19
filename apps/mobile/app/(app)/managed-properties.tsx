@@ -217,6 +217,7 @@ function ClaimForm() {
       </Text>
       <TextField
         label="Property ID"
+        required
         value={propertyId}
         onChangeText={setPropertyId}
         autoCapitalize="none"

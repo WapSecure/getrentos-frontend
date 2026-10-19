@@ -1,13 +1,13 @@
-import { ScrollView, Switch, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   Divider,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -81,28 +81,27 @@ export default function NotificationSettings() {
         onBack={() => router.back()}
       />
 
-      {query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={90} />
-          <Skeleton height={90} />
-          <Skeleton height={90} />
-        </View>
-      ) : query.isError ? (
-        <ErrorState
-          description="Couldn't load your notification preferences."
-          onRetry={() => query.refetch()}
-        />
-      ) : !query.data?.length ? (
-        <EmptyState
-          title="No preferences yet"
-          description="Preferences will appear here once your account is set up."
-        />
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
+      <ScrollView
+        contentContainerStyle={{
+          padding: spacing.xl,
+          paddingBottom: insets.bottom + spacing['3xl'],
+          gap: spacing.lg,
+        }}
+      >
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.md }}>
+              <Skeleton height={90} />
+              <Skeleton height={90} />
+              <Skeleton height={90} />
+            </View>
+          }
+          errorDescription="Couldn't load your notification preferences."
+          isEmpty={!query.data?.length}
+          empty={{
+            title: 'No preferences yet',
+            description: 'Preferences will appear here once your account is set up.',
           }}
         >
           <Text variant="caption" color="mutedForeground">
@@ -117,37 +116,25 @@ export default function NotificationSettings() {
                 <Text variant="caption" color="mutedForeground" style={{ marginTop: 2 }}>
                   {NOTIFICATION_CATEGORY_DESCRIPTION[category]}
                 </Text>
-                <Divider style={{ marginVertical: spacing.md }} />
-                <View style={{ gap: spacing.sm }}>
-                  {CHANNELS.filter(
-                    // Email exists only for the categories that are emailed.
-                    ({ key }) => key !== 'email' || categorySendsEmail(category)
-                  ).map(({ key, label }) => (
-                    <View
-                      key={key}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <Text variant="callout">{label}</Text>
-                      <Switch
-                        value={pref[key]}
-                        onValueChange={(value) =>
-                          mutation.mutate({ category, patch: { [key]: value } })
-                        }
-                        trackColor={{ true: colors.primary, false: colors.secondary }}
-                        thumbColor={colors.card}
-                      />
-                    </View>
-                  ))}
-                </View>
+                <Divider style={{ marginVertical: spacing.sm }} />
+                {CHANNELS.filter(
+                  // Email exists only for the categories that are emailed.
+                  ({ key }) => key !== 'email' || categorySendsEmail(category)
+                ).map(({ key, label }) => (
+                  <SwitchRow
+                    key={key}
+                    label={label}
+                    value={pref[key]}
+                    onValueChange={(value) =>
+                      mutation.mutate({ category, patch: { [key]: value } })
+                    }
+                  />
+                ))}
               </Card>
             );
           })}
-        </ScrollView>
-      )}
+        </QueryState>
+      </ScrollView>
     </View>
   );
 }

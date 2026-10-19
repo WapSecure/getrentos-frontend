@@ -10,6 +10,7 @@ import {
   Card,
   DateField,
   FormAlert,
+  NumberField,
   SegmentedControl,
   Skeleton,
   Text,
@@ -208,11 +209,13 @@ export default function RealtorNewListing() {
               placeholder={chosen!.title}
               hint="What buyers see first, e.g. “Renovated 4-bed duplex with BQ”"
             />
-            <TextField
-              label={type === 'RENT' ? 'Rent per year (₦)' : 'Asking price (₦)'}
-              keyboardType="number-pad"
-              value={n ? n.toLocaleString('en-NG') : ''}
-              onChangeText={setPrice}
+            <NumberField
+              label={type === 'RENT' ? 'Rent per year' : 'Asking price'}
+              currency
+              required
+              value={price}
+              onValueChange={setPrice}
+              placeholder="0"
             />
             <DateField
               label="Available from (optional)"

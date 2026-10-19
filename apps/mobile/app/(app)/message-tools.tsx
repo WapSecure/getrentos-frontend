@@ -16,7 +16,8 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { messagesApi } from '@/lib/api/messages';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
+import { messagesApi, type MessageReminder } from '@/lib/api/messages';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { MessageTemplateSheet } from '@/components/messages/MessageTemplateSheet';
@@ -75,10 +76,17 @@ export default function MessageTools() {
     onError: (e) => fail(e, 'Could not delete that shortcut.'),
   });
 
-  const toggleReminder = useMutation({
-    mutationFn: messagesApi.toggleReminder,
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.renter.messageReminders }),
-    onError: (e) => fail(e, 'Could not update that reminder.'),
+  // On/off flips at once and rolls back with a toast if the server refuses.
+  const toggleReminder = useOptimisticMutation({
+    mutationFn: (id: string) => messagesApi.toggleReminder(id),
+    patches: (id) => [
+      {
+        queryKey: qk.renter.messageReminders,
+        update: (old) =>
+          (old as MessageReminder[]).map((r) => (r.id === id ? { ...r, active: !r.active } : r)),
+      },
+    ],
+    errorMessage: 'Could not update that reminder.',
   });
 
   const deleteReminder = useMutation({
@@ -145,7 +153,7 @@ export default function MessageTools() {
       >
         {active.isLoading ? (
           [0, 1, 2].map((i) => <Skeleton key={i} height={84} radius={radius.lg} />)
-        ) : active.isError ? (
+        ) : active.isError && !active.data ? (
           <ErrorState onRetry={() => active.refetch()} />
         ) : tab === 'templates' ? (
           (templates.data ?? []).length === 0 ? (

@@ -5,6 +5,7 @@ import { Check } from 'lucide-react-native';
 import {
   Button,
   DateField,
+  NumberField,
   SegmentedControl,
   Text,
   TextField,
@@ -161,18 +162,19 @@ function NewListingForm({
         onChange={setListingType}
         options={LISTING_TYPES}
       />
-      <TextField
+      <NumberField
         label={
           listingType === 'SHORTLET'
-            ? 'Nightly rate (₦)'
+            ? 'Nightly rate'
             : listingType === 'SALE'
-              ? 'Asking price (₦)'
-              : 'Rent (₦)'
+              ? 'Asking price'
+              : 'Rent'
         }
+        required
+        currency
         value={price}
-        onChangeText={setPrice}
-        keyboardType="number-pad"
-        placeholder={listingType === 'SALE' ? 'e.g. 85000000' : 'e.g. 2500000'}
+        onValueChange={setPrice}
+        placeholder={listingType === 'SALE' ? 'e.g. 85,000,000' : 'e.g. 2,500,000'}
         error={
           price.trim() && amount === null ? 'Enter an amount in naira, numbers only.' : undefined
         }

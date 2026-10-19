@@ -50,9 +50,7 @@ export default function OwnerReviews() {
           accessibilityLabel={`Rated ${s.averageRating.toFixed(1)} out of 5 from ${s.reviewCount} reviews`}
           style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}
         >
-          <Text variant="display" style={{ fontSize: 40, lineHeight: 46 }}>
-            {s.averageRating.toFixed(1)}
-          </Text>
+          <Text variant="display">{s.averageRating.toFixed(1)}</Text>
           <View style={{ flex: 1, gap: 2 }}>
             <View style={{ flexDirection: 'row', gap: 2 }}>
               {[1, 2, 3, 4, 5].map((n) => (

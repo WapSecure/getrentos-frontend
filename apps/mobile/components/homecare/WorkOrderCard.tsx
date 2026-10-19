@@ -1,7 +1,7 @@
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { AlertTriangle, ChevronRight, Clock, Siren, Wrench } from 'lucide-react-native';
-import { Card, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, Text, useTheme } from '@getrentos/ui-native';
 import {
   STATUS_LABEL,
   categoryLabel,
@@ -22,27 +22,8 @@ export const STATUS_TONE: Record<WorkOrderStatus, Tone> = {
 };
 
 export function PriorityTag({ p }: { p: Priority }) {
-  const { colors, radius } = useTheme();
-  const c =
-    p === 'URGENT'
-      ? { fg: colors.destructive, bg: colors.destructiveSubtle }
-      : p === 'HIGH'
-        ? { fg: colors.warning, bg: colors.warningSubtle }
-        : { fg: colors.mutedForeground, bg: colors.secondary };
-  return (
-    <View
-      style={{
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: radius.sm,
-        backgroundColor: c.bg,
-      }}
-    >
-      <Text variant="caption" style={{ color: c.fg, fontWeight: '800', letterSpacing: 0.4 }}>
-        {p}
-      </Text>
-    </View>
-  );
+  const tone = p === 'URGENT' ? 'danger' : p === 'HIGH' ? 'warning' : 'neutral';
+  return <Badge label={p} tone={tone} />;
 }
 
 /** A work order at a glance: what, where, how urgent, and whether its clock is running out. */

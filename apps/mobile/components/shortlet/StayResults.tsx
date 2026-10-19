@@ -1,12 +1,13 @@
 import type { ReactElement } from 'react';
-import { ActivityIndicator, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BedDouble } from 'lucide-react-native';
 import { EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletFilters, type ShortletListing } from '@/lib/api/shortlets';
 import { haptics } from '@/lib/haptics';
 import { StayCard } from './StayCard';
@@ -47,13 +48,14 @@ export function StayResults({
 }) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
 
   const query = useInfiniteQuery({
     queryKey: qk.shortlets.list({ ...filters }),
     queryFn: ({ pageParam }) => shortletsApi.list(filters, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    // Changing a filter keeps the current results up until the new ones land.
+    placeholderData: keepPreviousData,
   });
   const wishlistQuery = useQuery({
     queryKey: qk.shortlets.wishlistIds,
@@ -61,23 +63,18 @@ export function StayResults({
   });
   const wishlisted = new Set(wishlistQuery.data ?? []);
 
-  const wishlist = useMutation({
+  const wishlist = useOptimisticMutation({
     mutationFn: ({ id, next }: { id: string; next: boolean }) =>
       next ? shortletsApi.addToWishlist(id) : shortletsApi.removeFromWishlist(id),
-    onMutate: async ({ id, next }) => {
-      void haptics.tap();
-      await qc.cancelQueries({ queryKey: qk.shortlets.wishlistIds });
-      const prev = qc.getQueryData<string[]>(qk.shortlets.wishlistIds);
-      qc.setQueryData<string[]>(qk.shortlets.wishlistIds, (old = []) =>
-        next ? [...old, id] : old.filter((x) => x !== id)
-      );
-      return { prev };
-    },
-    onError: (_e, _v, ctx) => qc.setQueryData(qk.shortlets.wishlistIds, ctx?.prev),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlistIds });
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlist });
-    },
+    patches: ({ id, next }) => [
+      {
+        queryKey: qk.shortlets.wishlistIds,
+        update: (old) =>
+          next ? [...(old as string[]), id] : (old as string[]).filter((x) => x !== id),
+      },
+    ],
+    invalidate: [qk.shortlets.wishlist],
+    errorMessage: 'Your wishlist didn’t update. Please try again.',
   });
 
   const items = query.data?.pages.flatMap((p) => p.items) ?? [];
@@ -110,13 +107,16 @@ export function StayResults({
             item={item}
             saved={wishlisted.has(item.id)}
             onPress={() => openStay(item.id, filters)}
-            onToggleSave={() => wishlist.mutate({ id: item.id, next: !wishlisted.has(item.id) })}
+            onToggleSave={() => {
+              void haptics.tap();
+              wishlist.mutate({ id: item.id, next: !wishlisted.has(item.id) });
+            }}
           />
         </View>
       )}
       ListHeaderComponent={listHeader}
       ListEmptyComponent={
-        query.isError ? (
+        query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : query.isPending ? (
           <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
@@ -138,8 +138,13 @@ export function StayResults({
       onEndReachedThreshold={0.6}
       ListFooterComponent={
         query.isFetchingNextPage ? (
-          <View style={{ paddingVertical: spacing.xl }}>
-            <ActivityIndicator color={colors.mutedForeground} />
+          <View
+            style={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+          >
+            <Skeleton height={290} radius={radius.lg} />
           </View>
         ) : (
           <View style={{ height: insets.bottom + spacing['3xl'] }} />
@@ -147,7 +152,7 @@ export function StayResults({
       }
       refreshControl={
         <RefreshControl
-          refreshing={query.isRefetching && !query.isFetchingNextPage}
+          refreshing={query.isRefetching && !query.isFetchingNextPage && !query.isPlaceholderData}
           onRefresh={() => query.refetch()}
           tintColor={colors.mutedForeground}
         />

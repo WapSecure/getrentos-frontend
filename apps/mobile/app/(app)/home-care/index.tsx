@@ -15,7 +15,15 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
-import { ErrorState, IconButton, Price, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  ErrorState,
+  IconButton,
+  Price,
+  Skeleton,
+  StatSkeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -98,7 +106,7 @@ export default function HomeCare() {
         <ErrorState onRetry={() => dashboard.refetch()} />
       ) : !d ? (
         <>
-          <Skeleton height={160} radius={radius.lg} />
+          <StatSkeleton />
           <Skeleton height={120} radius={radius.lg} />
         </>
       ) : (

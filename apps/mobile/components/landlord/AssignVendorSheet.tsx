@@ -6,7 +6,7 @@ import { HardHat } from 'lucide-react-native';
 import {
   Badge,
   Button,
-  EmptyState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -73,18 +73,21 @@ function AssignVendorBody({
         Who should handle <Text variant="bodyStrong">{request.issueTitle}</Text>?
       </Text>
 
-      {vendors.isLoading ? (
-        <View style={{ gap: spacing.sm }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={56} radius={radius.md} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<HardHat size={28} color={colors.mutedForeground} />}
-          title="No vendors yet"
-          description="Add a tradesperson to your list first."
-          action={
+      <QueryState
+        query={vendors}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={56} radius={radius.md} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <HardHat size={28} color={colors.mutedForeground} />,
+          title: 'No vendors yet',
+          description: 'Add a tradesperson to your list first.',
+          action: (
             <Button
               label="Add a vendor"
               size="sm"
@@ -93,9 +96,9 @@ function AssignVendorBody({
                 router.push('/(app)/landlord-vendors');
               }}
             />
-          }
-        />
-      ) : (
+          ),
+        }}
+      >
         <View style={{ gap: spacing.sm }}>
           {items.map((v) => (
             <Pressable
@@ -127,7 +130,7 @@ function AssignVendorBody({
             </Pressable>
           ))}
         </View>
-      )}
+      </QueryState>
     </View>
   );
 }

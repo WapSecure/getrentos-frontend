@@ -74,7 +74,7 @@ export default function LandlordProperties() {
         />
       </View>
 
-      {query.isError && items.length === 0 ? (
+      {query.isError && !query.data ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
           <ErrorState onRetry={() => query.refetch()} />
         </ScrollView>

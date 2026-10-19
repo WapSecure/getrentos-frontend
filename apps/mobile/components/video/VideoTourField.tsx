@@ -123,6 +123,7 @@ export function VideoTourField({
           disabled={busy != null}
           accessibilityRole="button"
           accessibilityLabel={hasVideo ? 'Replace the video tour' : 'Add a video tour'}
+          accessibilityState={{ disabled: busy != null, busy: busy === 'uploading' }}
           style={row}
         >
           {busy === 'uploading' ? (
@@ -153,6 +154,7 @@ export function VideoTourField({
                 onPress={() => setWatching(true)}
                 disabled={!videoUrl}
                 accessibilityRole="button"
+                accessibilityLabel="Watch the video tour"
                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
               >
                 <Play size={18} color={colors.primary} />
@@ -166,6 +168,7 @@ export function VideoTourField({
                 disabled={busy != null}
                 accessibilityRole="button"
                 accessibilityLabel="Remove the video tour"
+                accessibilityState={{ disabled: busy != null, busy: busy === 'removing' }}
                 hitSlop={10}
               >
                 {busy === 'removing' ? (

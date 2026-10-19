@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Linking,
@@ -40,6 +39,7 @@ import {
   Chip,
   DateField,
   Divider,
+  NumberField,
   Progress,
   Text,
   TextField,
@@ -112,11 +112,6 @@ const STEPS = [
 const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Student'];
 const LEASE_TERM_OPTIONS = ['6 months', '12 months', '24 months'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function formatIncome(raw: string): string {
-  const digits = raw.replace(/[^\d]/g, '');
-  return digits ? Number(digits).toLocaleString('en-NG') : '';
-}
 
 function validateStep(step: number, data: FormState): FieldErrors {
   const errors: FieldErrors = {};
@@ -490,6 +485,7 @@ function PersonalStep({
         onChangeText={(v) => update('fullName', v)}
         onSubmitEditing={() => emailRef.current?.focus()}
         error={errors.fullName}
+        required
       />
       <TextField
         ref={emailRef}
@@ -503,6 +499,7 @@ function PersonalStep({
         onChangeText={(v) => update('email', v)}
         onSubmitEditing={() => phoneRef.current?.focus()}
         error={errors.email}
+        required
       />
       <TextField
         ref={phoneRef}
@@ -511,8 +508,9 @@ function PersonalStep({
         keyboardType="phone-pad"
         returnKeyType="done"
         value={data.phone}
-        onChangeText={(v) => update('phone', v)}
+        onChangeText={(v) => update('phone', v.replace(/(?!^\+)\D/g, ''))}
         error={errors.phone}
+        required
       />
     </View>
   );
@@ -540,6 +538,7 @@ function MoveStep({
         value={data.currentAddress}
         onChangeText={(v) => update('currentAddress', v)}
         error={errors.currentAddress}
+        required
       />
       <DateField
         label="Preferred move-in date"
@@ -606,19 +605,15 @@ function IncomeStep({
         error={errors.employer}
       />
 
-      <TextField
+      <NumberField
         ref={incomeRef}
         label="Monthly income"
         placeholder="600,000"
-        keyboardType="number-pad"
+        currency
+        required
         returnKeyType="done"
-        leftIcon={
-          <Text variant="body" color="mutedForeground">
-            ₦
-          </Text>
-        }
-        value={formatIncome(data.monthlyIncome)}
-        onChangeText={(v) => update('monthlyIncome', v.replace(/[^\d]/g, ''))}
+        value={data.monthlyIncome}
+        onValueChange={(v) => update('monthlyIncome', v)}
         error={errors.monthlyIncome}
       />
       <Text variant="caption" color="mutedForeground" style={{ marginTop: -spacing.sm }}>
@@ -660,7 +655,7 @@ function ReferencesStep({
           keyboardType="phone-pad"
           returnKeyType="next"
           value={data.nextOfKinPhone}
-          onChangeText={(v) => update('nextOfKinPhone', v)}
+          onChangeText={(v) => update('nextOfKinPhone', v.replace(/(?!^\+)\D/g, ''))}
           onSubmitEditing={() => kinRelRef.current?.focus()}
         />
         <TextField
@@ -692,7 +687,7 @@ function ReferencesStep({
           keyboardType="phone-pad"
           returnKeyType="next"
           value={data.referencePhone}
-          onChangeText={(v) => update('referencePhone', v)}
+          onChangeText={(v) => update('referencePhone', v.replace(/(?!^\+)\D/g, ''))}
           onSubmitEditing={() => refRelRef.current?.focus()}
         />
         <TextField
@@ -798,32 +793,15 @@ function DocumentsStep({
                     </Pressable>
                   </View>
                 ) : (
-                  <Pressable
+                  <Button
+                    label="Upload"
+                    size="sm"
+                    fullWidth={false}
+                    accessibilityLabel={`Upload ${doc.name}`}
+                    loading={uploading}
+                    icon={<Upload size={13} color={colors.primaryForeground} />}
                     onPress={() => onUpload(doc)}
-                    disabled={uploading}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 5,
-                      paddingVertical: 7,
-                      paddingHorizontal: 12,
-                      borderRadius: radius.sm,
-                      backgroundColor: colors.primary,
-                      opacity: uploading ? 0.7 : 1,
-                    }}
-                  >
-                    {uploading ? (
-                      <ActivityIndicator size="small" color={colors.primaryForeground} />
-                    ) : (
-                      <Upload size={13} color={colors.primaryForeground} />
-                    )}
-                    <Text
-                      variant="caption"
-                      style={{ fontWeight: '700', color: colors.primaryForeground }}
-                    >
-                      {uploading ? 'Uploading…' : 'Upload'}
-                    </Text>
-                  </Pressable>
+                  />
                 )}
               </View>
             </View>

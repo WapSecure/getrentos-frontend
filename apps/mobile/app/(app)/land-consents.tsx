@@ -187,6 +187,7 @@ function ObjectionForm({ item, onDone }: { item: LandConsentRequest; onDone: () 
           value={reason}
           onChangeText={setReason}
           multiline
+          required
           error={
             submit.error
               ? submit.error instanceof ApiError

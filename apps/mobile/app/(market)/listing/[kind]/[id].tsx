@@ -103,7 +103,7 @@ export default function PublicListing() {
               title="Listing not found"
               description="This link doesn’t point to a listing."
             />
-          ) : query.isError ? (
+          ) : query.isError && !p ? (
             <ErrorState
               title="We couldn’t load this listing"
               description="It may have been taken down, or your connection dropped."

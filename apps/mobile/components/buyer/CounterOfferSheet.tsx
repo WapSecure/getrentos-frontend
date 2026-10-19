@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, NumberField, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerOffer } from '@/lib/api/buyerOffers';
@@ -69,15 +69,17 @@ function CounterForm({
       <Text variant="body" color="mutedForeground">
         Propose a new amount for <Text variant="bodyStrong">{offer.propertyTitle}</Text>.
       </Text>
-      <TextField
+      <NumberField
         label="Your counter amount"
         value={amount}
-        onChangeText={setAmount}
-        keyboardType="number-pad"
+        onValueChange={setAmount}
+        currency
+        required
         editable={!mutation.isPending}
       />
       <TextField
-        label="Message (optional)"
+        label="Message"
+        optional
         value={message}
         onChangeText={setMessage}
         multiline

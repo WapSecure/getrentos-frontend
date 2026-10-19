@@ -36,7 +36,7 @@ export default function LandlordReviews() {
         onBack={() => router.back()}
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList

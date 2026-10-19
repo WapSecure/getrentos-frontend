@@ -85,7 +85,7 @@ export default function LeaseScreen() {
     );
   }
 
-  if (leaseQuery.isError && !noActiveLease) {
+  if (leaseQuery.isError && !noActiveLease && !leaseQuery.data) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         {header}

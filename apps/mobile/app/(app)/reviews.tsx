@@ -125,7 +125,7 @@ export default function Reviews() {
       >
         {active.isLoading ? (
           [0, 1, 2].map((i) => <Skeleton key={i} height={96} radius={radius.lg} />)
-        ) : active.isError ? (
+        ) : active.isError && !active.data ? (
           <ErrorState onRetry={() => active.refetch()} />
         ) : tab === 'pending' ? (
           (pending.data ?? []).length === 0 ? (

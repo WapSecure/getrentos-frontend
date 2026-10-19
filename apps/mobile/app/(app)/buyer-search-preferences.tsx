@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, Switch, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +8,9 @@ import {
   Card,
   Chip,
   ErrorState,
+  NumberField,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -40,21 +42,21 @@ export default function BuyerSearchPreferences() {
         onBack={() => router.back()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        <SearchPreferencesForm data={query.data} />
+      ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={260} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <SearchPreferencesForm data={query.data} />
+        <ErrorState onRetry={() => query.refetch()} />
       )}
     </View>
   );
 }
 
 function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -100,19 +102,19 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       <Card elevated style={{ gap: spacing.md }}>
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
-            <TextField
+            <NumberField
               label="Min budget"
               value={minBudget}
-              onChangeText={setMinBudget}
-              keyboardType="number-pad"
+              onValueChange={setMinBudget}
+              currency
             />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField
+            <NumberField
               label="Max budget"
               value={maxBudget}
-              onChangeText={setMaxBudget}
-              keyboardType="number-pad"
+              onValueChange={setMaxBudget}
+              currency
             />
           </View>
         </View>
@@ -139,21 +141,12 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
         </View>
       </View>
 
-      <Card
-        elevated
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Notify me on match</Text>
-          <Text variant="caption" color="mutedForeground">
-            Get alerted when a new listing matches these preferences.
-          </Text>
-        </View>
-        <Switch
+      <Card elevated>
+        <SwitchRow
+          label="Notify me on match"
+          description="Get alerted when a new listing matches these preferences."
           value={notifyOnMatch}
           onValueChange={setNotifyOnMatch}
-          trackColor={{ true: colors.primary, false: colors.secondary }}
-          thumbColor={colors.card}
         />
       </Card>
 

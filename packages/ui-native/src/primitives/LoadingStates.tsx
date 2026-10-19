@@ -4,6 +4,7 @@ import { CloudOff } from 'lucide-react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { EmptyState, ErrorState, Skeleton } from './misc';
+import { LinkButton } from './FormControls';
 
 /* ------------------------------- Skeletons ------------------------------- */
 
@@ -168,6 +169,8 @@ export interface QueryStateProps {
   empty?: { icon?: ReactNode; title: string; description?: string; action?: ReactNode };
   errorTitle?: string;
   errorDescription?: string;
+  /** Wraps the skeleton, error and empty states, e.g. to match the screen's side padding. */
+  style?: StyleProp<ViewStyle>;
   children: ReactNode;
 }
 
@@ -185,6 +188,7 @@ export function QueryState({
   empty,
   errorTitle = 'This did not load',
   errorDescription = 'Check your connection, then try again.',
+  style,
   children,
 }: QueryStateProps) {
   const { colors, spacing, radius } = useTheme();
@@ -192,36 +196,55 @@ export function QueryState({
 
   if (!hasData && query.isError) {
     return (
-      <ErrorState
-        title={errorTitle}
-        description={errorDescription}
-        onRetry={query.refetch ? () => void query.refetch?.() : undefined}
-      />
+      <View style={style}>
+        <ErrorState
+          title={errorTitle}
+          description={errorDescription}
+          onRetry={query.refetch ? () => void query.refetch?.() : undefined}
+        />
+      </View>
     );
   }
-  if (!hasData) return <>{skeleton ?? <ListSkeleton />}</>;
-  if (isEmpty && empty) return <EmptyState {...empty} />;
+  if (!hasData) return <View style={style}>{skeleton ?? <ListSkeleton />}</View>;
+  if (isEmpty && empty)
+    return (
+      <View style={style}>
+        <EmptyState {...empty} />
+      </View>
+    );
 
   return (
     <>
       {query.isError ? (
-        <View
-          accessibilityLiveRegion="polite"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.sm,
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.sm,
-            borderRadius: radius.md,
-            backgroundColor: colors.secondary,
-            marginBottom: spacing.md,
-          }}
-        >
-          <CloudOff size={16} color={colors.mutedForeground} />
-          <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-            Showing what was saved on this device. Pull down to refresh.
-          </Text>
+        <View style={style}>
+          <View
+            accessibilityLiveRegion="polite"
+            style={[
+              {
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.sm,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                borderRadius: radius.md,
+                backgroundColor: colors.secondary,
+                marginBottom: spacing.md,
+              },
+            ]}
+          >
+            <CloudOff size={16} color={colors.mutedForeground} />
+            <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+              Could not refresh. Showing what was saved on this device.
+            </Text>
+            {query.refetch ? (
+              <LinkButton
+                label="Retry"
+                accessibilityLabel="Retry loading"
+                onPress={() => void query.refetch?.()}
+                style={{ minHeight: 32 }}
+              />
+            ) : null}
+          </View>
         </View>
       ) : null}
       {children}

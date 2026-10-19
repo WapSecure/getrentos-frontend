@@ -1,6 +1,6 @@
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -13,19 +13,19 @@ import {
   Star,
 } from 'lucide-react-native';
 import {
+  Button,
   Card,
   EmptyState,
   ErrorState,
   Skeleton,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerNotification } from '@/lib/api/owner';
 import type { Paginated } from '@/lib/api/properties';
 import { routeForNotification } from '@/lib/notificationRoutes';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
@@ -45,9 +45,6 @@ function iconFor(type: string) {
 export default function OwnerNotifications() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
-  const toast = useToast();
-
   const query = useQuery({
     queryKey: qk.owner.notifications,
     queryFn: () => ownerApi.notifications(),
@@ -56,31 +53,36 @@ export default function OwnerNotifications() {
   const items = query.data?.items ?? [];
   const unread = items.filter((n) => !n.read).length;
 
-  const readOne = useMutation({
+  const readOne = useOptimisticMutation({
     mutationFn: (id: string) => ownerApi.readNotification(id),
-    onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: qk.owner.notifications });
-      const previous = qc.getQueryData<Paginated<OwnerNotification>>(qk.owner.notifications);
-      qc.setQueryData<Paginated<OwnerNotification>>(qk.owner.notifications, (old) =>
-        old
-          ? { ...old, items: old.items.map((n) => (n.id === id ? { ...n, read: true } : n)) }
-          : old
-      );
-      return { previous };
-    },
-    onError: (_e, _id, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.owner.notifications, ctx.previous);
-    },
+    patches: (id) => [
+      {
+        queryKey: qk.owner.notifications,
+        update: (old) => {
+          const page = old as Paginated<OwnerNotification>;
+          return {
+            ...page,
+            items: page.items.map((n) => (n.id === id ? { ...n, read: true } : n)),
+          };
+        },
+      },
+    ],
+    errorMessage: 'Could not mark that as read.',
   });
 
-  const readAll = useMutation({
-    mutationFn: ownerApi.readAllNotifications,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.owner.notifications });
-      toast.show('All caught up.', 'success');
-    },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not mark those as read.', 'error'),
+  const readAll = useOptimisticMutation({
+    mutationFn: () => ownerApi.readAllNotifications(),
+    patches: () => [
+      {
+        queryKey: qk.owner.notifications,
+        update: (old) => {
+          const page = old as Paginated<OwnerNotification>;
+          return { ...page, items: page.items.map((n) => ({ ...n, read: true })) };
+        },
+      },
+    ],
+    errorMessage: 'Could not mark those as read.',
+    successMessage: 'All caught up.',
   });
 
   return (
@@ -94,24 +96,20 @@ export default function OwnerNotifications() {
         onBack={() => router.back()}
         accessory={
           unread > 0 ? (
-            <Pressable
+            <Button
+              label="Mark all read"
+              variant="ghost"
+              size="sm"
+              fullWidth={false}
+              icon={<CheckCheck size={16} color={colors.primary} />}
+              loading={readAll.isPending}
               onPress={() => readAll.mutate()}
-              disabled={readAll.isPending}
-              accessibilityRole="button"
-              accessibilityLabel="Mark all read"
-              hitSlop={10}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-            >
-              <CheckCheck size={16} color={colors.primary} />
-              <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-                Mark all read
-              </Text>
-            </Pressable>
+            />
           ) : null
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
@@ -152,7 +150,7 @@ export default function OwnerNotifications() {
                         borderRadius: radius.md,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: item.read ? colors.secondary : colors.primary + '1f',
+                        backgroundColor: item.read ? colors.secondary : colors.accent,
                       }}
                     >
                       <Icon size={17} color={item.read ? colors.mutedForeground : colors.primary} />

@@ -1,10 +1,19 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
-import { Button, Card, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Card,
+  Chip,
+  SwitchRow,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentVerificationSubjectType } from '@/lib/api/agent';
 import { ApiError } from '@/lib/api/client';
@@ -89,6 +98,7 @@ export default function SubmitVerification() {
           placeholder="e.g. Amaka Obi"
           value={subjectName}
           onChangeText={setSubjectName}
+          required
         />
 
         <View style={{ gap: spacing.sm }}>
@@ -106,31 +116,15 @@ export default function SubmitVerification() {
         </View>
 
         <Card elevated>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <Text variant="bodyStrong">ID verified</Text>
-            <Switch
-              value={idVerified}
-              onValueChange={setIdVerified}
-              trackColor={{ true: colors.primary, false: colors.secondary }}
-              thumbColor={colors.card}
-            />
-          </View>
+          <SwitchRow label="ID verified" value={idVerified} onValueChange={setIdVerified} />
         </Card>
 
         <Card elevated>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <Text variant="bodyStrong">Address confirmed</Text>
-            <Switch
-              value={addressConfirmed}
-              onValueChange={setAddressConfirmed}
-              trackColor={{ true: colors.primary, false: colors.secondary }}
-              thumbColor={colors.card}
-            />
-          </View>
+          <SwitchRow
+            label="Address confirmed"
+            value={addressConfirmed}
+            onValueChange={setAddressConfirmed}
+          />
         </Card>
 
         <TextField

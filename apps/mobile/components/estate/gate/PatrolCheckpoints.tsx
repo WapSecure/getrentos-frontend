@@ -243,6 +243,7 @@ function AddCheckpointForm({
       </Text>
       <TextField
         label="Name"
+        required
         value={name}
         onChangeText={setName}
         maxLength={80}

@@ -72,6 +72,7 @@ export default function LandWatch() {
             <Pressable
               key={w.id}
               accessibilityRole="button"
+              accessibilityLabel={`${w.land.label}, ${w.land.city}, ${w.land.state}`}
               onPress={() =>
                 router.push({ pathname: '/(app)/land-watch-detail/[id]', params: { id: w.id } })
               }

@@ -10,6 +10,7 @@ import {
   Divider,
   EmptyState,
   ErrorState,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -349,19 +350,22 @@ function CounterForm({ offer, onDone }: { offer: OwnerOffer; onDone: () => void 
         {offer.buyerName} offered ₦{offer.offerAmount.toLocaleString('en-NG')}. Name the price you’d
         accept.
       </Text>
-      <TextField
-        label="Your price (₦)"
-        keyboardType="number-pad"
-        value={value ? value.toLocaleString('en-NG') : ''}
-        onChangeText={setAmount}
+      <NumberField
+        label="Your price"
+        currency
+        required
+        value={amount}
+        onValueChange={setAmount}
         hint={value ? offerGap(value, offer.askingPrice) : undefined}
       />
       <TextField
-        label="Message (optional)"
+        label="Message"
+        optional
         value={message}
         onChangeText={setMessage}
         multiline
         maxLength={500}
+        showCount
       />
       <Button
         label="Send counter-offer"

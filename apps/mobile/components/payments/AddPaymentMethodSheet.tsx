@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
+  NumberField,
   SegmentedControl,
   Text,
   TextField,
@@ -83,15 +84,16 @@ function AddPaymentMethodForm({ onClose }: { onClose: () => void }) {
         placeholder={NAME_PLACEHOLDER[type]}
         value={name}
         onChangeText={setName}
+        required
       />
 
-      <TextField
+      <NumberField
+        code
         label="Last 4 digits"
         placeholder="1234"
-        keyboardType="number-pad"
         maxLength={4}
         value={last4}
-        onChangeText={(v) => setLast4(v.replace(/\D/g, ''))}
+        onValueChange={setLast4}
       />
 
       {type === 'card' ? (

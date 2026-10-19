@@ -7,6 +7,11 @@ export interface OptimisticPatch<TVars> {
   queryKey: QueryKey;
   /** The new cache value given the old one; return the old value to leave it alone. */
   update: (old: unknown, vars: TVars) => unknown;
+  /**
+   * `prefix` patches every cached query whose key starts with queryKey (all
+   * pages or filters of a list). Only use it when they share one data shape.
+   */
+  match?: 'exact' | 'prefix';
 }
 
 interface Options<TData, TVars> {
@@ -48,11 +53,15 @@ export function useOptimisticMutation<TData, TVars>({
     onMutate: async (vars: TVars) => {
       const list = patches(vars);
       await Promise.all(list.map((p) => qc.cancelQueries({ queryKey: p.queryKey })));
-      const snapshots = list.map((p) => [p.queryKey, qc.getQueryData(p.queryKey)] as const);
+      const snapshots: (readonly [QueryKey, unknown])[] = list.flatMap((p) =>
+        p.match === 'prefix'
+          ? qc.getQueriesData({ queryKey: p.queryKey })
+          : [[p.queryKey, qc.getQueryData(p.queryKey)] as const]
+      );
       for (const p of list) {
-        qc.setQueryData(p.queryKey, (old: unknown) =>
-          old === undefined ? old : p.update(old, vars)
-        );
+        const apply = (old: unknown) => (old === undefined ? old : p.update(old, vars));
+        if (p.match === 'prefix') qc.setQueriesData({ queryKey: p.queryKey }, apply);
+        else qc.setQueryData(p.queryKey, apply);
       }
       return { snapshots };
     },

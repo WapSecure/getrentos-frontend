@@ -2,7 +2,13 @@ import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle2, Package, Plus, Settings2 } from 'lucide-react-native';
@@ -14,6 +20,7 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
+  NumberField,
   Skeleton,
   Text,
   TextField,
@@ -75,6 +82,7 @@ export default function EstateDeliveries() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<DeliveryLog[]>(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
@@ -335,16 +343,16 @@ function LogDeliveryForm({ estateId, onDone }: { estateId: string; onDone: () =>
   return (
     <View style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
-        <TextField
+        <NumberField
           label="Courier’s code (if they have one)"
+          code
           value={code}
-          onChangeText={(v) => {
+          onValueChange={(v) => {
             setCode(v);
             // Any edit voids the last answer: a stale match beside a new code is worse than none.
             if (screen) setScreen(null);
             if (check.error) check.reset();
           }}
-          keyboardType="number-pad"
           maxLength={9}
           placeholder="e.g. 472913"
           containerStyle={{ flex: 1 }}

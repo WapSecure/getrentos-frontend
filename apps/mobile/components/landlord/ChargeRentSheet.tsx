@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
+  Chip,
   DateField,
+  NumberField,
   Text,
-  TextField,
   toISODate,
   useTheme,
   useToast,
@@ -49,7 +50,7 @@ function ChargeForm({
   onClose: () => void;
   onSubmittingChange: (submitting: boolean) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -101,39 +102,6 @@ function ChargeForm({
 
   const valid = unitIds.length > 0 && Number(amount) > 0 && dueDate;
 
-  const Chip = ({
-    label,
-    selected,
-    onPress,
-  }: {
-    label: string;
-    selected: boolean;
-    onPress: () => void;
-  }) => (
-    <Pressable
-      onPress={onPress}
-      disabled={mutation.isPending}
-      accessibilityRole="button"
-      accessibilityState={{ selected, disabled: mutation.isPending }}
-      style={{
-        paddingHorizontal: spacing.md,
-        paddingVertical: 8,
-        borderRadius: radius.full,
-        borderWidth: 1.5,
-        borderColor: selected ? colors.primary : colors.border,
-        backgroundColor: selected ? colors.primary + '14' : 'transparent',
-      }}
-    >
-      <Text
-        variant="caption"
-        numberOfLines={1}
-        style={{ color: selected ? colors.primary : colors.mutedForeground }}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-
   return (
     <View style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.sm }}>
@@ -150,6 +118,7 @@ function ChargeForm({
                 setPropertyId(p.id);
                 setUnitIds([]);
               }}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
@@ -167,6 +136,7 @@ function ChargeForm({
                 label={u.unitName}
                 selected={unitIds.includes(u.id)}
                 onPress={() => toggleUnit(u.id)}
+                disabled={mutation.isPending}
               />
             ))}
           </View>
@@ -184,6 +154,7 @@ function ChargeForm({
               label={CHARGE_CATEGORY_LABEL[c]}
               selected={c === category}
               onPress={() => setCategory(c)}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
@@ -200,18 +171,20 @@ function ChargeForm({
               label={BILLING_CYCLE_LABEL[c]}
               selected={c === cycle}
               onPress={() => setCycle(c)}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
       </View>
 
-      <TextField
-        label="Amount (₦)"
-        placeholder="200000"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="Amount"
+        placeholder="200,000"
         value={amount}
-        onChangeText={(v) => setAmount(v.replace(/\D/g, ''))}
+        onValueChange={setAmount}
         editable={!mutation.isPending}
+        required
       />
 
       <DateField

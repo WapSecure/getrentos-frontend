@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, RefreshControl, View } from 'react-native';
+import { Alert, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -70,7 +70,7 @@ export default function LandlordExpenses() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList
@@ -146,14 +146,11 @@ function ExpenseRow({ expense: e, onRemove }: { expense: LandlordExpense; onRemo
           <Badge label={EXPENSE_CATEGORY_LABEL[e.category]} tone="neutral" />
           <View style={{ flex: 1 }} />
           <Price amount={e.amount} variant="bodyStrong" />
-          <Pressable
+          <IconButton
             onPress={onRemove}
-            accessibilityRole="button"
             accessibilityLabel={`Remove ${EXPENSE_CATEGORY_LABEL[e.category]} expense`}
-            hitSlop={10}
-          >
-            <Trash2 size={16} color={colors.mutedForeground} />
-          </Pressable>
+            icon={<Trash2 size={16} color={colors.mutedForeground} />}
+          />
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>

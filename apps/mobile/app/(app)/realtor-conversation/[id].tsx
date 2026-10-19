@@ -25,6 +25,7 @@ import {
   EmptyState,
   ErrorState,
   IconButton,
+  LinkButton,
   Skeleton,
   Text,
   TextField,
@@ -274,20 +275,15 @@ export default function RealtorConversation() {
                     <Text variant="caption" style={{ color: colors.destructive }}>
                       {item.error}
                     </Text>
-                    <Pressable
+                    <LinkButton
+                      label="Retry"
+                      accessibilityHint="Sends the message again"
                       onPress={() => {
                         const retry = { ...item, error: undefined };
                         setPending((list) => list.map((x) => (x.key === item.key ? retry : x)));
                         send.mutate(retry);
                       }}
-                      accessibilityRole="button"
-                      accessibilityLabel="Retry sending"
-                      style={{ minHeight: 44, justifyContent: 'center' }}
-                    >
-                      <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
-                        Retry
-                      </Text>
-                    </Pressable>
+                    />
                   </View>
                 ) : (
                   <Text variant="caption" color="mutedForeground" style={{ alignSelf: 'flex-end' }}>

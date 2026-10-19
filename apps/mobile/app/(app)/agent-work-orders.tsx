@@ -8,16 +8,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Wrench } from 'lucide-react-native';
 import {
   Badge,
+  type BadgeTone,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
   useTheme,
   useToast,
-  type BadgeTone,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentWorkOrder, type AgentWorkOrderStatus } from '@/lib/api/agent';
@@ -111,21 +110,23 @@ export default function AgentWorkOrders() {
         />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={140} radius={radius.md} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Wrench size={34} color={colors.mutedForeground} />}
-          title="No work orders assigned"
-          description="When a property owner assigns you an on-site maintenance job, it shows up here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={140} radius={radius.md} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Wrench size={34} color={colors.mutedForeground} />,
+          title: 'No work orders assigned',
+          description:
+            'When a property owner assigns you an on-site maintenance job, it shows up here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -197,7 +198,8 @@ export default function AgentWorkOrders() {
                   {inProgress && !isCompleting ? (
                     <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
                       <Button
-                        label={uploadingId === item.id ? 'Uploading…' : 'Add photo'}
+                        label="Add photo"
+                        loadingLabel="Uploading…"
                         variant="secondary"
                         loading={uploadingId === item.id}
                         onPress={() => addPhoto(item.id)}
@@ -223,6 +225,7 @@ export default function AgentWorkOrders() {
                         onChangeText={setReport}
                         placeholder="e.g. Replaced the washer; tap no longer drips."
                         multiline
+                        required
                         editable={!complete.isPending}
                       />
                       {item.photos.length === 0 ? (
@@ -262,7 +265,7 @@ export default function AgentWorkOrders() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

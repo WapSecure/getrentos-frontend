@@ -179,7 +179,7 @@ export default function ResidentAmenities() {
                   variant="outline"
                   size="sm"
                   fullWidth={false}
-                  loading={cancel.isPending}
+                  loading={cancel.isPending && cancel.variables === b.id}
                   onPress={() => cancel.mutate(b.id)}
                   style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
                 />
@@ -294,7 +294,8 @@ function BookAmenityForm({
         </View>
       </Field>
       <Button
-        label={submitting ? 'Booking…' : 'Book'}
+        label="Book"
+        loadingLabel="Booking…"
         disabled={submitting || !canSubmit}
         loading={submitting}
         fullWidth

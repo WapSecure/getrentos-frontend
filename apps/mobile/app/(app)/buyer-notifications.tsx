@@ -1,12 +1,12 @@
-import { ScrollView, Switch, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -67,80 +67,53 @@ export default function BuyerNotificationSettings() {
         onBack={() => router.back()}
       />
 
-      {query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={70} />
-          <Skeleton height={70} />
-        </View>
-      ) : query.isError ? (
-        <ErrorState
-          description="Couldn't load your notification preferences."
-          onRetry={() => query.refetch()}
-        />
-      ) : !query.data?.length ? (
-        <EmptyState
-          title="No preferences yet"
-          description="Preferences will appear here once your account is set up."
-        />
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.md,
+      <View style={{ flex: 1 }}>
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ padding: spacing.xl, gap: spacing.md }}>
+              <Skeleton height={70} />
+              <Skeleton height={70} />
+            </View>
+          }
+          errorDescription="Couldn't load your notification preferences."
+          isEmpty={!query.data?.length}
+          empty={{
+            title: 'No preferences yet',
+            description: 'Preferences will appear here once your account is set up.',
           }}
         >
-          {query.data.map((pref) => (
-            <Card key={pref.id} elevated>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
+          <ScrollView
+            contentContainerStyle={{
+              padding: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.md,
+            }}
+          >
+            {(query.data ?? []).map((pref) => (
+              <Card key={pref.id} elevated>
                 <Text variant="bodyStrong">
                   {BUYER_NOTIFICATION_CATEGORY_LABEL[pref.id] ?? pref.id}
                 </Text>
-              </View>
-              <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Text variant="callout">Push</Text>
-                  <Switch
+                <View style={{ marginTop: spacing.sm }}>
+                  <SwitchRow
+                    label="Push"
                     value={pref.push}
                     onValueChange={(value) => setChannel(pref.id, 'push', value)}
-                    trackColor={{ true: colors.primary, false: colors.secondary }}
-                    thumbColor={colors.card}
                   />
-                </View>
-                {categorySendsEmail(pref.id) ? (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text variant="callout">Email</Text>
-                    <Switch
+                  {categorySendsEmail(pref.id) ? (
+                    <SwitchRow
+                      label="Email"
                       value={pref.email}
                       onValueChange={(value) => setChannel(pref.id, 'email', value)}
-                      trackColor={{ true: colors.primary, false: colors.secondary }}
-                      thumbColor={colors.card}
                     />
-                  </View>
-                ) : null}
-              </View>
-            </Card>
-          ))}
-        </ScrollView>
-      )}
+                  ) : null}
+                </View>
+              </Card>
+            ))}
+          </ScrollView>
+        </QueryState>
+      </View>
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import {
   Card,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -43,18 +44,18 @@ export default function LandlordMicrosite() {
         }
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        /* Mounted only once settings arrive, so the form seeds from props. */
+        <MicrositeForm initial={query.data} />
+      ) : query.isError ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
           {[0, 1].map((i) => (
             <Skeleton key={i} height={140} radius={radius.lg} />
           ))}
         </View>
-      ) : query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.data ? (
-        /* Mounted only once settings arrive, so the form seeds from props. */
-        <MicrositeForm initial={query.data} />
-      ) : null}
+      )}
     </View>
   );
 }
@@ -164,27 +165,21 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
       </Pressable>
 
       <Card padding={spacing.lg}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Globe size={19} color={colors.primary} />
-          <View style={{ flex: 1 }}>
-            <Text variant="bodyStrong">Public microsite</Text>
-            <Text variant="caption" color="mutedForeground">
-              A shareable page listing everything you have available.
-            </Text>
-          </View>
-          <Switch
-            value={enabled}
-            onValueChange={(v) => {
-              setEnabled(v);
-              save.mutate({ enabled: v });
-            }}
-            accessibilityLabel="Publish microsite"
-          />
-        </View>
+        <SwitchRow
+          icon={<Globe size={19} color={colors.primary} />}
+          label="Public microsite"
+          description="A shareable page listing everything you have available."
+          value={enabled}
+          onValueChange={(v) => {
+            setEnabled(v);
+            save.mutate({ enabled: v });
+          }}
+        />
       </Card>
 
       <TextField
         label="Address"
+        required
         placeholder="your-name"
         autoCapitalize="none"
         value={slug}
@@ -194,7 +189,8 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
       />
 
       <TextField
-        label="Bio (optional)"
+        label="Bio"
+        optional
         placeholder="A line about you for people browsing your page"
         multiline
         numberOfLines={3}
@@ -205,7 +201,8 @@ function MicrositeForm({ initial }: { initial: MicrositeSettings }) {
 
       <Button
         label="Save changes"
-        loading={save.isPending}
+        // The publish switch saves on its own; only a form save spins this button.
+        loading={save.isPending && save.variables?.enabled === undefined}
         disabled={!slugValid}
         onPress={() => save.mutate({ slug, bio: bio.trim() || undefined })}
       />

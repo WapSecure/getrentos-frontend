@@ -265,7 +265,8 @@ export default function RenterHome() {
         ]}
       />
 
-      {stats.isError ? (
+      {/* Only when there is nothing cached to show; a failed refresh keeps the numbers. */}
+      {stats.isError && !stats.data ? (
         <Card elevated style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Couldn’t load your dashboard</Text>
           <Text variant="callout" color="mutedForeground">

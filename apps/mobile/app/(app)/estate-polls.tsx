@@ -264,6 +264,7 @@ function CreateForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Question"
+        required
         value={question}
         onChangeText={setQuestion}
         multiline

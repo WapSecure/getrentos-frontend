@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import {
   ErrorState,
   FormAlert,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -242,7 +243,7 @@ function TargetForm({
   policy?: SlaPolicy;
   onDone: () => void;
 }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const d = DEFAULTS[priority];
@@ -311,28 +312,8 @@ function TargetForm({
         suffix=" h"
         onChange={setEscalate}
       />
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 }}>
-        <Text variant="body" style={{ flex: 1 }}>
-          Route emergencies first
-        </Text>
-        <Switch
-          value={emergency}
-          onValueChange={setEmergency}
-          accessibilityLabel="Route emergencies first"
-          trackColor={{ true: colors.primary, false: colors.border }}
-        />
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 }}>
-        <Text variant="body" style={{ flex: 1 }}>
-          Targets on
-        </Text>
-        <Switch
-          value={active}
-          onValueChange={setActive}
-          accessibilityLabel="Targets on"
-          trackColor={{ true: colors.primary, false: colors.border }}
-        />
-      </View>
+      <SwitchRow label="Route emergencies first" value={emergency} onValueChange={setEmergency} />
+      <SwitchRow label="Targets on" value={active} onValueChange={setActive} />
       {resolve * 60 < respond * 60 ? (
         <FormAlert tone="warning" message="The fix time is shorter than the response time." />
       ) : null}

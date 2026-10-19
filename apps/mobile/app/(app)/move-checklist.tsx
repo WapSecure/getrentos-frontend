@@ -1,22 +1,19 @@
-import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckSquare } from 'lucide-react-native';
-import { EmptyState, ErrorState, Skeleton, useTheme, useToast } from '@getrentos/ui-native';
+import { EmptyState, ErrorState, Skeleton, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { renterApi } from '@/lib/api/renter';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
+import { renterApi, type MoveInChecklistItem } from '@/lib/api/renter';
 import { ChecklistSection } from '@/components/checklist/ChecklistSection';
-import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function MoveChecklist() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const toast = useToast();
-  const [pendingKey, setPendingKey] = useState<string | undefined>(undefined);
 
   const moveInQuery = useQuery({
     queryKey: qk.renter.moveInChecklist,
@@ -27,38 +24,38 @@ export default function MoveChecklist() {
     queryFn: renterApi.moveOutChecklist,
   });
 
-  const toggleMoveIn = useMutation({
-    mutationFn: (key: string) => {
-      setPendingKey(key);
-      return renterApi.toggleMoveInChecklistItem(key);
-    },
+  // Ticks show at once; a refused toggle flips back with a toast.
+  const flip = (key: string) => (old: unknown) =>
+    (old as MoveInChecklistItem[]).map((i) =>
+      i.key === key ? { ...i, completed: !i.completed } : i
+    );
+
+  const toggleMoveIn = useOptimisticMutation({
+    mutationFn: (key: string) => renterApi.toggleMoveInChecklistItem(key),
+    patches: (key) => [{ queryKey: qk.renter.moveInChecklist, update: flip(key) }],
+    errorMessage: 'Could not update this item.',
     onSuccess: (updated) => {
       qc.setQueryData<typeof moveInQuery.data>(qk.renter.moveInChecklist, (old) =>
         old?.map((i) => (i.key === updated.key ? updated : i))
       );
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update this item.', 'error'),
-    onSettled: () => setPendingKey(undefined),
   });
 
-  const toggleMoveOut = useMutation({
-    mutationFn: (key: string) => {
-      setPendingKey(key);
-      return renterApi.toggleMoveOutChecklistItem(key);
-    },
+  const toggleMoveOut = useOptimisticMutation({
+    mutationFn: (key: string) => renterApi.toggleMoveOutChecklistItem(key),
+    patches: (key) => [{ queryKey: qk.renter.moveOutChecklist, update: flip(key) }],
+    errorMessage: 'Could not update this item.',
     onSuccess: (updated) => {
       qc.setQueryData<typeof moveOutQuery.data>(qk.renter.moveOutChecklist, (old) =>
         old?.map((i) => (i.key === updated.key ? updated : i))
       );
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not update this item.', 'error'),
-    onSettled: () => setPendingKey(undefined),
   });
 
   const isLoading = moveInQuery.isLoading || moveOutQuery.isLoading;
-  const isError = moveInQuery.isError || moveOutQuery.isError;
+  // A failed refresh keeps the saved checklist on screen.
+  const isError =
+    (moveInQuery.isError && !moveInQuery.data) || (moveOutQuery.isError && !moveOutQuery.data);
   const hasMoveIn = (moveInQuery.data?.length ?? 0) > 0;
   const hasMoveOut = (moveOutQuery.data?.length ?? 0) > 0;
 
@@ -101,7 +98,6 @@ export default function MoveChecklist() {
               title="Move-in checklist"
               items={moveInQuery.data!}
               onToggle={(key) => toggleMoveIn.mutate(key)}
-              pendingKey={pendingKey}
             />
           ) : null}
           {hasMoveOut ? (
@@ -109,7 +105,6 @@ export default function MoveChecklist() {
               title="Move-out checklist"
               items={moveOutQuery.data!}
               onToggle={(key) => toggleMoveOut.mutate(key)}
-              pendingKey={pendingKey}
             />
           ) : null}
         </ScrollView>

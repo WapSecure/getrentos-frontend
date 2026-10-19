@@ -7,6 +7,7 @@ import { Send } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
+  ErrorState,
   FormAlert,
   IconButton,
   Skeleton,
@@ -90,13 +91,16 @@ export function DisputeThread({
         />
         {disputes.isPending ? (
           <Skeleton height={140} radius={radius.lg} />
+        ) : disputes.isError && !disputes.data ? (
+          <ErrorState onRetry={() => disputes.refetch()} />
         ) : !d ? (
           <EmptyState title="Dispute not found" />
         ) : (
           <>
             <Card elevated style={{ gap: spacing.sm }}>
               <Text variant="caption" color="mutedForeground">
-                {d.guestPromise ? 'Guest Promise' : categoryLabel(d.category)} · opened {formatDate(d.createdAt, 'medium')}
+                {d.guestPromise ? 'Guest Promise' : categoryLabel(d.category)} · opened{' '}
+                {formatDate(d.createdAt, 'medium')}
               </Text>
               <Text variant="body">{d.description}</Text>
             </Card>
@@ -191,7 +195,8 @@ export function DisputeThread({
           </View>
           <IconButton
             onPress={() => send.mutate()}
-            disabled={!text.trim() || send.isPending}
+            disabled={!text.trim()}
+            loading={send.isPending}
             accessibilityLabel="Send reply"
             icon={
               <Send

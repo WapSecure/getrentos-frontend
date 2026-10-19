@@ -154,8 +154,12 @@ export function FormAlert({ message, tone = 'error', title }: FormAlertProps) {
 
 export interface LinkButtonProps {
   label: string;
+  /** Small icon before the label (e.g. a map pin for "Directions"). */
+  icon?: ReactNode;
+  /** Spoken name when the visible label needs context ("Edit address"). */
+  accessibilityLabel?: string;
   onPress: () => void;
-  tone?: 'primary' | 'muted';
+  tone?: 'primary' | 'muted' | 'destructive';
   disabled?: boolean;
   accessibilityRole?: AccessibilityRole;
   accessibilityHint?: string;
@@ -165,6 +169,8 @@ export interface LinkButtonProps {
 /** A text-only action ("Forgot password?", "Resend code") with a full 44-point target. */
 export function LinkButton({
   label,
+  icon,
+  accessibilityLabel,
   onPress,
   tone = 'primary',
   disabled,
@@ -177,19 +183,32 @@ export function LinkButton({
       onPress={onPress}
       disabled={disabled}
       accessibilityRole={accessibilityRole}
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
       hitSlop={{ left: 8, right: 8 }}
       style={({ pressed }) => [
-        { minHeight: 44, justifyContent: 'center', opacity: disabled ? 0.45 : pressed ? 0.6 : 1 },
+        {
+          minHeight: 44,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+          opacity: disabled ? 0.45 : pressed ? 0.6 : 1,
+        },
         style,
       ]}
     >
+      {icon}
       <Text
         variant="callout"
-        color={tone === 'primary' ? 'primary' : 'mutedForeground'}
-        style={{ fontWeight: tone === 'primary' ? '700' : '600' }}
+        color={
+          tone === 'primary'
+            ? 'primary'
+            : tone === 'destructive'
+              ? 'destructive'
+              : 'mutedForeground'
+        }
+        style={{ fontWeight: tone === 'muted' ? '600' : '700' }}
       >
         {label}
       </Text>

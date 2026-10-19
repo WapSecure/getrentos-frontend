@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { Button, Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Button, Chip, NumberField, Text, useTheme } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   PROPERTY_TYPES,
@@ -82,22 +82,24 @@ function FilterForm({
 
   return (
     <View style={{ gap: spacing.xl }}>
-      <Field label="Price range (₦ / month)">
+      <Field label="Price range per month">
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
-            <TextField
+            <NumberField
               placeholder="Min"
-              keyboardType="number-pad"
+              accessibilityLabel="Minimum price per month"
+              currency
               value={minStr}
-              onChangeText={setMinStr}
+              onValueChange={setMinStr}
             />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField
+            <NumberField
               placeholder="Max"
-              keyboardType="number-pad"
+              accessibilityLabel="Maximum price per month"
+              currency
               value={maxStr}
-              onChangeText={setMaxStr}
+              onValueChange={setMaxStr}
             />
           </View>
         </View>

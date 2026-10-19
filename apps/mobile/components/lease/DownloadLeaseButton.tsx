@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Download } from 'lucide-react-native';
-import { Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, useTheme, useToast } from '@getrentos/ui-native';
 import { leaseApi } from '@/lib/api/lease';
 import { ApiError } from '@/lib/api/client';
 
@@ -23,7 +23,7 @@ export function DownloadLeaseButton({
   /** Called once the document has been handed to the viewer. */
   onOpened?: () => void;
 } = {}) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors } = useTheme();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
 
@@ -54,31 +54,13 @@ export function DownloadLeaseButton({
   };
 
   return (
-    <Pressable
+    <Button
+      label={label}
+      variant="outline"
       onPress={download}
-      disabled={busy}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ busy }}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: spacing.sm,
-          paddingVertical: spacing.lg,
-          borderRadius: radius.lg,
-          borderWidth: 1,
-          borderColor: colors.border,
-          opacity: busy ? 0.6 : 1,
-        }}
-      >
-        <Download size={17} color={colors.primary} />
-        <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-          {busy ? 'Preparing…' : label}
-        </Text>
-      </View>
-    </Pressable>
+      loading={busy}
+      loadingLabel="Preparing…"
+      icon={<Download size={17} color={colors.primary} />}
+    />
   );
 }

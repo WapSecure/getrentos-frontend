@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Chip,
+  NumberField,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { buyerOffersApi, type BuyerFinancingType } from '@/lib/api/buyerOffers';
@@ -89,18 +97,20 @@ function OfferForm({
       <Text variant="body" color="mutedForeground">
         Make an offer on <Text variant="bodyStrong">{listing.title}</Text>.
       </Text>
-      <TextField
+      <NumberField
         label="Offer amount"
         value={amount}
-        onChangeText={setAmount}
-        keyboardType="number-pad"
+        onValueChange={setAmount}
+        currency
+        required
         editable={!mutation.isPending}
       />
-      <TextField
-        label="Deposit amount (optional)"
+      <NumberField
+        label="Deposit amount"
+        optional
         value={depositAmount}
-        onChangeText={setDepositAmount}
-        keyboardType="number-pad"
+        onValueChange={setDepositAmount}
+        currency
         editable={!mutation.isPending}
       />
       <View style={{ gap: spacing.sm }}>
@@ -119,7 +129,8 @@ function OfferForm({
         </View>
       </View>
       <TextField
-        label="Message (optional)"
+        label="Message"
+        optional
         value={message}
         onChangeText={setMessage}
         multiline

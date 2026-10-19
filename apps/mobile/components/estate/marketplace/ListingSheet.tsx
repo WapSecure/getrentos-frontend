@@ -6,6 +6,7 @@ import { ImagePlus, X } from 'lucide-react-native';
 import {
   Button,
   DateField,
+  NumberField,
   Price,
   Text,
   TextField,
@@ -314,11 +315,12 @@ function EditListingForm({
   return (
     <View style={{ gap: spacing.md }}>
       <TextField label="Headline" value={title} onChangeText={setTitle} maxLength={200} />
-      <TextField
-        label={listing.listingType === 'SHORTLET' ? 'Nightly rate (₦)' : 'Price (₦)'}
+      <NumberField
+        label={listing.listingType === 'SHORTLET' ? 'Nightly rate' : 'Price'}
+        required
+        currency
         value={price}
-        onChangeText={setPrice}
-        keyboardType="number-pad"
+        onValueChange={setPrice}
         error={
           price.trim() && amount === null ? 'Enter an amount in naira, numbers only.' : undefined
         }

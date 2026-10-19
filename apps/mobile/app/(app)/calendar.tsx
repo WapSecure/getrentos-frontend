@@ -64,7 +64,7 @@ export default function CalendarScreen() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -99,7 +99,13 @@ export default function CalendarScreen() {
                 {formatDate(g.date)}
               </Text>
               {g.events.map((e) => (
-                <Pressable key={e.id} onPress={() => setEditingEvent(e)}>
+                <Pressable
+                  key={e.id}
+                  onPress={() => setEditingEvent(e)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${e.title}, ${e.startTime} to ${e.endTime}`}
+                  accessibilityHint="Opens the event to edit it"
+                >
                   <Card elevated style={e.status === 'cancelled' ? { opacity: 0.55 } : undefined}>
                     <View
                       style={{

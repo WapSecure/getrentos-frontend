@@ -5,10 +5,10 @@ import { AlertTriangle, Check, Clock } from 'lucide-react-native';
 import {
   Button,
   Card,
+  NumberField,
   Screen,
   SectionHeader,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -94,10 +94,12 @@ export default function GatemanPatrol() {
         />
 
         <View style={{ gap: spacing.sm }}>
-          <TextField
+          <NumberField
             label="Checkpoint code"
+            code
+            maxLength={6}
             value={code}
-            onChangeText={(next) => {
+            onValueChange={(next) => {
               setCode(next);
               // Any edit clears the last answer: a stale "Main gate · step 1 of
               // 3" beside a code the guard has since changed is worse than
@@ -105,11 +107,11 @@ export default function GatemanPatrol() {
               if (result) setResult(null);
             }}
             placeholder="The six digits on the label"
-            keyboardType="number-pad"
             editable={!isLoading && !!estate}
           />
           <Button
-            label={scan.isPending ? 'Recording…' : 'Record this checkpoint'}
+            label="Record this checkpoint"
+            loadingLabel="Recording…"
             loading={scan.isPending}
             disabled={code.trim().length < 6 || !estate}
             onPress={() => scan.mutate(new Date().toISOString())}

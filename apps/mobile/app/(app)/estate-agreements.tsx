@@ -233,6 +233,7 @@ function ReasonForm({ closing, onDone }: { closing: Closing; onDone: () => void 
         </Text>
         <TextField
           label="Reason"
+          required
           value={reason}
           onChangeText={setReason}
           multiline

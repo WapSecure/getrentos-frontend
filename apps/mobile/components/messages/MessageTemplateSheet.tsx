@@ -53,6 +53,7 @@ function MessageTemplateForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Title"
+        required
         placeholder="e.g. Ask to book a viewing"
         maxLength={100}
         value={title}
@@ -61,6 +62,7 @@ function MessageTemplateForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Message"
+        required
         placeholder="Hi, I'd like to arrange a viewing this week: what times suit you?"
         multiline
         numberOfLines={4}

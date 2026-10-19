@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boxes, ChevronRight, Plus, ShieldAlert } from 'lucide-react-native';
 import {
@@ -20,8 +20,8 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
+  ListSkeleton,
   SegmentedControl,
-  Skeleton,
   Text,
   TextField,
   useTheme,
@@ -67,7 +67,7 @@ function warranty(a: Asset): { text: string; warn: boolean } | null {
 
 /** The things in each home that break: ACs, generators, pumps: with warranties and servicing. */
 export default function Assets() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const homes = useMyHomes();
   const [propertyId, setPropertyId] = useState('');
@@ -77,6 +77,7 @@ export default function Assets() {
   const query = useQuery({
     queryKey: qk.homeCare.assets(propertyId || 'all'),
     queryFn: () => homeCareApi.assets(propertyId || undefined),
+    placeholderData: keepPreviousData,
   });
   const items = useMemo(
     () => (query.data?.items ?? []).filter((a) => status === 'all' || a.status === status),
@@ -144,7 +145,7 @@ export default function Assets() {
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : query.isPending ? (
-          <Skeleton height={100} radius={radius.lg} />
+          <ListSkeleton variant="card" rows={3} height={100} />
         ) : !items.length ? (
           <EmptyState
             icon={<Boxes size={34} color={colors.mutedForeground} />}

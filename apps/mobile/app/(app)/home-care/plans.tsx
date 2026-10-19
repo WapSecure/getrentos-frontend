@@ -20,7 +20,7 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
-  Skeleton,
+  ListSkeleton,
   Text,
   TextField,
   toISODate,
@@ -56,7 +56,7 @@ const everyLabel = (d: number) => FREQUENCIES.find((f) => f.days === d)?.label ?
 
 /** Servicing on a schedule, so things are fixed before they break. */
 export default function Plans() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -108,7 +108,7 @@ export default function Plans() {
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : query.isPending ? (
-          <Skeleton height={100} radius={radius.lg} />
+          <ListSkeleton variant="card" rows={3} height={120} />
         ) : !plans.length ? (
           <EmptyState
             icon={<CalendarClock size={34} color={colors.mutedForeground} />}
@@ -251,6 +251,7 @@ function AddPlan({ onDone }: { onDone: () => void }) {
         ) : null}
         <TextField
           label="What to do"
+          required
           value={title}
           onChangeText={setTitle}
           hint="e.g. Service the generator"

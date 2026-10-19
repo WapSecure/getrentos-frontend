@@ -1,5 +1,5 @@
-import { Pressable, View } from 'react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { View } from 'react-native';
+import { Chip, Text, useTheme } from '@getrentos/ui-native';
 
 interface Option<T extends string> {
   value: T;
@@ -25,7 +25,7 @@ export function ChipSelect<T extends string>({
   emptyText,
   disabled = false,
 }: Props<T>) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
 
   return (
     <View style={{ gap: spacing.sm }}>
@@ -44,29 +44,13 @@ export function ChipSelect<T extends string>({
           {options.map((o) => {
             const selected = o.value === value;
             return (
-              <Pressable
+              <Chip
                 key={o.value}
+                label={o.label}
+                selected={selected}
                 onPress={() => onChange(o.value)}
                 disabled={disabled}
-                accessibilityRole="button"
-                accessibilityState={{ selected, disabled }}
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 8,
-                  borderRadius: radius.full,
-                  borderWidth: 1.5,
-                  borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary + '14' : 'transparent',
-                }}
-              >
-                <Text
-                  variant="caption"
-                  numberOfLines={1}
-                  style={{ color: selected ? colors.primary : colors.mutedForeground }}
-                >
-                  {o.label}
-                </Text>
-              </Pressable>
+              />
             );
           })}
         </View>

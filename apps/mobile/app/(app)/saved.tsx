@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
@@ -40,6 +40,7 @@ export default function Saved() {
   const listQuery = useQuery({
     queryKey: qk.listings.savedByWishlist(activeWishlistId),
     queryFn: () => savedListingsApi.list(1, 100, activeWishlistId),
+    placeholderData: keepPreviousData,
   });
   const items = useMemo(() => listQuery.data?.items ?? [], [listQuery.data]);
   const refetchList = listQuery.refetch;
@@ -135,18 +136,18 @@ export default function Saved() {
         <RecentlyViewedStrip />
       </View>
 
-      {listQuery.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={116} radius={16} />
-          ))}
-        </View>
-      ) : listQuery.isError ? (
+      {listQuery.isError && !listQuery.data ? (
         <ErrorState
           title="Couldn't load your saved homes"
           description="Check your connection and try again. Your shortlist is safe."
           onRetry={() => listQuery.refetch()}
         />
+      ) : listQuery.isLoading ? (
+        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} height={116} radius={16} />
+          ))}
+        </View>
       ) : items.length === 0 ? (
         <EmptyState
           icon={<Heart size={34} color={colors.mutedForeground} />}

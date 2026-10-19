@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
+  Chip,
   DateField,
+  NumberField,
   Text,
   TextField,
   toISODate,
@@ -46,7 +48,7 @@ function AddExpenseForm({
   onClose: () => void;
   onSubmittingChange: (submitting: boolean) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -95,29 +97,13 @@ function AddExpenseForm({
           {items.map((p) => {
             const selected = p.id === propertyId;
             return (
-              <Pressable
+              <Chip
                 key={p.id}
+                label={p.name}
+                selected={selected}
                 onPress={() => setPropertyId(p.id)}
                 disabled={mutation.isPending}
-                accessibilityRole="button"
-                accessibilityState={{ selected, disabled: mutation.isPending }}
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 8,
-                  borderRadius: radius.full,
-                  borderWidth: 1.5,
-                  borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary + '14' : 'transparent',
-                }}
-              >
-                <Text
-                  variant="caption"
-                  style={{ color: selected ? colors.primary : colors.mutedForeground }}
-                  numberOfLines={1}
-                >
-                  {p.name}
-                </Text>
-              </Pressable>
+              />
             );
           })}
         </View>
@@ -131,40 +117,26 @@ function AddExpenseForm({
           {EXPENSE_CATEGORIES.map((c) => {
             const selected = c === category;
             return (
-              <Pressable
+              <Chip
                 key={c}
+                label={EXPENSE_CATEGORY_LABEL[c]}
+                selected={selected}
                 onPress={() => setCategory(c)}
                 disabled={mutation.isPending}
-                accessibilityRole="button"
-                accessibilityState={{ selected, disabled: mutation.isPending }}
-                style={{
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: 8,
-                  borderRadius: radius.full,
-                  borderWidth: 1.5,
-                  borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary + '14' : 'transparent',
-                }}
-              >
-                <Text
-                  variant="caption"
-                  style={{ color: selected ? colors.primary : colors.mutedForeground }}
-                >
-                  {EXPENSE_CATEGORY_LABEL[c]}
-                </Text>
-              </Pressable>
+              />
             );
           })}
         </View>
       </View>
 
-      <TextField
-        label="Amount (₦)"
-        placeholder="25000"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="Amount"
+        placeholder="25,000"
         value={amount}
-        onChangeText={(v) => setAmount(v.replace(/\D/g, ''))}
+        onValueChange={setAmount}
         editable={!mutation.isPending}
+        required
       />
 
       <DateField

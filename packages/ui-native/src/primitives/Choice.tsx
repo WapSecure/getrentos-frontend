@@ -8,11 +8,15 @@ import { Text } from './Text';
 export interface SwitchRowProps {
   label: string;
   description?: string;
+  /** Spoken name when the visible label needs context ("Email for rent reminders"). */
+  accessibilityLabel?: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
   disabled?: boolean;
   /** Shown left of the text, e.g. a channel icon. */
   icon?: ReactNode;
+  /** `destructive` turns the track red when on, for switches like "Emergency". */
+  tone?: 'default' | 'destructive';
   style?: StyleProp<ViewStyle>;
 }
 
@@ -23,10 +27,12 @@ export interface SwitchRowProps {
 export function SwitchRow({
   label,
   description,
+  accessibilityLabel,
   value,
   onValueChange,
   disabled,
   icon,
+  tone = 'default',
   style,
 }: SwitchRowProps) {
   const { colors, spacing } = useTheme();
@@ -35,7 +41,7 @@ export function SwitchRow({
       onPress={() => onValueChange(!value)}
       disabled={disabled}
       accessibilityRole="switch"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={description}
       accessibilityState={{ checked: value, disabled }}
       aria-checked={value}
@@ -67,7 +73,10 @@ export function SwitchRow({
         // The row carries the semantics; the switch itself would be announced twice.
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
-        trackColor={{ true: colors.primary, false: colors.border }}
+        trackColor={{
+          true: tone === 'destructive' ? colors.destructive : colors.primary,
+          false: colors.border,
+        }}
         thumbColor={colors.card}
         ios_backgroundColor={colors.border}
       />
@@ -93,6 +102,8 @@ export interface RadioGroupProps<T extends string> {
   /** `list`: compact rows. `card`: each option a bordered, selectable tile. */
   variant?: 'list' | 'card';
   label?: string;
+  /** Spoken group name when the screen shows its own heading instead of `label`. */
+  accessibilityLabel?: string;
   error?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -104,6 +115,7 @@ export function RadioGroup<T extends string>({
   options,
   variant = 'list',
   label,
+  accessibilityLabel,
   error,
   style,
 }: RadioGroupProps<T>) {
@@ -113,7 +125,7 @@ export function RadioGroup<T extends string>({
     <View
       style={[{ gap: spacing.sm }, style]}
       accessibilityRole="radiogroup"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
     >
       {label ? (
         <Text

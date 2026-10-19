@@ -1,6 +1,6 @@
-import { Switch, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Contact } from 'lucide-react-native';
 import {
   Avatar,
@@ -8,18 +8,18 @@ import {
   EmptyState,
   Screen,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
-import { residentApi } from '@/lib/api/resident';
+import { residentApi, type ResidentHousehold } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 
 export default function ResidentDirectory() {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
-  const toast = useToast();
 
   const household = useQuery({
     queryKey: qk.resident.household,
@@ -31,13 +31,18 @@ export default function ResidentDirectory() {
     enabled: !!household.data?.directoryOptIn,
   });
 
-  const toggleOptIn = useMutation({
+  // A preference: the switch moves at once and goes back if the server refuses.
+  const toggleOptIn = useOptimisticMutation({
     mutationFn: (optIn: boolean) => residentApi.setDirectoryOptIn(optIn),
-    onSuccess: (updated) => {
-      qc.setQueryData(qk.resident.household, updated);
-      qc.invalidateQueries({ queryKey: qk.resident.directory });
-    },
-    onError: () => toast.show("Couldn't update that. Try again.", 'error'),
+    patches: (optIn) => [
+      {
+        queryKey: qk.resident.household,
+        update: (old) => ({ ...(old as ResidentHousehold), directoryOptIn: optIn }),
+      },
+    ],
+    invalidate: [qk.resident.directory],
+    errorMessage: "Couldn't update that. Try again.",
+    onSuccess: (updated) => qc.setQueryData(qk.resident.household, updated),
   });
 
   const optedIn = household.data?.directoryOptIn ?? false;
@@ -52,20 +57,13 @@ export default function ResidentDirectory() {
       />
       <Screen>
         <Card elevated>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="bodyStrong">Show my household in the directory</Text>
-              <Text variant="caption" color="mutedForeground">
-                Neighbors will see your unit, name and contact info.
-              </Text>
-            </View>
-            <Switch
-              value={optedIn}
-              onValueChange={(v) => toggleOptIn.mutate(v)}
-              disabled={household.isLoading || toggleOptIn.isPending}
-              trackColor={{ true: colors.primary, false: colors.border }}
-            />
-          </View>
+          <SwitchRow
+            label="Show my household in the directory"
+            description="Neighbors will see your unit, name and contact info."
+            value={optedIn}
+            onValueChange={(v) => toggleOptIn.mutate(v)}
+            disabled={household.isLoading}
+          />
         </Card>
 
         {!optedIn ? (

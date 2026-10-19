@@ -201,7 +201,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
                       justifyContent: 'center',
                     }}
                   >
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={colors.primaryForeground} />
                   </View>
                 ) : null}
                 {p.failed ? (
@@ -214,7 +214,11 @@ function Gallery({ listing: l }: { listing: HostListing }) {
                       padding: spacing.sm,
                     }}
                   >
-                    <Text variant="caption" style={{ color: '#fff', fontWeight: '700' }} center>
+                    <Text
+                      variant="caption"
+                      style={{ color: colors.destructiveForeground, fontWeight: '700' }}
+                      center
+                    >
                       Upload failed: remove and try again
                     </Text>
                   </View>
@@ -258,7 +262,7 @@ function Gallery({ listing: l }: { listing: HostListing }) {
                   justifyContent: 'center',
                 }}
               >
-                <X size={15} color="#fff" />
+                <X size={15} color={colors.primaryForeground} />
               </Pressable>
             </View>
           ))}
@@ -323,9 +327,10 @@ function Gallery({ listing: l }: { listing: HostListing }) {
         }}
       >
         <Button
-          label={uploading ? 'Uploading…' : 'Save photos'}
-          disabled={!changed || uploading}
-          loading={save.isPending}
+          label="Save photos"
+          disabled={!changed}
+          loading={save.isPending || uploading}
+          loadingLabel={uploading ? 'Uploading…' : undefined}
           onPress={() => save.mutate()}
         />
       </View>
