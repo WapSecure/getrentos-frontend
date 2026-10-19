@@ -89,29 +89,29 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 Contested decision
               </p>
-              <div className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
-                <div>
+              <div className="mt-2 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                <div className="min-w-0 break-words">
                   <span className="text-muted-foreground">Type · </span>
                   <span className="font-medium text-foreground">{target.label}</span>
                 </div>
-                <div>
+                <div className="min-w-0 break-words">
                   <span className="text-muted-foreground">Record · </span>
                   <span className="font-medium text-foreground">
                     {appeal.targetReference ?? appeal.targetLabel ?? `#${shortId(appeal.targetId)}`}
                   </span>
                 </div>
-                <div>
+                <div className="min-w-0 break-words">
                   <span className="text-muted-foreground">Subject · </span>
                   <span className="font-medium text-foreground">
                     {appeal.subjectName ?? shortId(appeal.subjectUserId)}
                   </span>
                   {appeal.subjectEmail && (
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      ({appeal.subjectEmail})
+                    <span className="mt-0.5 block break-all text-xs text-muted-foreground">
+                      {appeal.subjectEmail}
                     </span>
                   )}
                 </div>
-                <div>
+                <div className="min-w-0 break-words">
                   <span className="text-muted-foreground">Original decider · </span>
                   <span className="font-medium text-foreground">
                     {appeal.originalDeciderName ?? shortId(appeal.originalDeciderId)}
