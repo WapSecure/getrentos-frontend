@@ -25,6 +25,11 @@ export const landQueryKeys = {
   authorityQueue: (status: string) => ['admin', 'land', 'authority', 'queue', status] as const,
   authority: (authorityId: string) =>
     ['admin', 'land', 'authority', 'detail', authorityId] as const,
+  watchRoot: ['admin', 'land', 'watch'] as const,
+  watchInspections: (status: string) => ['admin', 'land', 'watch', 'inspections', status] as const,
+  watchInspection: (id: string) => ['admin', 'land', 'watch', 'inspection', id] as const,
+  watchIncidents: ['admin', 'land', 'watch', 'incidents'] as const,
+  watchSubscriptions: ['admin', 'land', 'watch', 'subscriptions'] as const,
 };
 
 /** `sentence-case` for enum values: `GOVERNORS_CONSENT` → "Governors consent". */
