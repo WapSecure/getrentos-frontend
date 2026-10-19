@@ -222,6 +222,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
+    label: 'Land Fraud Signals',
+    href: '/admin/land/fraud',
+    icon: ShieldAlert,
+    permission: 'fraud.review',
+  },
+  {
     label: 'Shortlets',
     href: ROUTES.ADMIN_SHORTLETS,
     icon: BedDouble,
