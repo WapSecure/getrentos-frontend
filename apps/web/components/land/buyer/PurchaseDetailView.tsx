@@ -192,6 +192,14 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         </div>
         <div className="flex flex-col items-end gap-2">
           <PurchaseStatusBadge status={purchase.status} />
+          {['ACTIVE', 'PAID_IN_FULL', 'COMPLETED'].includes(purchase.status) && (
+            <Link
+              href="/land/watch"
+              className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Watch this plot
+            </Link>
+          )}
           {purchase.propertyId && (
             <button
               type="button"
