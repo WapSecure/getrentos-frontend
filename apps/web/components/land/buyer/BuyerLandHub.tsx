@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from '@getrentos/ui';
-import { LayoutGrid, Gavel } from 'lucide-react';
+import { LayoutGrid, Gavel, UsersRound } from 'lucide-react';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { PurchasesList } from './PurchasesList';
 import { ReservationsList } from './ReservationsList';
@@ -25,6 +25,13 @@ export const BuyerLandHub = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            href="/buyer/land/representatives"
+            variant="ghost"
+            icon={<UsersRound className="h-4 w-4" />}
+          >
+            Representatives
+          </Button>
           <Button href="/land/disputes" variant="ghost" icon={<Gavel className="h-4 w-4" />}>
             Disputes
           </Button>
