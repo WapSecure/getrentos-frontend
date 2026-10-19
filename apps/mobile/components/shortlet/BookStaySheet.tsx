@@ -30,14 +30,27 @@ interface Props {
  * of the price. Instant stays confirm now; others go to the host first.
  */
 export function BookStaySheet(props: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={props.open} onClose={props.onClose} title="Confirm your stay">
-      {props.open ? <BookForm {...props} /> : null}
+    <Sheet
+      open={props.open}
+      onClose={submitting ? () => undefined : props.onClose}
+      title="Confirm your stay"
+    >
+      {props.open ? <BookForm {...props} onSubmittingChange={setSubmitting} /> : null}
     </Sheet>
   );
 }
 
-function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDates }: Props) {
+function BookForm({
+  onClose,
+  listing,
+  dates,
+  guests,
+  onGuestsChange,
+  onChangeDates,
+  onSubmittingChange,
+}: Props & { onSubmittingChange: (submitting: boolean) => void }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -55,6 +68,7 @@ function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDat
         checkOut: dates.checkOut,
         guestCount: guests,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (booking) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: ['shortlets', 'bookings'] });
@@ -76,6 +90,7 @@ function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDat
       }
       toast.show(err instanceof ApiError ? err.message : 'Could not book this stay.', 'error');
     },
+    onSettled: () => onSubmittingChange(false),
   });
 
   const q = quote.data;
@@ -88,6 +103,8 @@ function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDat
           void haptics.tap();
           onChangeDates();
         }}
+        disabled={book.isPending}
+        accessibilityState={{ disabled: book.isPending }}
         accessibilityRole="button"
         accessibilityLabel={`Dates ${seasonRange(dates.checkIn, dates.checkOut)}. Change dates`}
         style={({ pressed }) => ({
@@ -122,6 +139,7 @@ function BookForm({ onClose, listing, dates, guests, onGuestsChange, onChangeDat
         min={1}
         max={listing.maxGuests}
         onChange={onGuestsChange}
+        disabled={book.isPending}
       />
 
       {quote.isPending ? (

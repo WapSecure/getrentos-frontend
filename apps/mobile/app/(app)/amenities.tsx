@@ -217,7 +217,11 @@ function BookAmenitySheet({
   submitting: boolean;
 }) {
   return (
-    <Sheet open={!!amenity} onClose={onClose} title={amenity ? `Book ${amenity.name}` : ''}>
+    <Sheet
+      open={!!amenity}
+      onClose={submitting ? () => undefined : onClose}
+      title={amenity ? `Book ${amenity.name}` : ''}
+    >
       {amenity ? (
         <BookAmenityForm key={amenity.id} onSubmit={onSubmit} submitting={submitting} />
       ) : null}
@@ -258,6 +262,7 @@ function BookAmenityForm({
               label={dayLabel(d, i)}
               selected={dayIndex === i}
               onPress={() => setDayIndex(i)}
+              disabled={submitting}
             />
           ))}
         </View>
@@ -265,7 +270,13 @@ function BookAmenityForm({
       <Field label="Start time">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
           {HOUR_SLOTS.map((h) => (
-            <Chip key={h} label={hourLabel(h)} selected={hour === h} onPress={() => setHour(h)} />
+            <Chip
+              key={h}
+              label={hourLabel(h)}
+              selected={hour === h}
+              onPress={() => setHour(h)}
+              disabled={submitting}
+            />
           ))}
         </View>
       </Field>
@@ -277,13 +288,14 @@ function BookAmenityForm({
               label={d.label}
               selected={durationMinutes === d.minutes}
               onPress={() => setDurationMinutes(d.minutes)}
+              disabled={submitting}
             />
           ))}
         </View>
       </Field>
       <Button
         label={submitting ? 'Booking…' : 'Book'}
-        disabled={!canSubmit}
+        disabled={submitting || !canSubmit}
         loading={submitting}
         fullWidth
         onPress={submit}

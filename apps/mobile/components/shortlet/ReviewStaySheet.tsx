@@ -14,17 +14,31 @@ interface Props {
 }
 
 export function ReviewStaySheet({ open, onClose, booking }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Review your stay">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Review your stay">
       {/* Remount on each open so the rating always starts fresh. */}
       {booking ? (
-        <ReviewForm key={open ? 'open' : 'closed'} onClose={onClose} booking={booking} />
+        <ReviewForm
+          key={open ? 'open' : 'closed'}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+          booking={booking}
+        />
       ) : null}
     </Sheet>
   );
 }
 
-function ReviewForm({ onClose, booking }: { onClose: () => void; booking: ShortletBooking }) {
+function ReviewForm({
+  onClose,
+  onSubmittingChange,
+  booking,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+  booking: ShortletBooking;
+}) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -33,6 +47,7 @@ function ReviewForm({ onClose, booking }: { onClose: () => void; booking: Shortl
 
   const mutation = useMutation({
     mutationFn: () => shortletsApi.reviewBooking(booking.id, rating, comment.trim() || undefined),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['shortlets', 'bookings'] });
       qc.invalidateQueries({ queryKey: ['shortlets', 'reviews', booking.listingId] });
@@ -41,6 +56,7 @@ function ReviewForm({ onClose, booking }: { onClose: () => void; booking: Shortl
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not submit this review.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -54,8 +70,10 @@ function ReviewForm({ onClose, booking }: { onClose: () => void; booking: Shortl
           <Pressable
             key={n}
             onPress={() => setRating(n)}
+            disabled={mutation.isPending}
             accessibilityRole="button"
             accessibilityLabel={`${n} star${n === 1 ? '' : 's'}`}
+            accessibilityState={{ selected: n <= rating, disabled: mutation.isPending }}
             hitSlop={6}
           >
             <Star
@@ -73,11 +91,13 @@ function ReviewForm({ onClose, booking }: { onClose: () => void; booking: Shortl
         onChangeText={setComment}
         multiline
         numberOfLines={4}
+        editable={!mutation.isPending}
       />
 
       <Button
         label="Submit review"
         loading={mutation.isPending}
+        disabled={mutation.isPending}
         onPress={() => mutation.mutate()}
       />
     </View>

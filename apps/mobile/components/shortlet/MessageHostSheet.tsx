@@ -46,13 +46,13 @@ function Inner({
   return (
     <Sheet
       open={open}
-      onClose={onClose}
+      onClose={send.isPending ? () => undefined : onClose}
       title={`Message ${first}`}
       footer={
         <Button
           label="Send message"
           loading={send.isPending}
-          disabled={text.trim().length < 2}
+          disabled={send.isPending || text.trim().length < 2}
           onPress={() => send.mutate()}
         />
       }
@@ -69,6 +69,7 @@ function Inner({
           multiline
           autoFocus
           maxLength={2000}
+          editable={!send.isPending}
           containerStyle={{ minHeight: 120 }}
         />
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>

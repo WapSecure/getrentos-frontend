@@ -287,6 +287,7 @@ export function Stepper({
   max = 99,
   step = 1,
   suffix,
+  disabled = false,
 }: {
   label: string;
   hint?: string;
@@ -296,6 +297,7 @@ export function Stepper({
   max?: number;
   step?: number;
   suffix?: string;
+  disabled?: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();
   const set = (v: number) => {
@@ -322,9 +324,10 @@ export function Stepper({
       accessibilityLabel={label}
       accessibilityValue={{ text: `${value}${suffix ?? ''}` }}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-      onAccessibilityAction={(e) =>
-        set(e.nativeEvent.actionName === 'increment' ? value + step : value - step)
-      }
+      accessibilityState={{ disabled }}
+      onAccessibilityAction={(e) => {
+        if (!disabled) set(e.nativeEvent.actionName === 'increment' ? value + step : value - step);
+      }}
       style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 52 }}
     >
       <View style={{ flex: 1 }}>
@@ -337,9 +340,9 @@ export function Stepper({
       </View>
       <Pressable
         onPress={() => set(value - step)}
-        disabled={value <= min}
+        disabled={disabled || value <= min}
         hitSlop={8}
-        style={btn(value <= min)}
+        style={btn(disabled || value <= min)}
         importantForAccessibility="no"
       >
         <Minus size={16} color={colors.foreground} />
@@ -350,9 +353,9 @@ export function Stepper({
       </Text>
       <Pressable
         onPress={() => set(value + step)}
-        disabled={value >= max}
+        disabled={disabled || value >= max}
         hitSlop={8}
-        style={btn(value >= max)}
+        style={btn(disabled || value >= max)}
         importantForAccessibility="no"
       >
         <Plus size={16} color={colors.foreground} />

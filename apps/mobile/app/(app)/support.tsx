@@ -125,15 +125,26 @@ export default function Support() {
 }
 
 function ComposeSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Contact support">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Contact support">
       {/* Remount on each open so the form always starts blank. */}
-      <ComposeForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <ComposeForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function ComposeForm({ onClose }: { onClose: () => void }) {
+function ComposeForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -142,6 +153,7 @@ function ComposeForm({ onClose }: { onClose: () => void }) {
 
   const mutation = useMutation({
     mutationFn: () => supportApi.createThread(subject.trim(), category ?? undefined),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (thread) => {
       qc.invalidateQueries({ queryKey: qk.renter.supportThreads });
       onClose();
@@ -149,6 +161,7 @@ function ComposeForm({ onClose }: { onClose: () => void }) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not send this message.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -162,6 +175,7 @@ function ComposeForm({ onClose }: { onClose: () => void }) {
               label={c.label}
               selected={category === c.value}
               onPress={() => setCategory(c.value)}
+              disabled={mutation.isPending}
               size="sm"
             />
           ))}
@@ -174,11 +188,12 @@ function ComposeForm({ onClose }: { onClose: () => void }) {
         numberOfLines={4}
         value={subject}
         onChangeText={setSubject}
+        editable={!mutation.isPending}
       />
       <Button
         label="Send"
         loading={mutation.isPending}
-        disabled={subject.trim().length < 3}
+        disabled={mutation.isPending || subject.trim().length < 3}
         onPress={() => mutation.mutate()}
       />
     </View>
