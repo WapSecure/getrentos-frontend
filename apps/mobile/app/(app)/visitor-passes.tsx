@@ -297,7 +297,7 @@ function DenyWalkInSheet({
   return (
     <Sheet
       open={!!pass}
-      onClose={onClose}
+      onClose={submitting ? () => undefined : onClose}
       title={pass ? `Refuse ${pass.visitorName}?` : 'Refuse visitor?'}
       footer={
         <View style={{ gap: spacing.xs }}>
@@ -305,6 +305,7 @@ function DenyWalkInSheet({
             label="Refuse entry"
             fullWidth
             loading={submitting}
+            disabled={submitting}
             onPress={() => {
               void onSubmit(reason.trim() || undefined).then((saved) => {
                 if (saved) setReason('');
@@ -332,6 +333,7 @@ function DenyWalkInSheet({
           label="Reason (optional)"
           value={reason}
           onChangeText={setReason}
+          editable={!submitting}
           placeholder="e.g. I am not expecting anyone"
           hint="Shown to the guard, who may repeat it to the visitor."
         />
@@ -357,7 +359,7 @@ function IssuePassSheet({
   submitting: boolean;
 }) {
   return (
-    <Sheet open={open} onClose={onClose} title="Issue Visitor Pass">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Issue Visitor Pass">
       <IssuePassForm key={open ? 'open' : 'closed'} onSubmit={onSubmit} submitting={submitting} />
     </Sheet>
   );
@@ -390,6 +392,7 @@ function IssuePassForm({
           placeholder="e.g. Tunde Adekunle"
           value={visitorName}
           onChangeText={setVisitorName}
+          editable={!submitting}
         />
       </Field>
       <Field label="Phone (optional)">
@@ -398,10 +401,16 @@ function IssuePassForm({
           keyboardType="phone-pad"
           value={visitorPhone}
           onChangeText={setVisitorPhone}
+          editable={!submitting}
         />
       </Field>
       <Field label="Purpose (optional)">
-        <TextField placeholder="e.g. Family visit" value={purpose} onChangeText={setPurpose} />
+        <TextField
+          placeholder="e.g. Family visit"
+          value={purpose}
+          onChangeText={setPurpose}
+          editable={!submitting}
+        />
       </Field>
       <Field label="Expires (defaults to 24 hours)">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -411,13 +420,14 @@ function IssuePassForm({
               label={p.label}
               selected={expiryHours === p.hours}
               onPress={() => setExpiryHours(p.hours)}
+              disabled={submitting}
             />
           ))}
         </View>
       </Field>
       <Button
         label={submitting ? 'Issuing…' : 'Issue Pass'}
-        disabled={!canSubmit}
+        disabled={submitting || !canSubmit}
         loading={submitting}
         fullWidth
         onPress={() =>

@@ -236,7 +236,7 @@ function ReportSheet({
   submitting: boolean;
 }) {
   return (
-    <Sheet open={open} onClose={onClose} title="Report an Issue">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Report an Issue">
       <ReportForm key={open ? 'open' : 'closed'} onSubmit={onSubmit} submitting={submitting} />
     </Sheet>
   );
@@ -274,6 +274,7 @@ function ReportForm({
           onChangeText={setDescription}
           multiline
           numberOfLines={4}
+          editable={!submitting}
         />
       </Field>
       <Field label="Category (optional)">
@@ -284,6 +285,7 @@ function ReportForm({
               label={CATEGORY_LABEL[c]}
               selected={category === c}
               onPress={() => setCategory(c)}
+              disabled={submitting}
             />
           ))}
         </View>
@@ -296,6 +298,7 @@ function ReportForm({
               label={PRIORITY_LABEL[p]}
               selected={priority === p}
               onPress={() => setPriority(p)}
+              disabled={submitting}
             />
           ))}
         </View>
@@ -314,6 +317,7 @@ function ReportForm({
             />
             <Pressable
               onPress={() => setPhoto(null)}
+              disabled={submitting}
               accessibilityRole="button"
               accessibilityLabel="Remove photo"
               style={{
@@ -337,6 +341,7 @@ function ReportForm({
               fullWidth={false}
               icon={<Camera size={16} color={colors.foreground} />}
               onPress={async () => setPhoto(await capturePhoto())}
+              disabled={submitting}
             />
             <Button
               label="Choose Photo"
@@ -345,13 +350,14 @@ function ReportForm({
               fullWidth={false}
               icon={<Images size={16} color={colors.foreground} />}
               onPress={async () => setPhoto(await pickPhoto())}
+              disabled={submitting}
             />
           </View>
         )}
       </Field>
       <Button
         label={submitting ? 'Submitting…' : 'Submit Report'}
-        disabled={!canSubmit}
+        disabled={submitting || !canSubmit}
         loading={submitting}
         fullWidth
         onPress={() =>
