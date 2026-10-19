@@ -95,17 +95,26 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
                   <span className="font-medium text-foreground">{target.label}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Target · </span>
-                  <span className="font-mono text-xs text-foreground">{appeal.targetId}</span>
+                  <span className="text-muted-foreground">Record · </span>
+                  <span className="font-medium text-foreground">
+                    {appeal.targetReference ?? appeal.targetLabel ?? `#${shortId(appeal.targetId)}`}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Subject · </span>
-                  <span className="font-mono text-xs text-foreground">{appeal.subjectUserId}</span>
+                  <span className="font-medium text-foreground">
+                    {appeal.subjectName ?? shortId(appeal.subjectUserId)}
+                  </span>
+                  {appeal.subjectEmail && (
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      ({appeal.subjectEmail})
+                    </span>
+                  )}
                 </div>
                 <div>
                   <span className="text-muted-foreground">Original decider · </span>
-                  <span className="font-mono text-xs text-foreground">
-                    {shortId(appeal.originalDeciderId)}
+                  <span className="font-medium text-foreground">
+                    {appeal.originalDeciderName ?? shortId(appeal.originalDeciderId)}
                   </span>
                 </div>
               </div>

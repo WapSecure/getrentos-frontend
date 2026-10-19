@@ -71,8 +71,8 @@ export const AppealCard = ({ appeal, delay = 0, onReview }: AppealCardProps) => 
           </span>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground">{target.label}</p>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              #{shortId(appeal.targetId)}
+            <p className="truncate text-[11px] text-muted-foreground">
+              {appeal.targetReference ?? appeal.targetLabel ?? `#${shortId(appeal.targetId)}`}
             </p>
           </div>
         </div>
@@ -91,7 +91,8 @@ export const AppealCard = ({ appeal, delay = 0, onReview }: AppealCardProps) => 
 
       <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
         <span className="text-[11px] text-muted-foreground">
-          Filed {formatDate(appeal.createdAt)} · by {shortId(appeal.subjectUserId)}
+          Filed {formatDate(appeal.createdAt)} · by{' '}
+          {appeal.subjectName ?? shortId(appeal.subjectUserId)}
         </span>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={onReview}>
           <Gavel className="h-3.5 w-3.5" />

@@ -132,4 +132,10 @@ export interface TrustAppeal {
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string | null;
+  /** Readable fields the backend resolves so reviewers don't see raw UUIDs. */
+  subjectName?: string | null;
+  subjectEmail?: string | null;
+  originalDeciderName?: string | null;
+  targetReference?: string | null;
+  targetLabel?: string | null;
 }
