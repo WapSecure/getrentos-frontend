@@ -4,7 +4,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge, Button } from '@getrentos/ui';
-import { Clock, CornerDownRight, Lock, LogIn, Ruler, ShieldCheck, UserPlus } from 'lucide-react';
+import {
+  Clock,
+  CornerDownRight,
+  Lock,
+  LogIn,
+  Ruler,
+  ShieldCheck,
+  UserPlus,
+  Video,
+} from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES, signInThen } from '@/lib/constants/landBuyerRoutes';
@@ -19,6 +28,7 @@ import {
   type PublicLandLayoutDetail,
 } from '@/types/landBuyer';
 import { StartPurchaseDialog } from './StartPurchaseDialog';
+import { RequestTourDialog } from '../tours/RequestTourDialog';
 import { plotLabel } from './landSaleLogic';
 
 type Viewer = 'buyer' | 'member' | 'anonymous';
@@ -43,6 +53,7 @@ export const PlotReservePanel = ({
   );
   const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState<LandReservation | null>(null);
+  const [touring, setTouring] = useState(false);
 
   const reserve = useMutation({
     mutationFn: (plotId: string) => unwrap(landBuyerService.reserve(plotId)),
@@ -162,6 +173,16 @@ export const PlotReservePanel = ({
           conveyance step.
         </li>
       </ul>
+      {viewer === 'buyer' && available && (
+        <Button
+          fullWidth
+          variant="outline"
+          icon={<Video className="h-4 w-4" />}
+          onClick={() => setTouring(true)}
+        >
+          Ask for a live video tour
+        </Button>
+      )}
       {viewer === 'buyer' && (
         <Link
           href={LAND_BUYER_ROUTES.HUB_RESERVATIONS}
@@ -172,6 +193,12 @@ export const PlotReservePanel = ({
       )}
 
       <StartPurchaseDialog reservation={held} onClose={() => setHeld(null)} />
+      <RequestTourDialog
+        open={touring}
+        onClose={() => setTouring(false)}
+        target={{ plotId: plot.id }}
+        landName={`${plotLabel(plot)}, ${layout.name}`}
+      />
     </section>
   );
 };
