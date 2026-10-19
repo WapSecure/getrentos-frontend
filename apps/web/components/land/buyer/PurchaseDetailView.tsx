@@ -25,6 +25,8 @@ import {
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
 import { PerfectionPanel } from '../closing/PerfectionPanel';
+import { CoApprovalCard } from '../representatives/CoApprovalCard';
+import { landRepresentativeKeys } from '@/services/landRepresentativeService';
 
 type ToastState = { message: string; variant: 'success' | 'error' | 'info' } | null;
 
@@ -103,9 +105,17 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   const confirmStep = useMutation({
     mutationFn: (key: string) => unwrap(landBuyerService.confirmMilestone(purchaseId, key)),
     onMutate: (key) => setMilestoneKey(key),
-    onSuccess: (next) => {
+    onSuccess: (next, key) => {
       settle(next);
-      notify('Step confirmed.', 'success');
+      // Under two-person approval the step stays delivered until the representative approves too.
+      const held = next.milestones.find((m) => m.key === key)?.status === 'DELIVERED';
+      notify(
+        held ? 'Your approval is recorded. Waiting for your representative.' : 'Step confirmed.',
+        'success'
+      );
+      queryClient.invalidateQueries({
+        queryKey: landRepresentativeKeys.coApproval({ purchaseId }),
+      });
     },
     onError: (reason: Error) => notify(reason.message, 'error'),
     onSettled: () => setMilestoneKey(null),
@@ -322,6 +332,11 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
               />
             </TabsContent>
             <TabsContent value="conveyance" className="mt-4 space-y-4">
+              <CoApprovalCard
+                deal={{ purchaseId: purchase.id }}
+                labelFor={(key) => purchase.milestones.find((m) => m.key === key)?.label ?? key}
+                onChanged={(message, variant) => setToast({ message, variant })}
+              />
               <p className="flex gap-2 rounded-xl bg-info/5 p-3 text-sm text-muted-foreground">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" aria-hidden />
                 GetRentos holds your payments. Each step you confirm releases its share to the

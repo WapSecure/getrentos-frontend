@@ -12,6 +12,8 @@ import { buyerKeys } from '@/lib/queryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
 import { MilestoneTimeline } from './MilestoneTimeline';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
+import { CoApprovalCard } from '../representatives/CoApprovalCard';
+import { landRepresentativeKeys } from '@/services/landRepresentativeService';
 
 /**
  * Conveyance on a land resale (a marketplace transaction). Escrow is released
@@ -38,9 +40,19 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   const confirm = useMutation({
     mutationFn: (key: string) => unwrap(landBuyerService.confirmTransactionMilestone(txId, key)),
     onMutate: (key) => setPendingKey(key),
-    onSuccess: () => {
+    onSuccess: (updated) => {
       refresh();
-      setToast({ message: 'Step confirmed.', variant: 'success' });
+      queryClient.invalidateQueries({
+        queryKey: landRepresentativeKeys.coApproval({ transactionId: txId }),
+      });
+      setToast({
+        // Under two-person approval the step stays delivered until the representative approves too.
+        message:
+          updated.status === 'DELIVERED'
+            ? 'Your approval is recorded. Waiting for your representative.'
+            : 'Step confirmed.',
+        variant: 'success',
+      });
     },
     onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
     onSettled: () => setPendingKey(null),
@@ -157,6 +169,11 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
               />
             </section>
           )}
+          <CoApprovalCard
+            deal={{ transactionId: txId }}
+            labelFor={(key) => milestones.find((m) => m.key === key)?.label ?? key}
+            onChanged={(message, variant) => setToast({ message, variant })}
+          />
           <section className="rounded-2xl border border-border bg-card p-5">
             <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
               {outstanding.length === 0
