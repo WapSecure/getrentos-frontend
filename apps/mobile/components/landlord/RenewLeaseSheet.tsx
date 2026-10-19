@@ -15,14 +15,30 @@ interface Props {
 }
 
 export function RenewLeaseSheet({ open, onClose, lease }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Renew this lease">
-      {lease ? <RenewForm key={lease.id} lease={lease} onClose={onClose} /> : null}
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Renew this lease">
+      {lease ? (
+        <RenewForm
+          key={lease.id}
+          lease={lease}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
-function RenewForm({ lease, onClose }: { lease: LandlordLease; onClose: () => void }) {
+function RenewForm({
+  lease,
+  onClose,
+  onSubmittingChange,
+}: {
+  lease: LandlordLease;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -47,6 +63,7 @@ function RenewForm({ lease, onClose }: { lease: LandlordLease; onClose: () => vo
 
   const renew = useMutation({
     mutationFn: () => landlordApi.renewLease(lease.id, amount, leaseEnd),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       toast.show('Renewal offer sent.', 'success');
@@ -54,6 +71,7 @@ function RenewForm({ lease, onClose }: { lease: LandlordLease; onClose: () => vo
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not send that renewal.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const valid = amount > 0 && leaseEnd;
@@ -73,8 +91,9 @@ function RenewForm({ lease, onClose }: { lease: LandlordLease; onClose: () => vo
           setCheck(null);
         }}
         onBlur={() => {
-          if (amount > 0) preview.mutate();
+          if (amount > 0 && !renew.isPending) preview.mutate();
         }}
+        editable={!renew.isPending}
         hint={
           amount > 0 && amount !== lease.rentAmount
             ? `${increase > 0 ? '+' : ''}${increase}% on the current rent`
@@ -105,12 +124,13 @@ function RenewForm({ lease, onClose }: { lease: LandlordLease; onClose: () => vo
         value={leaseEnd}
         onChange={setLeaseEnd}
         min={lease.leaseEnd}
+        disabled={renew.isPending}
       />
 
       <Button
         label="Send renewal offer"
         loading={renew.isPending}
-        disabled={!valid}
+        disabled={renew.isPending || !valid}
         onPress={() => renew.mutate()}
       />
     </View>

@@ -244,14 +244,29 @@ export function ManagementFeeSheet({
   onClose: () => void;
   propertyId: string;
 }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Management fee">
-      {open ? <ManagementFeeForm propertyId={propertyId} onClose={onClose} /> : null}
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Management fee">
+      {open ? (
+        <ManagementFeeForm
+          propertyId={propertyId}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
-function ManagementFeeForm({ propertyId, onClose }: { propertyId: string; onClose: () => void }) {
+function ManagementFeeForm({
+  propertyId,
+  onClose,
+  onSubmittingChange,
+}: {
+  propertyId: string;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing, radius } = useTheme();
   const current = useQuery({
     queryKey: ['landlord', 'management-fee', propertyId],
@@ -265,6 +280,7 @@ function ManagementFeeForm({ propertyId, onClose }: { propertyId: string; onClos
       initialType={current.data?.type ?? 'PERCENTAGE'}
       initialValue={current.data ? String(current.data.value) : ''}
       onClose={onClose}
+      onSubmittingChange={onSubmittingChange}
       spacing={spacing.lg}
     />
   );
@@ -276,12 +292,14 @@ function ManagementFeeFields({
   initialType,
   initialValue,
   onClose,
+  onSubmittingChange,
   spacing,
 }: {
   propertyId: string;
   initialType: ManagementFeeType;
   initialValue: string;
   onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
   spacing: number;
 }) {
   const qc = useQueryClient();
@@ -294,12 +312,14 @@ function ManagementFeeFields({
 
   const save = useMutation({
     mutationFn: () => landlordApi.setManagementFeeConfig({ propertyId, type, value: n }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'management-fee', propertyId] });
       toast.show('Management fee saved.', 'success');
       onClose();
     },
     onError: (e) => fail(toast, e, 'Could not save that fee.'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -312,18 +332,20 @@ function ManagementFeeFields({
         ]}
         value={type}
         onChange={setType}
+        disabled={save.isPending}
       />
       <TextField
         label={type === 'PERCENTAGE' ? 'Percent (0–100)' : 'Amount (₦)'}
         keyboardType="decimal-pad"
         value={value}
         onChangeText={(v) => setValue(v.replace(/[^\d.]/g, ''))}
+        editable={!save.isPending}
         error={value !== '' && !valid ? 'A percentage cannot exceed 100.' : null}
       />
       <Button
         label="Save fee"
         loading={save.isPending}
-        disabled={!valid}
+        disabled={save.isPending || !valid}
         onPress={() => save.mutate()}
       />
     </View>

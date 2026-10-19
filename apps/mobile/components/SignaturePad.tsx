@@ -9,6 +9,7 @@ export interface SignaturePadProps {
   height?: number;
   /** Fires with a renderable `data:image/svg+xml,...` URI after every stroke, or `null` once cleared/empty. */
   onChange: (dataUri: string | null) => void;
+  disabled?: boolean;
 }
 
 interface SignatureState {
@@ -49,7 +50,12 @@ function signatureReducer(state: SignatureState, action: SignatureAction): Signa
  * as a standalone SVG document, URL-encoded (not base64) so it needs no
  * `btoa` polyfill.
  */
-export function SignaturePad({ width = 320, height = 160, onChange }: SignaturePadProps) {
+export function SignaturePad({
+  width = 320,
+  height = 160,
+  onChange,
+  disabled = false,
+}: SignaturePadProps) {
   const { colors, spacing, radius } = useTheme();
   const [{ strokes, currentPath }, dispatch] = useReducer(signatureReducer, {
     strokes: [],
@@ -77,8 +83,8 @@ export function SignaturePad({ width = 320, height = 160, onChange }: SignatureP
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
-        onMoveShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponder: () => !disabled,
+        onMoveShouldSetPanResponder: () => !disabled,
         onPanResponderGrant: (e: GestureResponderEvent) => {
           const { locationX, locationY } = e.nativeEvent;
           dispatch({ type: 'start', x: locationX, y: locationY });
@@ -91,7 +97,7 @@ export function SignaturePad({ width = 320, height = 160, onChange }: SignatureP
           dispatch({ type: 'commit' });
         },
       }),
-    []
+    [disabled]
   );
 
   const clear = () => {
@@ -110,6 +116,7 @@ export function SignaturePad({ width = 320, height = 160, onChange }: SignatureP
           borderColor: colors.border,
           backgroundColor: '#fff',
           overflow: 'hidden',
+          opacity: disabled ? 0.65 : 1,
         }}
       >
         <Svg width={width} height={height}>
@@ -147,6 +154,7 @@ export function SignaturePad({ width = 320, height = 160, onChange }: SignatureP
           fullWidth={false}
           icon={<Eraser size={14} color={colors.primary} />}
           onPress={clear}
+          disabled={disabled}
         />
       </View>
     </View>

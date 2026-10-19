@@ -13,15 +13,31 @@ interface Props {
 }
 
 export function AssignTenantSheet({ open, onClose, unit }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Assign a tenant">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Assign a tenant">
       {/* Remount per unit so the name never carries across. */}
-      {unit ? <AssignForm key={unit.id} unit={unit} onClose={onClose} /> : null}
+      {unit ? (
+        <AssignForm
+          key={unit.id}
+          unit={unit}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
-function AssignForm({ unit, onClose }: { unit: LandlordUnit; onClose: () => void }) {
+function AssignForm({
+  unit,
+  onClose,
+  onSubmittingChange,
+}: {
+  unit: LandlordUnit;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -29,6 +45,7 @@ function AssignForm({ unit, onClose }: { unit: LandlordUnit; onClose: () => void
 
   const assign = useMutation({
     mutationFn: () => landlordApi.assignTenant(unit.id, tenantName.trim()),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'units'] });
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
@@ -38,6 +55,7 @@ function AssignForm({ unit, onClose }: { unit: LandlordUnit; onClose: () => void
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not assign that tenant.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -51,12 +69,13 @@ function AssignForm({ unit, onClose }: { unit: LandlordUnit; onClose: () => void
         placeholder="e.g. Amaka Obi"
         value={tenantName}
         onChangeText={setTenantName}
+        editable={!assign.isPending}
       />
 
       <Button
         label="Assign tenant"
         loading={assign.isPending}
-        disabled={!tenantName.trim()}
+        disabled={assign.isPending || !tenantName.trim()}
         onPress={() => assign.mutate()}
       />
     </View>

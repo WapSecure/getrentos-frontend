@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,9 +24,12 @@ interface Props {
 }
 
 export function AssignVendorSheet({ open, onClose, request }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Assign a vendor">
-      {request ? <AssignVendorBody request={request} onClose={onClose} /> : null}
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Assign a vendor">
+      {request ? (
+        <AssignVendorBody request={request} onClose={onClose} onSubmittingChange={setSubmitting} />
+      ) : null}
     </Sheet>
   );
 }
@@ -33,9 +37,11 @@ export function AssignVendorSheet({ open, onClose, request }: Props) {
 function AssignVendorBody({
   request,
   onClose,
+  onSubmittingChange,
 }: {
   request: LandlordMaintenance;
   onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
 }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
@@ -48,6 +54,7 @@ function AssignVendorBody({
 
   const assign = useMutation({
     mutationFn: (vendorId: string) => landlordApi.assignVendor(request.id, vendorId),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'maintenance'] });
       toast.show('Vendor assigned.', 'success');
@@ -55,6 +62,7 @@ function AssignVendorBody({
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not assign that vendor.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const items = vendors.data?.items ?? [];

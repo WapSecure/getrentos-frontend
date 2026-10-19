@@ -15,15 +15,31 @@ interface Props {
 }
 
 export function SignLeaseSheet({ open, onClose, lease }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Sign this lease">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Sign this lease">
       {/* Remount per lease so a signature never carries across tenancies. */}
-      {lease ? <SignForm key={lease.id} lease={lease} onClose={onClose} /> : null}
+      {lease ? (
+        <SignForm
+          key={lease.id}
+          lease={lease}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
-function SignForm({ lease, onClose }: { lease: LandlordLease; onClose: () => void }) {
+function SignForm({
+  lease,
+  onClose,
+  onSubmittingChange,
+}: {
+  lease: LandlordLease;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -31,6 +47,7 @@ function SignForm({ lease, onClose }: { lease: LandlordLease; onClose: () => voi
 
   const sign = useMutation({
     mutationFn: () => landlordApi.signLease(lease.id, signature ?? ''),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       toast.show('Lease signed.', 'success');
@@ -38,6 +55,7 @@ function SignForm({ lease, onClose }: { lease: LandlordLease; onClose: () => voi
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not sign that lease.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -53,13 +71,13 @@ function SignForm({ lease, onClose }: { lease: LandlordLease; onClose: () => voi
         <Text variant="callout" color="mutedForeground" style={{ marginLeft: 4 }}>
           Sign below
         </Text>
-        <SignaturePad onChange={setSignature} />
+        <SignaturePad onChange={setSignature} disabled={sign.isPending} />
       </View>
 
       <Button
         label="Sign lease"
         loading={sign.isPending}
-        disabled={!signature}
+        disabled={sign.isPending || !signature}
         onPress={() => sign.mutate()}
       />
     </View>
