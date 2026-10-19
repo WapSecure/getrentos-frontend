@@ -26,6 +26,16 @@ export const LAND_DOCUMENT_TYPES = [
   'RECEIPT',
   'PHOTO',
   'OTHER',
+  // What a seller's authority to sell rests on.
+  'LETTERS_OF_ADMINISTRATION',
+  'PROBATE',
+  'COURT_ORDER',
+  'BOARD_RESOLUTION',
+  'DEVELOPMENT_AGREEMENT',
+  'FAMILY_RESOLUTION',
+  'COMMUNITY_RESOLUTION',
+  'CONSENT_LETTER',
+  'LEGAL_INQUIRY_REPORT',
 ] as const;
 export type LandDocumentType = (typeof LAND_DOCUMENT_TYPES)[number];
 

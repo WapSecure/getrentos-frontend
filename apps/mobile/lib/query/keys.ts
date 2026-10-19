@@ -17,6 +17,7 @@ export const qk = {
     mine: ['property-authorities', 'mine'] as const,
   },
   estateAgreements: ['estate-agreements', 'mine'] as const,
+  landConsents: ['land', 'consent-requests'] as const,
   host: {
     listings: ['host', 'listings'] as const,
     bookings: (view: string) => ['host', 'bookings', view] as const,

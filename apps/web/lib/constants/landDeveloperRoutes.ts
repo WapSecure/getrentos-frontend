@@ -14,6 +14,9 @@ export const LAND_DEVELOPER_ROUTES = {
   layout: (propertyId: string) => `${ROUTES.OWNER_LAND}/${encodeURIComponent(propertyId)}/layout`,
   analytics: (propertyId: string) =>
     `${ROUTES.OWNER_LAND}/${encodeURIComponent(propertyId)}/analytics`,
+  /** The seller's authority to sell, with co-owner and family consents. */
+  authority: (propertyId: string) =>
+    `${ROUTES.OWNER_LAND}/${encodeURIComponent(propertyId)}/authority`,
   /** The sales desk; scoped to one parcel's estate when `propertyId` is given. */
   purchases: (propertyId?: string) =>
     propertyId

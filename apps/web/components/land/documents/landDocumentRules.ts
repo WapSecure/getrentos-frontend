@@ -59,6 +59,15 @@ export const LAND_DOCUMENT_TYPE_LABELS: Record<LandDocumentType, string> = {
   RECEIPT: 'Receipt',
   PHOTO: 'Photo',
   OTHER: 'Other',
+  LETTERS_OF_ADMINISTRATION: 'Letters of administration',
+  PROBATE: 'Grant of probate',
+  COURT_ORDER: 'Court order',
+  BOARD_RESOLUTION: 'Board resolution',
+  DEVELOPMENT_AGREEMENT: 'Development agreement',
+  FAMILY_RESOLUTION: 'Family resolution',
+  COMMUNITY_RESOLUTION: 'Community resolution',
+  CONSENT_LETTER: 'Signed consent',
+  LEGAL_INQUIRY_REPORT: 'Legal inquiry report',
 };
 
 export const LAND_DOCUMENT_TYPE_OPTIONS = LAND_DOCUMENT_TYPES.map((value) => ({

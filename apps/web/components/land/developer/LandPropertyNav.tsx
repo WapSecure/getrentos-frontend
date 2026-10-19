@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { BarChart3, FileText, LayoutGrid, Receipt } from 'lucide-react';
+import { BarChart3, FileText, LayoutGrid, Receipt, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
 
-export type LandPropertySection = 'parcel' | 'layout' | 'sales' | 'analytics';
+export type LandPropertySection = 'parcel' | 'authority' | 'layout' | 'sales' | 'analytics';
 
 interface LandPropertyNavProps {
   propertyId: string;
@@ -20,6 +20,12 @@ const SECTIONS: {
   href: (propertyId: string) => string;
 }[] = [
   { key: 'parcel', label: 'Parcel & title', icon: FileText, href: LAND_DEVELOPER_ROUTES.portfolio },
+  {
+    key: 'authority',
+    label: 'Authority to sell',
+    icon: ShieldCheck,
+    href: LAND_DEVELOPER_ROUTES.authority,
+  },
   { key: 'layout', label: 'Estate layout', icon: LayoutGrid, href: LAND_DEVELOPER_ROUTES.layout },
   { key: 'sales', label: 'Sales', icon: Receipt, href: LAND_DEVELOPER_ROUTES.purchases },
   { key: 'analytics', label: 'Analytics', icon: BarChart3, href: LAND_DEVELOPER_ROUTES.analytics },

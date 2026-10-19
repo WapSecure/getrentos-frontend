@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
+  UserCheck,
   Users,
   ShieldCheck,
   Fingerprint,
@@ -163,6 +164,12 @@ const navItems: NavItem[] = [
     label: 'Land Disputes',
     href: '/admin/land/disputes',
     icon: Gavel,
+    permission: 'verifications.review',
+  },
+  {
+    label: 'Seller Authority',
+    href: '/admin/land/authority',
+    icon: UserCheck,
     permission: 'verifications.review',
   },
   {

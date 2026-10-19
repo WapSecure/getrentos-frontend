@@ -27,6 +27,7 @@ import {
   Users,
   Wallet,
   Wrench,
+  UserCheck,
 } from 'lucide-react-native';
 import { Avatar, Button, Card, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -81,6 +82,13 @@ export default function Account() {
       description: 'Leases, receipts and paperwork',
       icon: FileStack,
       onPress: go('/(app)/documents'),
+    },
+    {
+      key: 'land-consents',
+      label: 'Land sale consents',
+      description: 'Sales that need your consent as a co-owner or family member',
+      icon: UserCheck,
+      onPress: go('/(app)/land-consents'),
     },
     {
       key: 'calendar',

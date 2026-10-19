@@ -257,6 +257,8 @@ export const landKeys = {
   ownerDetail: (propertyId: string) => ['land', 'owner', propertyId] as const,
   public: ['land', 'public'] as const,
   publicListing: (listingId: string) => ['land', 'public', listingId] as const,
+  authority: (propertyId: string) => ['land', 'owner', propertyId, 'authority'] as const,
+  consentRequests: ['land', 'consent-requests'] as const,
 };
 
 export const shortletKeys = {
