@@ -29,15 +29,26 @@ interface Props {
 }
 
 export function ChargeRentSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Raise a charge">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Raise a charge">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <ChargeForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <ChargeForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function ChargeForm({ onClose }: { onClose: () => void }) {
+function ChargeForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -77,6 +88,7 @@ function ChargeForm({ onClose }: { onClose: () => void }) {
         ? landlordApi.charge({ ...base, unitId: unitIds[0] })
         : landlordApi.bulkCharge({ ...base, unitIds });
     },
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ['landlord', 'payments'] });
       toast.show(`Raised ${r.created} charge${r.created === 1 ? '' : 's'}.`, 'success');
@@ -84,6 +96,7 @@ function ChargeForm({ onClose }: { onClose: () => void }) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not raise that charge.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const valid = unitIds.length > 0 && Number(amount) > 0 && dueDate;
@@ -99,8 +112,9 @@ function ChargeForm({ onClose }: { onClose: () => void }) {
   }) => (
     <Pressable
       onPress={onPress}
+      disabled={mutation.isPending}
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled: mutation.isPending }}
       style={{
         paddingHorizontal: spacing.md,
         paddingVertical: 8,
@@ -197,14 +211,20 @@ function ChargeForm({ onClose }: { onClose: () => void }) {
         keyboardType="number-pad"
         value={amount}
         onChangeText={(v) => setAmount(v.replace(/\D/g, ''))}
+        editable={!mutation.isPending}
       />
 
-      <DateField label="Due date" value={dueDate} onChange={setDueDate} />
+      <DateField
+        label="Due date"
+        value={dueDate}
+        onChange={setDueDate}
+        disabled={mutation.isPending}
+      />
 
       <Button
         label={unitIds.length > 1 ? `Charge ${unitIds.length} units` : 'Raise charge'}
         loading={mutation.isPending}
-        disabled={!valid}
+        disabled={mutation.isPending || !valid}
         onPress={() => mutation.mutate()}
       />
     </View>

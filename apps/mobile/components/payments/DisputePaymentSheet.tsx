@@ -14,17 +14,35 @@ interface Props {
 }
 
 export function DisputePaymentSheet({ open, onClose, payment }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Dispute this payment">
+    <Sheet
+      open={open}
+      onClose={submitting ? () => undefined : onClose}
+      title="Dispute this payment"
+    >
       {/* Remount on each open so the reason field always starts blank. */}
       {payment ? (
-        <DisputePaymentForm key={open ? 'open' : 'closed'} onClose={onClose} payment={payment} />
+        <DisputePaymentForm
+          key={open ? 'open' : 'closed'}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+          payment={payment}
+        />
       ) : null}
     </Sheet>
   );
 }
 
-function DisputePaymentForm({ onClose, payment }: { onClose: () => void; payment: Payment }) {
+function DisputePaymentForm({
+  onClose,
+  onSubmittingChange,
+  payment,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+  payment: Payment;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -32,6 +50,7 @@ function DisputePaymentForm({ onClose, payment }: { onClose: () => void; payment
 
   const mutation = useMutation({
     mutationFn: () => paymentsApi.dispute(payment.id, reason.trim()),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (updated) => {
       qc.setQueryData(
         qk.renter.payments(1, 50),
@@ -43,6 +62,7 @@ function DisputePaymentForm({ onClose, payment }: { onClose: () => void; payment
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not submit the dispute.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -59,12 +79,13 @@ function DisputePaymentForm({ onClose, payment }: { onClose: () => void; payment
         numberOfLines={4}
         value={reason}
         onChangeText={setReason}
+        editable={!mutation.isPending}
       />
       <Button
         label="Submit dispute"
         variant="destructive"
         loading={mutation.isPending}
-        disabled={!reason.trim()}
+        disabled={mutation.isPending || !reason.trim()}
         onPress={() => mutation.mutate()}
       />
     </View>

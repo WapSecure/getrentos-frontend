@@ -20,15 +20,23 @@ interface Props {
 }
 
 export function UploadAgentDocumentSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Upload a document">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Upload a document">
       {/* Remount on each open so the form always starts blank. */}
-      <UploadForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <UploadForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function UploadForm({ onClose }: Omit<Props, 'open'>) {
+function UploadForm({
+  onClose,
+  onSubmittingChange,
+}: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -38,6 +46,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
 
   const mutation = useMutation({
     mutationFn: () => agentDocumentsApi.upload(file!, name.trim(), category),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['agent', 'documents'] });
       toast.show('Document uploaded.', 'success');
@@ -48,6 +57,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
         err instanceof ApiError ? err.message : 'Could not upload this document.',
         'error'
       ),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const pick = async () => {
@@ -64,6 +74,9 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
     <View style={{ gap: spacing.lg }}>
       <Pressable
         onPress={pick}
+        disabled={mutation.isPending}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: mutation.isPending }}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -86,7 +99,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
         </Text>
       </Pressable>
 
-      <TextField label="Name" value={name} onChangeText={setName} />
+      <TextField label="Name" value={name} onChangeText={setName} editable={!mutation.isPending} />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Category</Text>
@@ -98,6 +111,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
               size="sm"
               selected={category === c}
               onPress={() => setCategory(c)}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
@@ -106,7 +120,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
       <Button
         label="Upload"
         loading={mutation.isPending}
-        disabled={!canSubmit}
+        disabled={mutation.isPending || !canSubmit}
         onPress={() => mutation.mutate()}
       />
     </View>

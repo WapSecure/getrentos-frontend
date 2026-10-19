@@ -172,7 +172,8 @@ export default function ResidentEmergency() {
                     <Pressable
                       key={option.state}
                       accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
+                      accessibilityState={{ selected: isSelected, disabled: answer.isPending }}
+                      disabled={answer.isPending}
                       onPress={() => {
                         setSelected(option.state);
                         setNote('');
@@ -217,6 +218,7 @@ export default function ResidentEmergency() {
                     placeholder={notePlaceholder(selected)}
                     multiline
                     numberOfLines={3}
+                    editable={!answer.isPending}
                   />
                   <Button
                     label={answer.isPending ? 'Sending…' : 'Send to the estate office'}
@@ -228,6 +230,7 @@ export default function ResidentEmergency() {
                   <Button
                     variant="ghost"
                     label="Cancel"
+                    disabled={answer.isPending}
                     onPress={() => {
                       setSelected(null);
                       setNote('');

@@ -43,6 +43,7 @@ export default function RealtorDocuments() {
   const toast = useToast();
   const [filter, setFilter] = useState<DocumentCategory | 'all'>('all');
   const [uploading, setUploading] = useState(false);
+  const [uploadPending, setUploadPending] = useState(false);
   const [opening, setOpening] = useState<string | null>(null);
   const query = useQuery({ queryKey: qk.realtor.documents, queryFn: () => realtorApi.documents() });
   const all = query.data?.items ?? [];
@@ -180,14 +181,26 @@ export default function RealtorDocuments() {
         />
       )}
 
-      <Sheet open={uploading} onClose={() => setUploading(false)} title="Upload a document">
-        {uploading ? <UploadForm onDone={() => setUploading(false)} /> : null}
+      <Sheet
+        open={uploading}
+        onClose={uploadPending ? () => undefined : () => setUploading(false)}
+        title="Upload a document"
+      >
+        {uploading ? (
+          <UploadForm onDone={() => setUploading(false)} onSubmittingChange={setUploadPending} />
+        ) : null}
       </Sheet>
     </View>
   );
 }
 
-function UploadForm({ onDone }: { onDone: () => void }) {
+function UploadForm({
+  onDone,
+  onSubmittingChange,
+}: {
+  onDone: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -196,12 +209,14 @@ function UploadForm({ onDone }: { onDone: () => void }) {
   const [category, setCategory] = useState<DocumentCategory>('agency_agreement');
   const upload = useMutation({
     mutationFn: () => realtorApi.uploadDocument(file!, name.trim(), category),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: qk.realtor.documents });
       toast.show('Document uploaded.', 'success');
       onDone();
     },
+    onSettled: () => onSubmittingChange(false),
   });
   const pick = async () => {
     const picked = await pickDocument();
@@ -214,7 +229,9 @@ function UploadForm({ onDone }: { onDone: () => void }) {
     <View style={{ gap: spacing.md }}>
       <Pressable
         onPress={pick}
+        disabled={upload.isPending}
         accessibilityRole="button"
+        accessibilityState={{ disabled: upload.isPending }}
         accessibilityLabel={file ? `Chosen file ${file.name}. Choose another` : 'Choose a file'}
         style={{
           flexDirection: 'row',
@@ -237,7 +254,7 @@ function UploadForm({ onDone }: { onDone: () => void }) {
           {file ? file.name : 'Choose a file (up to 20 MB)'}
         </Text>
       </Pressable>
-      <TextField label="Name" value={name} onChangeText={setName} />
+      <TextField label="Name" value={name} onChangeText={setName} editable={!upload.isPending} />
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Type</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -248,6 +265,7 @@ function UploadForm({ onDone }: { onDone: () => void }) {
               size="sm"
               selected={category === c.value}
               onPress={() => setCategory(c.value)}
+              disabled={upload.isPending}
             />
           ))}
         </View>
@@ -259,7 +277,7 @@ function UploadForm({ onDone }: { onDone: () => void }) {
       ) : null}
       <Button
         label="Upload"
-        disabled={!file || !name.trim()}
+        disabled={upload.isPending || !file || !name.trim()}
         loading={upload.isPending}
         onPress={() => upload.mutate()}
       />

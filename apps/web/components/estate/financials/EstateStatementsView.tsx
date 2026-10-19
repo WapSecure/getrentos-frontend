@@ -22,6 +22,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { estateKeys } from '@/lib/queryKeys';
 import { estateService } from '@/services/estateService';
+import { BUSINESS_TYPE_LABELS, type AgencyBusinessType } from '@/services/agencyOnboardingService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
 import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
@@ -341,7 +342,14 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
                 canRaise={detail.status === 'ISSUED'}
                 isRaising={raiseDispute.isPending}
                 isWithdrawing={withdrawDispute.isPending}
-                onRaise={(lineId, reason) => raiseDispute.mutate({ lineId, reason })}
+                onRaise={async (lineId, reason) => {
+                  try {
+                    await raiseDispute.mutateAsync({ lineId, reason });
+                    return true;
+                  } catch {
+                    return false;
+                  }
+                }}
                 onWithdraw={(disputeId) => withdrawDispute.mutate(disputeId)}
               />
 
@@ -398,6 +406,8 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [registrationNumber, setRegistrationNumber] = useState('');
+  const [businessType, setBusinessType] = useState<AgencyBusinessType | ''>('');
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: account } = useQuery({
@@ -409,11 +419,20 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
 
   const save = useMutation({
     mutationFn: () =>
-      unwrap(estateService.updatePayoutAccount(estateId, { bankCode, accountNumber })),
+      unwrap(
+        estateService.updatePayoutAccount(estateId, {
+          bankCode,
+          accountNumber,
+          registrationNumber: registrationNumber.trim() || undefined,
+          businessType: businessType || undefined,
+        })
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: estateKeys.payoutAccount(estateId) });
       setBankCode('');
       setAccountNumber('');
+      setRegistrationNumber('');
+      setBusinessType('');
       setSubmitError(null);
     },
     onError: (error: Error) => {
@@ -474,6 +493,40 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
             className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            CAC number <span className="text-muted-foreground font-normal">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            placeholder="e.g. RC1234567"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Lets us verify the account belongs to the registered estate.
+          </p>
+        </div>
+        {registrationNumber.trim() && (
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Registration type
+            </label>
+            <select
+              value={businessType}
+              onChange={(e) => setBusinessType(e.target.value as AgencyBusinessType | '')}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Select a type…</option>
+              {(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => (
+                <option key={t} value={t}>
+                  {BUSINESS_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="mt-4 space-y-2">

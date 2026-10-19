@@ -13,6 +13,7 @@ interface Props<T extends string> {
   onChange: (value: T) => void;
   /** Shown instead of the chips when there is nothing to choose from. */
   emptyText?: string;
+  disabled?: boolean;
 }
 
 /** Single-choice chips: the landlord forms' stand-in for a select. */
@@ -22,6 +23,7 @@ export function ChipSelect<T extends string>({
   value,
   onChange,
   emptyText,
+  disabled = false,
 }: Props<T>) {
   const { colors, spacing, radius } = useTheme();
 
@@ -45,8 +47,9 @@ export function ChipSelect<T extends string>({
               <Pressable
                 key={o.value}
                 onPress={() => onChange(o.value)}
+                disabled={disabled}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, disabled }}
                 style={{
                   paddingHorizontal: spacing.md,
                   paddingVertical: 8,

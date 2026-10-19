@@ -14,17 +14,31 @@ interface Props {
 }
 
 export function CounterOfferSheet({ open, onClose, offer }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Counter this offer">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Counter this offer">
       {/* Remount on each open so the form always starts blank. */}
       {offer ? (
-        <CounterForm key={open ? 'open' : 'closed'} onClose={onClose} offer={offer} />
+        <CounterForm
+          key={open ? 'open' : 'closed'}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+          offer={offer}
+        />
       ) : null}
     </Sheet>
   );
 }
 
-function CounterForm({ onClose, offer }: { onClose: () => void; offer: BuyerOffer }) {
+function CounterForm({
+  onClose,
+  onSubmittingChange,
+  offer,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+  offer: BuyerOffer;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -33,6 +47,7 @@ function CounterForm({ onClose, offer }: { onClose: () => void; offer: BuyerOffe
 
   const mutation = useMutation({
     mutationFn: () => buyerOffersApi.counter(offer.id, Number(amount), message.trim() || undefined),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.buyer.offerThread(offer.id) });
       qc.invalidateQueries({ queryKey: ['buyer', 'offers'] });
@@ -44,6 +59,7 @@ function CounterForm({ onClose, offer }: { onClose: () => void; offer: BuyerOffe
         err instanceof ApiError ? err.message : 'Could not send this counter offer.',
         'error'
       ),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const canSubmit = Number(amount) > 0;
@@ -58,6 +74,7 @@ function CounterForm({ onClose, offer }: { onClose: () => void; offer: BuyerOffe
         value={amount}
         onChangeText={setAmount}
         keyboardType="number-pad"
+        editable={!mutation.isPending}
       />
       <TextField
         label="Message (optional)"
@@ -65,11 +82,12 @@ function CounterForm({ onClose, offer }: { onClose: () => void; offer: BuyerOffe
         onChangeText={setMessage}
         multiline
         numberOfLines={3}
+        editable={!mutation.isPending}
       />
       <Button
         label="Send counter offer"
         loading={mutation.isPending}
-        disabled={!canSubmit}
+        disabled={mutation.isPending || !canSubmit}
         onPress={() => mutation.mutate()}
       />
     </View>

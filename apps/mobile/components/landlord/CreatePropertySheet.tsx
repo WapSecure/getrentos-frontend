@@ -24,15 +24,22 @@ interface Props {
 }
 
 export function CreatePropertySheet({ open, onClose }: Props) {
+  const [busy, setBusy] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Add a property">
+    <Sheet open={open} onClose={busy ? () => undefined : onClose} title="Add a property">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <CreatePropertyForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <CreatePropertyForm key={open ? 'open' : 'closed'} onClose={onClose} onBusyChange={setBusy} />
     </Sheet>
   );
 }
 
-function CreatePropertyForm({ onClose }: { onClose: () => void }) {
+function CreatePropertyForm({
+  onClose,
+  onBusyChange,
+}: {
+  onClose: () => void;
+  onBusyChange: (busy: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -59,11 +66,13 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
       const { key } = await landlordApi.uploadPropertyMedia(file, 'image');
       return { uri: file.uri, key };
     },
+    onMutate: () => onBusyChange(true),
     onSuccess: (result) => {
       if (result) setCover(result);
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not upload that photo.', 'error'),
+    onSettled: () => onBusyChange(false),
   });
 
   const create = useMutation({
@@ -79,6 +88,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         coverImageKey: cover?.key,
         ...(pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       }),
+    onMutate: () => onBusyChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
       qc.invalidateQueries({ queryKey: ['landlord', 'dashboard'] });
@@ -87,6 +97,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not add that property.', 'error'),
+    onSettled: () => onBusyChange(false),
   });
 
   const valid = name.trim() && address.trim() && city.trim() && state.trim();
@@ -95,7 +106,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
     <View style={{ gap: spacing.lg }}>
       <Pressable
         onPress={() => uploadCover.mutate()}
-        disabled={uploadCover.isPending}
+        disabled={uploadCover.isPending || create.isPending}
         accessibilityRole="button"
         accessibilityLabel={cover ? 'Change the cover photo' : 'Add a cover photo'}
         style={{
@@ -124,6 +135,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
               }}
               accessibilityRole="button"
               accessibilityLabel="Remove the cover photo"
+              disabled={create.isPending}
               hitSlop={8}
               style={{
                 position: 'absolute',
@@ -155,6 +167,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         placeholder="e.g. 3-Bed Flat · Yaba"
         value={name}
         onChangeText={setName}
+        editable={!create.isPending}
       />
 
       <ChipSelect
@@ -162,6 +175,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         options={PROPERTY_TYPES.map((t) => ({ value: t, label: PROPERTY_TYPE_LABEL[t] }))}
         value={type}
         onChange={setType}
+        disabled={create.isPending}
       />
 
       <TextField
@@ -169,6 +183,7 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         placeholder="e.g. 22 Herbert Macaulay Way"
         value={address}
         onChangeText={setAddress}
+        editable={!create.isPending}
       />
 
       <LocationFields
@@ -188,12 +203,13 @@ function CreatePropertyForm({ onClose }: { onClose: () => void }) {
         numberOfLines={3}
         value={description}
         onChangeText={setDescription}
+        editable={!create.isPending}
       />
 
       <Button
         label="Add property"
         loading={create.isPending}
-        disabled={!valid || uploadCover.isPending}
+        disabled={create.isPending || !valid || uploadCover.isPending}
         onPress={() => create.mutate()}
       />
     </View>

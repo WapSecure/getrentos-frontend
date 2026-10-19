@@ -24,17 +24,31 @@ const FINANCING_OPTIONS: { value: BuyerFinancingType; label: string }[] = [
 ];
 
 export function MakeOfferSheet({ open, onClose, listing }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Make an offer">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Make an offer">
       {/* Remount on each open so the form always starts blank. */}
       {listing ? (
-        <OfferForm key={open ? 'open' : 'closed'} onClose={onClose} listing={listing} />
+        <OfferForm
+          key={open ? 'open' : 'closed'}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+          listing={listing}
+        />
       ) : null}
     </Sheet>
   );
 }
 
-function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerListingTarget }) {
+function OfferForm({
+  onClose,
+  onSubmittingChange,
+  listing,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+  listing: BuyerListingTarget;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -52,6 +66,7 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
         financingType,
         message: message.trim() || undefined,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (offer) => {
       qc.invalidateQueries({ queryKey: ['buyer', 'offers'] });
       qc.invalidateQueries({ queryKey: qk.buyer.dashboard });
@@ -64,6 +79,7 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
       if (readGate(err)) return;
       toast.show(err instanceof ApiError ? err.message : 'Could not submit this offer.', 'error');
     },
+    onSettled: () => onSubmittingChange(false),
   });
 
   const canSubmit = Number(amount) > 0;
@@ -78,12 +94,14 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
         value={amount}
         onChangeText={setAmount}
         keyboardType="number-pad"
+        editable={!mutation.isPending}
       />
       <TextField
         label="Deposit amount (optional)"
         value={depositAmount}
         onChangeText={setDepositAmount}
         keyboardType="number-pad"
+        editable={!mutation.isPending}
       />
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Financing</Text>
@@ -95,6 +113,7 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
               size="sm"
               selected={financingType === f.value}
               onPress={() => setFinancingType(f.value)}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
@@ -105,6 +124,7 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
         onChangeText={setMessage}
         multiline
         numberOfLines={3}
+        editable={!mutation.isPending}
       />
       <VerificationGateNotice
         error={mutation.error}
@@ -114,7 +134,7 @@ function OfferForm({ onClose, listing }: { onClose: () => void; listing: BuyerLi
       <Button
         label="Submit offer"
         loading={mutation.isPending}
-        disabled={!canSubmit}
+        disabled={mutation.isPending || !canSubmit}
         onPress={() => mutation.mutate()}
       />
     </View>

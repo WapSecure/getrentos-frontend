@@ -10,7 +10,7 @@ import { Button } from '@getrentos/ui';
 interface AddNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (note: string) => void;
+  onSave: (note: string) => Promise<boolean>;
   initialNote: string;
   propertyTitle: string;
 }
@@ -23,10 +23,17 @@ export const AddNoteModal = ({
   propertyTitle,
 }: AddNoteModalProps) => {
   const [note, setNote] = useState(initialNote);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = () => {
-    onSave(note);
-    onClose();
+  const handleSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    setError(null);
+    const saved = await onSave(note);
+    setIsSaving(false);
+    if (saved) onClose();
+    else setError('The note could not be saved. Your draft is unchanged.');
   };
 
   return (
@@ -57,12 +64,20 @@ export const AddNoteModal = ({
                 rows={5}
                 className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
               />
+              {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
               <div className="flex gap-3 mt-4">
-                <Button variant="primary" onClick={handleSave} fullWidth className="gap-2">
+                <Button
+                  variant="primary"
+                  onClick={() => void handleSave()}
+                  fullWidth
+                  className="gap-2"
+                  disabled={isSaving}
+                  isLoading={isSaving}
+                >
                   <Save className="w-4 h-4" />
                   Save Note
                 </Button>
-                <Button variant="ghost" onClick={onClose} fullWidth>
+                <Button variant="ghost" onClick={onClose} fullWidth disabled={isSaving}>
                   Cancel
                 </Button>
               </div>

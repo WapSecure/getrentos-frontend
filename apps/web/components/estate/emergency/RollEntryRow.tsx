@@ -49,7 +49,7 @@ interface RollEntryRowProps {
   rollOpen: boolean;
   isSaving: boolean;
   /** Answers for one person. Called with no note on a plain tap. */
-  onAnswer: (entryId: string, state: MusterRollState, stateNote?: string) => void;
+  onAnswer: (entryId: string, state: MusterRollState, stateNote?: string) => Promise<boolean>;
 }
 
 /**
@@ -158,11 +158,11 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
                 <Button
                   variant="secondary"
                   disabled={isSaving}
-                  onClick={() => {
+                  onClick={async () => {
                     // Saves the note against whatever the person is currently
                     // marked as, so adding a note can never silently re-answer them.
-                    onAnswer(entry.id, entry.state, note.trim() || undefined);
-                    setIsNoting(false);
+                    const saved = await onAnswer(entry.id, entry.state, note.trim() || undefined);
+                    if (saved) setIsNoting(false);
                   }}
                 >
                   Save note

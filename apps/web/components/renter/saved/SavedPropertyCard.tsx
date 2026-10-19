@@ -82,9 +82,14 @@ export const SavedPropertyCard = ({
     }`;
   };
 
-  const handleSaveNote = (newNote: string) => {
-    setNote(newNote);
-    noteMutation.mutate(newNote);
+  const handleSaveNote = async (newNote: string) => {
+    try {
+      await noteMutation.mutateAsync(newNote);
+      setNote(newNote);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleMoveToWishlist = (wishlistId: string) => {

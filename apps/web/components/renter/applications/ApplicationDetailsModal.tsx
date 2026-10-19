@@ -28,9 +28,9 @@ interface ApplicationDetailsModalProps {
   onClose: () => void;
   application: Application;
   onWithdraw?: (id: string, reason: string) => Promise<void>;
-  onAddNote?: (applicationId: string, content: string) => void;
+  onAddNote?: (applicationId: string, content: string) => Promise<boolean>;
   onDeleteNote?: (applicationId: string, noteId: string) => void;
-  onEditNote?: (applicationId: string, noteId: string, content: string) => void;
+  onEditNote?: (applicationId: string, noteId: string, content: string) => Promise<boolean>;
   notes?: Note[];
 }
 
@@ -356,10 +356,14 @@ export const ApplicationDetailsModal = ({
                   <ApplicationNotes
                     applicationId={application.id}
                     notes={notes}
-                    onAddNote={(content) => onAddNote && onAddNote(application.id, content)}
+                    onAddNote={(content) =>
+                      onAddNote ? onAddNote(application.id, content) : Promise.resolve(false)
+                    }
                     onDeleteNote={(noteId) => onDeleteNote && onDeleteNote(application.id, noteId)}
                     onEditNote={(noteId, content) =>
-                      onEditNote && onEditNote(application.id, noteId, content)
+                      onEditNote
+                        ? onEditNote(application.id, noteId, content)
+                        : Promise.resolve(false)
                     }
                   />
                 )}

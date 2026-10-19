@@ -27,7 +27,6 @@ import {
   managedSla,
   mine as myMandates,
   managedBreakFee,
-  optIntoManaged,
   recordHandover,
   submit as submitMandate,
   terminate as terminateMandate,
@@ -38,7 +37,14 @@ import {
   type ServicingTier,
   type VettedFirm,
 } from '@/services/mandateService';
+import {
+  myIntakes,
+  OPEN_INTAKE_STATUSES,
+  type ManagedIntake,
+} from '@/services/managedIntakeService';
 import { unwrap } from '@/lib/apiHelpers';
+import { ManagedIntakeDialog } from './ManagedIntakeDialog';
+import { ManagedIntakePanel } from './ManagedIntakePanel';
 import { formatCurrency } from '@/lib/format';
 
 /**
@@ -47,8 +53,8 @@ import { formatCurrency } from '@/lib/format';
  * GetRentos as a manager is an ordinary mandate under the hood, so this screen
  * does not invent a new flow — it shows the published fee card and, for each of
  * the owner's properties, either where its managed engagement stands or a way to
- * start one. Opting in is a request: it lands with ops for review and signing,
- * which is why a fresh opt-in shows as pending rather than active.
+ * start one. Starting one is an intake, not an opt-in: GetRentos visits, sends
+ * a proposal, and the owner's acceptance is what signs the mandate.
  */
 
 const MANDATE_STATUS_BADGE: Record<
@@ -72,6 +78,13 @@ const TIER_LABEL: Record<ServicingTier, string> = {
 };
 
 const ENDED_STATUSES = ['TERMINATED', 'EXPIRED', 'REJECTED'];
+
+const INTAKE_STAGE: Record<string, string> = {
+  SUBMITTED: 'Requested',
+  ASSESSMENT_SCHEDULED: 'Visit booked',
+  ASSESSED: 'Assessed',
+  PROPOSED: 'Proposal ready',
+};
 
 /** Live = opted in, pending, or active — anything that is not an ended state. */
 const isLiveEngagement = (m: ManagementMandateDto) => !ENDED_STATUSES.includes(m.status);
@@ -127,7 +140,7 @@ const FeeCardColumn = ({ card, highlight }: { card: ManagedTierCard; highlight: 
 
 export const GetRentosManagedView = () => {
   const queryClient = useQueryClient();
-  const [tierByProperty, setTierByProperty] = useState<Record<string, ServicingTier>>({});
+  const [intakeFor, setIntakeFor] = useState<{ id: string; name: string } | null>(null);
   const [firmPropertyByFirm, setFirmPropertyByFirm] = useState<Record<string, string>>({});
   const [endingId, setEndingId] = useState<string | null>(null);
   const [endReason, setEndReason] = useState('');
@@ -145,6 +158,10 @@ export const GetRentosManagedView = () => {
     queryKey: ['managed', 'mandates'],
     queryFn: () => unwrap(myMandates()),
   });
+  const intakes = useQuery({
+    queryKey: ['managed', 'intakes'],
+    queryFn: () => unwrap(myIntakes()),
+  });
   const sla = useQuery({
     queryKey: ['managed', 'sla'],
     queryFn: () => unwrap(managedSla()),
@@ -152,16 +169,6 @@ export const GetRentosManagedView = () => {
   const firms = useQuery({
     queryKey: ['managed', 'firms'],
     queryFn: () => unwrap(vettedFirms()),
-  });
-
-  const optIn = useMutation({
-    mutationFn: ({ propertyId, tier }: { propertyId: string; tier: ServicingTier }) =>
-      unwrap(optIntoManaged(propertyId, tier)),
-    onSuccess: () => {
-      setError(null);
-      void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
-    },
-    onError: (err: Error) => setError(err.message || 'Could not opt into GetRentos Managed.'),
   });
 
   const appoint = useMutation({
@@ -220,6 +227,16 @@ export const GetRentosManagedView = () => {
     if (isLiveEngagement(m) || isWindingDown(m)) committedProperties.add(propertyId);
   }
 
+  // The newest request per property (mine() is newest-first).
+  const intakeByProperty = new Map<string, ManagedIntake>();
+  for (const intake of intakes.data ?? []) {
+    if (!intakeByProperty.has(intake.propertyId)) intakeByProperty.set(intake.propertyId, intake);
+  }
+  const refreshIntakes = () => {
+    void queryClient.invalidateQueries({ queryKey: ['managed', 'intakes'] });
+    void queryClient.invalidateQueries({ queryKey: ['managed', 'mandates'] });
+  };
+
   const cards = feeCard.data ?? [];
   const propertyList = properties.data?.items ?? [];
 
@@ -250,7 +267,8 @@ export const GetRentosManagedView = () => {
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             We become the manager of record, with one published fee card and a service commitment
-            you can hold us to, and an ops-assigned portfolio manager. Pick a tier below.
+            you can hold us to, and an ops-assigned portfolio manager. Ask below: we visit, then
+            send you a proposal to accept.
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-5">
@@ -348,8 +366,15 @@ export const GetRentosManagedView = () => {
             const firmMandate =
               current && live && !current.managerIsGetRentos ? current : undefined;
             const windingDown = current && isWindingDown(current) ? current : undefined;
-            const selected = tierByProperty[property.id] ?? 'FULL_MANAGEMENT';
-            const busy = optIn.isPending && optIn.variables?.propertyId === property.id;
+            const intake = intakeByProperty.get(property.id);
+            const openIntake =
+              intake && OPEN_INTAKE_STATUSES.includes(intake.status) ? intake : undefined;
+            // Accepted and signed, waiting on GetRentos to set it up and go live.
+            const settingUp =
+              managed && managed.status !== 'ACTIVE' && intake?.status === 'ACCEPTED'
+                ? intake
+                : undefined;
+            const declined = !live && intake?.status === 'DECLINED' ? intake : undefined;
             const handoverBusy = handover.isPending && handover.variables === windingDown?.id;
 
             const activeMandate = managed ?? firmMandate;
@@ -396,9 +421,13 @@ export const GetRentosManagedView = () => {
                           {TIER_LABEL[managed.servicingTier]}
                         </span>
                       )}
-                      <Badge variant={MANDATE_STATUS_BADGE[managed.status]?.variant ?? 'neutral'}>
-                        {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
-                      </Badge>
+                      {settingUp ? (
+                        <Badge variant="info">Being set up by GetRentos</Badge>
+                      ) : (
+                        <Badge variant={MANDATE_STATUS_BADGE[managed.status]?.variant ?? 'neutral'}>
+                          {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
+                        </Badge>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -418,6 +447,15 @@ export const GetRentosManagedView = () => {
                       <Badge variant={firmMandate.status === 'ACTIVE' ? 'success' : 'warning'}>
                         {firmMandate.status === 'ACTIVE' ? 'Managed by firm' : 'Firm pending'}
                       </Badge>
+                      {firmMandate.status === 'ACTIVE' && !openIntake && (
+                        <button
+                          type="button"
+                          onClick={() => setIntakeFor({ id: property.id, name: property.name })}
+                          className="rounded-lg px-2 py-1 text-sm font-medium text-primary hover:underline"
+                        >
+                          Move to GetRentos
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -442,41 +480,37 @@ export const GetRentosManagedView = () => {
                         Confirm handover
                       </button>
                     </div>
+                  ) : openIntake ? (
+                    <div className="flex items-center gap-2 sm:shrink-0">
+                      <Badge variant={openIntake.status === 'PROPOSED' ? 'info' : 'warning'}>
+                        {INTAKE_STAGE[openIntake.status]}
+                      </Badge>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-2 sm:shrink-0">
-                      <select
-                        aria-label={`Service level for ${property.name}`}
-                        value={selected}
-                        onChange={(event) =>
-                          setTierByProperty((prev) => ({
-                            ...prev,
-                            [property.id]: event.target.value as ServicingTier,
-                          }))
-                        }
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                      >
-                        {cards.map((card) => (
-                          <option key={card.tier} value={card.tier}>
-                            {card.name} — {card.feePct}%
-                          </option>
-                        ))}
-                      </select>
                       <button
                         type="button"
-                        disabled={busy}
-                        onClick={() => optIn.mutate({ propertyId: property.id, tier: selected })}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                        onClick={() => setIntakeFor({ id: property.id, name: property.name })}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
                       >
-                        {busy ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                        ) : (
-                          <ShieldCheck className="h-4 w-4" aria-hidden />
-                        )}
-                        Request
+                        <ShieldCheck className="h-4 w-4" aria-hidden />
+                        Ask GetRentos to manage
                       </button>
                     </div>
                   )}
                 </div>
+
+                {(openIntake ?? settingUp) && (
+                  <ManagedIntakePanel
+                    intake={(openIntake ?? settingUp)!}
+                    onChanged={refreshIntakes}
+                  />
+                )}
+                {declined && !openIntake && (
+                  <p className="mt-3 border-t border-border pt-3 text-sm text-muted-foreground">
+                    GetRentos declined your last request: {declined.declinedReason}
+                  </p>
+                )}
 
                 {isEnding && activeMandate && (
                   <div className="mt-3 border-t border-border pt-3">
@@ -662,6 +696,15 @@ export const GetRentosManagedView = () => {
           </div>
         )}
       </div>
+      <ManagedIntakeDialog
+        property={intakeFor}
+        cards={cards}
+        onClose={() => setIntakeFor(null)}
+        onSubmitted={() => {
+          setIntakeFor(null);
+          refreshIntakes();
+        }}
+      />
     </>
   );
 };

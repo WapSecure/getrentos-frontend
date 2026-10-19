@@ -77,16 +77,26 @@ export default function ApplicationsPage() {
     onSuccess: invalidateNotes,
   });
 
-  const handleAddNote = (applicationId: string, content: string) => {
-    addNoteMutation.mutate({ applicationId, content });
+  const handleAddNote = async (applicationId: string, content: string) => {
+    try {
+      await addNoteMutation.mutateAsync({ applicationId, content });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const handleDeleteNote = (applicationId: string, noteId: string) => {
     deleteNoteMutation.mutate({ applicationId, noteId });
   };
 
-  const handleEditNote = (applicationId: string, noteId: string, content: string) => {
-    editNoteMutation.mutate({ applicationId, noteId, content });
+  const handleEditNote = async (applicationId: string, noteId: string, content: string) => {
+    try {
+      await editNoteMutation.mutateAsync({ applicationId, noteId, content });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const withdrawMutation = useMutation({

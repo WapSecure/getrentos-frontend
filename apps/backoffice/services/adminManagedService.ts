@@ -15,7 +15,121 @@ export interface ManagedMandate {
   deliveryPartnerName: string | null;
   status: string;
   createdAt: string;
+  /** What still stands between this engagement and going live. */
+  activationChecklist?: ActivationCheck[];
+  intakeId?: string | null;
 }
+
+export interface ActivationCheck {
+  key: string;
+  label: string;
+  done: boolean;
+  detail: string | null;
+}
+
+export type IntakeStatus =
+  | 'SUBMITTED'
+  | 'ASSESSMENT_SCHEDULED'
+  | 'ASSESSED'
+  | 'PROPOSED'
+  | 'ACCEPTED'
+  | 'DECLINED'
+  | 'WITHDRAWN';
+
+/** An owner's GetRentos Managed request, as the intake pipeline sees it. */
+export interface ManagedIntake {
+  id: string;
+  status: IntakeStatus;
+  proposalExpired: boolean;
+  propertyId: string;
+  propertyTitle: string;
+  propertyAddress: string;
+  propertyVerified: boolean;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  requestedTier: ManagedServicingTier;
+  propertyClass: string;
+  unitCount: number;
+  occupiedUnits: number;
+  annualRentRoll: number | null;
+  serviceNeeds: string[];
+  ownerNotes: string | null;
+  indicativeFeePct: number;
+  indicativeMonthlyFee: number | null;
+  assessorUserId: string | null;
+  assessorName: string | null;
+  assessmentScheduledFor: string | null;
+  assessedAt: string | null;
+  condition: 'GOOD' | 'FAIR' | 'POOR' | null;
+  risk: 'LOW' | 'MEDIUM' | 'HIGH' | null;
+  findings: string | null;
+  eligible: boolean | null;
+  recommendedTier: ManagedServicingTier | null;
+  /** The latest field visit for the assessment, with its proof of presence. */
+  visit: {
+    id: string;
+    status: FieldVisitStatus;
+    checkedInAt: string | null;
+    distanceM: number | null;
+    withinRange: boolean | null;
+  } | null;
+  proposal: {
+    tier: ManagedServicingTier;
+    tierName: string;
+    feePct: number | null;
+    exclusions: string | null;
+    note: string | null;
+    proposedAt: string | null;
+    expiresAt: string | null;
+  } | null;
+  acceptedAt: string | null;
+  declinedReason: string | null;
+  mandateId: string | null;
+  mandateStatus: string | null;
+  openingPositionNote: string | null;
+  openingPositionConfirmedAt: string | null;
+  createdAt: string;
+}
+
+const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
+  safeCall(() =>
+    authFetch<T>(path, { method: 'POST', ...(body ? { body: JSON.stringify(body) } : {}) })
+  );
+
+export const adminManagedIntakeService = {
+  list(status?: IntakeStatus): Promise<ApiResponse<ManagedIntake[]>> {
+    return safeCall(() =>
+      authFetch<ManagedIntake[]>(`/admin/managed-intakes${status ? `?status=${status}` : ''}`)
+    );
+  },
+  scheduleAssessment(id: string, assessorUserId: string, scheduledFor: string) {
+    return post<ManagedIntake>(`/admin/managed-intakes/${id}/schedule-assessment`, {
+      assessorUserId,
+      scheduledFor,
+    });
+  },
+  recordAssessment(
+    id: string,
+    input: {
+      condition: 'GOOD' | 'FAIR' | 'POOR';
+      risk: 'LOW' | 'MEDIUM' | 'HIGH';
+      findings: string;
+      eligible: boolean;
+      recommendedTier?: ManagedServicingTier;
+    }
+  ) {
+    return post<ManagedIntake>(`/admin/managed-intakes/${id}/assessment`, input);
+  },
+  propose(id: string, input: { tier: ManagedServicingTier; exclusions?: string; note?: string }) {
+    return post<ManagedIntake>(`/admin/managed-intakes/${id}/propose`, input);
+  },
+  decline(id: string, reason: string) {
+    return post<ManagedIntake>(`/admin/managed-intakes/${id}/decline`, { reason });
+  },
+  confirmOpeningPosition(id: string, note: string) {
+    return post<ManagedIntake>(`/admin/managed-intakes/${id}/opening-position`, { note });
+  },
+};
 
 /** A vetted firm a managed engagement can be handed to for local delivery. */
 export interface PartnerFirm {
@@ -229,3 +343,99 @@ export interface BulkApproveTerminationResult {
   approved: number;
   skipped: { id: string; reason: string }[];
 }
+
+export type FieldVisitStatus = 'SCHEDULED' | 'CHECKED_IN' | 'DONE' | 'CANCELLED';
+
+/** One trip by a field agent to a property. */
+export interface FieldVisit {
+  id: string;
+  kind: 'ASSESSMENT' | 'INSPECTION';
+  status: FieldVisitStatus;
+  overdue: boolean;
+  escalatedAt: string | null;
+  propertyId: string;
+  propertyTitle: string;
+  propertyAddress: string;
+  propertyHasPin: boolean;
+  intakeId: string | null;
+  assigneeUserId: string;
+  assigneeName: string | null;
+  scheduledFor: string;
+  purpose: string | null;
+  checkedInAt: string | null;
+  checkInDistanceM: number | null;
+  checkInAccuracyM: number | null;
+  checkInWithinRange: boolean | null;
+  completedAt: string | null;
+  outcomeNote: string | null;
+  cancelReason: string | null;
+}
+
+export interface FieldAgent {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  active: boolean;
+  states: string[];
+  areas: string[];
+  maxOpenVisits: number;
+  openVisits: number;
+}
+
+/** A field agent ranked for a property: covering it and with room come first. */
+export interface FieldAgentCandidate {
+  userId: string;
+  name: string | null;
+  covers: boolean;
+  openVisits: number;
+  maxOpenVisits: number;
+  atCapacity: boolean;
+}
+
+export const adminFieldService = {
+  agents(): Promise<ApiResponse<FieldAgent[]>> {
+    return safeCall(() => authFetch<FieldAgent[]>('/admin/field-operations/agents'));
+  },
+  saveAgent(
+    userId: string,
+    input: { states: string[]; areas: string[]; maxOpenVisits: number; active: boolean }
+  ): Promise<ApiResponse<FieldAgent>> {
+    return safeCall(() =>
+      authFetch<FieldAgent>(`/admin/field-operations/agents/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+  suggest(propertyId: string): Promise<ApiResponse<FieldAgentCandidate[]>> {
+    return safeCall(() =>
+      authFetch<FieldAgentCandidate[]>(`/admin/field-operations/suggest?propertyId=${propertyId}`)
+    );
+  },
+  visits(view: 'open' | 'overdue' | 'done'): Promise<ApiResponse<FieldVisit[]>> {
+    return safeCall(() => authFetch<FieldVisit[]>(`/admin/field-operations/visits?view=${view}`));
+  },
+  mine(): Promise<ApiResponse<FieldVisit[]>> {
+    return safeCall(() => authFetch<FieldVisit[]>('/admin/field-operations/visits/mine'));
+  },
+  scheduleInspection(input: {
+    propertyId: string;
+    assigneeUserId: string;
+    scheduledFor: string;
+    purpose: string;
+  }) {
+    return post<FieldVisit>('/admin/field-operations/visits', input);
+  },
+  checkIn(id: string, input: { lat: number; lng: number; accuracyM: number }) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/check-in`, input);
+  },
+  complete(id: string, outcomeNote: string) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/complete`, { outcomeNote });
+  },
+  reassign(id: string, assigneeUserId: string) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/reassign`, { assigneeUserId });
+  },
+  cancel(id: string, reason: string) {
+    return post<FieldVisit>(`/admin/field-operations/visits/${id}/cancel`, { reason });
+  },
+};

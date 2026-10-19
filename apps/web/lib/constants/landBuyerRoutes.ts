@@ -23,6 +23,7 @@ export const LAND_BUYER_ROUTES = {
 
   /** Any signed-in account with a seat. */
   REVIEWS: '/land/reviews',
+  ACCREDITATION: '/land/reviews/accreditation',
   review: (seatId: string) => `/land/reviews/${seatId}`,
 } as const;
 

@@ -317,9 +317,14 @@ export default function EstateEmergencyPage() {
                   entry={entry}
                   rollOpen={isLive}
                   isSaving={answerEntry.isPending && answerEntry.variables?.entryId === entry.id}
-                  onAnswer={(entryId, state, stateNote) =>
-                    answerEntry.mutate({ entryId, state, stateNote })
-                  }
+                  onAnswer={async (entryId, state, stateNote) => {
+                    try {
+                      await answerEntry.mutateAsync({ entryId, state, stateNote });
+                      return true;
+                    } catch {
+                      return false;
+                    }
+                  }}
                 />
               ))}
             </div>

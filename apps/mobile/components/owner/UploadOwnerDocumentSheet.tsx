@@ -17,15 +17,23 @@ interface Props {
 
 /** Files transfer paperwork. It starts private; the owner shares it from the list. */
 export function UploadOwnerDocumentSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Upload a document">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Upload a document">
       {/* Remount on each open so the form always starts blank. */}
-      <UploadForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <UploadForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function UploadForm({ onClose }: Omit<Props, 'open'>) {
+function UploadForm({
+  onClose,
+  onSubmittingChange,
+}: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -40,6 +48,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
 
   const mutation = useMutation({
     mutationFn: () => ownerApi.uploadDocument(file!, { name: name.trim(), type, propertyId }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.owner.documents });
       toast.show('Document uploaded. It stays private until you share it.', 'success');
@@ -50,6 +59,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
         err instanceof ApiError ? err.message : 'Could not upload this document.',
         'error'
       ),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const pick = async () => {
@@ -64,7 +74,9 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
     <View style={{ gap: spacing.lg }}>
       <Pressable
         onPress={pick}
+        disabled={mutation.isPending}
         accessibilityRole="button"
+        accessibilityState={{ disabled: mutation.isPending }}
         accessibilityLabel={file ? `Chosen file ${file.name}. Choose another` : 'Choose a file'}
         style={{
           flexDirection: 'row',
@@ -89,7 +101,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
         </Text>
       </Pressable>
 
-      <TextField label="Name" value={name} onChangeText={setName} />
+      <TextField label="Name" value={name} onChangeText={setName} editable={!mutation.isPending} />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Type</Text>
@@ -101,6 +113,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
               size="sm"
               selected={type === t.value}
               onPress={() => setType(t.value)}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
@@ -117,6 +130,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
                 size="sm"
                 selected={propertyId === p.id}
                 onPress={() => setPropertyId((cur) => (cur === p.id ? undefined : p.id))}
+                disabled={mutation.isPending}
               />
             ))}
           </View>
@@ -126,7 +140,7 @@ function UploadForm({ onClose }: Omit<Props, 'open'>) {
       <Button
         label="Upload"
         loading={mutation.isPending}
-        disabled={!file || !name.trim()}
+        disabled={mutation.isPending || !file || !name.trim()}
         onPress={() => mutation.mutate()}
       />
     </View>

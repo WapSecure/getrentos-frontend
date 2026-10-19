@@ -23,9 +23,9 @@ interface ApplicationsListProps {
   viewMode: 'grid' | 'list';
   onWithdraw?: (id: string, reason: string) => Promise<void>;
   notes?: Record<string, Note[]>;
-  onAddNote?: (applicationId: string, content: string) => void;
+  onAddNote?: (applicationId: string, content: string) => Promise<boolean>;
   onDeleteNote?: (applicationId: string, noteId: string) => void;
-  onEditNote?: (applicationId: string, noteId: string, content: string) => void;
+  onEditNote?: (applicationId: string, noteId: string, content: string) => Promise<boolean>;
 }
 
 export const ApplicationsList = ({

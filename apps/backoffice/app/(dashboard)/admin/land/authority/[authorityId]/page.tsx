@@ -47,6 +47,17 @@ import { Fact, LandCaseSection, PanelMessage } from '@/components/admin/land/cas
 
 const CLOSED = new Set(['REJECTED', 'REVOKED']);
 
+/**
+ * What the recorded decision was. A claim can move on while keeping it: an
+ * objection disputes a verified claim, and an appeal reopens a rejected one.
+ */
+const lastDecisionLabel = (status: LandAuthorityView['authority']['status']) =>
+  status === 'DISPUTED'
+    ? 'Verified before the objection'
+    : status === 'PENDING_REVIEW'
+      ? 'Not accepted, then appealed'
+      : LAND_AUTHORITY_STATUS_LABELS[status];
+
 /** One seller's claim of authority to sell: evidence, consents, objections and the decision. */
 export default function AdminLandAuthorityPage() {
   const params = useParams<{ authorityId: string }>();
@@ -667,7 +678,7 @@ const Decision = ({
       {authority.decision && (
         <div className="mb-3 text-sm">
           <p className="font-medium text-foreground">
-            {LAND_AUTHORITY_STATUS_LABELS[authority.status]} · {formatDate(authority.decision.at)}
+            {lastDecisionLabel(authority.status)} · {formatDate(authority.decision.at)}
           </p>
           {authority.decision.note && (
             <p className="whitespace-pre-wrap text-muted-foreground">{authority.decision.note}</p>

@@ -317,6 +317,8 @@ const DeclarationCard = ({
               />
             </Field>
             <LandDocumentPicker
+              // The picker reads its suggested type once; a new instrument type re-presets it.
+              key={instrumentType || 'none'}
               propertyId={propertyId}
               label="The instrument document"
               value={instrumentDocumentId}

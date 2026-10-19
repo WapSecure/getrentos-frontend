@@ -13,17 +13,31 @@ interface Props {
 }
 
 export function AddUnitSheet({ open, onClose, propertyId }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Add a unit">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Add a unit">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <AddUnitForm key={open ? 'open' : 'closed'} propertyId={propertyId} onClose={onClose} />
+      <AddUnitForm
+        key={open ? 'open' : 'closed'}
+        propertyId={propertyId}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
 const digits = (v: string) => v.replace(/\D/g, '');
 
-function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () => void }) {
+function AddUnitForm({
+  propertyId,
+  onClose,
+  onSubmittingChange,
+}: {
+  propertyId: string;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -43,6 +57,7 @@ function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () 
         askingRent: askingRent ? Number(askingRent) : undefined,
         askingRentPeriod: 'year',
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'units'] });
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
@@ -51,6 +66,7 @@ function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () 
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not add that unit.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -60,6 +76,7 @@ function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () 
         placeholder="e.g. Flat 2B"
         value={unitName}
         onChangeText={setUnitName}
+        editable={!create.isPending}
       />
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>
@@ -68,6 +85,7 @@ function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () 
             keyboardType="number-pad"
             value={bedrooms}
             onChangeText={(v) => setBedrooms(digits(v))}
+            editable={!create.isPending}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -76,6 +94,7 @@ function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () 
             keyboardType="number-pad"
             value={bathrooms}
             onChangeText={(v) => setBathrooms(digits(v))}
+            editable={!create.isPending}
           />
         </View>
       </View>
@@ -84,11 +103,12 @@ function AddUnitForm({ propertyId, onClose }: { propertyId: string; onClose: () 
         keyboardType="number-pad"
         value={askingRent}
         onChangeText={(v) => setAskingRent(digits(v))}
+        editable={!create.isPending}
       />
       <Button
         label="Add unit"
         loading={create.isPending}
-        disabled={!unitName.trim() || bedrooms === '' || bathrooms === ''}
+        disabled={create.isPending || !unitName.trim() || bedrooms === '' || bathrooms === ''}
         onPress={() => create.mutate()}
       />
     </View>
