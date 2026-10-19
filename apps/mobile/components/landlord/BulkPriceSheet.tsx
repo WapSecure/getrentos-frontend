@@ -14,14 +14,32 @@ interface Props {
 }
 
 export function BulkPriceSheet({ open, onClose, units }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Set rent for several units">
-      <BulkPriceForm key={open ? 'open' : 'closed'} units={units} onClose={onClose} />
+    <Sheet
+      open={open}
+      onClose={submitting ? () => undefined : onClose}
+      title="Set rent for several units"
+    >
+      <BulkPriceForm
+        key={open ? 'open' : 'closed'}
+        units={units}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function BulkPriceForm({ units, onClose }: { units: LandlordUnit[]; onClose: () => void }) {
+function BulkPriceForm({
+  units,
+  onClose,
+  onSubmittingChange,
+}: {
+  units: LandlordUnit[];
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -33,6 +51,7 @@ function BulkPriceForm({ units, onClose }: { units: LandlordUnit[]; onClose: () 
 
   const save = useMutation({
     mutationFn: () => landlordApi.bulkUpdatePricing(selected, Number(rent), 'year'),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ['landlord', 'units'] });
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
@@ -41,6 +60,7 @@ function BulkPriceForm({ units, onClose }: { units: LandlordUnit[]; onClose: () 
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not update those prices.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -52,8 +72,9 @@ function BulkPriceForm({ units, onClose }: { units: LandlordUnit[]; onClose: () 
             <Pressable
               key={u.id}
               onPress={() => toggle(u.id)}
+              disabled={save.isPending}
               accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
+              accessibilityState={{ checked: on, disabled: save.isPending }}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -91,12 +112,13 @@ function BulkPriceForm({ units, onClose }: { units: LandlordUnit[]; onClose: () 
         keyboardType="number-pad"
         value={rent}
         onChangeText={(v) => setRent(v.replace(/\D/g, ''))}
+        editable={!save.isPending}
       />
 
       <Button
         label={selected.length > 1 ? `Update ${selected.length} units` : 'Update rent'}
         loading={save.isPending}
-        disabled={selected.length === 0 || Number(rent) < 1}
+        disabled={save.isPending || selected.length === 0 || Number(rent) < 1}
         onPress={() => save.mutate()}
       />
     </View>

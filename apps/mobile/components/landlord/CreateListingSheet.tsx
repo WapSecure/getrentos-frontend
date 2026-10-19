@@ -22,17 +22,28 @@ interface Props {
 }
 
 export function CreateListingSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="List a unit">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="List a unit">
       {/* Remount per open so a dismissed draft never reappears. */}
-      <CreateListingForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <CreateListingForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
 const digits = (v: string) => v.replace(/\D/g, '');
 
-function CreateListingForm({ onClose }: { onClose: () => void }) {
+function CreateListingForm({
+  onClose,
+  onSubmittingChange,
+}: {
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -76,6 +87,7 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
         furnished,
         shortLetEnabled: false,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (listing) => {
       qc.invalidateQueries({ queryKey: ['landlord', 'listings'] });
       // The publication gate either puts it live or holds it for an admin.
@@ -96,6 +108,7 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
             : 'Could not create that listing.',
         'error'
       ),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const valid = unitId && title.trim() && Number(rent) > 0 && availabilityDate;
@@ -110,17 +123,24 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
           options={units.map((u) => ({ value: u.id, label: `${u.propertyName} · ${u.unitName}` }))}
           value={unitId}
           onChange={chooseUnit}
+          disabled={create.isPending}
           emptyText="Every unit already has a listing. Add a unit to a property first."
         />
       )}
 
-      <TextField label="Listing title" value={title} onChangeText={setTitle} />
+      <TextField
+        label="Listing title"
+        value={title}
+        onChangeText={setTitle}
+        editable={!create.isPending}
+      />
 
       <TextField
         label="Rent (₦)"
         keyboardType="number-pad"
         value={rent}
         onChangeText={(v) => setRent(digits(v))}
+        editable={!create.isPending}
       />
 
       <ChipSelect
@@ -130,12 +150,28 @@ function CreateListingForm({ onClose }: { onClose: () => void }) {
         ]}
         value={period}
         onChange={setPeriod}
+        disabled={create.isPending}
       />
 
-      <DateField label="Available from" value={availabilityDate} onChange={setAvailabilityDate} />
+      <DateField
+        label="Available from"
+        value={availabilityDate}
+        onChange={setAvailabilityDate}
+        disabled={create.isPending}
+      />
 
-      <Toggle label="Furnished" value={furnished} onChange={setFurnished} />
-      <Toggle label="Pets allowed" value={allowPets} onChange={setAllowPets} />
+      <Toggle
+        label="Furnished"
+        value={furnished}
+        onChange={setFurnished}
+        disabled={create.isPending}
+      />
+      <Toggle
+        label="Pets allowed"
+        value={allowPets}
+        onChange={setAllowPets}
+        disabled={create.isPending}
+      />
 
       <Button
         label="Create listing"
@@ -151,15 +187,22 @@ function Toggle({
   label,
   value,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
       <Text variant="callout">{label}</Text>
-      <Switch value={value} onValueChange={onChange} accessibilityLabel={label} />
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        disabled={disabled}
+        accessibilityLabel={label}
+      />
     </View>
   );
 }
