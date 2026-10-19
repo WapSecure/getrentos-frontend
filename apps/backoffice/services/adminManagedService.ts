@@ -439,3 +439,70 @@ export const adminFieldService = {
     return post<FieldVisit>(`/admin/field-operations/visits/${id}/cancel`, { reason });
   },
 };
+
+export type PnlGroupBy = 'property' | 'manager' | 'tier' | 'region';
+
+export interface PnlFigures {
+  revenue: number;
+  partnerShare: number;
+  directCosts: number;
+  margin: number;
+  marginPct: number | null;
+}
+
+export interface ManagedPnl {
+  from: string;
+  to: string;
+  groupBy: PnlGroupBy;
+  totals: PnlFigures & { engagements: number };
+  rows: (PnlFigures & { key: string; label: string; detail: string | null; engagements: number })[];
+  months: (PnlFigures & { period: string })[];
+}
+
+export type ManagedCostCategory =
+  | 'FIELD_VISIT'
+  | 'STAFF_TIME'
+  | 'TRANSPORT'
+  | 'LEGAL'
+  | 'MARKETING'
+  | 'VENDOR_OVERSIGHT'
+  | 'OTHER';
+
+export interface ManagedCost {
+  id: string;
+  mandateId: string;
+  propertyId: string;
+  propertyTitle: string;
+  category: ManagedCostCategory;
+  amount: number;
+  incurredOn: string;
+  note: string;
+  visitId: string | null;
+  voidedAt: string | null;
+  voidReason: string | null;
+}
+
+export const adminManagedPnlService = {
+  report(from: string, to: string, groupBy: PnlGroupBy): Promise<ApiResponse<ManagedPnl>> {
+    return safeCall(() =>
+      authFetch<ManagedPnl>(`/admin/managed-pnl?from=${from}&to=${to}&groupBy=${groupBy}`)
+    );
+  },
+  costs(from: string, to: string): Promise<ApiResponse<ManagedCost[]>> {
+    return safeCall(() =>
+      authFetch<ManagedCost[]>(`/admin/managed-pnl/costs?from=${from}&to=${to}`)
+    );
+  },
+  recordCost(input: {
+    mandateId: string;
+    category: ManagedCostCategory;
+    amount: number;
+    incurredOn: string;
+    note: string;
+  }) {
+    return post<ManagedCost>('/admin/managed-pnl/costs', input);
+  },
+  voidCost(id: string, reason: string) {
+    return post<{ id: string; voided: boolean }>(`/admin/managed-pnl/costs/${id}/void`, { reason });
+  },
+};

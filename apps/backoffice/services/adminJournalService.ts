@@ -7,7 +7,11 @@ export type JournalAccount =
   | 'OWNER_FUNDS_HELD'
   | 'OWNER_FUNDS_RELEASED'
   | 'TENANT_CREDIT'
-  | 'OWNER_DEDUCTIONS';
+  | 'OWNER_DEDUCTIONS'
+  | 'MANAGED_FEE_REVENUE'
+  | 'MANAGED_DELIVERY_COST'
+  | 'PARTNER_SHARE_PAYABLE'
+  | 'OPERATING_PAYABLE';
 
 export interface TrialBalance {
   accounts: { account: JournalAccount; debit: number; credit: number; balance: number }[];

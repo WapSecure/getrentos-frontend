@@ -15,7 +15,7 @@ import {
 
 const ACCOUNT: Record<
   JournalAccount,
-  { label: string; help: string; side: 'Asset' | 'Liability' }
+  { label: string; help: string; side: 'Asset' | 'Liability' | 'Income' | 'Expense' }
 > = {
   CASH_CLEARING: {
     label: 'Cash clearing',
@@ -50,6 +50,26 @@ const ACCOUNT: Record<
   TENANT_CREDIT: {
     label: 'Tenant credit',
     help: 'Overpayments owed back or carried forward',
+    side: 'Liability',
+  },
+  MANAGED_FEE_REVENUE: {
+    label: 'Managed fee revenue',
+    help: 'GetRentos Managed’s own fees withheld from owners’ payouts',
+    side: 'Income',
+  },
+  MANAGED_DELIVERY_COST: {
+    label: 'Managed delivery cost',
+    help: 'Partner shares and direct costs of delivering GetRentos Managed',
+    side: 'Expense',
+  },
+  PARTNER_SHARE_PAYABLE: {
+    label: 'Partner share payable',
+    help: 'Delivery partners’ earned share, not yet paid',
+    side: 'Liability',
+  },
+  OPERATING_PAYABLE: {
+    label: 'Operating payable',
+    help: 'Direct Managed costs met from GetRentos’s own funds',
     side: 'Liability',
   },
 };

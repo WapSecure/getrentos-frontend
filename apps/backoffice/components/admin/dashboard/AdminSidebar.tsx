@@ -32,6 +32,7 @@ import {
   Sparkles,
   ClipboardCheck,
   Navigation,
+  TrendingUp,
   Handshake,
   FileSignature,
   CircleAlert,
@@ -112,6 +113,12 @@ const navItems: NavItem[] = [
     label: 'Field Operations',
     href: '/admin/field-operations',
     icon: Navigation,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Managed P&L',
+    href: '/admin/managed-pnl',
+    icon: TrendingUp,
     permission: 'managed.view',
   },
   {
