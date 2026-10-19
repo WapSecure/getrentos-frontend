@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Briefcase, FileText } from 'lucide-react';
+import { Briefcase, FileText, BadgeCheck } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -178,6 +178,24 @@ export default function AdminAgenciesPage() {
                       label="CAC number"
                       value={`${p.registrationNumber} · ${TYPE_LABEL[p.businessType]}`}
                     />
+                    {p.verifiedLegalName ? (
+                      <div className="sm:col-span-2 flex items-start gap-1.5">
+                        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                        <p className="text-sm text-foreground">
+                          CAC-verified: <span className="font-medium">{p.verifiedLegalName}</span>
+                          {p.cacVerifiedAt ? (
+                            <span className="text-muted-foreground">
+                              {' '}
+                              · {formatDate(p.cacVerifiedAt)}
+                            </span>
+                          ) : null}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="sm:col-span-2 text-xs text-muted-foreground">
+                        Name not auto-verified against CAC (verify the certificate manually).
+                      </p>
+                    )}
                     <Row label="Address" value={`${p.registeredAddress}, ${p.state}`} />
                     <Row label="Contact" value={`${p.contactEmail} · ${p.contactPhone}`} />
                     <div className="sm:col-span-2">

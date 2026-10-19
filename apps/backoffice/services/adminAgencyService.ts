@@ -31,6 +31,9 @@ export interface AdminAgency {
     kybSubmittedAt: string | null;
     kybDecidedAt: string | null;
     kybDecisionNote: string | null;
+    /** CAC legal name the automated lookup confirmed at submission, if any. */
+    verifiedLegalName: string | null;
+    cacVerifiedAt: string | null;
   } | null;
 }
 
