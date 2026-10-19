@@ -1,5 +1,7 @@
 'use client';
 
+import { TextMessageConsentCard } from '@/components/shared/settings/TextMessageConsentCard';
+
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Handshake, CalendarClock, MessageCircle, Wallet, Star } from 'lucide-react';
@@ -75,6 +77,7 @@ export const NotificationSettings = () => {
   return (
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Notifications</h2>
+      <TextMessageConsentCard />
       <p className="text-sm text-muted-foreground mb-6">
         Choose what you want to be notified about
       </p>

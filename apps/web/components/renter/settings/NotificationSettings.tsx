@@ -1,5 +1,7 @@
 'use client';
 
+import { TextMessageConsentCard } from '@/components/shared/settings/TextMessageConsentCard';
+
 import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
@@ -61,10 +63,13 @@ export const NotificationSettings = () => {
   });
 
   return (
-    <NotificationSettingsForm
-      key={fetched ? 'loaded' : 'initial'}
-      initial={buildPreferences(fetched)}
-    />
+    <>
+      <TextMessageConsentCard />
+      <NotificationSettingsForm
+        key={fetched ? 'loaded' : 'initial'}
+        initial={buildPreferences(fetched)}
+      />
+    </>
   );
 };
 

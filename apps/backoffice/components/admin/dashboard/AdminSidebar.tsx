@@ -36,6 +36,7 @@ import {
   Navigation,
   TrendingUp,
   MessageSquareText,
+  MessageSquare,
   ShieldAlert,
   Handshake,
   FileSignature,
@@ -330,6 +331,12 @@ const navItems: NavItem[] = [
     label: 'Messages',
     href: ROUTES.ADMIN_MESSAGES,
     icon: MessageCircle,
+    permission: 'messages.manage',
+  },
+  {
+    label: 'Text Messaging',
+    href: '/admin/text-messaging',
+    icon: MessageSquare,
     permission: 'messages.manage',
   },
   {

@@ -1,5 +1,7 @@
 'use client';
 
+import { TextMessageConsentCard } from '@/components/shared/settings/TextMessageConsentCard';
+
 import { useState, useEffect } from 'react';
 import { CreditCard, FileText, Wrench, MessageCircle, Star } from 'lucide-react';
 import { SaveButton } from '@getrentos/ui';
@@ -63,6 +65,7 @@ export const NotificationSettings = () => {
   return (
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Notifications</h2>
+      <TextMessageConsentCard />
       <p className="text-sm text-muted-foreground mb-6">
         Choose what you want to be notified about
       </p>
