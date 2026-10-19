@@ -18,6 +18,10 @@ export const qk = {
   },
   estateAgreements: ['estate-agreements', 'mine'] as const,
   landConsents: ['land', 'consent-requests'] as const,
+  landWatches: ['land', 'watch'] as const,
+  landWatch: (id: string) => ['land', 'watch', id] as const,
+  landInspections: ['land', 'inspections'] as const,
+  landInspection: (id: string) => ['land', 'inspections', id] as const,
   host: {
     listings: ['host', 'listings'] as const,
     bookings: (view: string) => ['host', 'bookings', view] as const,

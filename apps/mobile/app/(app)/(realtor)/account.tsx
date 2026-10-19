@@ -19,6 +19,7 @@ import {
   Star,
   UserRound,
   Wallet,
+  ClipboardList,
 } from 'lucide-react-native';
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -53,6 +54,13 @@ export default function RealtorAccount() {
       description: 'What you’ve earned and withdrawing it',
       icon: Wallet,
       onPress: go('/(app)/realtor-commissions'),
+    },
+    {
+      key: 'land-inspections',
+      label: 'Land inspections',
+      description: 'Visits assigned to you as an inspector',
+      icon: ClipboardList,
+      onPress: go('/(app)/land-inspections'),
     },
     {
       key: 'documents',
