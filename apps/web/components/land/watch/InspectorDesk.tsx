@@ -14,6 +14,8 @@ import {
   Textarea,
   Toast,
   type ToastVariant,
+  DocumentUpload,
+  type PendingUpload,
 } from '@getrentos/ui';
 import {
   LAND_BOUNDARY_LABELS,
@@ -234,6 +236,7 @@ const Captures = ({
   notify: (m: string, v?: ToastVariant) => void;
 }) => {
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<PendingUpload[]>([]);
   const upload = async (files: File[]) => {
     if (!files.length) return;
     setBusy(true);
@@ -299,24 +302,32 @@ const Captures = ({
         </ul>
       )}
       {open && (
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary/40">
-          <Camera className="h-4 w-4" aria-hidden="true" />
-          {busy ? 'Uploading…' : 'Add photos'}
-          <input
-            type="file"
-            accept="image/*,application/pdf"
-            capture="environment"
+        <div className="mt-3 space-y-2">
+          <DocumentUpload
+            value={pending}
+            onChange={setPending}
+            accept=".jpg,.jpeg,.png,.webp,.pdf"
             multiple
-            className="sr-only"
+            maxSizeMB={20}
+            label="Photos and files from the land"
+            hint="Your location is recorded with each one. Take them on the land."
             disabled={busy}
-            onChange={(e) => {
-              // The input's FileList is live: copy it before clearing the input.
-              const picked = Array.from(e.target.files ?? []);
-              e.target.value = '';
-              void upload(picked);
-            }}
           />
-        </label>
+          {pending.length > 0 && (
+            <Button
+              size="sm"
+              icon={<Camera className="h-4 w-4" />}
+              isLoading={busy}
+              onClick={() => {
+                const files = pending.map((p) => p.file);
+                setPending([]);
+                void upload(files);
+              }}
+            >
+              Add {pending.length} to the inspection
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

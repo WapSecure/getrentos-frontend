@@ -26,6 +26,7 @@ import {
   Textarea,
   Toast,
   type ToastVariant,
+  DatePicker,
 } from '@getrentos/ui';
 import {
   boundaryTone,
@@ -834,7 +835,7 @@ const RemindersCard = ({ watch, onSaved, onFailed }: SectionProps) => {
               />
             </Field>
             <Field label="Due" required>
-              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+              <DatePicker value={dueDate} onChange={setDueDate} placeholder="Choose the due date" />
             </Field>
             <Field label="Amount (₦)">
               <Input
