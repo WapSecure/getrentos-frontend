@@ -51,6 +51,7 @@ export type TranslationKey =
   | 'sidebar.legal_cases'
   | 'sidebar.managed'
   | 'sidebar.activity'
+  | 'sidebar.queries'
   | 'sidebar.approvals'
   | 'sidebar.notices'
   | 'sidebar.landlord_leads'
@@ -151,6 +152,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.legal_cases': 'Legal cases',
     'sidebar.managed': 'GetRentos Managed',
     'sidebar.activity': 'Activity log',
+    'sidebar.queries': 'Ask your manager',
     'sidebar.approvals': 'Approvals',
     'sidebar.notices': 'Notices',
     'sidebar.landlord_leads': 'Leads',
@@ -250,6 +252,7 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     'sidebar.legal_cases': 'Court Matter Dem',
     'sidebar.managed': 'Make GetRentos Manage Am',
     'sidebar.activity': 'Wetin Don Happen',
+    'sidebar.queries': 'Ask Your Manager',
     'sidebar.approvals': 'Approval Dem',
     'sidebar.notices': 'Notice Dem',
     'sidebar.landlord_leads': 'Leads',

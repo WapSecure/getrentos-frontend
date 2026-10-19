@@ -35,6 +35,7 @@ import {
   ClipboardCheck,
   Navigation,
   TrendingUp,
+  MessageSquareText,
   Handshake,
   FileSignature,
   CircleAlert,
@@ -115,6 +116,12 @@ const navItems: NavItem[] = [
     label: 'Field Operations',
     href: '/admin/field-operations',
     icon: Navigation,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Owner Questions',
+    href: '/admin/owner-queries',
+    icon: MessageSquareText,
     permission: 'managed.view',
   },
   {

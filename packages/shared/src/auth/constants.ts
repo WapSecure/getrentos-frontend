@@ -357,6 +357,7 @@ export const ROUTES = {
   LANDLORD_LEGAL_CASES: '/landlord/legal-cases',
   LANDLORD_MANAGED: '/landlord/managed',
   LANDLORD_ACTIVITY: '/landlord/activity',
+  LANDLORD_QUERIES: '/landlord/queries',
   LANDLORD_APPROVALS: '/landlord/approvals',
   LANDLORD_NOTICES: '/landlord/notices',
   LANDLORD_LEADS: '/landlord/leads',
@@ -391,6 +392,7 @@ export const ROUTES = {
   /** Properties this owner may act for under someone else's authority. */
   OWNER_MANAGED: '/owner/managed',
   OWNER_ACTIVITY: '/owner/activity',
+  OWNER_QUERIES: '/owner/queries',
   OWNER_SETTINGS: '/owner/settings',
   OWNER_VERIFICATION: '/owner/verification',
   OWNER_BOOKINGS: '/owner/bookings',
