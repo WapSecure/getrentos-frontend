@@ -70,7 +70,7 @@ export default function BuyerNotificationInbox() {
       eyebrow="Buying"
       items={query.data?.items ?? []}
       loading={query.isPending}
-      error={query.isError}
+      error={query.isError && !query.data}
       refreshing={query.isRefetching}
       onRefresh={() => query.refetch()}
       onOpen={(n) => {

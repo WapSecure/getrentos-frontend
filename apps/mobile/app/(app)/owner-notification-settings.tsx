@@ -100,12 +100,14 @@ export default function OwnerNotificationSettings() {
                 <View style={{ marginTop: spacing.sm }}>
                   <SwitchRow
                     label="Push"
+                    accessibilityLabel={`${LABEL[pref.id] ?? pref.id}: push notifications`}
                     value={pref.push}
                     onValueChange={(value) => setChannel(pref.id, 'push', value)}
                   />
                   {categorySendsEmail(pref.id) ? (
                     <SwitchRow
                       label="Email"
+                      accessibilityLabel={`${LABEL[pref.id] ?? pref.id}: email`}
                       value={pref.email}
                       onValueChange={(value) => setChannel(pref.id, 'email', value)}
                     />

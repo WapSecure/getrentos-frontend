@@ -100,6 +100,7 @@ export default function RealtorNotificationSettings() {
                   {categorySendsEmail(p.id) ? (
                     <SwitchRow
                       label="Also by email"
+                      accessibilityLabel={`${copy.label}: also by email`}
                       value={p.email}
                       onValueChange={(v) => set(p.id, 'email', v)}
                       style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.md }}
