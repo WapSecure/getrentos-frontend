@@ -29,6 +29,11 @@ export interface DepositDeduction {
   decidedById: string | null;
   decidedAt: string | null;
   decisionNote: string | null;
+  /** The tenant's objection and the owner's answer to it. */
+  tenantDisputedAt: string | null;
+  tenantDisputeReason: string | null;
+  disputeAnsweredAt: string | null;
+  disputeAnswer: string | null;
   createdAt: string;
 }
 
@@ -111,10 +116,29 @@ export const depositService = {
     );
   },
 
-  approveDeduction(id: string, deductionId: string): Promise<ApiResponse<DepositHold>> {
+  approveDeduction(
+    id: string,
+    deductionId: string,
+    note?: string
+  ): Promise<ApiResponse<DepositHold>> {
     return safeCall(() =>
       authFetch<DepositHold>(`/deposits/${id}/deductions/${deductionId}/approve`, {
         method: 'POST',
+        body: JSON.stringify(note ? { note } : {}),
+      })
+    );
+  },
+
+  /** Answer a tenant's dispute of a deduction that already counts: keep it, or drop it. */
+  answerDispute(
+    id: string,
+    deductionId: string,
+    input: { answer: string; withdraw: boolean }
+  ): Promise<ApiResponse<DepositHold>> {
+    return safeCall(() =>
+      authFetch<DepositHold>(`/deposits/${id}/deductions/${deductionId}/answer-dispute`, {
+        method: 'POST',
+        body: JSON.stringify(input),
       })
     );
   },
