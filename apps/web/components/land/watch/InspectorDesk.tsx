@@ -10,10 +10,12 @@ import {
   Card,
   EmptyState,
   Field,
-  Input,
   Textarea,
   Toast,
   type ToastVariant,
+  DocumentUpload,
+  type PendingUpload,
+  NumberInput,
 } from '@getrentos/ui';
 import {
   LAND_BOUNDARY_LABELS,
@@ -234,6 +236,7 @@ const Captures = ({
   notify: (m: string, v?: ToastVariant) => void;
 }) => {
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<PendingUpload[]>([]);
   const upload = async (files: File[]) => {
     if (!files.length) return;
     setBusy(true);
@@ -299,24 +302,32 @@ const Captures = ({
         </ul>
       )}
       {open && (
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-secondary/40">
-          <Camera className="h-4 w-4" aria-hidden="true" />
-          {busy ? 'Uploading…' : 'Add photos'}
-          <input
-            type="file"
-            accept="image/*,application/pdf"
-            capture="environment"
+        <div className="mt-3 space-y-2">
+          <DocumentUpload
+            value={pending}
+            onChange={setPending}
+            accept=".jpg,.jpeg,.png,.webp,.pdf"
             multiple
-            className="sr-only"
+            maxSizeMB={20}
+            label="Photos and files from the land"
+            hint="Your location is recorded with each one. Take them on the land."
             disabled={busy}
-            onChange={(e) => {
-              // The input's FileList is live: copy it before clearing the input.
-              const picked = Array.from(e.target.files ?? []);
-              e.target.value = '';
-              void upload(picked);
-            }}
           />
-        </label>
+          {pending.length > 0 && (
+            <Button
+              size="sm"
+              icon={<Camera className="h-4 w-4" />}
+              isLoading={busy}
+              onClick={() => {
+                const files = pending.map((p) => p.file);
+                setPending([]);
+                void upload(files);
+              }}
+            >
+              Add {pending.length} to the inspection
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -375,37 +386,28 @@ const ReportForm = ({
   return (
     <Card static className="space-y-4 p-5">
       <h2 className="font-semibold text-foreground">Report</h2>
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium text-foreground">The boundary</legend>
-        <div className="grid grid-cols-2 gap-2">
+      <Field label="The boundary" required>
+        <div role="radiogroup" aria-label="The boundary" className="grid grid-cols-2 gap-2">
           {CONDITIONS.map((c) => (
-            <label
+            <button
               key={c}
-              className={`cursor-pointer rounded-lg border px-3 py-2 text-sm ${condition === c ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground'}`}
+              type="button"
+              role="radio"
+              aria-checked={condition === c}
+              onClick={() => setCondition(c)}
+              className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${condition === c ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:border-foreground/20'}`}
             >
-              <input
-                type="radio"
-                name="condition"
-                className="sr-only"
-                checked={condition === c}
-                onChange={() => setCondition(c)}
-              />
               {LAND_BOUNDARY_LABELS[c]}
-            </label>
+            </button>
           ))}
         </div>
-      </fieldset>
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Beacons on the survey">
-          <Input
-            type="number"
-            min={0}
-            value={expected}
-            onChange={(e) => setExpected(e.target.value)}
-          />
+          <NumberInput integer value={expected} onValueChange={setExpected} />
         </Field>
         <Field label="Beacons found">
-          <Input type="number" min={0} value={found} onChange={(e) => setFound(e.target.value)} />
+          <NumberInput integer value={found} onValueChange={setFound} />
         </Field>
       </div>
       <Field

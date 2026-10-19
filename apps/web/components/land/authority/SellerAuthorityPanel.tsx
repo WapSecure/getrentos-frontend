@@ -24,6 +24,7 @@ import {
   Textarea,
   Toast,
   type ToastVariant,
+  DatePicker,
 } from '@getrentos/ui';
 import {
   describeCapacityRule,
@@ -328,10 +329,10 @@ const DeclarationCard = ({
               disabled={locked}
             />
             <Field label="Valid until" hint="Leave empty if the instrument has no end date.">
-              <Input
-                type="date"
+              <DatePicker
                 value={expiresAt}
-                onChange={(event) => setExpiresAt(event.target.value)}
+                onChange={setExpiresAt}
+                placeholder="No end date"
                 disabled={locked}
               />
             </Field>

@@ -17,12 +17,13 @@ import {
   Badge,
   Button,
   EmptyState,
-  Input,
   PageLoadingState,
   Select,
   Textarea,
   Toast,
   type ToastVariant,
+  DatePicker,
+  Field,
 } from '@getrentos/ui';
 import {
   boundaryTone,
@@ -375,12 +376,9 @@ function AssignInspector({
             disabled={!options.length}
             options={options}
           />
-          <Input
-            type="date"
-            value={dueBy}
-            onChange={(e) => setDueBy(e.target.value)}
-            aria-label="Due by"
-          />
+          <Field label="Due by">
+            <DatePicker value={dueBy} onChange={setDueBy} placeholder="When the visit is due" />
+          </Field>
           <Button
             size="sm"
             variant="outline"
