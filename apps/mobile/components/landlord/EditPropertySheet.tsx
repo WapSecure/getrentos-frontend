@@ -22,15 +22,31 @@ interface Props {
 }
 
 export function EditPropertySheet({ open, onClose, property }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Edit property">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Edit property">
       {/* Remount per property so fields never carry across. */}
-      {property ? <EditForm key={property.id} property={property} onClose={onClose} /> : null}
+      {property ? (
+        <EditForm
+          key={property.id}
+          property={property}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
-function EditForm({ property, onClose }: { property: LandlordProperty; onClose: () => void }) {
+function EditForm({
+  property,
+  onClose,
+  onSubmittingChange,
+}: {
+  property: LandlordProperty;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -67,6 +83,7 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
         description: description.trim() || undefined,
         ...(pinMoved && pin ? { latitude: pin.latitude, longitude: pin.longitude } : {}),
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
       toast.show('Property updated.', 'success');
@@ -74,11 +91,12 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
     },
     onError: (e) =>
       toast.show(e instanceof ApiError ? e.message : 'Could not update that property.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <TextField label="Name" value={name} onChangeText={setName} />
+      <TextField label="Name" value={name} onChangeText={setName} editable={!save.isPending} />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="callout" color="mutedForeground" style={{ marginLeft: 4 }}>
@@ -91,8 +109,9 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
               <Pressable
                 key={t}
                 onPress={() => setType(t)}
+                disabled={save.isPending}
                 accessibilityRole="button"
-                accessibilityState={{ selected }}
+                accessibilityState={{ selected, disabled: save.isPending }}
                 style={{
                   paddingHorizontal: spacing.md,
                   paddingVertical: 8,
@@ -114,7 +133,12 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
         </View>
       </View>
 
-      <TextField label="Address" value={address} onChangeText={setAddress} />
+      <TextField
+        label="Address"
+        value={address}
+        onChangeText={setAddress}
+        editable={!save.isPending}
+      />
 
       <LocationFields
         country={country}
@@ -147,12 +171,13 @@ function EditForm({ property, onClose }: { property: LandlordProperty; onClose: 
         numberOfLines={3}
         value={description}
         onChangeText={setDescription}
+        editable={!save.isPending}
       />
 
       <Button
         label="Save changes"
         loading={save.isPending}
-        disabled={!name.trim() || !address.trim()}
+        disabled={save.isPending || !name.trim() || !address.trim()}
         onPress={() => save.mutate()}
       />
     </View>
