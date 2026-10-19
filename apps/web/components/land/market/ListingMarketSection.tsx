@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, MapPin, ShieldCheck } from 'lucide-react';
+import { BarChart3, MapPin, ScanSearch, ShieldCheck, Video } from 'lucide-react';
+import { Button } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -22,6 +23,7 @@ import { TrustLabelsList } from './TrustLabelsList';
 import { PricePositionBar } from './PricePositionBar';
 import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { RequestTourDialog } from '../tours/RequestTourDialog';
+import { RequestInspectionDialog } from '../inspections/RequestInspectionDialog';
 
 /**
  * Market context under a public land listing: its assurance tier, where its
@@ -32,6 +34,7 @@ import { RequestTourDialog } from '../tours/RequestTourDialog';
 export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   const [reporting, setReporting] = useState(false);
   const [touring, setTouring] = useState(false);
+  const [inspecting, setInspecting] = useState(false);
   const listing = useQuery({
     queryKey: landKeys.publicListing(listingId),
     queryFn: () => unwrap(landService.getPublicListing(listingId)),
@@ -84,25 +87,38 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
             Decision dossier and all-in cost
           </Link>
           {listing.data && (
-            <button
-              type="button"
-              onClick={() => setTouring(true)}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-            >
-              Live video tour
-            </button>
-          )}
-          {listing.data && (
-            <button
-              type="button"
-              onClick={() => setReporting(true)}
-              className="text-sm font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-            >
-              Report a problem with this land
-            </button>
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<Video className="h-4 w-4" />}
+                onClick={() => setTouring(true)}
+              >
+                Live video tour
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                icon={<ScanSearch className="h-4 w-4" />}
+                onClick={() => setInspecting(true)}
+              >
+                Independent inspection
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setReporting(true)}>
+                Report a problem with this land
+              </Button>
+            </>
           )}
         </div>
       </div>
+      {listing.data && (
+        <RequestInspectionDialog
+          open={inspecting}
+          onClose={() => setInspecting(false)}
+          target={{ listingId }}
+          landName={listing.data.title}
+        />
+      )}
       {listing.data && (
         <RequestTourDialog
           open={touring}
