@@ -21,6 +21,7 @@ import {
   BedDouble,
   Luggage,
   KeyRound,
+  History,
   ClipboardCheck,
   PiggyBank,
   Receipt,
@@ -79,6 +80,7 @@ export const navItems: NavItem[] = [
   // Literal label (like Billing below): a mandate holder is not necessarily the
   // owner, so this is not phrased as one of the owner's own properties.
   { label: 'Managed properties', href: ROUTES.OWNER_MANAGED, icon: KeyRound },
+  { labelKey: 'sidebar.activity', href: ROUTES.OWNER_ACTIVITY, icon: History },
   {
     label: 'Estate requests',
     href: ESTATE_MARKETPLACE_ROUTES.OWNER_ESTATE_AGREEMENTS,
