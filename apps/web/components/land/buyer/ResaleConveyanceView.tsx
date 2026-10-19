@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { EmptyState, PageErrorState, Toast } from '@getrentos/ui';
-import { ArrowLeft, Lock, ScrollText } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Lock, ScrollText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';
 import { buyerKeys } from '@/lib/queryKeys';
 import { landBuyerService } from '@/services/landBuyerService';
 import { MilestoneTimeline } from './MilestoneTimeline';
+import { ConditionsPanel } from '../closing/ConditionsPanel';
 
 /**
  * Conveyance on a land resale (a marketplace transaction). Escrow is released
@@ -57,6 +58,32 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   });
 
   const milestones = data ?? [];
+  const isLand = milestones.length > 0;
+  const conditionsKey = buyerLandKeys.transactionConditions(txId);
+  const conditions = useQuery({
+    queryKey: conditionsKey,
+    queryFn: () => unwrap(landBuyerService.listTransactionConditions(txId)),
+    enabled: isLand,
+  });
+  const settle = useMutation({
+    mutationFn: ({ key, how }: { key: string; how: 'confirm' | 'waive' }) =>
+      unwrap(landBuyerService.settleTransactionCondition(txId, key, how)),
+    onMutate: ({ key }) => setPendingKey(key),
+    onSuccess: (next, { how }) => {
+      queryClient.setQueryData(conditionsKey, next);
+      setToast({
+        message: how === 'confirm' ? 'Condition confirmed.' : 'Condition waived.',
+        variant: 'success',
+      });
+    },
+    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onSettled: () => setPendingKey(null),
+  });
+  const conditionList = conditions.data ?? [];
+  const failedCondition = conditionList.some((c) => c.failed);
+  const openConditions = conditionList.filter(
+    (c) => c.status !== 'SATISFIED' && c.status !== 'WAIVED'
+  );
   const outstanding = milestones.filter(
     (m) => m.required && m.status !== 'CONFIRMED' && m.status !== 'WAIVED'
   );
@@ -99,21 +126,57 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
           description="This transaction is not a land sale, so payment follows the usual purchase steps."
         />
       ) : (
-        <section className="rounded-2xl border border-border bg-card p-5">
-          <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
-            {outstanding.length === 0
-              ? 'Every required step is confirmed. Your payment can now be released to the seller.'
-              : `${outstanding.length} required step${outstanding.length === 1 ? '' : 's'} before your payment can be released.`}
-          </p>
-          <MilestoneTimeline
-            milestones={milestones}
-            contractOpen
-            requiredOnly
-            pendingKey={pendingKey}
-            onConfirm={(key) => confirm.mutateAsync(key)}
-            onDispute={(key, reason) => dispute.mutateAsync({ key, reason })}
-          />
-        </section>
+        <>
+          {conditionList.length > 0 && (
+            <section
+              aria-labelledby="conditions-heading"
+              className="rounded-2xl border border-border bg-card p-5"
+            >
+              <h2 id="conditions-heading" className="font-semibold text-foreground">
+                Conditions of the sale
+              </h2>
+              <p className="mb-4 mt-1 text-sm text-muted-foreground">
+                {openConditions.length === 0
+                  ? 'Every condition is met or waived.'
+                  : `${openConditions.length} condition${openConditions.length === 1 ? '' : 's'} still open. Your payment is not released while any is.`}
+              </p>
+              {failedCondition && (
+                <p className="mb-4 flex gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-foreground">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden />
+                  A condition was not met. You may cancel and take a full refund of what GetRentos
+                  holds from your transactions page, or keep the purchase.
+                </p>
+              )}
+              <ConditionsPanel
+                conditions={conditionList}
+                role="buyer"
+                sellerLabel="Seller"
+                busyKey={settle.isPending ? pendingKey : null}
+                onConfirm={(key) => settle.mutate({ key, how: 'confirm' })}
+                onWaive={(key) => settle.mutate({ key, how: 'waive' })}
+              />
+            </section>
+          )}
+          <section className="rounded-2xl border border-border bg-card p-5">
+            <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
+              {outstanding.length === 0
+                ? 'Every required step is confirmed. Your payment can now be released to the seller.'
+                : `${outstanding.length} required step${outstanding.length === 1 ? '' : 's'} before your payment can be released.`}
+            </p>
+            <MilestoneTimeline
+              milestones={milestones}
+              contractOpen
+              requiredOnly
+              pendingKey={pendingKey}
+              onConfirm={(key) => confirm.mutateAsync(key)}
+              onDispute={(key, reason) => dispute.mutateAsync({ key, reason })}
+            />
+            <p className="mt-4 text-xs text-muted-foreground">
+              Before any step is confirmed you can cancel and be refunded. Once you confirm a step,
+              a refund needs a failed condition above, or report a problem with the land.
+            </p>
+          </section>
+        </>
       )}
 
       {toast && (

@@ -1,3 +1,4 @@
+import type { LandClosingCondition } from '@/types/landClosing';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   BuyerLandPurchaseListParams,
@@ -153,6 +154,19 @@ export const landBuyerService = {
       post<LandMilestone>(
         `/buyer/land/transactions/${txId}/milestones/${encodeURIComponent(key)}/dispute`,
         { reason: reason.trim() }
+      )
+    ),
+
+  /** Conditions precedent on a land resale (§9.3); 400 for a sale that is not land. */
+  listTransactionConditions: (txId: string) =>
+    safeCall(() =>
+      authFetch<LandClosingCondition[]>(`/buyer/land/transactions/${txId}/conditions`)
+    ),
+
+  settleTransactionCondition: (txId: string, key: string, how: 'confirm' | 'waive') =>
+    safeCall(() =>
+      post<LandClosingCondition[]>(
+        `/buyer/land/transactions/${txId}/conditions/${encodeURIComponent(key)}/${how}`
       )
     ),
 };

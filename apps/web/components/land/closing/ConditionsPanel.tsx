@@ -36,6 +36,7 @@ export const ConditionsPanel = ({
   onConfirm,
   onWaive,
   onDeliver,
+  sellerLabel = 'Developer',
 }: {
   conditions: LandClosingCondition[];
   checklist?: LandClosingChecklistItem[];
@@ -44,6 +45,8 @@ export const ConditionsPanel = ({
   onConfirm?: (key: string) => void;
   onWaive?: (key: string) => void;
   onDeliver?: (key: string, note: string) => void;
+  /** Who delivers conditions: the developer on a plot, the seller on a resale. */
+  sellerLabel?: string;
 }) => {
   const [delivering, setDelivering] = useState<string | null>(null);
   const [note, setNote] = useState('');
@@ -74,7 +77,7 @@ export const ConditionsPanel = ({
               </p>
               {condition.deliveredNote && (
                 <p className="mt-1 text-xs text-foreground">
-                  Developer: “{condition.deliveredNote}”
+                  {sellerLabel}: “{condition.deliveredNote}”
                 </p>
               )}
               {condition.note && (
