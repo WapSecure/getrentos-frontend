@@ -25,6 +25,8 @@ import {
   Textarea,
   Toast,
   type ToastVariant,
+  DocumentUpload,
+  type PendingUpload,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -54,7 +56,8 @@ export default function AdminLandDisputePage() {
   const [decision, setDecision] = useState('');
   const [note, setNote] = useState('');
   const [noteShared, setNoteShared] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [uploads, setUploads] = useState<PendingUpload[]>([]);
+  const file = uploads[0]?.file ?? null;
   const [fileNote, setFileNote] = useState('');
 
   const key = landQueryKeys.dispute(disputeId);
@@ -118,7 +121,7 @@ export default function AdminLandDisputePage() {
     mutationFn: () =>
       unwrap(adminLandDisputeService.addEvidence(disputeId, file as File, fileNote)),
     onSuccess: (d) => {
-      setFile(null);
+      setUploads([]);
       setFileNote('');
       done(d, 'Evidence added to the case.');
     },
@@ -244,12 +247,13 @@ export default function AdminLandDisputePage() {
                 ))}
               </ul>
             )}
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
-              <input
-                type="file"
-                aria-label="Evidence file"
-                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                className="text-sm"
+            <div className="mt-4 space-y-2">
+              <DocumentUpload
+                value={uploads}
+                onChange={setUploads}
+                multiple={false}
+                maxSizeMB={20}
+                label="Evidence file"
               />
               <Input
                 value={fileNote}

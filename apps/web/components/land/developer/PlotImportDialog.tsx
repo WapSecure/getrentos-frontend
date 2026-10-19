@@ -1,9 +1,17 @@
 'use client';
 
-import { useId, useMemo, useState, type ChangeEvent } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
-import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet, Upload } from 'lucide-react';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DocumentUpload,
+  type PendingUpload,
+} from '@getrentos/ui';
+import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet } from 'lucide-react';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { downloadCsv } from '@/lib/export';
 import { formatCurrency } from '@/lib/format';
@@ -55,8 +63,8 @@ const ImportBody = ({
   onImported,
   onCancel,
 }: Omit<PlotImportDialogProps, 'open' | 'onOpenChange'> & { onCancel: () => void }) => {
-  const inputId = useId();
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [uploads, setUploads] = useState<PendingUpload[]>([]);
+  const fileName = uploads[0]?.file.name ?? null;
   const [parsed, setParsed] = useState<ParsedPlotFile | null>(null);
   const [rejection, setRejection] = useState<ServerRejection | null>(null);
   const [readError, setReadError] = useState<string | null>(null);
@@ -73,13 +81,15 @@ const ImportBody = ({
     onError: (error) => setRejection(toRejection(error)),
   });
 
-  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
+  const handleFiles = async (next: PendingUpload[]) => {
+    setUploads(next);
     setRejection(null);
     setReadError(null);
-    setFileName(file.name);
+    const file = next[0]?.file;
+    if (!file) {
+      setParsed(null);
+      return;
+    }
     try {
       setParsed(parsePlotCsv(await file.text()));
     } catch {
@@ -119,21 +129,16 @@ const ImportBody = ({
           <code className="text-xs">tags</code> (separated by ;). Up to{' '}
           {MAX_IMPORT_ROWS.toLocaleString('en-NG')} plots per file. The import is all or nothing.
         </p>
+        <DocumentUpload
+          className="mt-3"
+          value={uploads}
+          onChange={(next) => void handleFiles(next)}
+          accept=".csv,text/csv"
+          multiple={false}
+          maxSizeMB={5}
+          label="Plots CSV"
+        />
         <div className="mt-3 flex flex-wrap gap-2">
-          <label
-            htmlFor={inputId}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            <Upload className="h-4 w-4" aria-hidden="true" />
-            {fileName ? 'Choose another file' : 'Choose CSV file'}
-          </label>
-          <input
-            id={inputId}
-            type="file"
-            accept=".csv,text/csv"
-            className="sr-only"
-            onChange={handleFile}
-          />
           <Button
             type="button"
             variant="outline"

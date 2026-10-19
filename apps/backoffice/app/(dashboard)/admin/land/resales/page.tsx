@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, CircleAlert, ScrollText } from 'lucide-react';
-import { Badge, Button, EmptyState, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, EmptyState, Textarea, Toast, type ToastVariant, Card } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -196,44 +196,48 @@ export default function AdminLandResalesPage() {
           {items.map((sale) => {
             const expanded = open === sale.transactionId;
             return (
-              <li key={sale.transactionId} className="rounded-2xl border border-border bg-card">
-                <button
-                  type="button"
-                  aria-expanded={expanded}
-                  onClick={() => setOpen(expanded ? null : sale.transactionId)}
-                  className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-3 text-left hover:bg-secondary/40"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium text-foreground">{sale.propertyTitle}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {sale.sellerName} to {sale.buyerName} ·{' '}
-                      {formatCurrency(sale.amount, { compact: true })}
-                      {sale.nextDeadline ? ` · next deadline ${formatDate(sale.nextDeadline)}` : ''}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {sale.failedConditions > 0 && (
-                      <Badge variant="danger">{sale.failedConditions} failed</Badge>
-                    )}
-                    {sale.awaitingBuyer > 0 && (
-                      <Badge variant="info">{sale.awaitingBuyer} awaiting buyer</Badge>
-                    )}
-                    <Badge variant="neutral">{sale.openConditions} open</Badge>
-                    <ChevronDown
-                      className={`h-4 w-4 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`}
-                      aria-hidden
-                    />
-                  </div>
-                </button>
-                {expanded && (
-                  <div className="border-t border-border p-4">
-                    <SaleConditions
-                      sale={sale}
-                      canDecide={canDecide}
-                      onToast={(message) => setToast({ message, variant: 'success' })}
-                    />
-                  </div>
-                )}
+              <li key={sale.transactionId}>
+                <Card>
+                  <button
+                    type="button"
+                    aria-expanded={expanded}
+                    onClick={() => setOpen(expanded ? null : sale.transactionId)}
+                    className="flex w-full flex-wrap items-center justify-between gap-2 px-4 py-3 text-left hover:bg-secondary/40"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">{sale.propertyTitle}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {sale.sellerName} to {sale.buyerName} ·{' '}
+                        {formatCurrency(sale.amount, { compact: true })}
+                        {sale.nextDeadline
+                          ? ` · next deadline ${formatDate(sale.nextDeadline)}`
+                          : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {sale.failedConditions > 0 && (
+                        <Badge variant="danger">{sale.failedConditions} failed</Badge>
+                      )}
+                      {sale.awaitingBuyer > 0 && (
+                        <Badge variant="info">{sale.awaitingBuyer} awaiting buyer</Badge>
+                      )}
+                      <Badge variant="neutral">{sale.openConditions} open</Badge>
+                      <ChevronDown
+                        className={`h-4 w-4 text-muted-foreground transition-transform ${expanded ? 'rotate-180' : ''}`}
+                        aria-hidden
+                      />
+                    </div>
+                  </button>
+                  {expanded && (
+                    <div className="border-t border-border p-4">
+                      <SaleConditions
+                        sale={sale}
+                        canDecide={canDecide}
+                        onToast={(message) => setToast({ message, variant: 'success' })}
+                      />
+                    </div>
+                  )}
+                </Card>
               </li>
             );
           })}

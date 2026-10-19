@@ -11,6 +11,7 @@ import {
   Input,
   Select,
   Textarea,
+  DatePicker,
 } from '@getrentos/ui';
 import {
   LAND_TITLE_EVENT_KINDS,
@@ -86,14 +87,8 @@ const TitleEventForm = ({
             ariaLabel="Title event"
           />
         </Field>
-        <Field label="Date" htmlFor={`${id}-date`} required error={dateError}>
-          <Input
-            id={`${id}-date`}
-            type="date"
-            max={today()}
-            value={occurredAt}
-            onChange={(event) => setOccurredAt(event.target.value)}
-          />
+        <Field label="Date" required error={dateError}>
+          <DatePicker value={occurredAt} onChange={(next) => setOccurredAt(next)} max={today()} />
         </Field>
         <Field label="From" htmlFor={`${id}-from`} hint="e.g. the family, community or grantor.">
           <Input
@@ -123,13 +118,8 @@ const TitleEventForm = ({
             onChange={(event) => setInstrumentReference(event.target.value)}
           />
         </Field>
-        <Field label="Registered on" htmlFor={`${id}-registered`} error={registeredError}>
-          <Input
-            id={`${id}-registered`}
-            type="date"
-            value={registeredAt}
-            onChange={(event) => setRegisteredAt(event.target.value)}
-          />
+        <Field label="Registered on" error={registeredError}>
+          <DatePicker value={registeredAt} onChange={(next) => setRegisteredAt(next)} />
         </Field>
       </div>
       <Field label="Note" htmlFor={`${id}-note`}>

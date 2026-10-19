@@ -5,7 +5,9 @@ import { LAND_DOCUMENT_TYPES, type LandDocumentType } from '@/types/landDocument
  * validateLandDocumentUpload), so a bad file is explained before it is sent.
  * The API still decides.
  */
-export const LAND_DOCUMENT_MAX_BYTES = 20 * 1024 * 1024;
+/** The same cap in MB, for the shared upload control. */
+export const LAND_DOCUMENT_MAX_MB = 20;
+export const LAND_DOCUMENT_MAX_BYTES = LAND_DOCUMENT_MAX_MB * 1024 * 1024;
 
 export const LAND_DOCUMENT_MIME_TYPES = [
   'application/pdf',

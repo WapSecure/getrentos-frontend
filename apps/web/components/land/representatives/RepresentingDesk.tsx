@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, EmptyState, PageErrorState, Toast } from '@getrentos/ui';
+import { Badge, Button, Card, EmptyState, PageErrorState, Toast } from '@getrentos/ui';
 import { UsersRound } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -150,50 +150,52 @@ export const RepresentingDesk = () => {
       <AttendingTours />
       <ul className="space-y-4">
         {items.map((appointment) => (
-          <li key={appointment.id} className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="font-semibold text-foreground">{appointment.name}</p>
-                <p className="text-xs text-muted-foreground">{appointment.email}</p>
+          <li key={appointment.id}>
+            <Card className="p-5">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-foreground">{appointment.name}</p>
+                  <p className="text-xs text-muted-foreground">{appointment.email}</p>
+                </div>
+                <Badge variant={appointment.status === 'ACTIVE' ? 'success' : 'warning'}>
+                  {appointment.status === 'ACTIVE' ? 'You represent them' : 'Invitation'}
+                </Badge>
               </div>
-              <Badge variant={appointment.status === 'ACTIVE' ? 'success' : 'warning'}>
-                {appointment.status === 'ACTIVE' ? 'You represent them' : 'Invitation'}
-              </Badge>
-            </div>
-            <ul className="mt-2 list-inside list-disc text-sm text-muted-foreground">
-              {appointment.scopes.map((scope) => (
-                <li key={scope}>{REPRESENTATIVE_SCOPE_LABELS[scope]}</li>
-              ))}
-            </ul>
-            {appointment.note && (
-              <p className="mt-2 rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
-                “{appointment.note}”
-              </p>
-            )}
-            {appointment.status === 'INVITED' ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  isLoading={respond.isPending && respond.variables?.response === 'ACCEPT'}
-                  disabled={respond.isPending}
-                  onClick={() => respond.mutate({ id: appointment.id, response: 'ACCEPT' })}
-                >
-                  Accept
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  disabled={respond.isPending}
-                  onClick={() => respond.mutate({ id: appointment.id, response: 'DECLINE' })}
-                >
-                  Decline
-                </Button>
-              </div>
-            ) : (
-              <div className="mt-4">
-                <PrincipalDeals appointment={appointment} />
-              </div>
-            )}
+              <ul className="mt-2 list-inside list-disc text-sm text-muted-foreground">
+                {appointment.scopes.map((scope) => (
+                  <li key={scope}>{REPRESENTATIVE_SCOPE_LABELS[scope]}</li>
+                ))}
+              </ul>
+              {appointment.note && (
+                <p className="mt-2 rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
+                  “{appointment.note}”
+                </p>
+              )}
+              {appointment.status === 'INVITED' ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    isLoading={respond.isPending && respond.variables?.response === 'ACCEPT'}
+                    disabled={respond.isPending}
+                    onClick={() => respond.mutate({ id: appointment.id, response: 'ACCEPT' })}
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={respond.isPending}
+                    onClick={() => respond.mutate({ id: appointment.id, response: 'DECLINE' })}
+                  >
+                    Decline
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <PrincipalDeals appointment={appointment} />
+                </div>
+              )}
+            </Card>
           </li>
         ))}
       </ul>

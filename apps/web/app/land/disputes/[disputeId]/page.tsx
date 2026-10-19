@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, FileText, PauseCircle, Upload } from 'lucide-react';
-import { Badge, Button, Input, Textarea } from '@getrentos/ui';
+import { Badge, Button, Input, Textarea, DocumentUpload, type PendingUpload } from '@getrentos/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { unwrap } from '@/lib/apiHelpers';
@@ -20,7 +20,8 @@ const words = (value: string) => value.replace(/_/g, ' ').toLowerCase();
 export default function LandDisputePage() {
   const { disputeId } = useParams<{ disputeId: string }>();
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
+  const [uploads, setUploads] = useState<PendingUpload[]>([]);
+  const file = uploads[0]?.file ?? null;
   const [fileNote, setFileNote] = useState('');
   const [appeal, setAppeal] = useState('');
   const [message, setMessage] = useState<{ text: string; error?: boolean } | null>(null);
@@ -39,7 +40,7 @@ export default function LandDisputePage() {
   const upload = useMutation({
     mutationFn: () => unwrap(landDisputeService.addEvidence(disputeId, file as File, fileNote)),
     onSuccess: (d) => {
-      setFile(null);
+      setUploads([]);
       setFileNote('');
       refresh(d, 'Evidence added. It is kept with the case permanently.');
     },
@@ -191,12 +192,13 @@ export default function LandDisputePage() {
                 </ul>
               )}
               {LIVE.has(d.status) && (
-                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
-                  <input
-                    type="file"
-                    aria-label="Evidence file"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    className="text-sm"
+                <div className="mt-4 space-y-2">
+                  <DocumentUpload
+                    value={uploads}
+                    onChange={setUploads}
+                    multiple={false}
+                    maxSizeMB={20}
+                    label="Evidence file"
                   />
                   <Input
                     value={fileNote}

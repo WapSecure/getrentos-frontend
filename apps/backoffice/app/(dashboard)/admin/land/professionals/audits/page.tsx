@@ -4,7 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CircleAlert, ClipboardCheck } from 'lucide-react';
-import { Button, EmptyState, Select, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  Select,
+  Textarea,
+  Toast,
+  type ToastVariant,
+  Card,
+} from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -39,50 +47,52 @@ const AuditItem = ({
   const [outcome, setOutcome] = useState<LandReviewAuditOutcome | ''>('');
   const [note, setNote] = useState('');
   return (
-    <li className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="font-medium text-foreground">
-          {item.professionalName} · {LAND_PROFESSIONAL_ROLE_LABELS[item.role]}
-        </p>
-        <Link
-          href={`/admin/land/diligence/${encodeURIComponent(item.propertyId)}`}
-          className="text-sm text-primary hover:underline"
-        >
-          {item.propertyTitle}
-        </Link>
-      </div>
-      {item.completedAt && (
-        <p className="text-xs text-muted-foreground">Reported {formatDate(item.completedAt)}</p>
-      )}
-      <p className="mt-3 max-h-60 overflow-y-auto whitespace-pre-line rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
-        {item.report || 'No report text.'}
-      </p>
-      {canDecide && (
-        <div className="mt-4 grid gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto] sm:items-start">
-          <Select
-            value={outcome}
-            onValueChange={(v) => setOutcome(v as LandReviewAuditOutcome)}
-            ariaLabel="Audit outcome"
-            placeholder="Outcome"
-            options={OUTCOMES}
-          />
-          <Textarea
-            rows={2}
-            maxLength={4000}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            aria-label="Audit note"
-            placeholder="What you re-checked (registry, charting, site) and what you found."
-          />
-          <Button
-            disabled={!outcome || note.trim().length < 5 || saving}
-            isLoading={saving}
-            onClick={() => onRecord(outcome as LandReviewAuditOutcome, note.trim())}
+    <li>
+      <Card className="p-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="font-medium text-foreground">
+            {item.professionalName} · {LAND_PROFESSIONAL_ROLE_LABELS[item.role]}
+          </p>
+          <Link
+            href={`/admin/land/diligence/${encodeURIComponent(item.propertyId)}`}
+            className="text-sm text-primary hover:underline"
           >
-            Record
-          </Button>
+            {item.propertyTitle}
+          </Link>
         </div>
-      )}
+        {item.completedAt && (
+          <p className="text-xs text-muted-foreground">Reported {formatDate(item.completedAt)}</p>
+        )}
+        <p className="mt-3 max-h-60 overflow-y-auto whitespace-pre-line rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
+          {item.report || 'No report text.'}
+        </p>
+        {canDecide && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-[220px_minmax(0,1fr)_auto] sm:items-start">
+            <Select
+              value={outcome}
+              onValueChange={(v) => setOutcome(v as LandReviewAuditOutcome)}
+              ariaLabel="Audit outcome"
+              placeholder="Outcome"
+              options={OUTCOMES}
+            />
+            <Textarea
+              rows={2}
+              maxLength={4000}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              aria-label="Audit note"
+              placeholder="What you re-checked (registry, charting, site) and what you found."
+            />
+            <Button
+              disabled={!outcome || note.trim().length < 5 || saving}
+              isLoading={saving}
+              onClick={() => onRecord(outcome as LandReviewAuditOutcome, note.trim())}
+            >
+              Record
+            </Button>
+          </div>
+        )}
+      </Card>
     </li>
   );
 };

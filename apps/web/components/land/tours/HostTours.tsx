@@ -11,7 +11,12 @@ import {
   landSiteTourService,
 } from '@/services/landSiteTourService';
 import type { LandSiteTour } from '@/types/landSiteTour';
+import { DateTimeField } from '@/components/shared/forms/DateTimeField';
 import { TourCard } from './TourCard';
+
+/** Daylight at the land: starts from 08:00 to 16:30 Lagos time, as the API requires. */
+const EARLIEST_TOUR_HOUR = 8;
+const LATEST_TOUR_HOUR_EXCLUSIVE = 17;
 
 type Notify = (message: string, variant?: 'success' | 'error') => void;
 
@@ -60,16 +65,18 @@ const HostActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) =
             Lagos time, between 08:00 and 16:30 so there is daylight at the land. The buyer is in{' '}
             {tour.buyerTimeZone} and sees them in their own time.
           </p>
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-3 lg:grid-cols-3">
             {slots.map((value, index) => (
-              <Input
+              <DateTimeField
                 key={index}
-                type="datetime-local"
+                label={`Time ${index + 1} (Lagos)`}
                 value={value}
-                aria-label={`Time ${index + 1} (Lagos)`}
-                onChange={(e) =>
-                  setSlots((current) => current.map((s, i) => (i === index ? e.target.value : s)))
+                onChange={(next) =>
+                  setSlots((current) => current.map((s, i) => (i === index ? next : s)))
                 }
+                requireFuture
+                minHour={EARLIEST_TOUR_HOUR}
+                maxHour={LATEST_TOUR_HOUR_EXCLUSIVE}
               />
             ))}
           </div>
