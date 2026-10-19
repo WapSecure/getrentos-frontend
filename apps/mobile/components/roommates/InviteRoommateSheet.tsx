@@ -13,15 +13,23 @@ interface Props {
 }
 
 export function InviteRoommateSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Invite a roommate">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Invite a roommate">
       {/* Remount on each open so the form always starts blank. */}
-      <InviteRoommateForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <InviteRoommateForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function InviteRoommateForm({ onClose }: Omit<Props, 'open'>) {
+function InviteRoommateForm({
+  onClose,
+  onSubmittingChange,
+}: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -30,6 +38,7 @@ function InviteRoommateForm({ onClose }: Omit<Props, 'open'>) {
 
   const mutation = useMutation({
     mutationFn: () => roommatesApi.invite(email.trim(), message.trim() || undefined),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.roommates });
       toast.show('Invite sent.', 'success');
@@ -37,6 +46,7 @@ function InviteRoommateForm({ onClose }: Omit<Props, 'open'>) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not send this invite.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -51,6 +61,7 @@ function InviteRoommateForm({ onClose }: Omit<Props, 'open'>) {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
+        editable={!mutation.isPending}
       />
       <TextField
         label="Personal message (optional)"
@@ -59,11 +70,12 @@ function InviteRoommateForm({ onClose }: Omit<Props, 'open'>) {
         numberOfLines={3}
         value={message}
         onChangeText={setMessage}
+        editable={!mutation.isPending}
       />
       <Button
         label="Send invite"
         loading={mutation.isPending}
-        disabled={!email.trim()}
+        disabled={mutation.isPending || !email.trim()}
         onPress={() => mutation.mutate()}
       />
     </View>

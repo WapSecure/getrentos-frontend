@@ -23,19 +23,35 @@ const RATING_HINT: Record<number, string> = {
 };
 
 export function SubmitReviewSheet({ open, onClose, pending }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
     <Sheet
       open={open}
-      onClose={onClose}
+      onClose={submitting ? () => undefined : onClose}
       title={pending?.type === 'landlord' ? 'Review your landlord' : 'Review this property'}
     >
       {/* Remount per open so the rating and comment reset between tenancies. */}
-      {pending ? <SubmitReviewForm key={pending.id} pending={pending} onClose={onClose} /> : null}
+      {pending ? (
+        <SubmitReviewForm
+          key={pending.id}
+          pending={pending}
+          onClose={onClose}
+          onSubmittingChange={setSubmitting}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
-function SubmitReviewForm({ pending, onClose }: { pending: PendingReview; onClose: () => void }) {
+function SubmitReviewForm({
+  pending,
+  onClose,
+  onSubmittingChange,
+}: {
+  pending: PendingReview;
+  onClose: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -55,6 +71,7 @@ function SubmitReviewForm({ pending, onClose }: { pending: PendingReview; onClos
         rating,
         comment: comment.trim() || undefined,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.reviewsPending });
       qc.invalidateQueries({ queryKey: ['renter', 'reviews', 'submitted'] });
@@ -63,6 +80,7 @@ function SubmitReviewForm({ pending, onClose }: { pending: PendingReview; onClos
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not submit that review.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -73,7 +91,7 @@ function SubmitReviewForm({ pending, onClose }: { pending: PendingReview; onClos
       </Text>
 
       <View style={{ alignItems: 'center', gap: spacing.sm }}>
-        <StarRating value={rating} onChange={setRating} />
+        <StarRating value={rating} onChange={setRating} disabled={mutation.isPending} />
         <Text variant="caption" color="mutedForeground">
           {rating ? RATING_HINT[rating] : 'Tap to rate'}
         </Text>
@@ -86,12 +104,13 @@ function SubmitReviewForm({ pending, onClose }: { pending: PendingReview; onClos
         numberOfLines={4}
         value={comment}
         onChangeText={setComment}
+        editable={!mutation.isPending}
       />
 
       <Button
         label="Submit review"
         loading={mutation.isPending}
-        disabled={rating < 1}
+        disabled={mutation.isPending || rating < 1}
         onPress={() => mutation.mutate()}
       />
     </View>

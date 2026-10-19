@@ -7,10 +7,11 @@ interface Props {
   /** Omit to render a read-only rating. */
   onChange?: (value: number) => void;
   size?: number;
+  disabled?: boolean;
 }
 
 /** Five-star rating, interactive when `onChange` is supplied. */
-export function StarRating({ value, onChange, size = 28 }: Props) {
+export function StarRating({ value, onChange, size = 28, disabled = false }: Props) {
   const { colors } = useTheme();
   const readOnly = !onChange;
 
@@ -30,9 +31,10 @@ export function StarRating({ value, onChange, size = 28 }: Props) {
           <Pressable
             key={star}
             onPress={() => onChange(star)}
+            disabled={disabled}
             accessibilityRole="button"
             accessibilityLabel={`${star} star${star === 1 ? '' : 's'}`}
-            accessibilityState={{ selected: filled }}
+            accessibilityState={{ selected: filled, disabled }}
             hitSlop={4}
           >
             {icon}

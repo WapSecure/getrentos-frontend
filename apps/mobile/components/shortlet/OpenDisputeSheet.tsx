@@ -64,14 +64,14 @@ function Inner({
   return (
     <Sheet
       open={open}
-      onClose={onClose}
+      onClose={submit.isPending ? () => undefined : onClose}
       title="Ask support to step in"
       snapPoints={['88%']}
       footer={
         <Button
           label="Send to support"
           loading={submit.isPending}
-          disabled={!valid}
+          disabled={submit.isPending || !valid}
           onPress={() => submit.mutate()}
         />
       }
@@ -92,8 +92,9 @@ function Inner({
                   void haptics.tap();
                   setCategory(c.value);
                 }}
+                disabled={submit.isPending}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
+                accessibilityState={{ checked: on, disabled: submit.isPending }}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -120,6 +121,7 @@ function Inner({
           label="What happened?"
           value={description}
           onChangeText={setDescription}
+          editable={!submit.isPending}
           placeholder="The facts, in order. Dates and amounts help support decide quickly."
           multiline
           maxLength={2000}

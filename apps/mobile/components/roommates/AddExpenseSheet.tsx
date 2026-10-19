@@ -19,15 +19,29 @@ interface Props {
 }
 
 export function AddExpenseSheet({ open, onClose, names }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Add a shared expense">
+    <Sheet
+      open={open}
+      onClose={submitting ? () => undefined : onClose}
+      title="Add a shared expense"
+    >
       {/* Remount on each open so the form always starts blank. */}
-      <AddExpenseForm key={open ? 'open' : 'closed'} onClose={onClose} names={names} />
+      <AddExpenseForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+        names={names}
+      />
     </Sheet>
   );
 }
 
-function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
+function AddExpenseForm({
+  onClose,
+  onSubmittingChange,
+  names,
+}: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -46,6 +60,7 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
         splitAmong,
         category,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.roommateExpenses });
       toast.show('Expense added.', 'success');
@@ -53,6 +68,7 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not add this expense.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   const toggleSplit = (name: string) => {
@@ -74,6 +90,7 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
         placeholder="e.g. Groceries"
         value={description}
         onChangeText={setDescription}
+        editable={!mutation.isPending}
       />
       <TextField
         label="Amount (₦)"
@@ -81,8 +98,15 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
         keyboardType="numeric"
         value={amount}
         onChangeText={setAmount}
+        editable={!mutation.isPending}
       />
-      <TextField label="Paid by" placeholder="Name" value={paidBy} onChangeText={setPaidBy} />
+      <TextField
+        label="Paid by"
+        placeholder="Name"
+        value={paidBy}
+        onChangeText={setPaidBy}
+        editable={!mutation.isPending}
+      />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Category</Text>
@@ -93,6 +117,7 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
               label={EXPENSE_CATEGORY_LABEL[c]}
               selected={category === c}
               onPress={() => setCategory(c)}
+              disabled={mutation.isPending}
             />
           ))}
         </View>
@@ -108,6 +133,7 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
                 label={n}
                 selected={splitAmong.includes(n)}
                 onPress={() => toggleSplit(n)}
+                disabled={mutation.isPending}
               />
             ))}
           </View>
@@ -117,7 +143,7 @@ function AddExpenseForm({ onClose, names }: Omit<Props, 'open'>) {
       <Button
         label="Add expense"
         loading={mutation.isPending}
-        disabled={!canSubmit}
+        disabled={mutation.isPending || !canSubmit}
         onPress={() => mutation.mutate()}
       />
     </View>
