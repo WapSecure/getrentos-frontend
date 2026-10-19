@@ -30,6 +30,7 @@ import {
   LAND_INSPECTION_KIND_LABELS,
   landPoint,
   type LandBoundaryCondition,
+  describeDistance,
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
@@ -190,11 +191,7 @@ export default function LandInspectionJob() {
                         />
                       ) : null}
                       <Text variant="caption" color="mutedForeground">
-                        {e.distanceM == null
-                          ? 'no location'
-                          : e.distanceM === 0
-                            ? 'on the land'
-                            : `${e.distanceM} m away`}
+                        {describeDistance(e.distanceM)}
                       </Text>
                     </View>
                   ))}

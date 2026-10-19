@@ -21,6 +21,7 @@ import {
   landPoint,
   type InspectorJob,
   type LandBoundaryCondition,
+  describeDistance,
 } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -96,31 +97,33 @@ const JobList = ({ onOpen }: { onOpen: (id: string) => void }) => {
         />
       ) : (
         <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-          {jobs.data.map((j) => (
-            <li key={j.id}>
-              <button
-                type="button"
-                onClick={() => onOpen(j.id)}
-                className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left hover:bg-secondary/40"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{j.land.label}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    <span className="font-mono">{j.reference}</span> ·{' '}
-                    {LAND_INSPECTION_KIND_LABELS[j.kind]} · {j.land.city}
-                    {j.dueBy && ` · due ${formatDate(j.dueBy)}`}
-                  </p>
-                </div>
-                <Badge
-                  variant={
-                    OPEN.has(j.status) ? (j.status === 'QUERIED' ? 'warning' : 'info') : 'neutral'
-                  }
+          {[...jobs.data]
+            .sort((a, b) => Number(OPEN.has(b.status)) - Number(OPEN.has(a.status)))
+            .map((j) => (
+              <li key={j.id}>
+                <button
+                  type="button"
+                  onClick={() => onOpen(j.id)}
+                  className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 text-left hover:bg-secondary/40"
                 >
-                  {STATUS_WORDS[j.status] ?? j.status}
-                </Badge>
-              </button>
-            </li>
-          ))}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{j.land.label}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      <span className="font-mono">{j.reference}</span> ·{' '}
+                      {LAND_INSPECTION_KIND_LABELS[j.kind]} · {j.land.city}
+                      {j.dueBy && ` · due ${formatDate(j.dueBy)}`}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      OPEN.has(j.status) ? (j.status === 'QUERIED' ? 'warning' : 'info') : 'neutral'
+                    }
+                  >
+                    {STATUS_WORDS[j.status] ?? j.status}
+                  </Badge>
+                </button>
+              </li>
+            ))}
         </ul>
       )}
     </>
@@ -231,12 +234,12 @@ const Captures = ({
   notify: (m: string, v?: ToastVariant) => void;
 }) => {
   const [busy, setBusy] = useState(false);
-  const upload = async (files: FileList | null) => {
-    if (!files?.length) return;
+  const upload = async (files: File[]) => {
+    if (!files.length) return;
     setBusy(true);
     const position = await currentPosition();
     let added = 0;
-    for (const file of Array.from(files)) {
+    for (const file of files) {
       try {
         // A photo picked from the library keeps its own time when it has one.
         const taken =
@@ -289,11 +292,7 @@ const Captures = ({
                 )}
               </a>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {e.distanceM == null
-                  ? 'no location'
-                  : e.distanceM === 0
-                    ? 'on the land'
-                    : `${e.distanceM} m away`}
+                {describeDistance(e.distanceM)}
               </p>
             </li>
           ))}
@@ -311,8 +310,10 @@ const Captures = ({
             className="sr-only"
             disabled={busy}
             onChange={(e) => {
-              void upload(e.target.files);
+              // The input's FileList is live: copy it before clearing the input.
+              const picked = Array.from(e.target.files ?? []);
               e.target.value = '';
+              void upload(picked);
             }}
           />
         </label>

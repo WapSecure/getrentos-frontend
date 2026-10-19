@@ -41,6 +41,7 @@ import {
   type LandWatchInspection,
   type LandWatchReminderKind,
   type LandWatchTier,
+  describeDistance,
 } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -555,8 +556,7 @@ const InspectionItem = ({
                   </a>
                   <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
                     {formatDate(e.capturedAt)}
-                    {e.distanceM != null &&
-                      (e.distanceM === 0 ? ' · on the land' : ` · ${e.distanceM} m away`)}
+                    {e.distanceM != null && ` · ${describeDistance(e.distanceM)}`}
                     {e.capturedOffline && ' · captured offline'}
                   </p>
                 </li>

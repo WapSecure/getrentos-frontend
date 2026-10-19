@@ -32,6 +32,7 @@ import {
   landPoint,
   unwrap,
   type StaffInspection,
+  describeDistance,
 } from '@getrentos/shared';
 import { useAdminUser } from '../../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -179,16 +180,7 @@ export default function AdminLandInspectionPage() {
                         : '—'
                     }
                   />
-                  <Fact
-                    label="Filed from"
-                    value={
-                      r.distanceM == null
-                        ? 'No location'
-                        : r.distanceM === 0
-                          ? 'On the land'
-                          : `${r.distanceM} m away`
-                    }
-                  />
+                  <Fact label="Filed from" value={describeDistance(r.distanceM)} />
                 </div>
                 <p className="mt-4 whitespace-pre-wrap text-sm text-foreground">{r.summary}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -221,11 +213,7 @@ export default function AdminLandInspectionPage() {
                       )}
                     </a>
                     <p className="mt-1.5 text-foreground">
-                      {e.distanceM == null
-                        ? 'No location'
-                        : e.distanceM === 0
-                          ? 'On the land'
-                          : `${e.distanceM} m away`}
+                      {describeDistance(e.distanceM)}
                       {e.capturedOffline && ' · captured offline'}
                     </p>
                     <p className="text-muted-foreground">

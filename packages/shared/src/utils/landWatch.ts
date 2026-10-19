@@ -264,3 +264,14 @@ export const landPoint = (location: LandLocation): { lat: number; lng: number } 
   const [lng, lat] = 'ring' in location ? location.ring[0] : location.pin;
   return { lat, lng };
 };
+
+/** "80 m" up to a kilometre, then "1.2 km" / "499 km". */
+export const formatDistance = (metres: number): string => {
+  if (metres < 1000) return `${Math.round(metres)} m`;
+  const km = metres / 1000;
+  return `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+};
+
+/** Where a capture was taken, relative to the land. */
+export const describeDistance = (metres: number | null): string =>
+  metres == null ? 'no location' : metres === 0 ? 'on the land' : `${formatDistance(metres)} away`;

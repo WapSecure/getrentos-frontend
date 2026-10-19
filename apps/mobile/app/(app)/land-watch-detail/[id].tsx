@@ -25,6 +25,7 @@ import {
   LAND_INSPECTION_KIND_LABELS,
   LAND_INSPECTION_STATUS_LABELS,
   type LandWatchIncidentKind,
+  describeDistance,
 } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
@@ -142,11 +143,7 @@ export default function LandWatchDetail() {
                                 accessibilityLabel={`Photo taken ${date(e.capturedAt)}`}
                               />
                               <Text variant="caption" color="mutedForeground">
-                                {e.distanceM === 0
-                                  ? 'on the land'
-                                  : e.distanceM != null
-                                    ? `${e.distanceM} m away`
-                                    : 'no location'}
+                                {describeDistance(e.distanceM)}
                               </Text>
                             </View>
                           ))}
