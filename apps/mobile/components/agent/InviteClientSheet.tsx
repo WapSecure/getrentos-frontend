@@ -12,15 +12,23 @@ interface Props {
 }
 
 export function InviteClientSheet({ open, onClose }: Props) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Invite a client">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Invite a client">
       {/* Remount on each open so the form always starts blank. */}
-      <InviteClientForm key={open ? 'open' : 'closed'} onClose={onClose} />
+      <InviteClientForm
+        key={open ? 'open' : 'closed'}
+        onClose={onClose}
+        onSubmittingChange={setSubmitting}
+      />
     </Sheet>
   );
 }
 
-function InviteClientForm({ onClose }: Omit<Props, 'open'>) {
+function InviteClientForm({
+  onClose,
+  onSubmittingChange,
+}: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -28,6 +36,7 @@ function InviteClientForm({ onClose }: Omit<Props, 'open'>) {
 
   const mutation = useMutation({
     mutationFn: () => agentClientsApi.invite(email.trim()),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['agent', 'clients'] });
       toast.show('Invitation sent.', 'success');
@@ -35,6 +44,7 @@ function InviteClientForm({ onClose }: Omit<Props, 'open'>) {
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not send this invite.', 'error'),
+    onSettled: () => onSubmittingChange(false),
   });
 
   return (
@@ -49,11 +59,12 @@ function InviteClientForm({ onClose }: Omit<Props, 'open'>) {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
+        editable={!mutation.isPending}
       />
       <Button
         label="Send invite"
         loading={mutation.isPending}
-        disabled={!email.trim()}
+        disabled={mutation.isPending || !email.trim()}
         onPress={() => mutation.mutate()}
       />
     </View>

@@ -258,18 +258,27 @@ export function AddLeadSheet({
   /** Start with this listing picked, e.g. when adding from a listing. */
   listingId?: string;
 }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="New lead">
-      {open ? <AddLeadForm onDone={onClose} initialListingId={listingId} /> : null}
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="New lead">
+      {open ? (
+        <AddLeadForm
+          onDone={onClose}
+          onSubmittingChange={setSubmitting}
+          initialListingId={listingId}
+        />
+      ) : null}
     </Sheet>
   );
 }
 
 function AddLeadForm({
   onDone,
+  onSubmittingChange,
   initialListingId,
 }: {
   onDone: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
   initialListingId?: string;
 }) {
   const { colors, spacing } = useTheme();
@@ -295,22 +304,31 @@ function AddLeadForm({
         notes: notes.trim() || undefined,
         source: 'mobile',
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: (lead) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: ['realtor'] });
       toast.show(`${lead.fullName} added to your pipeline.`, 'success');
       onDone();
     },
+    onSettled: () => onSubmittingChange(false),
   });
   const live = listings.data?.items.filter((l) => l.status !== 'CLOSED') ?? [];
   return (
     <View style={{ gap: spacing.md }}>
-      <TextField label="Full name" value={fullName} onChangeText={setFullName} autoFocus />
+      <TextField
+        label="Full name"
+        value={fullName}
+        onChangeText={setFullName}
+        editable={!save.isPending}
+        autoFocus
+      />
       <TextField
         label="Phone"
         value={phone}
         onChangeText={setPhone}
         keyboardType="phone-pad"
+        editable={!save.isPending}
         hint="So you can call or WhatsApp them from here"
       />
       <TextField
@@ -319,6 +337,7 @@ function AddLeadForm({
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
+        editable={!save.isPending}
         error={emailOk ? undefined : 'That email doesn’t look right.'}
       />
       {live.length ? (
@@ -330,6 +349,7 @@ function AddLeadForm({
               size="sm"
               selected={!listingId}
               onPress={() => setListingId('')}
+              disabled={save.isPending}
             />
             {live.map((l) => (
               <Chip
@@ -338,6 +358,7 @@ function AddLeadForm({
                 size="sm"
                 selected={listingId === l.id}
                 onPress={() => setListingId(l.id)}
+                disabled={save.isPending}
               />
             ))}
           </View>
@@ -348,6 +369,7 @@ function AddLeadForm({
         value={notes}
         onChangeText={setNotes}
         multiline
+        editable={!save.isPending}
         hint="Budget, timing, what they’re looking for"
       />
       {save.error ? (
@@ -356,7 +378,7 @@ function AddLeadForm({
       <Button
         label="Add lead"
         icon={<UserPlus size={16} color={colors.primaryForeground} />}
-        disabled={fullName.trim().length < 2 || !emailOk}
+        disabled={save.isPending || fullName.trim().length < 2 || !emailOk}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />
@@ -380,10 +402,16 @@ export function ScheduleViewingSheet({
   /** Start with this listing picked, e.g. when booking from a listing. */
   listingId?: string;
 }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Schedule a viewing">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Schedule a viewing">
       {open ? (
-        <ScheduleViewingForm lead={lead} initialListingId={listingId} onDone={onClose} />
+        <ScheduleViewingForm
+          lead={lead}
+          initialListingId={listingId}
+          onDone={onClose}
+          onSubmittingChange={setSubmitting}
+        />
       ) : null}
     </Sheet>
   );
@@ -393,10 +421,12 @@ function ScheduleViewingForm({
   lead,
   initialListingId,
   onDone,
+  onSubmittingChange,
 }: {
   lead?: RealtorLead;
   initialListingId?: string;
   onDone: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
 }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
@@ -421,6 +451,7 @@ function ScheduleViewingForm({
         scheduledAt: when!,
         notes: notes.trim() || undefined,
       }),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: async () => {
       void haptics.success();
       // Booking a viewing is what qualifies a lead that was only contacted.
@@ -431,6 +462,7 @@ function ScheduleViewingForm({
       toast.show(`Viewing booked for ${formatDate(when!, 'medium')} at ${time}.`, 'success');
       onDone();
     },
+    onSettled: () => onSubmittingChange(false),
   });
   const choices = listings.data?.items.filter((l) => l.status !== 'CLOSED') ?? [];
   const lockedToLead = !!lead?.listingId;
@@ -454,6 +486,7 @@ function ScheduleViewingForm({
                   size="sm"
                   selected={listingId === l.id}
                   onPress={() => setListingId(l.id)}
+                  disabled={save.isPending}
                 />
               ))}
             </View>
@@ -467,10 +500,16 @@ function ScheduleViewingForm({
       ) : null}
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <View style={{ flex: 1 }}>
-          <DateField label="Date" value={date} onChange={setDate} min={toISODate(new Date())} />
+          <DateField
+            label="Date"
+            value={date}
+            onChange={setDate}
+            min={toISODate(new Date())}
+            disabled={save.isPending}
+          />
         </View>
         <View style={{ flex: 1 }}>
-          <TimeField label="Time" value={time} onChange={setTime} />
+          <TimeField label="Time" value={time} onChange={setTime} disabled={save.isPending} />
         </View>
       </View>
       <TextField
@@ -478,6 +517,7 @@ function ScheduleViewingForm({
         value={notes}
         onChangeText={setNotes}
         multiline
+        editable={!save.isPending}
         hint="Gate code, who to ask for, what to bring"
       />
       {inPast ? <FormAlert tone="warning" message="That time has already passed." /> : null}
@@ -487,7 +527,7 @@ function ScheduleViewingForm({
       <Button
         label="Book viewing"
         icon={<CalendarClock size={16} color={colors.primaryForeground} />}
-        disabled={!listingId || !when || inPast}
+        disabled={save.isPending || !listingId || !when || inPast}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />
@@ -497,14 +537,21 @@ function ScheduleViewingForm({
 
 /** Invite an owner or landlord by email, confirming who they are before sending. */
 export function InviteClientSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [submitting, setSubmitting] = useState(false);
   return (
-    <Sheet open={open} onClose={onClose} title="Invite a client">
-      {open ? <InviteClientForm onDone={onClose} /> : null}
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Invite a client">
+      {open ? <InviteClientForm onDone={onClose} onSubmittingChange={setSubmitting} /> : null}
     </Sheet>
   );
 }
 
-function InviteClientForm({ onDone }: { onDone: () => void }) {
+function InviteClientForm({
+  onDone,
+  onSubmittingChange,
+}: {
+  onDone: () => void;
+  onSubmittingChange: (submitting: boolean) => void;
+}) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -515,12 +562,14 @@ function InviteClientForm({ onDone }: { onDone: () => void }) {
   });
   const invite = useMutation({
     mutationFn: () => realtorApi.inviteClient(email.trim().toLowerCase()),
+    onMutate: () => onSubmittingChange(true),
     onSuccess: () => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: qk.realtor.clients });
       toast.show('Invite sent. They approve it from their account.', 'success');
       onDone();
     },
+    onSettled: () => onSubmittingChange(false),
   });
   const c = check.data;
   return (
@@ -538,6 +587,7 @@ function InviteClientForm({ onDone }: { onDone: () => void }) {
         }}
         keyboardType="email-address"
         autoCapitalize="none"
+        editable={!invite.isPending}
         autoFocus
       />
       {c ? (
@@ -562,6 +612,7 @@ function InviteClientForm({ onDone }: { onDone: () => void }) {
         <Button
           label={`Invite ${c.name ?? 'client'}`}
           loading={invite.isPending}
+          disabled={invite.isPending}
           onPress={() => invite.mutate()}
         />
       ) : (
