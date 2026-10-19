@@ -10,12 +10,12 @@ import {
   Card,
   EmptyState,
   Field,
-  Input,
   Textarea,
   Toast,
   type ToastVariant,
   DocumentUpload,
   type PendingUpload,
+  NumberInput,
 } from '@getrentos/ui';
 import {
   LAND_BOUNDARY_LABELS,
@@ -386,37 +386,28 @@ const ReportForm = ({
   return (
     <Card static className="space-y-4 p-5">
       <h2 className="font-semibold text-foreground">Report</h2>
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium text-foreground">The boundary</legend>
-        <div className="grid grid-cols-2 gap-2">
+      <Field label="The boundary" required>
+        <div role="radiogroup" aria-label="The boundary" className="grid grid-cols-2 gap-2">
           {CONDITIONS.map((c) => (
-            <label
+            <button
               key={c}
-              className={`cursor-pointer rounded-lg border px-3 py-2 text-sm ${condition === c ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground'}`}
+              type="button"
+              role="radio"
+              aria-checked={condition === c}
+              onClick={() => setCondition(c)}
+              className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${condition === c ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:border-foreground/20'}`}
             >
-              <input
-                type="radio"
-                name="condition"
-                className="sr-only"
-                checked={condition === c}
-                onChange={() => setCondition(c)}
-              />
               {LAND_BOUNDARY_LABELS[c]}
-            </label>
+            </button>
           ))}
         </div>
-      </fieldset>
+      </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label="Beacons on the survey">
-          <Input
-            type="number"
-            min={0}
-            value={expected}
-            onChange={(e) => setExpected(e.target.value)}
-          />
+          <NumberInput integer value={expected} onValueChange={setExpected} />
         </Field>
         <Field label="Beacons found">
-          <Input type="number" min={0} value={found} onChange={(e) => setFound(e.target.value)} />
+          <NumberInput integer value={found} onValueChange={setFound} />
         </Field>
       </div>
       <Field

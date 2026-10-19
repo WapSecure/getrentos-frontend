@@ -27,6 +27,8 @@ import {
   Toast,
   type ToastVariant,
   DatePicker,
+  Checkbox,
+  CurrencyInput,
 } from '@getrentos/ui';
 import {
   boundaryTone,
@@ -266,41 +268,37 @@ const SubscribeCard = ({
           options={options}
         />
       </Field>
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium text-foreground">Level</legend>
-        <div className="grid gap-3 sm:grid-cols-3">
+      <Field label="Level">
+        <div role="radiogroup" aria-label="Level" className="grid gap-3 sm:grid-cols-3">
           {TIERS.map((t) => (
-            <label
+            <button
               key={t}
-              className={`cursor-pointer rounded-xl border p-3 text-sm ${tier === t ? 'border-primary bg-primary/5' : 'border-border'}`}
+              type="button"
+              role="radio"
+              aria-checked={tier === t}
+              onClick={() => setTier(t)}
+              className={`rounded-xl border p-3 text-left text-sm transition-colors ${tier === t ? 'border-primary bg-primary/5' : 'border-border hover:border-foreground/20'}`}
             >
-              <input
-                type="radio"
-                name="tier"
-                className="sr-only"
-                checked={tier === t}
-                onChange={() => setTier(t)}
-              />
               <span className="block font-medium text-foreground">
                 {LAND_WATCH_TIER_LABELS[t].label}
               </span>
               <span className="mt-1 block text-muted-foreground">
                 {LAND_WATCH_TIER_LABELS[t].description}
               </span>
-            </label>
+            </button>
           ))}
         </div>
-      </fieldset>
+      </Field>
       {terms.data && (
-        <label className="flex items-start gap-2 rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
-          <input
-            type="checkbox"
-            className="mt-1"
+        <div className="flex items-start gap-2 rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
+          <Checkbox
+            id="land-watch-disclaimer"
             checked={accepted}
-            onChange={(e) => setAccepted(e.target.checked)}
+            onCheckedChange={setAccepted}
+            className="mt-0.5"
           />
-          <span>{terms.data.disclaimer}</span>
-        </label>
+          <label htmlFor="land-watch-disclaimer">{terms.data.disclaimer}</label>
+        </div>
       )}
       <div className="flex gap-2">
         <Button
@@ -693,14 +691,14 @@ const IncidentsCard = ({ watch, onSaved, onFailed }: SectionProps) => {
               maxLength={4000}
               placeholder="What you saw or were told, and when"
             />
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <Checkbox
+                id="incident-request-inspection"
                 checked={requestInspection}
-                onChange={(e) => setRequestInspection(e.target.checked)}
+                onCheckedChange={setRequestInspection}
               />
-              Send an inspector to look
-            </label>
+              <label htmlFor="incident-request-inspection">Send an inspector to look</label>
+            </div>
             <div className="flex gap-2">
               <Button
                 size="sm"
@@ -838,21 +836,16 @@ const RemindersCard = ({ watch, onSaved, onFailed }: SectionProps) => {
               <DatePicker value={dueDate} onChange={setDueDate} placeholder="Choose the due date" />
             </Field>
             <Field label="Amount (₦)">
-              <Input
-                type="number"
-                min={0}
+              <CurrencyInput
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onValueChange={(v) => setAmount(v ? String(v) : '')}
+                aria-label="Amount in naira"
               />
             </Field>
-            <label className="flex items-center gap-2 text-sm text-foreground sm:col-span-2">
-              <input
-                type="checkbox"
-                checked={annual}
-                onChange={(e) => setAnnual(e.target.checked)}
-              />
-              Every year
-            </label>
+            <div className="flex items-center gap-2 text-sm text-foreground sm:col-span-2">
+              <Checkbox id="reminder-annual" checked={annual} onCheckedChange={setAnnual} />
+              <label htmlFor="reminder-annual">Every year</label>
+            </div>
             <div className="flex gap-2 sm:col-span-2">
               <Button
                 size="sm"
