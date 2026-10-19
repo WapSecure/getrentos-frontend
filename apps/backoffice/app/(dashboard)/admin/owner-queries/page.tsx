@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Clock, MessageSquareText } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+} from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 
 import {
@@ -113,12 +122,11 @@ const Thread = ({
         </ol>
         {canOperate && q.status !== 'RESOLVED' && (
           <div className="border-t border-border pt-4">
-            <textarea
+            <Textarea
               rows={3}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               placeholder="Reply to the owner"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
             <div className="mt-2 flex gap-2">
               <Button

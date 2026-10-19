@@ -5,8 +5,13 @@ import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import {
   Button,
+  Checkbox,
   CurrencyInput,
   Dialog,
+  Field,
+  Input,
+  Select,
+  Textarea,
   DialogContent,
   DialogDescription,
   DialogTitle,
@@ -31,9 +36,6 @@ const SERVICE_NEEDS = [
   'Legal notices',
   'Vacant property care',
 ];
-
-const fieldClass =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 interface ManagedIntakeDialogProps {
   property: { id: string; name: string } | null;
@@ -111,107 +113,84 @@ export const ManagedIntakeDialog = ({
         </div>
 
         <div className="space-y-4 p-4">
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-foreground">Service level</span>
-            <select
+          <Field label="Service level">
+            <Select
+              ariaLabel="Service level"
               value={tier}
-              onChange={(e) => setTier(e.target.value as ServicingTier)}
-              className={fieldClass}
-            >
-              {cards.map((c) => (
-                <option key={c.tier} value={c.tier}>
-                  {c.name}: {c.feePct}% of rent collected
-                </option>
-              ))}
-            </select>
-          </label>
+              onValueChange={(v) => setTier(v as ServicingTier)}
+              options={cards.map((c) => ({
+                value: c.tier,
+                label: `${c.name}: ${c.feePct}% of rent collected`,
+              }))}
+            />
+          </Field>
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-foreground">
-              What kind of property is it?
-            </span>
-            <select
+          <Field label="What kind of property is it?">
+            <Select
+              ariaLabel="What kind of property is it?"
               value={propertyClass}
-              onChange={(e) => setPropertyClass(e.target.value as ManagedPropertyClass)}
-              className={fieldClass}
-            >
-              {Object.entries(PROPERTY_CLASS_LABEL).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+              onValueChange={(v) => setPropertyClass(v as ManagedPropertyClass)}
+              options={Object.entries(PROPERTY_CLASS_LABEL).map(([value, label]) => ({
+                value,
+                label,
+              }))}
+            />
+          </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-foreground">Units</span>
-              <input
+            <Field label="Units" htmlFor="intake-units">
+              <Input
+                id="intake-units"
                 inputMode="numeric"
                 value={unitCount}
                 onChange={(e) => setUnitCount(e.target.value.replace(/\D/g, ''))}
-                className={fieldClass}
               />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-foreground">Occupied now</span>
-              <input
+            </Field>
+            <Field
+              label="Occupied now"
+              htmlFor="intake-occupied"
+              error={occupiedUnits > units ? 'Can’t be more than units.' : undefined}
+            >
+              <Input
+                id="intake-occupied"
                 inputMode="numeric"
                 value={occupied}
                 onChange={(e) => setOccupied(e.target.value.replace(/\D/g, ''))}
-                className={fieldClass}
               />
-            </label>
+            </Field>
           </div>
-          {occupiedUnits > units && (
-            <p className="text-xs text-destructive">Occupied units can’t be more than units.</p>
-          )}
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-foreground">
-              Rent a year across the property (optional)
-            </span>
+          <Field
+            label="Rent a year across the property"
+            hint="Optional. Used for the fee estimate."
+          >
             <CurrencyInput prefix="₦" value={rentRoll || ''} onValueChange={setRentRoll} />
-          </label>
+          </Field>
 
-          <fieldset>
-            <legend className="mb-1.5 text-sm font-medium text-foreground">
-              What do you need help with?
-            </legend>
-            <div className="flex flex-wrap gap-2">
-              {SERVICE_NEEDS.map((need) => {
-                const on = needs.includes(need);
-                return (
-                  <button
-                    key={need}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => toggleNeed(need)}
-                    className={`rounded-full border px-3 py-1 text-sm ${
-                      on
-                        ? 'border-primary bg-primary/10 text-foreground'
-                        : 'border-border bg-background text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {need}
-                  </button>
-                );
-              })}
+          <Field label="What do you need help with?">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {SERVICE_NEEDS.map((need) => (
+                <label key={need} className="flex items-center gap-2 text-sm text-foreground">
+                  <Checkbox
+                    checked={needs.includes(need)}
+                    onCheckedChange={() => toggleNeed(need)}
+                    aria-label={need}
+                  />
+                  {need}
+                </label>
+              ))}
             </div>
-          </fieldset>
+          </Field>
 
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-foreground">
-              Anything we should know? (optional)
-            </span>
-            <textarea
+          <Field label="Anything we should know?" hint="Optional." htmlFor="intake-notes">
+            <Textarea
+              id="intake-notes"
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Current manager, tenants in arrears, repairs outstanding…"
-              className={fieldClass}
             />
-          </label>
+          </Field>
 
           {card && (
             <div className="rounded-xl border border-border bg-muted/40 p-3 text-sm">

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Clock, Loader2, MessageSquareText, Plus } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { ArrowLeft, Clock, MessageSquareText, Plus } from 'lucide-react';
+import { Badge, Button, Card, Field, Input, Select, Textarea } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { mine as myMandates } from '@/services/mandateService';
@@ -13,9 +13,6 @@ import {
   type QueryCategory,
   type QuerySummary,
 } from '@/services/ownerQueryService';
-
-const fieldClass =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 const lagos = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
@@ -81,63 +78,49 @@ const AskForm = ({ onDone }: { onDone: (id: string) => void }) => {
     );
   }
   return (
-    <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
+    <Card className="space-y-3 p-5">
       <div className="grid gap-3 sm:grid-cols-2">
-        <select
-          aria-label="Property"
-          value={propertyId}
-          onChange={(e) => setPropertyId(e.target.value)}
-          className={fieldClass}
-        >
-          <option value="">Which property?</option>
-          {properties.map(([id, title]) => (
-            <option key={id} value={id}>
-              {title}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label="Topic"
-          value={category}
-          onChange={(e) => setCategory(e.target.value as QueryCategory)}
-          className={fieldClass}
-        >
-          {Object.entries(CATEGORY_LABEL).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Field label="Property">
+          <Select
+            ariaLabel="Property"
+            value={propertyId}
+            onValueChange={setPropertyId}
+            placeholder="Which property?"
+            options={properties.map(([id, title]) => ({ value: id, label: title }))}
+          />
+        </Field>
+        <Field label="Topic">
+          <Select
+            ariaLabel="Topic"
+            value={category}
+            onValueChange={(v) => setCategory(v as QueryCategory)}
+            options={Object.entries(CATEGORY_LABEL).map(([value, label]) => ({ value, label }))}
+          />
+        </Field>
       </div>
-      <input
-        value={subject}
-        onChange={(e) => setSubject(e.target.value)}
-        placeholder="Subject, e.g. September statement"
-        className={fieldClass}
-      />
-      <textarea
-        rows={4}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder="Your question"
-        className={fieldClass}
-      />
+      <Field label="Subject" htmlFor="query-subject">
+        <Input
+          id="query-subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="e.g. September statement"
+        />
+      </Field>
+      <Field label="Your question" htmlFor="query-body">
+        <Textarea id="query-body" rows={4} value={body} onChange={(e) => setBody(e.target.value)} />
+      </Field>
       <p className="text-xs text-muted-foreground">
         Your manager owes you a first reply within 24 hours. The whole conversation stays here.
       </p>
-      <button
-        type="button"
-        disabled={
-          !propertyId || subject.trim().length < 3 || body.trim().length < 5 || ask.isPending
-        }
+      <Button
+        isLoading={ask.isPending}
+        disabled={!propertyId || subject.trim().length < 3 || body.trim().length < 5}
         onClick={() => ask.mutate()}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
       >
-        {ask.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
         Send question
-      </button>
+      </Button>
       {error && <p className="text-sm text-destructive">{error}</p>}
-    </div>
+    </Card>
   );
 };
 
@@ -225,42 +208,38 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
 
         {(!resolved || isOwner) && (
           <div className="mt-4 border-t border-border pt-4">
-            <textarea
+            <Textarea
               rows={3}
+              aria-label="Reply"
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               placeholder={resolved ? 'Write to reopen this question' : 'Write a reply'}
-              className={fieldClass}
             />
             <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={reply.trim().length < 2 || send.isPending}
+              <Button
+                isLoading={send.isPending}
+                disabled={reply.trim().length < 2}
                 onClick={() => send.mutate()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
               >
-                {send.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                 Send
-              </button>
+              </Button>
               {!resolved && (
-                <button
-                  type="button"
-                  disabled={resolve.isPending}
+                <Button
+                  variant="outline"
+                  isLoading={resolve.isPending}
                   onClick={() => resolve.mutate()}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
                 >
                   Mark resolved
-                </button>
+                </Button>
               )}
               {resolved && isOwner && (
-                <button
-                  type="button"
-                  disabled={reopen.isPending}
+                <Button
+                  variant="outline"
+                  isLoading={reopen.isPending}
                   onClick={() => reopen.mutate()}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
                 >
                   Reopen
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -299,13 +278,13 @@ export const QueryThreads = ({ as }: { as: 'owner' | 'manager' }) => {
           </p>
         </div>
         {as === 'owner' && !openId && (
-          <button
-            type="button"
+          <Button
+            className="shrink-0"
+            icon={<Plus className="h-4 w-4" aria-hidden />}
             onClick={() => setAsking((v) => !v)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
           >
-            <Plus className="h-4 w-4" aria-hidden /> Ask a question
-          </button>
+            Ask a question
+          </Button>
         )}
       </div>
 

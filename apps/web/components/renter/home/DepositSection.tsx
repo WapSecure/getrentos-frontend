@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, PiggyBank, ShieldCheck } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { PiggyBank, ShieldCheck } from 'lucide-react';
+import { Badge, Button, Card, Textarea } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -77,30 +77,25 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
       {d.canDispute &&
         (open ? (
           <div className="mt-2 space-y-2">
-            <textarea
+            <Textarea
               rows={3}
+              aria-label="Why you disagree"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Why you disagree, e.g. the damage was there when you moved in"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
             <div className="flex gap-2">
-              <button
-                type="button"
-                disabled={reason.trim().length < 10 || dispute.isPending}
+              <Button
+                size="sm"
+                isLoading={dispute.isPending}
+                disabled={reason.trim().length < 10}
                 onClick={() => dispute.mutate()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-50"
               >
-                {dispute.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                 Send dispute
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
-              >
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
-              </button>
+              </Button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
           </div>
@@ -120,7 +115,7 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
 const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
   const hold = deposit.hold;
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <Card className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold text-foreground">{deposit.propertyTitle}</h3>
@@ -212,7 +207,7 @@ const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
           )}
         </>
       )}
-    </div>
+    </Card>
   );
 };
 

@@ -3,15 +3,17 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { AlertTriangle, BadgeCheck, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
 import {
-  AlertTriangle,
-  BadgeCheck,
-  CheckCircle2,
-  Loader2,
-  ShieldAlert,
-  ShieldCheck,
-} from 'lucide-react';
-import { CurrencyInput } from '@getrentos/ui';
+  Button,
+  Card,
+  Checkbox,
+  CurrencyInput,
+  Field,
+  Input,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -24,9 +26,6 @@ import {
   type CheckResult,
   type ImpersonationChannel,
 } from '@/services/homeTeamService';
-
-const field =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 const CHANNELS: { value: ImpersonationChannel; label: string }[] = [
   { value: 'PHONE', label: 'Phone call or SMS' },
@@ -114,7 +113,7 @@ export const HomeTeamCard = () => {
   if (team.isLoading || homes.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+    <Card className="p-6">
       <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
         <ShieldCheck className="h-5 w-5 text-primary" aria-hidden />
         Who manages your home
@@ -177,20 +176,24 @@ export const HomeTeamCard = () => {
           Someone called, messaged or sent account details? Check them before you do anything.
         </p>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-          <select
-            aria-label="What to check"
-            value={kind}
-            onChange={(e) => {
-              setKind(e.target.value as CheckKind);
-              check.reset();
-            }}
-            className={`${field} sm:w-44`}
-          >
-            <option value="PHONE">Phone number</option>
-            <option value="EMAIL">Email address</option>
-            <option value="BANK_ACCOUNT">Bank account</option>
-          </select>
-          <input
+          <div className="sm:w-48">
+            <Select
+              ariaLabel="What to check"
+              value={kind}
+              onValueChange={(v) => {
+                setKind(v as CheckKind);
+                check.reset();
+              }}
+              searchable={false}
+              options={[
+                { value: 'PHONE', label: 'Phone number' },
+                { value: 'EMAIL', label: 'Email address' },
+                { value: 'BANK_ACCOUNT', label: 'Bank account' },
+              ]}
+            />
+          </div>
+          <Input
+            aria-label="Number, email or account"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder={
@@ -200,17 +203,15 @@ export const HomeTeamCard = () => {
                   ? '0803 123 4567'
                   : 'Account number'
             }
-            className={field}
           />
-          <button
-            type="button"
-            disabled={value.trim().length < 3 || check.isPending}
+          <Button
+            className="shrink-0"
+            isLoading={check.isPending}
+            disabled={value.trim().length < 3}
             onClick={() => check.mutate()}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
           >
-            {check.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
             Check
-          </button>
+          </Button>
         </div>
         <div className="mt-2">
           {check.data && <Verdict result={check.data} />}
@@ -239,88 +240,68 @@ export const HomeTeamCard = () => {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Report an impostor</h3>
             {homes.length > 1 && (
-              <select
-                aria-label="Which home"
-                value={reportLeaseId || homes[0].leaseId}
-                onChange={(e) => setReportLeaseId(e.target.value)}
-                className={field}
-              >
-                {homes.map((h) => (
-                  <option key={h.leaseId} value={h.leaseId}>
-                    {h.propertyTitle}
-                  </option>
-                ))}
-              </select>
+              <Field label="Which home">
+                <Select
+                  ariaLabel="Which home"
+                  value={reportLeaseId || homes[0].leaseId}
+                  onValueChange={setReportLeaseId}
+                  options={homes.map((h) => ({ value: h.leaseId, label: h.propertyTitle }))}
+                />
+              </Field>
             )}
-            <div className="grid gap-2 sm:grid-cols-2">
-              <select
-                aria-label="How they contacted you"
-                value={channel}
-                onChange={(e) => setChannel(e.target.value as ImpersonationChannel)}
-                className={field}
-              >
-                {CHANNELS.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-              <input
-                value={contactValue}
-                onChange={(e) => setContactValue(e.target.value)}
-                placeholder="Their number, email or account (optional)"
-                className={field}
-              />
-              <input
-                value={claimedToBe}
-                onChange={(e) => setClaimedToBe(e.target.value)}
-                placeholder="Who they said they were"
-                className={field}
-              />
-              <CurrencyInput
-                prefix="₦"
-                value={amount || ''}
-                onValueChange={setAmount}
-                placeholder="Amount asked for (optional)"
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="How they contacted you">
+                <Select
+                  ariaLabel="How they contacted you"
+                  value={channel}
+                  onValueChange={(v) => setChannel(v as ImpersonationChannel)}
+                  searchable={false}
+                  options={CHANNELS}
+                />
+              </Field>
+              <Field label="Their number, email or account" hint="Optional." htmlFor="imp-contact">
+                <Input
+                  id="imp-contact"
+                  value={contactValue}
+                  onChange={(e) => setContactValue(e.target.value)}
+                />
+              </Field>
+              <Field label="Who they said they were" htmlFor="imp-claimed">
+                <Input
+                  id="imp-claimed"
+                  value={claimedToBe}
+                  onChange={(e) => setClaimedToBe(e.target.value)}
+                  placeholder="e.g. your new manager"
+                />
+              </Field>
+              <Field label="Amount they asked for" hint="Optional.">
+                <CurrencyInput prefix="₦" value={amount || ''} onValueChange={setAmount} />
+              </Field>
             </div>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What happened"
-              className={field}
-            />
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <input
-                type="checkbox"
-                checked={paid}
-                onChange={(e) => setPaid(e.target.checked)}
-                className="h-4 w-4 accent-primary"
+            <Field label="What happened" htmlFor="imp-description">
+              <Textarea
+                id="imp-description"
+                rows={3}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
+            </Field>
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <Checkbox checked={paid} onCheckedChange={setPaid} aria-label="I already paid them" />
               I already paid them
             </label>
             <div className="flex gap-2">
-              <button
-                type="button"
-                disabled={
-                  claimedToBe.trim().length < 2 ||
-                  description.trim().length < 10 ||
-                  report.isPending
-                }
+              <Button
+                variant="danger"
+                isLoading={report.isPending}
+                disabled={claimedToBe.trim().length < 2 || description.trim().length < 10}
                 onClick={() => report.mutate()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground disabled:opacity-50"
               >
-                {report.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                 Send report
-              </button>
-              <button
-                type="button"
-                onClick={() => setReporting(false)}
-                className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
-              >
+              </Button>
+              <Button variant="ghost" onClick={() => setReporting(false)}>
                 Cancel
-              </button>
+              </Button>
             </div>
             {report.error && (
               <p className="text-sm text-destructive">{(report.error as Error).message}</p>
@@ -328,6 +309,6 @@ export const HomeTeamCard = () => {
           </div>
         )}
       </div>
-    </section>
+    </Card>
   );
 };

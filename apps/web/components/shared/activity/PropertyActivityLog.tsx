@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Bot, Building2, History, Loader2, ShieldCheck, UserRound, Wrench } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Bot, Building2, History, ShieldCheck, UserRound, Wrench } from 'lucide-react';
+import { Badge, Button, Select, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -38,9 +38,6 @@ const timeOf = (iso: string) =>
     hour: '2-digit',
     minute: '2-digit',
   });
-
-const selectClass =
-  'rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 /**
  * The owner's activity log: what managers, GetRentos, tenants and automatic
@@ -80,41 +77,24 @@ export const PropertyActivityLog = () => {
         </p>
       </div>
 
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row">
-        <select
-          aria-label="Property"
-          value={propertyId}
-          onChange={(e) => setPropertyId(e.target.value)}
-          className={selectClass}
-        >
-          <option value="">All properties</option>
-          {properties.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.title}
-            </option>
-          ))}
-        </select>
-        <div
-          className="inline-flex rounded-lg border border-border p-0.5"
-          role="group"
-          aria-label="Whose actions"
-        >
-          {(['everyone', 'managers'] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={who === value}
-              onClick={() => setWho(value)}
-              className={`rounded-md px-3 py-1.5 text-sm ${
-                who === value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {value === 'everyone' ? 'Everyone' : 'Managers only'}
-            </button>
-          ))}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="sm:w-72">
+          <Select
+            ariaLabel="Property"
+            value={propertyId}
+            onValueChange={setPropertyId}
+            options={[
+              { value: '', label: 'All properties' },
+              ...properties.map((p) => ({ value: p.id, label: p.title })),
+            ]}
+          />
         </div>
+        <Tabs value={who} onValueChange={(v) => setWho(v as 'managers' | 'everyone')}>
+          <TabsList aria-label="Whose actions">
+            <TabsTrigger value="everyone">Everyone</TabsTrigger>
+            <TabsTrigger value="managers">Managers only</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {feed.isLoading ? (
@@ -164,15 +144,13 @@ export const PropertyActivityLog = () => {
             </section>
           ))}
           {feed.hasNextPage && (
-            <button
-              type="button"
-              disabled={feed.isFetchingNextPage}
+            <Button
+              variant="outline"
+              isLoading={feed.isFetchingNextPage}
               onClick={() => void feed.fetchNextPage()}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
             >
-              {feed.isFetchingNextPage && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
               Show older activity
-            </button>
+            </Button>
           )}
         </div>
       )}

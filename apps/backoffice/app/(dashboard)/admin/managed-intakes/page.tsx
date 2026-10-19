@@ -5,17 +5,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck } from 'lucide-react';
 import {
   Badge,
+  type BadgeVariant,
   Button,
   Card,
   DatePicker,
   EmptyState,
+  Field,
   PageErrorState,
   Select,
   Tabs,
   TabsList,
   TabsTrigger,
+  Textarea,
   TimePicker,
-  type BadgeVariant,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 
@@ -59,9 +61,6 @@ const CLASS_LABEL: Record<string, string> = {
 };
 
 type Filter = 'open' | IntakeStatus;
-
-const textareaClass =
-  'mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 const lagosDateTime = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
@@ -286,8 +285,7 @@ const IntakeCard = ({
       {canOperate && (s === 'SUBMITTED' || s === 'ASSESSMENT_SCHEDULED') && (
         <Section title={s === 'SUBMITTED' ? 'Book the site visit' : 'Rebook the site visit'}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="block sm:w-80">
-              <span className="text-sm text-muted-foreground">Assessor</span>
+            <Field label="Assessor" className="sm:w-80">
               <div className="mt-1">
                 <FieldAssigneeSelect
                   ariaLabel="Assessor"
@@ -297,9 +295,8 @@ const IntakeCard = ({
                   staffOptions={staffOptions}
                 />
               </div>
-            </label>
-            <label className="block">
-              <span className="text-sm text-muted-foreground">Date</span>
+            </Field>
+            <Field label="Date">
               <div className="mt-1">
                 <DatePicker
                   value={visitDate}
@@ -307,13 +304,12 @@ const IntakeCard = ({
                   min={new Date().toISOString().slice(0, 10)}
                 />
               </div>
-            </label>
-            <label className="block">
-              <span className="text-sm text-muted-foreground">Time (Lagos)</span>
+            </Field>
+            <Field label="Time (Lagos)">
               <div className="mt-1">
                 <TimePicker value={visitTime} onChange={setVisitTime} minHour={7} maxHour={19} />
               </div>
-            </label>
+            </Field>
             <Button
               isLoading={schedule.mutation.isPending}
               disabled={!assessor || !visitDate || !visitTime}
@@ -365,12 +361,11 @@ const IntakeCard = ({
               options={TIER_OPTIONS}
             />
           </div>
-          <textarea
+          <Textarea
             rows={3}
             value={findings}
             onChange={(e) => setFindings(e.target.value)}
             placeholder="What the visit found: state of the building, tenants, risks. At least 20 characters."
-            className={textareaClass}
           />
           <Button
             className="mt-2"
@@ -394,19 +389,17 @@ const IntakeCard = ({
               options={TIER_OPTIONS}
             />
           </div>
-          <textarea
+          <Textarea
             rows={2}
             value={exclusions}
             onChange={(e) => setExclusions(e.target.value)}
             placeholder="Exclusions (optional), e.g. the generator house is not covered"
-            className={textareaClass}
           />
-          <textarea
+          <Textarea
             rows={2}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Note to the owner (optional)"
-            className={textareaClass}
           />
           <p className="mt-1 text-xs text-muted-foreground">
             The fee is the published one for the tier. Sending this is GetRentos accepting the
@@ -425,12 +418,11 @@ const IntakeCard = ({
 
       {canOperate && ['ASSESSED', 'PROPOSED', 'ACCEPTED'].includes(s) && (
         <Section title="Opening position">
-          <textarea
+          <Textarea
             rows={2}
             value={opening}
             onChange={(e) => setOpening(e.target.value)}
             placeholder="Deposits and who holds them, arrears, open repairs. At least 20 characters."
-            className={textareaClass}
           />
           <Button
             className="mt-2"
@@ -449,12 +441,11 @@ const IntakeCard = ({
 
       {canOperate && open && (
         <Section title="Decline">
-          <textarea
+          <Textarea
             rows={2}
             value={declineReason}
             onChange={(e) => setDeclineReason(e.target.value)}
             placeholder="The reason the owner will see. At least 10 characters."
-            className={textareaClass}
           />
           <Button
             className="mt-2"
