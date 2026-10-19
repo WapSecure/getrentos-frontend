@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApiError, onSessionExpired } from '@getrentos/shared';
-import { Toast } from '../Toast';
+import { ToastProvider, useToast, type ToastApi } from '../ToastProvider';
 
 const GENERIC_MUTATION_ERROR = 'We could not complete that action. Please try again.';
 
@@ -25,8 +25,21 @@ interface QueryProviderProps {
   loginPath?: string;
 }
 
-export function QueryProvider({ children, loginPath = '/login' }: QueryProviderProps) {
-  const [mutationError, setMutationError] = useState<{ id: number; message: string } | null>(null);
+export function QueryProvider(props: QueryProviderProps) {
+  return (
+    <ToastProvider>
+      <QueryClientHost {...props} />
+    </ToastProvider>
+  );
+}
+
+function QueryClientHost({ children, loginPath = '/login' }: QueryProviderProps) {
+  const toast = useToast();
+  // The client is created once; it reads the toast API through a ref.
+  const toastRef = useRef<ToastApi>(toast);
+  useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
 
   // A session that cannot be refreshed used to leave the app rendering zeros
   // with console errors and no explanation. Send them to sign in instead, with
@@ -50,7 +63,7 @@ export function QueryProvider({ children, loginPath = '/login' }: QueryProviderP
           onError: (error, _variables, _context, mutation) => {
             if (mutation.options.meta?.suppressGlobalError) return;
             if (mutation.options.onError && !mutation.options.meta?.showGlobalError) return;
-            setMutationError({ id: Date.now(), message: mutationErrorMessage(error) });
+            toastRef.current.error(mutationErrorMessage(error));
           },
         }),
         defaultOptions: {
@@ -62,25 +75,16 @@ export function QueryProvider({ children, loginPath = '/login' }: QueryProviderP
             },
             retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 10_000),
             // Operational failures should reach the nearest route boundary
-            // instead of being mistaken for a legitimate empty collection.
-            throwOnError: (error) => error instanceof ApiError && error.isRetryable,
+            // instead of being mistaken for a legitimate empty collection —
+            // but only when there is nothing to show. A failed background
+            // refresh keeps the data already on screen.
+            throwOnError: (error, query) =>
+              error instanceof ApiError && error.isRetryable && query.state.data === undefined,
             refetchOnWindowFocus: false,
           },
         },
       })
   );
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      {mutationError && (
-        <Toast
-          key={mutationError.id}
-          message={mutationError.message}
-          variant="error"
-          onClose={() => setMutationError(null)}
-        />
-      )}
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

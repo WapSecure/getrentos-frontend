@@ -27,6 +27,13 @@ interface ToastProps {
    * for a message the user has to act on.
    */
   duration?: number | null;
+  /** A follow-up such as "Undo" or "View". Clicking it also closes the toast. */
+  action?: { label: string; onClick: () => void };
+  /**
+   * `fixed` (default) pins a lone toast to the top right. `stack` leaves
+   * positioning to a container: ToastProvider uses it to stack several.
+   */
+  placement?: 'fixed' | 'stack';
 }
 
 // Design tokens, so the toast follows the theme like every other surface.
@@ -37,7 +44,14 @@ const variantStyles = {
   warning: { icon: AlertCircle, tone: 'bg-warning-subtle text-warning', bar: 'bg-warning' },
 };
 
-export const Toast = ({ message, variant, onClose, duration }: ToastProps) => {
+export const Toast = ({
+  message,
+  variant,
+  onClose,
+  duration,
+  action,
+  placement = 'fixed',
+}: ToastProps) => {
   const styles = variantStyles[variant];
   const Icon = styles.icon;
   const closeAfter = duration === undefined ? DEFAULT_DURATION_MS[variant] : duration;
@@ -68,7 +82,13 @@ export const Toast = ({ message, variant, onClose, duration }: ToastProps) => {
       onMouseLeave={() => setHeld(false)}
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
-      className="fixed left-4 right-4 top-36 z-[90] flex items-start gap-3 overflow-hidden rounded-xl border border-border bg-card py-3 pl-4 pr-2 text-card-foreground shadow-lg sm:left-auto sm:w-[26rem] md:top-20"
+      layout={placement === 'stack'}
+      className={cn(
+        'flex items-start gap-3 overflow-hidden rounded-xl border border-border bg-card py-3 pl-4 pr-2 text-card-foreground shadow-lg',
+        placement === 'fixed'
+          ? 'fixed left-4 right-4 top-36 z-[90] sm:left-auto sm:w-[26rem] md:top-20'
+          : 'pointer-events-auto relative w-full'
+      )}
     >
       <span aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', styles.bar)} />
       <span
@@ -82,6 +102,18 @@ export const Toast = ({ message, variant, onClose, duration }: ToastProps) => {
       <span className="min-w-0 flex-1 py-1 text-sm font-medium leading-5 text-foreground">
         {message}
       </span>
+      {action && (
+        <button
+          type="button"
+          onClick={() => {
+            action.onClick();
+            onClose();
+          }}
+          className="shrink-0 rounded-md px-2 py-1 text-sm font-semibold leading-5 text-primary transition-colors hover:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {action.label}
+        </button>
+      )}
       <button
         type="button"
         onClick={onClose}
