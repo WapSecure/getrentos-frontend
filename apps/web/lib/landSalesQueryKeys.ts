@@ -23,6 +23,8 @@ export const buyerLandKeys = {
     ['buyer', 'land', 'purchases', 'statement', purchaseId] as const,
   transactionMilestones: (txId: string) =>
     ['buyer', 'land', 'transactions', txId, 'milestones'] as const,
+  transactionConditions: (txId: string) =>
+    ['buyer', 'land', 'transactions', txId, 'conditions'] as const,
 };
 
 export const landMarketKeys = {

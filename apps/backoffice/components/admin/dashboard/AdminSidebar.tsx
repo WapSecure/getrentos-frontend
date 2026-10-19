@@ -175,6 +175,12 @@ const navItems: NavItem[] = [
     permission: 'sales.view',
   },
   {
+    label: 'Land Resales',
+    href: '/admin/land/resales',
+    icon: ScrollText,
+    permission: 'sales.view',
+  },
+  {
     label: 'Land Disputes',
     href: '/admin/land/disputes',
     icon: Gavel,

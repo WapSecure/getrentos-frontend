@@ -14,6 +14,7 @@ import type { LandMilestone, LandMilestoneDeliverInput } from '@/types/landDevel
 import { errorMessage, useNotify } from '../developer/feedback';
 import { DeliverMilestoneDialog } from './DeliverMilestoneDialog';
 import { MilestoneList } from './MilestoneList';
+import { ConditionsPanel } from '../closing/ConditionsPanel';
 
 /**
  * Conveyance steps on the sale of a whole parcel through a marketplace offer.
@@ -61,6 +62,21 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
     onError: (reason) => notify(errorMessage(reason), 'error'),
   });
 
+  const conditionsKey = landDeveloperKeys.transactionConditions(txId);
+  const conditions = useQuery({
+    queryKey: conditionsKey,
+    queryFn: () => unwrap(landDeveloperService.listTransactionConditions(txId)),
+  });
+  const deliverCondition = useMutation({
+    mutationFn: ({ conditionKey, note }: { conditionKey: string; note: string }) =>
+      unwrap(landDeveloperService.deliverTransactionCondition(txId, conditionKey, note)),
+    onSuccess: (next) => {
+      queryClient.setQueryData(conditionsKey, next);
+      notify('Marked met. The buyer has been asked to confirm.');
+    },
+    onError: (reason) => notify(errorMessage(reason), 'error'),
+  });
+
   const required = data?.filter((milestone) => milestone.required) ?? [];
   const satisfied = required.filter(
     (milestone) => milestone.status === 'CONFIRMED' || milestone.status === 'WAIVED'
@@ -82,6 +98,26 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
         Mark each step delivered as you complete it. The buyer confirms each one, and the payment is
         released to you once every required step is confirmed.
       </p>
+
+      {conditions.data && conditions.data.length > 0 && (
+        <Card static className="mt-6 p-5">
+          <h2 className="font-semibold text-foreground">Conditions of the sale</h2>
+          <p className="mb-4 mt-1 text-sm text-muted-foreground">
+            The payment is not released while any condition is open. Mark the ones you deliver as
+            met; GetRentos checked the rest against the record. A condition missed by its deadline
+            lets the buyer cancel with a full refund.
+          </p>
+          <ConditionsPanel
+            conditions={conditions.data}
+            role="developer"
+            sellerLabel="You"
+            busyKey={
+              deliverCondition.isPending ? (deliverCondition.variables?.conditionKey ?? null) : null
+            }
+            onDeliver={(conditionKey, note) => deliverCondition.mutate({ conditionKey, note })}
+          />
+        </Card>
+      )}
 
       <div className="mt-6">
         {isLoading ? (

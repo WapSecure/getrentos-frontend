@@ -1,3 +1,4 @@
+import type { LandClosingCondition } from '@/types/landClosing';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   LandCollectionsSummary,
@@ -214,6 +215,19 @@ export const landDeveloperService = {
       authFetch<LandMilestone>(
         `/owner/land/transactions/${txId}/milestones/${encodeURIComponent(key)}/deliver`,
         json('POST', input)
+      )
+    ),
+
+  listTransactionConditions: (txId: string) =>
+    safeCall(() =>
+      authFetch<LandClosingCondition[]>(`/owner/land/transactions/${txId}/conditions`)
+    ),
+
+  deliverTransactionCondition: (txId: string, key: string, note: string) =>
+    safeCall(() =>
+      authFetch<LandClosingCondition[]>(
+        `/owner/land/transactions/${txId}/conditions/${encodeURIComponent(key)}/deliver`,
+        json('POST', note ? { note } : {})
       )
     ),
 

@@ -30,4 +30,6 @@ export const landDeveloperKeys = {
   purchase: (purchaseId: string) => ['land', 'developer', 'purchases', purchaseId] as const,
   transactionMilestones: (txId: string) =>
     ['land', 'developer', 'transactions', txId, 'milestones'] as const,
+  transactionConditions: (txId: string) =>
+    ['land', 'developer', 'transactions', txId, 'conditions'] as const,
 };
