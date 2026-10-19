@@ -27,6 +27,7 @@ import {
 } from '@/services/adminManagedService';
 import { adminService } from '@/services/adminService';
 import { useAdminUser } from '../layout';
+import { FieldAssigneeSelect } from '@/components/admin/managed/FieldAssigneeSelect';
 import { hasAdminPermission } from '@/lib/adminAccess';
 
 const TIER_OPTIONS: { value: ManagedServicingTier; label: string }[] = [
@@ -91,6 +92,30 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
     {children}
   </div>
 );
+
+/** What the assessor's check-in proved, if they checked in at all. */
+const PresenceLine = ({ visit }: { visit: NonNullable<ManagedIntake['visit']> }) => {
+  if (visit.status === 'CANCELLED') return null;
+  if (!visit.checkedInAt) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        {visit.status === 'DONE' ? 'Assessed without an on-site check-in.' : 'No check-in yet.'}
+      </p>
+    );
+  }
+  const where =
+    visit.distanceM === null
+      ? 'the property has no map pin, so the distance is unknown'
+      : `${visit.distanceM} m from the property pin`;
+  return (
+    <p
+      className={`text-sm ${visit.withinRange === false ? 'text-destructive' : 'text-muted-foreground'}`}
+    >
+      Checked in {lagosDateTime(visit.checkedInAt)}: {where}
+      {visit.withinRange === false && ' (not on site)'}.
+    </p>
+  );
+};
 
 const IntakeCard = ({
   intake,
@@ -223,6 +248,7 @@ const IntakeCard = ({
           with {intake.assessorName ?? 'an assessor'}
         </p>
       )}
+      {intake.visit && <PresenceLine visit={intake.visit} />}
       {intake.assessedAt && (
         <p className="text-sm text-muted-foreground">
           Assessed {formatDate(intake.assessedAt)} by {intake.assessorName ?? 'staff'}: condition{' '}
@@ -260,14 +286,15 @@ const IntakeCard = ({
       {canOperate && (s === 'SUBMITTED' || s === 'ASSESSMENT_SCHEDULED') && (
         <Section title={s === 'SUBMITTED' ? 'Book the site visit' : 'Rebook the site visit'}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="block sm:w-64">
+            <label className="block sm:w-80">
               <span className="text-sm text-muted-foreground">Assessor</span>
               <div className="mt-1">
-                <Select
+                <FieldAssigneeSelect
                   ariaLabel="Assessor"
+                  propertyId={intake.propertyId}
                   value={assessor}
                   onValueChange={setAssessor}
-                  options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+                  staffOptions={staffOptions}
                 />
               </div>
             </label>
