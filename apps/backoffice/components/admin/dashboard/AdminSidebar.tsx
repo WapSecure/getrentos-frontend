@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminManagedService } from '@/services/adminManagedService';
 import {
   LayoutDashboard,
+  UserCheck,
   Users,
   ShieldCheck,
   Fingerprint,
@@ -187,6 +188,12 @@ const navItems: NavItem[] = [
     permission: 'verifications.review',
   },
   {
+    label: 'Seller Authority',
+    href: '/admin/land/authority',
+    icon: UserCheck,
+    permission: 'verifications.review',
+  },
+  {
     label: 'Land Professionals',
     href: '/admin/land/professionals',
     icon: BadgeCheck,
@@ -317,14 +324,27 @@ const navItems: NavItem[] = [
   },
 ];
 
-const navGroups = [
-  { label: 'Overview', items: navItems.slice(0, 1) },
-  { label: 'People and trust', items: navItems.slice(1, 6) },
-  { label: 'Marketplace operations', items: navItems.slice(6, 16) },
-  { label: 'Risk and finance', items: navItems.slice(16, 20) },
-  { label: 'Support and insights', items: navItems.slice(20, 23) },
-  { label: 'Platform administration', items: navItems.slice(23) },
+/**
+ * Each group starts at a named item, so adding an item to a group (the land
+ * screens keep growing) cannot push its neighbours into the next group, as
+ * fixed slice indices did.
+ */
+const startOf = (label: string) => navItems.findIndex((item) => item.label === label);
+const groupStarts: [group: string, firstItem: string][] = [
+  ['Overview', 'Dashboard'],
+  ['People and trust', 'Users'],
+  ['Marketplace operations', 'Property Authorities'],
+  ['Risk and finance', 'Land Diligence'],
+  ['Support and insights', 'Shortlets'],
+  ['Platform administration', 'Rent Finance'],
 ];
+const navGroups = groupStarts.map(([label, first], index) => ({
+  label,
+  items: navItems.slice(
+    startOf(first),
+    index + 1 < groupStarts.length ? startOf(groupStarts[index + 1][1]) : undefined
+  ),
+}));
 
 const hasAccess = (roles: string[] | undefined, item: NavItem) =>
   item.href === ROUTES.ADMIN_ACCESS

@@ -16,6 +16,7 @@ import {
   Star,
   UserRound,
   Wallet,
+  UserCheck,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -67,6 +68,13 @@ export default function BuyerAccount() {
       description: 'Browse verified land parcels',
       icon: LandPlot,
       onPress: go('/(app)/land'),
+    },
+    {
+      key: 'land-consents',
+      label: 'Land sale consents',
+      description: 'Sales that need your consent as a co-owner or family member',
+      icon: UserCheck,
+      onPress: go('/(app)/land-consents'),
     },
     {
       key: 'stays',

@@ -25,6 +25,7 @@ import {
   Star,
   Users,
   Wallet,
+  UserCheck,
 } from 'lucide-react-native';
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -101,6 +102,13 @@ export default function OwnerAccount() {
       description: 'Parcels, title and diligence',
       icon: LandPlot,
       onPress: go('/(app)/owner-land'),
+    },
+    {
+      key: 'land-consents',
+      label: 'Land sale consents',
+      description: 'Sales that need your consent as a co-owner or family member',
+      icon: UserCheck,
+      onPress: go('/(app)/land-consents'),
     },
     {
       key: 'team',

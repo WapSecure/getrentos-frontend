@@ -7,3 +7,4 @@ export * from './parcelBoundary';
 export * from './videoCall';
 export * from './videoLimits';
 export * from './trustLabel';
+export * from './landAuthority';

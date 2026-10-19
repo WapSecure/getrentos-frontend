@@ -45,6 +45,7 @@ const WEB_PATH_TO_ROUTE: Record<string, string> = {
   '/owner/billing': '/(app)/billing',
   '/owner/realtors': '/(app)/representatives',
   '/owner/land': '/(app)/owner-land',
+  '/land/consents': '/(app)/land-consents',
   '/owner/managed': '/(app)/managed-properties',
   '/owner/estate-agreements': '/(app)/estate-agreements',
   '/owner/shortlets': '/(app)/host',
@@ -200,7 +201,10 @@ export function routeForActionUrl(url?: string | null): string | null {
     .split(/[?#]/)[0]
     .replace(/^\/dashboard/, '')
     .replace(/\/$/, '');
-  return WEB_PATH_TO_ROUTE[path] ?? null;
+  if (WEB_PATH_TO_ROUTE[path]) return WEB_PATH_TO_ROUTE[path];
+  // One land parcel's pages (e.g. its authority to sell) open the land portfolio.
+  if (path.startsWith('/owner/land/')) return '/(app)/owner-land';
+  return null;
 }
 
 /** Each portal's own conversation screen, for a message notification. */
