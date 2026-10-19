@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -18,8 +18,11 @@ import {
   parseISO,
   startOfMonth,
   subMonths,
+  addDays,
 } from 'date-fns';
 import { cn } from '@getrentos/shared';
+import { controlShell, type ControlSize } from './controlStyles';
+import { useFieldControl } from './fieldContext';
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
@@ -37,6 +40,14 @@ interface DatePickerProps {
    */
   disabledDates?: readonly string[];
   className?: string;
+  /** Trigger id; inside a Field the field supplies it. */
+  id?: string;
+  invalid?: boolean;
+  required?: boolean;
+  /** Offer a "Clear" action once a date is chosen; clearing calls onChange(''). */
+  clearable?: boolean;
+  ariaLabel?: string;
+  controlSize?: ControlSize;
 }
 
 const toDate = (value?: string) => (value ? parseISO(value) : undefined);
@@ -50,8 +61,17 @@ export const DatePicker = ({
   disabled,
   disabledDates,
   className,
+  id,
+  invalid,
+  required,
+  clearable = false,
+  ariaLabel,
+  controlSize,
 }: DatePickerProps) => {
+  const field = useFieldControl({ id, invalid, required });
   const [open, setOpen] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [focusDay, setFocusDay] = useState<Date | null>(null);
   const selected = toDate(value);
   const minDate = toDate(min);
   const maxDate = toDate(max);
@@ -75,29 +95,66 @@ export const DatePicker = ({
     setOpen(false);
   };
 
+  // Keyboard: arrows move a day/week (crossing months), Home/End go to the week's ends.
+  useEffect(() => {
+    if (!open || !focusDay) return;
+    const key = format(focusDay, 'yyyy-MM-dd');
+    gridRef.current?.querySelector<HTMLButtonElement>(`[data-day="${key}"]`)?.focus();
+  }, [open, focusDay, viewMonth]);
+
+  const onGridKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const from = focusDay ?? selected ?? new Date();
+    const step: Record<string, number> = {
+      ArrowLeft: -1,
+      ArrowRight: 1,
+      ArrowUp: -7,
+      ArrowDown: 7,
+    };
+    let next: Date | null = null;
+    if (event.key in step) next = addDays(from, step[event.key]);
+    else if (event.key === 'Home') next = addDays(from, -getDay(from));
+    else if (event.key === 'End') next = addDays(from, 6 - getDay(from));
+    if (!next) return;
+    event.preventDefault();
+    if (!isSameMonth(next, viewMonth)) setViewMonth(startOfMonth(next));
+    setFocusDay(next);
+  };
+  const today = new Date();
+
   return (
     <RadixPopover.Root
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) setViewMonth(selected ?? new Date());
+        if (next) {
+          setViewMonth(selected ?? new Date());
+          setFocusDay(selected ?? new Date());
+        }
       }}
     >
       <RadixPopover.Trigger asChild>
         <button
           type="button"
+          id={field.id}
           disabled={disabled}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-label={
+            ariaLabel
+              ? `${ariaLabel}: ${selected ? format(selected, 'MMMM d, yyyy') : placeholder}`
+              : undefined
+          }
+          {...field.ariaProps}
           className={cn(
-            'flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-border bg-card px-3.5 text-left text-sm outline-none transition-[border-color,background-color,box-shadow] duration-150',
-            'hover:border-foreground/20',
-            'focus:border-primary focus:ring-4 focus:ring-primary/12 disabled:cursor-not-allowed disabled:bg-secondary/60 disabled:opacity-60 disabled:hover:border-border',
+            'flex items-center justify-between gap-2 text-left',
+            controlShell({ size: controlSize, invalid: field.invalid, disabled }),
             className
           )}
         >
-          <span className={selected ? 'text-foreground' : 'text-muted-foreground'}>
+          <span className={cn('truncate', selected ? 'text-foreground' : 'text-muted-foreground')}>
             {selected ? format(selected, 'MMM d, yyyy') : placeholder}
           </span>
-          <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+          <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </button>
       </RadixPopover.Trigger>
 
@@ -115,7 +172,9 @@ export const DatePicker = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.12 }}
-                className="z-[70] w-72 rounded-2xl border border-border bg-card p-3 shadow-[0_16px_40px_rgba(0,0,0,0.16)] focus:outline-none"
+                role="dialog"
+                aria-label={ariaLabel ?? 'Choose a date'}
+                className="z-[70] w-[18.5rem] rounded-2xl border border-border bg-card p-3 shadow-lg focus:outline-none"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <button
@@ -153,21 +212,30 @@ export const DatePicker = ({
                   ))}
                 </div>
 
-                <div className="grid grid-cols-7 gap-1">
+                <div ref={gridRef} onKeyDown={onGridKeyDown} className="grid grid-cols-7 gap-1">
                   {Array.from({ length: leadingBlanks }).map((_, i) => (
                     <div key={`blank-${i}`} />
                   ))}
                   {days.map((day) => {
                     const isSelected = selected && isSameDay(day, selected);
                     const dayDisabled = isDisabled(day);
+                    const focusable = focusDay
+                      ? isSameDay(day, focusDay)
+                      : isSelected || isToday(day);
                     return (
                       <button
                         key={day.toISOString()}
                         type="button"
+                        data-day={format(day, 'yyyy-MM-dd')}
+                        tabIndex={focusable ? 0 : -1}
+                        aria-label={format(day, 'EEEE, MMMM d, yyyy')}
+                        aria-pressed={Boolean(isSelected)}
+                        aria-current={isToday(day) ? 'date' : undefined}
                         onClick={() => handleSelect(day)}
+                        onFocus={() => setFocusDay(day)}
                         disabled={dayDisabled}
                         className={cn(
-                          'flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary',
+                          'flex h-9 w-9 items-center justify-center rounded-lg text-sm tabular-nums transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                           isSameMonth(day, viewMonth) ? 'text-foreground' : 'text-muted-foreground',
                           isSelected
                             ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
@@ -182,13 +250,28 @@ export const DatePicker = ({
                   })}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleSelect(new Date())}
-                  className="mt-3 w-full rounded-lg py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-accent focus:outline-none focus:ring-4 focus:ring-primary/12"
-                >
-                  Today
-                </button>
+                <div className="mt-3 flex items-center gap-2 border-t border-border pt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(today)}
+                    disabled={Boolean(isDisabled(today))}
+                    className="flex-1 rounded-lg py-1.5 text-center text-xs font-medium text-primary transition-colors hover:bg-accent focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/12 disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    Today
+                  </button>
+                  {clearable && value && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onChange('');
+                        setOpen(false);
+                      }}
+                      className="flex-1 rounded-lg py-1.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/12"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
               </motion.div>
             </RadixPopover.Content>
           </RadixPopover.Portal>

@@ -2,6 +2,8 @@
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cn, VALIDATION_PATTERNS } from '@getrentos/shared';
+import { controlShell, innerInputClass } from './controlStyles';
+import { useFieldControl } from './fieldContext';
 
 export interface NumberInputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -17,6 +19,8 @@ export interface NumberInputProps extends Omit<
   trailingIcon?: ReactNode;
   /** Extra classes for the native input rather than its visual shell. */
   inputClassName?: string;
+  /** Marks the control invalid. Inside a Field, its `error` does this for you. */
+  invalid?: boolean;
 }
 
 /**
@@ -48,10 +52,23 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
       className,
       inputClassName,
       disabled,
+      readOnly,
+      invalid,
+      id,
+      required,
+      'aria-describedby': describedBy,
+      'aria-invalid': ariaInvalid,
       ...props
     },
     ref
   ) => {
+    const field = useFieldControl({
+      id,
+      invalid,
+      required,
+      'aria-describedby': describedBy,
+      'aria-invalid': ariaInvalid,
+    });
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const raw = event.target.value;
       let cleaned = raw.replace(
@@ -72,23 +89,26 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
     return (
       <span
         className={cn(
-          'group flex min-h-11 w-full items-center gap-2 rounded-xl border border-border bg-card px-3.5 transition-[border-color,background-color,box-shadow] duration-150',
-          'hover:border-foreground/20',
-          'focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/12',
-          disabled && 'cursor-not-allowed bg-secondary/60 opacity-60 hover:border-border'
+          'group flex items-center gap-2',
+          controlShell({ invalid: field.invalid, disabled, readOnly, wraps: true })
         )}
       >
         {leadingIcon && <span className="shrink-0 text-muted-foreground">{leadingIcon}</span>}
         <input
           ref={ref}
           type="text"
+          id={field.id}
           inputMode={integer ? 'numeric' : 'decimal'}
           autoComplete="off"
           disabled={disabled}
+          readOnly={readOnly}
+          required={required}
+          {...field.ariaProps}
           value={value == null ? '' : String(value)}
           onChange={handleChange}
           className={cn(
-            'min-w-0 flex-1 border-0 bg-transparent py-2 text-sm text-foreground shadow-none outline-none placeholder:text-muted-foreground focus:shadow-none',
+            'tabular-nums',
+            innerInputClass,
             stripShellClasses(className),
             inputClassName
           )}

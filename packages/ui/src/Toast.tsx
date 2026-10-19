@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, AlertCircle, Info, XCircle, X } from 'lucide-react';
+import { cn } from '@getrentos/shared';
 
 export type ToastVariant = 'success' | 'error' | 'info' | 'warning';
 
@@ -28,35 +29,12 @@ interface ToastProps {
   duration?: number | null;
 }
 
+// Design tokens, so the toast follows the theme like every other surface.
 const variantStyles = {
-  success: {
-    bg: 'bg-green-50 dark:bg-green-900/20',
-    border: 'border-green-200 dark:border-green-800',
-    text: 'text-green-800 dark:text-green-300',
-    icon: CheckCircle,
-    iconColor: 'text-green-500',
-  },
-  error: {
-    bg: 'bg-red-50 dark:bg-red-900/20',
-    border: 'border-red-200 dark:border-red-800',
-    text: 'text-red-800 dark:text-red-300',
-    icon: XCircle,
-    iconColor: 'text-red-500',
-  },
-  info: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-800',
-    text: 'text-blue-800 dark:text-blue-300',
-    icon: Info,
-    iconColor: 'text-blue-500',
-  },
-  warning: {
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-    border: 'border-yellow-200 dark:border-yellow-800',
-    text: 'text-yellow-800 dark:text-yellow-300',
-    icon: AlertCircle,
-    iconColor: 'text-yellow-500',
-  },
+  success: { icon: CheckCircle, tone: 'bg-success-subtle text-success', bar: 'bg-success' },
+  error: { icon: XCircle, tone: 'bg-destructive-subtle text-destructive', bar: 'bg-destructive' },
+  info: { icon: Info, tone: 'bg-info-subtle text-info', bar: 'bg-info' },
+  warning: { icon: AlertCircle, tone: 'bg-warning-subtle text-warning', bar: 'bg-warning' },
 };
 
 export const Toast = ({ message, variant, onClose, duration }: ToastProps) => {
@@ -90,17 +68,27 @@ export const Toast = ({ message, variant, onClose, duration }: ToastProps) => {
       onMouseLeave={() => setHeld(false)}
       onFocusCapture={() => setHeld(true)}
       onBlurCapture={() => setHeld(false)}
-      className={`fixed left-4 right-4 top-36 z-[90] flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg sm:left-auto sm:max-w-md md:top-20 ${styles.bg} ${styles.border}`}
+      className="fixed left-4 right-4 top-36 z-[90] flex items-start gap-3 overflow-hidden rounded-xl border border-border bg-card py-3 pl-4 pr-2 text-card-foreground shadow-lg sm:left-auto sm:w-[26rem] md:top-20"
     >
-      <Icon aria-hidden="true" className={`h-5 w-5 shrink-0 ${styles.iconColor}`} />
-      <span className={`min-w-0 flex-1 text-sm font-medium ${styles.text}`}>{message}</span>
+      <span aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', styles.bar)} />
+      <span
+        className={cn(
+          'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+          styles.tone
+        )}
+      >
+        <Icon aria-hidden="true" className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 flex-1 py-1 text-sm font-medium leading-5 text-foreground">
+        {message}
+      </span>
       <button
         type="button"
         onClick={onClose}
         aria-label="Dismiss notification"
-        className={`ml-2 shrink-0 rounded-md p-1 ${styles.text} hover:opacity-70`}
+        className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <X className="w-4 h-4" aria-hidden="true" />
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </motion.div>
   );

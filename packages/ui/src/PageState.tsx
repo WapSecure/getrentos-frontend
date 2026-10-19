@@ -11,6 +11,8 @@ interface PageErrorStateProps {
   isRetrying?: boolean;
   isOffline?: boolean;
   className?: string;
+  /** h1 for a whole page; h2 when the error sits in a section of a page. */
+  headingLevel?: 'h1' | 'h2';
 }
 
 export function PageErrorState({
@@ -20,6 +22,7 @@ export function PageErrorState({
   isRetrying = false,
   isOffline = false,
   className,
+  headingLevel: Heading = 'h1',
 }: PageErrorStateProps) {
   const Icon: LucideIcon = isOffline ? WifiOff : AlertTriangle;
   const resolvedTitle = title ?? (isOffline ? 'You are offline' : 'We could not load this page');
@@ -37,10 +40,10 @@ export function PageErrorState({
         className
       )}
     >
-      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+      <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive-subtle text-destructive">
         <Icon className="h-7 w-7" aria-hidden="true" />
       </span>
-      <h1 className="text-xl font-semibold text-foreground">{resolvedTitle}</h1>
+      <Heading className="text-xl font-semibold text-foreground">{resolvedTitle}</Heading>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{resolvedDescription}</p>
       {onRetry && (
         <Button
