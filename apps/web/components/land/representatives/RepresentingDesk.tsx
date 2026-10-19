@@ -11,6 +11,8 @@ import {
   landRepresentativeKeys,
   landRepresentativeService,
 } from '@/services/landRepresentativeService';
+import { landSiteTourKeys, landSiteTourService } from '@/services/landSiteTourService';
+import { TourCard } from '../tours/TourCard';
 import {
   REPRESENTATIVE_SCOPE_LABELS,
   type LandRepresentativeAppointment,
@@ -76,6 +78,29 @@ const PrincipalDeals = ({ appointment }: { appointment: LandRepresentativeAppoin
   );
 };
 
+/** Video tours a buyer asked this representative to join. */
+const AttendingTours = () => {
+  const tours = useQuery({
+    queryKey: landSiteTourKeys.attending,
+    queryFn: () => unwrap(landSiteTourService.attending()),
+    retry: false,
+  });
+  const items = tours.data ?? [];
+  if (items.length === 0) return null;
+  return (
+    <section aria-labelledby="attending-heading" className="mb-6 space-y-3">
+      <h2 id="attending-heading" className="text-lg font-semibold text-foreground">
+        Video tours you are joining
+      </h2>
+      <ul className="space-y-3">
+        {items.map((tour) => (
+          <TourCard key={tour.id} tour={tour} who={`For ${tour.buyerName}`} />
+        ))}
+      </ul>
+    </section>
+  );
+};
+
 /** Buyers the signed-in person represents, and invitations waiting for an answer. */
 export const RepresentingDesk = () => {
   const queryClient = useQueryClient();
@@ -122,6 +147,7 @@ export const RepresentingDesk = () => {
   }
   return (
     <>
+      <AttendingTours />
       <ul className="space-y-4">
         {items.map((appointment) => (
           <li key={appointment.id} className="rounded-2xl border border-border bg-card p-5">

@@ -13,6 +13,7 @@ import {
   Ruler,
   ShieldCheck,
   Gavel,
+  Video,
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
@@ -168,6 +169,14 @@ export const OwnerLandWorkspace = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            href="/owner/land/tours"
+            variant="ghost"
+            rounded="lg"
+            icon={<Video className="h-4 w-4" />}
+          >
+            Video tours
+          </Button>
           <Button
             href="/land/disputes"
             variant="ghost"
