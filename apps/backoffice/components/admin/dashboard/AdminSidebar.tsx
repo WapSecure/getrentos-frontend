@@ -36,6 +36,7 @@ import {
   Navigation,
   TrendingUp,
   MessageSquareText,
+  ShieldAlert,
   Handshake,
   FileSignature,
   CircleAlert,
@@ -290,6 +291,12 @@ const navItems: NavItem[] = [
     label: 'Fraud & Risk',
     href: ROUTES.ADMIN_FRAUD,
     icon: AlertTriangle,
+    permission: 'fraud.review',
+  },
+  {
+    label: 'Impersonation Reports',
+    href: '/admin/impersonation-reports',
+    icon: ShieldAlert,
     permission: 'fraud.review',
   },
   {

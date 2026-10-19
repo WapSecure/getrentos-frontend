@@ -1,5 +1,6 @@
 'use client';
 
+import { HomeTeamCard } from './HomeTeamCard';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -250,6 +251,8 @@ export function HomeOverviewView() {
           </div>
         </div>
       </section>
+
+      <HomeTeamCard />
 
       {hasDataError && (
         <div
