@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Star,
   Wrench,
+  ClipboardList,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
@@ -50,6 +51,13 @@ export default function AgentAccount() {
       description: 'On-site maintenance jobs assigned to you',
       icon: Wrench,
       onPress: go('/(app)/agent-work-orders'),
+    },
+    {
+      key: 'land-inspections',
+      label: 'Land inspections',
+      description: 'Visits assigned to you as an inspector',
+      icon: ClipboardList,
+      onPress: go('/(app)/land-inspections'),
     },
     {
       key: 'verifications',

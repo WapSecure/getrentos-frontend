@@ -50,6 +50,8 @@ describe('owner and landlord web links', () => {
     expect(routeForActionUrl('/owner/estate-agreements')).toBe('/(app)/estate-agreements');
     // Seller authority: signatories answer in the app; a seller's parcel page opens their land.
     expect(routeForActionUrl('/land/consents')).toBe('/(app)/land-consents');
+    expect(routeForActionUrl('/land/watch')).toBe('/(app)/land-watch');
+    expect(routeForActionUrl('/land/inspections')).toBe('/(app)/land-inspections');
     expect(routeForActionUrl('/owner/land/abc-123/authority')).toBe('/(app)/owner-land');
   });
 });

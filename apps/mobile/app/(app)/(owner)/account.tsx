@@ -26,6 +26,8 @@ import {
   Users,
   Wallet,
   UserCheck,
+  Eye,
+  ClipboardList,
 } from 'lucide-react-native';
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -102,6 +104,20 @@ export default function OwnerAccount() {
       description: 'Parcels, title and diligence',
       icon: LandPlot,
       onPress: go('/(app)/owner-land'),
+    },
+    {
+      key: 'land-watch',
+      label: 'Land Watch',
+      description: 'Inspections, alerts and reminders for land you own',
+      icon: Eye,
+      onPress: go('/(app)/land-watch'),
+    },
+    {
+      key: 'land-inspections',
+      label: 'Land inspections',
+      description: 'Visits assigned to you as an inspector',
+      icon: ClipboardList,
+      onPress: go('/(app)/land-inspections'),
     },
     {
       key: 'land-consents',

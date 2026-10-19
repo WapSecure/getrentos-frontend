@@ -17,6 +17,8 @@ import {
   UserRound,
   Wallet,
   UserCheck,
+  Eye,
+  ClipboardList,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -68,6 +70,20 @@ export default function BuyerAccount() {
       description: 'Browse verified land parcels',
       icon: LandPlot,
       onPress: go('/(app)/land'),
+    },
+    {
+      key: 'land-watch',
+      label: 'Land Watch',
+      description: 'Inspections, alerts and reminders for land you own',
+      icon: Eye,
+      onPress: go('/(app)/land-watch'),
+    },
+    {
+      key: 'land-inspections',
+      label: 'Land inspections',
+      description: 'Visits assigned to you as an inspector',
+      icon: ClipboardList,
+      onPress: go('/(app)/land-inspections'),
     },
     {
       key: 'land-consents',

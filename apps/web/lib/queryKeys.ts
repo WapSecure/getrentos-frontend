@@ -259,6 +259,11 @@ export const landKeys = {
   publicListing: (listingId: string) => ['land', 'public', listingId] as const,
   authority: (propertyId: string) => ['land', 'owner', propertyId, 'authority'] as const,
   consentRequests: ['land', 'consent-requests'] as const,
+  watches: ['land', 'watch'] as const,
+  watch: (id: string) => ['land', 'watch', id] as const,
+  watchTerms: ['land', 'watch', 'terms'] as const,
+  inspectorJobs: ['land', 'inspections'] as const,
+  inspectorJob: (id: string) => ['land', 'inspections', id] as const,
 };
 
 export const shortletKeys = {
