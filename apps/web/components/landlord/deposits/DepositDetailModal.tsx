@@ -19,6 +19,7 @@ import {
   DEDUCTION_STATUS_LABELS,
   DEPOSIT_STATUS_LABELS,
   type DeductionStatus,
+  type DepositDeduction,
 } from '@/services/depositService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -32,6 +33,169 @@ const DEDUCTION_VARIANT: Record<DeductionStatus, BadgeVariant> = {
 const formatNaira = (amount: number) =>
   `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 
+/**
+ * One deduction, with what the owner can do about it. A tenant's dispute is
+ * shown in their words; a disputed proposal is approved only with an answer,
+ * and a disputed deduction that already counts is kept (with a reason) or
+ * dropped. Errors are shown, not swallowed.
+ */
+const DeductionRow = ({
+  depositId,
+  deduction: d,
+  open,
+  onChanged,
+}: {
+  depositId: string;
+  deduction: DepositDeduction;
+  open: boolean;
+  onChanged: () => void;
+}) => {
+  const [mode, setMode] = useState<'idle' | 'reject' | 'answer'>('idle');
+  const [text, setText] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const disputeOpen = Boolean(d.tenantDisputedAt && !d.disputeAnsweredAt);
+  const done = () => {
+    setMode('idle');
+    setText('');
+    setError(null);
+    onChanged();
+  };
+  const onError = (err: Error) => setError(err.message || 'That did not go through.');
+  const approve = useMutation({
+    mutationFn: () =>
+      unwrap(depositService.approveDeduction(depositId, d.id, text.trim() || undefined)),
+    onSuccess: done,
+    onError,
+  });
+  const reject = useMutation({
+    mutationFn: () => unwrap(depositService.rejectDeduction(depositId, d.id, text.trim())),
+    onSuccess: done,
+    onError,
+  });
+  const answer = useMutation({
+    mutationFn: (withdraw: boolean) =>
+      unwrap(depositService.answerDispute(depositId, d.id, { answer: text.trim(), withdraw })),
+    onSuccess: done,
+    onError,
+  });
+
+  return (
+    <div className="rounded-xl border border-border p-4">
+      <div className="flex items-center justify-between gap-3">
+        <span className="font-medium text-foreground">{formatNaira(d.amount)}</span>
+        <div className="flex items-center gap-1.5">
+          {disputeOpen && <Badge variant="danger">Disputed</Badge>}
+          <Badge variant={DEDUCTION_VARIANT[d.status]}>{DEDUCTION_STATUS_LABELS[d.status]}</Badge>
+        </div>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">{d.reason}</p>
+      {d.decisionNote && (
+        <p className="mt-1 text-sm text-muted-foreground">
+          {d.status === 'REJECTED' ? 'Rejected' : 'Note'}: {d.decisionNote}
+        </p>
+      )}
+      {d.tenantDisputedAt && (
+        <div className="mt-2 rounded-lg border border-border bg-muted/40 p-3 text-sm">
+          <p className="text-foreground">
+            <span className="font-medium">Tenant disputes this:</span> {d.tenantDisputeReason}
+          </p>
+          {d.disputeAnswer && (
+            <p className="mt-1 text-muted-foreground">
+              <span className="font-medium text-foreground">Your answer:</span> {d.disputeAnswer}
+            </p>
+          )}
+        </div>
+      )}
+
+      {open && d.status === 'PROPOSED' && (
+        <div className="mt-3 space-y-2">
+          {(mode !== 'idle' || disputeOpen) && (
+            <Input
+              placeholder={
+                mode === 'reject'
+                  ? 'Reason for rejecting'
+                  : disputeOpen
+                    ? 'Answer the tenant (needed to approve)'
+                    : 'Note (optional)'
+              }
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+          )}
+          <div className="flex flex-wrap gap-2">
+            {mode === 'reject' ? (
+              <>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  disabled={!text.trim() || reject.isPending}
+                  onClick={() => reject.mutate()}
+                >
+                  Confirm reject
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setMode('idle')}>
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={approve.isPending || (disputeOpen && text.trim().length < 10)}
+                  onClick={() => approve.mutate()}
+                >
+                  <Check className="h-4 w-4" />
+                  Approve
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setMode('reject')}
+                >
+                  <X className="h-4 w-4" />
+                  Reject
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {open && d.status === 'APPROVED' && disputeOpen && (
+        <div className="mt-3 space-y-2">
+          <Textarea
+            placeholder="Answer the tenant: why it stands, or that you are dropping it"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={text.trim().length < 10 || answer.isPending}
+              onClick={() => answer.mutate(false)}
+            >
+              Keep deduction
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={text.trim().length < 10 || answer.isPending}
+              onClick={() => answer.mutate(true)}
+            >
+              Drop deduction
+            </Button>
+          </div>
+        </div>
+      )}
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+    </div>
+  );
+};
+
 interface DepositDetailModalProps {
   depositId: string | null;
   onClose: () => void;
@@ -41,8 +205,6 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
   const queryClient = useQueryClient();
   const [amount, setAmount] = useState<number>(0);
   const [reason, setReason] = useState('');
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
-  const [rejectReason, setRejectReason] = useState('');
 
   const { data: deposit, isLoading } = useQuery({
     queryKey: depositId ? landlordKeys.deposit(depositId) : ['deposit', 'none'],
@@ -65,22 +227,6 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
     },
   });
 
-  const approveMutation = useMutation({
-    mutationFn: (deductionId: string) =>
-      unwrap(depositService.approveDeduction(depositId!, deductionId)),
-    onSuccess: afterChange,
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: ({ deductionId, note }: { deductionId: string; note: string }) =>
-      unwrap(depositService.rejectDeduction(depositId!, deductionId, note)),
-    onSuccess: () => {
-      setRejectingId(null);
-      setRejectReason('');
-      afterChange();
-    },
-  });
-
   const returnMutation = useMutation({
     mutationFn: () => unwrap(depositService.returnDeposit(depositId!)),
     onSuccess: afterChange,
@@ -89,6 +235,13 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
   const isOpen = Boolean(depositId);
   const canReturn = deposit && deposit.status !== 'RETURNED';
   const hasProposed = deposit?.deductions.some((d) => d.status === 'PROPOSED') ?? false;
+  const hasOpenDispute =
+    deposit?.deductions.some((d) => d.tenantDisputedAt && !d.disputeAnsweredAt) ?? false;
+  const returnBlocker = hasProposed
+    ? 'Resolve proposed deductions before returning'
+    : hasOpenDispute
+      ? 'Answer the tenant’s dispute before returning'
+      : undefined;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -145,80 +298,13 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                   <p className="text-sm text-muted-foreground">No deductions.</p>
                 ) : (
                   deposit.deductions.map((d) => (
-                    <div key={d.id} className="rounded-xl border border-border p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-medium text-foreground">{formatNaira(d.amount)}</span>
-                        <Badge variant={DEDUCTION_VARIANT[d.status]}>
-                          {DEDUCTION_STATUS_LABELS[d.status]}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground">{d.reason}</p>
-                      {d.decisionNote && (
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Rejected: {d.decisionNote}
-                        </p>
-                      )}
-                      {d.status === 'PROPOSED' && deposit.status !== 'RETURNED' && (
-                        <div className="mt-3">
-                          {rejectingId === d.id ? (
-                            <div className="space-y-2">
-                              <Input
-                                placeholder="Reason for rejecting"
-                                value={rejectReason}
-                                onChange={(e) => setRejectReason(e.target.value)}
-                              />
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="danger"
-                                  size="sm"
-                                  disabled={!rejectReason.trim() || rejectMutation.isPending}
-                                  onClick={() =>
-                                    rejectMutation.mutate({
-                                      deductionId: d.id,
-                                      note: rejectReason.trim(),
-                                    })
-                                  }
-                                >
-                                  Confirm reject
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setRejectingId(null);
-                                    setRejectReason('');
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                className="gap-1.5"
-                                disabled={approveMutation.isPending}
-                                onClick={() => approveMutation.mutate(d.id)}
-                              >
-                                <Check className="h-4 w-4" />
-                                Approve
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="gap-1.5"
-                                onClick={() => setRejectingId(d.id)}
-                              >
-                                <X className="h-4 w-4" />
-                                Reject
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <DeductionRow
+                      key={d.id}
+                      depositId={deposit.id}
+                      deduction={d}
+                      open={deposit.status !== 'RETURNED'}
+                      onChanged={afterChange}
+                    />
                   ))
                 )}
               </div>
@@ -257,8 +343,8 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                   <Button
                     variant="primary"
                     className="gap-1.5"
-                    disabled={hasProposed || returnMutation.isPending}
-                    title={hasProposed ? 'Resolve proposed deductions before returning' : undefined}
+                    disabled={Boolean(returnBlocker) || returnMutation.isPending}
+                    title={returnBlocker}
                     onClick={() => returnMutation.mutate()}
                   >
                     <Undo2 className="h-4 w-4" />
@@ -266,6 +352,14 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                   </Button>
                 )}
               </div>
+              {returnBlocker && canReturn && (
+                <p className="text-right text-xs text-muted-foreground">{returnBlocker}.</p>
+              )}
+              {returnMutation.error && (
+                <p className="text-right text-sm text-destructive">
+                  {(returnMutation.error as Error).message}
+                </p>
+              )}
             </div>
           )}
         </div>
