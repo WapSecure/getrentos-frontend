@@ -11,6 +11,7 @@ import {
   LogIn,
   Ruler,
   ShieldCheck,
+  ScanSearch,
   UserPlus,
   Video,
 } from 'lucide-react';
@@ -29,6 +30,7 @@ import {
 } from '@/types/landBuyer';
 import { StartPurchaseDialog } from './StartPurchaseDialog';
 import { RequestTourDialog } from '../tours/RequestTourDialog';
+import { RequestInspectionDialog } from '../inspections/RequestInspectionDialog';
 import { plotLabel } from './landSaleLogic';
 
 type Viewer = 'buyer' | 'member' | 'anonymous';
@@ -54,6 +56,7 @@ export const PlotReservePanel = ({
   const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState<LandReservation | null>(null);
   const [touring, setTouring] = useState(false);
+  const [inspecting, setInspecting] = useState(false);
 
   const reserve = useMutation({
     mutationFn: (plotId: string) => unwrap(landBuyerService.reserve(plotId)),
@@ -183,6 +186,16 @@ export const PlotReservePanel = ({
           Ask for a live video tour
         </Button>
       )}
+      {viewer === 'buyer' && available && (
+        <Button
+          fullWidth
+          variant="ghost"
+          icon={<ScanSearch className="h-4 w-4" />}
+          onClick={() => setInspecting(true)}
+        >
+          Commission an independent inspection
+        </Button>
+      )}
       {viewer === 'buyer' && (
         <Link
           href={LAND_BUYER_ROUTES.HUB_RESERVATIONS}
@@ -196,6 +209,12 @@ export const PlotReservePanel = ({
       <RequestTourDialog
         open={touring}
         onClose={() => setTouring(false)}
+        target={{ plotId: plot.id }}
+        landName={`${plotLabel(plot)}, ${layout.name}`}
+      />
+      <RequestInspectionDialog
+        open={inspecting}
+        onClose={() => setInspecting(false)}
         target={{ plotId: plot.id }}
         landName={`${plotLabel(plot)}, ${layout.name}`}
       />

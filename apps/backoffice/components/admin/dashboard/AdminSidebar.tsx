@@ -46,6 +46,7 @@ import {
   ArrowRightLeft,
   GitCompareArrows,
   FileCheck2,
+  MessageCircleQuestion,
 } from 'lucide-react';
 import { ROUTES, unwrap } from '@getrentos/shared';
 import { hasAdminPermission, hasStaffAccess } from '@/lib/adminAccess';
@@ -197,6 +198,12 @@ const navItems: NavItem[] = [
     href: '/admin/land/resales',
     icon: ScrollText,
     permission: 'sales.view',
+  },
+  {
+    label: 'Inspection Questions',
+    href: '/admin/land/inspection-questions',
+    icon: MessageCircleQuestion,
+    permission: 'verifications.review',
   },
   {
     label: 'Land Disputes',
