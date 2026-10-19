@@ -46,6 +46,7 @@ export function Checkbox({
         accessibilityRole="checkbox"
         accessibilityLabel={accessibilityLabel ?? (typeof label === 'string' ? label : undefined)}
         accessibilityState={{ checked, disabled }}
+        aria-checked={checked}
         accessibilityHint={error ? `Error: ${error}` : undefined}
         aria-invalid={!!error}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}

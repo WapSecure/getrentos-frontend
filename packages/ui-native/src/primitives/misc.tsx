@@ -25,7 +25,7 @@ export function Badge({ label, tone = 'neutral' }: { label: string; tone?: Badge
     info: { bg: colors.infoSubtle, fg: colors.accentForeground },
     success: { bg: colors.successSubtle, fg: colors.success },
     warning: { bg: colors.warningSubtle, fg: colors.warning },
-    danger: { bg: colors.destructive, fg: colors.destructiveForeground },
+    danger: { bg: colors.destructiveSubtle, fg: colors.destructive },
   };
   const c = map[tone];
   return (
@@ -176,7 +176,7 @@ export function ErrorState({
           borderRadius: 22,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: colors.destructive + '1f',
+          backgroundColor: colors.destructiveSubtle,
         }}
       >
         <RotateCw size={20} color={colors.destructive} />
