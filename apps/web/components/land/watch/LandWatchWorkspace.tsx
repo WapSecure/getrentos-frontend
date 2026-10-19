@@ -31,12 +31,8 @@ import {
   CurrencyInput,
 } from '@getrentos/ui';
 import {
-  boundaryTone,
-  LAND_BOUNDARY_LABELS,
   LAND_INCIDENT_KIND_LABELS,
   LAND_INCIDENT_STATUS_LABELS,
-  LAND_INSPECTION_KIND_LABELS,
-  LAND_INSPECTION_STATUS_LABELS,
   LAND_REMINDER_KIND_LABELS,
   LAND_WATCH_TIER_LABELS,
   type LandWatchDetail,
@@ -44,7 +40,6 @@ import {
   type LandWatchInspection,
   type LandWatchReminderKind,
   type LandWatchTier,
-  describeDistance,
 } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -53,6 +48,7 @@ import { landBuyerService } from '@/services/landBuyerService';
 import { landService } from '@/services/landService';
 import { landWatchService } from '@/services/landWatchService';
 import { errorMessage } from '../developer/feedback';
+import { InspectionReportCard } from './InspectionReportCard';
 
 type Notify = (message: string, variant?: ToastVariant) => void;
 const TIERS: LandWatchTier[] = ['ESSENTIAL', 'PROTECTED', 'MANAGED'];
@@ -501,98 +497,42 @@ const InspectionItem = ({
     },
     onError: (e) => onFailed(e, 'Could not request a reinspection.'),
   });
-  const r = i.report;
   return (
-    <li className="rounded-xl border border-border p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="text-sm font-medium text-foreground">
-            {LAND_INSPECTION_KIND_LABELS[i.kind]} · <span className="font-mono">{i.reference}</span>
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {i.inspector ? `${i.inspector.name} · ` : ''}
-            {r?.submittedAt
-              ? `visited ${formatDate(r.submittedAt)}`
-              : `requested ${formatDate(i.createdAt)}`}
-          </p>
-        </div>
-        {r?.boundaryCondition ? (
-          <Badge variant={boundaryTone(r.boundaryCondition)}>
-            {LAND_BOUNDARY_LABELS[r.boundaryCondition]}
-          </Badge>
-        ) : (
-          <Badge variant="neutral">{LAND_INSPECTION_STATUS_LABELS[i.status]}</Badge>
-        )}
-      </div>
-      {r && (
-        <>
-          {r.beaconsExpected != null && (
-            <p className="mt-2 text-sm text-foreground">
-              Beacons found: {r.beaconsFound ?? '—'} of {r.beaconsExpected}
-            </p>
-          )}
-          <p className="mt-2 whitespace-pre-wrap text-sm text-foreground">{r.summary}</p>
-          {r.staffNote && (
-            <p className="mt-1 text-xs text-muted-foreground">GetRentos: {r.staffNote}</p>
-          )}
-          {r.evidence.length > 0 && (
-            <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-              {r.evidence.map((e) => (
-                <li key={e.id}>
-                  <a href={e.url} target="_blank" rel="noopener noreferrer" className="block">
-                    {e.mimeType.startsWith('image/') ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={e.url}
-                        alt={e.note ?? e.fileName}
-                        className="aspect-square w-full rounded-lg object-cover"
-                      />
-                    ) : (
-                      <span className="flex aspect-square items-center justify-center rounded-lg bg-secondary p-2 text-center text-xs">
-                        {e.fileName}
-                      </span>
-                    )}
-                  </a>
-                  <p className="mt-1 text-[11px] leading-tight text-muted-foreground">
-                    {formatDate(e.capturedAt)}
-                    {e.distanceM != null && ` · ${describeDistance(e.distanceM)}`}
-                    {e.capturedOffline && ' · captured offline'}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-          {i.status === 'ACCEPTED' &&
-            (asking ? (
-              <div className="mt-3 space-y-2">
-                <Textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  rows={2}
-                  maxLength={2000}
-                  placeholder="What should the inspector look at again?"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    disabled={reason.trim().length < 10 || reinspect.isPending}
-                    isLoading={reinspect.isPending}
-                    onClick={() => reinspect.mutate()}
-                  >
-                    Request reinspection
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setAsking(false)}>
-                    Cancel
-                  </Button>
-                </div>
+    <li>
+      <InspectionReportCard
+        inspection={i}
+        actions={
+          i.status === 'ACCEPTED' &&
+          (asking ? (
+            <div className="mt-3 space-y-2">
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={2}
+                maxLength={2000}
+                placeholder="What should the inspector look at again?"
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={reason.trim().length < 10 || reinspect.isPending}
+                  isLoading={reinspect.isPending}
+                  onClick={() => reinspect.mutate()}
+                >
+                  Request reinspection
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setAsking(false)}>
+                  Cancel
+                </Button>
               </div>
-            ) : (
-              <Button className="mt-3" size="sm" variant="outline" onClick={() => setAsking(true)}>
-                Ask for a second look
-              </Button>
-            ))}
-        </>
-      )}
+            </div>
+          ) : (
+            <Button className="mt-3" size="sm" variant="outline" onClick={() => setAsking(true)}>
+              Ask for a second look
+            </Button>
+          ))
+        }
+      />
     </li>
   );
 };
