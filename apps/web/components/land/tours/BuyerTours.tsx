@@ -19,7 +19,11 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
   const [mode, setMode] = useState<'none' | 'other' | 'cancel' | 'rate'>('none');
   const [text, setText] = useState('');
   const [rating, setRating] = useState(0);
-  const done = (message: string) => () => {
+  // Each call answers with the updated tour: show it at once, then refresh.
+  const done = (message: string) => (updated: LandSiteTour) => {
+    queryClient.setQueryData<LandSiteTour[]>(landSiteTourKeys.buyer, (list) =>
+      list?.map((t) => (t.id === updated.id ? updated : t))
+    );
     void queryClient.invalidateQueries({ queryKey: landSiteTourKeys.buyer });
     setMode('none');
     setText('');
@@ -140,6 +144,11 @@ const BuyerActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) 
             >
               The seller did not join
             </Button>
+          )}
+          {tour.status === 'COMPLETED' && tour.buyerRating && (
+            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              You rated it <StarRating value={tour.buyerRating} label="Your rating" />
+            </span>
           )}
           {tour.status === 'COMPLETED' && !tour.buyerRating && (
             <Button size="sm" variant="outline" onClick={() => setMode('rate')}>

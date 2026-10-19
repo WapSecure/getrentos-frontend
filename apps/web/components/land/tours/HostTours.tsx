@@ -29,7 +29,11 @@ const HostActions = ({ tour, notify }: { tour: LandSiteTour; notify: Notify }) =
   const [notes, setNotes] = useState('');
   const [reason, setReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
-  const done = (message: string) => () => {
+  // Each call answers with the updated tour: show it at once, then refresh.
+  const done = (message: string) => (updated: LandSiteTour) => {
+    queryClient.setQueryData<LandSiteTour[]>(landSiteTourKeys.host, (list) =>
+      list?.map((t) => (t.id === updated.id ? updated : t))
+    );
     void queryClient.invalidateQueries({ queryKey: landSiteTourKeys.host });
     notify(message);
   };
