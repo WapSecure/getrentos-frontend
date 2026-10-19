@@ -23,6 +23,11 @@ export interface NumberFieldProps extends BaseProps {
    * zeros and are never grouped. Set this for them.
    */
   code?: boolean;
+  /**
+   * An amount of money held as a string: whole numbers, grouped, with the
+   * symbol in front ("₦" by default, or pass another).
+   */
+  currency?: boolean | string;
 }
 
 /**
@@ -37,23 +42,38 @@ export const NumberField = forwardRef<TextInput, NumberFieldProps>(function Numb
     grouped = false,
     unit,
     code = false,
+    currency,
     rightAccessory,
+    leftIcon,
     ...rest
   },
   ref
 ) {
-  const places = code ? 0 : decimals;
-  const display = grouped && !code ? groupDisplay(value) : value;
+  const symbol = currency ? (typeof currency === 'string' ? currency : '₦') : null;
+  const places = code || symbol ? 0 : decimals;
+  const display = (grouped || symbol) && !code ? groupDisplay(value) : value;
   return (
     <TextField
       ref={ref}
       {...rest}
       value={display}
-      onChangeText={(text) => onValueChange(sanitizeNumber(text, places))}
+      onChangeText={(text) => {
+        const next = sanitizeNumber(text, places);
+        // Amounts drop leading zeros ("007" is 7); codes keep them.
+        onValueChange(symbol ? next.replace(/^0+(?=\d)/, '') : next);
+      }}
       keyboardType={places > 0 ? 'decimal-pad' : 'number-pad'}
       inputMode={places > 0 ? 'decimal' : 'numeric'}
       autoCorrect={false}
       autoCapitalize="none"
+      leftIcon={
+        leftIcon ??
+        (symbol ? (
+          <Text variant="bodyStrong" color="mutedForeground">
+            {symbol}
+          </Text>
+        ) : undefined)
+      }
       rightAccessory={
         rightAccessory ??
         (unit ? (
