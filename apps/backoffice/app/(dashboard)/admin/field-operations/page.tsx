@@ -5,17 +5,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, Navigation } from 'lucide-react';
 import {
   Badge,
+  type BadgeVariant,
   Button,
   Card,
   DatePicker,
   EmptyState,
+  Field,
+  Input,
   PageErrorState,
   Select,
   Tabs,
   TabsList,
   TabsTrigger,
+  Textarea,
   TimePicker,
-  type BadgeVariant,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 
@@ -31,9 +34,6 @@ import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 
 type Tab = 'mine' | 'open' | 'overdue' | 'done' | 'team';
-
-const inputClass =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 const lagosDateTime = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
@@ -191,12 +191,11 @@ const VisitCard = ({
 
       {mode === 'mine' && open && visit.kind === 'INSPECTION' && (
         <div className="border-t border-border pt-3">
-          <textarea
+          <Textarea
             rows={2}
             value={outcome}
             onChange={(e) => setOutcome(e.target.value)}
             placeholder="What you found. At least 10 characters."
-            className={inputClass}
           />
           <Button
             className="mt-2"
@@ -238,11 +237,11 @@ const VisitCard = ({
       )}
       {mode === 'ops' && canOperate && open && visit.kind === 'INSPECTION' && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <input
+          <Input
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
             placeholder="Reason to cancel"
-            className={`${inputClass} sm:w-80`}
+            className="sm:w-80"
           />
           <Button
             variant="ghost"
@@ -330,11 +329,10 @@ const BookInspection = ({ staffOptions }: { staffOptions: { value: string; label
         <DatePicker value={date} onChange={setDate} min={new Date().toISOString().slice(0, 10)} />
         <TimePicker value={time} onChange={setTime} minHour={7} maxHour={19} />
       </div>
-      <input
+      <Input
         value={purpose}
         onChange={(e) => setPurpose(e.target.value)}
         placeholder="What the visit is for, e.g. quarterly condition check"
-        className={inputClass}
       />
       <Button
         isLoading={book.isPending}
@@ -394,32 +392,25 @@ const AgentRow = ({ agent, canOperate }: { agent: FieldAgent; canOperate: boolea
       {canOperate && (
         <>
           <div className="grid gap-3 sm:grid-cols-4">
-            <label className="block sm:col-span-1">
-              <span className="text-sm text-muted-foreground">States</span>
-              <input
-                value={states}
-                onChange={(e) => setStates(e.target.value)}
-                className={`mt-1 ${inputClass}`}
-              />
-            </label>
-            <label className="block sm:col-span-2">
-              <span className="text-sm text-muted-foreground">Areas (blank = whole state)</span>
-              <input
+            <Field label="States" className="sm:col-span-1">
+              <Input value={states} onChange={(e) => setStates(e.target.value)} className="mt-1" />
+            </Field>
+            <Field label="Areas (blank = whole state)" className="sm:col-span-2">
+              <Input
                 value={areas}
                 onChange={(e) => setAreas(e.target.value)}
                 placeholder="Lekki, Ikoyi, Ikate"
-                className={`mt-1 ${inputClass}`}
+                className="mt-1"
               />
-            </label>
-            <label className="block">
-              <span className="text-sm text-muted-foreground">Open visit limit</span>
-              <input
+            </Field>
+            <Field label="Open visit limit">
+              <Input
                 inputMode="numeric"
                 value={limit}
                 onChange={(e) => setLimit(e.target.value.replace(/\D/g, ''))}
-                className={`mt-1 ${inputClass}`}
+                className="mt-1"
               />
-            </label>
+            </Field>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-48">

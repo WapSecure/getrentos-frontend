@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Check, Loader2 } from 'lucide-react';
-import { Checkbox } from '@getrentos/ui';
+import { Check } from 'lucide-react';
+import { Button, Checkbox } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -169,15 +169,13 @@ export const ManagedIntakePanel = ({
                   management agreement.
                 </span>
               </label>
-              <button
-                type="button"
-                disabled={!agree || accept.isPending}
+              <Button
+                isLoading={accept.isPending}
+                disabled={!agree}
                 onClick={() => accept.mutate()}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
               >
-                {accept.isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                 Accept and sign
-              </button>
+              </Button>
             </>
           )}
         </div>

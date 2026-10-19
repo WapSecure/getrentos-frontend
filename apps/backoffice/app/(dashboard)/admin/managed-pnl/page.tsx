@@ -10,6 +10,8 @@ import {
   CurrencyInput,
   DatePicker,
   EmptyState,
+  Field,
+  Input,
   PageErrorState,
   Select,
   Tabs,
@@ -45,9 +47,6 @@ const GROUP_LABEL: Record<PnlGroupBy, string> = {
   tier: 'Package',
   region: 'Region',
 };
-
-const inputClass =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 /** The last 18 months as YYYY-MM, newest first, in Lagos time. */
 const recentMonths = () => {
@@ -144,12 +143,7 @@ const RecordCost = ({ canOperate, onSaved }: { canOperate: boolean; onSaved: () 
         <CurrencyInput prefix="₦" value={amount || ''} onValueChange={setAmount} />
         <DatePicker value={date} onChange={setDate} max={new Date().toISOString().slice(0, 10)} />
       </div>
-      <input
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="What it was for"
-        className={inputClass}
-      />
+      <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="What it was for" />
       <Button
         isLoading={save.isPending}
         disabled={!mandateId || amount <= 0 || !date || note.trim().length < 5}
@@ -218,11 +212,11 @@ const CostRow = ({
       </div>
       {voiding && (
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-          <input
+          <Input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Why it is wrong"
-            className={`${inputClass} sm:w-80`}
+            className="sm:w-80"
           />
           <Button
             variant="danger"
@@ -278,18 +272,16 @@ export default function ManagedPnlPage() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <label className="block sm:w-56">
-          <span className="text-sm text-muted-foreground">From</span>
+        <Field label="From" className="sm:w-56">
           <div className="mt-1">
             <Select ariaLabel="From month" value={from} onValueChange={setFrom} options={months} />
           </div>
-        </label>
-        <label className="block sm:w-56">
-          <span className="text-sm text-muted-foreground">To</span>
+        </Field>
+        <Field label="To" className="sm:w-56">
           <div className="mt-1">
             <Select ariaLabel="To month" value={to} onValueChange={setTo} options={months} />
           </div>
-        </label>
+        </Field>
       </div>
       {from > to && (
         <p className="text-sm text-destructive">The first month must not be after the last.</p>

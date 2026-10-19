@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  Textarea,
+} from '@getrentos/ui';
 import { formatCurrency, unwrap } from '@getrentos/shared';
 
 import {
@@ -75,12 +84,11 @@ const ReportCard = ({ report }: { report: ImpersonationReport }) => {
       )}
       {report.status !== 'CLOSED' && (
         <div className="space-y-2 border-t border-border pt-3">
-          <textarea
+          <Textarea
             rows={2}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="What was done: number blocked, bank told, tenant called…"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
           <div className="flex gap-2">
             {report.status === 'OPEN' && (

@@ -18,7 +18,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Badge, Select, Textarea } from '@getrentos/ui';
 
 import { landlordService } from '@/services/landlordService';
 import {
@@ -532,12 +532,13 @@ export const GetRentosManagedView = () => {
                           : `Notice-in-lieu of ${formatCurrency(breakFeeQuery.data.amount)} (${breakFeeQuery.data.reason}) will be added to your final statement.`}
                       </p>
                     )}
-                    <textarea
+                    <Textarea
+                      className="mt-2"
+                      aria-label="Why you are ending it"
                       value={endReason}
                       onChange={(event) => setEndReason(event.target.value)}
                       rows={2}
                       placeholder="Why are you ending it? Enter at least 10 characters."
-                      className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                     />
                     <div className="mt-2 flex gap-2">
                       <button
@@ -658,23 +659,16 @@ export const GetRentosManagedView = () => {
                     </span>
                   ) : (
                     <div className="flex items-center gap-2 sm:shrink-0">
-                      <select
-                        aria-label={`Property to appoint ${firm.name} for`}
-                        value={chosen}
-                        onChange={(event) =>
-                          setFirmPropertyByFirm((prev) => ({
-                            ...prev,
-                            [firm.id]: event.target.value,
-                          }))
-                        }
-                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-                      >
-                        {openProperties.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="w-56">
+                        <Select
+                          ariaLabel={`Property to appoint ${firm.name} for`}
+                          value={chosen}
+                          onValueChange={(value) =>
+                            setFirmPropertyByFirm((prev) => ({ ...prev, [firm.id]: value }))
+                          }
+                          options={openProperties.map((p) => ({ value: p.id, label: p.name }))}
+                        />
+                      </div>
                       <button
                         type="button"
                         disabled={busy || !chosen}
