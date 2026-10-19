@@ -35,6 +35,7 @@ import {
   ClipboardCheck,
   Navigation,
   TrendingUp,
+  Gauge,
   MessageSquareText,
   MessageSquare,
   ShieldAlert,
@@ -131,6 +132,12 @@ const navItems: NavItem[] = [
     label: 'Managed P&L',
     href: '/admin/managed-pnl',
     icon: TrendingUp,
+    permission: 'managed.view',
+  },
+  {
+    label: 'Management KPIs',
+    href: '/admin/pm-kpis',
+    icon: Gauge,
     permission: 'managed.view',
   },
   {

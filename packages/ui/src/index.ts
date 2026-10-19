@@ -27,6 +27,7 @@ export * from './NetworkStatus';
 export * from './Pagination';
 export * from './ParticleBackground';
 export * from './PageState';
+export * from './PmKpiPack';
 export * from './PageHeader';
 export * from './providers/ThemeProvider';
 export * from './providers/QueryProvider';

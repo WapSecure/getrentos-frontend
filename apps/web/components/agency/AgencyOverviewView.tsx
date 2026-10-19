@@ -45,6 +45,10 @@ export function AgencyOverviewView() {
         </h1>
         <p className="mt-1 text-muted-foreground">
           How the firm’s book is doing across every property you manage.{' '}
+          <Link href="/agency/performance" className="text-primary hover:underline">
+            Performance over time
+          </Link>
+          {' · '}
           <Link href="/agency/import" className="text-primary hover:underline">
             Import units from a CSV
           </Link>
@@ -60,7 +64,7 @@ export function AgencyOverviewView() {
               {d.clients.pending} pending · {d.clients.endedLast90Days} left in 90 days
             </Tile>
             <Tile icon={Building2} label="Occupancy" value={rate(d.portfolio.occupancyRate)}>
-              {d.portfolio.occupiedUnits} of {d.portfolio.units} units let across{' '}
+              {d.portfolio.occupiedUnits} of {d.portfolio.units} units occupied across{' '}
               {d.portfolio.properties} {d.portfolio.properties === 1 ? 'property' : 'properties'}
             </Tile>
             <Tile

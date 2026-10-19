@@ -1,3 +1,4 @@
+import type { PmKpiReport } from '@getrentos/ui';
 import { authFetch, safeCall, type ApiResponse } from '@getrentos/shared';
 
 export type ManagedServicingTier = 'COLLECT_ONLY' | 'COLLECT_MAINTAIN' | 'FULL_MANAGEMENT';
@@ -504,5 +505,24 @@ export const adminManagedPnlService = {
   },
   voidCost(id: string, reason: string) {
     return post<{ id: string; voided: boolean }>(`/admin/managed-pnl/costs/${id}/void`, { reason });
+  },
+};
+
+export type PmKpiScopeKind = PmKpiReport['scope']['kind'];
+
+export const adminPmKpiService = {
+  report(
+    from: string,
+    to: string,
+    scope: PmKpiScopeKind,
+    organizationId?: string
+  ): Promise<ApiResponse<PmKpiReport>> {
+    const firm = scope === 'FIRM' && organizationId ? `&organizationId=${organizationId}` : '';
+    return safeCall(() =>
+      authFetch<PmKpiReport>(`/admin/pm-kpis?from=${from}&to=${to}&scope=${scope}${firm}`)
+    );
+  },
+  firms(): Promise<ApiResponse<{ id: string; name: string }[]>> {
+    return safeCall(() => authFetch<{ id: string; name: string }[]>('/admin/pm-kpis/firms'));
   },
 };
