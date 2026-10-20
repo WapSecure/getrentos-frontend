@@ -24,24 +24,22 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
   }, [score]);
 
   const getScoreColor = () => {
-    if (score >= 80) return '#10b981';
-    if (score >= 60) return '#f59e0b';
-    if (score >= 40) return '#f97316';
-    return '#ef4444';
+    if (score >= 80) return 'stroke-success';
+    if (score >= 40) return 'stroke-warning';
+    return 'stroke-destructive';
   };
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="transform -rotate-90">
+      <svg width={size} height={size} className="transform -rotate-90" aria-hidden="true">
         {/* Background circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
           strokeWidth={strokeWidth}
-          className="dark:stroke-gray-700"
+          className="stroke-border"
         />
         {/* Progress circle */}
         <motion.circle
@@ -49,7 +47,7 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={getScoreColor()}
+          className={getScoreColor()}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}

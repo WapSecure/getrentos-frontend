@@ -171,7 +171,7 @@ export function StatementBreakdown({
                   <span
                     className={cn(
                       'shrink-0 tabular-nums',
-                      item.amount < 0 ? 'text-red-600' : 'text-foreground'
+                      item.amount < 0 ? 'text-destructive' : 'text-foreground'
                     )}
                   >
                     {formatCurrency(item.amount)}

@@ -5,7 +5,17 @@ import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAuthToken, tourSource, videoSource } from '@getrentos/shared';
-import { Badge, Button, EmptyState, Skeleton, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Skeleton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
+} from '@getrentos/ui';
 import {
   Armchair,
   BedDouble,
@@ -91,7 +101,7 @@ export function ShortletListingDetail({
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
   const [messageOpen, setMessageOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [activeImage, setActiveImage] = useState(0);
   const [mediaTab, setMediaTab] = useState<MediaTab>('photos');
 
@@ -134,15 +144,12 @@ export function ShortletListingDetail({
         return;
       }
       setBookingOpen(false);
-      setToast({
-        message: 'Booking request sent: the host will confirm shortly.',
-        variant: 'success',
-      });
+      toast.success('Booking request sent: the host will confirm shortly.');
     },
     onError: (reason: Error) => {
       // An identity gate is explained inside the dialog with a link to verify, not as a passing toast.
       if (!(reason instanceof VerificationRequiredError)) {
-        setToast({ message: reason.message, variant: 'error' });
+        toast.error(reason.message);
       }
     },
   });
@@ -157,9 +164,9 @@ export function ShortletListingDetail({
       setBookingOpen(false);
       setCreatedBooking(null);
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
-      setToast({ message: 'Payment received: your stay is confirmed.', variant: 'success' });
+      toast.success('Payment received: your stay is confirmed.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const openBooking = () => {
@@ -211,55 +218,34 @@ export function ShortletListingDetail({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <button
-        onClick={() => router.back()}
-        className="mb-4 text-sm text-muted-foreground hover:text-foreground"
-      >
+      <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-4">
         ← Back
-      </button>
+      </Button>
 
       {/* Media hero */}
       <div className="overflow-hidden rounded-xl border border-border bg-secondary/40">
         {showTabs && (
-          <div className="flex gap-1 border-b border-border bg-card p-2">
-            <button
-              type="button"
-              onClick={() => setMediaTab('photos')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                tab === 'photos'
-                  ? 'bg-secondary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <ImageIcon className="h-4 w-4" /> Photos
-            </button>
-            {hasVideo && (
-              <button
-                type="button"
-                onClick={() => setMediaTab('video')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                  tab === 'video'
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Video className="h-4 w-4" /> Video
-              </button>
-            )}
-            {hasTour && (
-              <button
-                type="button"
-                onClick={() => setMediaTab('tour')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                  tab === 'tour'
-                    ? 'bg-secondary text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <MapIcon className="h-4 w-4" /> 360 Tour
-              </button>
-            )}
-          </div>
+          <Tabs
+            value={tab}
+            onValueChange={(value) => setMediaTab(value as MediaTab)}
+            className="border-b border-border bg-card p-2"
+          >
+            <TabsList className="max-w-full">
+              <TabsTrigger value="photos" className="flex items-center gap-1.5 text-sm">
+                <ImageIcon className="h-4 w-4" /> Photos
+              </TabsTrigger>
+              {hasVideo && (
+                <TabsTrigger value="video" className="flex items-center gap-1.5 text-sm">
+                  <Video className="h-4 w-4" /> Video
+                </TabsTrigger>
+              )}
+              {hasTour && (
+                <TabsTrigger value="tour" className="flex items-center gap-1.5 text-sm">
+                  <MapIcon className="h-4 w-4" /> 360 Tour
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </Tabs>
         )}
 
         {tab === 'video' && video ? (
@@ -314,8 +300,11 @@ export function ShortletListingDetail({
               />
               <div className="absolute left-3 top-3 flex gap-2">
                 {listing.instantBooking && (
-                  <Badge className="bg-primary text-primary-foreground">
-                    <Zap className="mr-1 h-3 w-3" /> Instant
+                  <Badge
+                    icon={<Zap className="h-3 w-3" />}
+                    className="bg-primary text-primary-foreground"
+                  >
+                    Instant
                   </Badge>
                 )}
                 {listing.isVerified && <Badge variant="info">Verified host</Badge>}
@@ -333,6 +322,8 @@ export function ShortletListingDetail({
                     key={url}
                     type="button"
                     onClick={() => setActiveImage(i)}
+                    aria-label={`Show photo ${i + 1}`}
+                    aria-pressed={i === activeImage}
                     className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 transition ${
                       i === activeImage
                         ? 'border-primary'
@@ -372,8 +363,8 @@ export function ShortletListingDetail({
               <Badge variant="success">{listing.hostName}</Badge>
               {listing.hostVerified && <Badge variant="info">Verified host</Badge>}
               {listing.furnished && (
-                <Badge variant="neutral">
-                  <Armchair className="mr-1 h-3 w-3" /> Furnished
+                <Badge variant="neutral" icon={<Armchair className="h-3 w-3" />}>
+                  Furnished
                 </Badge>
               )}
             </div>
@@ -566,7 +557,7 @@ export function ShortletListingDetail({
             <div className="mb-3 flex items-center gap-3">
               {listing.ratingAverage != null ? (
                 <div className="flex items-center gap-1 text-xl font-semibold">
-                  <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+                  <Star className="h-5 w-5 fill-warning text-warning" />
                   {listing.ratingAverage.toFixed(1)}
                 </div>
               ) : null}
@@ -595,9 +586,7 @@ export function ShortletListingDetail({
                         <Star
                           key={n}
                           className={`h-3.5 w-3.5 ${
-                            n <= r.rating
-                              ? 'fill-amber-400 text-amber-400'
-                              : 'text-muted-foreground/40'
+                            n <= r.rating ? 'fill-warning text-warning' : 'text-muted-foreground/40'
                           }`}
                         />
                       ))}
@@ -612,7 +601,7 @@ export function ShortletListingDetail({
 
         {/* Right column: booking card */}
         <div className="md:sticky md:top-6 md:self-start">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <Card className="p-5">
             <p className="text-2xl font-semibold">
               {listing.nightlyRate != null ? formatCurrency(listing.nightlyRate) : '—'}
               {listing.pricingMode === 'PER_NIGHT' && (
@@ -720,8 +709,11 @@ export function ShortletListingDetail({
                 ))}
               </div>
             )}
-            <Button className="mt-4 w-full" onClick={openBooking}>
-              <PlayCircle className="mr-1.5 h-4 w-4" />
+            <Button
+              className="mt-4 w-full"
+              onClick={openBooking}
+              icon={<PlayCircle className="h-4 w-4" />}
+            >
               {listing.instantBooking ? 'Book now: instant confirmation' : 'Request to book'}
             </Button>
             {isSignedIn && (
@@ -729,8 +721,9 @@ export function ShortletListingDetail({
                 variant="outline"
                 className="mt-2 w-full"
                 onClick={() => setMessageOpen(true)}
+                icon={<MessageSquare className="h-4 w-4" />}
               >
-                <MessageSquare className="mr-1.5 h-4 w-4" /> Message host
+                Message host
               </Button>
             )}
             {wishlist.canUseWishlist && (
@@ -739,10 +732,12 @@ export function ShortletListingDetail({
                 className="mt-2 w-full"
                 onClick={() => wishlist.toggle.mutate(listing.id)}
                 disabled={wishlist.toggle.isPending}
+                icon={
+                  <Heart
+                    className={`h-4 w-4 ${wishlist.isSaved(listing.id) ? 'fill-destructive text-destructive' : ''}`}
+                  />
+                }
               >
-                <Heart
-                  className={`mr-1.5 h-4 w-4 ${wishlist.isSaved(listing.id) ? 'fill-destructive text-destructive' : ''}`}
-                />
                 {wishlist.isSaved(listing.id) ? 'Saved' : 'Save listing'}
               </Button>
             )}
@@ -751,7 +746,7 @@ export function ShortletListingDetail({
                 ? 'Instant booking is enabled for this stay.'
                 : 'The host will confirm your request before it is booked.'}
             </p>
-          </div>
+          </Card>
         </div>
       </div>
 
@@ -777,12 +772,9 @@ export function ShortletListingDetail({
           onClose={() => setMessageOpen(false)}
           onSent={() => {
             setMessageOpen(false);
-            setToast({ message: 'Message sent to the host.', variant: 'success' });
+            toast.success('Message sent to the host.');
           }}
         />
-      )}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

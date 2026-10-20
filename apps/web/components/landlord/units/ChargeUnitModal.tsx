@@ -1,9 +1,8 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
-import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
+import { Alert, Button, CurrencyInput, DatePicker, Field, Select } from '@getrentos/ui';
 import { Receipt } from 'lucide-react';
 import type { Unit } from '@/types/landlord';
 
@@ -85,62 +84,54 @@ const ChargeUnitForm = ({
       </div>
 
       <div className="p-4 space-y-3">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Category</label>
-          <LegacySelect
+        <Field label="Category">
+          <Select
             value={category}
-            onChange={(event) => setCategory(event.target.value as ChargeUnitInput['category'])}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground"
-          >
-            <option value="RENT">Rent</option>
-            <option value="SERVICE_CHARGE">Service charge</option>
-            <option value="DEPOSIT">Deposit</option>
-            <option value="LEVY">Levy</option>
-          </LegacySelect>
-        </div>
+            onValueChange={(value) => setCategory(value as ChargeUnitInput['category'])}
+            searchable={false}
+            options={[
+              { value: 'RENT', label: 'Rent' },
+              { value: 'SERVICE_CHARGE', label: 'Service charge' },
+              { value: 'DEPOSIT', label: 'Deposit' },
+              { value: 'LEVY', label: 'Levy' },
+            ]}
+          />
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Amount {period ? `(${period === 'year' ? 'per year' : 'per month'})` : ''}
-          </label>
+        <Field
+          label={`Amount ${period ? `(${period === 'year' ? 'per year' : 'per month'})` : ''}`}
+          required
+          hint={
+            rent === undefined
+              ? 'This unit has no listing or lease rent to copy: enter the amount yourself.'
+              : undefined
+          }
+        >
           <CurrencyInput
             prefix="₦"
             value={amount}
             onValueChange={(value) => setAmount(value === 0 ? '' : String(value))}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground"
           />
-          {rent === undefined && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              This unit has no listing or lease rent to copy: enter the amount yourself.
-            </p>
-          )}
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Billing cycle</label>
-          <LegacySelect
+        <Field label="Billing cycle">
+          <Select
             value={billingCycle}
-            onChange={(event) =>
-              setBillingCycle(event.target.value as ChargeUnitInput['billingCycle'])
-            }
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground"
-          >
-            <option value="MONTHLY">Monthly</option>
-            <option value="QUARTERLY">Quarterly</option>
-            <option value="ANNUAL">Annual</option>
-          </LegacySelect>
-        </div>
+            onValueChange={(value) => setBillingCycle(value as ChargeUnitInput['billingCycle'])}
+            searchable={false}
+            options={[
+              { value: 'MONTHLY', label: 'Monthly' },
+              { value: 'QUARTERLY', label: 'Quarterly' },
+              { value: 'ANNUAL', label: 'Annual' },
+            ]}
+          />
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Due date</label>
+        <Field label="Due date" required>
           <DatePicker value={dueDate} onChange={setDueDate} />
-        </div>
+        </Field>
 
-        {errorMessage && (
-          <p role="alert" className="text-xs text-red-600 dark:text-red-400">
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
         <div className="flex gap-2 pt-1">
           <Button variant="ghost" className="flex-1" onClick={onClose}>
@@ -149,7 +140,9 @@ const ChargeUnitForm = ({
           <Button
             variant="primary"
             className="flex-1 gap-2"
-            disabled={isPending || Number(amount) <= 0 || !dueDate}
+            disabled={Number(amount) <= 0 || !dueDate}
+            isLoading={isPending}
+            loadingText="Charging…"
             onClick={() =>
               onCharge({
                 unitId: unit.id,
@@ -161,7 +154,7 @@ const ChargeUnitForm = ({
             }
           >
             <Receipt className="w-4 h-4" />
-            {isPending ? 'Charging…' : 'Charge unit'}
+            Charge unit
           </Button>
         </div>
       </div>

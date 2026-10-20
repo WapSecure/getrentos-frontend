@@ -37,12 +37,20 @@ export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeade
         description="Track every application, review its progress, and keep your next steps organised."
         actions={
           <>
-            <Button variant="outline" onClick={onExport} className="gap-2" size="sm">
-              <Download className="h-4 w-4" aria-hidden="true" />
+            <Button
+              variant="outline"
+              onClick={onExport}
+              size="sm"
+              icon={<Download className="h-4 w-4" aria-hidden="true" />}
+            >
               Export
             </Button>
-            <Button href={ROUTES.RENTER_DISCOVER} variant="primary" className="gap-2" size="sm">
-              <Plus className="h-4 w-4" aria-hidden="true" />
+            <Button
+              href={ROUTES.RENTER_DISCOVER}
+              variant="primary"
+              size="sm"
+              icon={<Plus className="h-4 w-4" aria-hidden="true" />}
+            >
               New application
             </Button>
           </>
@@ -51,35 +59,35 @@ export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeade
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <div className="rounded-xl border border-border/70 bg-background/70 p-3">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-blue-500" />
+              <FileText className="w-4 h-4 text-info" />
               <span className="text-sm font-medium text-foreground">Total</span>
             </div>
             <p className="text-xl font-bold text-foreground mt-1">{total}</p>
           </div>
           <div className="rounded-xl border border-border/70 bg-background/70 p-3">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-yellow-500" />
+              <Clock className="w-4 h-4 text-warning" />
               <span className="text-sm font-medium text-foreground">Pending</span>
             </div>
             <p className="text-xl font-bold text-foreground mt-1">{pending}</p>
           </div>
           <div className="rounded-xl border border-border/70 bg-background/70 p-3">
             <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-amber-500" />
+              <Eye className="w-4 h-4 text-warning" />
               <span className="text-sm font-medium text-foreground">Under Review</span>
             </div>
             <p className="text-xl font-bold text-foreground mt-1">{underReview}</p>
           </div>
           <div className="rounded-xl border border-border/70 bg-background/70 p-3">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-500" />
+              <CheckCircle className="w-4 h-4 text-success" />
               <span className="text-sm font-medium text-foreground">Approved</span>
             </div>
             <p className="text-xl font-bold text-foreground mt-1">{approved}</p>
           </div>
           <div className="rounded-xl border border-border/70 bg-background/70 p-3">
             <div className="flex items-center gap-2">
-              <XCircle className="w-4 h-4 text-red-500" />
+              <XCircle className="w-4 h-4 text-destructive" />
               <span className="text-sm font-medium text-foreground">Rejected</span>
             </div>
             <p className="text-xl font-bold text-foreground mt-1">{rejected}</p>

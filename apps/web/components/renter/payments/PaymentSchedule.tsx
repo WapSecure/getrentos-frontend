@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Card, EmptyState } from '@getrentos/ui';
 
 interface Payment {
   id: string;
@@ -57,13 +57,13 @@ export const PaymentSchedule = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'text-green-500';
+        return 'text-success';
       case 'pending':
-        return 'text-yellow-500';
+        return 'text-warning';
       case 'overdue':
-        return 'text-red-500';
+        return 'text-destructive';
       default:
-        return 'text-gray-500';
+        return 'text-muted-foreground';
     }
   };
 
@@ -73,7 +73,7 @@ export const PaymentSchedule = ({
 
   if (upcomingPayments.length === 0) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+      <Card>
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
@@ -81,16 +81,13 @@ export const PaymentSchedule = ({
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">No upcoming payments</p>
         </div>
-        <div className="p-8 text-center">
-          <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-          <p className="text-sm text-gray-500">All payments are up to date!</p>
-        </div>
-      </div>
+        <EmptyState icon={CheckCircle} title="All payments are up to date!" size="compact" bare />
+      </Card>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
@@ -112,12 +109,14 @@ export const PaymentSchedule = ({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center justify-between p-3 hover:bg-secondary transition-colors"
+              className="flex items-center justify-between gap-3 p-3 hover:bg-secondary transition-colors"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">{payment.propertyName}</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-gray-500">Due {formatDate(payment.dueDate)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Due {formatDate(payment.dueDate)}
+                  </span>
                   <span className="text-xs font-semibold text-primary">
                     {formatCurrency(payment.amount - (payment.amountPaid ?? 0))}
                   </span>
@@ -144,6 +143,6 @@ export const PaymentSchedule = ({
           Pay All Now
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };

@@ -2,11 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Heart } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
-import { Button, Pagination } from '@getrentos/ui';
+import {
+  Button,
+  Pagination,
+  QueryState,
+  Skeleton,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -15,25 +21,39 @@ import { ROUTES } from '@/lib/constants/auth';
 
 export default function BuyerSavedPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [activeListing, setActiveListing] = useState<BuyerPropertyListing | null>(null);
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
 
-  const { data: savedData, isLoading } = useQuery({
-    queryKey: [...buyerKeys.saved, { page, pageSize: PAGE_SIZE }],
+  const savedKey = [...buyerKeys.saved, { page, pageSize: PAGE_SIZE }];
+  const savedQuery = useQuery({
+    queryKey: savedKey,
     queryFn: () => unwrap(buyerService.listSaved({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
+  const { data: savedData, isLoading } = savedQuery;
   const savedListings = savedData?.items ?? [];
   const total = savedData?.total ?? 0;
 
-  const unsaveMutation = useMutation({
+  const unsaveMutation = useOptimisticMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.unsaveListing(listingId)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
+    patches: () => [
+      {
+        queryKey: savedKey,
+        update: (old, listingId) => {
+          const current = old as { items: BuyerPropertyListing[]; total: number };
+          const items = current.items.filter((item) => item.id !== listingId);
+          return { ...current, items, total: current.total - (current.items.length - items.length) };
+        },
+      },
+    ],
+    invalidate: [buyerKeys.saved],
+    errorMessage: 'The property could not be removed from your saved list.',
   });
 
   const toggleSave = (propertyId: string) => {
     unsaveMutation.mutate(propertyId);
+    if (activeListing?.id === propertyId) setActiveListing(null);
   };
 
   return (
@@ -41,26 +61,39 @@ export default function BuyerSavedPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Saved Properties</h1>
         <p className="text-muted-foreground mt-1">
-          {isLoading
-            ? 'Loading…'
-            : `${total} propert${total === 1 ? 'y' : 'ies'} in your shortlist`}
+          {isLoading ? (
+            <Skeleton className="inline-block h-4 w-48 align-middle" />
+          ) : (
+            `${total} propert${total === 1 ? 'y' : 'ies'} in your shortlist`
+          )}
         </p>
       </div>
 
-      {!isLoading && savedListings.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Heart className="w-8 h-8 text-primary" />
+      <QueryState
+        isLoading={isLoading}
+        isError={savedQuery.isError && !savedData}
+        onRetry={() => void savedQuery.refetch()}
+        isRetrying={savedQuery.isFetching}
+        isEmpty={savedListings.length === 0}
+        empty={{
+          icon: Heart,
+          title: 'No saved properties yet',
+          description: 'Tap the heart icon on any property to save it here for later.',
+          action: (
+            <Button href={ROUTES.BUYER_DISCOVER} variant="primary">
+              Discover Properties
+            </Button>
+          ),
+        }}
+        scope="page"
+        loading={
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-80 rounded-2xl" />
+            ))}
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No saved properties yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Tap the heart icon on any property to save it here for later.
-          </p>
-          <Button href={ROUTES.BUYER_DISCOVER} variant="primary" className="mt-6">
-            Discover Properties
-          </Button>
-        </div>
-      ) : (
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {savedListings.map((listing, index) => (
             <PropertyListingCard
@@ -73,7 +106,7 @@ export default function BuyerSavedPage() {
             />
           ))}
         </div>
-      )}
+      </QueryState>
 
       {total > 0 && (
         <Pagination

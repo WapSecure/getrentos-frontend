@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Activity,
   Boxes,
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { ListSkeleton } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate, formatRelativeTime } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -45,7 +46,7 @@ const getEventMeta = (type: string): TimelineEventMeta => {
     normalizedType.includes('SERVICE') ||
     normalizedType.includes('VENDOR')
   ) {
-    return { icon: Wrench, iconClassName: 'bg-amber-500/10 text-amber-700 dark:text-amber-400' };
+    return { icon: Wrench, iconClassName: 'bg-warning-subtle text-warning' };
   }
 
   if (
@@ -59,16 +60,16 @@ const getEventMeta = (type: string): TimelineEventMeta => {
   if (normalizedType.includes('INSPECTION') || normalizedType.includes('FIELD')) {
     return {
       icon: ClipboardCheck,
-      iconClassName: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+      iconClassName: 'bg-success-subtle text-success',
     };
   }
 
   if (normalizedType.includes('ASSET') || normalizedType.includes('WARRANTY')) {
-    return { icon: Boxes, iconClassName: 'bg-violet-500/10 text-violet-700 dark:text-violet-400' };
+    return { icon: Boxes, iconClassName: 'bg-secondary text-foreground' };
   }
 
   if (normalizedType.includes('DOCUMENT') || normalizedType.includes('RECORD')) {
-    return { icon: FileText, iconClassName: 'bg-sky-500/10 text-sky-700 dark:text-sky-400' };
+    return { icon: FileText, iconClassName: 'bg-info-subtle text-info' };
   }
 
   return defaultEventMeta;
@@ -166,6 +167,7 @@ export function HomeManagementTimeline({
   } = useQuery({
     queryKey: homeManagementKeys.timeline(queryParams),
     queryFn: () => unwrap(homeManagementService.listTimeline(queryParams)),
+    placeholderData: keepPreviousData,
   });
   const timelineEvents = useMemo(
     () =>
@@ -200,8 +202,8 @@ export function HomeManagementTimeline({
 
       <div className="mt-5">
         {isLoading ? (
-          <TimelineLoadingState />
-        ) : error ? (
+          <ListSkeleton rows={4} className="rounded-2xl" />
+        ) : error && events.length === 0 ? (
           <EmptyState
             icon={CircleAlert}
             title="Service history could not be loaded"
@@ -276,18 +278,5 @@ export function HomeManagementTimeline({
         )}
       </div>
     </section>
-  );
-}
-
-function TimelineLoadingState() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      {Array.from({ length: 4 }, (_, index) => (
-        <div
-          key={index}
-          className="h-28 animate-pulse border-b border-border bg-muted last:border-b-0"
-        />
-      ))}
-    </div>
   );
 }

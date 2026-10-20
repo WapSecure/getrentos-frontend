@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DocumentsHeader } from '@/components/renter/documents/DocumentsHeader';
 import { DocumentsStats } from '@/components/renter/documents/DocumentsStats';
 import { DocumentsList } from '@/components/renter/documents/DocumentsList';
@@ -12,9 +12,17 @@ import { DocumentExpiryAlerts } from '@/components/renter/documents/DocumentExpi
 import { DocumentBulkActions } from '@/components/renter/documents/DocumentBulkActions';
 import { DocumentUploadModal } from '@/components/renter/documents/DocumentUploadModal';
 import { DocumentShareModal } from '@/components/renter/documents/DocumentShareModal';
-import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
-import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import {
+  ListSkeleton,
+  PageErrorState,
+  Pagination,
+  Skeleton,
+  StatGridSkeleton,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
+import { renterService, type RenterDocument } from '@/services/renterService';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import type {
   DocumentFilterStatus,
@@ -32,6 +40,7 @@ interface UploadData {
 
 export const DocumentsView = () => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const PAGE_SIZE = 12;
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,9 +59,11 @@ export const DocumentsView = () => {
     sortBy,
     sortOrder: 'desc' as const,
   };
+  const documentsQueryKey = [...renterKeys.documents, documentParams];
   const documentsQuery = useQuery({
-    queryKey: [...renterKeys.documents, documentParams],
+    queryKey: documentsQueryKey,
     queryFn: () => unwrap(renterService.listDocuments(documentParams)),
+    placeholderData: keepPreviousData,
   });
   const summaryQuery = useQuery({
     queryKey: renterKeys.documentSummary,
@@ -66,8 +77,6 @@ export const DocumentsView = () => {
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sharingDocumentId, setSharingDocumentId] = useState<string | null>(null);
-  const [downloadToast, setDownloadToast] = useState<string | null>(null);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
 
   const invalidateDocuments = () => {
     queryClient.invalidateQueries({ queryKey: renterKeys.documents });
@@ -89,7 +98,7 @@ export const DocumentsView = () => {
       setSelectedDocuments((prev) => prev.filter((sid) => sid !== id));
       if (documents.length === 1 && page > 1) setPage((current) => current - 1);
     },
-    onError: () => setErrorToast('The document could not be deleted.'),
+    onError: () => toast.error('The document could not be deleted.'),
   });
 
   const bulkDeleteMutation = useMutation({
@@ -106,13 +115,27 @@ export const DocumentsView = () => {
         setPage((current) => current - 1);
       }
     },
-    onError: () => setErrorToast('The selected documents could not be deleted.'),
+    onError: () => toast.error('The selected documents could not be deleted.'),
   });
 
-  const toggleFavoriteMutation = useMutation({
+  const toggleFavoriteMutation = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(renterService.toggleDocumentFavorite(id)),
-    onSuccess: invalidateDocuments,
-    onError: () => setErrorToast('The favorite status could not be updated.'),
+    patches: (id) => [
+      {
+        queryKey: documentsQueryKey,
+        update: (old) => {
+          const current = old as Paginated<RenterDocument>;
+          return {
+            ...current,
+            items: current.items.map((document) =>
+              document.id === id ? { ...document, isFavorite: !document.isFavorite } : document
+            ),
+          };
+        },
+      },
+    ],
+    invalidate: [renterKeys.documents, renterKeys.documentSummary],
+    errorMessage: 'The favorite status could not be updated.',
   });
 
   const shareMutation = useMutation({
@@ -126,7 +149,7 @@ export const DocumentsView = () => {
       await uploadMutation.mutateAsync(data);
       return true;
     } catch (error) {
-      setErrorToast(error instanceof Error ? error.message : 'The document could not be uploaded.');
+      toast.error(error instanceof Error ? error.message : 'The document could not be uploaded.');
       return false;
     }
   };
@@ -144,7 +167,7 @@ export const DocumentsView = () => {
       await shareMutation.mutateAsync({ id: sharingDocumentId, email });
       return true;
     } catch (error) {
-      setErrorToast(error instanceof Error ? error.message : 'The document could not be shared.');
+      toast.error(error instanceof Error ? error.message : 'The document could not be shared.');
       return false;
     }
   };
@@ -153,9 +176,8 @@ export const DocumentsView = () => {
     const res = await renterService.getDocumentDownloadUrl(id);
     if (res.success && res.data) {
       window.open(res.data.url, '_blank', 'noopener,noreferrer');
-      setDownloadToast(`${res.data.name} opened`);
-      window.setTimeout(() => setDownloadToast(null), 3000);
-    } else setErrorToast(res.error || 'The document could not be opened.');
+      toast.success(`${res.data.name} opened`);
+    } else toast.error(res.error || 'The document could not be opened.');
   };
 
   const handleSelectDocument = (id: string) => {
@@ -179,10 +201,19 @@ export const DocumentsView = () => {
   };
 
   if (documentsQuery.isLoading || summaryQuery.isLoading) {
-    return <PageLoadingState />;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-36 w-full rounded-xl" />
+        <StatGridSkeleton />
+        <div className="grid gap-6 lg:grid-cols-4">
+          <Skeleton className="h-64 w-full rounded-xl lg:col-span-1" />
+          <ListSkeleton rows={6} variant="cards" className="lg:col-span-3" />
+        </div>
+      </div>
+    );
   }
 
-  if (documentsQuery.isError || summaryQuery.isError) {
+  if ((documentsQuery.isError && !documentsData) || (summaryQuery.isError && !documentSummary)) {
     return (
       <PageErrorState
         title="Documents are unavailable"
@@ -276,13 +307,6 @@ export const DocumentsView = () => {
         documentName={documents.find((d) => d.id === sharingDocumentId)?.name || ''}
         onShare={handleConfirmShare}
       />
-
-      {downloadToast && (
-        <Toast message={downloadToast} variant="success" onClose={() => setDownloadToast(null)} />
-      )}
-      {errorToast && (
-        <Toast message={errorToast} variant="error" onClose={() => setErrorToast(null)} />
-      )}
     </>
   );
 };

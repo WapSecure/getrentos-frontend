@@ -4,18 +4,18 @@ import { formatCurrency } from '@/lib/format';
 import type { CreditScoreBand, SharedCreditCheck } from '@/types/credit-check';
 
 const bandLabel: Record<CreditScoreBand, { text: string; className: string }> = {
-  POOR: { text: 'Poor', className: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400' },
+  POOR: { text: 'Poor', className: 'bg-destructive-subtle text-destructive' },
   FAIR: {
     text: 'Fair',
-    className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
+    className: 'bg-warning-subtle text-warning',
   },
   GOOD: {
     text: 'Good',
-    className: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
+    className: 'bg-success-subtle text-success',
   },
   EXCELLENT: {
     text: 'Excellent',
-    className: 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
+    className: 'bg-success-subtle text-success',
   },
 };
 
@@ -25,7 +25,7 @@ export const CreditSummaryView = ({ check }: { check: SharedCreditCheck }) => {
   return (
     <div className="space-y-2">
       {check.isSample && (
-        <p className="rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+        <p className="rounded-md bg-warning-subtle px-2 py-1 text-xs font-medium text-warning">
           Sample data for testing. This did not come from a credit bureau.
         </p>
       )}
@@ -52,7 +52,7 @@ export const CreditSummaryView = ({ check }: { check: SharedCreditCheck }) => {
             </div>
             <div>
               <dd
-                className={`font-medium ${summary.delinquentAccounts > 0 ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}
+                className={`font-medium ${summary.delinquentAccounts > 0 ? 'text-destructive' : 'text-foreground'}`}
               >
                 {summary.delinquentAccounts}
               </dd>

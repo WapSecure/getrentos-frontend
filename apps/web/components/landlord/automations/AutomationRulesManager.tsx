@@ -17,9 +17,10 @@ import {
   Input,
   Select,
   Switch,
+  ListSkeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useOptimisticMutation,
+  useToast,
 } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -68,7 +69,7 @@ const emptyForm: RuleForm = {
 
 export function AutomationRulesManager() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<RuleForm>(emptyForm);
@@ -116,40 +117,41 @@ export function AutomationRulesManager() {
     onSuccess: () => {
       invalidate();
       setOpen(false);
-      setToast({ message: editingId ? 'Rule updated.' : 'Rule created.', variant: 'success' });
+      toast.success(editingId ? 'Rule updated.' : 'Rule created.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Unable to save the rule.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to save the rule.'),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => unwrap(automationService.deleteRule(id)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Rule removed.', variant: 'success' });
+      toast.success('Rule removed.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Unable to remove.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to remove.'),
   });
 
-  const toggle = useMutation({
+  const toggle = useOptimisticMutation({
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
       unwrap(automationService.updateRule(id, { enabled })),
-    onSuccess: () => invalidate(),
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Unable to update.', variant: 'error' }),
+    patches: ({ id, enabled }) => [
+      {
+        queryKey: landlordKeys.automationRules,
+        update: (old) =>
+          (old as AutomationRule[]).map((rule) => (rule.id === id ? { ...rule, enabled } : rule)),
+      },
+    ],
+    invalidate: [landlordKeys.automationRules],
+    errorMessage: 'Unable to update.',
   });
 
   const run = useMutation({
     mutationFn: (id: string) => unwrap(automationService.runRule(id)),
     onSuccess: (res) => {
       invalidate();
-      setToast({
-        message: `Sent to ${res.recipientCount} tenant${res.recipientCount === 1 ? '' : 's'}.`,
-        variant: 'success',
-      });
+      toast.success(`Sent to ${res.recipientCount} tenant${res.recipientCount === 1 ? '' : 's'}.`);
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Unable to run.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to run.'),
   });
 
   const openCreate = () => {
@@ -182,8 +184,8 @@ export function AutomationRulesManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-base font-semibold text-foreground">Automation rules</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Send an announcement automatically — on a recurring schedule, or when a tenancy event
@@ -194,7 +196,7 @@ export function AutomationRulesManager() {
       </div>
 
       {isLoading ? (
-        <div className="h-24 animate-pulse rounded-2xl bg-secondary/50" />
+        <ListSkeleton variant="cards" rows={2} />
       ) : rules.length === 0 ? (
         <Card static className="p-2">
           <EmptyState
@@ -229,11 +231,11 @@ export function AutomationRulesManager() {
                       : ' · not run yet'}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <Switch
                     checked={r.enabled}
                     onCheckedChange={(enabled) => toggle.mutate({ id: r.id, enabled })}
-                    aria-label="Enable rule"
+                    aria-label={`Enable ${r.name}`}
                   />
                   {r.trigger === 'SCHEDULE' && (
                     <Button
@@ -242,7 +244,9 @@ export function AutomationRulesManager() {
                       rounded="md"
                       icon={<Play className="h-4 w-4" />}
                       onClick={() => run.mutate(r.id)}
-                      disabled={run.isPending}
+                      disabled={run.isPending && run.variables !== r.id}
+                      isLoading={run.isPending && run.variables === r.id}
+                      aria-label={`Run ${r.name} now`}
                     >
                       Run now
                     </Button>
@@ -253,6 +257,7 @@ export function AutomationRulesManager() {
                     rounded="md"
                     icon={<Pencil className="h-4 w-4" />}
                     onClick={() => openEdit(r)}
+                    aria-label={`Edit ${r.name}`}
                   >
                     Edit
                   </Button>
@@ -262,7 +267,9 @@ export function AutomationRulesManager() {
                     rounded="md"
                     icon={<Trash2 className="h-4 w-4" />}
                     onClick={() => remove.mutate(r.id)}
-                    disabled={remove.isPending}
+                    disabled={remove.isPending && remove.variables !== r.id}
+                    isLoading={remove.isPending && remove.variables === r.id}
+                    aria-label={`Delete ${r.name}`}
                   >
                     Delete
                   </Button>
@@ -365,17 +372,14 @@ export function AutomationRulesManager() {
             <Button
               rounded="md"
               onClick={() => save.mutate()}
-              disabled={!canSave || save.isPending}
+              disabled={!canSave}
+              isLoading={save.isPending}
             >
-              {save.isPending ? 'Saving…' : 'Save rule'}
+              Save rule
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

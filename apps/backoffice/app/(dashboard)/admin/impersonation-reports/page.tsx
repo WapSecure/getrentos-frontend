@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
   EmptyState,
+  ListSkeleton,
+  PageErrorState,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -109,9 +112,7 @@ const ReportCard = ({ report }: { report: ImpersonationReport }) => {
               Close
             </Button>
           </div>
-          {review.error && (
-            <p className="text-sm text-destructive">{(review.error as Error).message}</p>
-          )}
+          {review.error && <Alert variant="danger">{(review.error as Error).message}</Alert>}
         </div>
       )}
     </Card>
@@ -125,6 +126,7 @@ export default function ImpersonationReportsPage() {
   const list = useQuery({
     queryKey: ['admin', 'impersonation', filter],
     queryFn: () => unwrap(adminImpersonationService.list(filter === 'all' ? undefined : filter)),
+    placeholderData: keepPreviousData,
   });
   return (
     <div className="space-y-6">
@@ -147,7 +149,14 @@ export default function ImpersonationReportsPage() {
         </TabsList>
       </Tabs>
       {list.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <ListSkeleton variant="cards" />
+      ) : list.isError && !list.data ? (
+        <PageErrorState
+          title="Could not load reports"
+          onRetry={() => void list.refetch()}
+          isRetrying={list.isFetching}
+          headingLevel="h2"
+        />
       ) : (list.data ?? []).length === 0 ? (
         <EmptyState
           icon={ShieldAlert}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Button } from '@getrentos/ui';
+import { Button, Skeleton } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { buyerLandKeys } from '@/lib/landSalesQueryKeys';
@@ -16,14 +16,13 @@ const KIND_LABELS = {
 
 /** Ledger of charges and payments with a running balance. Loaded on demand. */
 export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: buyerLandKeys.statement(purchaseId),
     queryFn: () => unwrap(landBuyerService.getStatement(purchaseId)),
   });
 
-  if (isLoading)
-    return <div className="h-32 animate-pulse rounded-xl bg-secondary" aria-busy="true" />;
-  if (isError || !data) {
+  if (isLoading) return <Skeleton className="h-32 rounded-xl" />;
+  if (!data) {
     return (
       <div role="alert" className="space-y-2 text-sm text-destructive">
         <p>{error instanceof Error ? error.message : 'Could not load the statement.'}</p>

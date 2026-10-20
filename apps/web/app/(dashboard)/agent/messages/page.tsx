@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Pagination, Select } from '@getrentos/ui';
+import { Button, Pagination, Select } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/agent/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/agent/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -34,6 +34,7 @@ export default function AgentMessagesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const conversationApi = conversationsData?.items ?? [];
   const total = conversationsData?.total ?? 0;
@@ -58,6 +59,7 @@ export default function AgentMessagesPage() {
           pageSize: CLIENT_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const clients = clientsData?.items ?? [];
   const clientTotal = clientsData?.total ?? 0;
@@ -127,7 +129,7 @@ export default function AgentMessagesPage() {
           <h1 className="text-2xl font-bold text-foreground">Messages</h1>
           <div className="flex flex-col items-end gap-2">
             <Select
-              className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+              className="w-56 max-w-full"
               value=""
               ariaLabel="Start a new conversation"
               placeholder="New conversation"
@@ -173,13 +175,15 @@ export default function AgentMessagesPage() {
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
           {activeConversation ? (
             <>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ArrowLeft className="w-4 h-4" />}
                 onClick={() => setActiveId(null)}
-                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+                className="sm:hidden self-start mb-2"
               >
-                <ArrowLeft className="w-4 h-4" />
                 Back to conversations
-              </button>
+              </Button>
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}

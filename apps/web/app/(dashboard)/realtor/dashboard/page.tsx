@@ -7,6 +7,7 @@ import { RealtorStatsCards } from '@/components/realtor/dashboard/RealtorStatsCa
 import { RealtorActivityFeed } from '@/components/realtor/dashboard/RealtorActivityFeed';
 import { RealtorQuickActions } from '@/components/realtor/dashboard/RealtorQuickActions';
 import { useQuery } from '@tanstack/react-query';
+import { Skeleton } from '@getrentos/ui';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -21,7 +22,7 @@ const RealtorCommissionChart = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 rounded-xl" />,
   }
 );
 

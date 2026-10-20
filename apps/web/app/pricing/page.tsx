@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, BadgeCheck } from 'lucide-react';
+import { TableSkeleton } from '@getrentos/ui';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
@@ -61,6 +62,7 @@ export default function PricingPage() {
                 <button
                   key={p.key}
                   type="button"
+                  aria-pressed={persona === p.key}
                   onClick={() => setPersona(p.key)}
                   className={
                     persona === p.key
@@ -75,7 +77,7 @@ export default function PricingPage() {
           </div>
 
           {isLoading ? (
-            <div className="h-64 animate-pulse rounded-2xl border border-border bg-card" />
+            <TableSkeleton rows={6} columns={3} />
           ) : (
             <PlanComparisonTable rows={entitlementsFor(persona)} />
           )}

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, ShieldCheck } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { ShieldCheck } from 'lucide-react';
+import { Alert, Button, Checkbox, Field, NumberInput } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -77,58 +77,35 @@ export const CreditCheckCard = ({ applicationId }: { applicationId: string }) =>
             whether you have overdue accounts and how much you owe, not your full report. You can
             take it back at any time.
           </p>
-          <div>
-            <label htmlFor="credit-bvn" className="block text-sm font-medium text-foreground mb-1">
-              Your BVN
-            </label>
-            <LegacyInput
-              id="credit-bvn"
-              type="text"
-              inputMode="numeric"
-              autoComplete="off"
+          <Field label="Your BVN" hint="Used for this one check and never saved.">
+            <NumberInput
               maxLength={11}
               value={bvn}
-              onChange={(event) => setBvn(event.target.value.replace(/\D/g, ''))}
+              onValueChange={setBvn}
               placeholder="11 digits"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Used for this one check and never saved.
-            </p>
-          </div>
-          <label className="flex items-start gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              checked={agreed}
-              onChange={(event) => setAgreed(event.target.checked)}
-              className="mt-0.5"
-            />
-            <span>
-              I agree to a credit check being run on me and its summary being shared with my
-              landlord for this application.
-            </span>
-          </label>
+          </Field>
+          <Checkbox
+            checked={agreed}
+            onCheckedChange={setAgreed}
+            label="I agree to a credit check being run on me and its summary being shared with my landlord for this application."
+          />
           {share.isError && (
-            <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+            <Alert variant="danger">
               {share.error instanceof Error
                 ? share.error.message
                 : 'We could not run the credit check. Please try again.'}
-            </p>
+            </Alert>
           )}
           <Button
             variant="primary"
             size="sm"
             onClick={() => share.mutate()}
-            disabled={!validBvn || !agreed || share.isPending}
+            disabled={!validBvn || !agreed}
             isLoading={share.isPending}
+            loadingText="Checking…"
           >
-            {share.isPending ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking…
-              </span>
-            ) : (
-              'Run and share credit check'
-            )}
+            Run and share credit check
           </Button>
         </div>
       )}

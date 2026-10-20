@@ -1,11 +1,20 @@
 'use client';
 
-import { LegacyInput, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
-
+import {
+  Pagination,
+  Button,
+  ConfirmDialog,
+  SearchInput,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Building2 } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Building2 } from 'lucide-react';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
 import {
   AddOwnerPropertyModal,
@@ -13,8 +22,6 @@ import {
 } from '@/components/owner/properties/AddOwnerPropertyModal';
 import { OwnerVerificationStatusModal } from '@/components/owner/properties/OwnerVerificationStatusModal';
 import { EditOwnerPropertyModal } from '@/components/owner/properties/EditOwnerPropertyModal';
-import { Button } from '@getrentos/ui';
-import { ConfirmDialog } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { landService } from '@/services/landService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -32,7 +39,7 @@ export default function OwnerPropertiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchParams = useSearchParams();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.properties });
 
@@ -55,13 +62,12 @@ export default function OwnerPropertiesPage() {
     },
     onSuccess: ({ failedProofCount }) => {
       invalidate();
-      setToast({
-        message:
-          failedProofCount > 0
-            ? 'Property created. Some documents need to be uploaded again from its verification status.'
-            : 'Property and ownership documents submitted for verification.',
-        variant: failedProofCount > 0 ? 'warning' : 'success',
-      });
+      toast.show(
+        failedProofCount > 0
+          ? 'Property created. Some documents need to be uploaded again from its verification status.'
+          : 'Property and ownership documents submitted for verification.',
+        failedProofCount > 0 ? 'warning' : 'success'
+      );
     },
   });
   const deleteMutation = useMutation({
@@ -73,9 +79,9 @@ export default function OwnerPropertiesPage() {
       unwrap(ownerService.updateProperty(id, updates)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Property details updated.', variant: 'success' });
+      toast.success('Property details updated.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   useEffect(() => {
@@ -100,7 +106,7 @@ export default function OwnerPropertiesPage() {
   const [editingProperty, setEditingProperty] = useState<OwnerProperty | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [
       ...ownerKeys.properties,
       {
@@ -119,6 +125,7 @@ export default function OwnerPropertiesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const properties = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -134,7 +141,7 @@ export default function OwnerPropertiesPage() {
   const handleResubmit = async (propertyId: string, proof: LandOwnershipProofInput) => {
     await unwrap(landService.submitOwnershipProof(propertyId, proof));
     invalidate();
-    setToast({ message: 'Updated ownership evidence submitted for review.', variant: 'success' });
+    toast.success('Updated ownership evidence submitted for review.');
     setStatusModalProperty(null);
   };
 
@@ -166,33 +173,36 @@ export default function OwnerPropertiesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Properties</h1>
-          <p className="text-muted-foreground mt-1">
-            {isLoading
-              ? 'Loading…'
-              : `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`}
-          </p>
+          <div className="text-muted-foreground mt-1">
+            {isLoading || (isError && !data) ? (
+              <Skeleton className="h-5 w-48" />
+            ) : (
+              `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`
+            )}
+          </div>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          onClick={() => setIsAddModalOpen(true)}
+          icon={<Plus className="w-4 h-4" />}
+        >
           Add Property
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name or city..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by name or city..."
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -200,7 +210,7 @@ export default function OwnerPropertiesPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -209,25 +219,31 @@ export default function OwnerPropertiesPage() {
         </div>
       </div>
 
-      {!isLoading && properties.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No properties yet' : 'No properties match your filters'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
+      {isLoading ? (
+        <ListSkeleton rows={6} variant="cards" label="Loading properties" />
+      ) : isError && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your properties"
+          onRetry={() => void refetch()}
+        />
+      ) : properties.length === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title={total === 0 ? 'No properties yet' : 'No properties match your filters'}
+          description={
+            total === 0
               ? 'Add your first property to verify ownership and unlock sale listings and investment tracking.'
-              : 'Try adjusting your search or filter.'}
-          </p>
-          {total === 0 && (
-            <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
-              Add Your First Property
-            </Button>
-          )}
-        </div>
+              : 'Try adjusting your search or filter.'
+          }
+          action={
+            total === 0 ? (
+              <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
+                Add Your First Property
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {properties.map((property, index) => (
@@ -280,9 +296,6 @@ export default function OwnerPropertiesPage() {
         onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

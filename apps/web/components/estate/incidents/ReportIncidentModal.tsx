@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, DocumentUpload, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, Field, IconButton, Select, Textarea } from '@getrentos/ui';
 
 const categoryOptions = [
   { value: 'SECURITY', label: 'Security' },
@@ -64,40 +64,29 @@ export const ReportIncidentModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Report Incident</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+                <Field label="Category">
                   <Select value={category} onValueChange={setCategory} options={categoryOptions} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
+                </Field>
+                <Field label="Priority">
                   <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
-                </div>
+                </Field>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Description
-                </label>
-                <textarea
+              <Field label="Description">
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
                   placeholder="What happened, where, and who's involved…"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Photo <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
+              <Field label="Photo" optionalLabel="(optional)">
                 <DocumentUpload
                   value={photo ? [{ id: 'photo', file: photo }] : []}
                   onChange={(items) => setPhoto(items[0]?.file ?? null)}
@@ -105,7 +94,7 @@ export const ReportIncidentModal = ({
                   multiple={false}
                   label=""
                 />
-              </div>
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -115,7 +104,9 @@ export const ReportIncidentModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Reporting…"
                 onClick={() =>
                   onSubmit({
                     description: description.trim(),
@@ -125,7 +116,7 @@ export const ReportIncidentModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Reporting…' : 'Report Incident'}
+                Report Incident
               </Button>
             </div>
           </motion.div>

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Bed, Bath, Square, MapPin, Star, Shield, ShieldCheck, GitCompare } from 'lucide-react';
 import { Property } from '@/types/renter';
 import { trustChainLabel } from '@getrentos/shared';
+import { EmptyState, IconButton } from '@getrentos/ui';
 
 interface DiscoverCompareDrawerProps {
   isOpen: boolean;
@@ -56,22 +57,16 @@ export const DiscoverCompareDrawer = ({
                   {properties.length} of 4 properties selected
                 </p>
               </div>
-              <button onClick={onClose} className="p-2 rounded-lg hover:bg-secondary">
-                <X className="w-5 h-5" />
-              </button>
+              <IconButton label="Close comparison" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-6">
               {properties.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                    <GitCompare className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-foreground">No properties selected</h3>
-                  <p className="text-muted-foreground mt-1">
-                    Click the compare icon on any property to add it here
-                  </p>
-                </div>
+                <EmptyState
+                  icon={GitCompare}
+                  title="No properties selected"
+                  description="Click the compare icon on any property to add it here"
+                />
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -82,16 +77,17 @@ export const DiscoverCompareDrawer = ({
                         </th>
                         {properties.map((property) => (
                           <th key={property.id} className="text-left py-3 px-4 min-w-[200px]">
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-start gap-2">
                               <span className="font-semibold text-foreground">
                                 {property.title}
                               </span>
-                              <button
+                              <IconButton
+                                label={`Remove ${property.title} from comparison`}
+                                icon={<X />}
+                                size="sm"
+                                variant="danger"
                                 onClick={() => onRemove(property.id)}
-                                className="text-gray-400 hover:text-red-500"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
+                              />
                             </div>
                           </th>
                         ))}
@@ -113,7 +109,7 @@ export const DiscoverCompareDrawer = ({
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1 text-sm">
-                              <MapPin className="w-3 h-3 text-gray-400" />
+                              <MapPin className="w-3 h-3 text-muted-foreground" />
                               {property.location}
                             </div>
                           </td>
@@ -124,7 +120,7 @@ export const DiscoverCompareDrawer = ({
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Bed className="w-4 h-4 text-gray-400" />
+                              <Bed className="w-4 h-4 text-muted-foreground" />
                               {property.bedrooms}
                             </div>
                           </td>
@@ -135,7 +131,7 @@ export const DiscoverCompareDrawer = ({
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Bath className="w-4 h-4 text-gray-400" />
+                              <Bath className="w-4 h-4 text-muted-foreground" />
                               {property.bathrooms}
                             </div>
                           </td>
@@ -146,7 +142,7 @@ export const DiscoverCompareDrawer = ({
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Square className="w-4 h-4 text-gray-400" />
+                              <Square className="w-4 h-4 text-muted-foreground" />
                               {property.size} sqm
                             </div>
                           </td>
@@ -168,12 +164,12 @@ export const DiscoverCompareDrawer = ({
                         {properties.map((property) => (
                           <td key={property.id} className="py-3 px-4">
                             {property.verified ? (
-                              <span className="inline-flex items-center gap-1 text-green-600">
+                              <span className="inline-flex items-center gap-1 text-success">
                                 <Shield className="w-4 h-4" />
                                 Yes
                               </span>
                             ) : (
-                              <span className="text-gray-400">No</span>
+                              <span className="text-muted-foreground">No</span>
                             )}
                           </td>
                         ))}
@@ -189,7 +185,7 @@ export const DiscoverCompareDrawer = ({
                                   .join('\n')}
                                 className={`inline-flex items-center gap-1 ${
                                   trustChainLabel(property.trustChain).tone === 'verified'
-                                    ? 'text-green-600'
+                                    ? 'text-success'
                                     : 'text-muted-foreground'
                                 }`}
                               >
@@ -197,7 +193,7 @@ export const DiscoverCompareDrawer = ({
                                 {trustChainLabel(property.trustChain).label}
                               </span>
                             ) : (
-                              <span className="text-gray-400">—</span>
+                              <span className="text-muted-foreground">—</span>
                             )}
                           </td>
                         ))}

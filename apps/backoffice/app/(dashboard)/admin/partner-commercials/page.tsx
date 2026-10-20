@@ -9,10 +9,11 @@ import {
   Card,
   ConfirmDialog,
   EmptyState,
+  Field,
+  ListSkeleton,
   NumberInput,
   PageErrorState,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, unwrap } from '@getrentos/shared';
 import {
@@ -24,28 +25,24 @@ const KEY = ['admin', 'partner-commercials'] as const;
 
 export default function PartnerCommercialsPage() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [payoutTarget, setPayoutTarget] = useState<PartnerCommercialRow | null>(null);
 
-  const {
-    data: partners = [],
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: KEY,
     queryFn: () => unwrap(adminPartnerCommercialsService.list()),
   });
+  const partners = data ?? [];
 
   const save = useMutation({
     mutationFn: ({ organizationId, pct }: { organizationId: string; pct: number }) =>
       unwrap(adminPartnerCommercialsService.setConfig(organizationId, pct)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: KEY });
-      setToast({ message: 'Partner share updated.', variant: 'success' });
+      toast.success('Partner share updated.');
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Unable to save.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to save.'),
   });
 
   const payout = useMutation({
@@ -54,16 +51,14 @@ export default function PartnerCommercialsPage() {
     onSuccess: (p) => {
       setPayoutTarget(null);
       queryClient.invalidateQueries({ queryKey: KEY });
-      setToast({
-        message:
-          p.status === 'SUCCESS'
-            ? `Paid ${formatCurrency(p.amount)} to the partner.`
-            : `Payout of ${formatCurrency(p.amount)} is ${p.status.toLowerCase()}.`,
-        variant: p.status === 'FAILED' ? 'error' : 'success',
-      });
+      const message =
+        p.status === 'SUCCESS'
+          ? `Paid ${formatCurrency(p.amount)} to the partner.`
+          : `Payout of ${formatCurrency(p.amount)} is ${p.status.toLowerCase()}.`;
+      if (p.status === 'FAILED') toast.error(message);
+      else toast.success(message);
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Unable to pay out.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to pay out.'),
   });
 
   const draftFor = (p: PartnerCommercialRow) =>
@@ -82,10 +77,10 @@ export default function PartnerCommercialsPage() {
         </p>
       </div>
 
-      {isError ? (
+      {isLoading ? (
+        <ListSkeleton variant="cards" rows={3} />
+      ) : isError && !data ? (
         <PageErrorState onRetry={() => refetch()} />
-      ) : isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary/50" />
       ) : partners.length === 0 ? (
         <Card className="p-2">
           <EmptyState
@@ -119,21 +114,21 @@ export default function PartnerCommercialsPage() {
                       across {p.earnedCount} statement{p.earnedCount === 1 ? '' : 's'}
                     </p>
                   </div>
-                  <div className="flex items-end gap-2">
-                    <div className="w-32">
-                      <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                        Partner share %
-                      </label>
+                  <div className="flex flex-wrap items-end gap-2">
+                    <Field label="Partner share %" className="w-32">
                       <NumberInput
                         min={0}
                         max={100}
                         value={draft}
                         onValueChange={(v) => setDrafts((d) => ({ ...d, [p.organizationId]: v }))}
                       />
-                    </div>
+                    </Field>
                     <Button
                       size="sm"
                       disabled={!dirty || !valid || save.isPending}
+                      isLoading={
+                        save.isPending && save.variables?.organizationId === p.organizationId
+                      }
                       onClick={() => save.mutate({ organizationId: p.organizationId, pct })}
                     >
                       Save
@@ -156,9 +151,6 @@ export default function PartnerCommercialsPage() {
         </div>
       )}
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <ConfirmDialog
         open={payoutTarget !== null}
         onOpenChange={(open) => !open && setPayoutTarget(null)}

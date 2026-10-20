@@ -2,38 +2,38 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, MessageSquare } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, type BadgeVariant, Button, Card } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { BuyerLead, BuyerLeadStage } from '@/types/owner';
 
-const stageConfig: Record<BuyerLeadStage, { label: string; className: string }> = {
+const stageConfig: Record<BuyerLeadStage, { label: string; variant: BadgeVariant }> = {
   new: {
     label: 'New',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
+    variant: 'info',
   },
   contacted: {
     label: 'Contacted',
-    className: 'text-purple-700 bg-purple-50 dark:text-purple-400 dark:bg-purple-900/20',
+    variant: 'info',
   },
   qualified: {
     label: 'Qualified',
-    className: 'text-indigo-700 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20',
+    variant: 'info',
   },
   viewing_scheduled: {
     label: 'Viewing Scheduled',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
+    variant: 'warning',
   },
   offer_made: {
     label: 'Offer Made',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+    variant: 'success',
   },
   closed: {
     label: 'Closed',
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-white/10',
+    variant: 'neutral',
   },
   lost: {
     label: 'Lost',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
+    variant: 'danger',
   },
 };
 
@@ -51,55 +51,54 @@ export const BuyerLeadCard = ({ lead, delay = 0, onMessage }: BuyerLeadCardProps
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
-            {getInitials(lead.buyerName)}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-foreground truncate">{lead.buyerName}</h3>
-              {lead.verified ? (
-                <ShieldCheck className="w-3.5 h-3.5 text-green-500 shrink-0" />
-              ) : (
-                <ShieldAlert className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-              )}
+      <Card className="rounded-2xl p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
+              {getInitials(lead.buyerName)}
             </div>
-            <p className="text-xs text-muted-foreground truncate">{lead.propertyName}</p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-semibold text-foreground truncate">{lead.buyerName}</h3>
+                {lead.verified ? (
+                  <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" aria-label="Verified" />
+                ) : (
+                  <ShieldAlert className="w-3.5 h-3.5 text-warning shrink-0" aria-label="Not verified" />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground truncate">{lead.propertyName}</p>
+            </div>
+          </div>
+          <Badge variant={stage.variant} className="whitespace-nowrap">
+            {stage.label}
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <div>
+            <p className="text-xs text-muted-foreground">Trust Score</p>
+            <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Inquired</p>
+            <p className="text-sm font-medium text-foreground">{formatDate(lead.inquiryDate)}</p>
           </div>
         </div>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${stage.className}`}
-        >
-          {stage.label}
-        </span>
-      </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <div>
-          <p className="text-xs text-gray-400">Trust Score</p>
-          <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
+        <div className="mt-4 pt-4 border-t border-border">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-full"
+            title="Message Buyer"
+            onClick={onMessage}
+            icon={<MessageSquare className="w-4 h-4" />}
+          >
+            Message buyer
+          </Button>
         </div>
-        <div>
-          <p className="text-xs text-gray-400">Inquired</p>
-          <p className="text-sm font-medium text-foreground">{formatDate(lead.inquiryDate)}</p>
-        </div>
-      </div>
-
-      <div className="mt-4 pt-4 border-t border-border">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="w-full gap-2"
-          title="Message Buyer"
-          onClick={onMessage}
-        >
-          <MessageSquare className="w-4 h-4" />
-          Message buyer
-        </Button>
-      </div>
+      </Card>
     </motion.div>
   );
 };

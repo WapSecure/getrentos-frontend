@@ -1,7 +1,7 @@
 'use client';
 
 import { Printer } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Alert, Badge, Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
 import type { AcquisitionCostItem, LandDossier } from '@/types/landDossier';
@@ -64,9 +64,7 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
         </Button>
       </header>
 
-      <p className="rounded-xl border border-warning/40 bg-warning/5 p-3 text-sm text-foreground">
-        {dossier.freshnessNote}
-      </p>
+      <Alert variant="warning">{dossier.freshnessNote}</Alert>
 
       <Section title="The land">
         <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">

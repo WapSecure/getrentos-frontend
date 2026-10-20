@@ -33,9 +33,9 @@ export const ThemeSwitch = () => {
       className={className}
     >
       {isDark ? (
-        <Moon className="h-4 w-4 text-gray-900 dark:text-white" />
+        <Moon className="h-4 w-4 text-foreground" />
       ) : (
-        <Sun className="h-4 w-4 text-gray-900 dark:text-white" />
+        <Sun className="h-4 w-4 text-foreground" />
       )}
     </button>
   );

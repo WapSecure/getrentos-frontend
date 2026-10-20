@@ -3,16 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Send } from 'lucide-react';
-import {
-  Button,
-  Card,
-  Field,
-  Input,
-  Select,
-  Textarea,
-  Toast,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Button, Card, Field, Input, Select, Textarea, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
@@ -20,7 +11,7 @@ import { automationService, type BroadcastAudience } from '@/services/automation
 import { AUDIENCE_OPTIONS, MERGE_FIELDS } from './constants';
 
 export function BroadcastComposer() {
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [audience, setAudience] = useState<BroadcastAudience>('ALL_TENANTS');
   const [propertyId, setPropertyId] = useState('');
   const [title, setTitle] = useState('');
@@ -48,19 +39,17 @@ export function BroadcastComposer() {
         })
       ),
     onSuccess: (res) => {
-      setToast({
-        message:
-          res.recipientCount === 0
-            ? 'No tenants matched that audience.'
-            : `Sent to ${res.recipientCount} tenant${res.recipientCount === 1 ? '' : 's'}.`,
-        variant: res.recipientCount === 0 ? 'error' : 'success',
-      });
+      if (res.recipientCount === 0) toast.error('No tenants matched that audience.');
+      else
+        toast.success(
+          `Sent to ${res.recipientCount} tenant${res.recipientCount === 1 ? '' : 's'}.`
+        );
       if (res.recipientCount > 0) {
         setTitle('');
         setBody('');
       }
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Unable to send.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to send.'),
   });
 
   const applyTemplate = (id: string) => {
@@ -134,16 +123,14 @@ export function BroadcastComposer() {
           <Button
             icon={<Send className="h-4 w-4" />}
             onClick={() => send.mutate()}
-            disabled={!canSend || send.isPending}
+            disabled={!canSend}
+            isLoading={send.isPending}
+            loadingText="Sending…"
           >
-            {send.isPending ? 'Sending…' : 'Send announcement'}
+            Send announcement
           </Button>
         </div>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </Card>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, Loader2, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Alert, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { BACKEND_ROLE_TO_ID, ROLES } from '@/lib/constants/auth';
 import { getStoredUser } from '@/lib/authStorage';
 import { useAddRole } from '@/hooks/useAddRole';
@@ -51,6 +51,7 @@ export const AddRoleDialog = ({
                 key={id}
                 type="button"
                 disabled={addRole.isPending}
+                aria-busy={(addRole.isPending && addRole.variables?.role === id) || undefined}
                 onClick={() => addRole.mutate({ role: id as AddableRoleId })}
                 className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary disabled:opacity-60"
               >
@@ -90,9 +91,9 @@ export const AddRoleDialog = ({
             </Link>
           )}
           {addRole.error && (
-            <p role="alert" className="text-sm text-destructive">
+            <Alert variant="danger">
               {addRole.error instanceof Error ? addRole.error.message : 'Could not add that role.'}
-            </p>
+            </Alert>
           )}
           <p className="pt-1 text-xs text-muted-foreground">
             Some actions in a new role need extra checks, such as identity verification before

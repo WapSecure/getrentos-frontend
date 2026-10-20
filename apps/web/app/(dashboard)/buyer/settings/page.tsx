@@ -3,6 +3,7 @@
 import { useBuyerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Card } from '@getrentos/ui';
 import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck } from 'lucide-react';
 import { ProfileSettings } from '@/components/buyer/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/buyer/settings/NotificationSettings';
@@ -61,6 +62,8 @@ export default function BuyerSettingsPage() {
                 return (
                   <button
                     key={tab.id}
+                    type="button"
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === tab.id
@@ -77,10 +80,8 @@ export default function BuyerSettingsPage() {
           </div>
         </div>
 
-        <div className="flex-1">
-          <div className="bg-card rounded-xl border border-border overflow-hidden p-6">
-            {renderContent()}
-          </div>
+        <div className="min-w-0 flex-1">
+          <Card className="p-4 sm:p-6">{renderContent()}</Card>
         </div>
       </div>
     </>

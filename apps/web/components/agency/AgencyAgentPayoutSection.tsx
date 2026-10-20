@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Users } from 'lucide-react';
-import { Badge, Button, type ToastVariant } from '@getrentos/ui';
+import { Users } from 'lucide-react';
+import { Badge, Button, ListSkeleton, type ToastVariant } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -78,21 +78,24 @@ export function AgencyAgentPayoutSection({
               separately on the firm payout.
             </p>
           </div>
-          <Button onClick={() => run.mutate()} disabled={run.isPending || totalReady <= 0}>
-            {run.isPending ? 'Paying…' : `Pay agents (${formatCurrency(totalReady)})`}
+          <Button
+            onClick={() => run.mutate()}
+            disabled={totalReady <= 0}
+            isLoading={run.isPending}
+            loadingText="Paying…"
+          >
+            {`Pay agents (${formatCurrency(totalReady)})`}
           </Button>
         </div>
 
         {payableQuery.isLoading ? (
-          <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-          </p>
+          <ListSkeleton rows={2} className="mt-4" />
         ) : payable.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
             No agent has an unpaid share right now.
           </p>
         ) : (
-          <div className="mt-4 overflow-hidden rounded-xl border border-border">
+          <div className="mt-4 overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted-foreground">

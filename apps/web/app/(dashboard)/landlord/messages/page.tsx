@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
+import { Pagination, Button, EmptyState } from '@getrentos/ui';
 import {
   ConversationList,
   type Conversation,
@@ -48,6 +48,7 @@ export default function LandlordMessagesPage() {
           search: debouncedSearch || undefined,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const conversations = conversationsData?.items ?? [];
   const total = conversationsData?.total ?? 0;
@@ -130,16 +131,18 @@ export default function LandlordMessagesPage() {
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
           {activeConversation ? (
             <>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                className="sm:hidden mb-2 self-start"
+                icon={<ArrowLeft className="w-4 h-4" />}
                 onClick={() => {
                   setActiveId(null);
                   setActiveConversation(null);
                 }}
-                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
               >
-                <ArrowLeft className="w-4 h-4" />
                 Back to conversations
-              </button>
+              </Button>
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
@@ -157,11 +160,11 @@ export default function LandlordMessagesPage() {
               )}
             </>
           ) : (
-            <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Select a conversation to start messaging
-              </p>
-            </div>
+            <EmptyState
+              icon={MessageCircle}
+              title="Select a conversation to start messaging"
+              className="flex-1"
+            />
           )}
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MaintenanceHeader } from '@/components/renter/maintenance/MaintenanceHeader';
 import { MaintenanceStats } from '@/components/renter/maintenance/MaintenanceStats';
@@ -12,13 +12,7 @@ import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledM
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
 import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import {
-  PageErrorState,
-  PageLoadingState,
-  Pagination,
-  Toast,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { ListSkeleton, PageErrorState, Pagination, useToast } from '@getrentos/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
 
@@ -26,13 +20,14 @@ export default function MaintenancePage() {
   const router = useRouter();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+  const [hasLoadedRequests, setHasLoadedRequests] = useState(false);
   const [requestsError, setRequestsError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   const [showReportModal, setShowReportModal] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [alerts, setAlerts] = useState<
     {
       id: string;
@@ -54,11 +49,6 @@ export default function MaintenancePage() {
     }[]
   >([]);
 
-  const showToast = useCallback((message: string, variant: ToastVariant) => {
-    setToast({ message, variant });
-    window.setTimeout(() => setToast(null), 3500);
-  }, []);
-
   useEffect(() => {
     const loadMaintenanceRequests = async () => {
       setIsLoadingRequests(true);
@@ -67,9 +57,10 @@ export default function MaintenancePage() {
       if (res.success && res.data) {
         setRequests(res.data.items ?? []);
         setTotal(res.data.total ?? 0);
+        setHasLoadedRequests(true);
       } else {
         setRequestsError(true);
-        showToast(res.message || 'Unable to load maintenance requests.', 'error');
+        toast.error(res.message || 'Unable to load maintenance requests.');
       }
       setIsLoadingRequests(false);
     };
@@ -109,7 +100,7 @@ export default function MaintenancePage() {
       }
     };
     loadLandlordContact();
-  }, [page, reloadKey, showToast]);
+  }, [page, reloadKey, toast]);
 
   const handleReportIssue = async (
     data: CreateMaintenanceRequestInput,
@@ -119,16 +110,15 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const created = res.data;
       setRequests((prev) => [created, ...prev]);
-      showToast(
+      toast.success(
         data.isEmergency
           ? 'Emergency maintenance request submitted at urgent priority.'
-          : 'Maintenance request submitted successfully.',
-        'success'
+          : 'Maintenance request submitted successfully.'
       );
       return true;
     }
 
-    showToast(res.message || 'Unable to submit your maintenance request.', 'error');
+    toast.error(res.message || 'Unable to submit your maintenance request.');
     return false;
   };
 
@@ -138,9 +128,9 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const updated = res.data;
       setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
-      showToast('Maintenance request cancelled.', 'info');
+      toast.info('Maintenance request cancelled.');
     } else {
-      showToast(res.message || 'Unable to cancel this maintenance request.', 'error');
+      toast.error(res.message || 'Unable to cancel this maintenance request.');
     }
   };
 
@@ -149,10 +139,10 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const updated = res.data;
       setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
-      showToast('Thanks for rating the vendor.', 'success');
+      toast.success('Thanks for rating the vendor.');
       return true;
     } else {
-      showToast(res.message || 'Unable to submit your vendor rating.', 'error');
+      toast.error(res.message || 'Unable to submit your vendor rating.');
       return false;
     }
   };
@@ -192,11 +182,7 @@ export default function MaintenancePage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <MaintenanceHeader onReport={() => setShowReportModal(true)} />
         <MaintenanceAlerts
           alerts={alerts}
@@ -211,11 +197,11 @@ export default function MaintenancePage() {
         />
       </div>
 
-      {!isLoadingRequests && !requestsError && <MaintenanceStats requests={requests} />}
+      {hasLoadedRequests && <MaintenanceStats requests={requests} />}
 
-      {isLoadingRequests ? (
-        <PageLoadingState />
-      ) : requestsError ? (
+      {isLoadingRequests && !hasLoadedRequests ? (
+        <ListSkeleton className="mt-6" />
+      ) : requestsError && !hasLoadedRequests ? (
         <PageErrorState
           title="Maintenance requests are unavailable"
           description="We could not load your reported issues. No request has been changed."

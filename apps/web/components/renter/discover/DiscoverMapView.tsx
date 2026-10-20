@@ -1,7 +1,8 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { MapPin } from 'lucide-react';
+import { EmptyState, Skeleton } from '@getrentos/ui';
 import { PropertyMap, type MapMarker } from '@/components/maps/PropertyMap';
 import { formatPrice, type Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
@@ -43,6 +44,7 @@ export const DiscoverMapView = ({ filters }: DiscoverMapViewProps) => {
   const { data, isLoading } = useQuery({
     queryKey: renterKeys.listings({ ...listingsFilters, pageSize: 100 }),
     queryFn: () => unwrap(renterService.listListings({ ...listingsFilters, pageSize: 100 })),
+    placeholderData: keepPreviousData,
   });
   const properties = data?.items ?? [];
 
@@ -60,21 +62,20 @@ export const DiscoverMapView = ({ filters }: DiscoverMapViewProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-border bg-card py-16 text-sm text-muted-foreground">
-        Loading map…
+      <div role="status" aria-label="Loading map" className="space-y-2">
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="h-[560px] w-full rounded-2xl" />
       </div>
     );
   }
 
   if (properties.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card py-16 text-center">
-        <MapPin className="h-8 w-8 text-muted-foreground" />
-        <p className="mt-2 font-medium text-foreground">No listings match your filters</p>
-        <p className="text-sm text-muted-foreground">
-          Try widening your search to see them on the map.
-        </p>
-      </div>
+      <EmptyState
+        icon={MapPin}
+        title="No listings match your filters"
+        description="Try widening your search to see them on the map."
+      />
     );
   }
 

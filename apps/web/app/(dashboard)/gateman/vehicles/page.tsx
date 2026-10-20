@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, LogOut as ExitIcon } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CardSkeleton,
+  DocumentUpload,
+  Field,
+  Input,
+  ListSkeleton,
+  Select,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
@@ -64,7 +74,7 @@ export default function GatemanVehiclesPage() {
   });
   const gateOptions = (gates ?? []).map((gate) => ({ value: gate.id, label: gate.name }));
 
-  const { data: insideData } = useQuery({
+  const { data: insideData, isLoading: isInsideLoading } = useQuery({
     queryKey: estateKeys.vehicleLogs(estate?.id ?? '', 'open'),
     queryFn: () =>
       unwrap(estateService.listVehicleLogs(estate!.id, { open: true, page: 1, pageSize: 100 })),
@@ -125,7 +135,7 @@ export default function GatemanVehiclesPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -146,63 +156,51 @@ export default function GatemanVehiclesPage() {
         <p className="text-muted-foreground text-sm mt-1">Log a vehicle entering the estate.</p>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Plate number</label>
-          <LegacyInput
+      <Card className="p-6 space-y-4">
+        <Field label="Plate number">
+          <Input
             type="text"
             value={plateNumber}
             onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
             placeholder="ABC123XY"
-            className="text-center text-xl tracking-[0.15em] font-bold uppercase"
+            inputClassName="text-center text-xl tracking-[0.15em] font-bold uppercase"
           />
-        </div>
+        </Field>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Description <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <LegacyInput
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Description" optionalLabel="(optional)">
+            <Input
               type="text"
               value={vehicleDescription}
               onChange={(e) => setVehicleDescription(e.target.value)}
               placeholder="e.g. Black Camry"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Driver <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <LegacyInput
+          </Field>
+          <Field label="Driver" optionalLabel="(optional)">
+            <Input
               type="text"
               value={driverName}
               onChange={(e) => setDriverName(e.target.value)}
               placeholder="e.g. Tunde"
             />
-          </div>
+          </Field>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Purpose</label>
+        <Field label="Purpose">
           <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
-        </div>
+        </Field>
 
         {gateOptions.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
+          <Field label="Gate">
             <Select
               value={effectiveGateId}
               onValueChange={setGateId}
               options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
             />
-          </div>
+          </Field>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Photo <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
+        <Field label="Photo" optionalLabel="(optional)">
           <DocumentUpload
             value={photo ? [{ id: 'photo', file: photo }] : []}
             onChange={(items) => setPhoto(items[0]?.file ?? null)}
@@ -210,12 +208,14 @@ export default function GatemanVehiclesPage() {
             multiple={false}
             label=""
           />
-        </div>
+        </Field>
 
         <Button
           variant="primary"
           fullWidth
-          disabled={!plateNumber.trim() || logEntry.isPending}
+          disabled={!plateNumber.trim()}
+          isLoading={logEntry.isPending}
+          loadingText="Logging…"
           onClick={() => {
             setError(null);
             setRefusal(null);
@@ -224,7 +224,7 @@ export default function GatemanVehiclesPage() {
             logEntry.mutate({});
           }}
         >
-          {logEntry.isPending ? 'Logging…' : 'Log Vehicle'}
+          Log Vehicle
         </Button>
 
         {refusal && (
@@ -242,16 +242,18 @@ export default function GatemanVehiclesPage() {
           />
         )}
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <Alert variant="danger">{error}</Alert>}
 
         <WatchlistWarning warning={warning ?? undefined} />
-      </div>
+      </Card>
 
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">
           Currently Inside ({inside.length})
         </h2>
-        {inside.length === 0 ? (
+        {isInsideLoading ? (
+          <ListSkeleton rows={2} />
+        ) : inside.length === 0 ? (
           <p className="text-sm text-muted-foreground">No vehicles currently logged inside.</p>
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
@@ -267,11 +269,13 @@ export default function GatemanVehiclesPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 shrink-0"
+                  className="shrink-0"
+                  icon={<ExitIcon className="w-3.5 h-3.5" />}
                   disabled={markExited.isPending}
+                  isLoading={markExited.isPending && markExited.variables === log.id}
+                  aria-label={`Mark ${log.plateNumber} as exited`}
                   onClick={() => markExited.mutate(log.id)}
                 >
-                  <ExitIcon className="w-3.5 h-3.5" />
                   Exit
                 </Button>
               </div>

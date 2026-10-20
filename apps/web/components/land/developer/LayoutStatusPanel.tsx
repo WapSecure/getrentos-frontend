@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, ConfirmDialog } from '@getrentos/ui';
+import { Alert, Badge, Button, ConfirmDialog } from '@getrentos/ui';
 import { AlertTriangle, CheckCircle2, Circle, Pencil, Rocket, Square } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -165,16 +165,14 @@ export const LayoutStatusPanel = ({ record, layout, onEdit, notify }: LayoutStat
       )}
 
       {publishError && (
-        <div
-          role="alert"
-          className="mt-4 flex gap-2 rounded-xl border border-warning/30 bg-warning/5 p-3 text-sm text-foreground"
+        <Alert
+          variant="warning"
+          icon={AlertTriangle}
+          title="The estate could not be published."
+          className="mt-4"
         >
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden="true" />
-          <span>
-            <span className="font-medium">The estate could not be published.</span>{' '}
-            <span className="text-muted-foreground">{publishError}</span>
-          </span>
-        </div>
+          {publishError}
+        </Alert>
       )}
 
       <ConfirmDialog

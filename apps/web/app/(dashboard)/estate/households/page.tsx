@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Plus, Upload, Lock } from 'lucide-react';
-import { Button, EmptyState, Pagination } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -39,6 +39,7 @@ export default function EstateHouseholdsPage() {
     queryKey: [...estateKeys.households(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(estateService.listHouseholds(estate!.id, { page, pageSize: PAGE_SIZE })),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const households = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -124,7 +125,7 @@ export default function EstateHouseholdsPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -154,7 +155,7 @@ export default function EstateHouseholdsPage() {
             {total} household{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
             <Upload className="w-4 h-4" />
             Import CSV
@@ -180,7 +181,7 @@ export default function EstateHouseholdsPage() {
       </div>
 
       {isHouseholdsLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : households.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState

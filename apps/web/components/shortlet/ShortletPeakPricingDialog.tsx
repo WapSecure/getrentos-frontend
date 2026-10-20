@@ -12,10 +12,11 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
+  IconButton,
   Input,
   NumberInput,
-  Toast,
-  type ToastVariant,
+  Skeleton,
+  useToast,
 } from '@getrentos/ui';
 import { PartyPopper, Trash2 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -47,7 +48,7 @@ export function ShortletPeakPricingDialog({
 }) {
   const queryClient = useQueryClient();
   const perNight = listing.pricingMode === 'PER_NIGHT';
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const [weekly, setWeekly] = useState(String(listing.weeklyDiscountPct || ''));
   const [twoWeek, setTwoWeek] = useState(String(listing.twoWeekDiscountPct || ''));
@@ -95,9 +96,9 @@ export function ShortletPeakPricingDialog({
       ),
     onSuccess: () => {
       refresh();
-      setToast({ message: 'Pricing rules saved.', variant: 'success' });
+      toast.success('Pricing rules saved.');
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const addSeason = useMutation({
@@ -118,18 +119,18 @@ export function ShortletPeakPricingDialog({
       setSeasonRate('');
       setSeasonMin('');
       refresh();
-      setToast({ message: 'Season added.', variant: 'success' });
+      toast.success('Season added.');
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const removeSeason = useMutation({
     mutationFn: (id: string) => unwrap(shortletService.deleteSeason(id)),
     onSuccess: () => {
       refresh();
-      setToast({ message: 'Season deleted.', variant: 'success' });
+      toast.success('Season deleted.');
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const fillDettyDecember = () => {
@@ -141,17 +142,16 @@ export function ShortletPeakPricingDialog({
   };
 
   const submitSeason = () => {
-    if (!seasonName.trim()) return setToast({ message: 'Name the season.', variant: 'error' });
+    if (!seasonName.trim()) return toast.error('Name the season.');
     if (!seasonStart || !seasonEnd) {
-      return setToast({ message: 'Pick the first and last night.', variant: 'error' });
+      return toast.error('Pick the first and last night.');
     }
     if (!(perNight && seasonRate) && !seasonMin) {
-      return setToast({
-        message: perNight
+      return toast.error(
+        perNight
           ? 'Give the season a nightly rate, a minimum stay, or both.'
-          : 'Give the season a minimum stay.',
-        variant: 'error',
-      });
+          : 'Give the season a minimum stay.'
+      );
     }
     addSeason.mutate();
   };
@@ -171,8 +171,13 @@ export function ShortletPeakPricingDialog({
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-sm font-semibold">Seasons</h3>
-              <Button variant="outline" size="sm" onClick={fillDettyDecember}>
-                <PartyPopper className="mr-1.5 h-4 w-4" /> Detty December preset
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fillDettyDecember}
+                icon={<PartyPopper className="h-4 w-4" />}
+              >
+                Detty December preset
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -182,7 +187,10 @@ export function ShortletPeakPricingDialog({
             </p>
 
             {seasonsLoading ? (
-              <p className="text-sm text-muted-foreground">Loading seasons…</p>
+              <div role="status" aria-label="Loading seasons" className="space-y-2">
+                <Skeleton className="h-12 w-full rounded-lg" />
+                <Skeleton className="h-12 w-full rounded-lg" />
+              </div>
             ) : (seasons ?? []).length > 0 ? (
               <div className="space-y-2">
                 {(seasons ?? []).map((s: ShortletSeason) => {
@@ -204,15 +212,14 @@ export function ShortletPeakPricingDialog({
                           {s.minNights != null ? ` · min ${s.minNights} nights` : ''}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
+                      <IconButton
                         size="sm"
-                        aria-label={`Delete ${s.name}`}
+                        label={`Delete ${s.name}`}
+                        icon={<Trash2 />}
                         onClick={() => removeSeason.mutate(s.id)}
+                        isLoading={removeSeason.isPending && removeSeason.variables === s.id}
                         disabled={removeSeason.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      />
                     </div>
                   );
                 })}
@@ -262,8 +269,13 @@ export function ShortletPeakPricingDialog({
                   <NumberInput min={1} max={90} value={seasonMin} onValueChange={setSeasonMin} />
                 </Field>
               </div>
-              <Button className="w-full" onClick={submitSeason} disabled={addSeason.isPending}>
-                {addSeason.isPending ? 'Adding…' : 'Add season'}
+              <Button
+                className="w-full"
+                onClick={submitSeason}
+                isLoading={addSeason.isPending}
+                loadingText="Adding…"
+              >
+                Add season
               </Button>
             </div>
           </section>
@@ -326,16 +338,13 @@ export function ShortletPeakPricingDialog({
             <Button
               className="w-full"
               onClick={() => saveRules.mutate()}
-              disabled={saveRules.isPending}
+              isLoading={saveRules.isPending}
+              loadingText="Saving…"
             >
-              {saveRules.isPending ? 'Saving…' : 'Save discounts & availability'}
+              Save discounts &amp; availability
             </Button>
           </section>
         </div>
-
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -12,7 +12,7 @@ import {
   Shield,
   Calendar,
 } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, IconButton, type BadgeVariant } from '@getrentos/ui';
 
 interface Payment {
   id: string;
@@ -126,19 +126,18 @@ export const PaymentCard = ({
         </div>
 
         {/* Payment Info */}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-foreground">{payment.propertyName}</h4>
             <Badge variant={statusConfig.variant} icon={<StatusIcon className="h-3 w-3" />}>
               {statusConfig.label}
             </Badge>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-muted-foreground">
-              <MethodIcon className="w-3 h-3" />
+            <Badge variant="neutral" icon={<MethodIcon className="w-3 h-3" />}>
               {payment.method.replace('_', ' ')}
-            </span>
+            </Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">{payment.description}</p>
-          <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               <span>Due {formatDate(payment.dueDate)}</span>
@@ -153,7 +152,7 @@ export const PaymentCard = ({
         </div>
 
         {/* Amount & Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="text-right">
             <p className="text-lg font-bold text-primary">{formatCurrency(payment.amount)}</p>
             {payment.status !== 'paid' && (payment.amountPaid ?? 0) > 0 ? (
@@ -162,7 +161,7 @@ export const PaymentCard = ({
                 {formatCurrency(payment.amount - (payment.amountPaid ?? 0))} left
               </p>
             ) : (
-              <p className="text-xs text-gray-500">{formatDate(payment.date)}</p>
+              <p className="text-xs text-muted-foreground">{formatDate(payment.date)}</p>
             )}
           </div>
 
@@ -194,29 +193,25 @@ export const PaymentCard = ({
               </Button>
             )}
             {payment.receiptUrl && (
-              <button
-                type="button"
+              <IconButton
+                size="sm"
+                label="Download receipt"
+                icon={<Download aria-hidden="true" />}
                 onClick={(e) => {
                   e.stopPropagation();
                   onDownloadReceipt();
                 }}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
-                aria-label="Download receipt"
-              >
-                <Download className="w-4 h-4 text-gray-500" />
-              </button>
+              />
             )}
-            <button
-              type="button"
+            <IconButton
+              size="sm"
+              label="View payment details"
+              icon={<ChevronRight aria-hidden="true" />}
               onClick={(e) => {
                 e.stopPropagation();
                 onViewDetails();
               }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
-              aria-label="View payment details"
-            >
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-            </button>
+            />
           </div>
         </div>
       </div>

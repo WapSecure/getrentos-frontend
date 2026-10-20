@@ -1,21 +1,25 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
   Button,
   Checkbox,
+  CurrencyInput,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Input,
-  NumberInput,
+  EmptyState,
+  IconButton,
+  PageErrorState,
   Pagination,
+  SearchInput,
   Select,
-  Toast,
-  type ToastVariant,
+  Skeleton,
+  useToast,
 } from '@getrentos/ui';
 import {
   ArrowUpDown,
@@ -27,7 +31,6 @@ import {
   MapPin,
   MessageSquare,
   Ruler,
-  Search,
   ShieldCheck,
   Trees,
 } from 'lucide-react';
@@ -133,7 +136,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
   const [page, setPage] = useState(1);
   const [chosenListing, setActiveListing] = useState<PublicLandListing | null>(null);
   const [savedListingIds, setSavedListingIds] = useState<string[]>([]);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const queryParams = useMemo(
     () => ({
@@ -165,9 +168,10 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     ]
   );
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: [...landKeys.public, queryParams],
     queryFn: () => unwrap(landMarketService.listPublic(queryParams)),
+    placeholderData: keepPreviousData,
   });
   const listings = data?.items ?? [];
 
@@ -183,23 +187,30 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
     (linkedListingId ? (listings.find((listing) => listing.id === linkedListingId) ?? null) : null);
   const total = data?.total ?? 0;
 
+  // Saving is shown at once and undone if the server refuses.
   const saveListing = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.saveListing(listingId)),
-    onSuccess: (_, listingId) => {
-      setSavedListingIds((ids) => [...ids, listingId]);
+    onMutate: (listingId) => setSavedListingIds((ids) => [...ids, listingId]),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buyer', 'saved'] });
-      setToast({ message: 'Land listing saved to your shortlist.', variant: 'success' });
+      toast.success('Land listing saved to your shortlist.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error, listingId) => {
+      setSavedListingIds((ids) => ids.filter((id) => id !== listingId));
+      toast.error(reason.message);
+    },
   });
 
   const unsaveListing = useMutation({
     mutationFn: (listingId: string) => unwrap(buyerService.unsaveListing(listingId)),
-    onSuccess: (_, listingId) => {
-      setSavedListingIds((ids) => ids.filter((id) => id !== listingId));
+    onMutate: (listingId) => setSavedListingIds((ids) => ids.filter((id) => id !== listingId)),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['buyer', 'saved'] });
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error, listingId) => {
+      setSavedListingIds((ids) => [...ids, listingId]);
+      toast.error(reason.message);
+    },
   });
 
   const updateFilter = (setter: (value: string) => void, value: string) => {
@@ -270,16 +281,15 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         </div>
 
         <div className="mb-3">
-          <Input
+          <SearchInput
             id="land-search"
             value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
+            onValueChange={(value) => {
+              setSearch(value);
               setPage(1);
             }}
             placeholder="Search by area, estate, street or plot number"
-            aria-label="Search land listings"
-            leadingIcon={<Search className="h-4 w-4" />}
+            label="Search land listings"
           />
         </div>
 
@@ -303,19 +313,21 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
             ariaLabel="Filter by city"
             className="min-h-11"
           />
-          <NumberInput
-            integer
-            min="0"
+          <CurrencyInput
+            prefix="₦"
+            min={0}
             value={minPrice}
-            onValueChange={(value) => updateFilter(setMinPrice, value)}
+            onValueChange={(value) => updateFilter(setMinPrice, value === 0 ? '' : String(value))}
             placeholder="Min price"
+            aria-label="Minimum price"
           />
-          <NumberInput
-            integer
-            min="0"
+          <CurrencyInput
+            prefix="₦"
+            min={0}
             value={maxPrice}
-            onValueChange={(value) => updateFilter(setMaxPrice, value)}
+            onValueChange={(value) => updateFilter(setMaxPrice, value === 0 ? '' : String(value))}
             placeholder="Max price"
+            aria-label="Maximum price"
           />
           <Select
             value={sort}
@@ -333,7 +345,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
         </div>
 
         <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-          <div className="w-56">
+          <div className="w-full sm:w-56">
             <Select
               value={titleType}
               onValueChange={(value) => updateFilter(setTitleType, value)}
@@ -341,7 +353,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               ariaLabel="Title document"
             />
           </div>
-          <div className="w-48">
+          <div className="w-full sm:w-48">
             <Select
               value={minArea}
               onValueChange={(value) => updateFilter(setMinArea, value)}
@@ -349,7 +361,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               ariaLabel="Minimum plot size"
             />
           </div>
-          <div className="w-56">
+          <div className="w-full sm:w-56">
             <Select
               value={minAssuranceTier}
               onValueChange={(value) => updateFilter(setMinAssuranceTier, value)}
@@ -357,24 +369,23 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
               ariaLabel="Minimum assurance"
             />
           </div>
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-            <Checkbox
-              checked={roadAccess}
-              onCheckedChange={(v) => {
-                setRoadAccess(v);
-                setPage(1);
-              }}
-              aria-label="Road access only"
-            />
-            Road access
-          </label>
+          <Checkbox
+            checked={roadAccess}
+            onCheckedChange={(v) => {
+              setRoadAccess(v);
+              setPage(1);
+            }}
+            label="Road access"
+          />
         </div>
 
-        <div className="mb-5 flex items-center justify-between gap-3">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            {isLoading
-              ? 'Loading verified land…'
-              : `${total} verified land ${total === 1 ? 'listing' : 'listings'}`}
+            {isLoading ? (
+              <Skeleton className="inline-block h-4 w-44 align-middle" />
+            ) : (
+              `${total} verified land ${total === 1 ? 'listing' : 'listings'}`
+            )}
           </p>
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             <ArrowUpDown className="h-3.5 w-3.5" />
@@ -382,27 +393,27 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           </span>
         </div>
 
-        {isError ? (
-          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
-            {error instanceof Error ? error.message : 'Unable to load land listings.'}
-          </div>
+        {isError && !data ? (
+          <PageErrorState
+            title="Unable to load land listings."
+            description={error instanceof Error ? error.message : undefined}
+            onRetry={() => void refetch()}
+            isRetrying={isFetching}
+            headingLevel="h2"
+            className="min-h-0 py-10"
+          />
         ) : isLoading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }, (_, index) => (
-              <div key={index} className="h-[23rem] animate-pulse rounded-2xl bg-secondary" />
+              <Skeleton key={index} className="h-[23rem] rounded-2xl" />
             ))}
           </div>
         ) : listings.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
-            <Trees className="mx-auto h-9 w-9 text-primary" />
-            <h2 className="mt-4 text-lg font-semibold text-foreground">
-              No verified land matches these filters
-            </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              Try another city or a wider price range. Only parcels that meet our ownership and
-              diligence gates appear here.
-            </p>
-          </div>
+          <EmptyState
+            icon={Trees}
+            title="No verified land matches these filters"
+            description="Try another city or a wider price range. Only parcels that meet our ownership and diligence gates appear here."
+          />
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {listings.map((listing) => {
@@ -421,16 +432,16 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                       <AssuranceTierBadge tier={listing.diligence?.assuranceTier} />
                     </div>
                     {mode === 'buyer' && (
-                      <button
-                        type="button"
+                      <IconButton
+                        label={isSaved ? 'Remove from saved listings' : 'Save land listing'}
+                        aria-pressed={isSaved}
+                        size="sm"
+                        icon={
+                          <Heart className={isSaved ? 'fill-destructive text-destructive' : ''} />
+                        }
                         onClick={() => toggleSaved(listing.id)}
-                        aria-label={isSaved ? 'Remove from saved listings' : 'Save land listing'}
-                        className="absolute right-3 top-3 rounded-xl bg-card/90 p-2 text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
-                      >
-                        <Heart
-                          className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : ''}`}
-                        />
-                      </button>
+                        className="absolute right-3 top-3 rounded-xl bg-card/90 text-foreground shadow-sm backdrop-blur hover:bg-card"
+                      />
                     )}
                     <div className="absolute bottom-3 left-3 rounded-xl bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-sm">
                       {formatCurrency(listing.askingPrice, { compact: true })}
@@ -605,16 +616,12 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
                   ) : null}
                 </section>
 
-                <div className="rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-muted-foreground">
-                  <p className="flex items-center gap-2 font-medium text-foreground">
-                    <ShieldCheck className="h-4 w-4 text-success" />
-                    Protected sale process
-                  </p>
-                  <p className="mt-1">
+                <Alert variant="success" icon={ShieldCheck} title="Protected sale process">
+                  <p>
                     Offers, acceptance, protected deposits, and settlement use the same secure buyer
                     transaction flow as other verified sale listings.
                   </p>
-                </div>
+                </Alert>
 
                 {activeListing.listedDate && (
                   <p className="text-xs text-muted-foreground">
@@ -677,10 +684,6 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
           )}
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 };

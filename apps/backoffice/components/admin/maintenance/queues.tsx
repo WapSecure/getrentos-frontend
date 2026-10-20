@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalendarClock, Clock3, Hammer, Receipt, Scroll, Wrench } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, ConfirmDialog, useToast, type BadgeVariant } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
 import { MaintenanceQueuePage, type MaintenanceQueueConfig } from './MaintenanceQueuePage';
@@ -162,18 +162,16 @@ function useMaintenanceActions() {
   const client = useQueryClient();
   const [action, setAction] = useState<MaintenanceAction | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
   const mutation = useMutation({
     mutationFn: async () => action?.run(reason.trim()),
     onSuccess: async () => {
       setAction(null);
       setReason('');
-      setToast({ message: 'Maintenance action completed and audited.', variant: 'success' });
+      toast.success('Maintenance action completed and audited.');
       await client.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
   return {
     request: setAction,
@@ -193,9 +191,6 @@ function useMaintenanceActions() {
           promptMinLength={10}
           onConfirm={() => mutation.mutate()}
         />
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </>
     ),
   };

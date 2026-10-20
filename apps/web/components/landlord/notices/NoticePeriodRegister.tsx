@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle2, Info } from 'lucide-react';
-import { Badge, Button, Card, Field, NumberInput, Select, Textarea } from '@getrentos/ui';
+import { Info } from 'lucide-react';
+import { Alert, Badge, Button, Card, Field, NumberInput, Select, Textarea } from '@getrentos/ui';
 
 import { formatDate } from '@/lib/format';
 import type { NoticeKind, NoticePeriodSettings, UnconfiguredPeriod } from '@/types/tenancy-notice';
@@ -56,27 +56,23 @@ export function NoticePeriodRegister({
   return (
     <div className="space-y-5">
       {missing.length > 0 ? (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-          <div>
-            <p className="font-medium">
-              {missing.length} {missing.length === 1 ? 'period is' : 'periods are'} still unrecorded
-            </p>
-            <p className="mt-0.5 text-muted-foreground">
-              Any notice that runs for a statutory period will be refused in these jurisdictions
-              until a number is recorded. That is deliberate: this platform does not hold a day
-              count of its own, so it cannot supply one and will not guess.
-            </p>
-          </div>
-        </div>
+        <Alert
+          variant="warning"
+          title={`${missing.length} ${missing.length === 1 ? 'period is' : 'periods are'} still unrecorded`}
+        >
+          <p>
+            Any notice that runs for a statutory period will be refused in these jurisdictions until
+            a number is recorded. That is deliberate: this platform does not hold a day count of its
+            own, so it cannot supply one and will not guess.
+          </p>
+        </Alert>
       ) : (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-success/30 bg-success-subtle p-4 text-sm text-foreground">
-          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
-          <p className="text-muted-foreground">
+        <Alert variant="success">
+          <p>
             Every statutory period this property base needs has a number recorded against it.
             Notices that run for a period can be served.
           </p>
-        </div>
+        </Alert>
       )}
 
       <div className="grid gap-5 lg:grid-cols-2">

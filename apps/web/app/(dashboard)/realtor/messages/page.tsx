@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import {
@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
-import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Pagination, useToast } from '@getrentos/ui';
 import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const PAGE_SIZE = 10;
@@ -24,7 +24,7 @@ function RealtorMessagesPageContent() {
   const [page, setPage] = useState(1);
   const [messagePage, setMessagePage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const handledClientRef = useRef<string | null>(null);
   const queryClient = useQueryClient();
   const { data: conversationsResult, isLoading: conversationsLoading } = useQuery({
@@ -55,6 +55,7 @@ function RealtorMessagesPageContent() {
         ),
       };
     },
+    placeholderData: keepPreviousData,
   });
   const conversations = conversationsResult?.items ?? [];
   const conversationTotal = conversationsResult?.total ?? 0;
@@ -76,10 +77,7 @@ function RealtorMessagesPageContent() {
       activateConversation(conversation.id);
     },
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to open a conversation with this client.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to open a conversation with this client.'),
   });
 
   useEffect(() => {
@@ -132,10 +130,7 @@ function RealtorMessagesPageContent() {
       setMessagePage(1);
     },
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to send this message. Please try again.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to send this message. Please try again.'),
   });
   const activeConversation = conversations.find((conversation) => conversation.id === activeId);
 
@@ -175,16 +170,18 @@ function RealtorMessagesPageContent() {
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
           {activeConversation ? (
             <div className="flex flex-1 min-h-0 flex-col gap-2">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ArrowLeft className="w-4 h-4" />}
                 onClick={() => {
                   setMessagePage(1);
                   setActiveId(null);
                 }}
-                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+                className="sm:hidden self-start"
               >
-                <ArrowLeft className="w-4 h-4" />
                 Back to conversations
-              </button>
+              </Button>
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
@@ -217,10 +214,6 @@ function RealtorMessagesPageContent() {
           )}
         </div>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

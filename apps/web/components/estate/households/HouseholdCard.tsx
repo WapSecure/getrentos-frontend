@@ -1,7 +1,7 @@
 'use client';
 
 import { Mail, Phone, Pencil, Trash2, UserPlus, UserMinus } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Badge, IconButton } from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface HouseholdCardProps {
@@ -32,7 +32,7 @@ export const HouseholdCard = ({
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">{household.residentName}</p>
-        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+        <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
           {household.contactPhone && (
             <span className="flex items-center gap-1">
               <Phone className="w-3 h-3" />
@@ -49,34 +49,33 @@ export const HouseholdCard = ({
       </div>
       <div className="flex items-center gap-1 shrink-0">
         {household.residentLinked ? (
-          <button
+          <IconButton
+            label="Unlink resident account"
+            icon={<UserMinus />}
+            size="sm"
             onClick={onUnlinkResident}
-            title="Unlink resident account"
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-          >
-            <UserMinus className="w-4 h-4" />
-          </button>
+          />
         ) : (
-          <button
+          <IconButton
+            label="Link a resident account"
+            icon={<UserPlus />}
+            size="sm"
             onClick={onLinkResident}
-            title="Link a resident account"
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-          >
-            <UserPlus className="w-4 h-4" />
-          </button>
+          />
         )}
-        <button
+        <IconButton
+          label={`Edit ${household.unitLabel}`}
+          icon={<Pencil />}
+          size="sm"
           onClick={onEdit}
-          className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
-        <button
+        />
+        <IconButton
+          label={`Remove ${household.unitLabel}`}
+          icon={<Trash2 />}
+          variant="danger"
+          size="sm"
           onClick={onRemove}
-          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        />
       </div>
     </div>
   );

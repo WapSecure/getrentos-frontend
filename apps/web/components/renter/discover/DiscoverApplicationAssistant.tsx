@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MessageSquare, Clock, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Skeleton } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -41,17 +41,25 @@ export const DiscoverApplicationAssistant = () => {
 
       <div className="p-4">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading your application status…</p>
+          <div role="status" aria-label="Loading your application status" className="space-y-3">
+            <Skeleton className="h-2 w-full rounded-full" />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <Skeleton className="h-6 w-6 shrink-0 rounded-full" />
+                <Skeleton className={index % 2 === 0 ? 'h-3.5 w-2/3' : 'h-3.5 w-1/2'} />
+              </div>
+            ))}
+          </div>
         ) : (
           <>
             <div className="mb-4">
-              <div className="flex justify-between text-xs text-gray-500 mb-1">
+              <div className="flex justify-between text-xs text-muted-foreground mb-1">
                 <span>Application Readiness</span>
                 <span>
                   {completedCount}/{totalSteps} steps completed
                 </span>
               </div>
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
                 <div className="h-full bg-primary rounded-full" style={{ width: `${progress}%` }} />
               </div>
             </div>
@@ -67,26 +75,26 @@ export const DiscoverApplicationAssistant = () => {
                 >
                   <div className="shrink-0">
                     {step.status === 'completed' && (
-                      <div className="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                        <CheckCircle className="w-3 h-3 text-green-600" />
+                      <div className="w-6 h-6 rounded-full bg-success-subtle flex items-center justify-center">
+                        <CheckCircle className="w-3 h-3 text-success" />
                       </div>
                     )}
                     {step.status === 'in_progress' && (
-                      <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                        <Clock className="w-3 h-3 text-blue-600" />
+                      <div className="w-6 h-6 rounded-full bg-info-subtle flex items-center justify-center">
+                        <Clock className="w-3 h-3 text-info" />
                       </div>
                     )}
                     {step.status === 'pending' && (
-                      <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-gray-400" />
+                      <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
                       </div>
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <p
                       className={`text-sm font-medium ${
                         step.status === 'completed'
-                          ? 'text-gray-500 line-through'
+                          ? 'text-muted-foreground line-through'
                           : 'text-foreground'
                       }`}
                     >

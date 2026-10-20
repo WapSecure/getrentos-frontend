@@ -54,7 +54,7 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Megaphone className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+            <Megaphone className="w-12 h-12 text-muted-foreground/60" />
           </div>
         )}
 
@@ -88,7 +88,7 @@ const ListingPreview = ({ listing }: { listing: Listing }) => {
             >
               {failed[index] ? (
                 <span className="flex h-full w-full items-center justify-center bg-secondary">
-                  <Megaphone className="h-4 w-4 text-gray-400" />
+                  <Megaphone className="h-4 w-4 text-muted-foreground" />
                 </span>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element

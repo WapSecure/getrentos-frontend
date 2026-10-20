@@ -17,12 +17,12 @@ interface MaintenanceHistoryTimelineProps {
 }
 
 const eventIcons = {
-  submitted: { icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-  assigned: { icon: User, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/20' },
-  in_progress: { icon: Wrench, color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
-  resolved: { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-900/20' },
-  comment: { icon: MessageCircle, color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-white/5' },
-  escalated: { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
+  submitted: { icon: Clock, color: 'text-info', bg: 'bg-info-subtle' },
+  assigned: { icon: User, color: 'text-purple', bg: 'bg-purple-subtle' },
+  in_progress: { icon: Wrench, color: 'text-warning', bg: 'bg-warning-subtle' },
+  resolved: { icon: CheckCircle, color: 'text-success', bg: 'bg-success-subtle' },
+  comment: { icon: MessageCircle, color: 'text-muted-foreground', bg: 'bg-secondary' },
+  escalated: { icon: AlertCircle, color: 'text-destructive', bg: 'bg-destructive-subtle' },
 };
 
 const formatDate = (dateString: string) => {
@@ -49,7 +49,7 @@ export const MaintenanceHistoryTimeline = ({ events }: MaintenanceHistoryTimelin
 
       <div className="p-4">
         <div className="relative">
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-muted" />
 
           <div className="space-y-4">
             {events.map((event, index) => {
@@ -73,10 +73,12 @@ export const MaintenanceHistoryTimeline = ({ events }: MaintenanceHistoryTimelin
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h4 className="text-sm font-medium text-foreground">{event.title}</h4>
-                      <span className="text-xs text-gray-500">{formatDate(event.date)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(event.date)}
+                      </span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-0.5">{event.description}</p>
-                    <p className="text-xs text-gray-400 mt-1">by {event.user}</p>
+                    <p className="text-xs text-muted-foreground mt-1">by {event.user}</p>
                   </div>
                 </motion.div>
               );

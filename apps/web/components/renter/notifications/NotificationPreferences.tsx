@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Card, Checkbox, Switch } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -119,6 +119,21 @@ const NotificationPreferencesForm = ({
           inApp: variables.enabled,
         })
       ),
+    meta: { showGlobalError: true },
+    onMutate: ({ prefId, enabled }) => {
+      const previous = preferences;
+      setPreferences((prev) =>
+        prev.map((p) =>
+          p.id === prefId
+            ? { ...p, enabled, channels: { email: enabled, push: enabled, inApp: enabled } }
+            : p
+        )
+      );
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      if (context) setPreferences(context.previous);
+    },
     onSuccess: (updated, { prefId }) => {
       setPreferences((prev) =>
         prev.map((p) =>
@@ -156,6 +171,19 @@ const NotificationPreferencesForm = ({
           [variables.channel]: variables.value,
         })
       ),
+    meta: { showGlobalError: true },
+    onMutate: ({ prefId, channel, value }) => {
+      const previous = preferences;
+      setPreferences((prev) =>
+        prev.map((p) =>
+          p.id === prefId ? { ...p, channels: { ...p.channels, [channel]: value } } : p
+        )
+      );
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      if (context) setPreferences(context.previous);
+    },
     onSuccess: (updated, { prefId }) => {
       setPreferences((prev) =>
         prev.map((p) =>
@@ -179,86 +207,63 @@ const NotificationPreferencesForm = ({
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
+    <Card>
+      <button
+        type="button"
         onClick={onToggleExpand}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        aria-expanded={isExpanded}
+        className="w-full p-4 flex items-center justify-between gap-3 hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-2">
           <Settings className="w-4 h-4 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Notification Preferences</h3>
-            <p className="text-xs text-gray-500">Manage how you receive notifications</p>
+            <p className="text-xs text-muted-foreground">Manage how you receive notifications</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="p-1 h-auto">
-          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </div>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-4">
           {preferences.map((pref) => (
-            <div
-              key={pref.id}
-              className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-foreground">{pref.label}</h4>
-                  <p className="text-xs text-muted-foreground">{pref.description}</p>
-                </div>
-                <button
-                  onClick={() => togglePreference(pref.id)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    pref.enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      pref.enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
+            <div key={pref.id} className="p-3 rounded-lg bg-secondary border border-border">
+              <Switch
+                label={pref.label}
+                description={pref.description}
+                checked={pref.enabled}
+                onCheckedChange={() => togglePreference(pref.id)}
+              />
 
               {pref.enabled && (
-                <div className="mt-3 pt-3 border-t border-border flex gap-4">
+                <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-4">
                   {categorySendsEmail(pref.category) && (
-                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <input
-                        type="checkbox"
-                        checked={pref.channels.email}
-                        onChange={() => toggleChannel(pref.id, 'email')}
-                        className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                      />
-                      Email
-                    </label>
+                    <Checkbox
+                      label="Email"
+                      checked={pref.channels.email}
+                      onCheckedChange={() => toggleChannel(pref.id, 'email')}
+                    />
                   )}
-                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={pref.channels.push}
-                      onChange={() => toggleChannel(pref.id, 'push')}
-                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                    />
-                    Push
-                  </label>
-                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <input
-                      type="checkbox"
-                      checked={pref.channels.inApp}
-                      onChange={() => toggleChannel(pref.id, 'inApp')}
-                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                    />
-                    In-App
-                  </label>
+                  <Checkbox
+                    label="Push"
+                    checked={pref.channels.push}
+                    onCheckedChange={() => toggleChannel(pref.id, 'push')}
+                  />
+                  <Checkbox
+                    label="In-App"
+                    checked={pref.channels.inApp}
+                    onCheckedChange={() => toggleChannel(pref.id, 'inApp')}
+                  />
                 </div>
               )}
             </div>
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Badge, PageErrorState } from '@getrentos/ui';
+import { Badge, PageErrorState, Skeleton } from '@getrentos/ui';
 import { ArrowLeft, BadgeCheck, FileCheck2, MapPin, Receipt } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -27,7 +27,6 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
   const {
     data: layout,
     isLoading,
-    isError,
     error,
     refetch,
     isRefetching,
@@ -39,12 +38,12 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
   if (isLoading) {
     return (
       <div className="space-y-4" aria-busy="true">
-        <div className="h-10 w-2/3 animate-pulse rounded-xl bg-secondary" />
-        <div className="h-80 animate-pulse rounded-2xl bg-secondary" />
+        <Skeleton className="h-10 w-2/3 rounded-xl" />
+        <Skeleton className="h-80 rounded-2xl" />
       </div>
     );
   }
-  if (isError || !layout) {
+  if (!layout) {
     return (
       <PageErrorState
         title="This estate is not available"

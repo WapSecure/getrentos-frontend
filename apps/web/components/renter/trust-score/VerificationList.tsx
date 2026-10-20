@@ -12,7 +12,7 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Card } from '@getrentos/ui';
 import { VerificationItem } from '@/types/trust-score';
 
 const iconMap: Record<string, React.ElementType> = {
@@ -50,22 +50,29 @@ export const VerificationList = ({ verifications }: VerificationListProps) => {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border flex justify-between items-center">
-        <div>
+    <Card>
+      <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-3">
+        <div className="min-w-0">
           <h3 className="font-semibold text-foreground">Verification Status</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {verifiedCount} of {totalCount} verifications completed
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-2 w-32 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className="h-2 w-32 bg-border rounded-full overflow-hidden"
+            role="progressbar"
+            aria-label="Verifications completed"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={totalCount ? Math.round((verifiedCount / totalCount) * 100) : 0}
+          >
             <div
               className="h-full bg-primary rounded-full transition-all duration-300"
               style={{ width: `${(verifiedCount / totalCount) * 100}%` }}
             />
           </div>
-          <span className="text-xs font-medium text-gray-500">
+          <span className="text-xs font-medium text-muted-foreground">
             {Math.round((verifiedCount / totalCount) * 100)}%
           </span>
         </div>
@@ -77,28 +84,28 @@ export const VerificationList = ({ verifications }: VerificationListProps) => {
           return (
             <div
               key={item.id}
-              className="p-4 flex items-center justify-between hover:bg-secondary transition-colors"
+              className="p-4 flex flex-wrap items-center justify-between gap-3 hover:bg-secondary transition-colors"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <div
-                  className={`p-2 rounded-lg ${item.verified ? 'bg-green-50 dark:bg-green-900/20' : 'bg-secondary'}`}
+                  className={`p-2 rounded-lg ${item.verified ? 'bg-success-subtle' : 'bg-secondary'}`}
                 >
                   <Icon
-                    className={`w-4 h-4 ${item.verified ? 'text-green-600' : 'text-gray-400'}`}
+                    className={`w-4 h-4 ${item.verified ? 'text-success' : 'text-muted-foreground'}`}
                   />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-foreground">{item.label}</p>
                     {item.verified ? (
-                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <CheckCircle className="w-4 h-4 text-success" aria-label="Verified" />
                     ) : (
-                      <Clock className="w-4 h-4 text-yellow-500" />
+                      <Clock className="w-4 h-4 text-warning" aria-label="Pending" />
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
                   {item.date && (
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Verified on {new Date(item.date).toLocaleDateString()}
                     </p>
                   )}
@@ -113,6 +120,6 @@ export const VerificationList = ({ verifications }: VerificationListProps) => {
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 };

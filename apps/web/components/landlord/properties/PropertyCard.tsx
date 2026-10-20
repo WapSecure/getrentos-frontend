@@ -89,6 +89,8 @@ export const PropertyCard = ({
           </div>
         )}
         <button
+          type="button"
+          aria-label={`Verification: ${verification.label}`}
           onClick={(e) => {
             e.stopPropagation();
             onVerify?.();
@@ -110,7 +112,7 @@ export const PropertyCard = ({
               aria-label={`More actions for ${property.name}`}
               title="More actions"
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
+              className="absolute top-3 right-3 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm hover:bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <MoreVertical className="w-4 h-4 text-foreground" />
             </button>

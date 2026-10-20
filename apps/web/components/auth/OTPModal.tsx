@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, IconButton } from '@getrentos/ui';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OTPModalProps {
@@ -101,12 +101,13 @@ export const OTPModal = ({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
-          <button
+          <IconButton
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-          >
-            <X className="w-5 h-5" />
-          </button>
+            label="Close"
+            size="sm"
+            icon={<X className="w-5 h-5" />}
+            className="absolute top-4 right-4"
+          />
 
           <div className="p-6">
             <div className="text-center mb-6">
@@ -116,16 +117,16 @@ export const OTPModal = ({
               <h3 className="text-xl font-semibold text-foreground mb-2">
                 Verify Your {method === 'email' ? 'Email' : 'Phone'}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 We sent a verification code to{' '}
                 <span className="font-medium text-foreground">{identifier}</span>
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm text-center">
+              <Alert variant="danger" className="mb-4">
                 {error}
-              </div>
+              </Alert>
             )}
 
             <div className="mb-6">
@@ -141,7 +142,7 @@ export const OTPModal = ({
 
             <div className="text-center mb-6">
               {!canResend ? (
-                <p className="text-sm text-gray-500">Resend code in {formatTime(timeLeft)}</p>
+                <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
               ) : (
                 <button
                   onClick={handleResend}

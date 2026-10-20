@@ -1,20 +1,19 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Download, Search } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Download } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Button,
   DataTable,
   EmptyState,
-  Input,
   PageErrorState,
   Pagination,
+  SearchInput,
   Select,
-  Toast,
+  useToast,
   type Column,
-  type ToastVariant,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
@@ -67,7 +66,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [filters, setFilters] = useState<Record<string, string>>(() =>
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
@@ -96,6 +95,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.rentFinance(config.resource, queryParams),
     queryFn: () => unwrap(config.listFn(queryParams)),
+    placeholderData: keepPreviousData,
   });
 
   const items = data?.items ?? [];
@@ -120,18 +120,15 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     try {
       const blob = await config.exportFn(queryParams);
       downloadBlob(blob, config.exportFilename ?? `${config.resource}.csv`);
-      setToast({ message: 'CSV export downloaded successfully.', variant: 'success' });
+      toast.success('CSV export downloaded successfully.');
     } catch {
-      setToast({
-        message: 'We could not export these records. Please try again.',
-        variant: 'error',
-      });
+      toast.error('We could not export these records. Please try again.');
     } finally {
       setExporting(false);
     }
-  }, [config, queryParams]);
+  }, [config, queryParams, toast]);
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title={`Could not load ${config.eyebrow.toLowerCase()}`}
@@ -165,22 +162,22 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
               variant="outline"
               size="sm"
               onClick={runExport}
-              disabled={exporting}
+              isLoading={exporting}
+              loadingText="Exporting…"
+              icon={<Download className="h-4 w-4" />}
             >
-              <Download className="mr-1.5 h-4 w-4" />
-              {exporting ? 'Exporting…' : 'Export CSV'}
+              Export CSV
             </Button>
           )}
-          <Input
+          <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onValueChange={setSearch}
             placeholder="Search…"
-            aria-label={`Search ${config.eyebrow.toLowerCase()}`}
-            leadingIcon={<Search className="h-4 w-4" />}
-            className="w-56"
+            label={`Search ${config.eyebrow.toLowerCase()}`}
+            className="w-full sm:w-56"
           />
           {config.filters?.map((filter) => (
-            <div key={filter.key} className="w-44">
+            <div key={filter.key} className="w-full sm:w-44">
               <Select
                 value={filters[filter.key]}
                 onValueChange={(value) => {
@@ -214,9 +211,6 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
           <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
         }
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

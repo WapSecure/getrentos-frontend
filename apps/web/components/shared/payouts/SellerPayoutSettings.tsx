@@ -1,9 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Landmark } from 'lucide-react';
-import { Badge, Button, Pagination, type BadgeVariant } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Field,
+  ListSkeleton,
+  NumberInput,
+  Pagination,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { sellerPayoutKeys } from '@/lib/queryKeys';
@@ -45,9 +54,10 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
     queryFn: () => unwrap(sellerPayoutService.getAccount()),
   });
 
-  const { data: payouts } = useQuery({
+  const { data: payouts, isLoading: payoutsLoading } = useQuery({
     queryKey: [...sellerPayoutKeys.payouts, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(sellerPayoutService.listSalePayouts({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
 
   const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
@@ -78,8 +88,8 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
           </p>
           {account.verified ? (
             <div className="flex items-center gap-2 mt-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 dark:text-green-400">
+              <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+              <p className="text-xs text-success">
                 Bank account verified and active for payouts
               </p>
             </div>
@@ -100,52 +110,31 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
       )}
 
       <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="seller-payout-bank-code"
-            className="block text-sm font-medium text-foreground mb-1"
-          >
-            Bank Code
-          </label>
-          <div className="relative">
-            <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              id="seller-payout-bank-code"
-              type="text"
-              value={bankCode}
-              onChange={(e) => setBankCode(e.target.value)}
-              placeholder="e.g. 058 for GTBank"
-              maxLength={6}
-              className="w-full pl-10 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
-        <div>
-          <label
-            htmlFor="seller-payout-account-number"
-            className="block text-sm font-medium text-foreground mb-1"
-          >
-            Account Number
-          </label>
-          <input
-            id="seller-payout-account-number"
-            type="text"
-            inputMode="numeric"
+        <Field label="Bank Code" htmlFor="seller-payout-bank-code">
+          <NumberInput
+            value={bankCode}
+            onValueChange={setBankCode}
+            placeholder="e.g. 058 for GTBank"
+            maxLength={6}
+            leadingIcon={<Landmark className="w-4 h-4" />}
+          />
+        </Field>
+        <Field label="Account Number" htmlFor="seller-payout-account-number">
+          <NumberInput
             value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+            onValueChange={setAccountNumber}
             placeholder="0123456789"
             maxLength={10}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
       </div>
 
       <div className="mt-6 space-y-3">
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <Alert variant="danger">{error}</Alert>}
         <Button
           variant="primary"
           isLoading={save.isPending}
-          disabled={!canSave || save.isPending}
+          disabled={!canSave}
           onClick={() => save.mutate()}
         >
           Update Payout Account
@@ -158,7 +147,9 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
           Sales GetRentos has paid out, and whether the money has reached your account.
         </p>
 
-        {sales.length === 0 ? (
+        {payoutsLoading ? (
+          <ListSkeleton rows={3} />
+        ) : sales.length === 0 ? (
           <p className="text-sm text-muted-foreground">No released sales yet.</p>
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
@@ -167,7 +158,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
               return (
                 <li
                   key={sale.transactionId}
-                  className="flex items-center justify-between gap-3 p-3"
+                  className="flex flex-wrap items-center justify-between gap-3 p-3"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">

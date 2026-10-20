@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { IdCard, ShieldAlert } from 'lucide-react';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
@@ -93,21 +94,18 @@ export const IdCheckDialog = ({
           </DialogDescription>
 
           <div className="mt-6 space-y-5">
-            <div className="flex items-start gap-2 rounded-xl border border-border bg-card px-3 py-2.5">
-              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <p className="text-xs leading-5 text-muted-foreground">
+            <Alert variant="neutral" icon={ShieldAlert}>
+              <p className="text-xs leading-5">
                 Recording a document does not admit anybody, and a visitor who showed none was still
                 admitted on their pass. This is a record of who was at the gate, for the estate to
                 look back at if an arrival is ever questioned.
               </p>
-            </div>
+            </Alert>
 
             {checkQuery.isLoading ? (
               <Skeleton className="h-48 w-full rounded-2xl" />
             ) : checkQuery.isError ? (
-              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
-                That record could not be read just now.
-              </p>
+              <Alert variant="danger">That record could not be read just now.</Alert>
             ) : !check ? (
               <p className="rounded-xl border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">
                 No identity document was recorded for this visit. This does not mean the check

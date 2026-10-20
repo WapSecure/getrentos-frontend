@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   Input,
+  NumberInput,
 } from '@getrentos/ui';
 import { authFetch } from '@/lib/apiHelpers';
 
@@ -102,14 +104,13 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
             }}
           >
             {reference ? (
-              <Input
+              <NumberInput
                 autoFocus
-                inputMode="numeric"
                 autoComplete="one-time-code"
                 maxLength={6}
                 aria-label="Code"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                onValueChange={setCode}
               />
             ) : (
               <Input
@@ -122,11 +123,7 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
                 onChange={(e) => setNewEmail(e.target.value)}
               />
             )}
-            {error ? (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            ) : null}
+            {error ? <Alert variant="danger">{error}</Alert> : null}
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
@@ -134,7 +131,7 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
               <Button
                 type="submit"
                 isLoading={busy}
-                disabled={busy || (reference ? code.length !== 6 : !newEmail.includes('@'))}
+                disabled={(reference ? code.length !== 6 : !newEmail.includes('@'))}
               >
                 {reference ? 'Confirm' : 'Send code'}
               </Button>

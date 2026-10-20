@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApplicationsHeader } from '@/components/renter/applications/ApplicationsHeader';
 import { ApplicationsFilterSort } from '@/components/renter/applications/ApplicationsFilterSort';
 import { ApplicationsList } from '@/components/renter/applications/ApplicationsList';
@@ -27,6 +27,7 @@ export default function ApplicationsPage() {
   const applicationsQuery = useQuery({
     queryKey: [...renterKeys.applications, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(renterService.listMyApplications({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const data = applicationsQuery.data;
   const applications = data?.items ?? [];
@@ -115,7 +116,7 @@ export default function ApplicationsPage() {
     return <PageLoadingState />;
   }
 
-  if (applicationsQuery.isError || notesQuery.isError) {
+  if ((applicationsQuery.isError && !data) || (notesQuery.isError && !notesQuery.data)) {
     const isRetrying = applicationsQuery.isFetching || notesQuery.isFetching;
     return (
       <PageErrorState

@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import { Star, Star as StarOutline, MapPin } from 'lucide-react';
 import { Textarea } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { renterService, type PendingReview } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -18,7 +19,7 @@ export const RenterReviews = () => {
   const [reviewText, setReviewText] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<PendingReview | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: pending = [] } = useQuery({
     queryKey: renterKeys.reviewsPending,
@@ -44,10 +45,10 @@ export const RenterReviews = () => {
       setShowReviewModal(false);
       setRating(0);
       setReviewText('');
-      setToast({ message: 'Review submitted: thanks for sharing!', variant: 'success' });
+      toast.success('Review submitted: thanks for sharing!');
     },
     onError: (err: Error) => {
-      setToast({ message: err.message || 'Failed to submit review.', variant: 'error' });
+      toast.error(err.message || 'Failed to submit review.');
     },
   });
 
@@ -80,9 +81,6 @@ export const RenterReviews = () => {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -96,7 +94,7 @@ export const RenterReviews = () => {
 
         <div className="p-4">
           {submitted.length > 0 && (
-            <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+            <div className="flex items-center gap-4 mb-4 p-3 rounded-lg bg-secondary/60">
               <div className="text-center">
                 <div className="text-3xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
                 <div className="flex gap-0.5 mt-1">
@@ -125,9 +123,9 @@ export const RenterReviews = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.75 + index * 0.05, duration: 0.3 }}
-                    className="flex items-center justify-between p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800"
+                    className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-warning-subtle border border-warning/20"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground">
                         {review.type === 'property' ? review.property : review.landlord}
                       </p>
@@ -149,8 +147,8 @@ export const RenterReviews = () => {
               <h3 className="text-sm font-medium text-foreground mb-3">Your Reviews</h3>
               <div className="space-y-3">
                 {submitted.map((review) => (
-                  <div key={review.id} className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                    <div className="flex justify-between items-start mb-2">
+                  <div key={review.id} className="p-3 rounded-lg bg-secondary/60">
+                    <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
                       <div>
                         <p className="text-sm font-medium text-foreground">
                           {review.category === 'PROPERTY'
@@ -201,11 +199,14 @@ export const RenterReviews = () => {
               </p>
 
               {/* Star Rating */}
-              <div className="flex justify-center gap-2 mb-4">
+              <div className="flex justify-center gap-2 mb-4" role="group" aria-label="Rating">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     type="button"
                     key={star}
+                    aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                    aria-pressed={rating === star}
+                    className="rounded-md focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setRating(star)}
@@ -220,13 +221,14 @@ export const RenterReviews = () => {
               </div>
 
               {/* Review Text */}
-              <Textarea
-                placeholder="Share your experience..."
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary mb-4"
-              />
+              <Field label="Your review" className="mb-4">
+                <Textarea
+                  placeholder="Share your experience..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  rows={4}
+                />
+              </Field>
 
               <div className="flex gap-3">
                 <Button

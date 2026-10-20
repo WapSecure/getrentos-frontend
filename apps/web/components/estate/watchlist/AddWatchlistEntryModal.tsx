@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  DatePicker,
+  DocumentUpload,
+  Field,
+  IconButton,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import type { WatchlistSeverity, WatchlistSubjectType } from '@/types/estate';
 
 /** The API's floor. Kept in step so the form never allows what the server will reject. */
@@ -114,15 +123,12 @@ export const AddWatchlistEntryModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Add to watch list</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Subject</label>
+                <Field label="Subject">
                   <Select
                     value={subjectType}
                     onValueChange={(value) => {
@@ -140,17 +146,14 @@ export const AddWatchlistEntryModal = ({
                     }}
                     options={SUBJECT_OPTIONS}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    What happens
-                  </label>
+                </Field>
+                <Field label="What happens">
                   <Select
                     value={severity}
                     onValueChange={(value) => setSeverity(value as WatchlistSeverity)}
                     options={SEVERITY_OPTIONS}
                   />
-                </div>
+                </Field>
               </div>
 
               <p className="text-xs text-muted-foreground">
@@ -159,11 +162,16 @@ export const AddWatchlistEntryModal = ({
                   : 'The gate is not refused. The estate office is told when they arrive.'}
               </p>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  {isVehicle ? 'Vehicle' : 'Full name'}
-                </label>
-                <LegacyInput
+              <Field
+                label={isVehicle ? 'Vehicle' : 'Full name'}
+                required
+                hint={
+                  isVehicle
+                    ? undefined
+                    : 'A full name, not one name. A single name word would flag everybody who shares it.'
+                }
+              >
+                <Input
                   type="text"
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
@@ -171,83 +179,62 @@ export const AddWatchlistEntryModal = ({
                     isVehicle ? 'e.g. Black Hilux, no plate visible' : 'e.g. Tunde Fagbenle'
                   }
                 />
-                {!isVehicle && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    A full name, not one name. A single name word would flag everybody who shares
-                    it.
-                  </p>
-                )}
-              </div>
+              </Field>
 
               {isVehicle ? (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Plate number
-                  </label>
-                  <LegacyInput
+                <Field
+                  label="Plate number"
+                  hint={
+                    <>
+                      Spacing and case are ignored, so <span className="font-mono">lag 123 xy</span>{' '}
+                      matches this too.
+                    </>
+                  }
+                >
+                  <Input
                     type="text"
                     value={plateNumber}
                     onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
                     placeholder="LAG-123-XY"
-                    className="uppercase"
+                    inputClassName="uppercase"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Spacing and case are ignored, so <span className="font-mono">lag 123 xy</span>{' '}
-                    matches this too.
-                  </p>
-                </div>
+                </Field>
               ) : (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Phone <span className="text-muted-foreground font-normal">(optional)</span>
-                  </label>
-                  <LegacyInput
-                    type="text"
+                <Field
+                  label="Phone"
+                  optionalLabel="(optional)"
+                  hint="A number is a much stronger match than a name. Worth adding if the estate has one."
+                >
+                  <Input
+                    type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. 08031234567"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    A number is a much stronger match than a name. Worth adding if the estate has
-                    one.
-                  </p>
-                </div>
+                </Field>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Why are they on this list?
-                </label>
-                <LegacyInput
+              <Field
+                label="Why are they on this list?"
+                required
+                hint={`A guard is shown this word for word, so they can explain the refusal to the person at the gate. At least ${REASON_MIN_LENGTH} characters.`}
+              >
+                <Input
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="e.g. Harassed residents in Block A"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  A guard is shown this word for word, so they can explain the refusal to the person
-                  at the gate. At least {REASON_MIN_LENGTH} characters.
-                </p>
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Permanent?{' '}
-                  <span className="text-muted-foreground font-normal">
-                    Leave blank for an entry that stands until somebody lifts it
-                  </span>
-                </label>
-                <LegacyInput
-                  type="date"
-                  value={expiresAt}
-                  onChange={(e) => setExpiresAt(e.target.value)}
-                />
-              </div>
+              <Field
+                label="Permanent?"
+                optionalLabel="Leave blank for an entry that stands until somebody lifts it"
+              >
+                <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Photo <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
+              <Field label="Photo" optionalLabel="(optional)">
                 <DocumentUpload
                   value={photo ? [{ id: 'photo', file: photo }] : []}
                   onChange={(items) => setPhoto(items[0]?.file ?? null)}
@@ -255,17 +242,17 @@ export const AddWatchlistEntryModal = ({
                   multiple={false}
                   label=""
                 />
-              </div>
+              </Field>
 
               {cannotMatch && label.trim().length > 0 && (
-                <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
+                <Alert variant="warning">
                   {isVehicle
                     ? 'A vehicle needs a plate number. Without one there is nothing a guard can compare, so the rule would never fire.'
                     : 'This cannot be matched against anybody yet. Give a full name, or add a phone number: otherwise the list would look like it was covering somebody it never would.'}
-                </p>
+                </Alert>
               )}
 
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              {error && <p className="text-xs text-destructive">{error}</p>}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -275,7 +262,9 @@ export const AddWatchlistEntryModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Adding…"
                 onClick={() =>
                   onSubmit({
                     label: label.trim(),
@@ -293,7 +282,7 @@ export const AddWatchlistEntryModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Adding…' : 'Add to list'}
+                Add to list
               </Button>
             </div>
           </motion.div>

@@ -12,7 +12,7 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Badge, Button, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
@@ -61,7 +61,7 @@ export default function AgentSyncPage() {
   ).length;
 
   if (isLoading) {
-    return <div className="p-10 text-center text-muted-foreground">Loading sync records…</div>;
+    return <ListSkeleton rows={5} label="Loading sync records" />;
   }
 
   return (
@@ -73,51 +73,33 @@ export default function AgentSyncPage() {
         </div>
         <Button
           variant="primary"
-          className="gap-2"
+          icon={<RefreshCw className="w-4 h-4" />}
           onClick={handleSyncAll}
-          disabled={pendingCount === 0 || isSyncingAll || !isOnline}
+          isLoading={isSyncingAll}
+          loadingText="Syncing..."
+          disabled={pendingCount === 0 || !isOnline}
         >
-          <RefreshCw className={`w-4 h-4 ${isSyncingAll ? 'animate-spin' : ''}`} />
-          {isSyncingAll ? 'Syncing...' : 'Sync All'}
+          Sync All
         </Button>
       </div>
 
-      <div
-        className={`mb-6 p-4 rounded-2xl border flex items-start gap-3 ${
-          isOnline
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-            : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
-        }`}
+      <Alert
+        variant={isOnline ? 'success' : 'warning'}
+        icon={isOnline ? Wifi : WifiOff}
+        title={isOnline ? 'Connected' : 'Offline'}
+        className="mb-6"
       >
-        {isOnline ? (
-          <Wifi className="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
-        ) : (
-          <WifiOff className="w-4 h-4 text-orange-600 dark:text-orange-400 mt-0.5 shrink-0" />
-        )}
-        <div>
-          <p
-            className={`text-sm font-medium ${isOnline ? 'text-green-700 dark:text-green-400' : 'text-orange-700 dark:text-orange-400'}`}
-          >
-            {isOnline ? 'Connected' : 'Offline'}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {isOnline
-              ? 'Inspections and verifications you capture in the field are saved locally and sync automatically when possible.'
-              : 'You are working offline. Records will be saved on this device and synced once you reconnect.'}
-          </p>
-        </div>
-      </div>
+        {isOnline
+          ? 'Inspections and verifications you capture in the field are saved locally and sync automatically when possible.'
+          : 'You are working offline. Records will be saved on this device and synced once you reconnect.'}
+      </Alert>
 
       {items.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Cloud className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">All caught up</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Every record you&apos;ve captured has been synced to GetRentos.
-          </p>
-        </div>
+        <EmptyState
+          icon={Cloud}
+          title="All caught up"
+          description="Every record you've captured has been synced to GetRentos."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {items.map((item) => {
@@ -130,11 +112,11 @@ export default function AgentSyncPage() {
               >
                 <div
                   className={`p-2 rounded-lg shrink-0 ${
-                    item.syncStatus === 'failed' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-secondary'
+                    item.syncStatus === 'failed' ? 'bg-destructive-subtle' : 'bg-secondary'
                   }`}
                 >
                   {item.syncStatus === 'failed' ? (
-                    <AlertCircle className="w-4 h-4 text-red-500" />
+                    <AlertCircle className="w-4 h-4 text-destructive" />
                   ) : (
                     <TypeIcon className="w-4 h-4 text-muted-foreground" />
                   )}
@@ -147,19 +129,22 @@ export default function AgentSyncPage() {
                   </p>
                 </div>
                 {synced ? (
-                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20 shrink-0">
-                    <Cloud className="w-3 h-3" />
+                  <Badge
+                    variant="success"
+                    icon={<Cloud className="w-3 h-3" />}
+                    className="shrink-0"
+                  >
                     Synced
-                  </span>
+                  </Badge>
                 ) : (
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-1.5 shrink-0"
+                    className="shrink-0"
+                    icon={<CloudOff className="w-3.5 h-3.5" />}
                     onClick={() => syncItem(item.id)}
                     disabled={!isOnline}
                   >
-                    <CloudOff className="w-3.5 h-3.5" />
                     {item.syncStatus === 'failed' ? 'Retry' : 'Sync'}
                   </Button>
                 )}

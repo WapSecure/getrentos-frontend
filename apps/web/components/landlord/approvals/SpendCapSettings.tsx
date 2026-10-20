@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SlidersHorizontal } from 'lucide-react';
-import { Button, CurrencyInput, type ToastVariant } from '@getrentos/ui';
+import { Button, Card, CurrencyInput, useToast } from '@getrentos/ui';
 import { mine, type ManagementMandateDto } from '@/services/mandateService';
 import { spendApprovalService } from '@/services/spendApprovalService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -13,11 +13,7 @@ import { unwrap } from '@/lib/apiHelpers';
  * it needs the owner's sign-off. Shown only when the owner has a live engagement
  * — the cap has no meaning without a manager to measure against.
  */
-export function SpendCapSettings({
-  onToast,
-}: {
-  onToast: (t: { message: string; variant: ToastVariant }) => void;
-}) {
+export function SpendCapSettings() {
   const { data } = useQuery({
     queryKey: ['mandates', 'mine'],
     queryFn: () => unwrap(mine()),
@@ -27,7 +23,7 @@ export function SpendCapSettings({
   if (engagements.length === 0) return null;
 
   return (
-    <div className="mb-6 rounded-2xl border border-border bg-card p-5">
+    <Card className="mb-6 p-5">
       <div className="mb-3 flex items-center gap-2">
         <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
         <h2 className="text-sm font-semibold text-foreground">Approval limits</h2>
@@ -37,20 +33,15 @@ export function SpendCapSettings({
       </p>
       <div className="space-y-3">
         {engagements.map((m) => (
-          <CapRow key={m.id} mandate={m} onToast={onToast} />
+          <CapRow key={m.id} mandate={m} />
         ))}
       </div>
-    </div>
+    </Card>
   );
 }
 
-function CapRow({
-  mandate,
-  onToast,
-}: {
-  mandate: ManagementMandateDto;
-  onToast: (t: { message: string; variant: ToastVariant }) => void;
-}) {
+function CapRow({ mandate }: { mandate: ManagementMandateDto }) {
+  const toast = useToast();
   const [cap, setCap] = useState<number>(mandate.maintenanceApprovalCap ?? 0);
   const [saving, setSaving] = useState(false);
 
@@ -58,11 +49,8 @@ function CapRow({
     setSaving(true);
     const res = await spendApprovalService.setMandateCap(mandate.id, cap > 0 ? cap : null);
     setSaving(false);
-    onToast(
-      res.success
-        ? { message: 'Approval limit saved.', variant: 'success' }
-        : { message: res.message || 'Could not save the limit.', variant: 'error' }
-    );
+    if (res.success) toast.success('Approval limit saved.');
+    else toast.error(res.message || 'Could not save the limit.');
   };
 
   return (
@@ -72,10 +60,15 @@ function CapRow({
       </span>
       <div className="flex items-center gap-2">
         <div className="w-40">
-          <CurrencyInput value={cap} onValueChange={setCap} placeholder="No limit" />
+          <CurrencyInput
+            value={cap}
+            onValueChange={setCap}
+            placeholder="No limit"
+            aria-label={`Approval limit for ${mandate.propertyTitle ?? 'property'}`}
+          />
         </div>
-        <Button variant="secondary" size="sm" onClick={save} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
+        <Button variant="secondary" size="sm" onClick={save} isLoading={saving}>
+          Save
         </Button>
       </div>
     </div>

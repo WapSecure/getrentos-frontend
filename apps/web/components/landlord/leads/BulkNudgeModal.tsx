@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send } from 'lucide-react';
-import { Button, Textarea } from '@getrentos/ui';
+import { Alert, Button, IconButton, Textarea } from '@getrentos/ui';
 
 interface BulkNudgeModalProps {
   leadCount: number;
@@ -42,8 +42,8 @@ export const BulkNudgeModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">
                   Nudge {leadCount} lead{leadCount === 1 ? '' : 's'}
                 </h3>
@@ -51,9 +51,7 @@ export const BulkNudgeModal = ({
                   Sends the same follow-up message to each selected lead.
                 </p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-3">
@@ -62,11 +60,12 @@ export const BulkNudgeModal = ({
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 placeholder="Write a follow-up message..."
+                aria-label="Follow-up message"
               />
               {isError && (
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <Alert variant="danger">
                   Something went wrong sending these nudges. Please try again.
-                </p>
+                </Alert>
               )}
             </div>
 
@@ -78,10 +77,12 @@ export const BulkNudgeModal = ({
                 variant="primary"
                 className="flex-1 gap-2"
                 onClick={() => onSend(message)}
-                disabled={!message.trim() || isSubmitting}
+                disabled={!message.trim()}
+                isLoading={isSubmitting}
+                loadingText="Sending…"
               >
                 <Send className="w-4 h-4" />
-                {isSubmitting ? 'Sending…' : `Nudge ${leadCount}`}
+                {`Nudge ${leadCount}`}
               </Button>
             </div>
           </motion.div>

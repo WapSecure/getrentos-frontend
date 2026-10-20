@@ -1,14 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
 import {
+  CardSkeleton,
+  EmptyState,
   Pagination,
   PageErrorState,
-  PageLoadingState,
-  Toast,
-  type ToastVariant,
+  Skeleton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
@@ -37,7 +41,7 @@ export function MaintenanceRequestsView() {
   const [schedulingRequest, setSchedulingRequest] = useState<LandlordMaintenanceRequest | null>(
     null
   );
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const requestsQuery = useQuery({
     queryKey: [
@@ -52,6 +56,7 @@ export function MaintenanceRequestsView() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data, isPending: isLoadingRequests } = requestsQuery;
   const requests = data?.items ?? [];
@@ -103,22 +108,19 @@ export function MaintenanceRequestsView() {
       invalidateRequests();
       void queryClient.invalidateQueries({ queryKey: landlordKeys.vendors });
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Could not save the vendor rating.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Could not save the vendor rating.'),
   });
 
   const markResolvedMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.markMaintenanceResolved(id)),
     onSuccess: invalidateRequests,
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Could not resolve this request.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Could not resolve this request.'),
   });
 
   const escalateMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.escalateMaintenance(id)),
     onSuccess: invalidateRequests,
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Could not escalate this request.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Could not escalate this request.'),
   });
 
   const handleAssignVendor = (requestId: string, vendorId: string, scheduledFor?: string) =>
@@ -134,37 +136,39 @@ export function MaintenanceRequestsView() {
         <h1 className="text-2xl font-bold text-foreground">Maintenance</h1>
         {/* Zero is a claim about the portfolio, so wait until it has been read
             before making it. */}
-        <p className="text-muted-foreground mt-1">
-          {isLoadingSummary
-            ? 'Counting your open tickets…'
-            : `${openCount} open ticket${openCount === 1 ? '' : 's'} across your portfolio`}
-        </p>
+        {isLoadingSummary ? (
+          <Skeleton className="mt-2 h-4 w-64 max-w-full" />
+        ) : summary ? (
+          <p className="text-muted-foreground mt-1">
+            {`${openCount} open ticket${openCount === 1 ? '' : 's'} across your portfolio`}
+          </p>
+        ) : null}
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6 overflow-x-auto">
-        {statusFilters.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={filter === option.value}
-            onClick={() => {
-              setFilter(option.value);
-              setPage(1);
-            }}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-              filter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={filter}
+        onValueChange={(value) => {
+          setFilter(value as 'all' | MaintenanceRequestStatus);
+          setPage(1);
+        }}
+        className="mb-6 max-w-full"
+      >
+        <TabsList className="max-w-full">
+          {statusFilters.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoadingRequests ? (
-        <PageLoadingState />
-      ) : requestsQuery.isError || summaryQuery.isError ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[0, 1, 2].map((i) => (
+            <CardSkeleton key={i} lines={3} />
+          ))}
+        </div>
+      ) : !data ? (
         <PageErrorState
           title="Maintenance requests are unavailable"
           description="We could not load requests and open-ticket totals. No request has been changed."
@@ -175,14 +179,14 @@ export function MaintenanceRequestsView() {
           isRetrying={requestsQuery.isFetching || summaryQuery.isFetching}
         />
       ) : requests.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <Wrench className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="font-medium text-foreground">
-            {filter === 'all'
+        <EmptyState
+          icon={Wrench}
+          title={
+            filter === 'all'
               ? 'No maintenance requests yet'
-              : `No ${filter.replace('_', ' ')} requests`}
-          </p>
-        </div>
+              : `No ${filter.replace('_', ' ')} requests`
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {requests.map((request) => (
@@ -246,10 +250,6 @@ export function MaintenanceRequestsView() {
           scheduleVisitMutation.error instanceof Error ? scheduleVisitMutation.error.message : null
         }
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

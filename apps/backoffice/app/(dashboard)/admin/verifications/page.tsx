@@ -1,15 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, ShieldCheck } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ShieldCheck } from 'lucide-react';
 import { VerificationRequestCard } from '@/components/admin/verifications/VerificationRequestCard';
 import { ReviewVerificationModal } from '@/components/admin/verifications/ReviewVerificationModal';
-import { ConfirmDialog, EmptyState, PageErrorState, Toast } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import {
+  CardSkeleton,
+  ConfirmDialog,
+  EmptyState,
+  PageErrorState,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
+} from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -33,7 +41,7 @@ export default function AdminVerificationsPage() {
   const [page, setPage] = useState(1);
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
   const [showApproveConfirm, setShowApproveConfirm] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -61,6 +69,7 @@ export default function AdminVerificationsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const requests = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -75,11 +84,10 @@ export default function AdminVerificationsPage() {
   };
 
   const reportActionError = (error: unknown, fallback: string) =>
-    setActionError(error instanceof Error ? error.message : fallback);
+    toast.error(error instanceof Error ? error.message : fallback);
 
   const approveMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.approveVerification(id)),
-    onMutate: () => setActionError(null),
     onSuccess: closeModalAndRefresh,
     onError: (error) => reportActionError(error, 'Could not approve this verification.'),
   });
@@ -87,7 +95,6 @@ export default function AdminVerificationsPage() {
   const rejectMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       unwrap(adminService.rejectVerification(id, reason)),
-    onMutate: () => setActionError(null),
     onSuccess: closeModalAndRefresh,
     onError: (error) => reportActionError(error, 'Could not reject this verification.'),
   });
@@ -95,7 +102,6 @@ export default function AdminVerificationsPage() {
   const requestClarificationMutation = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       unwrap(adminService.requestVerificationClarification(id, reason)),
-    onMutate: () => setActionError(null),
     onSuccess: closeModalAndRefresh,
     onError: (error) =>
       reportActionError(error, 'Could not request clarification for this verification.'),
@@ -140,18 +146,16 @@ export default function AdminVerificationsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by applicant or subject..."
-            leadingIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          label="Search verification requests"
+          placeholder="Search by applicant or subject..."
+          className="flex-1 max-w-sm"
+        />
         <Select
           value={typeFilter}
           onValueChange={(value) => {
@@ -159,42 +163,42 @@ export default function AdminVerificationsPage() {
             setPage(1);
           }}
           options={typeOptions}
+          ariaLabel="Filter by type"
+          searchable={false}
           className="w-full sm:w-44"
         />
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
-        {statusOptions.map((option) => (
-          <button
-            type="button"
-            key={option.value}
-            onClick={() => {
-              setStatusFilter(option.value);
-              setPage(1);
-            }}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-              statusFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(value) => {
+          setStatusFilter(value as StatusFilter);
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList>
+          {statusOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {isError ? (
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardSkeleton key={index} />
+          ))}
+        </div>
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load verification requests"
           description="The verification queue is temporarily unavailable. Your filters have been preserved."
           onRetry={() => void refetch()}
           isRetrying={isFetching}
         />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
       ) : requests.length === 0 ? (
         <EmptyState icon={ShieldCheck} title="No requests match your filters" />
       ) : (
@@ -247,9 +251,6 @@ export default function AdminVerificationsPage() {
         isLoading={approveMutation.isPending}
         onConfirm={() => activeRequest && approveMutation.mutate(activeRequest.id)}
       />
-      {actionError && (
-        <Toast message={actionError} variant="error" onClose={() => setActionError(null)} />
-      )}
     </>
   );
 }

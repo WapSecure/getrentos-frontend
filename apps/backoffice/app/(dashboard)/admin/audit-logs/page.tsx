@@ -1,15 +1,20 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search, ScrollText } from 'lucide-react';
-import { DataTable, PageErrorState, type Column } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { ScrollText } from 'lucide-react';
+import {
+  DataTable,
+  PageErrorState,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  type Column,
+} from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
 import { formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
@@ -48,6 +53,7 @@ export default function AdminAuditLogsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const logs: AuditLogEntry[] = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -128,42 +134,36 @@ export default function AdminAuditLogsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by actor, action, or target..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          label="Search audit logs"
+          placeholder="Search by actor, action, or target..."
+          className="flex-1 max-w-sm"
+        />
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
-        {severityOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => {
-              setSeverityFilter(option.value);
-              setPage(1);
-            }}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-              severityFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={severityFilter}
+        onValueChange={(value) => {
+          setSeverityFilter(value as SeverityFilter);
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList>
+          {severityOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {isError ? (
+      {isError && !data ? (
         <PageErrorState
           title="Could not load audit logs"
           description="The sensitive-action record is temporarily unavailable. Your search and severity filter have been preserved."

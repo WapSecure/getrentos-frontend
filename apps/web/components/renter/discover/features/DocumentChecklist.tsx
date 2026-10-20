@@ -3,16 +3,16 @@
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { FileText, Upload, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Toast, ToastVariant, FilePreviewDialog } from '@getrentos/ui';
+import { Button, FilePreviewDialog, Skeleton, useToast } from '@getrentos/ui';
 
 export const DocumentChecklist = () => {
   const queryClient = useQueryClient();
   const [isExpanded, setIsExpanded] = useState(true);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [previewDoc, setPreviewDoc] = useState<{ url: string; name: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -27,10 +27,10 @@ export const DocumentChecklist = () => {
       unwrap(renterService.uploadDocument(file, file.name, 'other', 'application', [])),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.documents });
-      setToast({ message: 'Document uploaded successfully', variant: 'success' });
+      toast.success('Document uploaded successfully');
     },
     onError: (err: Error) => {
-      setToast({ message: err.message || 'Failed to upload document', variant: 'error' });
+      toast.error(err.message || 'Failed to upload document');
     },
   });
 
@@ -44,27 +44,28 @@ export const DocumentChecklist = () => {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-card rounded-xl border border-border overflow-hidden"
       >
         <button
+          type="button"
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
           className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
         >
           <div className="flex items-center gap-3">
             <FileText className="w-5 h-5 text-primary" />
             <div className="text-left">
               <h3 className="font-semibold text-foreground">Your Documents</h3>
-              <p className="text-xs text-gray-500">
-                {isLoading
-                  ? 'Loading…'
-                  : `${uploadedCount} document${uploadedCount === 1 ? '' : 's'} uploaded`}
-              </p>
+              {isLoading ? (
+                <Skeleton className="mt-1 h-3 w-28" />
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  {`${uploadedCount} document${uploadedCount === 1 ? '' : 's'} uploaded`}
+                </p>
+              )}
             </div>
           </div>
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -72,7 +73,19 @@ export const DocumentChecklist = () => {
 
         {isExpanded && (
           <div className="p-4 pt-0 space-y-3">
-            {documents.length === 0 && !isLoading ? (
+            {isLoading ? (
+              <div role="status" aria-label="Loading documents" className="space-y-2">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2">
+                    <Skeleton className="h-4 w-4 shrink-0 rounded-full" />
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <Skeleton className={index % 2 === 0 ? 'h-3.5 w-2/3' : 'h-3.5 w-1/2'} />
+                      <Skeleton className="h-3 w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : documents.length === 0 ? (
               <p className="text-xs text-muted-foreground">
                 No documents yet. Upload your ID, proof of income and other documents to strengthen
                 your applications.
@@ -80,47 +93,43 @@ export const DocumentChecklist = () => {
             ) : (
               <div className="space-y-2">
                 {documents.map((doc, index) => (
-                  <motion.div
+                  <motion.button
                     key={doc.id}
+                    type="button"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => setPreviewDoc({ url: doc.url, name: doc.name })}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary cursor-pointer"
+                    className="flex w-full items-center justify-between p-2 rounded-lg text-left hover:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-success shrink-0" />
                       <div className="min-w-0">
                         <p className="text-sm text-foreground truncate hover:text-primary">
                           {doc.name}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {doc.category} · {doc.size}
                         </p>
                       </div>
                     </div>
-                  </motion.div>
+                  </motion.button>
                 ))}
               </div>
             )}
 
-            <button
+            <Button
+              variant="outline"
+              size="sm"
+              fullWidth
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploadMutation.isPending}
-              className="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg border border-dashed border-border text-xs text-primary hover:bg-primary/5 transition-colors"
+              isLoading={uploadMutation.isPending}
+              loadingText="Uploading…"
+              icon={<Upload className="w-3 h-3" />}
+              className="border-dashed text-primary"
             >
-              {uploadMutation.isPending ? (
-                <>
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Uploading…
-                </>
-              ) : (
-                <>
-                  <Upload className="w-3 h-3" />
-                  Upload a document
-                </>
-              )}
-            </button>
+              Upload a document
+            </Button>
             <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
           </div>
         )}

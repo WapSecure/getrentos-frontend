@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, Button, Select, Textarea, DatePicker } from '@getrentos/ui';
+import { Dialog, DialogContent, Button, Field, Select, Textarea, DatePicker } from '@getrentos/ui';
 import {
   INSPECTION_TYPES,
   INSPECTION_TYPE_LABELS,
@@ -67,18 +67,16 @@ export const CreateInspectionModal = ({
             </p>
           </div>
 
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium text-foreground">Property</span>
+          <Field label="Property" required>
             <Select
               value={propertyId}
               onValueChange={setPropertyId}
               placeholder="Select a property"
               options={properties.map((p) => ({ value: p.id, label: p.name }))}
             />
-          </label>
+          </Field>
 
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium text-foreground">Type</span>
+          <Field label="Type">
             <Select
               value={type}
               onValueChange={(v) => setType(v as InspectionType)}
@@ -87,31 +85,35 @@ export const CreateInspectionModal = ({
                 label: INSPECTION_TYPE_LABELS[t],
               }))}
             />
-          </label>
+          </Field>
 
           {type === 'ROUTINE' && (
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium text-foreground">Scheduled for (optional)</span>
-              <DatePicker value={scheduledFor} onChange={setScheduledFor} />
-            </label>
+            <Field label="Scheduled for (optional)">
+              <DatePicker value={scheduledFor} onChange={setScheduledFor} clearable />
+            </Field>
           )}
 
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium text-foreground">Notes (optional)</span>
+          <Field label="Notes (optional)">
             <Textarea
               value={summaryNotes}
               onChange={(e) => setSummaryNotes(e.target.value)}
               placeholder="Anything worth recording about this inspection"
               rows={3}
             />
-          </label>
+          </Field>
 
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="outline" onClick={close} disabled={isPending}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={submit} disabled={!propertyId || isPending}>
-              {isPending ? 'Creating…' : 'Create inspection'}
+            <Button
+              variant="primary"
+              onClick={submit}
+              disabled={!propertyId}
+              isLoading={isPending}
+              loadingText="Creating…"
+            >
+              Create inspection
             </Button>
           </div>
         </div>

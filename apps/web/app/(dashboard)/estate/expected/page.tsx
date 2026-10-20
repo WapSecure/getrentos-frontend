@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { tierAtLeast } from '@getrentos/shared';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton } from '@getrentos/ui';
 import { Upload } from 'lucide-react';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -58,7 +58,7 @@ export default function EstateExpectedPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -77,16 +77,22 @@ export default function EstateExpectedPage() {
               board.
             </p>
           </div>
-          <Button rounded="md" onClick={() => setIsImportOpen(true)}>
-            <Upload className="mr-2 h-4 w-4" />
+          <Button
+            rounded="md"
+            icon={<Upload className="h-4 w-4" />}
+            onClick={() => setIsImportOpen(true)}
+          >
             Enter a guest list
           </Button>
         </div>
 
-        <div className="mb-6 rounded-xl border border-border bg-card px-3 py-2.5 text-xs leading-5 text-muted-foreground">
-          This is a reference board, not an access control. Every visitor must still presents their
-          own pass at the gate, and a guard can always turn somebody away whatever this says.
-        </div>
+        <Alert variant="neutral" className="mb-6">
+          <p className="text-xs leading-5">
+            This is a reference board, not an access control. Every visitor must still presents
+            their own pass at the gate, and a guard can always turn somebody away whatever this
+            says.
+          </p>
+        </Alert>
 
         <ExpectedTodayBoard estateId={estate.id} />
 

@@ -36,11 +36,12 @@ export const ReferenceCodeChip = ({
       type="button"
       onClick={copy}
       title="Copy property code"
+      aria-label={copied ? `Property code ${code} copied` : `Copy property code ${code}`}
       className={`inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 font-mono text-xs text-foreground transition-colors hover:bg-accent ${className}`}
     >
       {code}
       {copied ? (
-        <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+        <Check className="h-3 w-3 text-success" />
       ) : (
         <Copy className="h-3 w-3 text-muted-foreground" />
       )}

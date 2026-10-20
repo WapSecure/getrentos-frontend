@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Button } from '@getrentos/ui';
+import { Button, IconButton } from '@getrentos/ui';
 import { notificationHref } from '@/lib/notificationHref';
 
 interface NotificationMetadata {
@@ -52,33 +52,33 @@ interface NotificationCardProps {
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
   application: {
     icon: FileText,
-    color: 'text-blue-600 dark:text-blue-400',
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    color: 'text-info',
+    bg: 'bg-info-subtle',
   },
   message: {
     icon: MessageCircle,
-    color: 'text-purple-600 dark:text-purple-400',
-    bg: 'bg-purple-50 dark:bg-purple-900/20',
+    color: 'text-purple',
+    bg: 'bg-purple-subtle',
   },
   payment: {
     icon: CreditCard,
-    color: 'text-green-600 dark:text-green-400',
-    bg: 'bg-green-50 dark:bg-green-900/20',
+    color: 'text-success',
+    bg: 'bg-success-subtle',
   },
   maintenance: {
     icon: Wrench,
-    color: 'text-orange-600 dark:text-orange-400',
-    bg: 'bg-orange-50 dark:bg-orange-900/20',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   lease: {
     icon: FileCheck,
-    color: 'text-cyan-600 dark:text-cyan-400',
-    bg: 'bg-cyan-50 dark:bg-cyan-900/20',
+    color: 'text-info',
+    bg: 'bg-info-subtle',
   },
   system: {
     icon: AlertCircle,
     color: 'text-muted-foreground',
-    bg: 'bg-gray-50 dark:bg-gray-800',
+    bg: 'bg-secondary',
   },
 };
 
@@ -131,9 +131,7 @@ export const NotificationCard = ({
   return (
     <div
       className={`group p-4 rounded-xl transition-all cursor-pointer ${
-        notification.read
-          ? 'hover:bg-secondary'
-          : 'bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+        notification.read ? 'hover:bg-secondary' : 'bg-info-subtle/50 hover:bg-info-subtle'
       } ${isHovered ? 'shadow-sm' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -155,9 +153,7 @@ export const NotificationCard = ({
                 >
                   {notification.title}
                 </h4>
-                {!notification.read && (
-                  <span className="w-2 h-2 bg-blue-500 rounded-full shrink-0" />
-                )}
+                {!notification.read && <span className="w-2 h-2 bg-info rounded-full shrink-0" />}
               </div>
               <p
                 className={`text-sm ${
@@ -166,7 +162,7 @@ export const NotificationCard = ({
               >
                 {notification.message}
               </p>
-              <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                 <span>{formatTimeAgo(notification.createdAt)}</span>
                 <span className="capitalize">{notification.type}</span>
               </div>
@@ -185,25 +181,22 @@ export const NotificationCard = ({
                 </Button>
               )}
               {!notification.read && (
-                <Button
-                  variant="ghost"
+                <IconButton
+                  label="Mark as read"
+                  icon={<CheckCircle />}
                   size="sm"
-                  className="p-1 h-auto text-blue-500 hover:text-blue-700"
+                  className="text-info hover:text-info"
                   onClick={handleMarkAsReadClick}
-                  title="Mark as read"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                </Button>
+                />
               )}
-              <Button
-                variant="ghost"
+              <IconButton
+                label="Delete notification"
+                icon={<Trash2 />}
                 size="sm"
-                className="p-1 h-auto text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                variant="danger"
+                className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
                 onClick={handleDeleteClick}
-                title="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              />
             </div>
           </div>
         </div>

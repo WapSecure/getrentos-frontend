@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock } from 'lucide-react';
-import { Button, DatePicker, TimePicker } from '@getrentos/ui';
+import { Alert, Button, DatePicker, Field, IconButton, TimePicker } from '@getrentos/ui';
 import type { LandlordLead } from '@/types/landlord';
 
 interface ConfirmViewingModalProps {
@@ -47,31 +47,25 @@ export const ConfirmViewingModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Confirm Viewing</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {lead.leadName} · {lead.propertyName}
                 </p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Date</label>
+              <Field label="Date" required>
                 <DatePicker value={date} onChange={setDate} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Time</label>
+              </Field>
+              <Field label="Time" required>
                 <TimePicker value={time} onChange={setTime} />
-              </div>
+              </Field>
               {isError && (
-                <p className="text-sm text-red-600 dark:text-red-400">
-                  Couldn&apos;t confirm the viewing. Please try again.
-                </p>
+                <Alert variant="danger">Couldn&apos;t confirm the viewing. Please try again.</Alert>
               )}
             </div>
 
@@ -83,10 +77,12 @@ export const ConfirmViewingModal = ({
                 variant="primary"
                 className="flex-1 gap-2"
                 onClick={handleConfirm}
-                disabled={!date || !time || isSubmitting}
+                disabled={!date || !time}
+                isLoading={isSubmitting}
+                loadingText="Confirming…"
               >
                 <CalendarClock className="w-4 h-4" />
-                {isSubmitting ? 'Confirming…' : 'Confirm'}
+                Confirm
               </Button>
             </div>
           </motion.div>

@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, Building2, MapPin, Search } from 'lucide-react';
-import { Badge, EmptyState, Input, Pagination, Select, Skeleton } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { ArrowRight, Building2, MapPin } from 'lucide-react';
+import { Badge, EmptyState, Pagination, SearchInput, Select, Skeleton } from '@getrentos/ui';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { ALL_NIGERIAN_CITIES } from '@/lib/constants/locations';
@@ -111,6 +111,7 @@ export const EstatesDirectoryBrowser = ({
     queryKey: ['estates', 'directory', queryParams],
     queryFn: () => unwrap(estateStorefrontService.directory(queryParams)),
     initialData: isDefaultView ? initialData : undefined,
+    placeholderData: keepPreviousData,
   });
 
   const estates = data?.items ?? [];
@@ -130,15 +131,15 @@ export const EstatesDirectoryBrowser = ({
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="sm:max-w-md sm:flex-1">
-          <Input
+          <SearchInput
             id="estate-directory-search"
             value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
+            onValueChange={(value) => {
+              setSearch(value);
               setPage(1);
             }}
+            label="Search estates"
             placeholder="Search by estate name, address or city"
-            leadingIcon={<Search className="h-4 w-4" />}
           />
         </div>
         <div className="sm:w-56">
@@ -163,7 +164,7 @@ export const EstatesDirectoryBrowser = ({
             <Skeleton key={i} className="h-72 w-full rounded-2xl" />
           ))}
         </div>
-      ) : isError ? (
+      ) : isError && !data ? (
         <div className="mt-10">
           <EmptyState
             icon={Building2}

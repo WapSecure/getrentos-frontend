@@ -1,30 +1,23 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Checkbox,
+  CurrencyInput,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
   Input,
   Select,
-  Toast,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import type { AdminEstateHouseholdQueue, AdminEstateDueQueue } from '@/types/estate';
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium">{label}</span>
-      {children}
-    </label>
-  );
-}
 
 const householdStatusOptions = [
   { value: 'ACTIVE', label: 'Active' },
@@ -46,7 +39,7 @@ export function HouseholdEditorDialog({
   const [status, setStatus] = useState(household?.status ?? 'ACTIVE');
   const [unlinkResident, setUnlinkResident] = useState(false);
   const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -68,7 +61,7 @@ export function HouseholdEditorDialog({
       await client.invalidateQueries({ queryKey: ['admin', 'estates'] });
       onClose();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   return (
@@ -101,19 +94,16 @@ export function HouseholdEditorDialog({
                 value={status}
                 onValueChange={(v) => setStatus(v as typeof status)}
                 options={householdStatusOptions}
-                ariaLabel="Household status"
               />
             </Field>
             {household?.residentLinked && (
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={unlinkResident}
-                  onCheckedChange={(v) => setUnlinkResident(Boolean(v))}
-                />
-                Unlink the current resident account from this household
-              </label>
+              <Checkbox
+                checked={unlinkResident}
+                onCheckedChange={setUnlinkResident}
+                label="Unlink the current resident account from this household"
+              />
             )}
-            <Field label="Administrative reason">
+            <Field label="Administrative reason" required>
               <Input
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
@@ -124,14 +114,18 @@ export function HouseholdEditorDialog({
               <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
                 Cancel
               </Button>
-              <Button onClick={() => mutation.mutate()} disabled={!household || mutation.isPending}>
-                {mutation.isPending ? 'Saving…' : 'Save changes'}
+              <Button
+                onClick={() => mutation.mutate()}
+                disabled={!household}
+                isLoading={mutation.isPending}
+                loadingText="Saving…"
+              >
+                Save changes
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
     </>
   );
 }
@@ -145,9 +139,9 @@ export function DueAmountDialog({
   onClose: () => void;
 }) {
   const client = useQueryClient();
-  const [amount, setAmount] = useState(due ? String(due.amount) : '');
+  const [amount, setAmount] = useState(due ? due.amount : 0);
   const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -163,7 +157,7 @@ export function DueAmountDialog({
       await client.invalidateQueries({ queryKey: ['admin', 'estates'] });
       onClose();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   return (
@@ -181,15 +175,10 @@ export function DueAmountDialog({
             Only available while the due is still pending or overdue.
           </DialogDescription>
           <div className="mt-5 space-y-4">
-            <Field label="Amount (₦)">
-              <Input
-                type="number"
-                min={0}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
+            <Field label="Amount">
+              <CurrencyInput value={amount} onValueChange={setAmount} prefix="₦" allowZero />
             </Field>
-            <Field label="Administrative reason">
+            <Field label="Administrative reason" required>
               <Input
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
@@ -200,14 +189,18 @@ export function DueAmountDialog({
               <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
                 Cancel
               </Button>
-              <Button onClick={() => mutation.mutate()} disabled={!due || mutation.isPending}>
-                {mutation.isPending ? 'Saving…' : 'Save changes'}
+              <Button
+                onClick={() => mutation.mutate()}
+                disabled={!due}
+                isLoading={mutation.isPending}
+                loadingText="Saving…"
+              >
+                Save changes
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
     </>
   );
 }

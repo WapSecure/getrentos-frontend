@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, Select } from '@getrentos/ui';
+import { Button, Field, IconButton, Select, Textarea } from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface ReportViolationModalProps {
@@ -65,39 +65,31 @@ export const ReportViolationModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Report Violation</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Household</label>
+              <Field label="Household">
                 <Select
                   value={householdId}
                   onValueChange={setHouseholdId}
                   options={householdOptions}
                   placeholder="Select a household"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+              <Field label="Category">
                 <Select value={category} onValueChange={setCategory} options={categoryOptions} />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Description
-                </label>
-                <textarea
+              <Field label="Description">
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
                   placeholder="What happened, when, and any witnesses…"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
-              </div>
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -107,7 +99,9 @@ export const ReportViolationModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Reporting…"
                 onClick={() =>
                   onSubmit({
                     householdId,
@@ -121,7 +115,7 @@ export const ReportViolationModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Reporting…' : 'Report Violation'}
+                Report Violation
               </Button>
             </div>
           </motion.div>

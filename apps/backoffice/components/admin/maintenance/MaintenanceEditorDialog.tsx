@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  DatePicker,
+  Field,
+  NumberInput,
   Button,
   Dialog,
   DialogContent,
@@ -10,7 +13,7 @@ import {
   DialogTitle,
   Input,
   Select,
-  Toast,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
@@ -60,7 +63,7 @@ export function MaintenanceEditorDialog({
   const [vendorId, setVendorId] = useState(
     editor?.kind === 'plan' ? (editor.value.assignedVendorId ?? '') : ''
   );
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const vendors = useQuery({
     queryKey: ['admin', 'maintenance', 'vendors', 'editor'],
     queryFn: () => unwrap(adminMaintenanceService.listVendors({ page: 1, pageSize: 100 })),
@@ -103,7 +106,7 @@ export function MaintenanceEditorDialog({
       await client.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
       onClose();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
   const vendorOptions = (vendors.data?.items ?? [])
     .filter((vendor) => vendor.isActive)
@@ -144,28 +147,13 @@ export function MaintenanceEditorDialog({
             {editor?.kind === 'sla' && (
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label="Response (minutes)">
-                  <Input
-                    type="number"
-                    min={1}
-                    value={response}
-                    onChange={(e) => setResponse(e.target.value)}
-                  />
+                  <NumberInput value={response} onValueChange={setResponse} />
                 </Field>
                 <Field label="Resolution (minutes)">
-                  <Input
-                    type="number"
-                    min={1}
-                    value={resolution}
-                    onChange={(e) => setResolution(e.target.value)}
-                  />
+                  <NumberInput value={resolution} onValueChange={setResolution} />
                 </Field>
                 <Field label="Escalation (minutes)">
-                  <Input
-                    type="number"
-                    min={1}
-                    value={escalation}
-                    onChange={(e) => setEscalation(e.target.value)}
-                  />
+                  <NumberInput value={escalation} onValueChange={setEscalation} />
                 </Field>
               </div>
             )}
@@ -176,19 +164,10 @@ export function MaintenanceEditorDialog({
                 </Field>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Frequency (days)">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={frequency}
-                      onChange={(e) => setFrequency(e.target.value)}
-                    />
+                    <NumberInput value={frequency} onValueChange={setFrequency} />
                   </Field>
                   <Field label="Next service date">
-                    <Input
-                      type="date"
-                      value={nextDueAt}
-                      onChange={(e) => setNextDueAt(e.target.value)}
-                    />
+                    <DatePicker value={nextDueAt} onChange={setNextDueAt} />
                   </Field>
                 </div>
                 <Field label="Assigned vendor">
@@ -213,23 +192,18 @@ export function MaintenanceEditorDialog({
               <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
                 Cancel
               </Button>
-              <Button onClick={() => mutation.mutate()} disabled={!value || mutation.isPending}>
-                {mutation.isPending ? 'Saving…' : 'Save changes'}
+              <Button
+                onClick={() => mutation.mutate()}
+                disabled={!value}
+                isLoading={mutation.isPending}
+                loadingText="Saving…"
+              >
+                Save changes
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
     </>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium">{label}</span>
-      {children}
-    </label>
   );
 }

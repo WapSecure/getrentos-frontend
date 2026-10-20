@@ -62,26 +62,26 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
 
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <NairaSign className="w-3 h-3 text-primary" />
-              <span className="text-xs text-gray-500">Total Paid</span>
+              <span className="text-xs text-muted-foreground">Total Paid</span>
             </div>
             <p className="text-lg font-bold text-foreground">{formatCurrency(totalPaid)}</p>
           </div>
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <TrendingUp className="w-3 h-3 text-primary" />
-              <span className="text-xs text-gray-500">Avg Payment</span>
+              <span className="text-xs text-muted-foreground">Avg Payment</span>
             </div>
             <p className="text-lg font-bold text-foreground">{formatCurrency(averagePayment)}</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+        <div className="p-3 rounded-lg bg-secondary">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3 text-primary" />
-            <span className="text-xs text-gray-500">Average per active month</span>
+            <span className="text-xs text-muted-foreground">Average per active month</span>
           </div>
           <p className="text-lg font-bold text-foreground">{formatCurrency(monthlyAverage)}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">

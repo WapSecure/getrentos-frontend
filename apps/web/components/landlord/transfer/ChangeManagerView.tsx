@@ -3,8 +3,22 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRightLeft, CalendarClock, CheckCircle2, TriangleAlert } from 'lucide-react';
-import { Badge, Button, Card, DatePicker, Textarea } from '@getrentos/ui';
+import { ArrowRightLeft, CalendarClock, TriangleAlert } from 'lucide-react';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  DatePicker,
+  EmptyState,
+  Field,
+  ListSkeleton,
+  RadioGroup,
+  Select,
+  Skeleton,
+  Textarea,
+} from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordService } from '@/services/landlordService';
@@ -129,46 +143,37 @@ export function ChangeManagerView() {
       </div>
 
       <Card className="space-y-5 p-5">
-        <div>
-          <label htmlFor="cm-property" className="block text-sm font-medium text-foreground">
-            Property
-          </label>
-          <select
-            id="cm-property"
+        <Field label="Property">
+          <Select
             value={propertyId}
-            onChange={(e) => {
-              setPropertyId(e.target.value);
+            onValueChange={(value) => {
+              setPropertyId(value);
               setFromMandateId('');
               setAcknowledge(false);
               setMessage(null);
             }}
-            className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-border bg-background px-3 text-sm"
-          >
-            <option value="">Choose a property…</option>
-            {(properties.data?.items ?? []).map((pr) => (
-              <option key={pr.id} value={pr.id}>
-                {pr.name}
-              </option>
-            ))}
-          </select>
-        </div>
+            placeholder="Choose a property…"
+            options={(properties.data?.items ?? []).map((pr) => ({ value: pr.id, label: pr.name }))}
+          />
+        </Field>
 
         {propertyId && preview.isLoading && (
-          <p className="text-sm text-muted-foreground">Checking…</p>
+          <div role="status" aria-label="Checking" className="space-y-2">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-16 w-full" />
+          </div>
         )}
-        {preview.isError && (
-          <p role="alert" className="text-sm text-destructive">
-            {(preview.error as Error).message}
-          </p>
+        {preview.isError && !p && (
+          <Alert variant="danger">{(preview.error as Error).message}</Alert>
         )}
 
         {p && (
           <>
             {p.openTransferId && (
-              <p className="rounded-lg bg-warning-subtle p-3 text-sm text-warning">
+              <Alert variant="warning">
                 A change of manager is already scheduled for this property. Call it off below to set
                 up a different one.
-              </p>
+              </Alert>
             )}
 
             <div>
@@ -176,84 +181,64 @@ export function ChangeManagerView() {
               {p.running.length === 0 ? (
                 <p className="mt-1 text-sm text-muted-foreground">You manage it yourself.</p>
               ) : (
-                <div className="mt-2 space-y-2">
-                  {p.running.map((r) => (
-                    <label
-                      key={r.mandateId}
-                      className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm ${
-                        fromMandateId === r.mandateId
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="from"
-                        checked={fromMandateId === r.mandateId}
-                        onChange={() => {
-                          setFromMandateId(r.mandateId);
-                          if (r.managerIsGetRentos && incoming.kind === 'GETRENTOS')
-                            setIncoming({ kind: 'FIRM', id: '' });
-                        }}
-                        className="mt-1"
-                      />
-                      <span>
-                        <span className="block font-medium text-foreground">{r.manager}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {r.scope.map((s) => s.toLowerCase()).join(', ')} · {r.noticePeriodDays}{' '}
-                          days&apos; notice, ending {formatDate(r.noticeEndsAt)} if given today
-                        </span>
-                      </span>
-                    </label>
-                  ))}
+                <div className="mt-2">
+                  <RadioGroup
+                    variant="card"
+                    aria-label="Managed now by"
+                    value={fromMandateId}
+                    onValueChange={(mandateId) => {
+                      setFromMandateId(mandateId);
+                      const r = p.running.find((item) => item.mandateId === mandateId);
+                      if (r?.managerIsGetRentos && incoming.kind === 'GETRENTOS')
+                        setIncoming({ kind: 'FIRM', id: '' });
+                    }}
+                    options={p.running.map((r) => ({
+                      value: r.mandateId,
+                      label: r.manager,
+                      description: `${r.scope.map((s) => s.toLowerCase()).join(', ')} · ${r.noticePeriodDays} days’ notice, ending ${formatDate(r.noticeEndsAt)} if given today`,
+                    }))}
+                  />
                 </div>
               )}
             </div>
 
             <div>
               <p className="text-sm font-medium text-foreground">Who takes over</p>
-              <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                {(
-                  [
-                    ['GETRENTOS', 'GetRentos Managed'],
-                    ['FIRM', 'A verified firm'],
-                    ['SELF', 'Me'],
-                  ] as const
-                ).map(([kind, label]) => (
-                  <button
-                    key={kind}
-                    type="button"
-                    aria-pressed={incoming.kind === kind}
-                    // You cannot move a property to the manager you are ending.
-                    disabled={kind === 'GETRENTOS' && !!outgoing?.managerIsGetRentos}
-                    onClick={() =>
-                      setIncoming(kind === 'FIRM' ? { kind, id: '' } : ({ kind } as Incoming))
-                    }
-                    className={`cursor-pointer rounded-lg border p-3 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
-                      incoming.kind === kind
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:bg-secondary'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
+              <div className="mt-2">
+                <RadioGroup
+                  variant="card"
+                  orientation="horizontal"
+                  columns={3}
+                  aria-label="Who takes over"
+                  value={incoming.kind}
+                  onValueChange={(kind) =>
+                    setIncoming(kind === 'FIRM' ? { kind, id: '' } : ({ kind } as Incoming))
+                  }
+                  options={[
+                    {
+                      value: 'GETRENTOS',
+                      label: 'GetRentos Managed',
+                      // You cannot move a property to the manager you are ending.
+                      disabled: !!outgoing?.managerIsGetRentos,
+                    },
+                    { value: 'FIRM', label: 'A verified firm' },
+                    { value: 'SELF', label: 'Me' },
+                  ]}
+                />
               </div>
               {incoming.kind === 'FIRM' && (
-                <select
-                  aria-label="Firm"
-                  value={incoming.id}
-                  onChange={(e) => setIncoming({ kind: 'FIRM', id: e.target.value })}
-                  className="mt-2 h-10 w-full cursor-pointer rounded-lg border border-border bg-background px-3 text-sm"
-                >
-                  <option value="">Choose a verified firm…</option>
-                  {(firms.data ?? []).map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name} · {f.activeEngagements} active engagement
-                      {f.activeEngagements === 1 ? '' : 's'}
-                    </option>
-                  ))}
-                </select>
+                <div className="mt-2">
+                  <Select
+                    ariaLabel="Firm"
+                    value={incoming.id}
+                    onValueChange={(id) => setIncoming({ kind: 'FIRM', id })}
+                    placeholder="Choose a verified firm…"
+                    options={(firms.data ?? []).map((f) => ({
+                      value: f.id,
+                      label: `${f.name} · ${f.activeEngagements} active engagement${f.activeEngagements === 1 ? '' : 's'}`,
+                    }))}
+                  />
+                </div>
               )}
               {incoming.kind === 'SELF' && !fromMandateId && (
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -264,19 +249,26 @@ export function ChangeManagerView() {
 
             <div>
               <p className="text-sm font-medium text-foreground">When</p>
-              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input type="radio" checked={when === 'DATE'} onChange={() => setWhen('DATE')} />
-                  On a date
-                </label>
-                <label className="flex cursor-pointer items-center gap-2">
-                  <input type="radio" checked={when === 'ASAP'} onChange={() => setWhen('ASAP')} />
-                  Straight away
-                </label>
+              <div className="mt-2">
+                <RadioGroup
+                  orientation="horizontal"
+                  aria-label="When"
+                  value={when}
+                  onValueChange={(value) => setWhen(value)}
+                  options={[
+                    { value: 'DATE', label: 'On a date' },
+                    { value: 'ASAP', label: 'Straight away' },
+                  ]}
+                />
               </div>
               {when === 'DATE' && (
                 <div className="mt-2 max-w-xs">
-                  <DatePicker value={date} onChange={setDate} min={lagosToday()} />
+                  <DatePicker
+                    value={date}
+                    onChange={setDate}
+                    min={lagosToday()}
+                    ariaLabel="Change date"
+                  />
                 </div>
               )}
               {early && (
@@ -290,48 +282,34 @@ export function ChangeManagerView() {
               )}
             </div>
 
-            <div>
-              <label htmlFor="cm-reason" className="block text-sm font-medium text-foreground">
-                Reason (optional)
-              </label>
-              <Textarea
-                id="cm-reason"
-                rows={2}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="mt-1"
-              />
-            </div>
+            <Field label="Reason" optionalLabel="(optional)">
+              <Textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
+            </Field>
 
             {p.openItems.length > 0 && (
-              <div className="rounded-lg border border-warning/40 bg-warning-subtle p-3 text-sm">
-                <p className="flex items-center gap-2 font-medium text-foreground">
-                  <TriangleAlert className="h-4 w-4 text-warning" aria-hidden /> Open on this
-                  property
-                </p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+              <Alert variant="warning" icon={TriangleAlert} title="Open on this property">
+                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
                   {p.openItems.map((i) => (
                     <li key={`${i.kind}-${i.id}`}>{i.label}</li>
                   ))}
                 </ul>
-                <label className="mt-3 flex cursor-pointer items-start gap-2 text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={acknowledge}
-                    onChange={(e) => setAcknowledge(e.target.checked)}
-                    className="mt-1"
-                  />
-                  I&apos;ve seen these. They carry over and are settled with the handover.
-                </label>
-              </div>
+                <Checkbox
+                  className="mt-3"
+                  checked={acknowledge}
+                  onCheckedChange={setAcknowledge}
+                  label="I’ve seen these. They carry over and are settled with the handover."
+                />
+              </Alert>
             )}
 
             <Button
               variant="primary"
-              disabled={blocked || submit.isPending}
+              disabled={blocked}
+              isLoading={submit.isPending}
+              loadingText="Scheduling…"
               onClick={() => submit.mutate()}
             >
-              {submit.isPending ? 'Scheduling…' : 'Schedule change of manager'}
+              Schedule change of manager
             </Button>
             <p className="text-xs text-muted-foreground">
               You&apos;ll be asked to confirm it&apos;s you.
@@ -339,23 +317,23 @@ export function ChangeManagerView() {
           </>
         )}
 
-        {message && (
-          <p
-            role="status"
-            className={`flex items-center gap-2 text-sm ${message.ok ? 'text-success' : 'text-destructive'}`}
-          >
-            {message.ok && <CheckCircle2 className="h-4 w-4" aria-hidden />}
-            {message.text}
-          </p>
-        )}
+        {message && <Alert variant={message.ok ? 'success' : 'danger'}>{message.text}</Alert>}
       </Card>
 
       <Card className="p-5">
         <h2 className="flex items-center gap-2 font-semibold text-foreground">
           <CalendarClock className="h-5 w-5 text-primary" aria-hidden /> Changes of manager
         </h2>
-        {!transfers.data?.length ? (
-          <p className="mt-2 text-sm text-muted-foreground">None yet.</p>
+        {transfers.isLoading ? (
+          <ListSkeleton rows={2} className="mt-3" />
+        ) : !transfers.data?.length ? (
+          <EmptyState
+            icon={ArrowRightLeft}
+            title="None yet."
+            size="compact"
+            bare
+            className="mt-2"
+          />
         ) : (
           <ul className="mt-3 space-y-3">
             {transfers.data.map((t) => (
@@ -377,7 +355,7 @@ export function ChangeManagerView() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={STATUS[t.status].variant}>{STATUS[t.status].label}</Badge>
                     {t.status !== 'OPEN' && t.status !== 'CANCELLED' && (
                       <Link
@@ -391,7 +369,9 @@ export function ChangeManagerView() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        disabled={cancel.isPending}
+                        disabled={cancel.isPending && cancel.variables !== t.id}
+                        isLoading={cancel.isPending && cancel.variables === t.id}
+                        aria-label={`Call off the change for ${t.propertyName}`}
                         onClick={() => cancel.mutate(t.id)}
                       >
                         Call off

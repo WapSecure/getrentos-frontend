@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { BadgeCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, EmptyState } from '@getrentos/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 
 interface ProFeatureGateProps {
@@ -55,20 +55,19 @@ export function ProFeatureGate({
   if (!isPro) {
     const href = upgradeHref ?? sectionBillingHref(pathname);
     return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-12 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-primary">
-          <BadgeCheck className="h-6 w-6" />
-        </div>
-        <h2 className="mt-4 text-lg font-semibold text-foreground">{title}</h2>
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
-        <Button
-          variant="primary"
-          className="mt-6"
-          href={href ?? 'mailto:hello@getrentos.com?subject=Upgrade%20to%20Pro'}
-        >
-          {href ? 'Upgrade to Pro' : 'Contact us to upgrade'}
-        </Button>
-      </div>
+      <EmptyState
+        icon={BadgeCheck}
+        title={title}
+        description={description}
+        action={
+          <Button
+            variant="primary"
+            href={href ?? 'mailto:hello@getrentos.com?subject=Upgrade%20to%20Pro'}
+          >
+            {href ? 'Upgrade to Pro' : 'Contact us to upgrade'}
+          </Button>
+        }
+      />
     );
   }
 

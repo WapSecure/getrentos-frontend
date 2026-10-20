@@ -9,7 +9,7 @@ import { AdminQuickActions } from '@/components/admin/dashboard/AdminQuickAction
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { PageErrorState } from '@getrentos/ui';
+import { PageErrorState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
 import { useAdminUser } from '../layout';
 
 // recharts is heavy: load it only when this dashboard mounts.
@@ -18,7 +18,7 @@ const PlatformGrowthChart = dynamic(
     import('@/components/admin/dashboard/PlatformGrowthChart').then((m) => m.PlatformGrowthChart),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 w-full rounded-xl" />,
   }
 );
 
@@ -40,14 +40,10 @@ export default function AdminDashboardPage() {
       <AdminDashboardHeader greeting={greeting} firstName={firstName} />
 
       {statsQuery.isLoading ? (
-        <div
-          className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-3 xl:grid-cols-6"
-          aria-label="Loading platform statistics"
-        >
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="h-32 animate-pulse rounded-xl bg-secondary/50" />
-          ))}
-        </div>
+        <StatGridSkeleton
+          count={6}
+          className="mb-8 grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6"
+        />
       ) : statsQuery.isError || !statsQuery.data ? (
         <PageErrorState
           title="Platform statistics unavailable"

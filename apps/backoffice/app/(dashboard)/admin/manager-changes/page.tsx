@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRightLeft } from 'lucide-react';
 import {
@@ -8,9 +7,9 @@ import {
   Button,
   Card,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -40,7 +39,7 @@ export default function ManagerChangesPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canOperate = hasAdminPermission(user?.roles, 'managed.operate');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const list = useQuery({
     queryKey: ['admin', 'management-transfers'],
@@ -51,12 +50,10 @@ export default function ManagerChangesPage() {
     onSuccess: (t) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'management-transfers'] });
       const failed = t.switchLog.filter((l) => !l.ok).length;
-      setToast({
-        message: failed ? `Switched with ${failed} step(s) to finish by hand.` : 'Switched.',
-        variant: failed ? 'error' : 'success',
-      });
+      if (failed) toast.error(`Switched with ${failed} step(s) to finish by hand.`);
+      else toast.success('Switched.');
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Did not switch.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Did not switch.'),
   });
 
   return (
@@ -73,14 +70,14 @@ export default function ManagerChangesPage() {
         </p>
       </div>
 
-      {list.isError ? (
+      {list.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : list.isError && !list.data ? (
         <PageErrorState
           title="Could not load manager changes"
           description={(list.error as Error).message}
           onRetry={() => list.refetch()}
         />
-      ) : list.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : !list.data?.length ? (
         <EmptyState
           icon={ArrowRightLeft}
@@ -114,13 +111,14 @@ export default function ManagerChangesPage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={STATUS[t.status].variant}>{STATUS[t.status].label}</Badge>
                     {canOperate && due && (
                       <Button
                         size="sm"
                         variant="primary"
                         disabled={switchNow.isPending}
+                        isLoading={switchNow.isPending && switchNow.variables === t.id}
                         onClick={() => switchNow.mutate(t.id)}
                       >
                         Switch now
@@ -147,10 +145,6 @@ export default function ManagerChangesPage() {
             );
           })}
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

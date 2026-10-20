@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@getrentos/ui';
+import { Alert, Badge, Button } from '@getrentos/ui';
 import { CheckCircle2, Circle, Clock3, FileCheck2, PackageCheck, XCircle } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandMilestone, LandMilestoneStatus } from '@/types/landDeveloper';
@@ -87,9 +87,9 @@ export const MilestoneList = ({
                   </p>
                 )}
                 {milestone.status === 'DISPUTED' && milestone.disputeReason && (
-                  <p className="mt-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-foreground">
-                    <span className="font-medium">Buyer disputed:</span> {milestone.disputeReason}
-                  </p>
+                  <Alert variant="danger" title="Buyer disputed:" className="mt-2">
+                    {milestone.disputeReason}
+                  </Alert>
                 )}
                 {canDeliverNow && !allowed && reason && (
                   <p className="mt-2 text-xs text-muted-foreground">{reason}</p>

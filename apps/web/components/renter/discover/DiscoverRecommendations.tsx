@@ -41,7 +41,7 @@ export const DiscoverRecommendations = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="flex items-start gap-3 p-3 rounded-lg border border-primary/20 bg-white/50 dark:bg-white/5"
+              className="flex items-start gap-3 p-3 rounded-lg border border-primary/20 bg-card"
             >
               <div className="flex-1 min-w-0">
                 <Link href={buildRoute.renterPropertyDetail(rec.id)}>

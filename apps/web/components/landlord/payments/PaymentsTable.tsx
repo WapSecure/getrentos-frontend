@@ -1,6 +1,7 @@
 'use client';
 
-import { Badge } from '@getrentos/ui';
+import { Receipt } from 'lucide-react';
+import { Badge, Button, EmptyState } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
 import type { RentPayment } from '@/types/landlord';
@@ -12,11 +13,7 @@ interface PaymentsTableProps {
 
 export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) => {
   if (payments.length === 0) {
-    return (
-      <div className="bg-card rounded-2xl border border-border p-12 text-center">
-        <p className="text-muted-foreground">No payments found</p>
-      </div>
-    );
+    return <EmptyState icon={Receipt} title="No payments found" />;
   }
 
   return (
@@ -69,12 +66,15 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                     </Badge>
                   </td>
                   <td className="px-4 py-3">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="text-primary"
                       onClick={() => onViewDetails(payment)}
-                      className="text-xs font-medium text-primary hover:text-primary-hover whitespace-nowrap"
+                      aria-label={`View details for ${payment.tenantName}`}
                     >
                       View Details
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               );

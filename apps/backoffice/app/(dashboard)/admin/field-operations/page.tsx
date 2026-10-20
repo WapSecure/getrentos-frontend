@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MapPin, Navigation } from 'lucide-react';
 import {
+  Alert,
   Badge,
   type BadgeVariant,
   Button,
@@ -12,6 +13,7 @@ import {
   EmptyState,
   Field,
   Input,
+  ListSkeleton,
   PageErrorState,
   Select,
   Tabs,
@@ -254,7 +256,7 @@ const VisitCard = ({
         </div>
       )}
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
     </Card>
   );
 };
@@ -341,7 +343,7 @@ const BookInspection = ({ staffOptions }: { staffOptions: { value: string; label
       >
         Book visit
       </Button>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
     </Card>
   );
 };
@@ -435,7 +437,7 @@ const AgentRow = ({ agent, canOperate }: { agent: FieldAgent; canOperate: boolea
           </div>
         </>
       )}
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
     </Card>
   );
 };
@@ -487,20 +489,18 @@ const FieldTeam = ({
               ariaLabel="Add to field team"
               value={adding}
               onValueChange={setAdding}
-              options={[
-                { value: '', label: 'Add a staff member…' },
-                ...staffOptions.filter((o) => !onTeam.has(o.value)),
-              ]}
+              placeholder="Add a staff member…"
+              options={staffOptions.filter((o) => !onTeam.has(o.value))}
             />
           </div>
           <Button isLoading={add.isPending} disabled={!adding} onClick={() => add.mutate()}>
             Add to field team
           </Button>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
         </Card>
       )}
       {agents.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <ListSkeleton />
       ) : (agents.data ?? []).length === 0 ? (
         <EmptyState
           icon={Navigation}
@@ -543,6 +543,7 @@ export default function FieldOperationsPage() {
           : adminFieldService.visits(tab as 'open' | 'overdue' | 'done')
       ),
     enabled: tab !== 'team',
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -573,14 +574,14 @@ export default function FieldOperationsPage() {
       ) : (
         <>
           {tab === 'open' && canOperate && <BookInspection staffOptions={staffOptions} />}
-          {visits.isError ? (
+          {visits.isLoading ? (
+            <ListSkeleton variant="cards" />
+          ) : visits.isError && !visits.data ? (
             <PageErrorState
               title="Could not load visits"
               description={(visits.error as Error).message}
               onRetry={() => void visits.refetch()}
             />
-          ) : visits.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
           ) : (visits.data ?? []).length === 0 ? (
             <EmptyState
               icon={MapPin}

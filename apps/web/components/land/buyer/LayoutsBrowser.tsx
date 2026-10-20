@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
-import { Badge, Input, Pagination, Select } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Alert, Badge, Input, Pagination, Select, Skeleton } from '@getrentos/ui';
 import { BadgeCheck, LayoutGrid, MapPin, Search } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -54,6 +54,7 @@ export const LayoutsBrowser = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: landLayoutKeys.list(params),
     queryFn: () => unwrap(landLayoutService.list(params)),
+    placeholderData: keepPreviousData,
   });
   const layouts = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -107,17 +108,14 @@ export const LayoutsBrowser = () => {
           : `${total} ${total === 1 ? 'estate' : 'estates'} selling plots`}
       </p>
 
-      {isError ? (
-        <div
-          role="alert"
-          className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive"
-        >
+      {isError && !data ? (
+        <Alert variant="danger">
           {error instanceof Error ? error.message : 'Unable to load estates.'}
-        </div>
+        </Alert>
       ) : isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="h-56 animate-pulse rounded-2xl bg-secondary" />
+            <Skeleton key={i} className="h-56 rounded-2xl" />
           ))}
         </div>
       ) : layouts.length === 0 ? (

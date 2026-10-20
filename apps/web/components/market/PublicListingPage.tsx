@@ -1,3 +1,4 @@
+import { Badge } from '@getrentos/ui';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
@@ -106,10 +107,9 @@ export async function PublicListingPage({
             <header className="space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 {listing.verified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-                    <BadgeCheck className="h-3.5 w-3.5" />{' '}
+                  <Badge variant="success" icon={<BadgeCheck className="h-3.5 w-3.5" />}>
                     {market === 'land' ? 'Ownership verified' : 'Verified'}
-                  </span>
+                  </Badge>
                 )}
               </div>
               <div className="flex items-start justify-between gap-4">
@@ -252,7 +252,7 @@ export async function PublicListingPage({
                     ) : null}
                   </div>
                   {listing.host.verified && (
-                    <ShieldCheck className="h-5 w-5 text-emerald-600" aria-label="Verified" />
+                    <ShieldCheck className="h-5 w-5 text-success" aria-label="Verified" />
                   )}
                 </div>
               )}

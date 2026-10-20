@@ -1,13 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Field, IconButton, Input, Select } from '@getrentos/ui';
 import type { Vendor, VendorInput, BusinessRegistrationType } from '@/types/landlord';
 import { BUSINESS_TYPE_LABELS } from '@/services/agencyOnboardingService';
 
@@ -87,85 +83,59 @@ const VendorForm = ({
         exit={{ opacity: 0, scale: 0.9 }}
         className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
       >
-        <div className="p-4 border-b border-border flex justify-between items-center">
+        <div className="p-4 border-b border-border flex justify-between items-center gap-3">
           <h3 className="font-semibold text-foreground">{vendor ? 'Edit Vendor' : 'Add Vendor'}</h3>
-          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-            <X className="w-4 h-4" />
-          </button>
+          <IconButton label="Close" size="sm" icon={<X />} onClick={handleClose} />
         </div>
 
         <div className="p-4 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Vendor Name <span className="text-destructive">*</span>
-            </label>
-            <LegacyInput
+          <Field label="Vendor Name" required>
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. AquaFlow Plumbers"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Service Type</label>
-            <LegacySelect
+          </Field>
+          <Field label="Service Type">
+            <Select
               value={serviceType}
-              onChange={(e) => setServiceType(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {options.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </LegacySelect>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Phone <span className="text-destructive">*</span>
-            </label>
-            <LegacyInput
+              onValueChange={setServiceType}
+              options={options.map((type) => ({ value: type, label: type }))}
+            />
+          </Field>
+          <Field label="Phone" required>
+            <Input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+234 803 555 1122"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              CAC number <span className="text-muted-foreground font-normal">(optional)</span>
-            </label>
-            <LegacyInput
+          </Field>
+          <Field
+            label="CAC number"
+            optionalLabel="(optional)"
+            hint="For a registered business, so we can verify its payout account."
+          >
+            <Input
               type="text"
               value={registrationNumber}
               onChange={(e) => setRegistrationNumber(e.target.value)}
               placeholder="e.g. RC1234567"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              For a registered business, so we can verify its payout account.
-            </p>
-          </div>
+          </Field>
           {registrationNumber.trim() && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Registration type
-              </label>
-              <LegacySelect
+            <Field label="Registration type">
+              <Select
                 value={businessType}
-                onChange={(e) => setBusinessType(e.target.value as BusinessRegistrationType | '')}
-                className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Select a type…</option>
-                {(Object.keys(BUSINESS_TYPE_LABELS) as BusinessRegistrationType[]).map((t) => (
-                  <option key={t} value={t}>
-                    {BUSINESS_TYPE_LABELS[t]}
-                  </option>
-                ))}
-              </LegacySelect>
-            </div>
+                onValueChange={(value) => setBusinessType(value as BusinessRegistrationType | '')}
+                placeholder="Select a type…"
+                searchable={false}
+                options={(Object.keys(BUSINESS_TYPE_LABELS) as BusinessRegistrationType[]).map(
+                  (t) => ({ value: t, label: BUSINESS_TYPE_LABELS[t] })
+                )}
+              />
+            </Field>
           )}
         </div>
 

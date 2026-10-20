@@ -1,6 +1,7 @@
 'use client';
 
 import { Trash2 } from 'lucide-react';
+import { IconButton } from '@getrentos/ui';
 import type { StaffMember } from '@/types/estate';
 
 interface StaffMemberRowProps {
@@ -22,12 +23,13 @@ export const StaffMemberRow = ({ member, onRemove }: StaffMemberRowProps) => {
           {member.email} · Gateman since {formatDate(member.addedAt)}
         </p>
       </div>
-      <button
+      <IconButton
+        label={`Remove ${member.name}`}
+        icon={<Trash2 />}
+        variant="danger"
+        size="sm"
         onClick={onRemove}
-        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 shrink-0"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
+      />
     </div>
   );
 };

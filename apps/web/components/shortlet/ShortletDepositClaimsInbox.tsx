@@ -69,6 +69,7 @@ export function ShortletDepositClaimsInbox({ role }: { role: 'host' | 'guest' })
                 <button
                   type="button"
                   className="w-full text-left"
+                  aria-expanded={expandedId === c.id}
                   onClick={() => setExpandedId(expandedId === c.id ? null : c.id)}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -96,15 +97,13 @@ export function ShortletDepositClaimsInbox({ role }: { role: 'host' | 'guest' })
                     (resolved && c.refundedAmount != null) ? (
                       <div className="flex flex-wrap items-center gap-2">
                         {c.status !== 'REJECTED' && c.deductedAmount != null && (
-                          <Badge variant="danger">
-                            <ShieldAlert className="mr-1 h-3 w-3" /> Withheld{' '}
-                            {formatCurrency(c.deductedAmount)}
+                          <Badge variant="danger" icon={<ShieldAlert className="h-3 w-3" />}>
+                            Withheld {formatCurrency(c.deductedAmount)}
                           </Badge>
                         )}
                         {c.refundedAmount != null && (
-                          <Badge variant="success">
-                            <RotateCcw className="mr-1 h-3 w-3" /> Refunded{' '}
-                            {formatCurrency(c.refundedAmount)}
+                          <Badge variant="success" icon={<RotateCcw className="h-3 w-3" />}>
+                            Refunded {formatCurrency(c.refundedAmount)}
                           </Badge>
                         )}
                         {c.resolvedAt && (

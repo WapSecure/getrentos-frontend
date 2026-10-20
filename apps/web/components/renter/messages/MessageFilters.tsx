@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { Select } from '@getrentos/ui';
+import { Card, Field, Select } from '@getrentos/ui';
 
 interface FilterState {
   type: string;
@@ -35,29 +35,30 @@ export const MessageFilters = ({
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <button
+        type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors"
+        className="w-full p-3 flex items-center justify-between gap-2 hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Filter className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-foreground">Filters</span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {unreadCount} unread / {totalCount} total
           </span>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         )}
       </button>
 
       {isExpanded && (
-        <div className="p-3 pt-0 grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">Message Type</label>
+        <div className="p-3 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Message Type">
             <Select
               value={filters.type}
               onValueChange={(value) => handleFilterChange('type', value)}
@@ -68,9 +69,8 @@ export const MessageFilters = ({
                 { value: 'sent', label: 'Sent by Me' },
               ]}
             />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">Sort By</label>
+          </Field>
+          <Field label="Sort By">
             <Select
               value={filters.sortBy}
               onValueChange={(value) => handleFilterChange('sortBy', value)}
@@ -81,9 +81,9 @@ export const MessageFilters = ({
                 { value: 'property', label: 'By Property' },
               ]}
             />
-          </div>
+          </Field>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

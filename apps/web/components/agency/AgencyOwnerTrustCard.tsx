@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, Loader2, ShieldCheck, Wallet } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, Wallet } from 'lucide-react';
+import { Badge, Card, Skeleton } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agencyTrustService, AGENCY_TRUST_ENTRY_LABELS } from '@/services/agencyTrustService';
@@ -27,13 +28,14 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
         <Wallet className="h-4 w-4 text-muted-foreground" />
         Client money held
       </h2>
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <Card className="rounded-2xl p-5">
         {isLoading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-            Loading the ledger…
+          <div role="status" aria-label="Loading the ledger" className="space-y-3">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-3 w-56" />
           </div>
-        ) : isError ? (
+        ) : isError && !data ? (
           <p className="text-sm text-muted-foreground">We couldn’t load this client’s ledger.</p>
         ) : !data || data.balance === null ? (
           <p className="text-sm text-muted-foreground">
@@ -47,24 +49,22 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(data.balance)}</p>
               </div>
               {data.inSync ? (
-                <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
-                  <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+                <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" aria-hidden />}>
                   Reconciled
-                </span>
+                </Badge>
               ) : (
-                <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+                <Badge
+                  variant="warning"
+                  icon={<AlertTriangle className="h-3.5 w-3.5" aria-hidden />}
+                >
                   Drift: ledger sums to {formatCurrency(data.reconciledBalance)}
-                </span>
+                </Badge>
               )}
             </div>
 
             {data.protection ? (
               <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                <ShieldCheck
-                  className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400"
-                  aria-hidden
-                />
+                <ShieldCheck className="h-3.5 w-3.5 text-success" aria-hidden />
                 Protected under {data.protection.schemeName}
                 {data.protection.coverageAmount != null
                   ? ` · up to ${formatCurrency(data.protection.coverageAmount)}`
@@ -73,7 +73,7 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
             ) : (
               <Link
                 href="/agency/protection"
-                className="mt-3 inline-flex items-center gap-1.5 text-xs text-amber-700 hover:underline dark:text-amber-400"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs text-warning hover:underline"
               >
                 <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
                 No client-money protection on record. Add one
@@ -81,7 +81,7 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
             )}
 
             {data.entries.length > 0 && (
-              <div className="mt-4 overflow-hidden rounded-xl border border-border">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-xs text-muted-foreground">
@@ -108,9 +108,7 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
                         </td>
                         <td
                           className={`px-3 py-2 text-right font-medium ${
-                            e.amount >= 0
-                              ? 'text-emerald-700 dark:text-emerald-400'
-                              : 'text-foreground'
+                            e.amount >= 0 ? 'text-success' : 'text-foreground'
                           }`}
                         >
                           {e.amount >= 0 ? '+' : '−'}
@@ -127,7 +125,7 @@ export function AgencyOwnerTrustCard({ ownerId }: { ownerId: string }) {
             )}
           </>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -1,13 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Mail, CheckCircle } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { useState } from 'react';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -15,7 +14,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export const RenterRoommates = () => {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: roommates = [] } = useQuery({
     queryKey: renterKeys.roommates,
@@ -23,7 +21,7 @@ export const RenterRoommates = () => {
   });
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const totalShare = roommates.reduce((sum, r) => sum + r.sharePercentage, 0);
 
@@ -32,18 +30,18 @@ export const RenterRoommates = () => {
     onSuccess: (res) => {
       if (res.success && res.data) {
         queryClient.invalidateQueries({ queryKey: renterKeys.roommates });
-        setToast({ message: `Invite sent to ${inviteEmail}`, variant: 'success' });
+        toast.success(`Invite sent to ${inviteEmail}`);
         setInviteEmail('');
         setShowInvite(false);
       } else {
-        setToast({ message: res.message || 'Failed to send invite', variant: 'error' });
+        toast.error(res.message || 'Failed to send invite');
       }
     },
   });
 
   const handleSendInvite = () => {
     if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
-      setToast({ message: 'Enter a valid email address', variant: 'error' });
+      toast.error('Enter a valid email address');
       return;
     }
     inviteMutation.mutate(inviteEmail);
@@ -53,9 +51,6 @@ export const RenterRoommates = () => {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -63,7 +58,7 @@ export const RenterRoommates = () => {
         className="bg-card rounded-xl border border-border overflow-hidden"
       >
         <div className="p-4 border-b border-border">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-3">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Roommates</h2>
               <p className="text-sm text-muted-foreground">Manage shared living arrangements</p>
@@ -76,22 +71,29 @@ export const RenterRoommates = () => {
         </div>
 
         {showInvite && (
-          <div className="p-4 border-b border-border bg-gray-50 dark:bg-white/5">
-            <div className="flex gap-2">
-              <LegacyInput
-                type="email"
-                placeholder="Enter roommate's email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Button size="sm" onClick={handleSendInvite}>
+          <div className="p-4 border-b border-border bg-secondary/60">
+            <div className="flex items-end gap-2">
+              <Field
+                label="Roommate's email"
+                hint="They'll need to accept to join your household"
+                className="min-w-0 flex-1"
+              >
+                <Input
+                  type="email"
+                  placeholder="Enter roommate's email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </Field>
+              <Button
+                size="sm"
+                onClick={handleSendInvite}
+                isLoading={inviteMutation.isPending}
+                className="mb-6"
+              >
                 Send Invite
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              They&apos;ll need to accept to join your household
-            </p>
           </div>
         )}
 
@@ -102,9 +104,9 @@ export const RenterRoommates = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 + index * 0.05, duration: 0.3 }}
-              className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-white/5"
+              className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg bg-secondary/60"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
                   {roommate.name.charAt(0)}
                 </div>
@@ -121,7 +123,7 @@ export const RenterRoommates = () => {
                   {roommate.sharePercentage}% share
                 </p>
                 <div className="flex items-center gap-1 mt-1">
-                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  <CheckCircle className="w-3 h-3 text-success" />
                   <span className="text-xs text-muted-foreground">Verified</span>
                 </div>
               </div>
@@ -134,7 +136,7 @@ export const RenterRoommates = () => {
               <span className="text-sm font-medium text-foreground">Rent Split</span>
               <span className="text-sm font-medium text-foreground">{totalShare}% allocated</span>
             </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
               <div className="h-full bg-primary rounded-full" style={{ width: `${totalShare}%` }} />
             </div>
             <p className="text-xs text-muted-foreground mt-2">
@@ -147,7 +149,7 @@ export const RenterRoommates = () => {
             fullWidth
             size="sm"
             className="mt-2 gap-1"
-            onClick={() => router.push(ROUTES.RENTER_PAYMENTS)}
+            href={ROUTES.RENTER_PAYMENTS}
           >
             <span className="text-sm">₦</span>
             Split Payments

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, X } from 'lucide-react';
+import { Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { Property } from '@/types/renter';
 import { downloadCsv, escapeHtml, printHtml } from '@/lib/export';
 
@@ -77,81 +77,62 @@ export const ExportSavedProperties = ({
     finishExport();
   };
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Export Saved Properties</h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {properties.length} properties on this page to export
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close export dialog"
-                className="p-1 rounded-lg hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-3">
-              <button
-                type="button"
-                onClick={exportToCSV}
-                disabled={exporting !== null}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20">
-                    <FileSpreadsheet className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-foreground">Export as CSV</p>
-                    <p className="text-xs text-gray-500">Download as spreadsheet for analysis</p>
-                  </div>
-                </div>
-                {exporting === 'csv' ? (
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Download className="w-5 h-5 text-gray-400" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={openPrintView}
-                disabled={exporting !== null}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/20">
-                    <FileText className="w-5 h-5 text-red-600" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-foreground">Print or save as PDF</p>
-                    <p className="text-xs text-gray-500">Open the browser print dialog</p>
-                  </div>
-                </div>
-                {exporting === 'print' ? (
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Download className="w-5 h-5 text-gray-400" />
-                )}
-              </button>
-            </div>
-          </motion.div>
+  const option = (
+    kind: 'csv' | 'print',
+    onClick: () => void,
+    icon: React.ReactNode,
+    title: string,
+    description: string
+  ) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={exporting !== null}
+      aria-busy={exporting === kind}
+      className="w-full flex items-center justify-between gap-3 p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20"
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        {icon}
+        <div className="min-w-0 text-left">
+          <p className="font-medium text-foreground">{title}</p>
+          <p className="text-xs text-muted-foreground">{description}</p>
         </div>
-      )}
-    </AnimatePresence>
+      </div>
+      <Download className="w-5 h-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+    </button>
+  );
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogTitle className="pr-8 font-semibold text-foreground">
+          Export Saved Properties
+        </DialogTitle>
+        <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+          {properties.length} properties on this page to export
+        </DialogDescription>
+
+        <div className="mt-4 space-y-3">
+          {option(
+            'csv',
+            exportToCSV,
+            <div className="p-2 rounded-lg bg-success-subtle">
+              <FileSpreadsheet className="w-5 h-5 text-success" aria-hidden="true" />
+            </div>,
+            'Export as CSV',
+            'Download as spreadsheet for analysis'
+          )}
+          {option(
+            'print',
+            openPrintView,
+            <div className="p-2 rounded-lg bg-destructive-subtle">
+              <FileText className="w-5 h-5 text-destructive" aria-hidden="true" />
+            </div>,
+            'Print or save as PDF',
+            'Open the browser print dialog'
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

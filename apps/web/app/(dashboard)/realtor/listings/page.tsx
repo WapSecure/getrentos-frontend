@@ -1,21 +1,23 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Megaphone } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
 import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
 import {
   Button,
+  EmptyState,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
   Pagination,
-  Toast,
-  type ToastVariant,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
@@ -29,7 +31,7 @@ const PAGE_SIZE = 10;
 
 export default function RealtorListingsPage() {
   const searchParams = useSearchParams();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
@@ -58,6 +60,7 @@ export default function RealtorListingsPage() {
       );
       return { ...result, items: result.items.map(mapRealtorListing) };
     },
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = listingsQuery;
   const listings = data?.items ?? [];
@@ -81,10 +84,7 @@ export default function RealtorListingsPage() {
     onError: (error) => {
       // Verification/tier gates surface as an inline upsell inside the modal, not a toast.
       if (error instanceof VerificationRequiredError) return;
-      setToast({
-        message: error.message || 'Unable to create this listing. Please try again.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to create this listing. Please try again.');
     },
   });
 
@@ -122,51 +122,42 @@ export default function RealtorListingsPage() {
             {total} listing{total === 1 ? '' : 's'} across your clients
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={openCreateModal}>
-          <Plus className="w-4 h-4" />
+        <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
           Add Listing
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by title or client..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
-          {filterOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search by title or client..."
+          label="Search listings"
+          className="flex-1 max-w-sm"
+        />
+        <Tabs
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value as StatusFilter);
+            setPage(1);
+          }}
+        >
+          <TabsList className="max-w-full">
+            {filterOptions.map((option) => (
+              <TabsTrigger key={option.value} value={option.value}>
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : listingsQuery.isError ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading listings" />
+      ) : listingsQuery.isError && !data ? (
         <PageErrorState
           title="Listings are unavailable"
           description="We could not load the listings you manage. Please try again."
@@ -174,36 +165,33 @@ export default function RealtorListingsPage() {
           isRetrying={listingsQuery.isFetching}
         />
       ) : listings.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <Megaphone className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No listings match your filters' : 'No listings yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={Megaphone}
+          title={hasActiveFilters ? 'No listings match your filters' : 'No listings yet'}
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to all managed listings.'
-              : 'Add a listing on behalf of one of your clients to get started.'}
-          </p>
-          {!hasActiveFilters ? (
-            <Button variant="primary" className="mt-6" onClick={openCreateModal}>
-              Add your first listing
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => {
-                setSearchQuery('');
-                setFilter('all');
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
+              : 'Add a listing on behalf of one of your clients to get started.'
+          }
+          action={
+            !hasActiveFilters ? (
+              <Button variant="primary" onClick={openCreateModal}>
+                Add your first listing
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilter('all');
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {listings.map((listing) => (
@@ -239,10 +227,6 @@ export default function RealtorListingsPage() {
         listing={previewListing}
         onClose={() => setPreviewListing(null)}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ShieldPlus } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Alert, Button } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -136,7 +136,7 @@ export const CreateStaffModal = ({
               />
             </Field>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <Alert variant="danger">{error}</Alert>}
 
             <div className="flex gap-2 pt-2">
               <Button
@@ -147,8 +147,13 @@ export const CreateStaffModal = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1" isLoading={submitting}>
-                {submitting ? 'Creating…' : 'Create staff'}
+              <Button
+                type="submit"
+                className="flex-1"
+                isLoading={submitting}
+                loadingText="Creating…"
+              >
+                Create staff
               </Button>
             </div>
           </form>

@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -39,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) => {
-  const { data = [] } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: estateKeys.duesTrend(estateId),
     queryFn: () => unwrap(estateService.getDuesCollectedTrend(estateId)),
     enabled: !!estateId,
@@ -53,8 +54,8 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
   const change = previousMonth > 0 ? ((currentMonth - previousMonth) / previousMonth) * 100 : null;
 
   return (
-    <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
+    <Card className="p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div>
           <h3 className="font-semibold text-foreground">Dues Collection Trend</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -62,28 +63,21 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
           </p>
         </div>
         {change !== null && (
-          <div
-            className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-              change >= 0
-                ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-                : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
-            }`}
+          <Badge
+            variant={change >= 0 ? 'success' : 'danger'}
+            icon={<TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />}
           >
-            <TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />
             {change >= 0 ? '+' : ''}
             {change.toFixed(1)}%
-          </div>
+          </Badge>
         )}
       </div>
 
-      {!hasData ? (
+      {isLoading ? (
+        <Skeleton className="h-56 w-full" />
+      ) : !hasData ? (
         <div className="h-56 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No dues collected yet</p>
-          </div>
+          <EmptyState icon={TrendingUp} title="No dues collected yet" size="compact" bare />
         </div>
       ) : (
         <div className="h-56">
@@ -95,11 +89,7 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
                   <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                vertical={false}
-                stroke="currentColor"
-                className="text-gray-100 dark:text-white/5"
-              />
+              <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
               <XAxis
                 dataKey="month"
                 axisLine={false}
@@ -125,12 +115,12 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
                 stroke="var(--primary)"
                 strokeWidth={2}
                 fill="url(#duesFill)"
-                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
+                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'var(--card)', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

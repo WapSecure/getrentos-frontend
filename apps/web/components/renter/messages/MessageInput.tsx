@@ -1,12 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { Textarea } from '@getrentos/ui';
-
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Send, Paperclip } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, IconButton, Textarea } from '@getrentos/ui';
 import { MessageAttachments } from './MessageAttachments';
 
 interface Attachment {
@@ -96,13 +92,14 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={1}
-            className="w-full px-4 py-2.5 rounded-xl border border-border bg-gray-50 dark:bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+            aria-label="Message"
+            className="resize-none"
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
         </div>
 
         <div className="flex items-center gap-1">
-          <LegacyInput
+          <input
             ref={fileInputRef}
             type="file"
             multiple
@@ -110,18 +107,16 @@ export const MessageInput = ({ onSend }: MessageInputProps) => {
             className="hidden"
             accept="image/*,.pdf,.doc,.docx"
           />
-          <button
-            type="button"
+          <IconButton
+            label="Attach files"
+            icon={<Paperclip />}
             onClick={() => fileInputRef.current?.click()}
             disabled={isSending}
-            aria-label="Attach files"
-            className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <Paperclip className="w-4 h-4 text-gray-500" />
-          </button>
+          />
           <Button
             onClick={() => void handleSend()}
             disabled={isSending || (!message.trim() && files.length === 0)}
+            isLoading={isSending}
             aria-label={isSending ? 'Sending message' : 'Send message'}
             variant="primary"
             className="p-2.5 rounded-xl"

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, CircleDashed, Send } from 'lucide-react';
-import { Badge, Button, Input } from '@getrentos/ui';
+import { Alert, Badge, Button, Input } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landClosing';
 
@@ -69,11 +69,11 @@ export const PerfectionPanel = ({
       </div>
 
       {perfection.status === 'PERFECTED' && (
-        <p className="rounded-xl bg-success/10 p-3 text-foreground">
+        <Alert variant="success">
           Registered in your name
           {perfection.perfectedAt ? ` on ${formatDate(perfection.perfectedAt)}` : ''}:{' '}
           <span className="font-medium">{perfection.finalInstrumentReference}</span>
-        </p>
+        </Alert>
       )}
 
       <ul className="space-y-2">

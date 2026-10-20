@@ -1,16 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
   Button,
   DataTable,
   EmptyState,
-  Input,
   PageErrorState,
   Pagination,
+  SearchInput,
   Select,
   type Column,
 } from '@getrentos/ui';
@@ -74,6 +73,7 @@ export function EstateQueuePage<T>({ config }: { config: EstateQueueConfig<T> })
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.estates(config.resource, queryParams),
     queryFn: () => unwrap(config.listFn(queryParams)),
+    placeholderData: keepPreviousData,
   });
 
   const items = data?.items ?? [];
@@ -101,7 +101,7 @@ export function EstateQueuePage<T>({ config }: { config: EstateQueueConfig<T> })
     ];
   }, [config]);
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title={`Could not load ${config.eyebrow.toLowerCase()}`}
@@ -128,12 +128,11 @@ export function EstateQueuePage<T>({ config }: { config: EstateQueueConfig<T> })
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Input
+          <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onValueChange={setSearch}
             placeholder="Search…"
-            aria-label={`Search ${config.eyebrow.toLowerCase()}`}
-            leadingIcon={<Search className="h-4 w-4" aria-hidden="true" />}
+            label={`Search ${config.eyebrow.toLowerCase()}`}
             className="w-full sm:w-56"
           />
           {config.filters?.map((filter) => (

@@ -1,6 +1,7 @@
 'use client';
 
 import { FileText, Eye, ThumbsUp, ChevronRight } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 
 interface Article {
   id: string;
@@ -58,15 +59,12 @@ export const HelpArticles = ({ searchQuery, selectedCategory }: HelpArticlesProp
 
   if (filteredArticles.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-8 text-center">
-        <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-muted-foreground">No articles found</p>
-      </div>
+      <EmptyState icon={FileText} title="No articles found" size="compact" />
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Help Articles</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -77,11 +75,11 @@ export const HelpArticles = ({ searchQuery, selectedCategory }: HelpArticlesProp
       <div className="divide-y divide-border">
         {filteredArticles.map((article) => (
           <div key={article.id} className="p-4 hover:bg-secondary transition-colors cursor-pointer">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <h4 className="text-sm font-medium text-foreground">{article.title}</h4>
                 <p className="text-sm text-muted-foreground mt-0.5">{article.description}</p>
-                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Eye className="w-3 h-3" />
                     {article.views} views
@@ -93,11 +91,11 @@ export const HelpArticles = ({ searchQuery, selectedCategory }: HelpArticlesProp
                   <span>Updated {new Date(article.updatedAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

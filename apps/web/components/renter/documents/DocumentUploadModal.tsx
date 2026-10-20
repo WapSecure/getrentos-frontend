@@ -1,15 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { FilePreviewDialog } from '@getrentos/ui';
+import { Button, Field, FilePreviewDialog, IconButton, Input, Select } from '@getrentos/ui';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -147,15 +141,13 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     Upload a new document to your vault
                   </p>
                 </div>
-                <button
-                  type="button"
+                <IconButton
+                  label="Close upload dialog"
+                  size="sm"
+                  icon={<X />}
                   onClick={onClose}
                   disabled={isUploading}
-                  aria-label="Close upload dialog"
-                  className="p-1 rounded-lg hover:bg-gray-100"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                />
               </div>
 
               <div className="p-4 space-y-4">
@@ -172,36 +164,35 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     <div className="space-y-2">
                       <FileText className="w-8 h-8 text-primary mx-auto" />
                       <p className="text-sm font-medium text-foreground">{file.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {(file.size / (1024 * 1024)).toFixed(2)} MB
                       </p>
-                      <div className="flex items-center justify-center gap-3">
-                        <button
-                          onClick={handlePreview}
-                          className="text-xs text-primary hover:text-primary-hover"
-                        >
+                      <div className="flex items-center justify-center gap-2">
+                        <Button variant="ghost" size="xs" onClick={handlePreview}>
                           Preview
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="xs"
                           onClick={() => setFile(null)}
-                          className="text-xs text-red-500 hover:text-red-600"
+                          className="text-destructive hover:bg-destructive-subtle"
                         >
                           Remove
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <Upload className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Drag and drop your file here</p>
-                      <p className="text-xs text-gray-500 mt-1">or</p>
+                      <p className="mt-1 text-xs text-muted-foreground">or</p>
                       <label className="cursor-pointer">
                         <span className="text-sm text-primary hover:text-primary-hover">
                           Browse files
                         </span>
-                        <LegacyInput type="file" onChange={handleFileSelect} className="hidden" />
+                        <input type="file" onChange={handleFileSelect} className="sr-only" />
                       </label>
-                      <p className="text-xs text-gray-400 mt-2">PDF, DOC, JPG, PNG up to 10MB</p>
+                      <p className="mt-2 text-xs text-muted-foreground">PDF, DOC, JPG, PNG up to 10MB</p>
                     </>
                   )}
                 </div>
@@ -216,7 +207,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                     />
                   </Field>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <Field label="Document Type">
                       <Select value={type} onValueChange={setType} options={documentTypes} />
                     </Field>
@@ -246,10 +237,10 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                 {isUploading && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Uploading...</span>
-                      <span className="text-gray-600">{progress}%</span>
+                      <span className="text-muted-foreground">Uploading...</span>
+                      <span className="text-muted-foreground">{progress}%</span>
                     </div>
-                    <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-2 overflow-hidden rounded-full bg-secondary">
                       <div
                         className="h-full bg-primary rounded-full transition-all duration-200"
                         style={{ width: `${progress}%` }}
@@ -264,9 +255,10 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
                   onClick={handleSubmit}
                   disabled={!file || isUploading}
                   isLoading={isUploading}
+                  loadingText="Uploading..."
+                  icon={<Upload className="h-4 w-4" />}
                 >
-                  <Upload className="w-4 h-4" />
-                  {isUploading ? 'Uploading...' : 'Upload Document'}
+                  Upload Document
                 </Button>
               </div>
             </motion.div>

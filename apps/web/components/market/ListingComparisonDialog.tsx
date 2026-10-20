@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { BadgeCheck, Check, Minus, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogDescription, DialogTitle, IconButton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { PublicListingCard, PublicMarket } from '@/services/publicMarketService';
 
@@ -80,14 +80,12 @@ export function ListingComparisonDialog({
                       <span className="line-clamp-2 font-semibold text-foreground">
                         {listing.title}
                       </span>
-                      <button
-                        type="button"
+                      <IconButton
+                        label={`Remove ${listing.title} from comparison`}
+                        size="sm"
+                        icon={<X />}
                         onClick={() => onRemove(listing.id)}
-                        aria-label={`Remove ${listing.title} from comparison`}
-                        className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                      />
                     </div>
                   </th>
                 ))}

@@ -17,8 +17,8 @@ const statusConfig: Record<
 };
 
 const priorityConfig: Record<Dispute['priority'], string> = {
-  high: 'text-red-600 dark:text-red-400',
-  medium: 'text-yellow-600 dark:text-yellow-400',
+  high: 'text-destructive',
+  medium: 'text-warning',
   low: 'text-muted-foreground',
 };
 

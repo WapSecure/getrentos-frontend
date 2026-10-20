@@ -11,6 +11,7 @@ import {
   TooltipProps,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { Badge, Skeleton } from '@getrentos/ui';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/format';
 import { ownerService } from '@/services/ownerService';
@@ -35,7 +36,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export const OwnerPortfolioChart = () => {
-  const { data = [] } = useQuery({
+  const { data = [], isLoading } = useQuery({
     queryKey: ownerKeys.portfolioTrend,
     queryFn: () => unwrap(ownerService.getPortfolioTrend()),
   });
@@ -49,7 +50,7 @@ export const OwnerPortfolioChart = () => {
 
   return (
     <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div>
           <h3 className="font-semibold text-foreground">Portfolio Value Trend</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -57,21 +58,19 @@ export const OwnerPortfolioChart = () => {
           </p>
         </div>
         {change !== null && (
-          <div
-            className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-              change >= 0
-                ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-                : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
-            }`}
+          <Badge
+            variant={change >= 0 ? 'success' : 'danger'}
+            icon={<TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />}
           >
-            <TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />
             {change >= 0 ? '+' : ''}
             {change.toFixed(1)}%
-          </div>
+          </Badge>
         )}
       </div>
 
-      {!hasData ? (
+      {isLoading ? (
+        <Skeleton className="h-56 w-full rounded-xl" />
+      ) : !hasData ? (
         <div className="h-56 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
@@ -93,7 +92,7 @@ export const OwnerPortfolioChart = () => {
               <CartesianGrid
                 vertical={false}
                 stroke="currentColor"
-                className="text-gray-100 dark:text-white/5"
+                className="text-border"
               />
               <XAxis
                 dataKey="month"

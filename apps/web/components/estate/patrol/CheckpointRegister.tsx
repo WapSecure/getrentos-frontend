@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, KeyRound, MapPin, Plus, RotateCcw, ShieldOff, ShieldCheck } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -15,7 +16,7 @@ import {
   EmptyState,
   Field,
   Input,
-  Skeleton,
+  ListSkeleton,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -104,7 +105,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
   };
 
   if (checkpointsQuery.isLoading) {
-    return <Skeleton className="h-40 w-full rounded-2xl" />;
+    return <ListSkeleton variant="cards" rows={3} />;
   }
 
   const checkpoints = checkpointsQuery.data ?? [];
@@ -245,9 +246,7 @@ export const CheckpointRegister = ({ estateId }: { estateId: string }) => {
             </Field>
 
             {createMutation.error && (
-              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
-                {(createMutation.error as Error).message}
-              </p>
+              <Alert variant="danger">{(createMutation.error as Error).message}</Alert>
             )}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

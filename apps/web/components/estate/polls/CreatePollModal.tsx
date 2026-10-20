@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus, Trash2, X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, Field, IconButton, Input } from '@getrentos/ui';
 
 const MAX_OPTIONS = 10;
 
@@ -52,40 +52,40 @@ export const CreatePollModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">New Poll</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Question</label>
-                <LegacyInput
+              <Field label="Question">
+                <Input
                   type="text"
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   placeholder="e.g. Should we repaint the main gate?"
                 />
-              </div>
+              </Field>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Options</label>
+                <p className="block text-sm font-medium text-foreground mb-1">Options</p>
                 <div className="space-y-2">
                   {options.map((option, index) => (
                     <div key={index} className="flex items-center gap-2">
-                      <LegacyInput
+                      <Input
                         type="text"
+                        className="min-w-0 flex-1"
+                        aria-label={`Option ${index + 1}`}
                         value={option}
                         onChange={(e) => updateOption(index, e.target.value)}
                         placeholder={`Option ${index + 1}`}
                       />
                       {options.length > 2 && (
-                        <button
+                        <IconButton
+                          label={`Remove option ${index + 1}`}
+                          icon={<Trash2 />}
+                          variant="danger"
+                          size="sm"
                           onClick={() => removeOption(index)}
-                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        />
                       )}
                     </div>
                   ))}
@@ -111,10 +111,12 @@ export const CreatePollModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Creating…"
                 onClick={() => onSubmit({ question: question.trim(), options: trimmedOptions })}
               >
-                {isSubmitting ? 'Creating…' : 'Create Poll'}
+                Create Poll
               </Button>
             </div>
           </motion.div>

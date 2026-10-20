@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, Upload, Users } from 'lucide-react';
-import { Badge, Button, Card, Select, Toast, type ToastVariant } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, Field, Select, useToast } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -30,7 +30,7 @@ export function TenancyImportCard() {
   const [propertyId, setPropertyId] = useState('');
   const [csv, setCsv] = useState<{ name: string; text: string } | null>(null);
   const [preview, setPreview] = useState<TenancyImportResult | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const chosen = propertyId || properties[0]?.value || '';
 
   const call = async (dryRun: boolean) => {
@@ -45,21 +45,20 @@ export function TenancyImportCard() {
   const check = useMutation({
     mutationFn: () => call(true),
     onSuccess: setPreview,
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
   const commit = useMutation({
     mutationFn: () => call(false),
     onSuccess: (r) => {
       setPreview(null);
       setCsv(null);
-      setToast({
-        message: `Imported ${r.imported} tenanc${r.imported === 1 ? 'y' : 'ies'} into ${r.propertyTitle}${
+      toast.success(
+        `Imported ${r.imported} tenanc${r.imported === 1 ? 'y' : 'ies'} into ${r.propertyTitle}${
           r.schedulesStarted ? `; rent schedules started for ${r.schedulesStarted}` : ''
-        }.`,
-        variant: 'success',
-      });
+        }.`
+      );
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (loading || properties.length === 0) return null;
@@ -80,8 +79,7 @@ export function TenancyImportCard() {
             carry over as an opening balance, and rent is billed from the next due date.
           </p>
         </div>
-        <label className="block space-y-1.5">
-          <span className="text-sm font-medium text-foreground">Property</span>
+        <Field label="Property">
           <Select
             value={chosen}
             onValueChange={(v) => {
@@ -90,7 +88,7 @@ export function TenancyImportCard() {
             }}
             options={properties}
           />
-        </label>
+        </Field>
         <div className="flex flex-wrap items-center gap-3">
           <input
             ref={fileRef}
@@ -105,8 +103,12 @@ export function TenancyImportCard() {
               setPreview(null);
             }}
           />
-          <Button variant="secondary" onClick={() => fileRef.current?.click()}>
-            <Upload className="h-4 w-4" /> {csv ? 'Choose another file' : 'Choose CSV'}
+          <Button
+            variant="secondary"
+            onClick={() => fileRef.current?.click()}
+            icon={<Upload className="h-4 w-4" />}
+          >
+            {csv ? 'Choose another file' : 'Choose CSV'}
           </Button>
           {csv && <span className="text-sm text-foreground">{csv.name}</span>}
           <a
@@ -122,15 +124,20 @@ export function TenancyImportCard() {
           matches), tenant_phone, rent_amount, rent_period (ANNUAL or MONTHLY), lease_start,
           lease_end (YYYY-MM-DD), deposit_amount, arrears_amount and next_due_date (all optional).
         </p>
-        <Button onClick={() => check.mutate()} disabled={!csv || !chosen || check.isPending}>
-          {check.isPending ? 'Checking…' : 'Check file'}
+        <Button
+          onClick={() => check.mutate()}
+          disabled={!csv || !chosen}
+          isLoading={check.isPending}
+          loadingText="Checking…"
+        >
+          Check file
         </Button>
       </Card>
 
       {preview && (
         <Card className="mt-6 p-5">
           {preview.fileError ? (
-            <p className="text-sm text-destructive">{preview.fileError}</p>
+            <Alert variant="danger">{preview.fileError}</Alert>
           ) : (
             <>
               <div className="flex flex-wrap items-center gap-2">
@@ -197,19 +204,15 @@ export function TenancyImportCard() {
               <Button
                 className="mt-4"
                 onClick={() => commit.mutate()}
-                disabled={!canCommit || commit.isPending}
+                disabled={!canCommit}
+                isLoading={commit.isPending}
+                loadingText="Importing…"
               >
-                {commit.isPending
-                  ? 'Importing…'
-                  : `Import ${preview.toImport.length} tenanc${preview.toImport.length === 1 ? 'y' : 'ies'}`}
+                {`Import ${preview.toImport.length} tenanc${preview.toImport.length === 1 ? 'y' : 'ies'}`}
               </Button>
             </>
           )}
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

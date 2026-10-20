@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Gavel } from 'lucide-react';
-import { EmptyState, PageErrorState } from '@getrentos/ui';
+import { CardSkeleton, EmptyState, PageErrorState } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { AppealCard } from '@/components/admin/trust/AppealCard';
 import { AppealResolveModal } from '@/components/admin/trust/AppealResolveModal';
@@ -34,17 +34,19 @@ export default function TrustAppealsPage() {
         </p>
       </div>
 
-      {isError ? (
+      {isLoading ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardSkeleton key={index} lines={4} />
+          ))}
+        </div>
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load appeals"
           description="The trust appeal queue is temporarily unavailable."
           onRetry={() => void refetch()}
           isRetrying={isFetching}
         />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
       ) : appeals.length === 0 ? (
         <EmptyState icon={Gavel} title="No appeals waiting" />
       ) : (

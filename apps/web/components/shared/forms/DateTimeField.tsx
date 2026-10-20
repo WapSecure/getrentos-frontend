@@ -88,7 +88,7 @@ export const DateTimeField = ({
         />
       </div>
       {inPast && (
-        <p role="alert" className="mt-1 text-xs text-red-500">
+        <p role="alert" className="mt-1 text-xs text-destructive">
           That time has already passed. Pick a time in the future.
         </p>
       )}

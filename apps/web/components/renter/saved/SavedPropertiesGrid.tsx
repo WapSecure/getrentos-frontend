@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ArrowUpDown } from 'lucide-react';
 import { SavedPropertyCard } from './SavedPropertyCard';
-import { Button } from '@getrentos/ui';
+import { Button, EmptyState } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { type SavedListingItem, type Wishlist } from '@/services/renterService';
 
@@ -38,36 +38,29 @@ export const SavedPropertiesGrid = ({
 }: SavedPropertiesGridProps) => {
   if (properties.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center py-12 bg-card rounded-xl border border-border"
-      >
-        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-          <Heart className="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium text-foreground">
-          {isFiltered ? 'No matching properties' : 'No saved properties yet'}
-        </h3>
-        <p className="text-muted-foreground mt-1">Start exploring and save properties you love</p>
-        {!isFiltered && (
-          <Button href={ROUTES.RENTER_DISCOVER} variant="primary" className="mt-4">
-            Discover Properties
-          </Button>
-        )}
-        {isFiltered && (
-          <p className="text-muted-foreground mt-1">
-            Try changing your filters to see more properties
-          </p>
-        )}
-      </motion.div>
+      <EmptyState
+        icon={Heart}
+        title={isFiltered ? 'No matching properties' : 'No saved properties yet'}
+        description={
+          isFiltered
+            ? 'Start exploring and save properties you love. Try changing your filters to see more properties.'
+            : 'Start exploring and save properties you love'
+        }
+        action={
+          !isFiltered && (
+            <Button href={ROUTES.RENTER_DISCOVER} variant="primary">
+              Discover Properties
+            </Button>
+          )
+        }
+      />
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <span>
             Showing {properties.length} of {total} saved properties
           </span>

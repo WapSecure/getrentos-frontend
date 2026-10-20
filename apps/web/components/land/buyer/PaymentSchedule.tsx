@@ -1,3 +1,4 @@
+import { Alert } from '@getrentos/ui';
 import { AlertTriangle } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { LandInstallment } from '@/types/landBuyer';
@@ -41,14 +42,10 @@ export const PaymentSchedule = ({
       </div>
 
       {summary.overdueCount > 0 && (
-        <p
-          className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
-          role="alert"
-        >
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+        <Alert variant="danger" icon={AlertTriangle}>
           {summary.overdueCount} installment{summary.overdueCount === 1 ? ' is' : 's are'} overdue:{' '}
           {formatCurrency(summary.overdueAmount)} including late fees. Pay now to avoid default.
-        </p>
+        </Alert>
       )}
 
       <div className="overflow-x-auto rounded-xl border border-border">

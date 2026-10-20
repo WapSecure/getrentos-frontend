@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceAnalyticsProps {
@@ -43,44 +44,38 @@ export const MaintenanceAnalytics = ({ requests }: MaintenanceAnalyticsProps) =>
 
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-green-500" />
-              <span className="text-xs text-gray-500">Resolution Rate</span>
+              <CheckCircle className="w-3 h-3 text-success" />
+              <span className="text-xs text-muted-foreground">Resolution Rate</span>
             </div>
             <p className="text-lg font-bold text-foreground">{resolutionRate}%</p>
           </div>
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3 text-blue-500" />
-              <span className="text-xs text-gray-500">Avg Response</span>
+              <Clock className="w-3 h-3 text-info" />
+              <span className="text-xs text-muted-foreground">Avg Response</span>
             </div>
             <p className="text-lg font-bold text-foreground">{avgResponseTime}h</p>
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+        <div className="p-3 rounded-lg bg-secondary">
           <div className="flex items-center gap-1">
-            <AlertCircle className="w-3 h-3 text-red-500" />
-            <span className="text-xs text-gray-500">Urgent Requests</span>
+            <AlertCircle className="w-3 h-3 text-destructive" />
+            <span className="text-xs text-muted-foreground">Urgent Requests</span>
           </div>
-          <p className="text-lg font-bold text-red-600 dark:text-red-400">{urgentRequests}</p>
+          <p className="text-lg font-bold text-destructive">{urgentRequests}</p>
         </div>
 
         {urgentRequests > 0 && (
-          <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-            <p className="text-xs text-red-700 dark:text-red-300">
-              ⚠️ {urgentRequests} urgent request{urgentRequests > 1 ? 's' : ''} need attention
-            </p>
-          </div>
+          <Alert variant="danger">
+            {urgentRequests} urgent request{urgentRequests > 1 ? 's' : ''} need attention
+          </Alert>
         )}
 
         {resolutionRate > 80 && total > 0 && (
-          <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-            <p className="text-xs text-green-700 dark:text-green-300">
-              ✅ Great resolution rate! Keep up the good work.
-            </p>
-          </div>
+          <Alert variant="success">Great resolution rate! Keep up the good work.</Alert>
         )}
       </div>
     </motion.div>

@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { X, CheckCircle, XCircle } from 'lucide-react';
+import { Alert, Button, Field, IconButton, Select } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 
 interface ApplicationWithdrawModalProps {
@@ -68,70 +66,42 @@ export const ApplicationWithdrawModal = ({
             <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
                 <h3 className="font-semibold text-foreground">Withdraw Application</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{application.title}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{application.title}</p>
               </div>
-              <button
-                type="button"
+              <IconButton
+                label="Close withdrawal dialog"
+                icon={<X />}
+                size="sm"
                 onClick={onClose}
-                aria-label="Close withdrawal dialog"
-                className="p-1 rounded-lg hover:bg-secondary transition-colors"
                 disabled={isLoading}
-              >
-                <X className="w-4 h-4" aria-hidden="true" />
-              </button>
+              />
             </div>
 
             {step === 'confirm' && (
               <div className="p-4 space-y-4">
-                <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                        Are you sure?
-                      </p>
-                      <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-0.5">
-                        This action cannot be undone. You&apos;ll need to reapply if you change your
-                        mind.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <Alert variant="warning" title="Are you sure?">
+                  This action cannot be undone. You&apos;ll need to reapply if you change your mind.
+                </Alert>
 
-                <div>
-                  <p className="block text-sm font-medium text-foreground mb-1.5">
-                    Reason for withdrawal
-                  </p>
-                  <LegacySelect
-                    aria-label="Reason for withdrawal"
+                <Field label="Reason for withdrawal">
+                  <Select
                     value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="">Select a reason...</option>
-                    {reasons.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </LegacySelect>
-                </div>
+                    onValueChange={setReason}
+                    placeholder="Select a reason..."
+                    options={reasons.map((r) => ({ value: r, label: r }))}
+                  />
+                </Field>
 
                 <div className="flex gap-3">
                   <Button
                     variant="danger"
                     fullWidth
                     onClick={handleWithdraw}
-                    disabled={!reason || isLoading}
+                    disabled={!reason}
+                    isLoading={isLoading}
+                    loadingText="Withdrawing..."
                   >
-                    {isLoading ? (
-                      <div
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"
-                        aria-label="Withdrawing application"
-                      />
-                    ) : (
-                      'Confirm Withdrawal'
-                    )}
+                    Confirm Withdrawal
                   </Button>
                   <Button variant="ghost" fullWidth onClick={onClose} disabled={isLoading}>
                     Cancel
@@ -142,11 +112,11 @@ export const ApplicationWithdrawModal = ({
 
             {step === 'success' && (
               <div className="p-8 text-center" role="status">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success-subtle flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-success" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Application Withdrawn</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Your application has been successfully withdrawn.
                 </p>
               </div>
@@ -154,11 +124,11 @@ export const ApplicationWithdrawModal = ({
 
             {step === 'error' && (
               <div className="p-8 text-center" role="alert">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-                  <XCircle className="w-8 h-8 text-red-600" />
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive-subtle flex items-center justify-center">
+                  <XCircle className="w-8 h-8 text-destructive" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Something Went Wrong</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Failed to withdraw application. Please try again.
                 </p>
               </div>

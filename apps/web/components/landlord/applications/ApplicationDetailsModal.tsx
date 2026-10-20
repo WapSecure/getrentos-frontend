@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Mail, Phone, ShieldCheck, Check, MessageSquareText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, IconButton } from '@getrentos/ui';
 import { formatDate, getInitials } from '@/lib/format';
 import { ScreeningPanel } from '@/components/landlord/applications/ScreeningPanel';
 import type { RentalApplication } from '@/types/landlord';
@@ -35,20 +35,18 @@ export const ApplicationDetailsModal = ({
             className="bg-card rounded-xl max-w-2xl w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 shrink-0 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
                   {getInitials(application.applicantName)}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-semibold text-foreground">{application.applicantName}</h3>
                   <p className="text-xs text-muted-foreground">
                     Applied for {application.propertyName} • {application.unitName}
                   </p>
                 </div>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-5 overflow-y-auto flex-1">

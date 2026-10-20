@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ClipboardList,
-  Search,
   UserRound,
   Building2,
   ListTodo,
@@ -20,12 +19,15 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  CardSkeleton,
   EmptyState,
+  Field,
   Input,
+  ListSkeleton,
   PageErrorState,
   Pagination,
-  LegacyInput,
-  Toast,
+  SearchInput,
+  useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
@@ -60,6 +62,7 @@ export const AgentRegister = () => {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const items = data?.items ?? [];
 
@@ -84,28 +87,33 @@ export const AgentRegister = () => {
             Field-agent register: clients, assigned properties, tasks, inspections and reviews.
           </p>
         </div>
-        <Button variant="outline" onClick={handleExport} disabled={exporting}>
-          {exporting ? 'Exporting…' : 'Export CSV'}
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          isLoading={exporting}
+          loadingText="Exporting…"
+        >
+          Export CSV
         </Button>
       </div>
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-          <div className="relative flex-1 min-w-[220px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <LegacyInput
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search name or email..."
-              className="w-full pl-9"
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onValueChange={(value) => {
+              setSearch(value);
+              setPage(1);
+            }}
+            label="Search agents"
+            placeholder="Search name or email..."
+            className="flex-1 min-w-[220px] max-w-sm"
+          />
         </div>
 
-        {isError ? (
+        {isLoading ? (
+          <ListSkeleton rows={5} className="rounded-none border-0" />
+        ) : isError && !data ? (
           <PageErrorState
             title="Could not load agents"
             description="The agent register is temporarily unavailable."
@@ -113,12 +121,6 @@ export const AgentRegister = () => {
             isRetrying={isFetching}
             className="min-h-[220px] rounded-none border-0"
           />
-        ) : isLoading ? (
-          <div className="space-y-2 p-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-secondary" />
-            ))}
-          </div>
         ) : items.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
@@ -155,7 +157,7 @@ export const AgentRegister = () => {
                 <div className="flex items-center gap-4">
                   <div className="text-right text-sm">
                     <p className="flex items-center justify-end gap-1 font-semibold">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                       {a.averageRating || '—'}
                     </p>
                     <p className="text-xs text-muted-foreground">{a.reviewCount} reviews</p>
@@ -206,7 +208,10 @@ function AgentDetailDialog({
         onClick={(e) => e.stopPropagation()}
       >
         {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading agent…</div>
+          <div className="space-y-4 p-5">
+            <CardSkeleton lines={2} />
+            <CardSkeleton lines={4} />
+          </div>
         ) : isError || !data ? (
           <div className="p-8 text-center">
             <p className="text-destructive">Could not load the agent case.</p>
@@ -271,7 +276,7 @@ function AgentCase360({
             {detail.phone ? ` · ${detail.phone}` : ''} · Joined {formatDate(detail.createdAt)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant={detail.accountStatus === 'ACTIVE' ? 'success' : 'neutral'}>
             {detail.accountStatus}
           </Badge>
@@ -312,7 +317,7 @@ function AgentCase360({
         </div>
       </div>
       {detail.suspended && detail.suspendedReason && (
-        <p className="border-b border-border bg-destructive/5 px-5 py-2 text-sm text-destructive">
+        <p className="border-b border-border bg-destructive-subtle px-5 py-2 text-sm text-destructive">
           Suspended{detail.suspendedAt ? ` ${formatDate(detail.suspendedAt)}` : ''}:{' '}
           {detail.suspendedReason}
         </p>
@@ -465,7 +470,7 @@ function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: 
   const client = useQueryClient();
   const [newAgentId, setNewAgentId] = useState('');
   const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -480,43 +485,42 @@ function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: 
       await client.invalidateQueries({ queryKey: ['admin', 'agents'] });
       onClose();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   return (
-    <>
-      <Dialog open onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="p-6">
-          <DialogTitle className="font-semibold">Reassign task</DialogTitle>
-          <DialogDescription className="mt-1 text-sm text-muted-foreground">
-            {task.title}: find the target agent&apos;s user ID from their own case-360 URL or the
-            users register.
-          </DialogDescription>
-          <div className="mt-5 space-y-4">
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium">Target agent user ID</span>
-              <Input value={newAgentId} onChange={(e) => setNewAgentId(e.target.value)} />
-            </label>
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium">Administrative reason</span>
-              <Input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="At least 10 characters"
-              />
-            </label>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
-                Cancel
-              </Button>
-              <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
-                {mutation.isPending ? 'Reassigning…' : 'Reassign'}
-              </Button>
-            </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="p-6">
+        <DialogTitle className="font-semibold">Reassign task</DialogTitle>
+        <DialogDescription className="mt-1 text-sm text-muted-foreground">
+          {task.title}: find the target agent&apos;s user ID from their own case-360 URL or the
+          users register.
+        </DialogDescription>
+        <div className="mt-5 space-y-4">
+          <Field label="Target agent user ID">
+            <Input value={newAgentId} onChange={(e) => setNewAgentId(e.target.value)} />
+          </Field>
+          <Field label="Administrative reason">
+            <Input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="At least 10 characters"
+            />
+          </Field>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => mutation.mutate()}
+              isLoading={mutation.isPending}
+              loadingText="Reassigning…"
+            >
+              Reassign
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

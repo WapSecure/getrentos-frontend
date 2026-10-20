@@ -56,8 +56,10 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
             <PostSwitcher />
             <ThemeToggle />
             <button
+              type="button"
               onClick={handleSignOut}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              aria-label="Sign out"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive-subtle"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sign out</span>

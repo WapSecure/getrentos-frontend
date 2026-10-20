@@ -4,7 +4,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 
 import { useState, useEffect } from 'react';
 import { CreditCard, FileText, Wrench, MessageCircle, Star } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { SaveButton, Switch } from '@getrentos/ui';
 import { landlordService, type LandlordNotificationPreference } from '@/services/landlordService';
 import { categorySendsEmail } from '@getrentos/shared';
 
@@ -78,22 +78,30 @@ export const NotificationSettings = () => {
         {preferences.map((pref) => (
           <div
             key={pref.id}
-            className="flex items-center justify-between p-3 rounded-lg border border-border"
+            className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border"
           >
-            <div className="flex items-center gap-3">
-              <pref.icon className="w-4 h-4 text-gray-400" />
+            <div className="flex min-w-0 items-center gap-3">
+              <pref.icon className="w-4 h-4 shrink-0 text-muted-foreground" />
               <span className="text-sm text-foreground">{pref.label}</span>
             </div>
-            <div className="flex items-center gap-8">
+            <div className="flex shrink-0 items-center gap-8">
               <div className="w-10 flex justify-center">
                 {categorySendsEmail(pref.id) ? (
-                  <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                  <Switch
+                    checked={pref.email}
+                    onCheckedChange={() => toggle(pref.id, 'email')}
+                    aria-label={`${pref.label} by email`}
+                  />
                 ) : (
                   <NoEmail />
                 )}
               </div>
               <div className="w-10 flex justify-center">
-                <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                <Switch
+                  checked={pref.push}
+                  onCheckedChange={() => toggle(pref.id, 'push')}
+                  aria-label={`${pref.label} by push`}
+                />
               </div>
             </div>
           </div>
@@ -104,19 +112,6 @@ export const NotificationSettings = () => {
     </div>
   );
 };
-
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);
 
 /** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (

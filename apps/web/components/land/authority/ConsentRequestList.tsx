@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, CircleAlert, Inbox, MapPin, XCircle } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, Card, EmptyState, Skeleton, Textarea, useToast } from '@getrentos/ui';
 import {
   LAND_CONSENT_LABELS,
   LAND_SELLER_CAPACITY_LABELS,
@@ -18,21 +18,29 @@ import { errorMessage } from '../developer/feedback';
 
 /** The consent requests addressed to the signed-in account, each answerable in place. */
 export const ConsentRequestList = () => {
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const query = useQuery({
     queryKey: landKeys.consentRequests,
     queryFn: () => unwrap(landAuthorityService.myConsentRequests()),
   });
 
   if (query.isLoading) {
-    return <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <Skeleton className="h-48 rounded-2xl" />;
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <EmptyState
         icon={CircleAlert}
         title="Your consent requests could not be loaded"
         description={query.error instanceof Error ? query.error.message : undefined}
+        action={
+          <Button
+            variant="outline"
+            onClick={() => void query.refetch()}
+            isLoading={query.isFetching}
+          >
+            Try again
+          </Button>
+        }
       />
     );
   }
@@ -47,29 +55,19 @@ export const ConsentRequestList = () => {
     );
   }
   return (
-    <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-      <ul className="space-y-4">
-        {items.map((item) => (
-          <li key={item.signatoryId}>
-            <ConsentRequestCard item={item} onDone={setToast} />
-          </li>
-        ))}
-      </ul>
-    </>
+    <ul className="space-y-4">
+      {items.map((item) => (
+        <li key={item.signatoryId}>
+          <ConsentRequestCard item={item} />
+        </li>
+      ))}
+    </ul>
   );
 };
 
-const ConsentRequestCard = ({
-  item,
-  onDone,
-}: {
-  item: LandConsentRequest;
-  onDone: (toast: { message: string; variant: ToastVariant }) => void;
-}) => {
+const ConsentRequestCard = ({ item }: { item: LandConsentRequest }) => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [objecting, setObjecting] = useState(false);
   const [reason, setReason] = useState('');
   const respond = useMutation({
@@ -79,16 +77,13 @@ const ConsentRequestCard = ({
       setObjecting(false);
       setReason('');
       void queryClient.invalidateQueries({ queryKey: landKeys.consentRequests });
-      onDone({
-        message:
-          decision === 'OBJECT'
-            ? 'Objection recorded. The sale is paused while GetRentos looks into it.'
-            : 'Thank you. Your consent is recorded.',
-        variant: 'success',
-      });
+      toast.success(
+        decision === 'OBJECT'
+          ? 'Objection recorded. The sale is paused while GetRentos looks into it.'
+          : 'Thank you. Your consent is recorded.'
+      );
     },
-    onError: (error) =>
-      onDone({ message: errorMessage(error, 'Could not record your answer.'), variant: 'error' }),
+    onError: (error) => toast.error(errorMessage(error, 'Could not record your answer.')),
   });
 
   const answered = item.consent !== 'PENDING';
@@ -151,6 +146,8 @@ const ConsentRequestCard = ({
                 onChange={(event) => setReason(event.target.value)}
                 rows={3}
                 maxLength={2000}
+                showCount
+                aria-label="Why you object"
                 placeholder="Why you object (GetRentos and the seller see this)"
               />
               <div className="flex flex-wrap gap-2">

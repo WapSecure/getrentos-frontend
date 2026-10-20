@@ -1,9 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
-import { Badge, EmptyState, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Pagination,
+  Skeleton,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -39,6 +47,7 @@ export function ArrearsView() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data } = arrearsQuery;
   const payments = data?.items ?? [];
@@ -61,23 +70,27 @@ export function ArrearsView() {
         </p>
       </div>
 
-      {!summaryQuery.isLoading && !summaryQuery.isError && (
-        <div className="mb-6 flex items-center justify-between rounded-xl border border-border bg-card p-5 shadow-xs">
-          <div>
-            <p className="text-sm text-muted-foreground">Total in arrears</p>
-            <p className="text-2xl font-bold text-foreground mt-1">
-              {formatCurrency(totalOverdue)}
+      {summaryQuery.isLoading ? (
+        <Skeleton className="mb-6 h-[86px] w-full rounded-xl" />
+      ) : (
+        summary && (
+          <Card className="mb-6 flex flex-wrap items-center justify-between gap-3 p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Total in arrears</p>
+              <p className="text-2xl font-bold text-foreground mt-1">
+                {formatCurrency(totalOverdue)}
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {overdueCount} payment{overdueCount === 1 ? '' : 's'} overdue
             </p>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {overdueCount} payment{overdueCount === 1 ? '' : 's'} overdue
-          </p>
-        </div>
+          </Card>
+        )
       )}
 
-      {arrearsQuery.isLoading || summaryQuery.isLoading ? (
-        <PageLoadingState />
-      ) : arrearsQuery.isError || summaryQuery.isError ? (
+      {arrearsQuery.isLoading ? (
+        <ListSkeleton rows={4} />
+      ) : !data || (summaryQuery.isError && !summary) ? (
         <PageErrorState
           title="Arrears are unavailable"
           description="We could not load overdue balances. No tenant status has been changed."
@@ -88,13 +101,11 @@ export function ArrearsView() {
           isRetrying={arrearsQuery.isFetching || summaryQuery.isFetching}
         />
       ) : payments.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12">
-          <EmptyState
-            icon={AlertTriangle}
-            title="Nothing in arrears"
-            description="Overdue rent payments will appear here automatically once flagged past their due date."
-          />
-        </div>
+        <EmptyState
+          icon={AlertTriangle}
+          title="Nothing in arrears"
+          description="Overdue rent payments will appear here automatically once flagged past their due date."
+        />
       ) : (
         <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
           {payments.map((payment) => {
@@ -102,7 +113,10 @@ export function ArrearsView() {
             const stage = ladderStage(overdueDays);
             const isLateFee = payment.category === 'late_fee';
             return (
-              <div key={payment.id} className="p-4 flex items-center justify-between gap-4">
+              <div
+                key={payment.id}
+                className="p-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
                     {payment.tenantName || 'Tenant'} · {payment.propertyName} ({payment.unitName})
@@ -112,7 +126,7 @@ export function ArrearsView() {
                     {overdueDays} day{overdueDays === 1 ? '' : 's'} overdue
                   </p>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex flex-wrap items-center gap-3">
                   <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(payment.amount - (payment.amountPaid ?? 0))}
                     {(payment.amountPaid ?? 0) > 0 && (

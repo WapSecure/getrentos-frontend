@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gauge, RefreshCw } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button, CardSkeleton } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminLandService } from '@/services/adminLandService';
 import { humaniseEnum, landQueryKeys, riskBadgeVariant } from '@/lib/landDiligence';
@@ -65,8 +65,8 @@ export const LandRiskPanel = ({
       }
     >
       {risk.isLoading ? (
-        <PanelMessage>Loading the risk breakdown…</PanelMessage>
-      ) : risk.isError || !data ? (
+        <CardSkeleton lines={4} />
+      ) : !data ? (
         <PanelMessage>
           {risk.error instanceof Error ? risk.error.message : 'The risk breakdown is unavailable.'}
         </PanelMessage>

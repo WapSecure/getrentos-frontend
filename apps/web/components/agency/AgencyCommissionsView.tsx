@@ -7,14 +7,16 @@ import { ArrowLeft, Coins, Receipt, Percent, Settings2 } from 'lucide-react';
 import {
   Badge,
   Button,
+  Card,
+  EmptyState,
+  Field,
   NumberInput,
   Select,
   StatCard,
   PageLoadingState,
   PageErrorState,
-  Toast,
   type BadgeVariant,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -49,9 +51,9 @@ export function AgencyCommissionsView() {
   const [editing, setEditing] = useState(false);
   const [lettingPct, setLettingPct] = useState('');
   const [renewalPct, setRenewalPct] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey,
     queryFn: () => unwrap(agencyCommissionService.summary()),
   });
@@ -62,10 +64,9 @@ export function AgencyCommissionsView() {
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
       setEditing(false);
-      setToast({ message: 'Rate card updated.', variant: 'success' });
+      toast.success('Rate card updated.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not update the rate card.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not update the rate card.'),
   });
 
   const teamQuery = useQuery({
@@ -83,10 +84,9 @@ export function AgencyCommissionsView() {
       unwrap(agencyCommissionService.setAgentSplit(userId, splitPct)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agency', 'team'] });
-      setToast({ message: 'Split updated.', variant: 'success' });
+      toast.success('Split updated.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not update the split.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not update the split.'),
   });
 
   const assignMutation = useMutation({
@@ -98,8 +98,7 @@ export function AgencyCommissionsView() {
       agentUserId: string | null;
     }) => unwrap(agencyCommissionService.assignAgent(commissionId, agentUserId)),
     onSuccess: () => refreshCommissionsAndTeam(),
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not credit the agent.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not credit the agent.'),
   });
 
   const agentOptions = [
@@ -111,7 +110,7 @@ export function AgencyCommissionsView() {
   ];
 
   if (isLoading) return <PageLoadingState />;
-  if (isError || !data)
+  if (!data)
     return <PageErrorState title="Couldn’t load commissions" onRetry={() => refetch()} />;
 
   const startEditing = () => {
@@ -124,11 +123,11 @@ export function AgencyCommissionsView() {
     const letting = Number(lettingPct);
     const renewal = Number(renewalPct);
     if (!Number.isFinite(letting) || !Number.isFinite(renewal)) {
-      setToast({ message: 'Enter both rates as whole percentages.', variant: 'error' });
+      toast.error('Enter both rates as whole percentages.');
       return;
     }
     if (letting < 0 || letting > 100 || renewal < 0 || renewal > 100) {
-      setToast({ message: 'Rates must be between 0 and 100.', variant: 'error' });
+      toast.error('Rates must be between 0 and 100.');
       return;
     }
     configMutation.mutate({ lettingPct: letting, renewalPct: renewal });
@@ -171,8 +170,8 @@ export function AgencyCommissionsView() {
       </div>
 
       {/* Rate card */}
-      <div className="mt-6 rounded-2xl border border-border bg-card p-5">
-        <div className="flex items-start justify-between gap-3">
+      <Card className="mt-6 rounded-2xl p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Settings2 className="h-4 w-4 text-muted-foreground" />
@@ -192,26 +191,22 @@ export function AgencyCommissionsView() {
 
         {editing ? (
           <div className="mt-4 flex flex-wrap items-end gap-4">
-            <label className="block">
-              <span className="text-xs text-muted-foreground">Letting %</span>
+            <Field label="Letting %" className="w-32">
               <NumberInput
                 value={lettingPct}
                 onValueChange={setLettingPct}
                 trailingIcon={<Percent className="h-4 w-4" />}
-                className="mt-1 w-32"
               />
-            </label>
-            <label className="block">
-              <span className="text-xs text-muted-foreground">Renewal %</span>
+            </Field>
+            <Field label="Renewal %" className="w-32">
               <NumberInput
                 value={renewalPct}
                 onValueChange={setRenewalPct}
                 trailingIcon={<Percent className="h-4 w-4" />}
-                className="mt-1 w-32"
               />
-            </label>
+            </Field>
             <div className="flex gap-2">
-              <Button onClick={save} disabled={configMutation.isPending}>
+              <Button onClick={save} isLoading={configMutation.isPending}>
                 Save
               </Button>
               <Button
@@ -235,21 +230,19 @@ export function AgencyCommissionsView() {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Ledger */}
       <div className="mt-6">
         <h2 className="mb-2 text-sm font-semibold text-foreground">Ledger</h2>
         {data.commissions.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-card p-12 text-center">
-            <Coins className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-            <p className="text-muted-foreground">No commissions earned yet.</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              They appear here automatically when you let or renew a managed tenancy.
-            </p>
-          </div>
+          <EmptyState
+            icon={Coins}
+            title="No commissions earned yet."
+            description="They appear here automatically when you let or renew a managed tenancy."
+          />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted-foreground">
@@ -291,6 +284,7 @@ export function AgencyCommissionsView() {
                             assignMutation.mutate({ commissionId: c.id, agentUserId: v || null })
                           }
                           options={agentOptions}
+                          ariaLabel="Credited agent"
                         />
                       </div>
                       {c.agentShareAmount != null && (
@@ -319,13 +313,9 @@ export function AgencyCommissionsView() {
         savingUserId={splitMutation.isPending ? splitMutation.variables?.userId : null}
       />
 
-      <AgencyPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
+      <AgencyPayoutSection onToast={(message, variant) => toast.show(message, variant)} />
 
-      <AgencyAgentPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
+      <AgencyAgentPayoutSection onToast={(message, variant) => toast.show(message, variant)} />
     </div>
   );
 }

@@ -18,10 +18,10 @@ const categoryIcons: Record<string, React.ElementType> = {
 };
 
 const categoryColors: Record<string, string> = {
-  'Lease Agreements': 'text-blue-600 dark:text-blue-400',
-  Receipts: 'text-green-600 dark:text-green-400',
-  'Inspection Reports': 'text-purple-600 dark:text-purple-400',
-  Insurance: 'text-orange-600 dark:text-orange-400',
+  'Lease Agreements': 'text-info',
+  Receipts: 'text-success',
+  'Inspection Reports': 'text-primary',
+  Insurance: 'text-warning',
   Miscellaneous: 'text-muted-foreground',
 };
 
@@ -66,7 +66,7 @@ export const DocumentCategories = ({
 
         {categoryList.map((category) => {
           const Icon = categoryIcons[category] || FileText;
-          const color = categoryColors[category] || 'text-gray-600';
+          const color = categoryColors[category] || 'text-muted-foreground';
 
           return (
             <button

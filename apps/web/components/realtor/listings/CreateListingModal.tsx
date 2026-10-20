@@ -1,12 +1,18 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, Check } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
+import {
+  Button,
+  CurrencyInput,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  Input,
+  RadioGroup,
+} from '@getrentos/ui';
 import type { ListingCategory } from '@/types/realtor';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
@@ -77,6 +83,7 @@ export const CreateListingModal = ({
         })
       ),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
   });
   const clients = clientsPage?.items ?? [];
   const selectedClient =
@@ -101,6 +108,7 @@ export const CreateListingModal = ({
         })
       ),
     enabled: isOpen && !!clientId,
+    placeholderData: keepPreviousData,
   });
   const properties = propertiesPage?.items ?? [];
   const selectedProperty =
@@ -143,173 +151,132 @@ export const CreateListingModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">Add Listing</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Client <span className="text-red-500">*</span>
-                  </label>
-                  <PaginatedSelect
-                    value={clientId}
-                    onValueChange={(value) => {
-                      setClientId(value);
-                      setSelectedClientState(clients.find((client) => client.id === value) ?? null);
-                      setPropertyId('');
-                      setSelectedPropertyState(null);
-                      setPropertySearch('');
-                      setPropertyPage(1);
-                    }}
-                    items={clients}
-                    selectedItem={selectedClient}
-                    getItemValue={(client) => client.id}
-                    getItemLabel={clientLabel}
-                    search={clientSearch}
-                    onSearchChange={(value) => {
-                      setClientSearch(value);
-                      setClientPage(1);
-                    }}
-                    searchPlaceholder="Search approved clients"
-                    page={clientPage}
-                    pageSize={SELECTOR_PAGE_SIZE}
-                    total={clientsPage?.total ?? 0}
-                    onPageChange={setClientPage}
-                    placeholder="Select a client"
-                    emptyMessage="No active clients match this search."
-                    isLoading={isClientsLoading}
-                    ariaLabel="client"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Assigned property <span className="text-red-500">*</span>
-                  </label>
-                  <PaginatedSelect
-                    value={propertyId}
-                    onValueChange={(value) => {
-                      setPropertyId(value);
-                      setSelectedPropertyState(
-                        properties.find((property) => property.id === value) ?? null
-                      );
-                    }}
-                    items={properties}
-                    selectedItem={selectedProperty}
-                    getItemValue={(property) => property.id}
-                    getItemLabel={(property) => `${property.title} · ${property.city}`}
-                    search={propertySearch}
-                    onSearchChange={(value) => {
-                      setPropertySearch(value);
-                      setPropertyPage(1);
-                    }}
-                    searchPlaceholder="Search assigned properties"
-                    page={propertyPage}
-                    pageSize={SELECTOR_PAGE_SIZE}
-                    total={propertiesPage?.total ?? 0}
-                    onPageChange={setPropertyPage}
-                    placeholder={clientId ? 'Select an assigned property' : 'Select a client first'}
-                    disabled={!clientId}
-                    emptyMessage="No assigned properties match this search."
-                    isLoading={isPropertiesLoading}
-                    ariaLabel="assigned property"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Category</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(['sale', 'rental'] as ListingCategory[]).map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setCategory(option)}
-                        className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
-                          category === option
-                            ? 'border-primary bg-accent text-primary'
-                            : 'border-border text-muted-foreground'
-                        }`}
-                      >
-                        {option === 'sale' ? 'For Sale' : 'For Rent'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Listing Title <span className="text-red-500">*</span>
-                  </label>
-                  <LegacyInput
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    {category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'}{' '}
-                    <span className="text-red-500">*</span>
-                  </label>
-                  <CurrencyInput
-                    prefix="₦"
-                    min={0}
-                    value={price}
-                    onValueChange={(v) => setPrice(v === 0 ? '' : String(v))}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-              </>
-            </div>
-
-            {((clientsPage?.total ?? 0) > 0 || isClientsLoading || !!error) && (
-              <div className="p-4 border-t border-border space-y-3 shrink-0">
-                {error ? (
-                  <VerificationRequiredNotice
-                    error={error}
-                    href={ROUTES.REALTOR_LISTINGS}
-                    verificationHref={ROUTES.REALTOR_VERIFICATION}
-                  />
-                ) : null}
-                <div className="flex justify-end">
-                  <Button
-                    variant="primary"
-                    className="gap-1.5"
-                    onClick={handleSubmit}
-                    disabled={
-                      !selectedClient ||
-                      !selectedProperty ||
-                      !title ||
-                      !(Number(price) >= 1) ||
-                      isSubmitting
-                    }
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    {isSubmitting ? 'Creating…' : 'Create draft'}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg sm:p-0">
+        <div className="p-4 pr-12 border-b border-border shrink-0">
+          <DialogTitle className="font-semibold text-foreground">Add Listing</DialogTitle>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+          <Field label="Client" required>
+            <PaginatedSelect
+              value={clientId}
+              onValueChange={(value) => {
+                setClientId(value);
+                setSelectedClientState(clients.find((client) => client.id === value) ?? null);
+                setPropertyId('');
+                setSelectedPropertyState(null);
+                setPropertySearch('');
+                setPropertyPage(1);
+              }}
+              items={clients}
+              selectedItem={selectedClient}
+              getItemValue={(client) => client.id}
+              getItemLabel={clientLabel}
+              search={clientSearch}
+              onSearchChange={(value) => {
+                setClientSearch(value);
+                setClientPage(1);
+              }}
+              searchPlaceholder="Search approved clients"
+              page={clientPage}
+              pageSize={SELECTOR_PAGE_SIZE}
+              total={clientsPage?.total ?? 0}
+              onPageChange={setClientPage}
+              placeholder="Select a client"
+              emptyMessage="No active clients match this search."
+              isLoading={isClientsLoading}
+              ariaLabel="client"
+            />
+          </Field>
+
+          <Field label="Assigned property" required>
+            <PaginatedSelect
+              value={propertyId}
+              onValueChange={(value) => {
+                setPropertyId(value);
+                setSelectedPropertyState(
+                  properties.find((property) => property.id === value) ?? null
+                );
+              }}
+              items={properties}
+              selectedItem={selectedProperty}
+              getItemValue={(property) => property.id}
+              getItemLabel={(property) => `${property.title} · ${property.city}`}
+              search={propertySearch}
+              onSearchChange={(value) => {
+                setPropertySearch(value);
+                setPropertyPage(1);
+              }}
+              searchPlaceholder="Search assigned properties"
+              page={propertyPage}
+              pageSize={SELECTOR_PAGE_SIZE}
+              total={propertiesPage?.total ?? 0}
+              onPageChange={setPropertyPage}
+              placeholder={clientId ? 'Select an assigned property' : 'Select a client first'}
+              disabled={!clientId}
+              emptyMessage="No assigned properties match this search."
+              isLoading={isPropertiesLoading}
+              ariaLabel="assigned property"
+            />
+          </Field>
+
+          <Field label="Category">
+            <RadioGroup
+              value={category}
+              onValueChange={setCategory}
+              options={[
+                { value: 'sale', label: 'For Sale' },
+                { value: 'rental', label: 'For Rent' },
+              ]}
+              variant="card"
+              columns={2}
+            />
+          </Field>
+
+          <Field label="Listing Title" required>
+            <Input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
+            />
+          </Field>
+
+          <Field label={category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'} required>
+            <CurrencyInput
+              prefix="₦"
+              min={0}
+              value={price}
+              onValueChange={(v) => setPrice(v === 0 ? '' : String(v))}
+            />
+          </Field>
+        </div>
+
+        {((clientsPage?.total ?? 0) > 0 || isClientsLoading || !!error) && (
+          <div className="p-4 border-t border-border space-y-3 shrink-0">
+            {error ? (
+              <VerificationRequiredNotice
+                error={error}
+                href={ROUTES.REALTOR_LISTINGS}
+                verificationHref={ROUTES.REALTOR_VERIFICATION}
+              />
+            ) : null}
+            <div className="flex justify-end">
+              <Button
+                variant="primary"
+                icon={<Check className="w-3.5 h-3.5" />}
+                onClick={handleSubmit}
+                isLoading={isSubmitting}
+                loadingText="Creating…"
+                disabled={!selectedClient || !selectedProperty || !title || !(Number(price) >= 1)}
+              >
+                Create draft
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

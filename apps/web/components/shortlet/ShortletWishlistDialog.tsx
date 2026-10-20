@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Button,
   Dialog,
@@ -11,9 +10,9 @@ import {
   DialogDescription,
   DialogTitle,
   EmptyState,
+  IconButton,
   Skeleton,
-  Toast,
-  type ToastVariant,
+  useOptimisticMutation,
 } from '@getrentos/ui';
 import { BedDouble, Heart, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -24,8 +23,6 @@ import type { ShortletListing } from '@/types/shortlet';
 
 export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: shortletKeys.wishlist,
@@ -33,13 +30,21 @@ export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
   });
   const listings = data?.items ?? [];
 
-  const unsave = useMutation({
+  const unsave = useOptimisticMutation({
     mutationFn: (listingId: string) => unwrap(shortletService.unsaveWishlist(listingId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: shortletKeys.wishlist });
-      queryClient.invalidateQueries({ queryKey: shortletKeys.wishlistIds });
-    },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    patches: (listingId) => [
+      {
+        queryKey: shortletKeys.wishlist,
+        update: (old) => {
+          const page = old as NonNullable<typeof data>;
+          return { ...page, items: page.items.filter((l) => l.id !== listingId) };
+        },
+      },
+      {
+        queryKey: shortletKeys.wishlistIds,
+        update: (old) => (old as string[]).filter((id) => id !== listingId),
+      },
+    ],
   });
 
   return (
@@ -68,7 +73,7 @@ export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
                 <WishlistRow
                   key={l.id}
                   listing={l}
-                  removing={unsave.isPending}
+                  removing={unsave.isPending && unsave.variables === l.id}
                   onRemove={() => unsave.mutate(l.id)}
                   onOpen={() => {
                     onClose();
@@ -79,9 +84,6 @@ export function ShortletWishlistDialog({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -131,15 +133,13 @@ function WishlistRow({
         <Button variant="outline" size="sm" onClick={onOpen}>
           View
         </Button>
-        <Button
-          variant="ghost"
+        <IconButton
           size="sm"
+          label={`Remove ${listing.title} from saved`}
+          icon={<Heart className="fill-destructive text-destructive" />}
           onClick={onRemove}
           disabled={removing}
-          aria-label="Remove"
-        >
-          <Heart className="h-4 w-4 fill-destructive text-destructive" />
-        </Button>
+        />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 
 interface Verification {
   id: string;
@@ -30,7 +31,7 @@ export const ScoreFactors = ({ verifications }: ScoreFactorsProps) => {
   }));
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Score Factors</h3>
         <p className="text-xs text-muted-foreground mt-0.5">What impacts your trust score</p>
@@ -38,11 +39,11 @@ export const ScoreFactors = ({ verifications }: ScoreFactorsProps) => {
 
       <div className="divide-y divide-border">
         {factors.map((factor, index) => (
-          <div key={index} className="p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {factor.status === 'positive' && <CheckCircle className="w-4 h-4 text-green-500" />}
-              {factor.status === 'pending' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
-              {factor.status === 'negative' && <XCircle className="w-4 h-4 text-red-500" />}
+          <div key={index} className="p-3 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              {factor.status === 'positive' && <CheckCircle className="w-4 h-4 text-success" />}
+              {factor.status === 'pending' && <AlertCircle className="w-4 h-4 text-warning" />}
+              {factor.status === 'negative' && <XCircle className="w-4 h-4 text-destructive" />}
               <div>
                 <span className="text-sm text-foreground">{factor.label}</span>
                 <p className="text-xs text-muted-foreground">{factor.description}</p>
@@ -51,10 +52,10 @@ export const ScoreFactors = ({ verifications }: ScoreFactorsProps) => {
             <span
               className={`text-sm font-semibold ${
                 factor.status === 'positive'
-                  ? 'text-green-600'
+                  ? 'text-success'
                   : factor.status === 'pending'
-                    ? 'text-yellow-600'
-                    : 'text-red-600'
+                    ? 'text-warning'
+                    : 'text-destructive'
               }`}
             >
               {factor.impact}
@@ -62,6 +63,6 @@ export const ScoreFactors = ({ verifications }: ScoreFactorsProps) => {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

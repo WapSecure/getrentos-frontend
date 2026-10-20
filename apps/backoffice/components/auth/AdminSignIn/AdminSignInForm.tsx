@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
-import { Input } from '@getrentos/ui';
+import { Alert, Checkbox, Field, Input, NumberInput } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { SessionExpiredNotice } from '@getrentos/ui';
 import { Logo } from '@getrentos/ui';
 import {
@@ -46,7 +46,7 @@ export const AdminSignInForm = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [pendingChallenge, setPendingChallenge] = useState<string | null>(null);
   const [twoFactorCode, setTwoFactorCode] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const loginMutation = useMutation({
     mutationFn: ({ identifier, password }: AdminFormData) =>
@@ -77,18 +77,15 @@ export const AdminSignInForm = () => {
       setRememberMe(true);
     }
     if (consumeSessionExpiredFlag()) {
-      setToast({ message: 'Your session has expired. Please sign in again.', variant: 'info' });
+      toast.info('Your session has expired. Please sign in again.');
     }
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [setValue]);
+  }, [setValue, toast]);
 
   const completeSignIn = (result: AuthResult, identifier?: string) => {
     const isAdmin = (result.roles || []).some((r) => BACKEND_ROLE_TO_ID[r] === 'admin');
     if (!isAdmin) {
-      setToast({
-        message: 'This account does not have administrator access.',
-        variant: 'error',
-      });
+      toast.error('This account does not have administrator access.');
       return;
     }
 
@@ -114,17 +111,14 @@ export const AdminSignInForm = () => {
     const response = await loginMutation.mutateAsync(data);
 
     if (!response.success || !response.data) {
-      setToast({ message: response.message || 'Invalid credentials.', variant: 'error' });
+      toast.error(response.message || 'Invalid credentials.');
       return;
     }
 
     if (isTwoFactorChallenge(response.data)) {
       setPendingChallenge(response.data.challengeToken);
       setTwoFactorCode('');
-      setToast({
-        message: 'Enter the 6-digit code from your authenticator app to continue.',
-        variant: 'info',
-      });
+      toast.info('Enter the 6-digit code from your authenticator app to continue.');
       return;
     }
 
@@ -141,11 +135,9 @@ export const AdminSignInForm = () => {
 
     if (!response.success || !response.data) {
       setTwoFactorCode('');
-      setToast({
-        message:
-          response.message || 'The authentication code is invalid or has expired. Try again.',
-        variant: 'error',
-      });
+      toast.error(
+        response.message || 'The authentication code is invalid or has expired. Try again.'
+      );
       return;
     }
 
@@ -159,10 +151,6 @@ export const AdminSignInForm = () => {
 
   return (
     <div className="w-full max-w-md">
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
       <div className="mb-8 text-center">
         <Logo href={ROUTES.ADMIN_LOGIN} size="lg" className="mx-auto mb-4 w-fit" />
         <h1 className="text-2xl font-bold text-foreground">Administrator Sign In</h1>
@@ -176,35 +164,22 @@ export const AdminSignInForm = () => {
       <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {pendingChallenge ? (
           <>
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-                Two-factor authentication
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Enter the 6-digit code from your authenticator app to finish signing in.
-              </p>
-            </div>
+            <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
+              Enter the 6-digit code from your authenticator app to finish signing in.
+            </Alert>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">
-                Authentication code
-              </label>
-              <Input
-                type="text"
-                inputMode="numeric"
+            <Field label="Authentication code">
+              <NumberInput
                 autoComplete="one-time-code"
+                maxLength={6}
                 value={twoFactorCode}
-                onChange={(event) =>
-                  setTwoFactorCode(
-                    event.target.value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6)
-                  )
+                onValueChange={(value) =>
+                  setTwoFactorCode(value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6))
                 }
                 inputClassName="py-3 text-center font-mono tracking-[0.5em]"
                 placeholder="••••••"
-                aria-label="Authentication code"
               />
-            </div>
+            </Field>
 
             <Button
               type="button"
@@ -213,67 +188,47 @@ export const AdminSignInForm = () => {
               fullWidth
               disabled={twoFactorCode.length !== 6 || twoFactorMutation.isPending}
               isLoading={twoFactorMutation.isPending}
+              icon={<ShieldCheck className="h-4 w-4" />}
               onClick={completeTwoFactorSignIn}
             >
-              <ShieldCheck className="h-4 w-4" />
               Verify and sign in
             </Button>
 
-            <button
-              type="button"
-              onClick={cancelTwoFactor}
-              className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
+            <Button type="button" variant="ghost" fullWidth onClick={cancelTwoFactor}>
               Back to sign in
-            </button>
+            </Button>
           </>
         ) : (
           <>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
+            <Field label="Email" error={errors.identifier?.message}>
               <Input
                 type="email"
                 {...register('identifier')}
                 inputClassName="py-3"
                 placeholder="admin@getrentos.com"
               />
-              {errors.identifier && (
-                <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
-              )}
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">Password</label>
-              <div className="relative">
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  {...register('password')}
-                  inputClassName="py-3 pr-8"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-              )}
-            </div>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+            <Field label="Password" error={errors.password?.message}>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                {...register('password')}
+                inputClassName="py-3"
+                placeholder="Enter your password"
+                trailingIcon={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                }
               />
-              <span className="text-sm text-muted-foreground">Remember me</span>
-            </label>
+            </Field>
+
+            <Checkbox checked={rememberMe} onCheckedChange={setRememberMe} label="Remember me" />
 
             <Button
               type="submit"
@@ -282,8 +237,8 @@ export const AdminSignInForm = () => {
               fullWidth
               disabled={!isValid || loginMutation.isPending}
               isLoading={loginMutation.isPending}
+              icon={<Lock className="h-4 w-4" />}
             >
-              <Lock className="h-4 w-4" />
               Sign in
             </Button>
           </>

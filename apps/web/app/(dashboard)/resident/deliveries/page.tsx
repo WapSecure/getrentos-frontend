@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Package } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -50,15 +50,13 @@ export default function ResidentDeliveriesPage() {
       <h2 className="mb-3 text-sm font-semibold text-foreground">At the gate</h2>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : deliveries.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={Package}
-            title="No deliveries yet"
-            description="Packages logged at the gate for your household will show up here."
-          />
-        </div>
+        <EmptyState
+          icon={Package}
+          title="No deliveries yet"
+          description="Packages logged at the gate for your household will show up here."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {deliveries.map((log) => (

@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Building2, MapPin } from 'lucide-react';
+import { EmptyState, Skeleton } from '@getrentos/ui';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { EstateAvailableListings } from './EstateAvailableListings';
@@ -32,17 +33,24 @@ export const EstateMicrositePageClient = ({
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center text-muted-foreground">Loading…</div>
+      <div className="max-w-6xl mx-auto px-4 pb-16" role="status" aria-label="Loading">
+        <Skeleton className="h-48 sm:h-64 w-full rounded-2xl mt-6" />
+        <div className="px-2 mt-6 space-y-2">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      </div>
     );
   }
 
   if (isError || !profile) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold text-foreground">Estate not found</h1>
-        <p className="text-muted-foreground mt-2">
-          This link may be incorrect or no longer active.
-        </p>
+      <div className="max-w-3xl mx-auto px-4 py-24">
+        <EmptyState
+          icon={Building2}
+          title="Estate not found"
+          description="This link may be incorrect or no longer active."
+        />
       </div>
     );
   }

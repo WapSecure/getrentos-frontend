@@ -174,8 +174,9 @@ export const Navigation = () => {
                   </Link>
                   <ThemeSwitch />
                   <button
+                    type="button"
                     onClick={signOut}
-                    className={`${linkBase} text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300`}
+                    className={`${linkBase} text-destructive hover:text-destructive/80`}
                   >
                     Sign out
                   </button>
@@ -186,6 +187,7 @@ export const Navigation = () => {
             <div className="flex shrink-0 items-center gap-3 lg:hidden">
               <ThemeSwitch />
               <button
+                type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen}
@@ -255,8 +257,9 @@ export const Navigation = () => {
                   Dashboard
                 </Link>
                 <button
+                  type="button"
                   onClick={signOut}
-                  className="rounded-lg px-4 py-2 text-left text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                  className="rounded-lg px-4 py-2 text-left text-destructive transition-colors hover:bg-destructive-subtle"
                 >
                   Sign out
                 </button>

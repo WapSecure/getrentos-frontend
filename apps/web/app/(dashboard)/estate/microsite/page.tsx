@@ -5,7 +5,16 @@ import { useRouter } from 'next/navigation';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy, Check, Globe, ExternalLink } from 'lucide-react';
-import { Button, Switch, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  CardSkeleton,
+  Field,
+  Input,
+  Switch,
+  Textarea,
+  useToast,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -33,7 +42,7 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
   const [bio, setBio] = useState(settings.bio || '');
   const [enabled, setEnabled] = useState(settings.enabled);
   const [copied, setCopied] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const invalidateSettings = () =>
@@ -44,11 +53,11 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
       unwrap(estateService.updateMicrositeSettings(estateId, { slug, bio, enabled })),
     onSuccess: (updated) => {
       setSlug(updated.slug);
-      setToast({ message: 'Microsite settings saved.', variant: 'success' });
+      toast.success('Microsite settings saved.');
       invalidateSettings();
     },
     onError: (err: Error) => {
-      setToast({ message: err.message || 'Unable to save these settings.', variant: 'error' });
+      toast.error(err.message || 'Unable to save these settings.');
     },
   });
 
@@ -57,11 +66,11 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
     mutationFn: (file: File) => unwrap(estateService.uploadMicrositeBanner(estateId, file)),
     onSuccess: (updated) => {
       setBannerUrl(updated.bannerUrl);
-      setToast({ message: 'Banner updated.', variant: 'success' });
+      toast.success('Banner updated.');
       invalidateSettings();
     },
     onError: (err: Error) => {
-      setToast({ message: err.message || 'Unable to upload this banner.', variant: 'error' });
+      toast.error(err.message || 'Unable to upload this banner.');
     },
   });
 
@@ -90,22 +99,19 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
         </p>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">Publish microsite</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {enabled
-                ? 'Live: visible to anyone with the link'
-                : 'Draft: not publicly visible yet'}
-            </p>
-          </div>
-          <Switch checked={enabled} onCheckedChange={setEnabled} aria-label="Publish microsite" />
-        </div>
+      <Card className="p-6 space-y-6">
+        <Switch
+          checked={enabled}
+          onCheckedChange={setEnabled}
+          label="Publish microsite"
+          description={
+            enabled ? 'Live: visible to anyone with the link' : 'Draft: not publicly visible yet'
+          }
+        />
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Banner image</label>
-          <div className="flex items-center gap-4">
+          <p className="block text-sm font-medium text-foreground mb-1">Banner image</p>
+          <div className="flex flex-wrap items-center gap-4">
             {bannerUrl ? (
               <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-border">
                 <SafeImage
@@ -133,7 +139,6 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
               variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploadBanner.isPending}
               isLoading={uploadBanner.isPending}
             >
               {bannerUrl ? 'Change banner' : 'Upload banner'}
@@ -141,27 +146,27 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Link</label>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{`${typeof window !== 'undefined' ? window.location.origin : ''}/e/`}</span>
-            <input
+        <Field
+          label="Link"
+          error={
+            !slugIsValid && slug.length > 0
+              ? 'Lowercase letters, numbers, and hyphens only.'
+              : undefined
+          }
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground break-all">{`${typeof window !== 'undefined' ? window.location.origin : ''}/e/`}</span>
+            <Input
               type="text"
               value={slug}
               onChange={(e) => setSlug(e.target.value.toLowerCase())}
-              className="flex-1 min-w-0 p-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="flex-1 min-w-0"
               placeholder="your-estate-name"
             />
           </div>
-          {!slugIsValid && slug.length > 0 && (
-            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-              Lowercase letters, numbers, and hyphens only.
-            </p>
-          )}
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">About</label>
+        <Field label="About">
           <Textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
@@ -169,23 +174,31 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
             maxLength={500}
             placeholder="Tell prospective residents about the estate..."
           />
-        </div>
+        </Field>
 
         <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="flex-1 min-w-0 p-2 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-muted-foreground truncate">
+          <div className="flex flex-wrap items-center gap-2 min-w-0 w-full">
+            <div className="flex-1 min-w-0 p-2 rounded-lg bg-secondary text-sm text-muted-foreground truncate">
               {publicUrl}
             </div>
-            <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-2 shrink-0">
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyLink}
+              className="shrink-0"
+              icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            >
               {copied ? 'Copied!' : 'Copy'}
             </Button>
             {enabled && (
-              <a href={publicUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="sm" className="gap-2 shrink-0">
-                  <ExternalLink className="w-4 h-4" />
-                  View
-                </Button>
+              <a
+                href={publicUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View
               </a>
             )}
           </div>
@@ -201,11 +214,7 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
             Save Changes
           </Button>
         </div>
-      </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
+      </Card>
     </div>
   );
 }
@@ -222,7 +231,7 @@ export default function EstateMicrositePage() {
   });
 
   if (isEstateLoading || isPlanLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -243,7 +252,7 @@ export default function EstateMicrositePage() {
   }
 
   if (isSettingsLoading || !settings) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   return (

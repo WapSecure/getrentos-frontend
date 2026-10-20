@@ -1,6 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 import type { MusterTally } from '@/types/estate';
 
 interface MusterTallyStripProps {
@@ -23,7 +24,7 @@ interface MusterTallyStripProps {
  */
 export const MusterTallyStrip = ({ tally, tallyLabel }: MusterTallyStripProps) => {
   const tiles = [
-    { label: 'Accounted for', value: tally.accountedFor, tone: 'text-emerald-600' },
+    { label: 'Accounted for', value: tally.accountedFor, tone: 'text-success' },
     { label: 'Not on site', value: tally.notOnSite, tone: 'text-foreground' },
     {
       label: 'Needs help',
@@ -31,11 +32,11 @@ export const MusterTallyStrip = ({ tally, tallyLabel }: MusterTallyStripProps) =
       // The only number on this screen that asks for something to be done.
       tone: tally.needsHelp > 0 ? 'text-destructive' : 'text-muted-foreground',
     },
-    { label: 'Still unaccounted for', value: tally.unaccounted, tone: 'text-amber-600' },
+    { label: 'Still unaccounted for', value: tally.unaccounted, tone: 'text-warning' },
   ];
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4">
+    <Card className="p-4">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {tiles.map((tile) => (
           <div key={tile.label}>
@@ -48,11 +49,11 @@ export const MusterTallyStrip = ({ tally, tallyLabel }: MusterTallyStripProps) =
       <p className="text-sm text-muted-foreground mt-4">{tallyLabel}</p>
 
       {tally.settled && (
-        <p className="text-sm text-emerald-600 mt-2 flex items-center gap-1.5">
+        <p className="text-sm text-success mt-2 flex items-center gap-1.5">
           <Check className="w-4 h-4" />
           Every name on the roll has an answer.
         </p>
       )}
-    </div>
+    </Card>
   );
 };

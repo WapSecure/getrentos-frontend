@@ -8,11 +8,12 @@ import { ArrowLeft, CircleAlert, Gauge, RefreshCw, ShieldAlert } from 'lucide-re
 import {
   Badge,
   Button,
+  CardSkeleton,
   EmptyState,
-  PageLoadingState,
+  PageErrorState,
+  Skeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -35,7 +36,7 @@ export default function AdminLandFraudParcelPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'fraud.review');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const key = landQueryKeys.fraudParcel(propertyId);
   const query = useQuery({
     queryKey: key,
@@ -45,10 +46,10 @@ export default function AdminLandFraudParcelPage() {
   const done = (a: LandFraudAssessment, message: string) => {
     queryClient.setQueryData(key, a);
     void queryClient.invalidateQueries({ queryKey: landQueryKeys.fraudRoot });
-    setToast({ message, variant: 'success' });
+    toast.success(message);
   };
   const failed = (e: unknown, fallback: string) =>
-    setToast({ message: readLandApiError(e, fallback).message, variant: 'error' });
+    toast.error(readLandApiError(e, fallback).message);
   const rescan = useMutation({
     mutationFn: () => unwrap(adminLandFraudService.rescan(propertyId)),
     onSuccess: (a) => done(a, 'Rescanned.'),
@@ -57,14 +58,15 @@ export default function AdminLandFraudParcelPage() {
 
   if (!canView)
     return <EmptyState icon={CircleAlert} title="You do not have access to fraud signals" />;
-  if (query.isLoading) return <PageLoadingState />;
+  if (query.isLoading) return <ParcelSkeleton />;
   const a = query.data;
-  if (query.isError || !a) {
+  if (!a) {
     return (
-      <EmptyState
-        icon={CircleAlert}
+      <PageErrorState
         title="This parcel could not be loaded"
         description={query.error instanceof Error ? query.error.message : undefined}
+        onRetry={() => void query.refetch()}
+        isRetrying={query.isFetching}
       />
     );
   }
@@ -73,9 +75,6 @@ export default function AdminLandFraudParcelPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <Link
         href="/admin/land/fraud"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -239,9 +238,11 @@ function SignalItem({
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             maxLength={2000}
+            showCount
             placeholder="What you checked and found"
+            aria-label="What you checked and found"
           />
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
               variant="outline"
@@ -264,5 +265,21 @@ function SignalItem({
         </div>
       )}
     </li>
+  );
+}
+
+function ParcelSkeleton() {
+  return (
+    <div role="status" aria-label="Loading parcel" className="space-y-5">
+      <Skeleton className="h-4 w-36" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-72 max-w-full" />
+        <Skeleton className="h-4 w-56" />
+      </div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <CardSkeleton lines={6} />
+        <CardSkeleton lines={4} />
+      </div>
+    </div>
   );
 }

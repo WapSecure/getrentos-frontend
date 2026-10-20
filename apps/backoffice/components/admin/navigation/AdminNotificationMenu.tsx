@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
 import {
   DropdownMenu,
@@ -11,38 +11,44 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Skeleton,
+  useOptimisticMutation,
 } from '@getrentos/ui';
 import { formatRelativeTime, unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminService } from '@/services/adminService';
 
 export function AdminNotificationMenu() {
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
   const query = useQuery({
     queryKey: adminKeys.notifications,
     queryFn: () => unwrap(adminService.getNotificationPage(1, 10)),
   });
-  const refresh = () => queryClient.invalidateQueries({ queryKey: adminKeys.notifications });
-  const markRead = useMutation({
+  const markReadIn = (old: unknown, id?: string) => {
+    const feed = old as typeof query.data;
+    if (!feed) return old;
+    const newlyRead = feed.items.filter((n) => !n.read && (!id || n.id === id)).length;
+    return {
+      ...feed,
+      items: feed.items.map((n) => (!id || n.id === id ? { ...n, read: true } : n)),
+      unreadTotal: id ? Math.max(0, feed.unreadTotal - newlyRead) : 0,
+    };
+  };
+  const markRead = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(adminService.markNotificationRead(id)),
-    onMutate: () => setActionError(null),
-    onSuccess: refresh,
-    onError: () => setActionError('Could not mark this notification as read. Please try again.'),
+    patches: (id) => [{ queryKey: adminKeys.notifications, update: (old) => markReadIn(old, id) }],
+    errorMessage: 'Could not mark this notification as read. Please try again.',
   });
-  const markAll = useMutation({
+  const markAll = useOptimisticMutation({
     mutationFn: () => unwrap(adminService.markAllNotificationsRead()),
-    onMutate: () => setActionError(null),
-    onSuccess: refresh,
-    onError: () => setActionError('Could not mark all notifications as read. Please try again.'),
+    patches: () => [{ queryKey: adminKeys.notifications, update: (old) => markReadIn(old) }],
+    errorMessage: 'Could not mark all notifications as read. Please try again.',
   });
   const notifications = query.data?.items ?? [];
   const unreadCount = query.data?.unreadTotal ?? 0;
-  const pending = markRead.isPending || markAll.isPending;
 
   return (
-    <DropdownMenu open={open} onOpenChange={(next) => { setOpen(next); if (next) setActionError(null); }}>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -50,7 +56,7 @@ export function AdminNotificationMenu() {
           className="relative rounded-lg p-2 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <Bell className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
-          {unreadCount > 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />}
+          {unreadCount > 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" aria-hidden="true" />}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[min(20rem,calc(100vw-2rem))] p-1.5">
@@ -58,20 +64,22 @@ export function AdminNotificationMenu() {
           <DropdownMenuLabel className="px-0 py-1 font-semibold">Notifications</DropdownMenuLabel>
           {unreadCount > 0 && (
             <DropdownMenuItem
-              disabled={pending}
-              onSelect={(event) => { event.preventDefault(); markAll.mutate(); }}
+              onSelect={(event) => { event.preventDefault(); markAll.mutate(undefined); }}
               className="text-xs text-primary"
             >
-              {markAll.isPending ? 'Updating…' : 'Mark all read'}
+              Mark all read
             </DropdownMenuItem>
           )}
         </div>
         <DropdownMenuSeparator />
-        {actionError && <p role="alert" className="px-3 py-2 text-xs text-destructive">{actionError}</p>}
         <div className="max-h-96 overflow-y-auto">
           {query.isPending ? (
-            <p role="status" className="px-3 py-4 text-sm text-muted-foreground">Loading notifications…</p>
-          ) : query.isError ? (
+            <div role="status" aria-label="Loading notifications" className="space-y-2 p-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : query.isError && !query.data ? (
             <>
               <p role="alert" className="px-3 py-2 text-sm text-destructive">Could not load notifications.</p>
               <DropdownMenuItem onSelect={(event) => { event.preventDefault(); void query.refetch(); }}>Retry loading</DropdownMenuItem>
@@ -81,7 +89,6 @@ export function AdminNotificationMenu() {
           ) : notifications.map((notification) => (
             <DropdownMenuItem
               key={notification.id}
-              disabled={pending}
               onSelect={(event) => {
                 event.preventDefault();
                 if (!notification.read) markRead.mutate(notification.id);

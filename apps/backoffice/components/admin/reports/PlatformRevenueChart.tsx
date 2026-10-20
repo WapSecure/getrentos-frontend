@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
+import { Badge } from '@getrentos/ui';
 import { TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@getrentos/shared';
 
@@ -49,16 +50,18 @@ export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
           </p>
         </div>
         {change !== null && (
-          <div
-            className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${change >= 0 ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}
+          <Badge
+            variant={change >= 0 ? 'success' : 'danger'}
+            icon={
+              <TrendingUp
+                className={`h-3 w-3 ${change < 0 ? 'rotate-180' : ''}`}
+                aria-hidden="true"
+              />
+            }
           >
-            <TrendingUp
-              className={`h-3 w-3 ${change < 0 ? 'rotate-180' : ''}`}
-              aria-hidden="true"
-            />
             {change >= 0 ? '+' : ''}
             {change.toFixed(1)}%
-          </div>
+          </Badge>
         )}
       </div>
 

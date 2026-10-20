@@ -19,7 +19,7 @@ export const ResetStep = ({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label className="block text-sm font-medium text-foreground mb-1.5">
           New Password
         </label>
         <Input
@@ -32,7 +32,7 @@ export const ResetStep = ({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label className="block text-sm font-medium text-foreground mb-1.5">
           Confirm Password
         </label>
         <Input
@@ -44,7 +44,7 @@ export const ResetStep = ({
         />
       </div>
 
-      <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <CheckCircle className="w-4 h-4 text-primary" />
         <span>Password must be at least 8 characters</span>
       </div>

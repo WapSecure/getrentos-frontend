@@ -2,15 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  Input,
-  Skeleton,
-  Toast,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Badge, Button, EmptyState, Input, Skeleton, useToast } from '@getrentos/ui';
 import { MessageSquare, Send, ShieldCheck } from 'lucide-react';
 import { cn } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -28,7 +20,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const queryKey = role === 'guest' ? shortletKeys.guestMessages : shortletKeys.hostMessages;
   const listFn = role === 'guest' ? shortletService.myMessages : shortletService.hostMessages;
@@ -54,9 +46,9 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
     onSuccess: () => {
       setDraft('');
       queryClient.invalidateQueries({ queryKey });
-      setToast({ message: 'Message sent.', variant: 'success' });
+      toast.success('Message sent.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const submit = () => {
@@ -94,6 +86,7 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                 <button
                   key={c.id}
                   type="button"
+                  aria-current={activeId === c.id ? 'true' : undefined}
                   onClick={() => openThread(c)}
                   className={cn(
                     'flex w-full items-start gap-2 border-b border-border p-3 text-left transition hover:bg-secondary/40',
@@ -171,6 +164,8 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                 <div className="flex gap-2">
                   <Input
                     placeholder="Write a message…"
+                    aria-label="Message"
+                    className="min-w-0 flex-1"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     onKeyDown={(e) => {
@@ -180,7 +175,13 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
                       }
                     }}
                   />
-                  <Button onClick={submit} disabled={!draft.trim() || send.isPending}>
+                  <Button
+                    onClick={submit}
+                    isLoading={send.isPending}
+                    disabled={!draft.trim()}
+                    aria-label="Send message"
+                    className="shrink-0"
+                  >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
@@ -199,10 +200,6 @@ export function ShortletMessagesInbox({ role }: { role: 'guest' | 'host' }) {
           )}
         </div>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

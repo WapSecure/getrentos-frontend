@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, Coins, Gauge, Users, Wallet, Wrench } from 'lucide-react';
-import { Card, PageErrorState } from '@getrentos/ui';
+import { Card, CardSkeleton, PageErrorState, StatGridSkeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { agencyDashboardService, type AgencyDashboard } from '@/services/agencyDashboardService';
 
@@ -24,7 +24,7 @@ export function AgencyOverviewView() {
     },
   });
 
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <div className="p-6">
         <PageErrorState
@@ -56,7 +56,13 @@ export function AgencyOverviewView() {
       </div>
 
       {!d ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <>
+          <StatGridSkeleton count={4} className="gap-4" />
+          <div className="mt-4 grid gap-4 lg:grid-cols-3">
+            <CardSkeleton lines={4} className="lg:col-span-2" />
+            <CardSkeleton lines={4} />
+          </div>
+        </>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

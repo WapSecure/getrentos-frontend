@@ -10,6 +10,7 @@ import {
   Key,
   CalendarDays,
 } from 'lucide-react';
+import { Alert, Badge } from '@getrentos/ui';
 
 interface ApplicationStep {
   id: string;
@@ -80,11 +81,11 @@ export const ApplicationTimeline = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'text-green-600';
+        return 'text-success';
       case 'current':
         return 'text-primary';
       default:
-        return 'text-gray-400';
+        return 'text-muted-foreground';
     }
   };
 
@@ -96,19 +97,19 @@ export const ApplicationTimeline = ({
     >
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Application Timeline</h3>
-        <p className="text-xs text-gray-500 mt-1">Track your application progress</p>
+        <p className="text-xs text-muted-foreground mt-1">Track your application progress</p>
       </div>
 
       <div className="p-4">
         {/* Progress Bar */}
         <div className="mb-4">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
             <span>Overall Progress</span>
             <span>
               {completedCount}/{totalSteps} steps
             </span>
           </div>
-          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-2 bg-secondary rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
@@ -133,58 +134,49 @@ export const ApplicationTimeline = ({
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     step.status === 'completed'
-                      ? 'bg-green-100 dark:bg-green-900/20'
+                      ? 'bg-success-subtle'
                       : step.status === 'current'
                         ? 'bg-primary/20'
                         : 'bg-secondary'
                   }`}
                 >
                   {step.status === 'completed' ? (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-success" />
                   ) : step.status === 'current' ? (
                     <Clock className="w-4 h-4 text-primary" />
                   ) : (
-                    <step.icon className="w-4 h-4 text-gray-400" />
+                    <step.icon className="w-4 h-4 text-muted-foreground" />
                   )}
                 </div>
                 {index < steps.length - 1 && (
                   <div
                     className={`absolute top-8 left-1/2 w-0.5 h-8 -translate-x-1/2 ${
-                      step.status === 'completed' ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'
+                      step.status === 'completed' ? 'bg-success' : 'bg-border'
                     }`}
                   />
                 )}
               </div>
 
               {/* Content */}
-              <div className="flex-1 pb-6">
-                <div className="flex justify-between items-start">
+              <div className="min-w-0 flex-1 pb-6">
+                <div className="flex justify-between items-start gap-2">
                   <h4 className={`text-sm font-semibold ${getStatusColor(step.status)}`}>
                     {step.title}
                   </h4>
-                  {step.status === 'current' && (
-                    <span className="text-xs text-primary px-2 py-0.5 rounded-full bg-accent">
-                      In Progress
-                    </span>
-                  )}
+                  {step.status === 'current' && <Badge variant="info">In Progress</Badge>}
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">{step.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
 
                 {/* Estimated dates */}
                 {step.id === 'submitted' && submittedDate && (
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Submitted: {new Date(submittedDate).toLocaleDateString()}
                   </p>
                 )}
                 {step.id === 'reviewing' && estimatedDecisionDate && step.status === 'current' && (
-                  <div className="mt-2 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="w-3 h-3 text-yellow-600" />
-                      <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                        Estimated decision: {new Date(estimatedDecisionDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
+                  <Alert variant="warning" icon={AlertCircle} className="mt-2 px-3 py-2 text-xs">
+                    Estimated decision: {new Date(estimatedDecisionDate).toLocaleDateString()}
+                  </Alert>
                 )}
               </div>
             </motion.div>
@@ -193,31 +185,15 @@ export const ApplicationTimeline = ({
 
         {/* Next Steps */}
         {currentStatus === 'approved' && (
-          <div className="mt-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium text-green-800 dark:text-green-300">
-                Next Steps
-              </span>
-            </div>
-            <p className="text-xs text-green-700 dark:text-green-400 mt-1">
-              Schedule your move-in inspection and complete the lease agreement
-            </p>
-          </div>
+          <Alert variant="success" icon={CalendarDays} title="Next Steps" className="mt-4">
+            Schedule your move-in inspection and complete the lease agreement
+          </Alert>
         )}
 
         {currentStatus === 'rejected' && (
-          <div className="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-medium text-red-800 dark:text-red-300">
-                Application Not Approved
-              </span>
-            </div>
-            <p className="text-xs text-red-700 dark:text-red-400 mt-1">
-              Contact the landlord for feedback or continue exploring other properties
-            </p>
-          </div>
+          <Alert variant="danger" title="Application Not Approved" className="mt-4">
+            Contact the landlord for feedback or continue exploring other properties
+          </Alert>
         )}
       </div>
     </motion.div>

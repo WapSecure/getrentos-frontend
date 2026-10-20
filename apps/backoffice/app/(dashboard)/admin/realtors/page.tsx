@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
 import { RealtorRegister } from '@/components/admin/marketplace/RealtorRegister';
 import { RealtorPayoutOversight } from '@/components/admin/marketplace/RealtorPayoutOversight';
 import { RealtorCommissionRates } from '@/components/admin/marketplace/RealtorCommissionRates';
@@ -25,22 +26,15 @@ export default function AdminRealtorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === t.id
-                ? 'bg-secondary text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+        <TabsList aria-label="Realtor views" className="max-w-full">
+          {TABS.map((t) => (
+            <TabsTrigger key={t.id} value={t.id} className="text-sm">
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {tab === 'register' && <RealtorRegister />}
       {tab === 'payouts' && <RealtorPayoutOversight />}

@@ -1,19 +1,22 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TrendingUp } from 'lucide-react';
 import {
   Badge,
   Button,
   Card,
+  CardSkeleton,
   CurrencyInput,
   DatePicker,
   EmptyState,
   Field,
   Input,
+  ListSkeleton,
   PageErrorState,
   Select,
+  StatGridSkeleton,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -177,7 +180,7 @@ const CostRow = ({
             {cost.voidedAt && <> · voided: {cost.voidReason}</>}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm tabular-nums text-foreground">
             {formatCurrency(cost.amount)}
           </span>
@@ -185,13 +188,14 @@ const CostRow = ({
             <Badge variant="neutral">Voided</Badge>
           ) : (
             canOperate && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="xs"
+                className="hover:text-destructive"
                 onClick={() => setVoiding((v) => !v)}
-                className="text-sm text-muted-foreground hover:text-destructive"
               >
                 Void
-              </button>
+              </Button>
             )
           )}
         </div>
@@ -232,11 +236,13 @@ export default function ManagedPnlPage() {
     queryKey: ['admin', 'managed-pnl', 'report', from, to, groupBy],
     queryFn: () => unwrap(adminManagedPnlService.report(from, to, groupBy)),
     enabled: from <= to,
+    placeholderData: keepPreviousData,
   });
   const costs = useQuery({
     queryKey: ['admin', 'managed-pnl', 'costs', from, to],
     queryFn: () => unwrap(adminManagedPnlService.costs(from, to)),
     enabled: from <= to,
+    placeholderData: keepPreviousData,
   });
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-pnl'] });
 
@@ -273,14 +279,17 @@ export default function ManagedPnlPage() {
         <p className="text-sm text-destructive">The first month must not be after the last.</p>
       )}
 
-      {report.isError ? (
+      {report.isError && !pnl ? (
         <PageErrorState
           title="Could not load the P&L"
           description={(report.error as Error).message}
           onRetry={() => void report.refetch()}
         />
       ) : report.isLoading || !pnl || !t ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <div className="space-y-6">
+          <StatGridSkeleton />
+          <CardSkeleton lines={6} />
+        </div>
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -413,7 +422,9 @@ export default function ManagedPnlPage() {
 
       <Card className="p-5">
         <h2 className="font-semibold text-foreground">Direct costs in this range</h2>
-        {(costs.data ?? []).length === 0 ? (
+        {costs.isLoading ? (
+          <ListSkeleton rows={3} className="mt-3" />
+        ) : (costs.data ?? []).length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">None recorded.</p>
         ) : (
           <ul className="divide-y divide-border">

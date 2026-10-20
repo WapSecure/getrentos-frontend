@@ -1,6 +1,7 @@
 'use client';
 
 import { Eye } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 
 /**
  * The estate's note about somebody it matched but did not refuse.
@@ -18,12 +19,8 @@ export const WatchlistWarning = ({ warning }: { warning?: string }) => {
   if (!warning) return null;
 
   return (
-    <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
-      <Eye className="w-5 h-5 shrink-0 mt-0.5" />
-      <div>
-        <p className="text-sm font-medium">On the estate&apos;s watch list</p>
-        <p className="text-xs opacity-80 mt-0.5">{warning}</p>
-      </div>
-    </div>
+    <Alert variant="warning" icon={Eye} title="On the estate’s watch list">
+      <p className="text-xs">{warning}</p>
+    </Alert>
   );
 };

@@ -1,10 +1,7 @@
 'use client';
 
-import { NumberInput } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { Wifi } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Field, NumberInput, SaveButton, Switch } from '@getrentos/ui';
 
 const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
 const dayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -36,12 +33,15 @@ export const FieldPreferencesSettings = () => {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Service Areas</label>
-          <div className="flex flex-wrap gap-2">
+          <p id="field-service-areas" className="block text-sm font-medium text-foreground mb-2">
+            Service Areas
+          </p>
+          <div role="group" aria-labelledby="field-service-areas" className="flex flex-wrap gap-2">
             {serviceAreaOptions.map((area) => (
               <button
                 key={area}
                 type="button"
+                aria-pressed={serviceAreas.includes(area)}
                 onClick={() => toggleArea(area)}
                 className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                   serviceAreas.includes(area)
@@ -56,12 +56,15 @@ export const FieldPreferencesSettings = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Available Days</label>
-          <div className="flex flex-wrap gap-2">
+          <p id="field-available-days" className="block text-sm font-medium text-foreground mb-2">
+            Available Days
+          </p>
+          <div role="group" aria-labelledby="field-available-days" className="flex flex-wrap gap-2">
             {dayOptions.map((day) => (
               <button
                 key={day}
                 type="button"
+                aria-pressed={availableDays.includes(day)}
                 onClick={() => toggleDay(day)}
                 className={`w-11 h-9 rounded-lg text-sm border transition-colors ${
                   availableDays.includes(day)
@@ -75,47 +78,20 @@ export const FieldPreferencesSettings = () => {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Max Tasks Per Day
-          </label>
-          <NumberInput
-            min={1}
-            max={20}
-            value={maxDailyTasks}
-            onValueChange={setMaxDailyTasks}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <Field label="Max Tasks Per Day">
+          <NumberInput min={1} max={20} value={maxDailyTasks} onValueChange={setMaxDailyTasks} />
+        </Field>
 
-        <label className="flex items-center justify-between p-3 rounded-lg border border-border cursor-pointer">
-          <div className="flex items-start gap-3">
-            <Wifi className="w-4 h-4 text-gray-400 mt-0.5" />
-            <div>
-              <p className="text-sm text-foreground">Sync photos over cellular data</p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                By default, large inspection photos wait for Wi-Fi to sync and save your data
-              </p>
-            </div>
-          </div>
-          <Toggle checked={syncOnCellular} onChange={() => setSyncOnCellular((v) => !v)} />
-        </label>
+        <Switch
+          checked={syncOnCellular}
+          onCheckedChange={setSyncOnCellular}
+          label="Sync photos over cellular data"
+          description="By default, large inspection photos wait for Wi-Fi to sync and save your data"
+          className="p-3 rounded-lg border border-border"
+        />
       </div>
 
       <SaveButton label="Save Preferences" className="mt-6" />
     </div>
   );
 };
-
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);

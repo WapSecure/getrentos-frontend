@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { TrendingUp } from 'lucide-react';
-import { Field, PageErrorState, PmKpiPack, Select, Skeleton } from '@getrentos/ui';
+import { Alert, Field, PageErrorState, PmKpiPack, Select, StatGridSkeleton } from '@getrentos/ui';
 import { recentMonthOptions } from '@getrentos/shared';
 import { agencyDashboardService } from '@/services/agencyDashboardService';
 
@@ -26,6 +26,7 @@ export function AgencyPerformanceView() {
       return res.data!;
     },
     enabled: from <= to,
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -46,32 +47,24 @@ export function AgencyPerformanceView() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <Field label="From" className="sm:w-52">
-          <div className="mt-1">
-            <Select ariaLabel="From month" value={from} onValueChange={setFrom} options={months} />
-          </div>
+          <Select ariaLabel="From month" value={from} onValueChange={setFrom} options={months} />
         </Field>
         <Field label="To" className="sm:w-52">
-          <div className="mt-1">
-            <Select ariaLabel="To month" value={to} onValueChange={setTo} options={months} />
-          </div>
+          <Select ariaLabel="To month" value={to} onValueChange={setTo} options={months} />
         </Field>
       </div>
       {from > to && (
-        <p className="text-sm text-destructive">The first month must not be after the last.</p>
+        <Alert variant="danger">The first month must not be after the last.</Alert>
       )}
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <PageErrorState
           title="Could not load the figures"
           description={(query.error as Error).message}
           onRetry={() => void query.refetch()}
         />
       ) : from > to ? null : query.isLoading || !query.data ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
-        </div>
+        <StatGridSkeleton count={4} className="gap-4 xl:grid-cols-4" />
       ) : (
         <PmKpiPack report={query.data} />
       )}

@@ -14,9 +14,9 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  ListSkeleton,
   Select,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -81,7 +81,7 @@ function utilisationTone(pct: number): { variant: 'success' | 'warning' | 'dange
 
 export function BudgetsView() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<BudgetForm>(emptyForm);
@@ -111,20 +111,18 @@ export function BudgetsView() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: landlordKeys.budgets() });
       setIsOpen(false);
-      setToast({ message: editingId ? 'Budget updated.' : 'Budget set.', variant: 'success' });
+      toast.success(editingId ? 'Budget updated.' : 'Budget set.');
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Unable to save this budget.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Unable to save this budget.'),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => unwrap(budgetService.remove(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: landlordKeys.budgets() });
-      setToast({ message: 'Budget removed.', variant: 'success' });
+      toast.success('Budget removed.');
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Unable to remove this budget.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Unable to remove this budget.'),
   });
 
   const openCreate = () => {
@@ -149,7 +147,7 @@ export function BudgetsView() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-foreground">Budgets vs actuals</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Set a spending target per property and category, and track it against what you&rsquo;ve
@@ -163,7 +161,7 @@ export function BudgetsView() {
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary/50" />
+        <ListSkeleton variant="cards" rows={2} />
       ) : budgets.length === 0 ? (
         <Card static className="p-2">
           <EmptyState
@@ -202,7 +200,7 @@ export function BudgetsView() {
                       </span>
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={tone.variant}>{b.utilisationPct}%</Badge>
                     <Button
                       variant="outline"
@@ -210,6 +208,7 @@ export function BudgetsView() {
                       rounded="md"
                       icon={<Pencil className="h-4 w-4" />}
                       onClick={() => openEdit(b)}
+                      aria-label={`Edit budget for ${b.propertyTitle}`}
                     >
                       Edit
                     </Button>
@@ -219,7 +218,9 @@ export function BudgetsView() {
                       rounded="md"
                       icon={<Trash2 className="h-4 w-4" />}
                       onClick={() => remove.mutate(b.id)}
-                      disabled={remove.isPending}
+                      disabled={remove.isPending && remove.variables !== b.id}
+                      isLoading={remove.isPending && remove.variables === b.id}
+                      aria-label={`Remove budget for ${b.propertyTitle}`}
                     >
                       Remove
                     </Button>
@@ -294,17 +295,14 @@ export function BudgetsView() {
             <Button
               rounded="md"
               onClick={() => save.mutate()}
-              disabled={!canSave || save.isPending}
+              disabled={!canSave}
+              isLoading={save.isPending}
             >
-              {save.isPending ? 'Saving…' : editingId ? 'Update budget' : 'Set budget'}
+              {editingId ? 'Update budget' : 'Set budget'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
-  X,
   Check,
   Lock,
   ShieldAlert,
@@ -17,8 +15,17 @@ import {
   Clock,
   Banknote,
   XCircle,
+  type LucideIcon,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Alert,
+  type AlertVariant,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type {
   EscrowSaleTransaction,
@@ -73,36 +80,32 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
 
 const payoutStatusMeta: Record<
   NonNullable<EscrowSaleTransaction['sellerPayoutStatus']>,
-  { title: string; description: string; icon: React.ReactNode; className: string }
+  { title: string; description: string; icon: LucideIcon; variant: AlertVariant }
 > = {
   PENDING: {
     title: 'Payout pending',
     description: 'Set up your payout account so the sale proceeds can be sent to you.',
-    icon: <Clock className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />,
-    className:
-      'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400',
+    icon: Clock,
+    variant: 'warning',
   },
   PROCESSING: {
     title: 'Payout on its way',
     description: 'The transfer has been sent and is waiting on your bank to confirm it.',
-    icon: <Clock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />,
-    className:
-      'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400',
+    icon: Clock,
+    variant: 'info',
   },
   PAID: {
     title: 'Paid out',
     description: 'The sale proceeds have been sent to your payout account.',
-    icon: <Banknote className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />,
-    className:
-      'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
+    icon: Banknote,
+    variant: 'success',
   },
   FAILED: {
     title: 'Payout failed',
     description:
       'The transfer to your payout account didn’t go through. Check your account details.',
-    icon: <XCircle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />,
-    className:
-      'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
+    icon: XCircle,
+    variant: 'danger',
   },
 };
 
@@ -118,203 +121,167 @@ export const EscrowTransactionDetailModal = ({
   const isFrozen = transaction.escrowStatus === 'frozen' || transaction.escrowStatus === 'disputed';
   const isRefunded = transaction.escrowStatus === 'refunded';
   const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
+  const payout = transaction.sellerPayoutStatus
+    ? payoutStatusMeta[transaction.sellerPayoutStatus]
+    : null;
 
   return (
-    <AnimatePresence>
-      {transaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="font-semibold text-foreground">{transaction.propertyName}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Buyer: {transaction.buyerName}
-                </p>
-              </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-5 overflow-y-auto flex-1">
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Sale Price</span>
-                <span className="text-lg font-bold text-primary">
-                  {formatCurrency(transaction.salePrice)}
-                </span>
-              </div>
-
-              {isFrozen ? (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-red-700 dark:text-red-400">
-                      Payment on hold: dispute open
-                    </p>
-                    <p className="text-xs text-red-600 dark:text-red-300 mt-0.5">
-                      {transaction.disputeReason ||
-                        'A dispute has been raised on this transaction. Funds are held until resolution.'}
-                    </p>
-                  </div>
-                </div>
-              ) : isRefunded ? (
-                <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-foreground">Payment refunded</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      GetRentos refunded the buyer&apos;s payment and this sale will not go ahead.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <h4 className="text-sm font-medium text-foreground mb-3">Payment progress</h4>
-                  <div className="space-y-0">
-                    {escrowSteps.map((step, index) => {
-                      const isDone = index < activeIndex || transaction.escrowStatus === 'released';
-                      const isActive =
-                        index === activeIndex && transaction.escrowStatus !== 'released';
-                      const isLast = index === escrowSteps.length - 1;
-                      return (
-                        <div key={step.key} className="flex gap-3">
-                          <div className="flex flex-col items-center">
-                            <div
-                              className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                                isDone || (isActive && transaction.escrowStatus === 'released')
-                                  ? 'bg-primary text-white'
-                                  : isActive
-                                    ? 'bg-primary/20 text-primary ring-2 ring-primary'
-                                    : 'bg-secondary text-gray-400'
-                              }`}
-                            >
-                              {isDone ? (
-                                <Check className="w-3.5 h-3.5" />
-                              ) : (
-                                <span className="text-xs font-semibold">{index + 1}</span>
-                              )}
-                            </div>
-                            {!isLast && (
-                              <div
-                                className={`w-0.5 flex-1 min-h-6 ${isDone ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'}`}
-                              />
-                            )}
-                          </div>
-                          <div className="pb-5">
-                            <p
-                              className={`text-sm font-medium ${
-                                isDone || isActive ? 'text-foreground' : 'text-muted-foreground'
-                              }`}
-                            >
-                              {step.label}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-0.5">{step.description}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Land sales only: their conveyance steps gate the payout. */}
-              <LandConveyanceEntry transaction={transaction} />
-
-              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                <Lock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-blue-700 dark:text-blue-300">
-                  GetRentos holds the buyer’s money and pays it to you automatically once all
-                  verification and payment conditions are met. It can’t be paid out early, which
-                  protects both parties.
-                </p>
-              </div>
-
-              {transaction.releasedAt && (
-                <p className="text-xs text-gray-400 text-center">
-                  Funds released on {formatDate(transaction.releasedAt)}
-                </p>
-              )}
-
-              {transaction.sellerPayoutStatus && (
-                <div
-                  className={`p-3 rounded-lg border flex items-start gap-2 ${
-                    payoutStatusMeta[transaction.sellerPayoutStatus].className
-                  }`}
-                >
-                  {payoutStatusMeta[transaction.sellerPayoutStatus].icon}
-                  <div>
-                    <p className="text-xs font-medium">
-                      {payoutStatusMeta[transaction.sellerPayoutStatus].title}
-                    </p>
-                    <p className="text-xs mt-0.5 opacity-80">
-                      {payoutStatusMeta[transaction.sellerPayoutStatus].description}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="border border-border rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setShowActivityLog((v) => !v)}
-                  className="w-full flex items-center justify-between p-3 text-left hover:bg-secondary transition-colors"
-                >
-                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <ScrollText className="w-4 h-4 text-gray-400" />
-                    Activity Log
-                    <span className="text-xs font-normal text-gray-400">
-                      ({transaction.activityLog.length} events)
-                    </span>
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-400 transition-transform ${showActivityLog ? 'rotate-180' : ''}`}
-                  />
-                </button>
-
-                {showActivityLog && (
-                  <div className="border-t border-border divide-y divide-border">
-                    {transaction.activityLog.map((entry) => {
-                      const actor = actorConfig[entry.actor];
-                      const ActorIcon = actor.icon;
-                      return (
-                        <div key={entry.id} className="flex items-start gap-3 p-3">
-                          <div className="p-1.5 rounded-lg bg-secondary shrink-0">
-                            <ActorIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs text-foreground">{entry.action}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
-                              {actor.label} · {formatDate(entry.timestamp, 'long')}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" className="flex-1" onClick={onClose}>
-                Close
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 gap-1.5"
-                onClick={() => router.push(ROUTES.OWNER_MESSAGES)}
-              >
-                <LifeBuoy className="w-4 h-4" />
-                Contact Support
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0">
+        <div className="shrink-0 border-b border-border p-4 pr-12">
+          <DialogTitle className="font-semibold text-foreground">
+            {transaction.propertyName}
+          </DialogTitle>
+          <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+            Buyer: {transaction.buyerName}
+          </DialogDescription>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="flex-1 space-y-5 overflow-y-auto p-4">
+          <div className="flex items-center justify-between rounded-lg bg-secondary/60 p-3">
+            <span className="text-sm text-muted-foreground">Sale Price</span>
+            <span className="text-lg font-bold text-primary">
+              {formatCurrency(transaction.salePrice)}
+            </span>
+          </div>
+
+          {isFrozen ? (
+            <Alert variant="danger" icon={ShieldAlert} title="Payment on hold: dispute open">
+              {transaction.disputeReason ||
+                'A dispute has been raised on this transaction. Funds are held until resolution.'}
+            </Alert>
+          ) : isRefunded ? (
+            <Alert variant="neutral" icon={ShieldAlert} title="Payment refunded">
+              GetRentos refunded the buyer&apos;s payment and this sale will not go ahead.
+            </Alert>
+          ) : (
+            <div>
+              <h4 className="mb-3 text-sm font-medium text-foreground">Payment progress</h4>
+              <ol className="space-y-0">
+                {escrowSteps.map((step, index) => {
+                  const isDone = index < activeIndex || transaction.escrowStatus === 'released';
+                  const isActive =
+                    index === activeIndex && transaction.escrowStatus !== 'released';
+                  const isLast = index === escrowSteps.length - 1;
+                  return (
+                    <li key={step.key} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                            isDone || (isActive && transaction.escrowStatus === 'released')
+                              ? 'bg-primary text-primary-foreground'
+                              : isActive
+                                ? 'bg-primary/20 text-primary ring-2 ring-primary'
+                                : 'bg-secondary text-muted-foreground'
+                          }`}
+                        >
+                          {isDone ? (
+                            <Check className="h-3.5 w-3.5" />
+                          ) : (
+                            <span className="text-xs font-semibold">{index + 1}</span>
+                          )}
+                        </div>
+                        {!isLast && (
+                          <div
+                            className={`min-h-6 w-0.5 flex-1 ${isDone ? 'bg-primary' : 'bg-border'}`}
+                          />
+                        )}
+                      </div>
+                      <div className="pb-5">
+                        <p
+                          className={`text-sm font-medium ${
+                            isDone || isActive ? 'text-foreground' : 'text-muted-foreground'
+                          }`}
+                        >
+                          {step.label}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{step.description}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+
+          {/* Land sales only: their conveyance steps gate the payout. */}
+          <LandConveyanceEntry transaction={transaction} />
+
+          <Alert variant="info" icon={Lock}>
+            GetRentos holds the buyer’s money and pays it to you automatically once all
+            verification and payment conditions are met. It can’t be paid out early, which
+            protects both parties.
+          </Alert>
+
+          {transaction.releasedAt && (
+            <p className="text-center text-xs text-muted-foreground">
+              Funds released on {formatDate(transaction.releasedAt)}
+            </p>
+          )}
+
+          {payout && (
+            <Alert variant={payout.variant} icon={payout.icon} title={payout.title}>
+              {payout.description}
+            </Alert>
+          )}
+
+          <div className="overflow-hidden rounded-lg border border-border">
+            <button
+              type="button"
+              onClick={() => setShowActivityLog((v) => !v)}
+              aria-expanded={showActivityLog}
+              className="flex w-full items-center justify-between p-3 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <ScrollText className="h-4 w-4 text-muted-foreground" />
+                Activity Log
+                <span className="text-xs font-normal text-muted-foreground">
+                  ({transaction.activityLog.length} events)
+                </span>
+              </span>
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground transition-transform ${showActivityLog ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {showActivityLog && (
+              <div className="divide-y divide-border border-t border-border">
+                {transaction.activityLog.map((entry) => {
+                  const actor = actorConfig[entry.actor];
+                  const ActorIcon = actor.icon;
+                  return (
+                    <div key={entry.id} className="flex items-start gap-3 p-3">
+                      <div className="shrink-0 rounded-lg bg-secondary p-1.5">
+                        <ActorIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs text-foreground">{entry.action}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {actor.label} · {formatDate(entry.timestamp, 'long')}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex shrink-0 gap-3 border-t border-border p-4">
+          <Button variant="ghost" className="flex-1" onClick={onClose}>
+            Close
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => router.push(ROUTES.OWNER_MESSAGES)}
+            icon={<LifeBuoy className="h-4 w-4" />}
+          >
+            Contact Support
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

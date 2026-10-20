@@ -1,11 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { X, Plus, Trash2, Camera, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  IconButton,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
 import type {
@@ -142,184 +149,173 @@ export const NewInspectionModal = ({
   const canSubmit = taskId && rooms.every((r) => r.room.trim());
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">New Inspection</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Task <span className="text-red-500">*</span>
-                </label>
-                <Select
-                  value={taskId}
-                  onValueChange={setTaskId}
-                  placeholder="Select an inspection task"
-                  options={tasks.map((task) => ({
-                    value: task.id,
-                    label: `${task.title}: ${task.propertyAddress}`,
-                  }))}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Inspection Type <span className="text-red-500">*</span>
-                </label>
-                <Select
-                  value={type}
-                  onValueChange={(value) => setType(value as InspectionType)}
-                  options={inspectionTypeOptions}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Client Name <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <Input
-                  type="text"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                  placeholder={selectedTask?.assignedBy || 'Client name'}
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-foreground">Rooms</label>
-                  <Button variant="ghost" size="xs" className="gap-1" onClick={addRoom}>
-                    <Plus className="w-3 h-3" />
-                    Add Room
-                  </Button>
-                </div>
-                <div className="space-y-3">
-                  {rooms.map((room, index) => (
-                    <div key={index} className="p-3 rounded-lg border border-border space-y-2">
-                      <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          value={room.room}
-                          onChange={(e) => updateRoom(index, 'room', e.target.value)}
-                          placeholder="e.g. Living Room"
-                          className="flex-1"
-                          inputClassName="py-1.5"
-                        />
-                        <Select
-                          value={room.condition}
-                          onValueChange={(value) =>
-                            updateRoom(index, 'condition', value as RoomCondition)
-                          }
-                          options={conditionOptions.map((condition) => ({
-                            value: condition,
-                            label: condition.charAt(0).toUpperCase() + condition.slice(1),
-                          }))}
-                          className="min-h-9 w-32"
-                        />
-                        {rooms.length > 1 && (
-                          <button
-                            onClick={() => removeRoom(index)}
-                            className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                      <Input
-                        type="text"
-                        value={room.notes}
-                        onChange={(e) => updateRoom(index, 'notes', e.target.value)}
-                        placeholder="Notes (optional)"
-                        inputClassName="py-1.5"
-                      />
-                      {(() => {
-                        const roomPhotos = photos.filter(
-                          (p) => p.room === room.room.trim() && room.room.trim()
-                        );
-                        return (
-                          <div className="space-y-2">
-                            {roomPhotos.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {roomPhotos.map((photo) => (
-                                  <div key={photo.id} className="relative h-14 w-14">
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img
-                                      src={photo.url}
-                                      alt={photo.name}
-                                      className="h-14 w-14 rounded-md object-cover"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => removePhoto(photo.id)}
-                                      className="absolute -right-1.5 -top-1.5 rounded-full bg-destructive p-0.5 text-white"
-                                      aria-label="Remove photo"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            <label className="flex w-fit cursor-pointer items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-                              <Camera className="h-3.5 w-3.5" />
-                              {uploadingRoom === room.room && room.room
-                                ? 'Uploading…'
-                                : roomPhotos.length > 0
-                                  ? 'Add another photo'
-                                  : 'Attach photo'}
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                disabled={!taskId || !room.room.trim() || uploadingRoom !== null}
-                                onChange={(e) => {
-                                  void uploadPhoto(room.room, e.target.files?.[0]);
-                                  e.target.value = '';
-                                }}
-                              />
-                            </label>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  ))}
-                </div>
-                {photoError && <p className="mt-2 text-xs text-destructive">{photoError}</p>}
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-border shrink-0">
-              <Button
-                variant="primary"
-                fullWidth
-                className="gap-1.5"
-                onClick={() => void handleSubmit()}
-                disabled={!canSubmit || isSubmitting}
-              >
-                <Check className="w-4 h-4" />
-                {isSubmitting ? 'Saving…' : 'Save Inspection'}
-              </Button>
-              {submitError && (
-                <p className="mt-2 text-xs text-destructive" role="alert">
-                  {submitError}
-                </p>
-              )}
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg sm:p-0">
+        <div className="p-4 pr-12 border-b border-border shrink-0">
+          <DialogTitle className="font-semibold text-foreground">New Inspection</DialogTitle>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+          <Field label="Task" required>
+            <Select
+              value={taskId}
+              onValueChange={setTaskId}
+              placeholder="Select an inspection task"
+              options={tasks.map((task) => ({
+                value: task.id,
+                label: `${task.title}: ${task.propertyAddress}`,
+              }))}
+            />
+          </Field>
+
+          <Field label="Inspection Type" required>
+            <Select
+              value={type}
+              onValueChange={(value) => setType(value as InspectionType)}
+              options={inspectionTypeOptions}
+            />
+          </Field>
+
+          <Field label="Client Name" optionalLabel="(optional)">
+            <Input
+              type="text"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              placeholder={selectedTask?.assignedBy || 'Client name'}
+            />
+          </Field>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-foreground">Rooms</p>
+              <Button
+                variant="ghost"
+                size="xs"
+                icon={<Plus className="w-3 h-3" />}
+                onClick={addRoom}
+              >
+                Add Room
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {rooms.map((room, index) => (
+                <div key={index} className="p-3 rounded-lg border border-border space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={room.room}
+                      onChange={(e) => updateRoom(index, 'room', e.target.value)}
+                      placeholder="e.g. Living Room"
+                      aria-label={`Room ${index + 1} name`}
+                      className="min-w-0 flex-1"
+                      inputClassName="py-1.5"
+                    />
+                    <Select
+                      value={room.condition}
+                      onValueChange={(value) =>
+                        updateRoom(index, 'condition', value as RoomCondition)
+                      }
+                      ariaLabel={`Room ${index + 1} condition`}
+                      options={conditionOptions.map((condition) => ({
+                        value: condition,
+                        label: condition.charAt(0).toUpperCase() + condition.slice(1),
+                      }))}
+                      className="min-h-9 w-32 shrink-0"
+                    />
+                    {rooms.length > 1 && (
+                      <IconButton
+                        label={`Remove room ${index + 1}`}
+                        icon={<Trash2 />}
+                        variant="danger"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => removeRoom(index)}
+                      />
+                    )}
+                  </div>
+                  <Input
+                    type="text"
+                    value={room.notes}
+                    onChange={(e) => updateRoom(index, 'notes', e.target.value)}
+                    placeholder="Notes (optional)"
+                    aria-label={`Room ${index + 1} notes`}
+                    inputClassName="py-1.5"
+                  />
+                  {(() => {
+                    const roomPhotos = photos.filter(
+                      (p) => p.room === room.room.trim() && room.room.trim()
+                    );
+                    return (
+                      <div className="space-y-2">
+                        {roomPhotos.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {roomPhotos.map((photo) => (
+                              <div key={photo.id} className="relative h-14 w-14">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={photo.url}
+                                  alt={photo.name}
+                                  className="h-14 w-14 rounded-md object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removePhoto(photo.id)}
+                                  className="absolute -right-1.5 -top-1.5 rounded-full bg-destructive p-0.5 text-destructive-foreground"
+                                  aria-label="Remove photo"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <label className="flex w-fit cursor-pointer items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
+                          <Camera className="h-3.5 w-3.5" />
+                          {uploadingRoom === room.room && room.room
+                            ? 'Uploading…'
+                            : roomPhotos.length > 0
+                              ? 'Add another photo'
+                              : 'Attach photo'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={!taskId || !room.room.trim() || uploadingRoom !== null}
+                            onChange={(e) => {
+                              void uploadPhoto(room.room, e.target.files?.[0]);
+                              e.target.value = '';
+                            }}
+                          />
+                        </label>
+                      </div>
+                    );
+                  })()}
+                </div>
+              ))}
+            </div>
+            {photoError && <p className="mt-2 text-xs text-destructive">{photoError}</p>}
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-border shrink-0">
+          <Button
+            variant="primary"
+            fullWidth
+            icon={<Check className="w-4 h-4" />}
+            onClick={() => void handleSubmit()}
+            isLoading={isSubmitting}
+            loadingText="Saving…"
+            disabled={!canSubmit}
+          >
+            Save Inspection
+          </Button>
+          {submitError && (
+            <Alert variant="danger" className="mt-2">
+              {submitError}
+            </Alert>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

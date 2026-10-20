@@ -10,7 +10,7 @@ import { MagicLinkSignIn } from './methods/MagicLinkSignIn';
 import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
-import { Toast, ToastVariant } from '@getrentos/ui';
+import { useToast, type ToastVariant } from '@getrentos/ui';
 import { SessionExpiredNotice } from '@getrentos/ui';
 import { AuthMethodTabs } from '../AuthMethodTabs';
 
@@ -21,7 +21,7 @@ interface SignInRightContentProps {
 
 export const SignInRightContent = ({ method, setMethod }: SignInRightContentProps) => {
   const router = useRouter();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
@@ -49,8 +49,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   }, [isLocked, lockoutTimer]);
 
   const showToast = (message: string, variant: ToastVariant) => {
-    setToast({ message, variant });
-    setTimeout(() => setToast(null), 5000);
+    toast.show(message, variant);
   };
 
   const handleLoginAttempt = () => {
@@ -109,10 +108,6 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
   return (
     <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
       <div className="w-full max-w-[30rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
         {/* Back Button */}
         <button
@@ -143,7 +138,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
 
         {/* Lockout Warning */}
         {isLocked && lockoutTimer && (
-          <div className="mb-4 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-600 dark:text-yellow-400 text-sm flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-lg bg-warning-subtle border border-warning/20 text-warning text-sm flex items-center gap-2">
             <span>
               Account temporarily locked. Try again in {Math.floor(lockoutTimer / 60)}:
               {(lockoutTimer % 60).toString().padStart(2, '0')}

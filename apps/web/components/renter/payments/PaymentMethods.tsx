@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CreditCard, Building2, Wallet, Plus, Trash2 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, Card, IconButton, Input, NumberInput } from '@getrentos/ui';
 
 interface PaymentMethod {
   id: string;
@@ -27,6 +25,7 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
   const [showAdd, setShowAdd] = useState(false);
   const [last4, setLast4] = useState('');
   const [expiry, setExpiry] = useState('');
+  const [adding, setAdding] = useState(false);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -43,22 +42,31 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
 
   const handleAdd = async () => {
     if (!last4 || !expiry) return;
-    await onAdd({ last4, expiry });
-    setLast4('');
-    setExpiry('');
-    setShowAdd(false);
+    setAdding(true);
+    try {
+      await onAdd({ last4, expiry });
+      setLast4('');
+      setExpiry('');
+      setShowAdd(false);
+    } finally {
+      setAdding(false);
+    }
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
             <h3 className="font-semibold text-foreground">Payment Methods</h3>
             <p className="text-xs text-muted-foreground mt-0.5">Manage your payment options</p>
           </div>
-          <Button size="sm" variant="ghost" onClick={() => setShowAdd(!showAdd)}>
-            <Plus className="w-4 h-4" />
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Plus className="w-4 h-4" />}
+            onClick={() => setShowAdd(!showAdd)}
+          >
             Add
           </Button>
         </div>
@@ -75,40 +83,36 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
               transition={{ delay: index * 0.05 }}
               className="flex items-center justify-between p-3 hover:bg-secondary transition-colors"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-gray-500" />
+                  <Icon className="w-5 h-5 text-muted-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">{method.name}</p>
                   {method.expiry && (
-                    <p className="text-xs text-gray-500">Expires {method.expiry}</p>
+                    <p className="text-xs text-muted-foreground">Expires {method.expiry}</p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {method.isDefault && (
-                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs rounded-full">
-                    Default
-                  </span>
-                )}
+                {method.isDefault && <Badge variant="success">Default</Badge>}
                 {!method.isDefault && (
-                  <button
-                    type="button"
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    className="text-primary"
                     onClick={() => onSetDefault(method.id)}
-                    className="min-h-9 rounded-lg px-2 text-xs font-semibold text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
                   >
                     Set default
-                  </button>
+                  </Button>
                 )}
-                <button
-                  type="button"
+                <IconButton
+                  variant="danger"
+                  size="sm"
+                  label={`Remove ${method.name}`}
+                  icon={<Trash2 aria-hidden="true" />}
                   onClick={() => onRemove(method.id)}
-                  aria-label={`Remove ${method.name}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-destructive/15"
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
+                />
               </div>
             </motion.div>
           );
@@ -118,27 +122,30 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
       {showAdd && (
         <div className="p-4 border-t border-border">
           <div className="flex gap-2">
-            <LegacyInput
-              type="text"
-              value={last4}
-              onChange={(e) => setLast4(e.target.value)}
-              placeholder="Last 4 digits"
-              maxLength={4}
-              className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <LegacyInput
+            <div className="min-w-0 flex-1">
+              <NumberInput
+                value={last4}
+                onValueChange={setLast4}
+                placeholder="Last 4 digits"
+                aria-label="Last 4 digits"
+                maxLength={4}
+              />
+            </div>
+            <Input
               type="text"
               value={expiry}
               onChange={(e) => setExpiry(e.target.value)}
               placeholder="MM/YY"
-              className="w-20 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Expiry (MM/YY)"
+              maxLength={5}
+              className="w-24"
             />
-            <Button size="sm" onClick={handleAdd}>
+            <Button size="sm" onClick={handleAdd} isLoading={adding}>
               Add
             </Button>
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

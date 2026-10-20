@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Gavel, Clock, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { Button, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import { Gavel, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Button, Textarea, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   trustAppealService,
@@ -22,22 +22,22 @@ const STATUS_PRESENTATION: Record<
   OPEN: {
     label: 'Appeal submitted — under review',
     icon: Clock,
-    className: 'text-amber-700 dark:text-amber-400',
+    className: 'text-warning',
   },
   UNDER_REVIEW: {
     label: 'Appeal under review',
     icon: Clock,
-    className: 'text-amber-700 dark:text-amber-400',
+    className: 'text-warning',
   },
   OVERTURNED: {
     label: 'Appeal successful — the decision has been reopened for review',
     icon: CheckCircle2,
-    className: 'text-emerald-700 dark:text-emerald-400',
+    className: 'text-success',
   },
   UPHELD: {
     label: 'Appeal reviewed — the original decision stands',
     icon: XCircle,
-    className: 'text-red-700 dark:text-red-400',
+    className: 'text-destructive',
   },
   CLOSED: {
     label: 'Appeal closed',
@@ -70,7 +70,7 @@ export const AppealControl = ({
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: appeals, isLoading } = useQuery({
     queryKey: MY_APPEALS_KEY,
@@ -88,10 +88,9 @@ export const AppealControl = ({
       queryClient.invalidateQueries({ queryKey: MY_APPEALS_KEY });
       setOpen(false);
       setReason('');
-      setToast({ message: 'Appeal submitted. An officer will review it.', variant: 'success' });
+      toast.success('Appeal submitted. An officer will review it.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not submit your appeal.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not submit your appeal.'),
   });
 
   if (isLoading) return null;
@@ -121,20 +120,16 @@ export const AppealControl = ({
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder={`Tell us why you are appealing ${subject} (at least 10 characters).`}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label="Reason for your appeal"
           />
           <div className="flex gap-2">
             <Button
               size="sm"
-              disabled={reason.trim().length < 10 || file.isPending}
+              disabled={reason.trim().length < 10}
+              isLoading={file.isPending}
               onClick={() => file.mutate()}
-              className="gap-1.5"
+              icon={<Gavel className="h-4 w-4" />}
             >
-              {file.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Gavel className="h-4 w-4" />
-              )}
               Submit appeal
             </Button>
             <Button
@@ -159,10 +154,6 @@ export const AppealControl = ({
           <Gavel className="h-3.5 w-3.5" />
           Appeal this decision
         </button>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

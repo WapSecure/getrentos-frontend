@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Copy, Check, Gift, Users, Wallet, Mail, MessageCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton } from '@getrentos/ui';
 import { referralService } from '@/services/referralService';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { ReferralSummary } from '@/types/referral';
@@ -24,14 +24,12 @@ export const ReferralSummaryCard = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading…</div>;
+    return <CardSkeleton lines={4} />;
   }
 
   if (!summary) {
     return (
-      <div className="text-sm text-red-600 dark:text-red-400">
-        Couldn&apos;t load your referral details. Please try again.
-      </div>
+      <Alert variant="danger">Couldn&apos;t load your referral details. Please try again.</Alert>
     );
   }
 
@@ -91,7 +89,7 @@ export const ReferralSummaryCard = () => {
         </div>
 
         <div className="flex items-center gap-2 mb-5">
-          <div className="flex-1 min-w-0 p-3 rounded-xl bg-gray-50 dark:bg-white/5 text-center">
+          <div className="flex-1 min-w-0 p-3 rounded-xl bg-secondary text-center">
             <span className="text-2xl font-bold tracking-widest text-primary">{summary.code}</span>
           </div>
           <Button variant="outline" onClick={handleCopyLink} className="gap-2 shrink-0">
@@ -104,6 +102,7 @@ export const ReferralSummaryCard = () => {
           {shareOptions.map((option) => (
             <button
               key={option.name}
+              type="button"
               onClick={option.action}
               className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
             >

@@ -281,7 +281,7 @@ export const GeoInsightsPanel = ({
                             <li key={place.name} className="text-xs text-muted-foreground">
                               <span className="font-medium text-foreground">{place.name}</span>
                               {place.rating != null && (
-                                <span className="ml-1 text-amber-600 dark:text-amber-400">
+                                <span className="ml-1 text-warning">
                                   ★ {place.rating.toFixed(1)}
                                 </span>
                               )}{' '}

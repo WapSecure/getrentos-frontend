@@ -68,13 +68,13 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
         {!isCurrentUser && (
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-medium text-foreground">{message.senderName}</span>
-            <span className="text-xs text-gray-500 capitalize">{message.senderRole}</span>
+            <span className="text-xs text-muted-foreground capitalize">{message.senderRole}</span>
           </div>
         )}
 
         <div
           className={`rounded-2xl p-3 ${
-            isCurrentUser ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-800 text-foreground'
+            isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
           }`}
         >
           <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
@@ -86,7 +86,7 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
                 <div
                   key={index}
                   className={`flex items-center gap-2 p-2 rounded-lg ${
-                    isCurrentUser ? 'bg-primary-hover' : 'bg-white/50 dark:bg-gray-700/50'
+                    isCurrentUser ? 'bg-primary-hover' : 'bg-background/60'
                   }`}
                 >
                   <span className="text-sm">{renderAttachmentIcon(attachment.type)}</span>
@@ -103,11 +103,11 @@ export const MessageBubble = ({ message, isCurrentUser }: MessageBubbleProps) =>
         <div
           className={`flex items-center gap-1 mt-1 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
         >
-          <span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
+          <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
           {isCurrentUser && (
-            <span className="text-gray-400">
+            <span className="text-muted-foreground">
               {message.read ? (
-                <CheckCheck className="w-3 h-3 text-green-500" />
+                <CheckCheck className="w-3 h-3 text-success" />
               ) : (
                 <Check className="w-3 h-3" />
               )}

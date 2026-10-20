@@ -5,7 +5,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Handshake, ShieldCheck, MessageCircle, CalendarClock, Heart, Bell } from 'lucide-react';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Switch, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService, type BuyerNotificationPreference } from '@/services/buyerService';
@@ -22,7 +22,7 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> 
 export const NotificationSettings = () => {
   const queryClient = useQueryClient();
   const [preferences, setPreferences] = useState<BuyerNotificationPreference[]>([]);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: serverPrefs = [] } = useQuery({
     queryKey: buyerKeys.notificationPrefs,
@@ -43,13 +43,9 @@ export const NotificationSettings = () => {
     mutationFn: () => unwrap(buyerService.updateNotificationPreferences(preferences)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: buyerKeys.notificationPrefs });
-      setToast({ message: 'Notification preferences saved.', variant: 'success' });
+      toast.success('Notification preferences saved.');
     },
-    onError: (error) =>
-      setToast({
-        message: error.message || 'Failed to save notification preferences.',
-        variant: 'error',
-      }),
+    onError: (error) => toast.error(error.message || 'Failed to save notification preferences.'),
   });
 
   return (
@@ -74,19 +70,27 @@ export const NotificationSettings = () => {
               className="flex items-center justify-between p-3 rounded-lg border border-border"
             >
               <div className="flex items-center gap-3">
-                <Icon className="w-4 h-4 text-gray-400" />
+                <Icon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-foreground">{meta.label}</span>
               </div>
               <div className="flex items-center gap-8">
                 <div className="w-10 flex justify-center">
                   {categorySendsEmail(pref.id) ? (
-                    <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                    <Switch
+                      checked={pref.email}
+                      onCheckedChange={() => toggle(pref.id, 'email')}
+                      aria-label={`${meta.label} by email`}
+                    />
                   ) : (
                     <NoEmail />
                   )}
                 </div>
                 <div className="w-10 flex justify-center">
-                  <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                  <Switch
+                    checked={pref.push}
+                    onCheckedChange={() => toggle(pref.id, 'push')}
+                    aria-label={`${meta.label} by push`}
+                  />
                 </div>
               </div>
             </div>
@@ -103,26 +107,9 @@ export const NotificationSettings = () => {
       >
         Save Preferences
       </Button>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };
-
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);
 
 /** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (

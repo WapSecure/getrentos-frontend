@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import { IconButton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
@@ -27,21 +28,21 @@ interface StatCardProps {
 }
 
 const colorClasses = {
-  blue: { bg: 'bg-blue-50 dark:bg-blue-950/20', icon: 'text-blue-600 dark:text-blue-400' },
+  blue: { bg: 'bg-info-subtle', icon: 'text-info' },
   orange: {
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    icon: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-warning-subtle',
+    icon: 'text-warning',
   },
   purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    icon: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-primary/10',
+    icon: 'text-primary',
   },
   emerald: {
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    icon: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-success-subtle',
+    icon: 'text-success',
   },
   gold: { bg: 'bg-accent', icon: 'text-primary' },
-  green: { bg: 'bg-green-50 dark:bg-green-950/20', icon: 'text-green-600 dark:text-green-400' },
+  green: { bg: 'bg-success-subtle', icon: 'text-success' },
 } as const;
 
 const StatCard = ({
@@ -74,14 +75,13 @@ const StatCard = ({
     >
       <div className="relative p-4">
         {isCurrency && onToggleMoney ? (
-          <button
-            type="button"
+          <IconButton
             onClick={onToggleMoney}
-            aria-label={moneyVisible ? 'Hide monetary values' : 'Show monetary values'}
-            className="absolute right-3 top-3 rounded-lg p-2 text-muted-foreground hover:bg-secondary"
-          >
-            {moneyVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+            label={moneyVisible ? 'Hide monetary values' : 'Show monetary values'}
+            icon={moneyVisible ? <EyeOff /> : <Eye />}
+            size="sm"
+            className="absolute right-3 top-3"
+          />
         ) : null}
         <div
           className={`inline-flex p-2.5 rounded-xl ${colors.bg} transition-all duration-300 group-hover:scale-110 mb-3`}

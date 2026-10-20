@@ -10,7 +10,6 @@ import {
   Building2,
   Check,
   Clock,
-  Loader2,
   MapPin,
   ShieldCheck,
   Sparkles,
@@ -18,7 +17,17 @@ import {
   Users,
   Wrench,
 } from 'lucide-react';
-import { Badge, Select, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 
 import { landlordService } from '@/services/landlordService';
 import {
@@ -271,7 +280,7 @@ export const GetRentosManagedView = () => {
             send you a proposal to accept.
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <Card className="p-5">
           <h2 className="flex items-center gap-2 font-semibold text-foreground">
             <Briefcase className="h-5 w-5 text-muted-foreground" aria-hidden />
             Work with a vetted firm
@@ -280,12 +289,16 @@ export const GetRentosManagedView = () => {
             Appoint an independent agency you choose. You and the firm agree the terms; the
             engagement still runs on GetRentos. See the firms further down.
           </p>
-        </div>
+        </Card>
       </div>
 
       {/* The GetRentos fee card */}
       {feeCard.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading the fee card…</p>
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <CardSkeleton key={i} lines={4} />
+          ))}
+        </div>
       ) : (
         <div className="mb-8 grid gap-4 md:grid-cols-3">
           {cards.map((card) => (
@@ -342,21 +355,19 @@ export const GetRentosManagedView = () => {
       <h2 className="mb-3 text-sm font-semibold text-foreground">Your properties</h2>
 
       {error && (
-        <p className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <Alert variant="danger" className="mb-3">
           {error}
-        </p>
+        </Alert>
       )}
 
       {properties.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading your properties…</p>
+        <ListSkeleton variant="cards" rows={3} />
       ) : propertyList.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-8 text-center">
-          <Building2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground" aria-hidden />
-          <p className="font-medium text-foreground">No properties yet</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            Add a property first, then you can place it under GetRentos management.
-          </p>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="No properties yet"
+          description="Add a property first, then you can place it under GetRentos management."
+        />
       ) : (
         <div className="space-y-3">
           {propertyList.map((property) => {
@@ -415,7 +426,7 @@ export const GetRentosManagedView = () => {
                   </div>
 
                   {managed ? (
-                    <div className="flex items-center gap-2 sm:shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                       {managed.servicingTier && (
                         <span className="text-sm text-muted-foreground">
                           {TIER_LABEL[managed.servicingTier]}
@@ -428,19 +439,20 @@ export const GetRentosManagedView = () => {
                           {MANDATE_STATUS_BADGE[managed.status]?.label ?? managed.status}
                         </Badge>
                       )}
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:text-destructive"
                         onClick={() => {
                           setEndReason('');
                           setEndingId(isEnding ? null : managed.id);
                         }}
-                        className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:text-destructive"
                       >
                         {endLabel}
-                      </button>
+                      </Button>
                     </div>
                   ) : firmMandate ? (
-                    <div className="flex items-center gap-2 sm:shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                       <span className="text-sm text-muted-foreground">
                         {firmMandate.managerOrganizationName ?? 'A firm'}
                       </span>
@@ -448,37 +460,38 @@ export const GetRentosManagedView = () => {
                         {firmMandate.status === 'ACTIVE' ? 'Managed by firm' : 'Firm pending'}
                       </Badge>
                       {firmMandate.status === 'ACTIVE' && !openIntake && (
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary"
                           onClick={() => setIntakeFor({ id: property.id, name: property.name })}
-                          className="rounded-lg px-2 py-1 text-sm font-medium text-primary hover:underline"
                         >
                           Move to GetRentos
-                        </button>
+                        </Button>
                       )}
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="hover:text-destructive"
                         onClick={() => {
                           setEndReason('');
                           setEndingId(isEnding ? null : firmMandate.id);
                         }}
-                        className="rounded-lg px-2 py-1 text-sm text-muted-foreground hover:text-destructive"
                       >
                         {endLabel}
-                      </button>
+                      </Button>
                     </div>
                   ) : windingDown ? (
-                    <div className="flex items-center gap-2 sm:shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                       <Badge variant="warning">Ending: handover due</Badge>
-                      <button
-                        type="button"
-                        disabled={handoverBusy}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        isLoading={handoverBusy}
                         onClick={() => handover.mutate(windingDown.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
                       >
-                        {handoverBusy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                         Confirm handover
-                      </button>
+                      </Button>
                     </div>
                   ) : openIntake ? (
                     <div className="flex items-center gap-2 sm:shrink-0">
@@ -488,14 +501,13 @@ export const GetRentosManagedView = () => {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 sm:shrink-0">
-                      <button
-                        type="button"
+                      <Button
+                        size="sm"
+                        icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
                         onClick={() => setIntakeFor({ id: property.id, name: property.name })}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground"
                       >
-                        <ShieldCheck className="h-4 w-4" aria-hidden />
                         Ask GetRentos to manage
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -520,17 +532,14 @@ export const GetRentosManagedView = () => {
                         : 'End this engagement. The manager’s access stops immediately. GetRentos then prepares your final statement with rent collected to date, fees and any break fee. During handover, you and the manager exchange keys, balances and documents, then confirm completion here. GetRentos does not need to approve it.'}
                     </p>
                     {!isPendingMandate && breakFeeQuery.data && (
-                      <p
-                        className={`mt-2 rounded-lg border px-3 py-2 text-sm ${
-                          breakFeeQuery.data.waived
-                            ? 'border-border bg-muted/40 text-muted-foreground'
-                            : 'border-warning/30 bg-warning-subtle text-foreground'
-                        }`}
+                      <Alert
+                        variant={breakFeeQuery.data.waived ? 'neutral' : 'warning'}
+                        className="mt-2"
                       >
                         {breakFeeQuery.data.waived
                           ? `No break fee. ${breakFeeQuery.data.reason}`
                           : `Notice-in-lieu of ${formatCurrency(breakFeeQuery.data.amount)} (${breakFeeQuery.data.reason}) will be added to your final statement.`}
-                      </p>
+                      </Alert>
                     )}
                     <Textarea
                       className="mt-2"
@@ -540,26 +549,26 @@ export const GetRentosManagedView = () => {
                       rows={2}
                       placeholder="Why are you ending it? Enter at least 10 characters."
                     />
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        type="button"
-                        disabled={endBusy || endReason.trim().length < 10}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        disabled={endReason.trim().length < 10}
+                        isLoading={endBusy}
                         onClick={() =>
                           endEngagement.mutate({ id: activeMandate.id, reason: endReason.trim() })
                         }
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground disabled:opacity-50"
                       >
-                        {endBusy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
                         {isPendingMandate ? 'Cancel the request' : 'End management'}
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setEndingId(null)}
                         disabled={endBusy}
-                        className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
                       >
                         Keep it
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -582,13 +591,15 @@ export const GetRentosManagedView = () => {
         </p>
 
         {firms.isLoading ? (
-          <p className="mt-3 text-sm text-muted-foreground">Loading firms…</p>
+          <ListSkeleton variant="cards" rows={2} className="mt-3" />
         ) : (firms.data ?? []).length === 0 ? (
-          <div className="mt-3 rounded-2xl border border-border bg-card p-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              No vetted firms are listed yet. GetRentos Managed above is available now.
-            </p>
-          </div>
+          <EmptyState
+            icon={Briefcase}
+            title="No vetted firms are listed yet"
+            description="GetRentos Managed above is available now."
+            size="compact"
+            className="mt-3"
+          />
         ) : (
           <div className="mt-3 space-y-3">
             {(firms.data ?? []).map((firm: VettedFirm, index: number) => {
@@ -658,8 +669,8 @@ export const GetRentosManagedView = () => {
                       All your properties are already assigned
                     </span>
                   ) : (
-                    <div className="flex items-center gap-2 sm:shrink-0">
-                      <div className="w-56">
+                    <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                      <div className="w-full min-w-0 sm:w-56">
                         <Select
                           ariaLabel={`Property to appoint ${firm.name} for`}
                           value={chosen}
@@ -669,19 +680,17 @@ export const GetRentosManagedView = () => {
                           options={openProperties.map((p) => ({ value: p.id, label: p.name }))}
                         />
                       </div>
-                      <button
-                        type="button"
-                        disabled={busy || !chosen}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!chosen}
+                        isLoading={busy}
+                        icon={<Briefcase className="h-4 w-4" aria-hidden />}
+                        aria-label={`Appoint ${firm.name}`}
                         onClick={() => appoint.mutate({ firmId: firm.id, propertyId: chosen })}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground disabled:opacity-50"
                       >
-                        {busy ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                        ) : (
-                          <Briefcase className="h-4 w-4" aria-hidden />
-                        )}
                         Appoint
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>

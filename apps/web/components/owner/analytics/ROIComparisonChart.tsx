@@ -47,7 +47,7 @@ export const ROIComparisonChart = ({ metrics }: ROIComparisonChartProps) => {
             <CartesianGrid
               vertical={false}
               stroke="currentColor"
-              className="text-gray-100 dark:text-white/5"
+              className="text-border"
             />
             <XAxis
               dataKey="name"
@@ -66,7 +66,7 @@ export const ROIComparisonChart = ({ metrics }: ROIComparisonChartProps) => {
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ fill: 'currentColor', className: 'text-gray-50 dark:text-white/5' }}
+              cursor={{ fill: 'currentColor', className: 'text-secondary' }}
             />
             <Bar dataKey="roi" fill="var(--primary)" radius={[4, 4, 0, 0]} maxBarSize={48} />
           </BarChart>

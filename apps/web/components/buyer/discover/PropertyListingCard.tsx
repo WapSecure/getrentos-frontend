@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { MapPin, BedDouble, Bath, Ruler, Heart, ShieldCheck, Building2 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';
 
@@ -31,25 +31,30 @@ export const PropertyListingCard = ({
     >
       <div className="relative h-44 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          <Building2 className="w-12 h-12 text-muted-foreground" />
         </div>
         {listing.ownerVerified && (
-          <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-            <ShieldCheck className="w-3 h-3" />
+          <Badge
+            variant="success"
+            icon={<ShieldCheck className="w-3 h-3" />}
+            className="absolute top-3 left-3"
+          >
             Verified Owner
-          </div>
+          </Badge>
         )}
-        <button
+        <IconButton
+          label={isSaved ? 'Remove from saved' : 'Save property'}
+          aria-pressed={isSaved}
+          size="sm"
+          icon={
+            <Heart className={isSaved ? 'text-destructive fill-destructive' : 'text-foreground'} />
+          }
           onClick={(e) => {
             e.stopPropagation();
             onToggleSave();
           }}
-          className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
-        >
-          <Heart
-            className={`w-4 h-4 ${isSaved ? 'text-red-500 fill-red-500' : 'text-foreground'}`}
-          />
-        </button>
+          className="absolute top-3 right-3 bg-card/90 backdrop-blur-sm hover:bg-card"
+        />
         <div className="absolute bottom-3 left-3 bg-primary text-primary-foreground px-2.5 py-1 rounded-lg text-sm font-bold">
           {formatCurrency(listing.askingPrice, { compact: true })}
         </div>

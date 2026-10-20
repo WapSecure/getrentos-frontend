@@ -1,14 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { CreditCard, Receipt, Search, TriangleAlert, TrendingUp } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { CreditCard, Receipt, TriangleAlert, TrendingUp } from 'lucide-react';
 import {
   Badge,
+  Card,
   EmptyState,
-  LegacyInput,
   PageErrorState,
   Pagination,
+  SearchInput,
+  Select,
+  Skeleton,
+  StatGridSkeleton,
+  TableSkeleton,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
@@ -72,6 +77,7 @@ export const SubscriptionsOverview = () => {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const items = list.data?.items ?? [];
@@ -95,7 +101,9 @@ export const SubscriptionsOverview = () => {
         </p>
       </div>
 
-      {overview.isError ? (
+      {overview.isLoading ? (
+        <StatGridSkeleton />
+      ) : overview.isError && !stats ? (
         <PageErrorState
           title="Could not load the subscription pulse"
           onRetry={() => void overview.refetch()}
@@ -103,21 +111,17 @@ export const SubscriptionsOverview = () => {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((card) => (
-            <div key={card.label} className="rounded-2xl border border-border bg-card p-5">
+            <Card key={card.label} className="p-5">
               <div className="flex items-center gap-2">
                 <card.icon
-                  className={
-                    card.warn
-                      ? 'h-4 w-4 text-amber-600 dark:text-amber-400'
-                      : 'h-4 w-4 text-muted-foreground'
-                  }
+                  className={card.warn ? 'h-4 w-4 text-warning' : 'h-4 w-4 text-muted-foreground'}
                 />
                 <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                   {card.label}
                 </p>
               </div>
               <p className="mt-2 text-2xl font-bold text-foreground">{card.value}</p>
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -134,38 +138,38 @@ export const SubscriptionsOverview = () => {
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[260px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <LegacyInput
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by customer email or name"
-            className="pl-9"
-            aria-label="Search subscriptions"
-          />
-        </div>
-        <select
-          value={status}
-          onChange={(event) => {
-            setStatus(event.target.value);
+        <SearchInput
+          value={search}
+          onValueChange={(value) => {
+            setSearch(value);
             setPage(1);
           }}
-          aria-label="Filter by status"
-          className="h-10 rounded-lg border border-border bg-card px-3 text-sm text-foreground"
-        >
-          <option value="">All statuses</option>
-          {(['TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELLED', 'NONE'] as const).map((value) => (
-            <option key={value} value={value}>
-              {STATUS_LABEL[value]}
-            </option>
-          ))}
-        </select>
+          placeholder="Search by customer email or name"
+          label="Search subscriptions"
+          className="min-w-[260px] flex-1"
+        />
+        <Select
+          value={status}
+          onValueChange={(value) => {
+            setStatus(value);
+            setPage(1);
+          }}
+          ariaLabel="Filter by status"
+          searchable={false}
+          className="w-full sm:w-48"
+          options={[
+            { value: '', label: 'All statuses' },
+            ...(['TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELLED', 'NONE'] as const).map((value) => ({
+              value,
+              label: STATUS_LABEL[value],
+            })),
+          ]}
+        />
       </div>
 
-      {list.isError ? (
+      {list.isLoading ? (
+        <TableSkeleton rows={5} columns={5} />
+      ) : list.isError && !list.data ? (
         <PageErrorState title="Could not load subscriptions" onRetry={() => void list.refetch()} />
       ) : items.length === 0 ? (
         <EmptyState
@@ -284,9 +288,7 @@ function SubscriptionRow({
               <span className="text-xs text-muted-foreground">Cancellation scheduled</span>
             )}
             {row.captureRefundPending && (
-              <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                Card-capture refund pending
-              </span>
+              <span className="text-xs font-medium text-warning">Card-capture refund pending</span>
             )}
             {row.latestReference && (
               <span className="font-mono text-[11px] text-muted-foreground">
@@ -332,9 +334,9 @@ function CustomerInvoices({ userId }: { userId: string }) {
   });
 
   if (isLoading) {
-    return <div className="h-16 animate-pulse rounded-lg bg-card" />;
+    return <Skeleton className="h-16 w-full rounded-lg" />;
   }
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title="Could not load this customer's payments"
@@ -410,9 +412,7 @@ function InvoiceRow({ invoice }: { invoice: AdminSubscriptionInvoice }) {
         {/* An inferred amount came from our reconciliation, not a confirmed
             charge: worth flagging before it is quoted back to a customer. */}
         {invoice.inferred && (
-          <span className="block text-xs text-amber-600 dark:text-amber-400">
-            Inferred from provider
-          </span>
+          <span className="block text-xs text-warning">Inferred from provider</span>
         )}
       </td>
       <td className="p-3">

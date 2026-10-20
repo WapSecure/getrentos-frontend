@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Plus } from 'lucide-react';
-import { Button, EmptyState, Toast } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, useToast } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -33,9 +33,7 @@ export default function EstateGovernancePage() {
   const [historyRecordId, setHistoryRecordId] = useState<string | null>(null);
   const [signaturesRecordId, setSignaturesRecordId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<GovernanceRecordType | 'all'>('all');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
   const planGate = usePlanGateModal();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
@@ -53,6 +51,7 @@ export default function EstateGovernancePage() {
         )
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
 
   const invalidate = () => {
@@ -74,10 +73,7 @@ export default function EstateGovernancePage() {
         setNewVersionOf(null);
         return;
       }
-      setToast({
-        message: error.message || 'We could not upload this record. Please try again.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'We could not upload this record. Please try again.');
     },
   });
 
@@ -86,10 +82,7 @@ export default function EstateGovernancePage() {
       unwrap(estateService.removeGovernanceRecord(estate!.id, recordId)),
     onSuccess: invalidate,
     onError: (error: Error) => {
-      setToast({
-        message: error.message || 'We could not remove this record. Please try again.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'We could not remove this record. Please try again.');
     },
   });
 
@@ -99,7 +92,7 @@ export default function EstateGovernancePage() {
   };
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -135,6 +128,7 @@ export default function EstateGovernancePage() {
             key={filter.value}
             variant={typeFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={typeFilter === filter.value}
             onClick={() => setTypeFilter(filter.value)}
           >
             {filter.label}
@@ -143,7 +137,7 @@ export default function EstateGovernancePage() {
       </div>
 
       {isRecordsLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : records.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState
@@ -204,10 +198,6 @@ export default function EstateGovernancePage() {
         onClose={planGate.close}
         reason={planGate.reason}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

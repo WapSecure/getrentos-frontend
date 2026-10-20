@@ -52,6 +52,8 @@ export default function LandlordSettingsPage() {
                 return (
                   <button
                     key={tab.id}
+                    type="button"
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === tab.id

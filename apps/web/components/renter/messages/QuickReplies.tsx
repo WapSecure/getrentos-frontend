@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Zap, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Card, Field, IconButton, Input } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -45,21 +43,23 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
+    <Card>
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        aria-expanded={isExpanded}
+        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-foreground">Quick Replies</span>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         )}
-      </div>
+      </button>
 
       {isExpanded && (
         <div className="p-3 pt-0 space-y-2">
@@ -71,6 +71,7 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
           {replies.map((reply) => (
             <button
               key={reply.id}
+              type="button"
               onClick={() => onSelectReply(reply.response)}
               className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-secondary rounded-lg transition-colors"
             >
@@ -78,32 +79,38 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
             </button>
           ))}
           {isAdding && (
-            <div className="space-y-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-border">
-              <LegacyInput
-                type="text"
-                value={shortcut}
-                onChange={(e) => setShortcut(e.target.value)}
-                placeholder="Shortcut (e.g. /viewing)"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <LegacyInput
-                type="text"
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
-                placeholder="Reply text"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+            <div className="space-y-2 p-2 rounded-lg bg-secondary/60 border border-border">
+              <Field label="Shortcut" required>
+                <Input
+                  type="text"
+                  value={shortcut}
+                  onChange={(e) => setShortcut(e.target.value)}
+                  placeholder="Shortcut (e.g. /viewing)"
+                />
+              </Field>
+              <Field label="Reply text" required>
+                <Input
+                  type="text"
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  placeholder="Reply text"
+                />
+              </Field>
               <div className="flex gap-2">
                 <Button
                   size="sm"
                   onClick={handleAdd}
                   disabled={!shortcut.trim() || !response.trim()}
+                  isLoading={addMutation.isPending}
                 >
                   Save
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
-                  <X className="w-3 h-3" />
-                </Button>
+                <IconButton
+                  size="sm"
+                  label="Cancel"
+                  icon={<X />}
+                  onClick={() => setIsAdding(false)}
+                />
               </div>
             </div>
           )}
@@ -111,14 +118,13 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
             variant="ghost"
             size="sm"
             fullWidth
-            className="gap-1"
+            icon={<Plus className="w-3 h-3" />}
             onClick={() => setIsAdding(!isAdding)}
           >
-            <Plus className="w-3 h-3" />
             Add Custom Reply
           </Button>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

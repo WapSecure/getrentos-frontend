@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button, Skeleton } from '@getrentos/ui';
 import { BadgeCheck, Clock3, FileCheck2, Plus, ScrollText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -77,8 +77,8 @@ export const TitleHistorySection = ({
 
       <div className="mt-4">
         {isLoading ? (
-          <div className="h-24 animate-pulse rounded-xl bg-secondary" aria-busy="true" />
-        ) : isError ? (
+          <Skeleton className="h-24 rounded-xl" />
+        ) : isError && !data ? (
           <p className="text-sm text-destructive">
             {errorMessage(error, 'The chain of title could not be loaded.')}
           </p>

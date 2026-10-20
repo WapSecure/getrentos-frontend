@@ -1,10 +1,9 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, ShieldCheck } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ShieldCheck } from 'lucide-react';
+import { Pagination, QueryState, SearchInput, Skeleton } from '@getrentos/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
 import { buyerService } from '@/services/buyerService';
@@ -22,7 +21,7 @@ export default function BuyerTransactionsPage() {
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
 
-  const { data: transactionsData, isLoading } = useQuery({
+  const transactionsQuery = useQuery({
     queryKey: [
       ...buyerKeys.transactions,
       { search: searchQuery, status: filter, page, pageSize: PAGE_SIZE },
@@ -36,7 +35,9 @@ export default function BuyerTransactionsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
+  const { data: transactionsData, isLoading } = transactionsQuery;
   const transactions = transactionsData?.items ?? [];
   const total = transactionsData?.total ?? 0;
 
@@ -75,30 +76,31 @@ export default function BuyerTransactionsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Transactions</h1>
         <p className="text-muted-foreground mt-1">
-          {isLoading
-            ? 'Loading…'
-            : `${total} purchase${total === 1 ? '' : 's'} protected by GetRentos`}
+          {isLoading ? (
+            <Skeleton className="inline-block h-4 w-56 align-middle" />
+          ) : (
+            `${total} purchase${total === 1 ? '' : 's'} protected by GetRentos`
+          )}
         </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by property or owner..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search by property or owner..."
+          label="Search transactions"
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -106,7 +108,7 @@ export default function BuyerTransactionsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -115,21 +117,30 @@ export default function BuyerTransactionsPage() {
         </div>
       </div>
 
-      {transactions.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <ShieldCheck className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No transactions match your filters' : 'No transactions on this page'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
+      <QueryState
+        isLoading={isLoading}
+        isError={transactionsQuery.isError && !transactionsData}
+        onRetry={() => void transactionsQuery.refetch()}
+        isRetrying={transactionsQuery.isFetching}
+        isEmpty={transactions.length === 0}
+        empty={{
+          icon: ShieldCheck,
+          title:
+            total === 0 ? 'No transactions match your filters' : 'No transactions on this page',
+          description:
+            total === 0
               ? 'Once an owner accepts your offer, the purchase and its protected payment will appear here.'
-              : 'Choose another page to view more transactions.'}
-          </p>
-        </div>
-      ) : (
+              : 'Choose another page to view more transactions.',
+        }}
+        scope="page"
+        loading={
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-56 rounded-2xl" />
+            ))}
+          </div>
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {transactions.map((transaction, index) => (
             <BuyerEscrowTransactionCard
@@ -140,7 +151,7 @@ export default function BuyerTransactionsPage() {
             />
           ))}
         </div>
-      )}
+      </QueryState>
 
       {total > 0 && (
         <Pagination
@@ -156,6 +167,7 @@ export default function BuyerTransactionsPage() {
         transaction={activeTransaction}
         onClose={() => setActiveTransactionId(null)}
         onMakePayment={handleMakePayment}
+        isPaying={depositMutation.isPending || releaseMutation.isPending}
       />
     </>
   );

@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, FileText, House, Wrench } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { Badge } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
+import { CardSkeleton } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -27,7 +29,7 @@ const formatShortDate = (value?: string) => {
  * of maintaining a second client-side "home management" data model.
  */
 export const RenterHomeManagement = () => {
-  const { data: lease } = useQuery({
+  const { data: lease, isLoading: leaseLoading } = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
   });
@@ -48,9 +50,11 @@ export const RenterHomeManagement = () => {
   );
   const expiringDocuments = documents.filter((document) => document.status === 'expiring');
 
+  if (leaseLoading) return <CardSkeleton />;
+
   if (!lease) {
     return (
-      <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <Card className="p-5">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
             <House className="h-5 w-5" />
@@ -72,12 +76,12 @@ export const RenterHomeManagement = () => {
             </Button>
           </div>
         </div>
-      </section>
+      </Card>
     );
   }
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <Card>
       <div className="border-b border-border bg-muted/30 p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
@@ -136,6 +140,6 @@ export const RenterHomeManagement = () => {
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
-    </section>
+    </Card>
   );
 };

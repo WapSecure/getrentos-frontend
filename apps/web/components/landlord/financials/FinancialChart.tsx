@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
+import { Card } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 
 interface FinancialPoint {
@@ -38,19 +39,19 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 export const FinancialChart = ({ data }: FinancialChartProps) => {
   return (
-    <div className="bg-card rounded-2xl border border-border p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+    <Card className="p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="min-w-0">
           <h3 className="font-semibold text-foreground">Income vs Expenses</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Last 6 months</p>
         </div>
         <div className="flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-success" />
             Income
           </span>
           <span className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="w-2.5 h-2.5 rounded-full bg-gray-400" />
+            <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground" />
             Expenses
           </span>
         </div>
@@ -59,11 +60,7 @@ export const FinancialChart = ({ data }: FinancialChartProps) => {
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={4}>
-            <CartesianGrid
-              vertical={false}
-              stroke="currentColor"
-              className="text-gray-100 dark:text-white/5"
-            />
+            <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
             <XAxis
               dataKey="period"
               axisLine={false}
@@ -81,25 +78,25 @@ export const FinancialChart = ({ data }: FinancialChartProps) => {
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ fill: 'currentColor', className: 'text-gray-100 dark:text-white/5' }}
+              cursor={{ fill: 'currentColor', className: 'text-border' }}
             />
             <Bar
               dataKey="income"
               name="Income"
-              fill="#10b981"
+              fill="var(--success)"
               radius={[4, 4, 0, 0]}
               maxBarSize={28}
             />
             <Bar
               dataKey="expenses"
               name="Expenses"
-              fill="#9ca3af"
+              fill="var(--muted-foreground)"
               radius={[4, 4, 0, 0]}
               maxBarSize={28}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 };

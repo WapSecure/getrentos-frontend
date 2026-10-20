@@ -1,20 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, BellRing, Plus, Settings2 } from 'lucide-react';
+import { BellRing, Plus, Settings2 } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   DataTable,
   Dialog,
   DialogContent,
   DialogTitle,
-  Toast,
+  EmptyState,
+  Skeleton,
+  useToast,
   type Column,
 } from '@getrentos/ui';
-
 import {
   NoticeLadderTimeline,
   noticeKindLabel,
@@ -67,9 +69,7 @@ export default function LandlordNoticesPage() {
   };
   const [raising, setRaising] = useState(false);
   const [serving, setServing] = useState<TenancyNotice | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const {
     data: running,
@@ -97,22 +97,16 @@ export default function LandlordNoticesPage() {
     still the answer to the question they arrived with, so it goes to the same
     place as every other outcome on this screen.
   */
-  const noticeToast =
-    toast ??
-    (ladderFailed
-      ? { message: 'That tenancy is not one you can read.', variant: 'error' as const }
-      : null);
-
-  const dismissToast = () => {
-    setToast(null);
-    if (ladderFailed) closeLadder();
-  };
+  useEffect(() => {
+    if (!ladderFailed) return;
+    toast.error('That tenancy is not one you can read.');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    closeLadder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ladderFailed]);
 
   const onError = (error: unknown) =>
-    setToast({
-      message: error instanceof Error ? error.message : 'Something went wrong.',
-      variant: 'error',
-    });
+    toast.error(error instanceof Error ? error.message : 'Something went wrong.');
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: landlordKeys.notices });
@@ -125,10 +119,7 @@ export default function LandlordNoticesPage() {
       unwrap(landlordService.raiseNotice(input)),
     onSuccess: () => {
       setRaising(false);
-      setToast({
-        message: 'Notice raised. It is a draft until service is recorded.',
-        variant: 'success',
-      });
+      toast.success('Notice raised. It is a draft until service is recorded.');
       refresh();
     },
     onError,
@@ -144,10 +135,7 @@ export default function LandlordNoticesPage() {
     }) => unwrap(landlordService.serveNotice(id, input)),
     onSuccess: () => {
       setServing(null);
-      setToast({
-        message: 'Service recorded. The period now runs from the date you gave.',
-        variant: 'success',
-      });
+      toast.success('Service recorded. The period now runs from the date you gave.');
       refresh();
     },
     onError,
@@ -157,7 +145,7 @@ export default function LandlordNoticesPage() {
     mutationFn: (input: { jurisdiction: string; kind: NoticeKind; days: number; basis: string }) =>
       unwrap(landlordService.setNoticePeriod(input)),
     onSuccess: () => {
-      setToast({ message: 'Period recorded.', variant: 'success' });
+      toast.success('Period recorded.');
       refresh();
     },
     onError,
@@ -167,7 +155,7 @@ export default function LandlordNoticesPage() {
     mutationFn: (input: { jurisdiction: string; kind: NoticeKind }) =>
       unwrap(landlordService.clearNoticePeriod(input)),
     onSuccess: () => {
-      setToast({ message: 'Your period was removed.', variant: 'success' });
+      toast.success('Your period was removed.');
       refresh();
     },
     onError,
@@ -255,6 +243,8 @@ export default function LandlordNoticesPage() {
 
       <div className="mb-4 flex w-fit gap-1 rounded-lg bg-secondary p-1">
         <button
+          type="button"
+          aria-pressed={tab === 'running'}
           onClick={() => setTab('running')}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
             tab === 'running'
@@ -266,6 +256,8 @@ export default function LandlordNoticesPage() {
           Running
         </button>
         <button
+          type="button"
+          aria-pressed={tab === 'periods'}
           onClick={() => setTab('periods')}
           className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
             tab === 'periods'
@@ -289,21 +281,19 @@ export default function LandlordNoticesPage() {
         does not belong at the top of a worklist.
       */}
       {tab === 'running' && unconfigured > 0 && (
-        <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-          <div>
-            <p className="font-medium">
-              {unconfigured} notice {unconfigured === 1 ? 'period is' : 'periods are'} unrecorded
-            </p>
-            <p className="mt-0.5 text-muted-foreground">
-              A notice to quit or an intention to recover will be refused in those jurisdictions
-              until a number is recorded. This platform holds no day count of its own.
-            </p>
-            <Button variant="ghost" className="mt-1.5" onClick={() => setTab('periods')}>
+        <Alert
+          variant="warning"
+          className="mb-4"
+          title={`${unconfigured} notice ${unconfigured === 1 ? 'period is' : 'periods are'} unrecorded`}
+          action={
+            <Button variant="ghost" size="sm" onClick={() => setTab('periods')}>
               Record one
             </Button>
-          </div>
-        </div>
+          }
+        >
+          A notice to quit or an intention to recover will be refused in those jurisdictions until a
+          number is recorded. This platform holds no day count of its own.
+        </Alert>
       )}
 
       {tab === 'running' ? (
@@ -313,12 +303,10 @@ export default function LandlordNoticesPage() {
           errorTitle="We couldn't load your notices"
           skeletonClassName="h-16"
           empty={
-            <div className="rounded-2xl border border-border bg-card p-12 text-center">
-              <BellRing className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-              <p className="text-muted-foreground">
-                Nothing is running. Open a tenancy to raise the first step.
-              </p>
-            </div>
+            <EmptyState
+              icon={BellRing}
+              title="Nothing is running. Open a tenancy to raise the first step."
+            />
           }
         >
           <DataTable
@@ -329,12 +317,9 @@ export default function LandlordNoticesPage() {
           />
         </ListState>
       ) : isPeriodsPending || !periods ? (
-        <div className="space-y-3" aria-busy="true" aria-label="Loading">
+        <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
           {[0, 1, 2].map((row) => (
-            <div
-              key={row}
-              className="h-32 animate-pulse rounded-2xl border border-border bg-card"
-            />
+            <Skeleton key={row} className="h-32 rounded-2xl" />
           ))}
         </div>
       ) : (
@@ -420,9 +405,6 @@ export default function LandlordNoticesPage() {
         />
       )}
 
-      {noticeToast && (
-        <Toast message={noticeToast.message} variant={noticeToast.variant} onClose={dismissToast} />
-      )}
     </>
   );
 }

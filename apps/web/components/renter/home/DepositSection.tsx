@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PiggyBank, ShieldCheck } from 'lucide-react';
-import { Badge, Button, Card, Textarea } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, CardSkeleton, EmptyState, Textarea } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -97,7 +97,7 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
                 Cancel
               </Button>
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <Alert variant="danger">{error}</Alert>}
           </div>
         ) : (
           <button
@@ -234,15 +234,17 @@ export const DepositSection = () => {
         </p>
       </div>
       {deposits.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : deposits.isError ? (
-        <p className="text-sm text-destructive">
+        <CardSkeleton lines={4} />
+      ) : deposits.isError && !deposits.data ? (
+        <Alert variant="danger">
           {(deposits.error as Error).message || 'Could not load your deposit.'}
-        </p>
+        </Alert>
       ) : (deposits.data ?? []).length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
-          No deposit on record for your tenancies.
-        </div>
+        <EmptyState
+          icon={PiggyBank}
+          title="No deposit on record for your tenancies."
+          size="compact"
+        />
       ) : (
         (deposits.data ?? []).map((d) => <DepositCard key={d.leaseId} deposit={d} />)
       )}

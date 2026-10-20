@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
   Button,
+  Card,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -12,12 +14,11 @@ import {
   EmptyState,
   Field,
   Pagination,
+  ListSkeleton,
   Select,
-  Skeleton,
   Textarea,
-  Toast,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import { CalendarX } from 'lucide-react';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
@@ -57,9 +58,9 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
   const [page, setPage] = useState(1);
   const [waiveTarget, setWaiveTarget] = useState<AdminHostPenalty | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, isRefetching, refetch } = useQuery({
     queryKey: [...QUERY_KEY, { status, page }],
     queryFn: () =>
       unwrap(
@@ -69,6 +70,7 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const rows = data?.items ?? [];
 
@@ -78,13 +80,13 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
       setWaiveTarget(null);
       setReason('');
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      setToast({ message: `Fee waived for ${fee.hostName ?? 'the host'}.`, variant: 'success' });
+      toast.success(`Fee waived for ${fee.hostName ?? 'the host'}.`);
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm">
+    <Card>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
         <div>
           <p className="text-sm font-medium">Host cancellation fees</p>
@@ -93,7 +95,7 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
             days, capped at ₦250,000), taken from their payouts.
           </p>
         </div>
-        <div className="w-44">
+        <div className="w-full sm:w-44">
           <Select
             value={status}
             onValueChange={(v) => {
@@ -105,18 +107,25 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
         </div>
       </div>
 
-      {isError ? (
-        <div className="p-6 text-sm">
-          <p className="text-destructive">Could not load cancellation fees.</p>
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => void refetch()}>
-            Try again
-          </Button>
-        </div>
-      ) : isLoading ? (
-        <div className="space-y-2 p-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-lg" />
-          ))}
+      {isLoading ? (
+        <ListSkeleton rows={3} label="Loading cancellation fees" className="rounded-none border-0" />
+      ) : isError && !data ? (
+        <div className="p-4">
+          <Alert
+            variant="danger"
+            action={
+              <Button
+                variant="outline"
+                size="sm"
+                isLoading={isRefetching}
+                onClick={() => void refetch()}
+              >
+                Try again
+              </Button>
+            }
+          >
+            Could not load cancellation fees.
+          </Alert>
         </div>
       ) : rows.length === 0 ? (
         <EmptyState
@@ -200,6 +209,7 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
                   maxLength={500}
+                  showCount
                   placeholder="e.g. Flooding in Lekki made the flat unsafe; photos on file."
                 />
               </Field>
@@ -213,18 +223,17 @@ export function HostCancellationFeesPanel({ canWaive }: { canWaive: boolean }) {
                 </Button>
                 <Button
                   onClick={() => waive.mutate()}
-                  disabled={waive.isPending || reason.trim().length < 5}
+                  disabled={reason.trim().length < 5}
+                  isLoading={waive.isPending}
+                  loadingText="Waiving…"
                 >
-                  {waive.isPending ? 'Waiving…' : 'Waive fee'}
+                  Waive fee
                 </Button>
               </div>
             </div>
           </DialogContent>
         </Dialog>
       )}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-    </div>
+    </Card>
   );
 }

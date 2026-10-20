@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Button, Pagination, useOptimisticMutation } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/buyer/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/buyer/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -43,8 +43,12 @@ export default function BuyerMessagesPage() {
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
 
+  const conversationsKey = [
+    ...buyerKeys.conversations,
+    { search: searchQuery, page, pageSize: PAGE_SIZE },
+  ];
   const { data: conversationsData } = useQuery({
-    queryKey: [...buyerKeys.conversations, { search: searchQuery, page, pageSize: PAGE_SIZE }],
+    queryKey: conversationsKey,
     queryFn: () =>
       unwrap(
         buyerService.listConversations({
@@ -53,6 +57,7 @@ export default function BuyerMessagesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const conversations = conversationsData?.items ?? [];
   const total = conversationsData?.total ?? 0;
@@ -72,10 +77,24 @@ export default function BuyerMessagesPage() {
     },
   });
 
-  const markReadMutation = useMutation({
+  const markReadMutation = useOptimisticMutation({
     mutationFn: (conversationId: string) =>
       unwrap(buyerService.markConversationRead(conversationId)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.conversations }),
+    patches: () => [
+      {
+        queryKey: conversationsKey,
+        update: (old, conversationId) => {
+          const current = old as { items: BuyerConversation[] };
+          return {
+            ...current,
+            items: current.items.map((c) =>
+              c.id === conversationId ? { ...c, unreadCount: 0 } : c
+            ),
+          };
+        },
+      },
+    ],
+    invalidate: [buyerKeys.conversations],
   });
 
   const handleSelect = (id: string) => {
@@ -152,13 +171,15 @@ export default function BuyerMessagesPage() {
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
           {activeConversation ? (
             <>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ArrowLeft className="w-4 h-4" />}
                 onClick={() => setActiveId(null)}
-                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+                className="sm:hidden mb-2 w-fit"
               >
-                <ArrowLeft className="w-4 h-4" />
                 Back to conversations
-              </button>
+              </Button>
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}
@@ -167,7 +188,7 @@ export default function BuyerMessagesPage() {
               />
             </>
           ) : (
-            <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
+            <div className="flex-1 bg-card border border-border rounded-2xl flex items-center justify-center">
               <p className="text-sm text-muted-foreground">
                 Select a conversation to start messaging
               </p>

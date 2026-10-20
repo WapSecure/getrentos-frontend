@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Badge, Card } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
@@ -45,49 +46,62 @@ export const EscrowTransactionCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="font-semibold text-foreground truncate">{transaction.propertyName}</h3>
-          <p className="text-xs text-muted-foreground truncate">Buyer: {transaction.buyerName}</p>
+      <Card interactive className="rounded-2xl p-4">
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={`Open ${transaction.propertyName}`}
+          className="absolute inset-0 z-10 rounded-2xl focus:outline-none"
+        />
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate font-semibold text-foreground">{transaction.propertyName}</h3>
+            <p className="truncate text-xs text-muted-foreground">
+              Buyer: {transaction.buyerName}
+            </p>
+          </div>
+          <Badge
+            variant={
+              isFrozen
+                ? 'danger'
+                : isRefunded
+                  ? 'neutral'
+                  : transaction.escrowStatus === 'released'
+                    ? 'success'
+                    : 'info'
+            }
+            icon={
+              isFrozen || isRefunded ? (
+                <ShieldAlert className="h-3 w-3" />
+              ) : (
+                <ShieldCheck className="h-3 w-3" />
+              )
+            }
+            className="whitespace-nowrap"
+          >
+            {statusLabels[transaction.escrowStatus]}
+          </Badge>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
-            isFrozen
-              ? 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
-              : isRefunded
-                ? 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-white/10'
-                : transaction.escrowStatus === 'released'
-                  ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-                  : 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20'
-          }`}
-        >
-          {isFrozen || isRefunded ? (
-            <ShieldAlert className="w-3 h-3" />
-          ) : (
-            <ShieldCheck className="w-3 h-3" />
-          )}
-          {statusLabels[transaction.escrowStatus]}
-        </span>
-      </div>
 
-      <p className="text-lg font-bold text-primary mt-3">
-        {formatCurrency(transaction.salePrice, { compact: true })}
-      </p>
+        <p className="mt-3 text-lg font-bold text-primary">
+          {formatCurrency(transaction.salePrice, { compact: true })}
+        </p>
 
-      <div className="mt-3">
-        <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ${
-              isFrozen ? 'bg-red-500' : isRefunded ? 'bg-gray-400' : 'bg-primary'
-            }`}
-            style={{ width: `${progressPct}%` }}
-          />
+        <div className="mt-3">
+          <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isFrozen ? 'bg-destructive' : isRefunded ? 'bg-muted-foreground' : 'bg-primary'
+              }`}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Opened {formatDate(transaction.createdAt)}
+          </p>
         </div>
-        <p className="text-xs text-gray-400 mt-1.5">Opened {formatDate(transaction.createdAt)}</p>
-      </div>
+      </Card>
     </motion.div>
   );
 };

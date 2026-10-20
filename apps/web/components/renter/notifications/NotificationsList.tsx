@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { BellOff } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 import { NotificationCard } from './NotificationCard';
 
 interface Notification {
@@ -30,18 +31,18 @@ export const NotificationsList = ({
 }: NotificationsListProps) => {
   if (notifications.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-12 text-center">
-        <BellOff className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-foreground">No notifications</h3>
-        <p className="text-muted-foreground mt-2">
-          {notifications.length === 0 ? "You're all caught up!" : 'Try adjusting your filters'}
-        </p>
-      </div>
+      <EmptyState
+        icon={BellOff}
+        title="No notifications"
+        description={
+          notifications.length === 0 ? "You're all caught up!" : 'Try adjusting your filters'
+        }
+      />
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="divide-y divide-border">
         <AnimatePresence>
           {notifications.map((notification, index) => (
@@ -61,6 +62,6 @@ export const NotificationsList = ({
           ))}
         </AnimatePresence>
       </div>
-    </div>
+    </Card>
   );
 };

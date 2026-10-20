@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
-import { Button, DocumentUpload, Select } from '@getrentos/ui';
+import { Alert, Button, DocumentUpload, Field, IconButton, Select } from '@getrentos/ui';
 import type { Property, VerificationStatus } from '@/types/landlord';
 import type { LandOwnershipProofInput } from '@/types/land';
 
@@ -20,30 +20,30 @@ const statusConfig: Record<
   verified: {
     label: 'Verified',
     icon: ShieldCheck,
-    bg: 'bg-green-50 dark:bg-green-900/20',
-    color: 'text-green-600 dark:text-green-400',
+    bg: 'bg-success-subtle',
+    color: 'text-success',
     message: 'Ownership has been confirmed. This property is eligible to be listed for rent.',
   },
   pending: {
     label: 'Pending Review',
     icon: ShieldAlert,
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-    color: 'text-yellow-600 dark:text-yellow-400',
+    bg: 'bg-warning-subtle',
+    color: 'text-warning',
     message:
       'Our compliance team is reviewing your submitted documents. This typically takes 24–48 hours.',
   },
   unverified: {
     label: 'Unverified',
     icon: ShieldAlert,
-    bg: 'bg-gray-100 dark:bg-gray-800',
-    color: 'text-gray-600 dark:text-gray-400',
+    bg: 'bg-secondary',
+    color: 'text-muted-foreground',
     message: 'Submit an ownership document to unlock listing this property for rent.',
   },
   rejected: {
     label: 'Rejected',
     icon: ShieldX,
-    bg: 'bg-red-50 dark:bg-red-900/20',
-    color: 'text-red-600 dark:text-red-400',
+    bg: 'bg-destructive-subtle',
+    color: 'text-destructive',
     message: 'Verification could not be completed with the documents provided. Please resubmit.',
   },
 };
@@ -90,14 +90,12 @@ export const LandlordVerificationStatusModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Ownership Verification</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{property.name}</p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
@@ -115,9 +113,9 @@ export const LandlordVerificationStatusModal = ({
 
               {canSubmit && (
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
+                  <p className="block text-sm font-medium text-foreground mb-1">
                     Upload ownership evidence
-                  </label>
+                  </p>
                   <DocumentUpload
                     value={file ? [{ id: 'file', file }] : []}
                     onChange={(items) => setFile(items[0]?.file ?? null)}
@@ -126,7 +124,7 @@ export const LandlordVerificationStatusModal = ({
                     label=""
                     hint="PDF or image: preview before submitting"
                   />
-                  <div className="mt-3">
+                  <Field label="Document type" className="mt-3">
                     <Select
                       value={documentType}
                       onValueChange={(value) =>
@@ -150,11 +148,11 @@ export const LandlordVerificationStatusModal = ({
                       ]}
                       ariaLabel="Ownership proof type"
                     />
-                  </div>
+                  </Field>
                 </div>
               )}
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <Alert variant="danger">{error}</Alert>}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -165,11 +163,12 @@ export const LandlordVerificationStatusModal = ({
                 <Button
                   variant="primary"
                   onClick={handleSubmit}
-                  disabled={!file || isSubmitting}
+                  disabled={!file}
                   isLoading={isSubmitting}
+                  loadingText="Submitting…"
                   className="flex-1"
                 >
-                  {isSubmitting ? 'Submitting…' : 'Submit Document'}
+                  Submit Document
                 </Button>
               )}
             </div>

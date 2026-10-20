@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import { IconButton, ThemeToggle } from '@getrentos/ui';
 import { EstateProfileDropdown } from './EstateProfileDropdown';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { EstateSwitcher } from './EstateSwitcher';
@@ -47,12 +47,13 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
               <NotificationBell portal="estate" basePath="/estate/notifications" />
               <EstateProfileDropdown user={user} />
 
-              <button
+              <IconButton
+                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
+                aria-expanded={isMobileMenuOpen}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                className="lg:hidden"
+              />
             </div>
           </div>
         </div>

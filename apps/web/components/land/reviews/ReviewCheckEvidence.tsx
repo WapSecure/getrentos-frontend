@@ -1,7 +1,15 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { Button, ConfirmDialog, DocumentPreviewButton, Field, Input, Select } from '@getrentos/ui';
+import {
+  Button,
+  ConfirmDialog,
+  DocumentPreviewButton,
+  Field,
+  IconButton,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import { Link2, Upload, X } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDocumentType } from '@/types/landDocument';
@@ -167,15 +175,7 @@ export const ReviewCheckEvidence = ({
             <p className="text-sm font-medium text-foreground">
               {mode === 'upload' ? 'Upload and cite on this check' : 'Cite a property document'}
             </p>
-            <button
-              type="button"
-              onClick={reset}
-              disabled={busy}
-              className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"
-              aria-label="Cancel"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <IconButton label="Cancel" size="sm" icon={<X />} onClick={reset} disabled={busy} />
           </div>
           {mode === 'upload' ? (
             <LandDocumentUploadFields

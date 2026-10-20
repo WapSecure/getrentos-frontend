@@ -1,10 +1,16 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
-
+import {
+  Pagination,
+  SearchInput,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Skeleton,
+} from '@getrentos/ui';
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search, ShieldCheck } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { ShieldCheck } from 'lucide-react';
 import { EscrowTransactionCard } from '@/components/owner/transactions/EscrowTransactionCard';
 import { EscrowTransactionDetailModal } from '@/components/owner/transactions/EscrowTransactionDetailModal';
 import { ownerService } from '@/services/ownerService';
@@ -31,7 +37,7 @@ export default function OwnerTransactionsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [
       ...ownerKeys.transactions,
       {
@@ -50,6 +56,7 @@ export default function OwnerTransactionsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const transactions = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -70,26 +77,28 @@ export default function OwnerTransactionsPage() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Sales in progress</h1>
-        <p className="text-muted-foreground mt-1">
-          {isLoading ? 'Loading…' : `${total} sale${total === 1 ? '' : 's'} protected by GetRentos`}
-        </p>
+        <div className="text-muted-foreground mt-1">
+          {isLoading ? (
+            <Skeleton className="h-5 w-48" />
+          ) : (
+            `${total} sale${total === 1 ? '' : 's'} protected by GetRentos`
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by property or buyer..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by property or buyer..."
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -97,7 +106,7 @@ export default function OwnerTransactionsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -106,20 +115,24 @@ export default function OwnerTransactionsPage() {
         </div>
       </div>
 
-      {transactions.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <ShieldCheck className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No transactions yet' : 'No transactions match your filters'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
+      {isLoading ? (
+        <ListSkeleton rows={6} variant="cards" label="Loading sales" />
+      ) : isError && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your sales"
+          onRetry={() => void refetch()}
+        />
+      ) : transactions.length === 0 ? (
+        <EmptyState
+          icon={ShieldCheck}
+          title={total === 0 ? 'No transactions yet' : 'No transactions match your filters'}
+          description={
+            total === 0
               ? 'Once you accept a buyer offer, the sale and its protected payment will appear here.'
-              : 'Try adjusting your search or filter.'}
-          </p>
-        </div>
+              : 'Try adjusting your search or filter.'
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {transactions.map((transaction, index) => (

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Check, BadgeCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, Card, CardSkeleton } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import type { BillingCycle, PlanPricing } from '@/services/subscriptionService';
 
@@ -35,7 +35,7 @@ export function ProPriceCard({
   const [cycle, setCycle] = useState<BillingCycle>('MONTHLY');
 
   if (!pricing) {
-    return <div className="h-40 animate-pulse rounded-2xl border border-border bg-card" />;
+    return <CardSkeleton lines={4} />;
   }
 
   const amount = cycle === 'ANNUAL' ? pricing.annualKobo : pricing.monthlyKobo;
@@ -44,8 +44,8 @@ export function ProPriceCard({
   const capture = pricing.trialTokenizeKobo ? naira(pricing.trialTokenizeKobo) : null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
-      <div className="flex items-center gap-3">
+    <Card className="p-6">
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
           <BadgeCheck className="h-5 w-5" />
         </div>
@@ -58,19 +58,19 @@ export function ProPriceCard({
           </p>
         </div>
         {isPro && (
-          <span className="ml-auto rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <Badge variant="success" className="ml-auto">
             Current plan
-          </span>
+          </Badge>
         )}
       </div>
 
-      <div className="mt-5 flex items-baseline gap-1">
+      <div className="mt-5 flex flex-wrap items-baseline gap-1">
         <span className="text-3xl font-bold tracking-tight text-foreground">{naira(amount)}</span>
         <span className="text-sm text-muted-foreground">/{per}</span>
         {cycle === 'ANNUAL' && pricing.annualSavingPercent > 0 && (
-          <span className="ml-2 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <Badge variant="success" className="ml-2">
             Save {pricing.annualSavingPercent}%
-          </span>
+          </Badge>
         )}
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
@@ -85,6 +85,7 @@ export function ProPriceCard({
           <button
             key={c}
             type="button"
+            aria-pressed={cycle === c}
             onClick={() => setCycle(c)}
             className={
               cycle === c
@@ -103,12 +104,11 @@ export function ProPriceCard({
             <Button
               variant="primary"
               fullWidth
-              disabled={upgrading}
+              isLoading={upgrading}
+              loadingText="Opening secure checkout…"
               onClick={() => onUpgrade(cycle)}
             >
-              {upgrading
-                ? 'Opening secure checkout…'
-                : trialAvailable
+              {trialAvailable
                   ? `Start ${pricing.trialDays}-day free trial`
                   : `Subscribe: ${naira(amount)}/${per}`}
             </Button>
@@ -137,6 +137,6 @@ export function ProPriceCard({
           </p>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

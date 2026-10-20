@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, UsersRound, Flame, X } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { UsersRound, Flame, X } from 'lucide-react';
 import {
   Button,
-  LegacyInput,
+  EmptyState,
+  IconButton,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
   Pagination,
-  Toast,
-  type ToastVariant,
+  SearchInput,
+  useToast,
 } from '@getrentos/ui';
 import { LeadCard } from '@/components/landlord/leads/LeadCard';
 import { ConfirmViewingModal } from '@/components/landlord/leads/ConfirmViewingModal';
@@ -54,7 +55,7 @@ export default function LandlordLeadsPage() {
   const [nudgingLead, setNudgingLead] = useState<LandlordLead | null>(null);
   const [selectedLeadIds, setSelectedLeadIds] = useState<string[]>([]);
   const [showBulkNudge, setShowBulkNudge] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const planGate = usePlanGateModal();
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export default function LandlordLeadsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data } = leadsQuery;
   const leads = data?.items ?? [];
@@ -117,11 +119,11 @@ export default function LandlordLeadsPage() {
     mutationFn: (message: string) => unwrap(landlordService.nudgeLead(nudgingLead!.id, message)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: landlordKeys.leads });
-      setToast({ message: `Nudge sent to ${nudgingLead?.leadName}.`, variant: 'success' });
+      toast.success(`Nudge sent to ${nudgingLead?.leadName}.`);
       setNudgingLead(null);
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to send this nudge.', variant: 'error' });
+      toast.error(error.message || 'Unable to send this nudge.');
     },
   });
 
@@ -134,7 +136,7 @@ export default function LandlordLeadsPage() {
         result.skipped > 0
           ? `Nudged ${result.nudged} lead${result.nudged === 1 ? '' : 's'}, skipped ${result.skipped}.`
           : `Nudged ${result.nudged} lead${result.nudged === 1 ? '' : 's'}.`;
-      setToast({ message: summary, variant: result.nudged > 0 ? 'success' : 'error' });
+      toast.show(summary, result.nudged > 0 ? 'success' : 'error');
       setSelectedLeadIds([]);
       setShowBulkNudge(false);
     },
@@ -143,7 +145,7 @@ export default function LandlordLeadsPage() {
         setShowBulkNudge(false);
         return;
       }
-      setToast({ message: error.message || 'Unable to send these nudges.', variant: 'error' });
+      toast.error(error.message || 'Unable to send these nudges.');
     },
   });
 
@@ -163,16 +165,13 @@ export default function LandlordLeadsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, email, or property..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by name, email, or property..."
+          label="Search leads"
+          className="flex-1 max-w-sm"
+        />
         <button
           type="button"
           aria-pressed={staleOnly}
@@ -183,8 +182,8 @@ export default function LandlordLeadsPage() {
           }}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap border ${
             staleOnly
-              ? 'bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-400'
-              : 'bg-card border-border text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-warning-subtle border-warning/40 text-warning'
+              : 'bg-card border-border text-muted-foreground hover:text-foreground'
           }`}
         >
           <Flame className="w-4 h-4" />
@@ -193,7 +192,7 @@ export default function LandlordLeadsPage() {
       </div>
 
       <div className="mb-6">
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
@@ -207,7 +206,7 @@ export default function LandlordLeadsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -225,28 +224,24 @@ export default function LandlordLeadsPage() {
             <Button
               variant="primary"
               size="sm"
-              className="gap-1.5"
               onClick={() => setShowBulkNudge(true)}
+              icon={<Flame className="w-3.5 h-3.5" />}
             >
-              <Flame className="w-3.5 h-3.5" />
               Nudge all
             </Button>
-            <Button
-              variant="ghost"
+            <IconButton
               size="sm"
-              className="px-2"
               onClick={() => setSelectedLeadIds([])}
-              title="Clear selection"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+              label="Clear selection"
+              icon={<X />}
+            />
           </div>
         </div>
       )}
 
       {leadsQuery.isLoading ? (
-        <PageLoadingState />
-      ) : leadsQuery.isError ? (
+        <ListSkeleton rows={6} variant="cards" label="Loading leads" />
+      ) : leadsQuery.isError && !data ? (
         <PageErrorState
           title="Leads are unavailable"
           description="We could not load your rental enquiries. Please try again."
@@ -254,38 +249,37 @@ export default function LandlordLeadsPage() {
           isRetrying={leadsQuery.isFetching}
         />
       ) : leads.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <UsersRound className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters
+        <EmptyState
+          icon={UsersRound}
+          title={
+            hasActiveFilters
               ? staleOnly
                 ? 'No cold leads match'
                 : 'No leads match your filters'
-              : 'No leads yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+              : 'No leads yet'
+          }
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to your full pipeline.'
-              : 'Messages, viewing requests, and applications from renters will appear here.'}
-          </p>
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => {
-                setSearchQuery('');
-                setDebouncedSearch('');
-                setFilter('all');
-                setStaleOnly(false);
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
+              : 'Messages, viewing requests, and applications from renters will appear here.'
+          }
+          action={
+            hasActiveFilters ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setDebouncedSearch('');
+                  setFilter('all');
+                  setStaleOnly(false);
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {leads.map((lead, index) => (
@@ -346,10 +340,6 @@ export default function LandlordLeadsPage() {
           isSubmitting={bulkNudgeMutation.isPending}
           isError={bulkNudgeMutation.isError}
         />
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
       <UpgradeToProModal
         isOpen={planGate.isOpen}

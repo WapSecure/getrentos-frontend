@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { CircleAlert, UserCheck } from 'lucide-react';
-import { Badge, EmptyState, Select } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState, Select } from '@getrentos/ui';
 import {
   formatDate,
   LAND_AUTHORITY_STATUS_LABELS,
@@ -36,6 +36,7 @@ export default function AdminLandAuthorityQueuePage() {
     queryKey: landQueryKeys.authorityQueue(filter),
     queryFn: () => unwrap(adminLandAuthorityService.queue(status)),
     enabled: canView,
+    placeholderData: keepPreviousData,
   });
 
   if (!canView) {
@@ -69,21 +70,20 @@ export default function AdminLandAuthorityQueuePage() {
           options={FILTERS}
         />
       </div>
-      {query.isLoading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : query.isError ? (
-        <EmptyState
-          icon={CircleAlert}
-          title="Claims could not be loaded"
-          description={query.error instanceof Error ? query.error.message : undefined}
-        />
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={UserCheck}
-          title="Nothing here"
-          description="No claims match this filter."
-        />
-      ) : (
+      <QueryState
+        isLoading={query.isLoading}
+        isError={query.isError && !query.data}
+        onRetry={() => void query.refetch()}
+        isRetrying={query.isFetching}
+        errorTitle="Claims could not be loaded"
+        errorDescription={query.error instanceof Error ? query.error.message : undefined}
+        isEmpty={items.length === 0}
+        empty={{
+          icon: UserCheck,
+          title: 'Nothing here',
+          description: 'No claims match this filter.',
+        }}
+      >
         <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
           {items.map(({ authority, gaps }) => {
             const objections = authority.signatories.filter((s) => s.consent === 'OBJECTED').length;
@@ -124,7 +124,7 @@ export default function AdminLandAuthorityQueuePage() {
             );
           })}
         </ul>
-      )}
+      </QueryState>
     </>
   );
 }

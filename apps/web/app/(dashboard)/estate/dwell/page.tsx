@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Button, Select } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Button, CardSkeleton, Select } from '@getrentos/ui';
 import { tierAtLeast } from '@getrentos/shared';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -97,10 +97,11 @@ export default function EstateDwellPage() {
     queryKey: estateKeys.authorisationDwell(estate?.id ?? '', from, undefined, sort),
     queryFn: () => unwrap(estateService.getAuthorisationDwell(estate!.id, { from, sort })),
     enabled: !!estate && entitled,
+    placeholderData: keepPreviousData,
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -125,13 +126,14 @@ export default function EstateDwellPage() {
           <Button
             variant="secondary"
             className="gap-2"
-            disabled={boardQuery.isFetching}
+            isLoading={boardQuery.isFetching}
+            loadingText="Refreshing…"
             onClick={() => {
               void boardQuery.refetch();
               void reportQuery.refetch();
             }}
           >
-            {boardQuery.isFetching ? 'Refreshing…' : 'Refresh now'}
+            Refresh now
           </Button>
         </div>
 
@@ -148,15 +150,21 @@ export default function EstateDwellPage() {
         <section>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-1">
             <h2 className="text-lg font-semibold text-foreground">How long visits run</h2>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <div className="w-40">
-                <Select value={rangeDays} onValueChange={selectRange} options={RANGE_OPTIONS} />
+                <Select
+                  value={rangeDays}
+                  onValueChange={selectRange}
+                  options={RANGE_OPTIONS}
+                  ariaLabel="Period"
+                />
               </div>
               <div className="w-48">
                 <Select
                   value={sort}
                   onValueChange={(value) => setSort(value as 'dwell' | 'visits')}
                   options={SORT_OPTIONS}
+                  ariaLabel="Sort order"
                 />
               </div>
             </div>

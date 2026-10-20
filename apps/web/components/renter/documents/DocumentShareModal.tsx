@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Field, IconButton, Input } from '@getrentos/ui';
 
 interface DocumentShareModalProps {
   isOpen: boolean;
@@ -50,47 +48,47 @@ export const DocumentShareModal = ({
                 <h3 className="font-semibold text-foreground">Share Document</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{documentName}</p>
               </div>
-              <button
-                type="button"
+              <IconButton
+                label="Close share dialog"
+                size="sm"
+                icon={<X />}
                 onClick={onClose}
                 disabled={isSharing}
-                aria-label="Close share dialog"
-                className="p-1 rounded-lg hover:bg-gray-100"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="p-4 space-y-4">
               {/* Share with Email */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Share with email
-                </label>
+              <Field
+                label="Share with email"
+                hint={
+                  lastSharedWith ? (
+                    <span className="flex items-center gap-1 text-success">
+                      <Check className="h-3 w-3" />
+                      Shared with {lastSharedWith}
+                    </span>
+                  ) : undefined
+                }
+              >
                 <div className="flex gap-2">
-                  <LegacyInput
+                  <Input
                     type="email"
                     value={shareEmail}
                     onChange={(e) => setShareEmail(e.target.value)}
                     placeholder="Enter email address"
-                    className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="min-w-0 flex-1"
                   />
                   <Button
                     size="sm"
                     onClick={() => void handleShare()}
                     disabled={!shareEmail.trim() || isSharing}
                     isLoading={isSharing}
+                    loadingText="Sharing"
                   >
-                    {isSharing ? 'Sharing' : 'Share'}
+                    Share
                   </Button>
                 </div>
-                {lastSharedWith && (
-                  <p className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 mt-1.5">
-                    <Check className="w-3 h-3" />
-                    Shared with {lastSharedWith}
-                  </p>
-                )}
-              </div>
+              </Field>
 
               <Button variant="primary" fullWidth onClick={onClose}>
                 Done

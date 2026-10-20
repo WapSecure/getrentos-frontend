@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Siren, Plus } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -45,6 +45,7 @@ export default function EstateIncidentsPage() {
         estateService.listIncidents(estate!.id, statusFilter === 'all' ? undefined : statusFilter)
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
 
   const invalidate = () => {
@@ -84,7 +85,7 @@ export default function EstateIncidentsPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -113,6 +114,7 @@ export default function EstateIncidentsPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => setStatusFilter(filter.value)}
           >
             {filter.label}
@@ -121,7 +123,7 @@ export default function EstateIncidentsPage() {
       </div>
 
       {isIncidentsLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : incidents.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState

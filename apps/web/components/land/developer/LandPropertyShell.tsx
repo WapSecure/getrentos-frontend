@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { PageErrorState } from '@getrentos/ui';
+import { PageErrorState, Skeleton } from '@getrentos/ui';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
@@ -21,7 +21,7 @@ interface LandPropertyShellProps {
 
 /** The header, back link and section navigation around one land property's pages. */
 export const LandPropertyShell = ({ propertyId, section, children }: LandPropertyShellProps) => {
-  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: landKeys.ownerDetail(propertyId),
     queryFn: () => unwrap(landService.getOwnerLand(propertyId)),
   });
@@ -29,14 +29,14 @@ export const LandPropertyShell = ({ propertyId, section, children }: LandPropert
   if (isLoading) {
     return (
       <div className="space-y-4" aria-busy="true">
-        <div className="h-16 animate-pulse rounded-2xl bg-secondary" />
-        <div className="h-10 w-80 max-w-full animate-pulse rounded-xl bg-secondary" />
-        <div className="h-96 animate-pulse rounded-2xl bg-secondary" />
+        <Skeleton className="h-16 rounded-2xl" />
+        <Skeleton className="h-10 w-80 max-w-full rounded-xl" />
+        <Skeleton className="h-96 rounded-2xl" />
       </div>
     );
   }
 
-  if (isError || !data) {
+  if (!data) {
     return (
       <PageErrorState
         title="We could not open this land property"

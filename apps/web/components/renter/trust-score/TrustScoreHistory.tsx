@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Card } from '@getrentos/ui';
 import { TrustScoreHistoryItem } from '@/types/trust-score';
 import { humanizeScoreReason } from '@/components/renter/trust-score/reasonLabels';
 
@@ -22,25 +22,27 @@ export const TrustScoreHistory = ({ history }: TrustScoreHistoryProps) => {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
+    <Card>
+      <button
+        type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/20"
       >
-        <div>
+        <div className="min-w-0">
           <h3 className="font-semibold text-foreground">Score History</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Track your trust score changes</p>
         </div>
-        <Button variant="ghost" size="sm" className="p-1 h-auto">
+        <span className="rounded-md p-1 text-muted-foreground" aria-hidden="true">
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </div>
+        </span>
+      </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 divide-y divide-border">
           {history.map((item, index) => (
-            <div key={index} className="py-3 flex items-center justify-between">
-              <div>
+            <div key={index} className="py-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
                   {humanizeScoreReason(item.reason)}
                 </p>
@@ -51,23 +53,23 @@ export const TrustScoreHistory = ({ history }: TrustScoreHistoryProps) => {
                 <span
                   className={`text-xs font-medium ${
                     item.change > 0
-                      ? 'text-green-600'
+                      ? 'text-success'
                       : item.change < 0
-                        ? 'text-red-600'
-                        : 'text-gray-500'
+                        ? 'text-destructive'
+                        : 'text-muted-foreground'
                   }`}
                 >
                   {item.change > 0 && '+'}
                   {item.change}
                 </span>
-                {item.change > 0 && <TrendingUp className="w-3 h-3 text-green-600" />}
-                {item.change < 0 && <TrendingDown className="w-3 h-3 text-red-600" />}
-                {item.change === 0 && <Minus className="w-3 h-3 text-gray-500" />}
+                {item.change > 0 && <TrendingUp className="w-3 h-3 text-success" />}
+                {item.change < 0 && <TrendingDown className="w-3 h-3 text-destructive" />}
+                {item.change === 0 && <Minus className="w-3 h-3 text-muted-foreground" />}
               </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

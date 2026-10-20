@@ -1,7 +1,7 @@
 'use client';
 
-import { AlertTriangle, CheckCircle2, Circle, Clock, ShieldAlert } from 'lucide-react';
-import { Badge, type BadgeVariant } from '@getrentos/ui';
+import { CheckCircle2, Circle, ClipboardList, Clock, ShieldAlert } from 'lucide-react';
+import { Alert, Badge, EmptyState, type BadgeVariant } from '@getrentos/ui';
 
 import { formatDate } from '@/lib/format';
 import type { LeaseLadder, NoticeKind, NoticeState, TenancyNotice } from '@/types/tenancy-notice';
@@ -162,41 +162,42 @@ export function NoticeLadderTimeline({
     <div className="space-y-3">
       {/* The block, stated before the steps, because it decides what comes next. */}
       {next && nextBlockedReason && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
-          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-          <div>
-            <p className="font-medium">{KIND_LABEL[next.kind]} is not available yet</p>
-            <p className="mt-0.5 text-muted-foreground">{nextBlockedReason}</p>
-            {next.blockedUntil && (
-              <p className="mt-1.5 text-xs font-medium text-warning">
-                Available from {formatDate(next.blockedUntil)}
-              </p>
-            )}
-          </div>
-        </div>
+        <Alert
+          variant="warning"
+          icon={ShieldAlert}
+          title={`${KIND_LABEL[next.kind]} is not available yet`}
+        >
+          <p>{nextBlockedReason}</p>
+          {next.blockedUntil && (
+            <p className="mt-1.5 text-xs font-medium text-warning">
+              Available from {formatDate(next.blockedUntil)}
+            </p>
+          )}
+        </Alert>
       )}
 
       {ladder.jurisdictionFellBack && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-          <p className="text-muted-foreground">
+        <Alert variant="warning">
+          <p>
             The property&rsquo;s state is recorded as &ldquo;{ladder.jurisdictionDerivedFrom}
             &rdquo;, which does not match a jurisdiction, so this tenancy is being read against{' '}
             <span className="font-medium text-foreground">{ladder.jurisdiction}</span>. Check the
             property before relying on any period here.
           </p>
-        </div>
+        </Alert>
       )}
 
       {notices.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card px-4 py-10 text-center">
-          <p className="text-sm font-medium text-foreground">Nothing has been served yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {next
+        <EmptyState
+          icon={ClipboardList}
+          title="Nothing has been served yet"
+          description={
+            next
               ? `The first step is the ${KIND_LABEL[next.kind].toLowerCase()}.`
-              : 'This tenancy is at the top of the ladder.'}
-          </p>
-        </div>
+              : 'This tenancy is at the top of the ladder.'
+          }
+          size="compact"
+        />
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           {notices.map((notice) => (

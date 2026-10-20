@@ -1,14 +1,22 @@
 'use client';
 
-import { LegacyInput, NumberInput } from '@getrentos/ui';
-
-import { Textarea } from '@getrentos/ui';
-
 import { useState, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import { Check, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  CurrencyInput,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Input,
+  NumberInput,
+  Textarea,
+} from '@getrentos/ui';
 import { MarketPriceInsights } from '@/components/owner/listings/MarketPriceInsights';
 import type { OwnerProperty, SaleListing } from '@/types/owner';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
@@ -255,342 +263,296 @@ export const CreateSaleListingModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="font-semibold text-foreground">Create Sale Listing</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Step {step + 1} of {steps.length}: {steps[step]}
-                </p>
-              </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0">
+        <div className="shrink-0 border-b border-border p-4 pr-12">
+          <DialogTitle className="font-semibold text-foreground">Create Sale Listing</DialogTitle>
+          <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+            Step {step + 1} of {steps.length}: {steps[step]}
+          </DialogDescription>
+        </div>
 
-            <div className="px-4 pt-3 shrink-0">
-              <div className="flex gap-1.5">
-                {steps.map((label, index) => (
-                  <div
-                    key={label}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      index <= step ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
-                    }`}
+        <div className="shrink-0 px-4 pt-3">
+          <div className="flex gap-1.5" aria-hidden="true">
+            {steps.map((label, index) => (
+              <div
+                key={label}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  index <= step ? 'bg-primary' : 'bg-secondary'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          {step === 0 && (
+            <>
+              <Field label="Property" required>
+                <PaginatedSelect
+                  value={form.propertyId}
+                  onValueChange={(value) => {
+                    setSelectedProperty(
+                      verifiedProperties.find((property) => property.id === value) ?? null
+                    );
+                    update('propertyId', value);
+                  }}
+                  items={verifiedProperties}
+                  selectedItem={propertyForForm}
+                  getItemValue={(property) => property.id}
+                  getItemLabel={(property) => property.name}
+                  search={propertySearch}
+                  onSearchChange={(value) => {
+                    setPropertySearch(value);
+                    setPropertyPage(1);
+                  }}
+                  searchPlaceholder="Search verified properties"
+                  page={propertyPage}
+                  pageSize={PROPERTY_PAGE_SIZE}
+                  total={propertyTotal}
+                  onPageChange={setPropertyPage}
+                  placeholder="Select a verified property"
+                  emptyMessage="No verified properties match this search."
+                  isLoading={isPropertiesLoading}
+                  ariaLabel="verified property"
+                />
+              </Field>
+
+              <Field label="Listing Title" required>
+                <Input
+                  type="text"
+                  value={form.listingTitle}
+                  onChange={(e) => update('listingTitle', e.target.value)}
+                  placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
+                />
+              </Field>
+
+              <Field label="Asking Price" required>
+                <CurrencyInput
+                  prefix="₦"
+                  min={0}
+                  value={form.askingPrice}
+                  onValueChange={(v) => update('askingPrice', v === 0 ? '' : String(v))}
+                />
+              </Field>
+
+              {propertyForForm && (
+                <MarketPriceInsights
+                  city={propertyForForm.city}
+                  onUseSuggestedPrice={(price) => update('askingPrice', String(price))}
+                />
+              )}
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <Field label="Size (sqm)">
+                  <NumberInput
+                    min={0}
+                    value={form.propertySize}
+                    onValueChange={(v) => update('propertySize', v)}
                   />
+                </Field>
+                <Field label="Bedrooms">
+                  <NumberInput
+                    min={0}
+                    value={form.bedrooms}
+                    onValueChange={(v) => update('bedrooms', v)}
+                  />
+                </Field>
+                <Field label="Bathrooms">
+                  <NumberInput
+                    min={0}
+                    value={form.bathrooms}
+                    onValueChange={(v) => update('bathrooms', v)}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Description">
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => update('description', e.target.value)}
+                  rows={3}
+                  placeholder="Describe the property to prospective buyers"
+                />
+              </Field>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <p className="text-xs text-muted-foreground">
+                Photos and the video tour belong to the property, so every listing of it shows them.
+                Anything you add here is saved to the property when you create the listing.
+              </p>
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-foreground">
+                  Cover Image{' '}
+                  {!existingCover && (
+                    <span className="text-destructive" aria-hidden="true">
+                      *
+                    </span>
+                  )}
+                </p>
+                <MediaPicker
+                  accept="image/*"
+                  icon={<ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                  busy={uploading === 'cover'}
+                  label={
+                    media.cover
+                      ? media.cover.name
+                      : existingCover
+                        ? 'Using the property’s cover: click to replace'
+                        : 'Click to upload'
+                  }
+                  done={!!media.cover || !!existingCover}
+                  onFiles={([file]) => void stage('cover', file)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-foreground">
+                  Gallery Images{' '}
+                  <span className="font-normal text-muted-foreground">(optional)</span>
+                </p>
+                <MediaPicker
+                  accept="image/*"
+                  multiple
+                  icon={<Upload className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                  busy={uploading === 'gallery'}
+                  label={
+                    media.gallery.length
+                      ? `${media.gallery.length} image(s) added: add more`
+                      : existingGallery.length
+                        ? `${existingGallery.length} on the property: add more`
+                        : 'Add gallery images'
+                  }
+                  done={media.gallery.length > 0}
+                  onFiles={(files) => void stageGallery(files)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium text-foreground">
+                  Video Tour <span className="font-normal text-muted-foreground">(optional)</span>
+                </p>
+                <MediaPicker
+                  accept="video/*"
+                  icon={<Video className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                  busy={uploading === 'video'}
+                  label={
+                    media.video
+                      ? media.video.name
+                      : propertyForForm?.videoTourKey
+                        ? 'The property has a video tour: click to replace'
+                        : 'Upload a walkthrough, up to 5 minutes'
+                  }
+                  done={!!media.video || !!propertyForForm?.videoTourKey}
+                  onFiles={([file]) => void stage('video', file)}
+                />
+              </div>
+              {mediaError && <Alert variant="danger">{mediaError}</Alert>}
+            </>
+          )}
+
+          {step === 2 && (
+            <div>
+              <p className="mb-3 text-sm font-medium text-foreground">
+                Select property features & amenities
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {featureOptions.map((feature) => (
+                  <div
+                    key={feature}
+                    className={`rounded-lg border px-3 py-2 transition-colors ${
+                      form.features.includes(feature) ? 'border-primary bg-accent' : 'border-border'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={form.features.includes(feature)}
+                      onCheckedChange={() => toggleFeature(feature)}
+                      label={feature}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
+          )}
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {step === 0 && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Property <span className="text-red-500">*</span>
-                    </label>
-                    <PaginatedSelect
-                      value={form.propertyId}
-                      onValueChange={(value) => {
-                        setSelectedProperty(
-                          verifiedProperties.find((property) => property.id === value) ?? null
-                        );
-                        update('propertyId', value);
-                      }}
-                      items={verifiedProperties}
-                      selectedItem={propertyForForm}
-                      getItemValue={(property) => property.id}
-                      getItemLabel={(property) => property.name}
-                      search={propertySearch}
-                      onSearchChange={(value) => {
-                        setPropertySearch(value);
-                        setPropertyPage(1);
-                      }}
-                      searchPlaceholder="Search verified properties"
-                      page={propertyPage}
-                      pageSize={PROPERTY_PAGE_SIZE}
-                      total={propertyTotal}
-                      onPageChange={setPropertyPage}
-                      placeholder="Select a verified property"
-                      emptyMessage="No verified properties match this search."
-                      isLoading={isPropertiesLoading}
-                      ariaLabel="verified property"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Listing Title <span className="text-red-500">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={form.listingTitle}
-                      onChange={(e) => update('listingTitle', e.target.value)}
-                      placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Asking Price (₦) <span className="text-red-500">*</span>
-                    </label>
-                    <CurrencyInput
-                      prefix="₦"
-                      min={0}
-                      value={form.askingPrice}
-                      onValueChange={(v) => update('askingPrice', v === 0 ? '' : String(v))}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  {propertyForForm && (
-                    <MarketPriceInsights
-                      city={propertyForForm.city}
-                      onUseSuggestedPrice={(price) => update('askingPrice', String(price))}
-                    />
-                  )}
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Size (sqm)
-                      </label>
-                      <NumberInput
-                        min={0}
-                        value={form.propertySize}
-                        onValueChange={(v) => update('propertySize', v)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Bedrooms
-                      </label>
-                      <NumberInput
-                        min={0}
-                        value={form.bedrooms}
-                        onValueChange={(v) => update('bedrooms', v)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Bathrooms
-                      </label>
-                      <NumberInput
-                        min={0}
-                        value={form.bathrooms}
-                        onValueChange={(v) => update('bathrooms', v)}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Description
-                    </label>
-                    <Textarea
-                      value={form.description}
-                      onChange={(e) => update('description', e.target.value)}
-                      rows={3}
-                      placeholder="Describe the property to prospective buyers"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                </>
-              )}
-
-              {step === 1 && (
-                <>
-                  <p className="text-xs text-muted-foreground">
-                    Photos and the video tour belong to the property, so every listing of it shows
-                    them. Anything you add here is saved to the property when you create the
-                    listing.
-                  </p>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Cover Image {!existingCover && <span className="text-red-500">*</span>}
-                    </label>
-                    <MediaPicker
-                      accept="image/*"
-                      icon={<ImageIcon className="w-4 h-4 text-gray-400 shrink-0" />}
-                      busy={uploading === 'cover'}
-                      label={
-                        media.cover
-                          ? media.cover.name
-                          : existingCover
-                            ? 'Using the property’s cover: click to replace'
-                            : 'Click to upload'
-                      }
-                      done={!!media.cover || !!existingCover}
-                      onFiles={([file]) => void stage('cover', file)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Gallery Images <span className="text-gray-400 font-normal">(optional)</span>
-                    </label>
-                    <MediaPicker
-                      accept="image/*"
-                      multiple
-                      icon={<Upload className="w-4 h-4 text-gray-400 shrink-0" />}
-                      busy={uploading === 'gallery'}
-                      label={
-                        media.gallery.length
-                          ? `${media.gallery.length} image(s) added: add more`
-                          : existingGallery.length
-                            ? `${existingGallery.length} on the property: add more`
-                            : 'Add gallery images'
-                      }
-                      done={media.gallery.length > 0}
-                      onFiles={(files) => void stageGallery(files)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Video Tour <span className="text-gray-400 font-normal">(optional)</span>
-                    </label>
-                    <MediaPicker
-                      accept="video/*"
-                      icon={<Video className="w-4 h-4 text-gray-400 shrink-0" />}
-                      busy={uploading === 'video'}
-                      label={
-                        media.video
-                          ? media.video.name
-                          : propertyForForm?.videoTourKey
-                            ? 'The property has a video tour: click to replace'
-                            : 'Upload a walkthrough, up to 5 minutes'
-                      }
-                      done={!!media.video || !!propertyForForm?.videoTourKey}
-                      onFiles={([file]) => void stage('video', file)}
-                    />
-                  </div>
-                  {mediaError && <p className="text-sm text-destructive">{mediaError}</p>}
-                </>
-              )}
-
-              {step === 2 && (
-                <div>
-                  <p className="text-sm font-medium text-foreground mb-3">
-                    Select property features & amenities
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {featureOptions.map((feature) => (
-                      <label
-                        key={feature}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm cursor-pointer transition-colors ${
-                          form.features.includes(feature)
-                            ? 'border-primary bg-accent text-primary'
-                            : 'border-border text-muted-foreground'
-                        }`}
-                      >
-                        <LegacyInput
-                          type="checkbox"
-                          checked={form.features.includes(feature)}
-                          onChange={() => toggleFeature(feature)}
-                          className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                        />
-                        {feature}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {step === 3 && (
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-                    <SummaryRow label="Property" value={propertyForForm?.name || '—'} />
-                    <SummaryRow label="Title" value={form.listingTitle || '—'} />
-                    <SummaryRow
-                      label="Asking Price"
-                      value={form.askingPrice ? `₦${form.askingPrice}` : '—'}
-                    />
-                    <SummaryRow
-                      label="Cover Image"
-                      value={media.cover?.name ?? (existingCover ? 'The property’s cover' : '—')}
-                    />
-                    <SummaryRow
-                      label="Video Tour"
-                      value={
-                        media.video?.name ??
-                        (propertyForForm?.videoTourKey ? 'The property’s video' : 'None')
-                      }
-                    />
-                    <SummaryRow
-                      label="Features"
-                      value={form.features.length ? `${form.features.length} selected` : 'None'}
-                    />
-                  </div>
-                  {createError && (
-                    <p role="alert" className="text-sm text-destructive">
-                      {createError}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Publishing makes this listing searchable to verified buyers, or puts it in
-                    review first when we need to check something. A draft stays off the market until
-                    you publish it.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              {step > 0 && (
-                <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
-                  Back
-                </Button>
-              )}
-              <div className="flex-1" />
-              {step < steps.length - 1 && (
-                <Button
-                  variant="primary"
-                  onClick={() => setStep((s) => s + 1)}
-                  disabled={
-                    verifiedProperties.length === 0 ||
-                    (step === 0 && !canProceedFromStep1) ||
-                    (step === 1 && !canProceedFromStep2)
+          {step === 3 && (
+            <div className="space-y-3">
+              <div className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+                <SummaryRow label="Property" value={propertyForForm?.name || '—'} />
+                <SummaryRow label="Title" value={form.listingTitle || '—'} />
+                <SummaryRow
+                  label="Asking Price"
+                  value={form.askingPrice ? `₦${form.askingPrice}` : '—'}
+                />
+                <SummaryRow
+                  label="Cover Image"
+                  value={media.cover?.name ?? (existingCover ? 'The property’s cover' : '—')}
+                />
+                <SummaryRow
+                  label="Video Tour"
+                  value={
+                    media.video?.name ??
+                    (propertyForForm?.videoTourKey ? 'The property’s video' : 'None')
                   }
-                >
-                  Continue
-                </Button>
-              )}
-              {step === steps.length - 1 && (
-                <>
-                  <Button
-                    variant="outline"
-                    disabled={creating}
-                    onClick={() => void handleCreate('draft')}
-                  >
-                    Save Draft
-                  </Button>
-                  <Button
-                    variant="primary"
-                    className="gap-2"
-                    disabled={creating}
-                    isLoading={creating}
-                    onClick={() => void handleCreate('published')}
-                  >
-                    <Check className="w-4 h-4" />
-                    Publish
-                  </Button>
-                </>
-              )}
+                />
+                <SummaryRow
+                  label="Features"
+                  value={form.features.length ? `${form.features.length} selected` : 'None'}
+                />
+              </div>
+              {createError && <Alert variant="danger">{createError}</Alert>}
+              <p className="text-xs text-muted-foreground">
+                Publishing makes this listing searchable to verified buyers, or puts it in review
+                first when we need to check something. A draft stays off the market until you
+                publish it.
+              </p>
             </div>
-          </motion.div>
+          )}
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="flex shrink-0 gap-3 border-t border-border p-4">
+          {step > 0 && (
+            <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
+              Back
+            </Button>
+          )}
+          <div className="flex-1" />
+          {step < steps.length - 1 && (
+            <Button
+              variant="primary"
+              onClick={() => setStep((s) => s + 1)}
+              disabled={
+                verifiedProperties.length === 0 ||
+                (step === 0 && !canProceedFromStep1) ||
+                (step === 1 && !canProceedFromStep2)
+              }
+            >
+              Continue
+            </Button>
+          )}
+          {step === steps.length - 1 && (
+            <>
+              <Button
+                variant="outline"
+                disabled={creating}
+                onClick={() => void handleCreate('draft')}
+              >
+                Save Draft
+              </Button>
+              <Button
+                variant="primary"
+                isLoading={creating}
+                icon={<Check className="h-4 w-4" />}
+                onClick={() => void handleCreate('published')}
+              >
+                Publish
+              </Button>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -612,16 +574,16 @@ const MediaPicker = ({
   onFiles: (files: File[]) => void;
 }) => (
   <label
-    className={`flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border transition-colors ${
-      busy ? 'opacity-70' : 'hover:border-primary cursor-pointer'
+    className={`flex items-center gap-3 rounded-lg border-2 border-dashed border-border px-3 py-3 transition-colors focus-within:ring-2 focus-within:ring-ring ${
+      busy ? 'opacity-70' : 'cursor-pointer hover:border-primary'
     }`}
   >
-    <LegacyInput
+    <input
       type="file"
       accept={accept}
       multiple={multiple}
       disabled={busy}
-      className="hidden"
+      className="sr-only"
       onChange={(e) => {
         const files = Array.from(e.target.files ?? []);
         // Reset so re-picking the same file still fires a change event.
@@ -629,9 +591,9 @@ const MediaPicker = ({
         onFiles(files);
       }}
     />
-    {busy ? <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" /> : icon}
-    <span className="text-sm text-muted-foreground truncate">{busy ? 'Uploading…' : label}</span>
-    {done && !busy && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
+    {busy ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" /> : icon}
+    <span className="truncate text-sm text-muted-foreground">{busy ? 'Uploading…' : label}</span>
+    {done && !busy && <Check className="ml-auto h-4 w-4 shrink-0 text-success" />}
   </label>
 );
 

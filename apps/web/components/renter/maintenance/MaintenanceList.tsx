@@ -1,11 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { Search, Wrench } from 'lucide-react';
+import { Wrench } from 'lucide-react';
+import { Card, EmptyState, SearchInput, Select } from '@getrentos/ui';
 import { MaintenanceCard } from './MaintenanceCard';
 import { MaintenanceDetailsModal } from './MaintenanceDetailsModal';
 import { VendorRatingModal } from './VendorRatingModal';
@@ -79,7 +76,7 @@ export const MaintenanceList = ({
 
   return (
     <>
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <Card>
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -90,57 +87,45 @@ export const MaintenanceList = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <LegacyInput
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-40"
-                />
-              </div>
+              <SearchInput
+                value={searchTerm}
+                onValueChange={setSearchTerm}
+                label="Search maintenance requests"
+                placeholder="Search..."
+                className="w-full sm:w-48"
+              />
 
-              <LegacySelect
+              <Select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </LegacySelect>
+                onValueChange={setFilterStatus}
+                options={statusOptions}
+                ariaLabel="Filter by status"
+                className="w-full sm:w-40"
+              />
 
-              <LegacySelect
+              <Select
                 value={filterPriority}
-                onChange={(e) => setFilterPriority(e.target.value)}
-                className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {priorityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </LegacySelect>
+                onValueChange={setFilterPriority}
+                options={priorityOptions}
+                ariaLabel="Filter by priority"
+                className="w-full sm:w-40"
+              />
             </div>
           </div>
         </div>
 
         <div className="divide-y divide-border">
           {filteredRequests.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                <Wrench className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-foreground">No maintenance requests</h3>
-              <p className="text-muted-foreground mt-1">
-                {searchTerm || filterStatus !== 'all' || filterPriority !== 'all'
+            <EmptyState
+              icon={Wrench}
+              bare
+              title="No maintenance requests"
+              description={
+                searchTerm || filterStatus !== 'all' || filterPriority !== 'all'
                   ? 'Try adjusting your filters'
-                  : 'Report an issue to get started'}
-              </p>
-            </div>
+                  : 'Report an issue to get started'
+              }
+            />
           ) : (
             filteredRequests.map((request) => (
               <div key={request.id}>
@@ -154,7 +139,7 @@ export const MaintenanceList = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Details Modal */}
       {selectedRequest && (

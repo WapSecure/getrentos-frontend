@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { AlertTriangle, CalendarClock, BadgeCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, Card } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import type { MyBilling } from '@/services/billingService';
 import { useCardUpdateLink, useManageSubscription } from '@/hooks/useBilling';
@@ -89,12 +89,12 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
   const storeName = billing.managedBy === 'play_store' ? 'Google Play' : 'App Store';
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <Card className="p-6">
       <div className="flex items-start gap-3">
         <div
           className={
             isPastDue
-              ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400'
+              ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-subtle text-warning'
               : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-primary'
           }
         >
@@ -116,9 +116,9 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
       </div>
 
       {error instanceof Error && (
-        <p className="mt-4 text-sm text-destructive" role="alert">
+        <Alert variant="danger" className="mt-4">
           {error.message}
-        </p>
+        </Alert>
       )}
 
       {storeManaged ? (
@@ -132,28 +132,35 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
           {isPastDue && !billing.cancelAtPeriodEnd && (
             <Button
               variant="primary"
-              disabled={cardUpdate.opening}
+              isLoading={cardUpdate.opening}
+              loadingText="Opening…"
               onClick={cardUpdate.openCardUpdate}
             >
-              {cardUpdate.opening ? 'Opening…' : 'Update card'}
+              Update card
             </Button>
           )}
 
           {billing.cancelAtPeriodEnd ? (
-            <Button variant="primary" disabled={pending} onClick={() => reactivate.mutate()}>
-              {pending ? 'Resuming…' : 'Resume plan'}
+            <Button
+              variant="primary"
+              isLoading={pending}
+              loadingText="Resuming…"
+              onClick={() => reactivate.mutate()}
+            >
+              Resume plan
             </Button>
           ) : confirming ? (
             <>
               <Button
                 variant="danger"
-                disabled={pending}
+                isLoading={pending}
+                loadingText="Cancelling…"
                 onClick={() => {
                   setConfirming(false);
                   cancel.mutate();
                 }}
               >
-                {pending ? 'Cancelling…' : 'Yes, cancel at period end'}
+                Yes, cancel at period end
               </Button>
               <Button variant="ghost" disabled={pending} onClick={() => setConfirming(false)}>
                 Keep my plan
@@ -172,6 +179,6 @@ export function ManageSubscriptionCard({ billing }: { billing?: MyBilling }) {
           You&apos;ll keep Pro until {accessEnds}: nothing is charged after that.
         </p>
       )}
-    </div>
+    </Card>
   );
 }

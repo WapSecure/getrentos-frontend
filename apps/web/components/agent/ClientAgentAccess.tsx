@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Pagination } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { UserCheck } from 'lucide-react';
+import { Button, Card, EmptyState, ListSkeleton, Pagination, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -18,13 +18,14 @@ type Property = { id: string; title: string; city: string; state: string };
 export function ClientAgentAccess() {
   const queryClient = useQueryClient();
   const [propertiesFor, setPropertiesFor] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
   const [propertyPage, setPropertyPage] = useState(1);
   const { data: assignmentsData, isLoading } = useQuery({
     queryKey: [...agentKeys.clientAssignments, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(agentService.listClientAssignments({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const assignments = (assignmentsData?.items ?? []) as Assignment[];
   const assignmentTotal = assignmentsData?.total ?? 0;
@@ -41,6 +42,7 @@ export function ClientAgentAccess() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const properties = (propertiesData?.items ?? []) as Property[];
   const propertyTotal = propertiesData?.total ?? 0;
@@ -49,17 +51,17 @@ export function ClientAgentAccess() {
     mutationFn: (id: string) => unwrap(agentService.approveClientAssignment(id)),
     onSuccess: () => {
       refresh();
-      setToast({ message: 'Agent access approved.', variant: 'success' });
+      toast.success('Agent access approved.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
   const revoke = useMutation({
     mutationFn: (id: string) => unwrap(agentService.revokeClientAssignment(id)),
     onSuccess: () => {
       refresh();
-      setToast({ message: 'Agent access revoked.', variant: 'success' });
+      toast.success('Agent access revoked.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
   const assign = useMutation({
     mutationFn: ({ id, propertyId }: { id: string; propertyId: string }) =>
@@ -68,9 +70,9 @@ export function ClientAgentAccess() {
       queryClient.invalidateQueries({
         queryKey: agentKeys.assignableProperties(propertiesFor ?? ''),
       });
-      setToast({ message: 'Property assigned to Agent.', variant: 'success' });
+      toast.success('Property assigned to Agent.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   return (
@@ -82,15 +84,13 @@ export function ClientAgentAccess() {
         </p>
       </div>
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading Agent requests…</p>
+        <ListSkeleton variant="cards" rows={3} label="Loading Agent requests" />
       ) : assignments.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground">
-          No Agent requests.
-        </div>
+        <EmptyState icon={UserCheck} title="No Agent requests." />
       ) : (
         <div className="space-y-4">
           {assignments.map((assignment) => (
-            <div key={assignment.id} className="rounded-2xl border border-border bg-card p-5">
+            <Card key={assignment.id} className="p-5">
               <h2 className="font-semibold text-foreground">{assignment.agent.legalName}</h2>
               <p className="text-sm text-muted-foreground">
                 {assignment.agent.companyName || assignment.agent.email}
@@ -98,7 +98,7 @@ export function ClientAgentAccess() {
               <div className="mt-4 flex flex-wrap gap-2">
                 {assignment.status === 'PENDING' ? (
                   <Button
-                    isLoading={approve.isPending}
+                    isLoading={approve.isPending && approve.variables === assignment.id}
                     onClick={() => approve.mutate(assignment.id)}
                   >
                     Approve access
@@ -117,7 +117,7 @@ export function ClientAgentAccess() {
                     <Button
                       variant="ghost"
                       className="text-destructive"
-                      isLoading={revoke.isPending}
+                      isLoading={revoke.isPending && revoke.variables === assignment.id}
                       onClick={() => revoke.mutate(assignment.id)}
                     >
                       Revoke
@@ -132,15 +132,15 @@ export function ClientAgentAccess() {
                   {properties.map((property) => (
                     <div
                       key={property.id}
-                      className="flex items-center justify-between py-2 text-sm"
+                      className="flex items-center justify-between gap-3 py-2 text-sm"
                     >
-                      <span>
+                      <span className="min-w-0">
                         {property.title} · {property.city}, {property.state}
                       </span>
                       <Button
                         size="sm"
                         variant="outline"
-                        isLoading={assign.isPending}
+                        isLoading={assign.isPending && assign.variables?.propertyId === property.id}
                         onClick={() =>
                           assign.mutate({ id: assignment.id, propertyId: property.id })
                         }
@@ -160,7 +160,7 @@ export function ClientAgentAccess() {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -175,9 +175,6 @@ export function ClientAgentAccess() {
           }}
           className="mt-6"
         />
-      )}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

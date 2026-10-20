@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { Logo, ThemeToggle } from '@getrentos/ui';
+import { IconButton, Logo, ThemeToggle } from '@getrentos/ui';
 import { AdminProfileDropdown } from './AdminProfileDropdown';
 import { ROUTES } from '@getrentos/shared';
 import { AdminMobileNavigation } from '@/components/admin/dashboard/AdminSidebar';
@@ -64,15 +64,13 @@ export const AdminNavbar = ({ user }: AdminNavbarProps) => {
 
               <AdminProfileDropdown user={user} />
 
-              <button
-                type="button"
+              <IconButton
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={isMobileMenuOpen}
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                className="lg:hidden"
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
+              />
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PaymentsHeader } from '@/components/renter/payments/PaymentsHeader';
 import { PaymentsStats } from '@/components/renter/payments/PaymentsStats';
 import { PaymentsList } from '@/components/renter/payments/PaymentsList';
@@ -67,6 +67,7 @@ export default function PaymentsPage() {
   const paymentsQuery = useQuery({
     queryKey: [...renterKeys.payments, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(renterService.listPayments({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const receiptsQuery = useQuery({
     queryKey: [...renterKeys.receipts, { page: 1, pageSize: 12 }],
@@ -329,7 +330,7 @@ export default function PaymentsPage() {
     );
   }
 
-  if (paymentQueries.some((query) => query.isError)) {
+  if (paymentQueries.some((query) => query.isError && !query.data)) {
     return (
       <>
         {tabNav}

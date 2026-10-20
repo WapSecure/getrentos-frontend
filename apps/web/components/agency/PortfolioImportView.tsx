@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, FileSpreadsheet, Upload } from 'lucide-react';
-import { Badge, Button, Card, Select, Toast, type ToastVariant } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, Field, Select, Skeleton, useToast } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -29,7 +29,7 @@ export function PortfolioImportView() {
   const [propertyId, setPropertyId] = useState('');
   const [csv, setCsv] = useState<{ name: string; text: string } | null>(null);
   const [preview, setPreview] = useState<UnitImportResult | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const chosen = propertyId || properties[0]?.value || '';
 
   const call = async (dryRun: boolean) => {
@@ -44,19 +44,18 @@ export function PortfolioImportView() {
   const check = useMutation({
     mutationFn: () => call(true),
     onSuccess: setPreview,
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
   const commit = useMutation({
     mutationFn: () => call(false),
     onSuccess: (r) => {
       setPreview(null);
       setCsv(null);
-      setToast({
-        message: `Imported ${r.created} unit${r.created === 1 ? '' : 's'} into ${r.propertyTitle}.`,
-        variant: 'success',
-      });
+      toast.success(
+        `Imported ${r.created} unit${r.created === 1 ? '' : 's'} into ${r.propertyTitle}.`
+      );
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const template = `data:text/csv;charset=utf-8,${encodeURIComponent(UNITS_CSV_TEMPLATE)}`;
@@ -78,15 +77,18 @@ export function PortfolioImportView() {
 
       <Card className="space-y-4 p-5">
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading the properties you manage…</p>
+          <div role="status" aria-label="Loading the properties you manage" className="space-y-3">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-9 w-36" />
+          </div>
         ) : properties.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             You can import into properties your firm manages. There are none live yet.
           </p>
         ) : (
           <>
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium text-foreground">Property</span>
+            <Field label="Property">
               <Select
                 value={chosen}
                 onValueChange={(v) => {
@@ -95,7 +97,7 @@ export function PortfolioImportView() {
                 }}
                 options={properties}
               />
-            </label>
+            </Field>
             <div className="flex flex-wrap items-center gap-3">
               <input
                 ref={fileRef}
@@ -110,8 +112,12 @@ export function PortfolioImportView() {
                   setPreview(null);
                 }}
               />
-              <Button variant="secondary" onClick={() => fileRef.current?.click()}>
-                <Upload className="h-4 w-4" /> {csv ? 'Choose another file' : 'Choose CSV'}
+              <Button
+                variant="secondary"
+                onClick={() => fileRef.current?.click()}
+                icon={<Upload className="h-4 w-4" />}
+              >
+                {csv ? 'Choose another file' : 'Choose CSV'}
               </Button>
               {csv && <span className="text-sm text-foreground">{csv.name}</span>}
               <a
@@ -127,8 +133,13 @@ export function PortfolioImportView() {
               (ANNUAL or MONTHLY, default ANNUAL). Units already on the property are skipped by
               name.
             </p>
-            <Button onClick={() => check.mutate()} disabled={!csv || !chosen || check.isPending}>
-              {check.isPending ? 'Checking…' : 'Check file'}
+            <Button
+              onClick={() => check.mutate()}
+              disabled={!csv || !chosen}
+              isLoading={check.isPending}
+              loadingText="Checking…"
+            >
+              Check file
             </Button>
           </>
         )}
@@ -137,7 +148,7 @@ export function PortfolioImportView() {
       {preview && (
         <Card className="mt-6 p-5">
           {preview.fileError ? (
-            <p className="text-sm text-destructive">{preview.fileError}</p>
+            <Alert variant="danger">{preview.fileError}</Alert>
           ) : (
             <>
               <div className="flex flex-wrap items-center gap-2">
@@ -147,7 +158,8 @@ export function PortfolioImportView() {
                   {preview.errors.length} with errors
                 </Badge>
               </div>
-              <table className="mt-4 w-full text-sm">
+              <div className="mt-4 overflow-x-auto">
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
                     <th className="py-2 pr-3 font-medium">Line</th>
@@ -198,14 +210,15 @@ export function PortfolioImportView() {
                     ))}
                 </tbody>
               </table>
+              </div>
               <Button
                 className="mt-4"
                 onClick={() => commit.mutate()}
-                disabled={!canCommit || commit.isPending}
+                disabled={!canCommit}
+                isLoading={commit.isPending}
+                loadingText="Importing…"
               >
-                {commit.isPending
-                  ? 'Importing…'
-                  : `Import ${preview.toCreate.length} unit${preview.toCreate.length === 1 ? '' : 's'}`}
+                {`Import ${preview.toCreate.length} unit${preview.toCreate.length === 1 ? '' : 's'}`}
               </Button>
               {preview.errors.length > 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -215,10 +228,6 @@ export function PortfolioImportView() {
             </>
           )}
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

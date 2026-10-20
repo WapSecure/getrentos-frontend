@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   MapPin,
   Bed,
@@ -17,8 +16,21 @@ import {
   ExternalLink,
   MoreHorizontal,
   CheckSquare,
+  StickyNote,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  IconButton,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -57,7 +69,6 @@ export const SavedPropertyCard = ({
 }: SavedPropertyCardProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [showMenu, setShowMenu] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [note, setNote] = useState(property.note ?? '');
@@ -94,35 +105,18 @@ export const SavedPropertyCard = ({
 
   const handleMoveToWishlist = (wishlistId: string) => {
     onMoveToWishlist(property.id, wishlistId);
-    setShowMenu(false);
   };
 
-  const getStatusConfig = (status: string) => {
+  const getStatusConfig = (status: string): { label: string; variant: BadgeVariant } | null => {
     switch (status) {
       case 'pending':
-        return {
-          label: 'Pending',
-          color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-          icon: '⏳',
-        };
+        return { label: 'Pending', variant: 'warning' };
       case 'under_review':
-        return {
-          label: 'Under Review',
-          color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-          icon: '🔍',
-        };
+        return { label: 'Under Review', variant: 'info' };
       case 'approved':
-        return {
-          label: 'Approved!',
-          color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-          icon: '✅',
-        };
+        return { label: 'Approved!', variant: 'success' };
       case 'rejected':
-        return {
-          label: 'Not Selected',
-          color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-          icon: '❌',
-        };
+        return { label: 'Not Selected', variant: 'danger' };
       default:
         return null;
     }
@@ -132,46 +126,106 @@ export const SavedPropertyCard = ({
     ? getStatusConfig(property.applicationStatus)
     : null;
 
+  const selectButton = onSelect && (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={!!isSelected}
+      aria-label={`Select ${property.title}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+      className="absolute top-2 left-2 z-20 p-1 bg-card/90 rounded-full hover:bg-card transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+    >
+      {isSelected ? (
+        <CheckSquare className="w-4 h-4 text-primary" aria-hidden="true" />
+      ) : (
+        <Square className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+      )}
+    </button>
+  );
+
+  const actionsMenu = (includeNote: boolean) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <IconButton
+          variant="outline"
+          size="sm"
+          label={`More actions for ${property.title}`}
+          icon={<MoreHorizontal />}
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {includeNote && (
+          <DropdownMenuItem onSelect={() => setShowNoteModal(true)}>
+            <BookmarkPlus className="w-3 h-3" aria-hidden="true" />
+            Add Note
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onSelect={() => setShowShareModal(true)}>
+          <ExternalLink className="w-3 h-3" aria-hidden="true" />
+          Share Property
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs text-muted-foreground">
+          Move to wishlist
+        </DropdownMenuLabel>
+        {wishlists.map((list) => (
+          <DropdownMenuItem key={list.id} onSelect={() => handleMoveToWishlist(list.id)}>
+            <BookmarkPlus className="w-3 h-3" aria-hidden="true" />
+            {list.name}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => onRemove(property.id)} className="text-destructive">
+          <Trash2 className="w-3 h-3" aria-hidden="true" />
+          Remove
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const modals = (
+    <>
+      <AddNoteModal
+        isOpen={showNoteModal}
+        onClose={() => setShowNoteModal(false)}
+        onSave={handleSaveNote}
+        initialNote={note}
+        propertyTitle={property.title}
+      />
+      <SharePropertyModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        property={property}
+      />
+    </>
+  );
+
   // List View
   if (viewMode === 'list') {
     return (
       <>
-        <div className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow">
+        <Card hover>
           <div className="flex flex-col sm:flex-row">
             <PropertyPhoto
               src={property.image}
               alt={property.title}
               className="w-full sm:w-48 h-40 shrink-0"
             >
-              {onSelect && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect();
-                  }}
-                  className="absolute top-2 left-2 z-20 p-1 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors"
-                >
-                  {isSelected ? (
-                    <CheckSquare className="w-4 h-4 text-primary" />
-                  ) : (
-                    <Square className="w-4 h-4 text-gray-500" />
-                  )}
-                </button>
-              )}
+              {selectButton}
 
               {statusConfig && (
-                <div
-                  className={`absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color} z-10`}
-                >
-                  <span className="mr-1">{statusConfig.icon}</span>
+                <Badge variant={statusConfig.variant} className="absolute bottom-2 left-2 z-10">
                   {statusConfig.label}
-                </div>
+                </Badge>
               )}
             </PropertyPhoto>
 
-            <div className="flex-1 p-4">
+            <div className="min-w-0 flex-1 p-4">
               <div className="flex flex-wrap justify-between gap-2">
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-semibold text-foreground hover:text-primary transition-colors">
                     {property.title}
                   </h3>
@@ -209,8 +263,9 @@ export const SavedPropertyCard = ({
               </div>
 
               {note && (
-                <div className="mt-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-xs text-muted-foreground">
-                  📝 {note}
+                <div className="mt-2 flex items-start gap-1.5 p-2 bg-secondary/60 rounded-lg text-xs text-muted-foreground">
+                  <StickyNote className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0">{note}</span>
                 </div>
               )}
 
@@ -225,107 +280,30 @@ export const SavedPropertyCard = ({
                 <Button size="sm" variant="outline" onClick={() => setShowNoteModal(true)}>
                   Add Note
                 </Button>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-2 rounded-lg border border-border hover:bg-secondary"
-                  >
-                    <MoreHorizontal className="w-4 h-4" />
-                  </button>
-                  <AnimatePresence>
-                    {showMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-lg border border-border z-10"
-                      >
-                        <button
-                          onClick={() => {
-                            setShowShareModal(true);
-                            setShowMenu(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Share Property
-                        </button>
-                        <div className="border-t border-border my-1" />
-                        <div className="px-2 py-1">
-                          <p className="text-xs text-gray-500 px-2 py-1">Move to wishlist</p>
-                          {wishlists.map((list) => (
-                            <button
-                              key={list.id}
-                              onClick={() => handleMoveToWishlist(list.id)}
-                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                            >
-                              <BookmarkPlus className="w-3 h-3" />
-                              {list.name}
-                            </button>
-                          ))}
-                        </div>
-                        <div className="border-t border-border my-1" />
-                        <button
-                          onClick={() => {
-                            onRemove(property.id);
-                            setShowMenu(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Remove
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {actionsMenu(false)}
               </div>
             </div>
           </div>
-        </div>
-
-        <AddNoteModal
-          isOpen={showNoteModal}
-          onClose={() => setShowNoteModal(false)}
-          onSave={handleSaveNote}
-          initialNote={note}
-          propertyTitle={property.title}
-        />
-        <SharePropertyModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          property={property}
-        />
+        </Card>
+        {modals}
       </>
     );
   }
 
   return (
     <>
-      <div className="group bg-card rounded-xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 relative">
+      <Card hover className="group relative">
         <PropertyPhoto src={property.image} alt={property.title} className="h-48">
-          {onSelect && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect();
-              }}
-              className="absolute top-2 left-2 z-20 p-1 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors"
-            >
-              {isSelected ? (
-                <CheckSquare className="w-4 h-4 text-primary" />
-              ) : (
-                <Square className="w-4 h-4 text-gray-500" />
-              )}
-            </button>
-          )}
+          {selectButton}
 
           <button
+            type="button"
             onClick={() => onRemove(property.id)}
-            className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors z-10"
+            className="absolute top-2 right-2 p-1.5 bg-card/90 rounded-full hover:bg-card transition-colors z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
+            aria-label="Remove from saved"
             title="Remove from saved"
           >
-            <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+            <Heart className="w-4 h-4 text-destructive fill-destructive" aria-hidden="true" />
           </button>
 
           <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded-lg text-sm font-bold z-10">
@@ -333,13 +311,12 @@ export const SavedPropertyCard = ({
           </div>
 
           {statusConfig && (
-            <div
-              className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color} z-10`}
-              style={{ left: onSelect ? '44px' : '8px' }}
+            <Badge
+              variant={statusConfig.variant}
+              className={`absolute top-2 z-10 ${onSelect ? 'left-11' : 'left-2'}`}
             >
-              <span className="mr-1">{statusConfig.icon}</span>
               {statusConfig.label}
-            </div>
+            </Badge>
           )}
         </PropertyPhoto>
 
@@ -352,7 +329,7 @@ export const SavedPropertyCard = ({
             <span className="text-xs line-clamp-1">{property.location}</span>
           </div>
 
-          <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Bed className="w-3 h-3" />
               <span>{pluralize(property.bedrooms, 'bed')}</span>
@@ -368,8 +345,9 @@ export const SavedPropertyCard = ({
           </div>
 
           {note && (
-            <div className="mt-2 p-2 bg-gray-50 dark:bg-white/5 rounded-lg text-xs text-muted-foreground line-clamp-2">
-              📝 {note}
+            <div className="mt-2 flex items-start gap-1.5 p-2 bg-secondary/60 rounded-lg text-xs text-muted-foreground">
+              <StickyNote className="w-3 h-3 mt-0.5 shrink-0" aria-hidden="true" />
+              <span className="min-w-0 line-clamp-2">{note}</span>
             </div>
           )}
 
@@ -382,86 +360,11 @@ export const SavedPropertyCard = ({
             >
               View Details
             </Button>
-            <div className="relative">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg border border-border hover:bg-secondary"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-lg border border-border z-10"
-                  >
-                    <button
-                      onClick={() => {
-                        setShowNoteModal(true);
-                        setShowMenu(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                    >
-                      <BookmarkPlus className="w-3 h-3" />
-                      Add Note
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowShareModal(true);
-                        setShowMenu(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      Share Property
-                    </button>
-                    <div className="border-t border-border my-1" />
-                    <div className="px-2 py-1">
-                      <p className="text-xs text-gray-500 px-2 py-1">Move to wishlist</p>
-                      {wishlists.map((list) => (
-                        <button
-                          key={list.id}
-                          onClick={() => handleMoveToWishlist(list.id)}
-                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-secondary"
-                        >
-                          <BookmarkPlus className="w-3 h-3" />
-                          {list.name}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="border-t border-border my-1" />
-                    <button
-                      onClick={() => {
-                        onRemove(property.id);
-                        setShowMenu(false);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      Remove
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {actionsMenu(true)}
           </div>
         </div>
-      </div>
-
-      <AddNoteModal
-        isOpen={showNoteModal}
-        onClose={() => setShowNoteModal(false)}
-        onSave={handleSaveNote}
-        initialNote={note}
-        propertyTitle={property.title}
-      />
-      <SharePropertyModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        property={property}
-      />
+      </Card>
+      {modals}
     </>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Card } from '@getrentos/ui';
+import { Alert, Card, Skeleton } from '@getrentos/ui';
 import { AlertTriangle } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -29,7 +29,7 @@ const Figure = ({ label, value, note }: { label: string; value: string; note?: s
 
 /** Plots by status, sell-through, inventory value and what buyers owe. */
 export const InventoryDashboard = ({ propertyId }: { propertyId: string }) => {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.dashboard(propertyId),
     queryFn: () => unwrap(landDeveloperService.getDashboard(propertyId)),
   });
@@ -38,18 +38,17 @@ export const InventoryDashboard = ({ propertyId }: { propertyId: string }) => {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy="true">
         {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-secondary" />
+          <Skeleton key={i} className="h-24 rounded-2xl" />
         ))}
       </div>
     );
   }
 
-  if (isError || !data) {
+  if (!data) {
     return (
-      <p className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-        <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+      <Alert variant="danger" icon={AlertTriangle}>
         {error instanceof Error ? error.message : 'The inventory figures could not be loaded.'}
-      </p>
+      </Alert>
     );
   }
 

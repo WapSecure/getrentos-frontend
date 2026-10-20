@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { CheckCircle, Clock, AlertCircle, Shield } from 'lucide-react';
+import { StatCard, type StatCardAccent } from '@getrentos/ui';
 
 interface Payment {
   id: string;
@@ -49,50 +49,38 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
       icon: CheckCircle,
       label: 'Total Paid',
       value: formatCurrency(totalPaid),
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-50 dark:bg-green-900/20',
+      accent: 'green' as StatCardAccent,
     },
     {
       icon: Clock,
       label: 'Pending',
       value: formatCurrency(pendingAmount),
-      color: 'text-yellow-600 dark:text-yellow-400',
-      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+      accent: 'orange' as StatCardAccent,
     },
     {
       icon: AlertCircle,
       label: 'Overdue',
       value: formatCurrency(overdueAmount),
-      color: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-50 dark:bg-red-900/20',
+      accent: 'red' as StatCardAccent,
     },
     {
       icon: Shield,
       label: 'Held by GetRentos',
       value: formatCurrency(escrowAmount),
-      color: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      accent: 'blue' as StatCardAccent,
     },
   ];
 
   return (
     <section aria-label="Payment overview" className="mb-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {stats.map((stat, index) => (
-        <motion.div
+      {stats.map((stat) => (
+        <StatCard
           key={stat.label}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
-          className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm"
-        >
-          <div className="flex items-center gap-2">
-            <span className={`rounded-lg p-2 ${stat.bg}`}>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} aria-hidden="true" />
-            </span>
-            <span className="text-xs text-muted-foreground">{stat.label}</span>
-          </div>
-          <p className="mt-3 text-lg font-bold tracking-tight text-foreground">{stat.value}</p>
-        </motion.div>
+          icon={stat.icon}
+          label={stat.label}
+          value={stat.value}
+          accent={stat.accent}
+        />
       ))}
     </section>
   );

@@ -1,10 +1,8 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { Volume2, VolumeX, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Card, Field, Select, Switch } from '@getrentos/ui';
 
 export const NotificationSound = () => {
   const [isEnabled, setIsEnabled] = useState(true);
@@ -19,63 +17,46 @@ export const NotificationSound = () => {
   ];
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
+    <Card>
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        aria-expanded={isExpanded}
+        className="w-full p-4 flex items-center justify-between gap-3 hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-2">
           {isEnabled ? (
             <Volume2 className="w-4 h-4 text-primary" />
           ) : (
-            <VolumeX className="w-4 h-4 text-gray-400" />
+            <VolumeX className="w-4 h-4 text-muted-foreground" />
           )}
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Notification Sound</h3>
-            <p className="text-xs text-gray-500">Play sound for new notifications</p>
+            <p className="text-xs text-muted-foreground">Play sound for new notifications</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="p-1 h-auto">
-          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </div>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-foreground">Sound Enabled</span>
-            <button
-              onClick={() => setIsEnabled(!isEnabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+          <Switch label="Sound Enabled" checked={isEnabled} onCheckedChange={setIsEnabled} />
 
           {isEnabled && (
-            <div>
-              <label className="block text-xs font-medium text-foreground mb-1">Sound Type</label>
-              <LegacySelect
+            <Field label="Sound Type">
+              <Select
                 value={selectedSound}
-                onChange={(e) => setSelectedSound(e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {soundOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </LegacySelect>
-            </div>
+                onValueChange={setSelectedSound}
+                options={soundOptions}
+              />
+            </Field>
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

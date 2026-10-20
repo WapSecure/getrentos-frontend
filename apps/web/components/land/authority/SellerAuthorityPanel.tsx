@@ -14,17 +14,18 @@ import {
   Users,
 } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
+  DatePicker,
   Field,
   Input,
   PageErrorState,
   Select,
+  Skeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
-  DatePicker,
+  useToast,
 } from '@getrentos/ui';
 import {
   describeCapacityRule,
@@ -66,7 +67,7 @@ const isClaim = (view: unknown): view is LandAuthorityView =>
 export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) => {
   const queryClient = useQueryClient();
   const key = landKeys.authority(propertyId);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const query = useQuery({
     queryKey: key,
     queryFn: () => unwrap(landAuthorityService.get(propertyId)),
@@ -75,15 +76,14 @@ export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) 
   const saved = (view: LandAuthorityView, message: string) => {
     queryClient.setQueryData(key, view);
     void queryClient.invalidateQueries({ queryKey: landKeys.ownerDetail(propertyId) });
-    setToast({ message, variant: 'success' });
+    toast.success(message);
   };
-  const failed = (error: unknown, fallback: string) =>
-    setToast({ message: errorMessage(error, fallback), variant: 'error' });
+  const failed = (error: unknown, fallback: string) => toast.error(errorMessage(error, fallback));
 
   if (query.isLoading) {
-    return <div className="h-96 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <Skeleton className="h-96 rounded-2xl" />;
   }
-  if (query.isError || !query.data) {
+  if (!query.data) {
     return (
       <PageErrorState
         title="We could not load your authority to sell"
@@ -100,9 +100,6 @@ export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) 
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <StatusCard view={isClaim(view) ? view : null} />
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <DeclarationCard
@@ -126,7 +123,7 @@ export const SellerAuthorityPanel = ({ propertyId }: SellerAuthorityPanelProps) 
           onFailed={failed}
           onWithdrawn={() => {
             void queryClient.invalidateQueries({ queryKey: key });
-            setToast({ message: 'Claim withdrawn.', variant: 'success' });
+            toast.success('Claim withdrawn.');
           }}
         />
       )}
@@ -167,11 +164,10 @@ const StatusCard = ({ view }: { view: LandAuthorityView | null }) => {
         </Badge>
       </div>
       {authority.status === 'DISPUTED' && (
-        <p className="mt-3 flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-foreground">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+        <Alert variant="danger" icon={AlertTriangle} className="mt-3">
           Someone has objected to this sale. It is paused, and you cannot change the claim, until
           GetRentos resolves the objection.
-        </p>
+        </Alert>
       )}
       {authority.decision?.note && (
         <p className="mt-3 text-sm text-foreground">

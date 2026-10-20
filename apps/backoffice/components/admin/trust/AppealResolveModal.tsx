@@ -3,8 +3,17 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Gavel, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, Button, Textarea } from '@getrentos/ui';
-import { cn, formatDate, unwrap } from '@getrentos/shared';
+import {
+  Alert,
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Button,
+  RadioGroup,
+  Textarea,
+} from '@getrentos/ui';
+import { formatDate, unwrap } from '@getrentos/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
 import type { TrustAppeal, TrustAppealDecision } from '@/types/trust';
@@ -69,15 +78,7 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
               Resolve appeal
             </DialogTitle>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span
-                className={cn(
-                  'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                  status.bg,
-                  status.text
-                )}
-              >
-                {status.label}
-              </span>
+              <Badge variant={status.variant}>{status.label}</Badge>
               <span className="text-xs text-muted-foreground">
                 Filed {formatDate(appeal.createdAt)}
               </span>
@@ -128,10 +129,9 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
             </div>
 
             {actionError && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
-                <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                <span>{actionError}</span>
-              </div>
+              <Alert variant="danger" icon={ShieldAlert}>
+                {actionError}
+              </Alert>
             )}
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
@@ -141,66 +141,50 @@ export const AppealResolveModal = ({ appeal, onClose }: AppealResolveModalProps)
                 cannot be resolved by the officer who made the original decision.
               </p>
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDecision('UPHELD');
-                    setActionError(null);
-                  }}
-                  className={cn(
-                    'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors',
-                    decision === 'UPHELD'
-                      ? 'border-red-400 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-200'
-                      : 'border-border hover:border-red-300'
-                  )}
-                >
-                  <ShieldCheck className="h-4 w-4 shrink-0" />
-                  <span>
-                    <span className="block font-medium">Uphold</span>
-                    <span className="block text-[11px] text-muted-foreground">
-                      The original decision stands
-                    </span>
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDecision('OVERTURNED');
-                    setActionError(null);
-                  }}
-                  className={cn(
-                    'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors',
-                    decision === 'OVERTURNED'
-                      ? 'border-green-400 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-900/20 dark:text-green-200'
-                      : 'border-border hover:border-green-300'
-                  )}
-                >
-                  <RotateCcw className="h-4 w-4 shrink-0" />
-                  <span>
-                    <span className="block font-medium">Overturn</span>
-                    <span className="block text-[11px] text-muted-foreground">
-                      Reopen it for re-review
-                    </span>
-                  </span>
-                </button>
-              </div>
+              <RadioGroup
+                value={decision}
+                onValueChange={(value) => {
+                  setDecision(value);
+                  setActionError(null);
+                }}
+                variant="card"
+                columns={2}
+                aria-label="Decision"
+                className="mt-3"
+                options={[
+                  {
+                    value: 'UPHELD' as TrustAppealDecision,
+                    label: 'Uphold',
+                    description: 'The original decision stands',
+                    icon: <ShieldCheck className="h-4 w-4" />,
+                  },
+                  {
+                    value: 'OVERTURNED' as TrustAppealDecision,
+                    label: 'Overturn',
+                    description: 'Reopen it for re-review',
+                    icon: <RotateCcw className="h-4 w-4" />,
+                  },
+                ]}
+              />
 
               <Textarea
                 value={resolution}
                 onChange={(e) => setResolution(e.target.value)}
                 rows={3}
                 placeholder="Note for the record (optional)"
-                className="mt-3 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Resolution note"
+                className="mt-3"
               />
 
               <div className="mt-3 flex items-center gap-2">
                 <Button
                   size="sm"
                   disabled={!decision || resolveMutation.isPending}
+                  isLoading={resolveMutation.isPending}
+                  loadingText="Saving…"
                   onClick={() => resolveMutation.mutate()}
                 >
-                  {resolveMutation.isPending ? 'Saving…' : 'Resolve appeal'}
+                  Resolve appeal
                 </Button>
                 <Button
                   size="sm"

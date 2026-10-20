@@ -1,16 +1,14 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Bell, Menu, X } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import { IconButton, Input, ThemeToggle, useOptimisticMutation } from '@getrentos/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
@@ -37,8 +35,9 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const notificationsRef = useRef<HTMLDivElement>(null);
 
+  const bellKey = [...renterKeys.notifications, { page: 1, pageSize: 5 }];
   const { data } = useQuery({
-    queryKey: [...renterKeys.notifications, { page: 1, pageSize: 5 }],
+    queryKey: bellKey,
     queryFn: () => unwrap(renterService.listNotifications({ page: 1, pageSize: 5 })),
   });
   const notifications = data?.items ?? [];
@@ -51,14 +50,24 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
     invalidateNotifications();
   });
 
-  const markAsReadMutation = useMutation({
+  const markRead = (old: unknown, isTarget: (id: string) => boolean) => {
+    const page = old as { items: { id: string; read: boolean }[] };
+    return {
+      ...page,
+      items: page.items.map((n) => (isTarget(n.id) ? { ...n, read: true } : n)),
+    };
+  };
+
+  const markAsReadMutation = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),
-    onSuccess: invalidateNotifications,
+    patches: (id) => [{ queryKey: bellKey, update: (old) => markRead(old, (n) => n === id) }],
+    invalidate: [renterKeys.notifications],
   });
 
-  const markAllAsReadMutation = useMutation({
+  const markAllAsReadMutation = useOptimisticMutation<unknown, void>({
     mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
-    onSuccess: invalidateNotifications,
+    patches: () => [{ queryKey: bellKey, update: (old) => markRead(old, () => true) }],
+    invalidate: [renterKeys.notifications],
   });
 
   useEffect(() => {
@@ -172,23 +181,23 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               role="search"
               onSubmit={handleSearch}
             >
-              <div className="relative w-full">
-                <button
-                  type="submit"
-                  aria-label="Submit property search"
-                  className="absolute left-1 top-1/2 z-10 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  <Search aria-hidden="true" className="w-4" />
-                </button>
-                <LegacyInput
-                  type="text"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  aria-label="Search properties and locations"
-                  placeholder={t('nav.search_placeholder')}
-                  className="w-full rounded-xl border border-border bg-secondary/60 py-2 pl-10 pr-4 text-foreground placeholder-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/10"
-                />
-              </div>
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="Search properties and locations"
+                placeholder={t('nav.search_placeholder')}
+                className="w-full"
+                leadingIcon={
+                  <button
+                    type="submit"
+                    aria-label="Submit property search"
+                    className="-ml-1 flex rounded-md p-1 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Search aria-hidden="true" className="w-4 h-4" />
+                  </button>
+                }
+              />
             </form>
 
             {/* Right Section */}
@@ -229,6 +238,7 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                         <h3 className="font-semibold text-foreground">Notifications</h3>
                         {unreadCount > 0 && (
                           <button
+                            type="button"
                             onClick={handleMarkAllAsRead}
                             className="text-xs text-primary hover:text-primary-hover"
                           >
@@ -247,15 +257,15 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                               type="button"
                               key={notification.id}
                               className={`block w-full p-3 text-left border-b border-border hover:bg-secondary transition-colors ${
-                                !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                                !notification.read ? 'bg-info-subtle' : ''
                               }`}
                               onClick={() => handleOpenNotification(notification)}
                             >
-                              <div className="flex justify-between items-start mb-1">
+                              <div className="flex justify-between items-start gap-2 mb-1">
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
-                                <span className="text-xs text-muted-foreground">
+                                <span className="shrink-0 text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(notification.createdAt), {
                                     addSuffix: true,
                                   })}
@@ -286,38 +296,35 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               <RenterProfileDropdown user={user} />
 
               {/* Mobile Menu Button */}
-              <button
-                type="button"
+              <IconButton
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="renter-mobile-menu"
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                className="lg:hidden"
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
+              />
             </div>
           </div>
 
           {/* Mobile Search Bar */}
           <form className="py-3 md:hidden" role="search" onSubmit={handleSearch}>
-            <div className="relative">
-              <button
-                type="submit"
-                aria-label="Submit property search"
-                className="absolute left-1 top-1/2 z-10 -translate-y-1/2 rounded-md p-2 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <Search aria-hidden="true" className="w-4" />
-              </button>
-              <LegacyInput
-                type="text"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                aria-label="Search properties and locations"
-                placeholder={t('nav.search_placeholder')}
-                className="w-full rounded-xl border border-border bg-secondary/60 py-2 pl-10 pr-4 text-foreground placeholder-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-4 focus:ring-primary/10"
-              />
-            </div>
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              aria-label="Search properties and locations"
+              placeholder={t('nav.search_placeholder')}
+              leadingIcon={
+                <button
+                  type="submit"
+                  aria-label="Submit property search"
+                  className="-ml-1 flex rounded-md p-1 text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Search aria-hidden="true" className="w-4 h-4" />
+                </button>
+              }
+            />
           </form>
         </div>
       </nav>

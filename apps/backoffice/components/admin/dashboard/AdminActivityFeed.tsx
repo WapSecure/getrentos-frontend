@@ -1,32 +1,20 @@
 'use client';
 
-import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell, RefreshCcw } from 'lucide-react';
+import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { formatRelativeTime } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { Button } from '@getrentos/ui';
+import { EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
 
 type ActivityType = 'verification' | 'dispute' | 'fraud' | 'signup';
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   verification: { icon: ShieldCheck, bg: 'bg-accent', color: 'text-primary' },
-  dispute: {
-    icon: Gavel,
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    color: 'text-orange-600 dark:text-orange-400',
-  },
-  fraud: {
-    icon: AlertTriangle,
-    bg: 'bg-red-50 dark:bg-red-950/20',
-    color: 'text-red-600 dark:text-red-400',
-  },
-  signup: {
-    icon: UserPlus,
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    color: 'text-blue-600 dark:text-blue-400',
-  },
+  dispute: { icon: Gavel, bg: 'bg-warning-subtle', color: 'text-warning' },
+  fraud: { icon: AlertTriangle, bg: 'bg-destructive-subtle', color: 'text-destructive' },
+  signup: { icon: UserPlus, bg: 'bg-info-subtle', color: 'text-info' },
 };
 
 const typeFor = (type: string): ActivityType => {
@@ -67,41 +55,17 @@ export const AdminActivityFeed = () => {
 
       <div className="divide-y divide-border">
         {isLoading ? (
-          <div className="space-y-px" aria-label="Loading recent activity">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="flex gap-3 p-4">
-                <div className="h-8 w-8 shrink-0 animate-pulse rounded-lg bg-secondary" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-2/3 animate-pulse rounded bg-secondary" />
-                  <div className="h-3 w-full animate-pulse rounded bg-secondary/70" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : isError ? (
-          <div className="p-8 text-center" role="alert">
-            <p className="text-sm font-medium text-foreground">
-              Recent activity could not be loaded
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              isLoading={isFetching}
-            >
-              <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" /> Try again
-            </Button>
-          </div>
+          <ListSkeleton label="Loading recent activity" className="rounded-none border-0" />
+        ) : isError && !activity ? (
+          <PageErrorState
+            title="Recent activity could not be loaded"
+            onRetry={() => void refetch()}
+            isRetrying={isFetching}
+            headingLevel="h2"
+            className="min-h-0 border-0 py-10"
+          />
         ) : !activity || activity.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No activity yet</p>
-          </div>
+          <EmptyState icon={Bell} title="No activity yet" size="compact" bare />
         ) : (
           activity.map((item) => {
             const config = typeConfig[typeFor(item.type)];
@@ -117,7 +81,9 @@ export const AdminActivityFeed = () => {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{item.title}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
-                  <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(item.timestamp)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatRelativeTime(item.timestamp)}
+                  </p>
                 </div>
               </div>
             );

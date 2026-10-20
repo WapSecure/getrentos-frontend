@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Textarea } from '@getrentos/ui';
+import { Alert, Button, Select, Skeleton, Textarea } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminManagementTransfersService } from '@/services/adminManagementTransfersService';
 
@@ -71,7 +71,18 @@ export function HandoverPanel({
     onError: fail,
   });
 
-  if (q.isLoading) return <p className="text-xs text-muted-foreground">Loading handover…</p>;
+  if (q.isLoading)
+    return (
+      <div
+        role="status"
+        aria-label="Loading handover"
+        className="mt-3 space-y-2 border-t border-border pt-3"
+      >
+        <Skeleton className="h-3 w-2/3" />
+        <Skeleton className="h-3 w-1/2" />
+        <Skeleton className="h-3 w-1/3" />
+      </div>
+    );
   if (!h || !pack) return <p className="text-xs text-muted-foreground">No handover pack yet.</p>;
 
   const waitingOnOutgoing = h.required.outgoing && !pack.outgoingSignedAt;
@@ -117,6 +128,7 @@ export function HandoverPanel({
                 size="sm"
                 variant="outline"
                 disabled={confirmDeposit.isPending}
+                isLoading={confirmDeposit.isPending && confirmDeposit.variables === a.depositHoldId}
                 onClick={() => confirmDeposit.mutate(a.depositHoldId)}
               >
                 Confirm received
@@ -145,6 +157,7 @@ export function HandoverPanel({
                 size="sm"
                 variant="primary"
                 disabled={resolution.trim().length < 10 || resolve.isPending}
+                isLoading={resolve.isPending}
                 onClick={() => resolve.mutate()}
               >
                 Record resolution
@@ -161,22 +174,16 @@ export function HandoverPanel({
         <div className="space-y-2 rounded-lg border border-border p-3">
           <p className="text-xs font-medium text-foreground">Sign for GetRentos (outgoing)</p>
           {outside.map((d) => (
-            <select
+            <Select
               key={d.id}
-              aria-label={`Deposit ${d.amount}`}
+              ariaLabel={`Deposit ${d.amount}`}
               value={deposits[d.id] ?? ''}
-              onChange={(e) => setDeposits((s) => ({ ...s, [d.id]: e.target.value }))}
-              className="h-9 w-full rounded-lg border border-border bg-background px-2 text-xs"
-            >
-              <option value="">
-                Deposit {formatCurrency(d.amount)} ({d.tenant}): what happened…
-              </option>
-              {TREATMENTS.map(([v, label]) => (
-                <option key={v} value={v}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              onValueChange={(value) => setDeposits((s) => ({ ...s, [d.id]: value }))}
+              placeholder={`Deposit ${formatCurrency(d.amount)} (${d.tenant}): what happened…`}
+              options={TREATMENTS.map(([value, label]) => ({ value, label }))}
+              searchable={false}
+              className="w-full"
+            />
           ))}
           <Textarea
             rows={2}
@@ -192,6 +199,7 @@ export function HandoverPanel({
               outside.some((d) => !deposits[d.id]) ||
               signOutgoing.isPending
             }
+            isLoading={signOutgoing.isPending}
             onClick={() => signOutgoing.mutate()}
           >
             Sign handover
@@ -207,12 +215,13 @@ export function HandoverPanel({
             size="sm"
             variant="primary"
             disabled={accept.isPending}
+            isLoading={accept.isPending}
             onClick={() => accept.mutate()}
           >
             Accept for GetRentos
           </Button>
         )}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
     </div>
   );
 }

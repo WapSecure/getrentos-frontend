@@ -2,8 +2,18 @@
 
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  PageErrorState,
+  Pagination,
+  Skeleton,
+  type ToastVariant,
+  useToast,
+} from '@getrentos/ui';
 import {
   ArrowRight,
   FileSearch,
@@ -47,13 +57,14 @@ export const OwnerLandWorkspace = () => {
     searchParams.get('property')
   );
   const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const notify = (message: string, variant: ToastVariant = 'success') =>
-    setToast({ message, variant });
+    toast.show(message, variant);
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: [...landKeys.owner, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landService.listOwnerLand({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
 
   const records = useMemo(() => data?.items ?? [], [data]);
@@ -75,18 +86,18 @@ export const OwnerLandWorkspace = () => {
       unwrap(landService.upsertParcel(propertyId, parcel)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Land parcel record saved.', variant: 'success' });
+      toast.success('Land parcel record saved.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const submitForReview = useMutation({
     mutationFn: (propertyId: string) => unwrap(landService.submitForReview(propertyId)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Submitted. Compliance will review this parcel.', variant: 'success' });
+      toast.success('Submitted. Compliance will review this parcel.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const uploadProof = useMutation({
@@ -94,12 +105,9 @@ export const OwnerLandWorkspace = () => {
       unwrap(landService.submitOwnershipProof(propertyId, proof)),
     onSuccess: () => {
       invalidate();
-      setToast({
-        message: 'Ownership evidence submitted for compliance review.',
-        variant: 'success',
-      });
+      toast.success('Ownership evidence submitted for compliance review.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const createLand = useMutation({
@@ -141,18 +149,18 @@ export const OwnerLandWorkspace = () => {
       setPage(1);
       setSelectedPropertyId(property.id);
       invalidate();
-      setToast({
-        message: !parcelSaved
+      toast.show(
+        !parcelSaved
           ? 'Land was registered, but parcel details were not saved. Select it from your portfolio to complete the record.'
           : failedProofCount > 0
             ? 'Land was registered. Upload its ownership evidence again from the parcel record to begin review.'
             : submitted
               ? 'Land registered and submitted. Compliance will now verify its ownership and title.'
               : 'Land registered. Complete the items in the review panel, then submit it for review.',
-        variant: !parcelSaved || failedProofCount > 0 || !submitted ? 'warning' : 'success',
-      });
+        !parcelSaved || failedProofCount > 0 || !submitted ? 'warning' : 'success'
+      );
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -207,7 +215,9 @@ export const OwnerLandWorkspace = () => {
       <section className="mb-6 grid gap-4 md:grid-cols-3">
         <Card static className="p-4">
           <p className="text-xs text-muted-foreground">Registered parcels</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">{isLoading ? '—' : total}</p>
+          <p className="mt-1 text-2xl font-semibold text-foreground">
+            {isLoading ? <Skeleton className="h-8 w-12" /> : total}
+          </p>
         </Card>
         <Card static className="p-4">
           <p className="text-xs text-muted-foreground">Ready for sale on this page</p>
@@ -229,34 +239,31 @@ export const OwnerLandWorkspace = () => {
         </Card>
       </section>
 
-      {isError ? (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
-          {error instanceof Error ? error.message : 'Unable to load your land portfolio.'}
-        </div>
+      {isError && !data ? (
+        <PageErrorState
+          title="Unable to load your land portfolio."
+          description={error instanceof Error ? error.message : undefined}
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+          headingLevel="h2"
+          className="min-h-0 py-10"
+        />
       ) : isLoading ? (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)]">
-          <div className="h-80 animate-pulse rounded-2xl bg-secondary" />
-          <div className="h-[34rem] animate-pulse rounded-2xl bg-secondary" />
+          <Skeleton className="h-80 rounded-2xl" />
+          <Skeleton className="h-[34rem] rounded-2xl" />
         </div>
       ) : records.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-14 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <FileSearch className="h-7 w-7" />
-          </div>
-          <h2 className="mt-4 text-lg font-semibold text-foreground">No land parcels yet</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Create a land record with its parcel size and title evidence. We will not publish it
-            before compliance verifies both ownership and diligence.
-          </p>
-          <Button
-            className="mt-6"
-            variant="primary"
-            rounded="lg"
-            onClick={() => setRegistrationOpen(true)}
-          >
-            Register your first parcel
-          </Button>
-        </div>
+        <EmptyState
+          icon={FileSearch}
+          title="No land parcels yet"
+          description="Create a land record with its parcel size and title evidence. We will not publish it before compliance verifies both ownership and diligence."
+          action={
+            <Button variant="primary" rounded="lg" onClick={() => setRegistrationOpen(true)}>
+              Register your first parcel
+            </Button>
+          }
+        />
       ) : (
         <div className="grid gap-6 xl:grid-cols-[minmax(18rem,0.78fr)_minmax(0,1.45fr)]">
           <div className="space-y-3">
@@ -267,6 +274,7 @@ export const OwnerLandWorkspace = () => {
                 <button
                   key={record.property.id}
                   type="button"
+                  aria-current={active ? 'true' : undefined}
                   onClick={() => setSelectedPropertyId(record.property.id)}
                   className={`w-full rounded-2xl border p-4 text-left transition-all ${
                     active
@@ -345,29 +353,27 @@ export const OwnerLandWorkspace = () => {
               )}
               {selected.diligence?.status === 'VERIFIED' &&
                 selected.property.verificationStatus === 'APPROVED' && (
-                  <div className="mt-4 rounded-2xl border border-success/25 bg-success/5 p-4">
-                    <div className="flex gap-3">
-                      <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-success" />
-                      <div>
-                        <p className="font-medium text-foreground">Ready to list</p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          This land parcel has passed both gates. Continue to the normal sale
-                          listing flow. Offers and payment protection work the same way.
-                        </p>
-                        <Button
-                          href={ROUTES.OWNER_LISTINGS}
-                          variant="outline"
-                          size="sm"
-                          rounded="lg"
-                          className="mt-3"
-                          iconPosition="right"
-                          icon={<ArrowRight className="h-4 w-4" />}
-                        >
-                          Create sale listing
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <Alert
+                    variant="success"
+                    icon={ShieldCheck}
+                    title="Ready to list"
+                    className="mt-4"
+                    action={
+                      <Button
+                        href={ROUTES.OWNER_LISTINGS}
+                        variant="outline"
+                        size="sm"
+                        rounded="lg"
+                        iconPosition="right"
+                        icon={<ArrowRight className="h-4 w-4" />}
+                      >
+                        Create sale listing
+                      </Button>
+                    }
+                  >
+                    This land parcel has passed both gates. Continue to the normal sale listing
+                    flow. Offers and payment protection work the same way.
+                  </Alert>
                 )}
             </div>
           )}
@@ -381,10 +387,6 @@ export const OwnerLandWorkspace = () => {
           await createLand.mutateAsync(input);
         }}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 };

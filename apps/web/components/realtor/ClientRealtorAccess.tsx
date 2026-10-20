@@ -1,9 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
-import { Button, Input, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Users } from 'lucide-react';
+import {
+  Button,
+  Card,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  SearchInput,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -12,7 +21,7 @@ const PAGE_SIZE = 10;
 
 export function ClientRealtorAccess() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [propertiesFor, setPropertiesFor] = useState<string | null>(null);
@@ -33,6 +42,7 @@ export function ClientRealtorAccess() {
           search: invitationSearch,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const invitations = invitationsData?.items ?? [];
   const invitationTotal = invitationsData?.total ?? 0;
@@ -50,6 +60,7 @@ export function ClientRealtorAccess() {
           search: assignablePropertySearch,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const properties = propertiesData?.items ?? [];
   const propertyTotal = propertiesData?.total ?? 0;
@@ -59,18 +70,18 @@ export function ClientRealtorAccess() {
     mutationFn: (id: string) => unwrap(realtorService.approveRealtorInvitation(id)),
     onSuccess: () => {
       refreshInvitations();
-      setToast({ message: 'Realtor access approved.', variant: 'success' });
+      toast.success('Realtor access approved.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
   const revoke = useMutation({
     mutationFn: (id: string) => unwrap(realtorService.revokeRealtorAccess(id)),
     onSuccess: () => {
       refreshInvitations();
       setPropertiesFor(null);
-      setToast({ message: 'Realtor access revoked.', variant: 'success' });
+      toast.success('Realtor access revoked.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
   const assign = useMutation({
     mutationFn: ({ id, propertyId }: { id: string; propertyId: string }) =>
@@ -78,9 +89,9 @@ export function ClientRealtorAccess() {
     onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.assignableProperties(id) });
       refreshInvitations();
-      setToast({ message: 'Property assigned to Realtor.', variant: 'success' });
+      toast.success('Property assigned to Realtor.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const toggleProperties = (relationshipId: string) => {
@@ -98,31 +109,32 @@ export function ClientRealtorAccess() {
         </p>
       </div>
       <div className="mb-6 max-w-md">
-        <Input
-          type="search"
+        <SearchInput
           value={search}
-          onChange={(event) => {
-            setSearch(event.target.value);
+          onValueChange={(value) => {
+            setSearch(value);
             setPage(1);
             setPropertiesFor(null);
           }}
           placeholder="Search Realtors..."
-          leadingIcon={<Search className="h-4 w-4" />}
-          aria-label="Search Realtor invitations"
+          label="Search Realtor invitations"
         />
       </div>
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading invitations…</p>
+        <ListSkeleton variant="cards" rows={3} label="Loading invitations" />
       ) : invitations.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground">
-          {invitationTotal === 0 && invitationSearch
-            ? 'No Realtor invitations match your search.'
-            : 'No Realtor invitations.'}
-        </div>
+        <EmptyState
+          icon={Users}
+          title={
+            invitationTotal === 0 && invitationSearch
+              ? 'No Realtor invitations match your search.'
+              : 'No Realtor invitations.'
+          }
+        />
       ) : (
         <div className="space-y-4">
           {invitations.map((invitation) => (
-            <div key={invitation.id} className="rounded-2xl border border-border bg-card p-5">
+            <Card key={invitation.id} className="p-5">
               <h2 className="font-semibold text-foreground">
                 {invitation.realtor.legalName || invitation.realtor.email}
               </h2>
@@ -132,7 +144,7 @@ export function ClientRealtorAccess() {
               <div className="mt-4 flex flex-wrap gap-2">
                 {invitation.status === 'PENDING' ? (
                   <Button
-                    isLoading={approve.isPending}
+                    isLoading={approve.isPending && approve.variables === invitation.id}
                     onClick={() => approve.mutate(invitation.id)}
                   >
                     Approve access
@@ -145,7 +157,7 @@ export function ClientRealtorAccess() {
                     <Button
                       variant="ghost"
                       className="text-destructive"
-                      isLoading={revoke.isPending}
+                      isLoading={revoke.isPending && revoke.variables === invitation.id}
                       onClick={() => revoke.mutate(invitation.id)}
                     >
                       Revoke
@@ -160,21 +172,22 @@ export function ClientRealtorAccess() {
                   <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-sm font-medium">Your properties</p>
                     <div className="w-full sm:max-w-xs">
-                      <Input
-                        type="search"
+                      <SearchInput
                         value={propertySearch}
-                        onChange={(event) => {
-                          setPropertySearch(event.target.value);
+                        onValueChange={(value) => {
+                          setPropertySearch(value);
                           setPropertyPage(1);
                         }}
                         placeholder="Search properties..."
-                        leadingIcon={<Search className="h-4 w-4" />}
-                        aria-label="Search properties available to assign"
+                        label="Search properties available to assign"
                       />
                     </div>
                   </div>
                   {isLoadingProperties ? (
-                    <p className="py-2 text-sm text-muted-foreground">Loading properties…</p>
+                    <div role="status" aria-label="Loading properties" className="space-y-3 py-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
                   ) : properties.length === 0 ? (
                     <p className="py-2 text-sm text-muted-foreground">
                       {assignablePropertySearch
@@ -187,13 +200,15 @@ export function ClientRealtorAccess() {
                         key={property.id}
                         className="flex items-center justify-between gap-3 py-2 text-sm"
                       >
-                        <span>
+                        <span className="min-w-0">
                           {property.title} · {property.city}, {property.state}
                         </span>
                         <Button
                           size="sm"
                           variant="outline"
-                          isLoading={assign.isPending}
+                          isLoading={
+                            assign.isPending && assign.variables?.propertyId === property.id
+                          }
                           onClick={() =>
                             assign.mutate({ id: invitation.id, propertyId: property.id })
                           }
@@ -214,7 +229,7 @@ export function ClientRealtorAccess() {
                   )}
                 </div>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -229,9 +244,6 @@ export function ClientRealtorAccess() {
           }}
           className="mt-6"
         />
-      )}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

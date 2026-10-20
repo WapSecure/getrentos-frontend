@@ -1,20 +1,36 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
-import { HomeManagementEscalationQueue } from '@/components/home-management/HomeManagementEscalationQueue';
-import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
-import { HomeManagementOperationsCommandCenter } from '@/components/home-management/HomeManagementOperationsCommandCenter';
-import { HomeManagementPortfolioAnalytics } from '@/components/home-management/HomeManagementPortfolioAnalytics';
-import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
+import {
+  HomeManagementEscalationQueue,
+} from '@/components/home-management/HomeManagementEscalationQueue';
+import {
+  HomeManagementInspectionFeed,
+} from '@/components/home-management/HomeManagementInspectionFeed';
+import {
+  HomeManagementOperationsCommandCenter,
+} from '@/components/home-management/HomeManagementOperationsCommandCenter';
+import {
+  HomeManagementPortfolioAnalytics,
+} from '@/components/home-management/HomeManagementPortfolioAnalytics';
+import {
+  HomeManagementRecordsPanel,
+} from '@/components/home-management/HomeManagementRecordsPanel';
 import { HomeManagementSlaPolicies } from '@/components/home-management/HomeManagementSlaPolicies';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
-import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
-import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
-import { PreventiveMaintenancePlans } from '@/components/home-management/PreventiveMaintenancePlans';
+import {
+  HomeManagementVendorPerformance,
+} from '@/components/home-management/HomeManagementVendorPerformance';
+import {
+  HomeManagementWorkOrderQueue,
+} from '@/components/home-management/HomeManagementWorkOrderQueue';
+import {
+  PreventiveMaintenancePlans,
+} from '@/components/home-management/PreventiveMaintenancePlans';
 import { EmptyState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -89,12 +105,14 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
           pageSize: ASSET_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const plansQuery = useQuery({
     queryKey: [...homeManagementKeys.plans, { page: planPage, pageSize: PLAN_PAGE_SIZE }],
     queryFn: () =>
       unwrap(homeManagementService.listPlans({ page: planPage, pageSize: PLAN_PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
 
   const workOrdersQuery = useQuery({
@@ -109,6 +127,7 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
           pageSize: WORK_ORDER_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const dashboardQuery = useQuery({
@@ -163,7 +182,7 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
         <HomeManagementVendorPerformance vendors={vendors} isLoading={vendorsQuery.isLoading} />
       )}
 
-      {propertiesQuery.isError && (
+      {propertiesQuery.isError && !propertiesQuery.data && (
         <div className="mt-8">
           <EmptyState
             icon={CircleAlert}

@@ -2,6 +2,7 @@
 
 import { Receipt } from 'lucide-react';
 import { formatCurrency } from '@getrentos/shared';
+import { Badge, Card, CardSkeleton, type BadgeVariant } from '@getrentos/ui';
 import { useInvoices } from '@/hooks/useBilling';
 import type { SubscriptionInvoice } from '@/services/billingService';
 
@@ -19,21 +20,17 @@ const day = (iso: string | null) =>
 
 /** Status pill, wording kept to what the customer needs to know. */
 function StatusPill({ status }: { status: SubscriptionInvoice['status'] }) {
-  const styles: Record<SubscriptionInvoice['status'], string> = {
-    PAID: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    REFUNDED: 'bg-secondary text-muted-foreground',
-    FAILED: 'bg-destructive/10 text-destructive',
+  const variants: Record<SubscriptionInvoice['status'], BadgeVariant> = {
+    PAID: 'success',
+    REFUNDED: 'neutral',
+    FAILED: 'danger',
   };
   const labels: Record<SubscriptionInvoice['status'], string> = {
     PAID: 'Paid',
     REFUNDED: 'Refunded',
     FAILED: 'Failed',
   };
-  return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles[status]}`}>
-      {labels[status]}
-    </span>
-  );
+  return <Badge variant={variants[status]}>{labels[status]}</Badge>;
 }
 
 /**
@@ -51,14 +48,14 @@ export function BillingHistoryCard() {
   const { invoices, isLoading } = useInvoices();
 
   if (isLoading) {
-    return <div className="h-40 animate-pulse rounded-2xl border border-border bg-card" />;
+    return <CardSkeleton lines={4} />;
   }
 
   // Nothing charged yet: an empty table would just be noise on a free account.
   if (!invoices || invoices.items.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <Card className="p-6">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
           <Receipt className="h-5 w-5" />
@@ -112,6 +109,6 @@ export function BillingHistoryCard() {
       <p className="mt-3 text-xs text-muted-foreground">
         Questions about a charge? Quote the invoice number and we can find it straight away.
       </p>
-    </div>
+    </Card>
   );
 }

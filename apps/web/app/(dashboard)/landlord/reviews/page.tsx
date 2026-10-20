@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Star, MessageCircle, Home, Clock } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Pagination, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -16,7 +16,7 @@ const StarRow = ({ rating }: { rating: number }) => (
     {Array.from({ length: 5 }).map((_, i) => (
       <Star
         key={i}
-        className={`w-3.5 h-3.5 ${i < rating ? 'fill-primary text-primary' : 'text-gray-200 dark:text-gray-700'}`}
+        className={`w-3.5 h-3.5 ${i < rating ? 'fill-primary text-primary' : 'text-border'}`}
       />
     ))}
   </div>
@@ -24,9 +24,10 @@ const StarRow = ({ rating }: { rating: number }) => (
 
 export default function LandlordReviewsPage() {
   const [page, setPage] = useState(1);
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [...landlordKeys.reviews, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listReviews({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const reviews = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -67,7 +68,7 @@ export default function LandlordReviewsPage() {
         <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
           {categories.map((category) => (
             <div key={category.label} className="flex items-center gap-3">
-              <category.icon className="w-4 h-4 text-gray-400 shrink-0" />
+              <category.icon className="w-4 h-4 text-muted-foreground shrink-0" />
               <span className="text-sm text-muted-foreground w-36 shrink-0">{category.label}</span>
               <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
                 <div
@@ -83,28 +84,42 @@ export default function LandlordReviewsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        {reviews.map((review: TenantReview) => (
-          <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
-                  {getInitials(review.tenantName)}
+      {isLoading ? (
+        <ListSkeleton rows={3} variant="cards" label="Loading reviews" />
+      ) : isError && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your reviews"
+          onRetry={() => void refetch()}
+        />
+      ) : reviews.length === 0 ? (
+        <EmptyState icon={Star} title="No reviews yet" />
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((review: TenantReview) => (
+            <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+                    {getInitials(review.tenantName)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{review.tenantName}</p>
+                    <p className="text-xs text-muted-foreground">{review.propertyName}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{review.tenantName}</p>
-                  <p className="text-xs text-muted-foreground">{review.propertyName}</p>
+                <div className="text-right shrink-0">
+                  <StarRow rating={review.rating} />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatDate(review.createdAt)}
+                  </p>
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <StarRow rating={review.rating} />
-                <p className="text-xs text-gray-400 mt-1">{formatDate(review.createdAt)}</p>
-              </div>
+              <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>
             </div>
-            <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {total > 0 && (
         <Pagination

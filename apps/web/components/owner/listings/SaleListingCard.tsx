@@ -12,37 +12,38 @@ import {
   Bath,
   Ruler,
 } from 'lucide-react';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
 
 const statusConfig: Record<
   SaleListingStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   draft: {
     label: 'Draft',
     icon: FileEdit,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+    variant: 'neutral',
   },
   pending_verification: {
     label: 'Pending Verification',
     icon: ShieldAlert,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
+    variant: 'warning',
   },
   published: {
     label: 'Published',
     icon: Megaphone,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+    variant: 'success',
   },
   paused: {
     label: 'Paused',
     icon: Pause,
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
+    variant: 'warning',
   },
   closed: {
     label: 'Closed',
     icon: XCircle,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
+    variant: 'danger',
   },
 };
 
@@ -61,19 +62,27 @@ export const SaleListingCard = ({ listing, onClick, delay = 0 }: SaleListingCard
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-ring"
     >
+      {onClick && (
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={listing.listingTitle}
+          className="absolute inset-0 z-10 rounded-2xl focus:outline-none"
+        />
+      )}
       <div className="relative h-40 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Megaphone className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          <Megaphone className="w-12 h-12 text-muted-foreground/60" />
         </div>
-        <div
-          className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.className}`}
+        <Badge
+          variant={status.variant}
+          icon={<StatusIcon className="w-3 h-3" />}
+          className="absolute top-3 left-3"
         >
-          <StatusIcon className="w-3 h-3" />
           {status.label}
-        </div>
+        </Badge>
       </div>
 
       <div className="p-4">

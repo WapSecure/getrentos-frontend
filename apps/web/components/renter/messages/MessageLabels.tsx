@@ -1,6 +1,7 @@
 'use client';
 
 import { Tag } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 
 interface Label {
   id: string;
@@ -17,7 +18,7 @@ interface MessageLabelsProps {
 
 export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageLabelsProps) => {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-3 border-b border-border flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4 text-primary" />
@@ -28,6 +29,8 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
       <div className="p-2 space-y-1">
         {/* All Labels Option */}
         <button
+          type="button"
+          aria-pressed={selectedLabel === 'all'}
           onClick={() => onSelectLabel('all')}
           className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
             selectedLabel === 'all'
@@ -36,7 +39,7 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
           }`}
         >
           <span>All Conversations</span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {labels.reduce((sum, l) => sum + l.count, 0)}
           </span>
         </button>
@@ -44,6 +47,8 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
         {labels.map((label) => (
           <button
             key={label.id}
+            type="button"
+            aria-pressed={selectedLabel === label.id}
             onClick={() => onSelectLabel(label.id)}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
               selectedLabel === label.id
@@ -55,10 +60,10 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
               <span className={`w-2 h-2 rounded-full ${label.color.split(' ')[0]}`} />
               <span>{label.name}</span>
             </div>
-            <span className="text-xs text-gray-500">{label.count}</span>
+            <span className="text-xs text-muted-foreground">{label.count}</span>
           </button>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

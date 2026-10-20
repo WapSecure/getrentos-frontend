@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { Alert, Badge, Button, IconButton, Input, Skeleton } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
@@ -80,24 +80,19 @@ export const MessageThread = ({
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-              isResolved
-                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
-            }`}
-          >
+          <Badge variant={isResolved ? 'success' : 'warning'}>
             {isResolved ? 'Resolved' : 'Open'}
-          </span>
+          </Badge>
           {!isResolved && onResolve && (
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="xs"
               onClick={onResolve}
-              disabled={resolving}
-              className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent disabled:opacity-50"
+              isLoading={resolving}
+              loadingText="Resolving…"
             >
-              {resolving ? 'Resolving…' : 'Mark resolved'}
-            </button>
+              Mark resolved
+            </Button>
           )}
         </div>
       </div>
@@ -109,19 +104,23 @@ export const MessageThread = ({
               The conversation messages could not be loaded.
             </p>
             {onRetry && (
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
                 onClick={onRetry}
-                disabled={retrying}
-                className="mt-3 rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-secondary disabled:opacity-50"
+                isLoading={retrying}
+                loadingText="Retrying…"
               >
-                {retrying ? 'Retrying…' : 'Try again'}
-              </button>
+                Try again
+              </Button>
             )}
           </div>
         ) : loading ? (
-          <div className="flex h-full items-center justify-center" role="status">
-            <p className="text-sm text-muted-foreground">Loading messages…</p>
+          <div className="space-y-3" role="status" aria-label="Loading messages">
+            <Skeleton className="h-10 w-2/3 rounded-2xl" />
+            <Skeleton className="ml-auto h-10 w-1/2 rounded-2xl" />
+            <Skeleton className="h-10 w-3/5 rounded-2xl" />
           </div>
         ) : messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
@@ -167,9 +166,13 @@ export const MessageThread = ({
       </div>
 
       <div className="border-t border-border p-3">
-        {sendError && <p className="mb-2 text-xs text-destructive">{sendError}</p>}
+        {sendError && (
+          <Alert variant="danger" className="mb-2">
+            {sendError}
+          </Alert>
+        )}
         <div className="flex items-center gap-2">
-          <LegacyInput
+          <Input
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -179,17 +182,16 @@ export const MessageThread = ({
             placeholder={isResolved ? 'This conversation is resolved' : 'Type a message...'}
             aria-label="Message"
             disabled={isResolved || sending || loading || error}
-            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1"
           />
-          <button
-            type="button"
+          <IconButton
+            variant="secondary"
             onClick={() => void handleSend()}
-            disabled={!draft.trim() || sending || isResolved || loading || error}
-            aria-label={sending ? 'Sending message' : 'Send message'}
-            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-          >
-            <Send className={`w-4 h-4 ${sending ? 'animate-pulse' : ''}`} aria-hidden="true" />
-          </button>
+            disabled={!draft.trim() || isResolved || loading || error}
+            isLoading={sending}
+            label={sending ? 'Sending message' : 'Send message'}
+            icon={<Send aria-hidden="true" />}
+          />
         </div>
       </div>
     </div>

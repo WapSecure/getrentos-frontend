@@ -1,7 +1,7 @@
 'use client';
 
 import { Trash2, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { IconButton } from '@getrentos/ui';
 
 interface DocumentBulkActionsProps {
   selectedCount: number;
@@ -18,20 +18,16 @@ export const DocumentBulkActions = ({
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
       <div className="bg-card rounded-xl shadow-2xl border border-border p-3 flex items-center gap-3">
         <span className="text-sm font-medium text-foreground">{selectedCount} selected</span>
-        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
-        <Button variant="ghost" size="sm" onClick={onClearSelection} className="p-1.5">
-          <X className="w-4 h-4" />
-        </Button>
-        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
-        <Button
-          variant="ghost"
+        <div className="h-6 w-px bg-border" />
+        <IconButton label="Clear selection" icon={<X />} size="sm" onClick={onClearSelection} />
+        <div className="h-6 w-px bg-border" />
+        <IconButton
+          label="Delete selected"
+          icon={<Trash2 />}
+          variant="danger"
           size="sm"
           onClick={onDelete}
-          className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-          title="Delete selected"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+        />
       </div>
     </div>
   );

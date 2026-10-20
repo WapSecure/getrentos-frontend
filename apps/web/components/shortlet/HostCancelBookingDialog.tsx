@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
@@ -80,10 +81,12 @@ export function HostCancelBookingDialog({
           </DialogDescription>
         </div>
         <div className="space-y-4 border-t border-border p-5">
-          {isLoading || !preview ? (
+          {isLoading ? (
             <Skeleton className="h-28 w-full rounded-lg" />
+          ) : !preview ? (
+            <Alert variant="danger">We couldn&apos;t load the cancellation terms. Try again.</Alert>
           ) : !preview.canCancel ? (
-            <p className="text-sm text-destructive">{preview.blockedReason}</p>
+            <Alert variant="danger">{preview.blockedReason}</Alert>
           ) : (
             <>
               <dl className="space-y-2 rounded-lg border border-border p-4 text-sm">
@@ -130,19 +133,25 @@ export function HostCancelBookingDialog({
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
                   maxLength={500}
+                  showCount
                   placeholder="e.g. A pipe burst and the flat is being repaired."
                 />
               </Field>
             </>
           )}
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose} disabled={cancel.isPending}>
               Keep the booking
             </Button>
             {preview?.canCancel && (
-              <Button variant="danger" onClick={submit} disabled={cancel.isPending}>
-                {cancel.isPending ? 'Cancelling…' : 'Cancel stay'}
+              <Button
+                variant="danger"
+                onClick={submit}
+                isLoading={cancel.isPending}
+                loadingText="Cancelling…"
+              >
+                Cancel stay
               </Button>
             )}
           </div>

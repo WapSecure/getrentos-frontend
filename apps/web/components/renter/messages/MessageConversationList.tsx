@@ -1,6 +1,7 @@
 'use client';
 
 import { MessageCircle } from 'lucide-react';
+import { EmptyState } from '@getrentos/ui';
 import { ConversationItem } from './ConversationItem';
 import { Conversation } from '@/types/messages';
 
@@ -47,13 +48,11 @@ export const MessageConversationList = ({
 
   if (conversations.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-8 text-center">
-        <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <h3 className="text-lg font-medium text-foreground">No conversations</h3>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Start a conversation with a landlord or agent
-        </p>
-      </div>
+      <EmptyState
+        icon={MessageCircle}
+        title="No conversations"
+        description="Start a conversation with a landlord or agent"
+      />
     );
   }
 

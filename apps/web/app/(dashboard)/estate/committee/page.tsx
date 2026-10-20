@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Landmark, Trash2 } from 'lucide-react';
-import { Badge, Button, EmptyState, Select } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  CardSkeleton,
+  EmptyState,
+  IconButton,
+  ListSkeleton,
+  Select,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -82,7 +90,7 @@ export default function EstateCommitteePage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -110,25 +118,30 @@ export default function EstateCommitteePage() {
               label: `${h.unitLabel}: ${h.residentName}`,
             }))}
             placeholder="Select a household"
+            ariaLabel="Household"
+            searchable
           />
           <Select
             value={title}
             onValueChange={(value) => setTitle(value as CommitteeTitle)}
             options={titleOptions}
+            ariaLabel="Committee title"
           />
         </div>
         <Button
           variant="primary"
-          className="gap-2 mt-3"
-          disabled={!householdId || appointMember.isPending}
+          className="mt-3"
+          disabled={!householdId}
+          isLoading={appointMember.isPending}
+          loadingText="Appointing…"
           onClick={() => appointMember.mutate()}
         >
-          {appointMember.isPending ? 'Appointing…' : 'Appoint'}
+          Appoint
         </Button>
       </div>
 
       {isMembersLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : !members || members.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState
@@ -149,14 +162,14 @@ export default function EstateCommitteePage() {
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <Badge variant={titleVariant[member.title]}>{titleLabel[member.title]}</Badge>
-                <button
+                <IconButton
+                  label={`Remove ${member.residentName} from the committee`}
+                  icon={<Trash2 />}
+                  variant="danger"
+                  size="sm"
                   onClick={() => removeMember.mutate(member.id)}
                   disabled={removeMember.isPending}
-                  className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"
-                  aria-label={`Remove ${member.residentName} from the committee`}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                />
               </div>
             </div>
           ))}

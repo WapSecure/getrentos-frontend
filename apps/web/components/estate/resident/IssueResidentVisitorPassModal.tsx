@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, DatePicker, LegacyInput } from '@getrentos/ui';
+import { Button, DatePicker, Field, IconButton, Input } from '@getrentos/ui';
 
 interface IssueResidentVisitorPassModalProps {
   isOpen: boolean;
@@ -50,57 +50,40 @@ export const IssueResidentVisitorPassModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Issue Visitor Pass</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Visitor Name
-                </label>
-                <LegacyInput
+              <Field label="Visitor Name">
+                <Input
                   type="text"
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   placeholder="e.g. Tunde Adekunle"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Phone <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
-                  type="text"
+              <Field label="Phone" optionalLabel="(optional)">
+                <Input
+                  type="tel"
                   value={visitorPhone}
                   onChange={(e) => setVisitorPhone(e.target.value)}
                   placeholder="e.g. 08012345678"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Purpose <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field label="Purpose" optionalLabel="(optional)">
+                <Input
                   type="text"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
                   placeholder="e.g. Family visit"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Expires{' '}
-                  <span className="text-gray-400 font-normal">
-                    (optional: defaults to 24 hours)
-                  </span>
-                </label>
-                <DatePicker value={expiresAt} onChange={setExpiresAt} />
-              </div>
+              <Field label="Expires" optionalLabel="(optional: defaults to 24 hours)">
+                <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -110,7 +93,9 @@ export const IssueResidentVisitorPassModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Issuing…"
                 onClick={() =>
                   onSubmit({
                     visitorName: visitorName.trim(),
@@ -120,7 +105,7 @@ export const IssueResidentVisitorPassModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Issuing…' : 'Issue Pass'}
+                Issue Pass
               </Button>
             </div>
           </motion.div>

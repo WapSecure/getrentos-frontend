@@ -133,6 +133,7 @@ export const ReviewCheckRow = ({
               id={`${name}-note`}
               rows={2}
               maxLength={2000}
+              showCount
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="What you checked and what you found"

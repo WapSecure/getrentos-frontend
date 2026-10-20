@@ -1,11 +1,17 @@
 'use client';
 
-import { Button, LegacyInput, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
-
+import {
+  Button,
+  PageErrorState,
+  Pagination,
+  SearchInput,
+  EmptyState,
+  ListSkeleton,
+} from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Search, Users } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Users } from 'lucide-react';
 import { BuyerLeadCard } from '@/components/owner/leads/BuyerLeadCard';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -51,6 +57,7 @@ export default function OwnerLeadsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data } = leadsQuery;
   const leads = data?.items ?? [];
@@ -82,16 +89,12 @@ export default function OwnerLeadsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by buyer or property..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by buyer or property..."
+          className="flex-1 max-w-sm"
+        />
         <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
@@ -105,7 +108,7 @@ export default function OwnerLeadsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -115,8 +118,8 @@ export default function OwnerLeadsPage() {
       </div>
 
       {leadsQuery.isLoading ? (
-        <PageLoadingState />
-      ) : leadsQuery.isError ? (
+        <ListSkeleton rows={6} variant="cards" label="Loading leads" />
+      ) : leadsQuery.isError && !data ? (
         <PageErrorState
           title="Buyer leads are unavailable"
           description="We could not load enquiries for your sale listings. Please try again."
@@ -124,33 +127,30 @@ export default function OwnerLeadsPage() {
           isRetrying={leadsQuery.isFetching}
         />
       ) : leads.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <Users className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No leads match your filters' : 'No buyer leads yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={Users}
+          title={hasActiveFilters ? 'No leads match your filters' : 'No buyer leads yet'}
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to your full pipeline.'
-              : 'Inquiries from buyers on your published sale listings will appear here.'}
-          </p>
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => {
-                setSearchQuery('');
-                setDebouncedSearch('');
-                setFilter('all');
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
+              : 'Inquiries from buyers on your published sale listings will appear here.'
+          }
+          action={
+            hasActiveFilters ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setDebouncedSearch('');
+                  setFilter('all');
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {leads.map((lead, index) => (

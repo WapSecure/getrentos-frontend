@@ -67,12 +67,12 @@ export const RoleCard = ({ role, isSelected, onSelect, onDeselect, disabled }: R
       )}
 
       <div
-        className={`w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center mb-4 transition-colors ${
+        className={`w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4 transition-colors ${
           isSelected ? 'bg-primary/20' : ''
         }`}
       >
         <Icon
-          className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-gray-600 dark:text-gray-400'}`}
+          className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}
         />
       </div>
 
@@ -81,13 +81,13 @@ export const RoleCard = ({ role, isSelected, onSelect, onDeselect, disabled }: R
       >
         {role.name}
       </h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{role.description}</p>
+      <p className="text-sm text-muted-foreground">{role.description}</p>
 
       <div className="mt-3 flex flex-wrap gap-1">
         {role.requiresVerification.map((req) => (
           <span
             key={req}
-            className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 dark:text-gray-500"
+            className="text-xs px-2 py-0.5 bg-secondary rounded-full text-muted-foreground"
           >
             {req === 'identity' && 'ID Verified'}
             {req === 'property' && 'Property Docs'}

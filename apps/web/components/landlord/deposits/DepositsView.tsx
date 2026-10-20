@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, PiggyBank } from 'lucide-react';
 import {
   Button,
+  CardSkeleton,
+  EmptyState,
   Pagination,
   PageErrorState,
-  PageLoadingState,
-  Toast,
-  type ToastVariant,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import { DepositCard } from '@/components/landlord/deposits/DepositCard';
 import { RecordDepositModal } from '@/components/landlord/deposits/RecordDepositModal';
@@ -43,13 +46,14 @@ export function DepositsView() {
   const [filter, setFilter] = useState<'all' | DepositStatus>('all');
   const [isRecordOpen, setIsRecordOpen] = useState(false);
   const [openDepositId, setOpenDepositId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const status = filter === 'all' ? undefined : filter;
 
   const depositsQuery = useQuery({
     queryKey: [...landlordKeys.deposits({ status }), { page }],
     queryFn: () => unwrap(depositService.list({ status, page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = depositsQuery;
   const deposits = data?.items ?? [];
@@ -73,8 +77,7 @@ export function DepositsView() {
       setIsRecordOpen(false);
       setOpenDepositId(created.id);
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Could not record the deposit.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Could not record the deposit.'),
   });
 
   return (
@@ -92,30 +95,30 @@ export function DepositsView() {
         </Button>
       </div>
 
-      <div className="mb-6 flex w-fit gap-1 overflow-x-auto rounded-lg bg-secondary p-1">
-        {statusFilters.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={filter === option.value}
-            onClick={() => {
-              setFilter(option.value);
-              setPage(1);
-            }}
-            className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              filter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={filter}
+        onValueChange={(value) => {
+          setFilter(value as 'all' | DepositStatus);
+          setPage(1);
+        }}
+        className="mb-6 max-w-full"
+      >
+        <TabsList className="max-w-full">
+          {statusFilters.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : depositsQuery.isError ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <CardSkeleton key={i} lines={2} />
+          ))}
+        </div>
+      ) : !data ? (
         <PageErrorState
           title="Deposits are unavailable"
           description="We could not load held and returned deposits. No deposit has been changed."
@@ -123,17 +126,17 @@ export function DepositsView() {
           isRetrying={depositsQuery.isFetching}
         />
       ) : deposits.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <PiggyBank className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="font-medium text-foreground">
-            {filter === 'all' ? 'No deposits yet' : `No ${filter.toLowerCase()} deposits`}
-          </p>
-          {filter !== 'all' && (
-            <Button variant="outline" className="mt-5" onClick={() => setFilter('all')}>
-              View all deposits
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          icon={PiggyBank}
+          title={filter === 'all' ? 'No deposits yet' : `No ${filter.toLowerCase()} deposits`}
+          action={
+            filter !== 'all' ? (
+              <Button variant="outline" onClick={() => setFilter('all')}>
+                View all deposits
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {deposits.map((deposit) => (
@@ -161,10 +164,6 @@ export function DepositsView() {
       />
 
       <DepositDetailModal depositId={openDepositId} onClose={() => setOpenDepositId(null)} />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

@@ -4,7 +4,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Skeleton,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -82,11 +91,11 @@ export const StartPurchaseDialog = ({
             </DialogDescription>
 
             {layout.isLoading ? (
-              <div className="mt-4 h-40 animate-pulse rounded-xl bg-secondary" />
-            ) : layout.isError ? (
-              <p className="mt-4 text-sm text-destructive" role="alert">
+              <Skeleton className="mt-4 h-40 rounded-xl" />
+            ) : layout.isError && !layout.data ? (
+              <Alert variant="danger" className="mt-4">
                 {layout.error instanceof Error ? layout.error.message : 'Could not load the plans.'}
-              </p>
+              </Alert>
             ) : plans.length === 0 ? (
               <p className="mt-4 text-sm text-muted-foreground">
                 This estate has no active payment plan right now, so a purchase cannot start.
@@ -134,26 +143,21 @@ export const StartPurchaseDialog = ({
             </p>
 
             {notVerified.length > 0 && (
-              <section className="mt-5 rounded-2xl border border-warning/40 bg-warning/5 p-4">
-                <h3 className="text-sm font-semibold text-foreground">
-                  Before you commit: what was not verified on this land
-                </h3>
-                <div className="mt-3">
+              <Alert
+                variant="warning"
+                title="Before you commit: what was not verified on this land"
+                className="mt-5"
+              >
+                <div className="mt-2">
                   <TrustLabelsList notVerified={notVerified} />
                 </div>
-                <label className="mt-3 flex cursor-pointer items-start gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-4 w-4"
-                    checked={accepted}
-                    onChange={(event) => setAccepted(event.target.checked)}
-                  />
-                  <span>
-                    I have read what was not verified and accept it. I understand I can have my own
-                    lawyer check these before I pay.
-                  </span>
-                </label>
-              </section>
+                <Checkbox
+                  className="mt-3"
+                  checked={accepted}
+                  onCheckedChange={setAccepted}
+                  label="I have read what was not verified and accept it. I understand I can have my own lawyer check these before I pay."
+                />
+              </Alert>
             )}
 
             {error && (

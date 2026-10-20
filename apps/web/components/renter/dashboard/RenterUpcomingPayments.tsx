@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Calendar, Home, AlertCircle, ArrowRight } from 'lucide-react';
+import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -62,23 +63,22 @@ export const RenterUpcomingPayments = () => {
             transition={{ delay: 0.4 + index * 0.05, duration: 0.3 }}
             className={`p-3 rounded-lg border ${
               payment.status === 'overdue'
-                ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800'
-                : 'bg-gray-50 dark:bg-white/5 border-border'
+                ? 'bg-destructive-subtle border-destructive/20'
+                : 'bg-secondary/60 border-border'
             }`}
           >
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-muted-foreground" />
+            <div className="flex justify-between items-start gap-2 mb-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <Home className="w-4 h-4 shrink-0 text-muted-foreground" />
                 <span className="font-medium text-foreground text-sm">{payment.property}</span>
               </div>
               {payment.status === 'overdue' && (
-                <div className="flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3 text-red-500" />
-                  <span className="text-xs text-red-500">Overdue</span>
-                </div>
+                <Badge variant="danger" icon={<AlertCircle className="w-3 h-3" />}>
+                  Overdue
+                </Badge>
               )}
             </div>
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="w-3 h-3" />
                 <span>Due {formatDate(payment.dueDate)}</span>

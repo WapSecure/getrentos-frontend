@@ -1,27 +1,28 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { ConfirmDialog } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  EmptyState,
+  IconButton,
+  Input,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, Receipt } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { rentSuffix } from '@/lib/leaseTerm';
 import type { Unit, UnitOccupancyStatus } from '@/types/landlord';
 
-const statusConfig: Record<UnitOccupancyStatus, { label: string; className: string }> = {
-  occupied: {
-    label: 'Occupied',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  vacant: {
-    label: 'Vacant',
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
-  },
-  notice_given: {
-    label: 'Notice Given',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
+const statusConfig: Record<UnitOccupancyStatus, { label: string; variant: BadgeVariant }> = {
+  occupied: { label: 'Occupied', variant: 'success' },
+  vacant: { label: 'Vacant', variant: 'warning' },
+  notice_given: { label: 'Notice Given', variant: 'info' },
 };
 
 interface UnitsTableProps {
@@ -39,7 +40,6 @@ export const UnitsTable = ({
   onChargeUnit,
   pendingUnitId,
 }: UnitsTableProps) => {
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [assigningUnitId, setAssigningUnitId] = useState<string | null>(null);
   const [tenantNameInput, setTenantNameInput] = useState('');
   const [vacatingUnit, setVacatingUnit] = useState<Unit | null>(null);
@@ -58,12 +58,7 @@ export const UnitsTable = ({
   };
 
   if (units.length === 0) {
-    return (
-      <div className="bg-card rounded-2xl border border-border p-12 text-center">
-        <DoorClosed className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-        <p className="text-muted-foreground">No units found</p>
-      </div>
-    );
+    return <EmptyState icon={DoorClosed} title="No units found" />;
   }
 
   return (
@@ -113,97 +108,81 @@ export const UnitsTable = ({
                     {rentSuffix(unit.leaseRentPeriod ?? unit.askingRentPeriod)}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${status.className}`}
-                    >
-                      {status.label}
-                    </span>
+                    <Badge variant={status.variant}>{status.label}</Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {unit.tenantName || '—'}
                   </td>
                   <td className="px-4 py-3 relative">
-                    <button
-                      type="button"
-                      aria-label={`Actions for ${unit.unitName}`}
-                      disabled={pendingUnitId === unit.id}
-                      onClick={() => setOpenMenuId(openMenuId === unit.id ? null : unit.id)}
-                      className="p-1.5 rounded-lg hover:bg-secondary"
-                    >
-                      <MoreVertical className="w-4 h-4 text-gray-400" />
-                    </button>
-
-                    {openMenuId === unit.id && (
-                      <div className="absolute right-4 top-10 z-20 w-44 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-border py-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <IconButton
+                          label={`Actions for ${unit.unitName}`}
+                          size="sm"
+                          icon={<MoreVertical />}
+                          isLoading={pendingUnitId === unit.id}
+                        />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
                         {unit.occupancyStatus === 'occupied' && (
-                          <button
-                            onClick={() => {
-                              onChargeUnit(unit);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
-                          >
+                          <DropdownMenuItem onSelect={() => onChargeUnit(unit)}>
                             <Receipt className="w-3.5 h-3.5" />
                             Charge rent
-                          </button>
+                          </DropdownMenuItem>
                         )}
                         {unit.occupancyStatus === 'vacant' ? (
-                          <button
-                            onClick={() => {
-                              setAssigningUnitId(unit.id);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
-                          >
+                          <DropdownMenuItem onSelect={() => setAssigningUnitId(unit.id)}>
                             <UserPlus className="w-3.5 h-3.5" />
                             Assign Tenant
-                          </button>
+                          </DropdownMenuItem>
                         ) : (
-                          <button
-                            onClick={() => {
-                              setVacatingUnit(unit);
-                              setOpenMenuId(null);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary"
-                          >
+                          <DropdownMenuItem onSelect={() => setVacatingUnit(unit)}>
                             <DoorClosed className="w-3.5 h-3.5" />
                             Mark Vacant
-                          </button>
+                          </DropdownMenuItem>
                         )}
-                      </div>
-                    )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
 
                     {assigningUnitId === unit.id && (
-                      <div className="absolute right-4 top-10 z-30 w-56 bg-white dark:bg-[#0f1f24] rounded-lg shadow-lg border border-border p-3">
-                        <label className="block text-xs font-medium text-foreground mb-1.5">
+                      <div className="absolute right-4 top-10 z-30 w-56 bg-card rounded-lg shadow-lg border border-border p-3">
+                        <label
+                          htmlFor={`assign-tenant-${unit.id}`}
+                          className="block text-xs font-medium text-foreground mb-1.5"
+                        >
                           Tenant name
                         </label>
-                        <LegacyInput
+                        <Input
+                          id={`assign-tenant-${unit.id}`}
                           type="text"
                           autoFocus
+                          controlSize="sm"
                           value={tenantNameInput}
                           onChange={(e) => setTenantNameInput(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleAssignSubmit(unit.id)}
                           placeholder="e.g. Adaeze Okafor"
-                          className="w-full px-2.5 py-1.5 text-xs rounded-md border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                         <div className="flex gap-2 mt-2">
-                          <button
+                          <Button
+                            size="xs"
+                            className="flex-1"
                             onClick={() => handleAssignSubmit(unit.id)}
-                            disabled={pendingUnitId === unit.id || !tenantNameInput.trim()}
-                            className="flex-1 text-xs font-medium text-primary-foreground bg-primary rounded-md py-1.5 hover:bg-primary-hover"
+                            disabled={!tenantNameInput.trim()}
+                            isLoading={pendingUnitId === unit.id}
                           >
                             Assign
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            size="xs"
+                            variant="secondary"
+                            className="flex-1"
                             onClick={() => {
                               setAssigningUnitId(null);
                               setTenantNameInput('');
                             }}
-                            className="flex-1 text-xs font-medium text-muted-foreground bg-secondary rounded-md py-1.5"
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                         {assignError && (
                           <p className="mt-2 text-xs text-destructive" role="alert">

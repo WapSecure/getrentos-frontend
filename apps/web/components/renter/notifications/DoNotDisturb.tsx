@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { Moon, Clock, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { TimePicker } from '@getrentos/ui';
+import { Alert, Card, Field, Switch, TimePicker } from '@getrentos/ui';
 
 export const DoNotDisturb = () => {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -12,69 +11,56 @@ export const DoNotDisturb = () => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
+    <Card>
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        aria-expanded={isExpanded}
+        className="w-full p-4 flex items-center justify-between gap-3 hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-2">
           <Moon className="w-4 h-4 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Do Not Disturb</h3>
-            <p className="text-xs text-gray-500">Silence notifications during quiet hours</p>
+            <p className="text-xs text-muted-foreground">
+              Silence notifications during quiet hours
+            </p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="p-1 h-auto">
-          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </div>
+        {isExpanded ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        )}
+      </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Quiet Hours</p>
-              <p className="text-xs text-gray-500">Mute notifications during these hours</p>
-            </div>
-            <button
-              onClick={() => setIsEnabled(!isEnabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                isEnabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  isEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+          <Switch
+            label="Quiet Hours"
+            description="Mute notifications during these hours"
+            checked={isEnabled}
+            onCheckedChange={setIsEnabled}
+          />
 
           {isEnabled && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">Start Time</label>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Start Time">
                 <TimePicker value={startTime} onChange={setStartTime} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">End Time</label>
+              </Field>
+              <Field label="End Time">
                 <TimePicker value={endTime} onChange={setEndTime} />
-              </div>
+              </Field>
             </div>
           )}
 
           {isEnabled && (
-            <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-600" />
-                <p className="text-xs text-blue-700 dark:text-blue-300">
-                  Notifications will be silenced from {startTime} to {endTime}
-                </p>
-              </div>
-            </div>
+            <Alert variant="info" icon={Clock}>
+              Notifications will be silenced from {startTime} to {endTime}
+            </Alert>
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

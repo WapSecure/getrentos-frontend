@@ -1,18 +1,20 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { BadgeCheck, Home, Inbox, Mail, Phone, ShieldCheck, TrendingUp } from 'lucide-react';
 import {
-  BadgeCheck,
-  Home,
-  Inbox,
-  Mail,
-  Phone,
-  Search,
-  ShieldCheck,
-  TrendingUp,
-} from 'lucide-react';
-import { Badge, Card, EmptyState, Input, PageLoadingState, Select } from '@getrentos/ui';
+  Alert,
+  Badge,
+  Card,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  SearchInput,
+  Select,
+  StatCard,
+  StatGridSkeleton,
+} from '@getrentos/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -63,14 +65,6 @@ const stageLabel = (stage: string) => {
   };
   return labels[stage] ?? stage.replace(/_/g, ' ');
 };
-
-const StatTile = ({ label, value, hint }: { label: string; value: number; hint?: string }) => (
-  <div className="rounded-2xl border border-border bg-card p-4">
-    <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-    <p className="text-2xl font-bold text-foreground mt-1">{value}</p>
-    {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
-  </div>
-);
 
 const LeadRow = ({ lead }: { lead: EstateLead }) => (
   <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border py-4 last:border-b-0">
@@ -143,7 +137,10 @@ export default function EstateLeadsPage() {
   const [page, setPage] = useState(1);
 
   const leadsQuery = useQuery({
-    queryKey: estateKeys.leads(estateId, market || undefined),
+    // The page is part of the key, so paging fetches the next 25 instead of
+    // reusing the first page from the cache. Invalidating the leads key still
+    // matches every page.
+    queryKey: [...estateKeys.leads(estateId, market || undefined), page],
     queryFn: () =>
       unwrap(
         estateMarketplaceService.listLeads(estateId, {
@@ -153,6 +150,7 @@ export default function EstateLeadsPage() {
         })
       ),
     enabled: Boolean(estateId),
+    placeholderData: keepPreviousData,
   });
 
   const leads = useMemo(() => leadsQuery.data?.items ?? [], [leadsQuery.data]);
@@ -179,7 +177,12 @@ export default function EstateLeadsPage() {
   }, [leads]);
 
   if (leadsQuery.isLoading) {
-    return <PageLoadingState />;
+    return (
+      <div className="space-y-6">
+        <StatGridSkeleton />
+        <ListSkeleton rows={5} />
+      </div>
+    );
   }
 
   return (
@@ -192,11 +195,32 @@ export default function EstateLeadsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatTile label="Enquiries" value={total} hint="On properties you market" />
-        <StatTile label="Verified enquirers" value={stats.verified} hint="Identity checked" />
-        <StatTile label="Offers in" value={stats.offers} hint="On this page" />
-        <StatTile label="Markets active" value={stats.markets} hint="Rent, sale, shortlet" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={Inbox}
+          label="Enquiries"
+          value={total}
+          subtitle="On properties you market"
+        />
+        <StatCard
+          icon={BadgeCheck}
+          accent="primary"
+          label="Verified enquirers"
+          value={stats.verified}
+          subtitle="Identity checked"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Offers in"
+          value={stats.offers}
+          subtitle="On this page"
+        />
+        <StatCard
+          icon={Home}
+          label="Markets active"
+          value={stats.markets}
+          subtitle="Rent, sale, shortlet"
+        />
       </div>
 
       <Card static>
@@ -217,12 +241,12 @@ export default function EstateLeadsPage() {
               ]}
             />
             <div className="min-w-[220px] flex-1">
-              <Input
+              <SearchInput
                 id="estate-lead-search"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onValueChange={setSearch}
+                label="Search enquiries"
                 placeholder="Search an enquirer or a property"
-                leadingIcon={<Search className="h-4 w-4" />}
               />
             </div>
           </div>
@@ -248,49 +272,27 @@ export default function EstateLeadsPage() {
           )}
 
           {total > 25 && (
-            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-              <p className="text-sm text-muted-foreground">
-                Showing {visible.length} of {total}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={page === 1}
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
-                  className="text-sm font-medium text-primary hover:underline disabled:opacity-40"
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  disabled={page * 25 >= total}
-                  onClick={() => setPage((current) => current + 1)}
-                  className="text-sm font-medium text-primary hover:underline disabled:opacity-40"
-                >
-                  Next
-                </button>
-              </div>
+            <div className="mt-4 border-t border-border pt-4">
+              <Pagination page={page} pageSize={25} total={total} onPageChange={setPage} />
             </div>
           )}
         </div>
       </Card>
 
-      <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-        <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-        <p className="text-sm text-muted-foreground">
+      <Alert variant="neutral" icon={ShieldCheck}>
+        <p>
           You see enquiries for properties the owner has given you marketing rights for. A property
           that is merely inside the estate: with no agreement: stays private to its owner, and its
           enquiries never reach this page.
         </p>
-      </div>
+      </Alert>
 
-      <div className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
-        <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-        <p className="text-sm text-muted-foreground">
+      <Alert variant="neutral" icon={TrendingUp}>
+        <p>
           The property owner sees these same enquiries. Contact them when a lead is serious so you
           are presenting one story, not two.
         </p>
-      </div>
+      </Alert>
     </div>
   );
 }

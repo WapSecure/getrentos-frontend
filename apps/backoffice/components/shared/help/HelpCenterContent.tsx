@@ -61,6 +61,8 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
                 className="bg-card border border-border rounded-xl overflow-hidden"
               >
                 <button
+                  type="button"
+                  aria-expanded={isOpen}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="w-full flex items-center justify-between gap-3 p-4 text-left"
                 >

@@ -2,18 +2,18 @@
 
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingCard } from '@/components/realtor/viewings/ViewingCard';
 import { ScheduleViewingModal } from '@/components/realtor/viewings/ScheduleViewingModal';
 import type { CreateViewingInput } from '@/components/realtor/viewings/ScheduleViewingModal';
 import {
   Button,
+  EmptyState,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
   Pagination,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
@@ -28,7 +28,7 @@ function RealtorViewingsPageContent() {
 
   const [isModalOpen, setIsModalOpen] = useState(!!defaultLeadId);
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const queryClient = useQueryClient();
   const viewingsQuery = useQuery({
     queryKey: [...realtorKeys.viewings, { page, pageSize: PAGE_SIZE }],
@@ -36,6 +36,7 @@ function RealtorViewingsPageContent() {
       const result = await unwrap(realtorService.listViewings({ page, pageSize: PAGE_SIZE }));
       return { ...result, items: result.items.map(mapRealtorViewing) };
     },
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = viewingsQuery;
   const viewings = data?.items ?? [];
@@ -60,20 +61,14 @@ function RealtorViewingsPageContent() {
       setIsModalOpen(false);
     },
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to schedule this viewing. Please try again.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to schedule this viewing. Please try again.'),
   });
   const updateViewing = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' }) =>
       unwrap(realtorService.updateViewingStatus(id, status)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.viewings }),
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to update this viewing. Please try again.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to update this viewing. Please try again.'),
   });
 
   const handleSubmit = async (appointment: CreateViewingInput) => {
@@ -94,15 +89,18 @@ function RealtorViewingsPageContent() {
             {total} scheduled tour{total === 1 ? '' : 's'}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setIsModalOpen(true)}
+        >
           Schedule Viewing
         </Button>
       </div>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : viewingsQuery.isError ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading viewings" />
+      ) : viewingsQuery.isError && !data ? (
         <PageErrorState
           title="Viewings are unavailable"
           description="We could not load your scheduled tours. Please try again."
@@ -110,18 +108,16 @@ function RealtorViewingsPageContent() {
           isRetrying={viewingsQuery.isFetching}
         />
       ) : viewings.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <CalendarClock className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">No viewings scheduled</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Schedule a tour with one of your leads to get started.
-          </p>
-          <Button variant="primary" className="mt-6" onClick={() => setIsModalOpen(true)}>
-            Schedule a viewing
-          </Button>
-        </div>
+        <EmptyState
+          icon={CalendarClock}
+          title="No viewings scheduled"
+          description="Schedule a tour with one of your leads to get started."
+          action={
+            <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+              Schedule a viewing
+            </Button>
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {viewings.map((viewing) => (
@@ -154,10 +150,6 @@ function RealtorViewingsPageContent() {
         onSubmit={handleSubmit}
         isSubmitting={createViewing.isPending}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

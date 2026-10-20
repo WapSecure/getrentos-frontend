@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, ConfirmDialog, EmptyState, PageErrorState, Toast } from '@getrentos/ui';
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  PageErrorState,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
 import { Hourglass, MapPinned } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -22,9 +29,7 @@ export const ReservationsList = () => {
   const now = useNow();
   const [starting, setStarting] = useState<LandReservation | null>(null);
   const [cancelling, setCancelling] = useState<LandReservation | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: buyerLandKeys.reservations,
@@ -39,15 +44,15 @@ export const ReservationsList = () => {
     onSuccess: (reservation) => {
       queryClient.invalidateQueries({ queryKey: buyerLandKeys.reservations });
       queryClient.invalidateQueries({ queryKey: landLayoutKeys.detail(reservation.layoutId) });
-      setToast({ message: `${plotLabel(reservation)} released.`, variant: 'success' });
+      toast.success(`${plotLabel(reservation)} released.`);
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   if (isLoading) {
-    return <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <Skeleton className="h-40 rounded-2xl" />;
   }
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         description={error instanceof Error ? error.message : undefined}
@@ -177,9 +182,6 @@ export const ReservationsList = () => {
           cancelling ? cancel.mutateAsync(cancelling).catch(() => undefined) : null
         }
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

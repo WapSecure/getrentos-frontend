@@ -35,9 +35,14 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      className="relative rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-ring"
     >
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`Open offer from ${offer.buyerName}`}
+        className="absolute inset-0 z-10 rounded-2xl focus:outline-none"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
@@ -55,27 +60,27 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Offer Amount</p>
+          <p className="text-xs text-muted-foreground">Offer Amount</p>
           <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
           <p
-            className={`text-xs ${diffPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+            className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}
           >
             {diffPct >= 0 ? '+' : ''}
             {diffPct.toFixed(1)}% vs asking
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Financing</p>
+          <p className="text-xs text-muted-foreground">Financing</p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-            <FinancingIcon className="w-3.5 h-3.5 text-gray-400" />
+            <FinancingIcon className="w-3.5 h-3.5 text-muted-foreground" />
             {financingLabels[offer.financingType]}
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
+      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
         Submitted {formatDate(offer.submittedAt)}
       </p>
     </motion.div>

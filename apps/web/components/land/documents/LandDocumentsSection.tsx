@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react';
 import {
+  Alert,
   Badge,
   Button,
   ConfirmDialog,
@@ -10,6 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   DocumentPreviewButton,
+  Skeleton,
 } from '@getrentos/ui';
 import { FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
 import { formatDate } from '@/lib/format';
@@ -231,14 +233,18 @@ export const LandDocumentsSection = ({
 
       <div className="mt-4">
         {isLoading ? (
-          <div className="h-24 animate-pulse rounded-xl bg-secondary" aria-busy="true" />
-        ) : isError ? (
-          <p className="text-sm text-destructive">
-            {errorMessage(error, 'The documents could not be loaded.')}{' '}
-            <button type="button" className="font-medium underline" onClick={() => refetch()}>
-              Try again
-            </button>
-          </p>
+          <Skeleton className="h-24 rounded-xl" />
+        ) : isError && !data ? (
+          <Alert
+            variant="danger"
+            action={
+              <Button size="sm" variant="outline" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
+          >
+            {errorMessage(error, 'The documents could not be loaded.')}
+          </Alert>
         ) : !data || data.length === 0 ? (
           <div className="flex items-center gap-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
             <FolderOpen className="h-5 w-5 shrink-0" aria-hidden="true" />

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell } from 'lucide-react';
+import { IconButton, useOptimisticMutation } from '@getrentos/ui';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 import { formatRelativeTime } from '@/lib/format';
 import { notificationHref, type NotificationPortal } from '@/lib/notificationHref';
@@ -43,14 +44,26 @@ export function NotificationBell({
     queryFn: () => unwrap(safeCall(() => authFetch<BellNotification[]>(basePath))),
   });
   const refresh = () => queryClient.invalidateQueries({ queryKey });
-  const markRead = useMutation({
+  const markRead = useOptimisticMutation({
     mutationFn: (id: string) =>
       unwrap(safeCall(() => authFetch(`${basePath}/${id}/read`, { method: 'PATCH' }))),
-    onSuccess: refresh,
+    patches: (id: string) => [
+      {
+        queryKey,
+        update: (old) =>
+          (old as BellNotification[]).map((n) => (n.id === id ? { ...n, read: true } : n)),
+      },
+    ],
   });
-  const markAllRead = useMutation({
-    mutationFn: () => unwrap(safeCall(() => authFetch(`${basePath}/read-all`, { method: 'POST' }))),
-    onSuccess: refresh,
+  const markAllRead = useOptimisticMutation<unknown, void>({
+    mutationFn: () =>
+      unwrap(safeCall(() => authFetch(`${basePath}/read-all`, { method: 'POST' }))),
+    patches: () => [
+      {
+        queryKey,
+        update: (old) => (old as BellNotification[]).map((n) => ({ ...n, read: true })),
+      },
+    ],
   });
 
   // Real-time: refresh the bell when the backend pushes a new notification.
@@ -69,16 +82,20 @@ export function NotificationBell({
 
   return (
     <div className="relative">
-      <button
+      <IconButton
         onClick={() => setOpen(!open)}
-        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-        className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-      >
-        <Bell className="w-5 h-5 text-muted-foreground" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-        )}
-      </button>
+        label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+        aria-expanded={open}
+        className="relative"
+        icon={
+          <>
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+            )}
+          </>
+        }
+      />
 
       <AnimatePresence>
         {open && (
@@ -92,6 +109,7 @@ export function NotificationBell({
               <h3 className="font-semibold text-foreground">Notifications</h3>
               {unreadCount > 0 && (
                 <button
+                  type="button"
                   onClick={() => markAllRead.mutate()}
                   className="text-xs text-primary hover:text-primary-hover"
                 >

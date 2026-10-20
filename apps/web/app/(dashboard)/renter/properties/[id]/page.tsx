@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   ArrowLeft,
   MapPin,
@@ -20,12 +20,15 @@ import {
   Lock,
 } from 'lucide-react';
 import {
+  Badge,
   Button,
+  Card,
   EmptyState,
+  IconButton,
   PageErrorState,
   PageLoadingState,
-  Toast,
-  ToastVariant,
+  useOptimisticMutation,
+  useToast,
 } from '@getrentos/ui';
 import { VirtualTourViewerModal } from '@/components/renter/discover/features/VirtualTourViewerModal';
 import { PropertyGallery } from '@/components/renter/property-detail/PropertyGallery';
@@ -37,8 +40,8 @@ import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
 import { formatPrice, monthlyEquivalent } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
-import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { renterService, type SavedListingItem } from '@/services/renterService';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { trustChainLabel } from '@getrentos/shared';
 
@@ -52,11 +55,10 @@ const nairaFormatter = new Intl.NumberFormat('en-NG', {
 export default function PropertyDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const [tourOpen, setTourOpen] = useState(false);
   const [tourMode, setTourMode] = useState<TourModalMode>('tour');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const propertyQuery = useQuery({
     queryKey: renterKeys.listing(params.id),
@@ -75,32 +77,36 @@ export default function PropertyDetailPage() {
   const savedListings = savedListingsData?.items ?? [];
   const isSaved = savedListings.some((p) => p.id === params.id);
 
-  const showToast = (message: string, variant: ToastVariant) => {
-    setToast({ message, variant });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const saveMutation = useMutation({
-    mutationFn: () => unwrap(renterService.saveListing(property?.id ?? '')),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
-      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
-      showToast('Property saved successfully!', 'success');
-    },
-  });
-
-  const unsaveMutation = useMutation({
-    mutationFn: () => unwrap(renterService.unsaveListing(property?.id ?? '')),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
-      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
-      showToast('Property removed from saved', 'info');
-    },
+  const saveMutation = useOptimisticMutation({
+    mutationFn: (save: boolean) =>
+      unwrap(
+        save
+          ? renterService.saveListing(property?.id ?? '')
+          : renterService.unsaveListing(property?.id ?? '')
+      ),
+    patches: (save) => [
+      {
+        queryKey: renterKeys.savedListings,
+        update: (old) => {
+          const page = old as Paginated<SavedListingItem>;
+          const items = save
+            ? [...page.items, { id: params.id } as SavedListingItem]
+            : page.items.filter((item) => item.id !== params.id);
+          return { ...page, items };
+        },
+      },
+    ],
+    invalidate: [renterKeys.dashboardStats],
+    errorMessage: 'Your saved properties did not update. Please try again.',
+    onSuccess: (_data, save) =>
+      save
+        ? toast.success('Property saved successfully!')
+        : toast.info('Property removed from saved'),
   });
 
   if (propertyQuery.isLoading) return <PageLoadingState />;
 
-  if (propertyQuery.isError) {
+  if (propertyQuery.isError && !propertyQuery.data) {
     return (
       <PageErrorState
         title="Property details are unavailable"
@@ -126,10 +132,10 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const handleToggleSave = () => (isSaved ? unsaveMutation.mutate() : saveMutation.mutate());
+  const handleToggleSave = () => saveMutation.mutate(!isSaved);
 
   const handleCompare = () => {
-    showToast('Added to comparison: open Discover to view your comparison list', 'info');
+    toast.info('Added to comparison: open Discover to view your comparison list');
   };
 
   const openTour = (mode: TourModalMode) => {
@@ -139,17 +145,15 @@ export default function PropertyDetailPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => router.back()}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        icon={<ArrowLeft className="w-4 h-4" />}
+        className="mb-4"
       >
-        <ArrowLeft className="w-4 h-4" />
         Back
-      </button>
+      </Button>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -162,7 +166,7 @@ export default function PropertyDetailPage() {
           />
 
           <div>
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-2xl font-bold text-foreground">{property.title}</h1>
@@ -172,25 +176,21 @@ export default function PropertyDetailPage() {
                       (() => {
                         const { label, tone } = trustChainLabel(property.trustChain);
                         return (
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full ${
-                              tone === 'verified'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-secondary text-foreground border border-border'
-                            }`}
+                          <Badge
+                            variant={tone === 'verified' ? 'success' : 'neutral'}
+                            icon={<Shield className="w-3 h-3" aria-hidden="true" />}
                           >
-                            <Shield
-                              className={`w-3 h-3 ${tone === 'verified' ? '' : 'text-green-600'}`}
-                            />
                             {label}
-                          </span>
+                          </Badge>
                         );
                       })()
                     : property.verified && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
-                          <Shield className="w-3 h-3" />
+                        <Badge
+                          variant="success"
+                          icon={<Shield className="w-3 h-3" aria-hidden="true" />}
+                        >
                           Verified
-                        </span>
+                        </Badge>
                       )}
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground mt-1">
@@ -220,7 +220,7 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <Bed className="w-4 h-4" />
                 <span>
@@ -253,18 +253,32 @@ export default function PropertyDetailPage() {
               >
                 Apply Now
               </Button>
-              <Button variant="outline" className="gap-2" onClick={() => openTour('booking')}>
-                <Calendar className="w-4 h-4" />
+              <Button
+                variant="outline"
+                icon={<Calendar className="w-4 h-4" />}
+                onClick={() => openTour('booking')}
+              >
                 Schedule Viewing
               </Button>
-              <Button variant="outline" className="px-3" onClick={handleToggleSave}>
-                <Heart
-                  className={`w-4 h-4 ${isSaved ? 'text-red-500 fill-red-500' : 'text-muted-foreground'}`}
-                />
-              </Button>
-              <Button variant="outline" className="px-3" onClick={handleCompare}>
-                <GitCompare className="w-4 h-4" />
-              </Button>
+              <IconButton
+                variant="outline"
+                label={isSaved ? 'Remove from saved' : 'Save property'}
+                aria-pressed={isSaved}
+                onClick={handleToggleSave}
+                icon={
+                  <Heart
+                    className={
+                      isSaved ? 'text-destructive fill-destructive' : 'text-muted-foreground'
+                    }
+                  />
+                }
+              />
+              <IconButton
+                variant="outline"
+                label="Add to comparison"
+                onClick={handleCompare}
+                icon={<GitCompare />}
+              />
             </div>
           </div>
 
@@ -307,7 +321,7 @@ export default function PropertyDetailPage() {
           <PropertyLandlordCard property={property} />
 
           {property.additionalFees && property.additionalFees.length > 0 && (
-            <div className="bg-card border border-border rounded-xl p-4">
+            <Card className="p-4">
               <h3 className="text-sm font-semibold text-foreground mb-3">Cost Breakdown</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
@@ -332,11 +346,11 @@ export default function PropertyDetailPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           )}
 
           {property.period === 'year' && (
-            <div className="bg-card border border-border rounded-xl p-4">
+            <Card className="p-4">
               <h3 className="text-sm font-semibold text-foreground mb-3">Payment Options</h3>
               {property.allowsMonthlyPayment ? (
                 <div className="space-y-3">
@@ -368,7 +382,7 @@ export default function PropertyDetailPage() {
                   </p>
                 </div>
               )}
-            </div>
+            </Card>
           )}
         </div>
       </div>

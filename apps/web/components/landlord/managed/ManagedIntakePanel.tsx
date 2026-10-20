@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
-import { Button, Checkbox } from '@getrentos/ui';
+import { Alert, Button, Checkbox } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -153,23 +153,19 @@ export const ManagedIntakePanel = ({
           )}
 
           {intake.proposalExpired ? (
-            <p className="mt-3 text-sm text-destructive">
+            <Alert variant="warning" className="mt-3">
               This proposal has lapsed. Contact GetRentos for a fresh one.
-            </p>
+            </Alert>
           ) : (
             <>
-              <label className="mt-3 flex items-start gap-2 text-sm text-foreground">
-                <Checkbox
-                  checked={agree}
-                  onCheckedChange={setAgree}
-                  aria-label="Agree to the management terms"
-                />
-                <span>
-                  I agree to GetRentos managing this property on these terms. Accepting signs the
-                  management agreement.
-                </span>
-              </label>
+              <Checkbox
+                className="mt-3"
+                checked={agree}
+                onCheckedChange={setAgree}
+                label="I agree to GetRentos managing this property on these terms. Accepting signs the management agreement."
+              />
               <Button
+                className="mt-3"
                 isLoading={accept.isPending}
                 disabled={!agree}
                 onClick={() => accept.mutate()}
@@ -182,20 +178,22 @@ export const ManagedIntakePanel = ({
       )}
 
       {error && (
-        <p className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <Alert variant="danger" className="mt-3">
           {error}
-        </p>
+        </Alert>
       )}
 
       {intake.status !== 'ACCEPTED' && (
-        <button
-          type="button"
-          disabled={withdraw.isPending}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-3 hover:text-destructive"
+          isLoading={withdraw.isPending}
+          loadingText="Withdrawing…"
           onClick={() => withdraw.mutate()}
-          className="mt-3 text-sm text-muted-foreground hover:text-destructive disabled:opacity-50"
         >
-          {withdraw.isPending ? 'Withdrawing…' : 'Withdraw request'}
-        </button>
+          Withdraw request
+        </Button>
       )}
     </div>
   );

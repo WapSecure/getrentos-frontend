@@ -45,8 +45,12 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        aria-label={`Account menu for ${fullName}`}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
+        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
           {initials}
@@ -112,8 +116,9 @@ export const LandlordProfileDropdown = ({ user }: LandlordProfileDropdownProps) 
 
             <div className="border-t border-border py-2">
               <button
+                type="button"
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive-subtle transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out

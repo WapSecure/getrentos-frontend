@@ -1,10 +1,29 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ShieldCheck, UserRoundSearch } from 'lucide-react';
-import { formatDate, cn } from '@getrentos/shared';
-import type { TrustReviewCaseSummary } from '@/types/trust';
+import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
+import { formatDate } from '@getrentos/shared';
+import type {
+  TrustReviewCasePriority,
+  TrustReviewCaseStatus,
+  TrustReviewCaseSummary,
+} from '@/types/trust';
 import { REVIEW_CASE_PRIORITY_META, REVIEW_CASE_STATUS_META } from './trustMeta';
+
+export const REVIEW_CASE_STATUS_VARIANT: Record<TrustReviewCaseStatus, BadgeVariant> = {
+  OPEN: 'warning',
+  ASSIGNED: 'info',
+  ESCALATED: 'warning',
+  RESOLVED: 'success',
+  CLOSED: 'neutral',
+};
+
+export const REVIEW_CASE_PRIORITY_VARIANT: Record<TrustReviewCasePriority, BadgeVariant> = {
+  LOW: 'neutral',
+  MEDIUM: 'info',
+  HIGH: 'warning',
+  CRITICAL: 'danger',
+};
 
 interface ReviewCaseCardProps {
   caseItem: TrustReviewCaseSummary;
@@ -12,7 +31,7 @@ interface ReviewCaseCardProps {
   onReview: () => void;
 }
 
-export const ReviewCaseCard = ({ caseItem, delay = 0, onReview }: ReviewCaseCardProps) => {
+export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProps) => {
   const statusMeta = REVIEW_CASE_STATUS_META[caseItem.status];
   const priorityMeta = REVIEW_CASE_PRIORITY_META[caseItem.priority];
   const verification = caseItem.verification;
@@ -23,27 +42,13 @@ export const ReviewCaseCard = ({ caseItem, delay = 0, onReview }: ReviewCaseCard
     : '—';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.25 }}
-      className="rounded-2xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
-    >
+    <Card hover delay={delay} className="flex flex-col gap-3 p-5">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 text-muted-foreground">
           <ShieldCheck className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium uppercase tracking-wide">Review case</span>
         </div>
-        <span
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold',
-            statusMeta.bg,
-            statusMeta.text
-          )}
-        >
-          <span className={cn('h-1.5 w-1.5 rounded-full', priorityMeta.dot)} />
-          {statusMeta.label}
-        </span>
+        <Badge variant={REVIEW_CASE_STATUS_VARIANT[caseItem.status]}>{statusMeta.label}</Badge>
       </div>
 
       <div>
@@ -75,26 +80,17 @@ export const ReviewCaseCard = ({ caseItem, delay = 0, onReview }: ReviewCaseCard
         </div>
       )}
 
-      <div className="mt-auto pt-2 flex items-center justify-between border-t border-border">
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
         <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              'rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize',
-              priorityMeta.bg,
-              priorityMeta.text
-            )}
-          >
+          <Badge variant={REVIEW_CASE_PRIORITY_VARIANT[caseItem.priority]}>
             {priorityMeta.label}
-          </span>
+          </Badge>
           <span className="text-xs text-muted-foreground">{formatDate(caseItem.createdAt)}</span>
         </div>
-        <button
-          onClick={onReview}
-          className="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10"
-        >
+        <Button size="xs" variant="ghost" className="text-primary" onClick={onReview}>
           Review →
-        </button>
+        </Button>
       </div>
-    </motion.div>
+    </Card>
   );
 };

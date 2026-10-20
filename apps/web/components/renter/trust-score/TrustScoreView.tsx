@@ -35,7 +35,7 @@ export const TrustScoreView = () => {
   const scoreBreakdown = data?.scoreBreakdown;
 
   if (trustScoreQuery.isLoading) return <PageLoadingState />;
-  if (trustScoreQuery.isError) {
+  if (trustScoreQuery.isError && !data) {
     return (
       <PageErrorState
         title="Trust score is unavailable"

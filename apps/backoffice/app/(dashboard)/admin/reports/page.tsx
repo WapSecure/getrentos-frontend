@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Button, PageErrorState, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, PageErrorState, Skeleton, StatGridSkeleton, useToast } from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -18,13 +18,13 @@ const PlatformRevenueChart = dynamic(
     import('@/components/admin/reports/PlatformRevenueChart').then((m) => m.PlatformRevenueChart),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 w-full rounded-xl" />,
   }
 );
 
 export default function AdminReportsPage() {
   const [exported, setExported] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const statsQuery = useQuery({
     queryKey: adminKeys.reportsStats,
@@ -79,15 +79,12 @@ export default function AdminReportsPage() {
     mutationFn: () => unwrap(adminService.exportReportsCsv()),
     onSuccess: () => {
       setExported(true);
-      setToast({ message: 'CSV export downloaded successfully.', variant: 'success' });
+      toast.success('CSV export downloaded successfully.');
       window.setTimeout(() => setExported(false), 2500);
     },
     onError: (error: Error) => {
       setExported(false);
-      setToast({
-        message: error.message || 'The CSV export could not be downloaded.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'The CSV export could not be downloaded.');
     },
   });
 
@@ -105,33 +102,22 @@ export default function AdminReportsPage() {
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5"
           onClick={handleExport}
-          disabled={exportMutation.isPending}
           isLoading={exportMutation.isPending}
+          icon={
+            exported ? (
+              <Check className="w-3.5 h-3.5 text-success" />
+            ) : (
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+            )
+          }
         >
-          {exported ? (
-            <Check className="w-3.5 h-3.5 text-green-500" />
-          ) : (
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-          )}
           {exported ? 'Exported' : 'Export CSV'}
         </Button>
       </div>
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
       {statsQuery.isLoading ? (
-        <div
-          className="grid grid-cols-2 gap-4 mb-6 lg:grid-cols-4"
-          aria-label="Loading report statistics"
-        >
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="h-32 animate-pulse rounded-xl bg-secondary/50" />
-          ))}
-        </div>
+        <StatGridSkeleton className="mb-6 grid-cols-2 gap-4 lg:grid-cols-4" />
       ) : statsQuery.isError || !statsQuery.data ? (
         <PageErrorState
           title="Report totals unavailable"
@@ -157,11 +143,8 @@ export default function AdminReportsPage() {
 
       <div className="mb-6">
         {revenueQuery.isLoading ? (
-          <div
-            className="h-72 animate-pulse rounded-xl bg-secondary/50"
-            aria-label="Loading revenue chart"
-          />
-        ) : revenueQuery.isError ? (
+          <Skeleton className="h-72 w-full rounded-xl" />
+        ) : revenueQuery.isError && !revenueQuery.data ? (
           <PageErrorState
             title="Revenue chart unavailable"
             description="The revenue series could not be loaded."
@@ -183,12 +166,16 @@ export default function AdminReportsPage() {
         </div>
         <div className="divide-y divide-border">
           {breakdownQuery.isLoading ? (
-            <div className="space-y-4 p-5" aria-label="Loading GMV category breakdown">
+            <div
+              className="space-y-4 p-5"
+              role="status"
+              aria-label="Loading GMV category breakdown"
+            >
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-12 animate-pulse rounded bg-secondary/50" />
+                <Skeleton key={index} className="h-12 w-full" />
               ))}
             </div>
-          ) : breakdownQuery.isError ? (
+          ) : breakdownQuery.isError && !breakdownQuery.data ? (
             <PageErrorState
               title="Category breakdown unavailable"
               description="The GMV category breakdown could not be loaded."

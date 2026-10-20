@@ -1,7 +1,7 @@
 'use client';
 
 import { Clock, MapPin, Siren } from 'lucide-react';
-import { EmptyState } from '@getrentos/ui';
+import { Card, EmptyState, ListSkeleton } from '@getrentos/ui';
 import type { OnSiteBoard as OnSiteBoardData } from '@/types/estate';
 
 interface OnSiteBoardProps {
@@ -24,13 +24,7 @@ interface OnSiteBoardProps {
  */
 export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[0, 1, 2].map((key) => (
-          <div key={key} className="h-20 animate-pulse rounded-2xl bg-secondary" />
-        ))}
-      </div>
-    );
+    return <ListSkeleton variant="cards" rows={3} />;
   }
 
   if (!board || board.entries.length === 0) {
@@ -45,7 +39,7 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-card rounded-2xl border border-border p-4">
+      <Card className="p-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <p className="text-2xl font-bold text-foreground">{board.tally.open}</p>
@@ -71,7 +65,7 @@ export const OnSiteBoard = ({ board, isLoading }: OnSiteBoardProps) => {
           authorisation&rsquo;s hours. A visit with no stated end is shown here and nobody is
           notified about it.
         </p>
-      </div>
+      </Card>
 
       <div className="space-y-3">
         {board.entries.map((entry) => (

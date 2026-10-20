@@ -1,23 +1,14 @@
 'use client';
 
 import { Building2, Home, MessageSquare } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorClient } from '@/types/realtor';
 
-const statusConfig: Record<RealtorClient['status'], { label: string; className: string }> = {
-  active: {
-    label: 'Active',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  pending: {
-    label: 'Pending',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  inactive: {
-    label: 'Inactive',
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
-  },
+const statusConfig: Record<RealtorClient['status'], { label: string; variant: BadgeVariant }> = {
+  active: { label: 'Active', variant: 'success' },
+  pending: { label: 'Pending', variant: 'warning' },
+  inactive: { label: 'Inactive', variant: 'neutral' },
 };
 
 interface ClientCardProps {
@@ -30,7 +21,7 @@ export const ClientCard = ({ client, onMessage }: ClientCardProps) => {
   const RoleIcon = client.role === 'owner' ? Building2 : Home;
 
   return (
-    <article className="rounded-xl border border-border bg-card p-4 shadow-xs">
+    <Card className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
@@ -44,30 +35,33 @@ export const ClientCard = ({ client, onMessage }: ClientCardProps) => {
             </p>
           </div>
         </div>
-        <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
-        >
+        <Badge variant={status.variant} className="shrink-0 whitespace-nowrap">
           {status.label}
-        </span>
+        </Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Properties</p>
+          <p className="text-xs text-muted-foreground">Properties</p>
           <p className="text-sm font-medium text-foreground">{client.propertiesRepresented}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Client Since</p>
+          <p className="text-xs text-muted-foreground">Client Since</p>
           <p className="text-sm font-medium text-foreground">{formatDate(client.joinedDate)}</p>
         </div>
       </div>
 
       <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-        <Button variant="outline" size="sm" fullWidth className="gap-1.5" onClick={onMessage}>
-          <MessageSquare className="w-3.5 h-3.5" />
+        <Button
+          variant="outline"
+          size="sm"
+          fullWidth
+          icon={<MessageSquare className="w-3.5 h-3.5" />}
+          onClick={onMessage}
+        >
           Message
         </Button>
       </div>
-    </article>
+    </Card>
   );
 };

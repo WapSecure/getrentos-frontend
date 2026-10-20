@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare } from 'lucide-react';
-import { Switch } from '@getrentos/ui';
+import { Alert, Card, Switch } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { getMessagingConsent, setMessagingConsent } from '@/services/messagingConsentService';
@@ -46,7 +46,7 @@ export const TextMessageConsentCard = () => {
   );
 
   return (
-    <div className="mb-6 rounded-xl border border-border bg-card p-5">
+    <Card className="mb-6 p-5">
       <h3 className="flex items-center gap-2 font-semibold text-foreground">
         <MessageSquare className="h-4 w-4 text-primary" aria-hidden />
         Text messages
@@ -81,8 +81,10 @@ export const TextMessageConsentCard = () => {
         not from us.
       </p>
       {save.error && (
-        <p className="mt-2 text-sm text-destructive">{(save.error as Error).message}</p>
+        <Alert variant="danger" className="mt-2">
+          {(save.error as Error).message}
+        </Alert>
       )}
-    </div>
+    </Card>
   );
 };

@@ -31,6 +31,7 @@ export const LegalResourceList = () => {
         <Button
           variant={activeCategory === 'all' ? 'primary' : 'ghost'}
           size="sm"
+          aria-pressed={activeCategory === 'all'}
           onClick={() => setActiveCategory('all')}
         >
           All
@@ -40,6 +41,7 @@ export const LegalResourceList = () => {
             key={category}
             variant={activeCategory === category ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={activeCategory === category}
             onClick={() => setActiveCategory(category)}
           >
             {categoryLabels[category]}

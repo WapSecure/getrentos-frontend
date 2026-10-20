@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, Building2 } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Button, Field, IconButton, Input, useToast } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -40,6 +38,7 @@ const ProfileSettingsForm = ({
   user: { fullName: string; email: string; role?: string } | null;
 }) => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [formData, setFormData] = useState(initial);
 
   const updateMutation = useMutation({
@@ -51,7 +50,10 @@ const ProfileSettingsForm = ({
           companyName: formData.companyName,
         })
       ),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ownerKeys.profile }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ownerKeys.profile });
+      toast.success('Saved');
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,12 +71,17 @@ const ProfileSettingsForm = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-6">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-semibold">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-2xl font-semibold">
               {user?.fullName?.charAt(0) || 'U'}
             </div>
-            <button className="absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-white hover:bg-primary-hover transition-colors">
-              <Camera className="w-4 h-4" />
-            </button>
+            <IconButton
+              type="button"
+              label="Change profile photo"
+              icon={<Camera />}
+              size="sm"
+              variant="secondary"
+              className="absolute -bottom-1 -right-1 rounded-full"
+            />
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">Profile Photo</p>
@@ -82,67 +89,53 @@ const ProfileSettingsForm = ({
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
-              type="text"
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
+        <Field label="Full Name">
+          <Input
+            type="text"
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
+            leadingIcon={<User className="w-4 h-4" />}
+          />
+        </Field>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
+          {/* The API doesn't change email here; sending it made every save fail validation. */}
+          <Field
+            label="Email Address"
+            hint="Your sign-in email. Changing it sends a code to the new address."
+          >
+            <Input
               type="email"
               value={formData.email}
               readOnly
-              aria-describedby="owner-email-hint"
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-secondary text-muted-foreground cursor-not-allowed"
+              leadingIcon={<Mail className="w-4 h-4" />}
+              className="cursor-not-allowed bg-secondary text-muted-foreground"
             />
-            <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
-          </div>
-          {/* The API doesn't change email here; sending it made every save fail validation. */}
-          <p id="owner-email-hint" className="mt-1 text-xs text-muted-foreground">
-            Your sign-in email. Changing it sends a code to the new address.
-          </p>
+          </Field>
+          <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
+        <Field label="Phone Number">
+          <Input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            leadingIcon={<Phone className="w-4 h-4" />}
+          />
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Company / Agency Name
-          </label>
-          <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
-              type="text"
-              value={formData.companyName}
-              onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
+        <Field label="Company / Agency Name">
+          <Input
+            type="text"
+            value={formData.companyName}
+            onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+            leadingIcon={<Building2 className="w-4 h-4" />}
+          />
+        </Field>
 
-        <SaveButton type="submit" label="Save Changes" />
+        <Button type="submit" variant="primary" isLoading={updateMutation.isPending}>
+          Save Changes
+        </Button>
       </form>
     </div>
   );

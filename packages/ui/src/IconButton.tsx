@@ -7,7 +7,7 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
   /** Required: an icon alone has no name for a screen reader. Also shown as the tooltip. */
   label: string;
   icon: ReactNode;
-  variant?: 'ghost' | 'outline' | 'secondary' | 'danger';
+  variant?: 'ghost' | 'outline' | 'secondary' | 'danger' | 'primary';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
 }
@@ -19,6 +19,7 @@ const VARIANTS = {
   secondary:
     'border border-border/70 bg-secondary text-secondary-foreground hover:bg-foreground/[0.05]',
   danger: 'text-destructive hover:bg-destructive-subtle',
+  primary: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover',
 } as const;
 
 // The smallest still meets a 32px target; md and lg reach the 40–44px touch size.

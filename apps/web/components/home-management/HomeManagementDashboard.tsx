@@ -1,5 +1,6 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
+import { Alert, Card, Skeleton } from '@getrentos/ui';
 import { Boxes, CalendarClock, ClipboardList, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -31,16 +32,24 @@ export function HomeManagementDashboard() {
           operating view.
         </p>
       </div>
-      {error && <p className="mb-4 text-sm text-red-600">Unable to load Home Management data.</p>}
+      {error && !data && (
+        <Alert variant="danger" className="mb-4">
+          Unable to load Home Management data.
+        </Alert>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {cards.map(({ key, label, icon: Icon }) => (
-          <div key={key} className="rounded-2xl border border-border bg-card p-5">
+          <Card key={key} className="rounded-2xl p-5">
             <Icon className="mb-3 h-5 w-5 text-primary" />
             <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="mt-1 text-3xl font-semibold text-foreground">
-              {isLoading ? '—' : (data?.[key as keyof typeof data] ?? 0)}
-            </p>
-          </div>
+            <div className="mt-1 text-3xl font-semibold text-foreground">
+              {isLoading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                (data?.[key as keyof typeof data] ?? 0)
+              )}
+            </div>
+          </Card>
         ))}
       </div>
     </>

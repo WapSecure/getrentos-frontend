@@ -4,7 +4,18 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarClock, Pause, Play, Plus, Receipt, Trash2, X } from 'lucide-react';
-import { Button, CurrencyInput, Input } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  CardSkeleton,
+  CurrencyInput,
+  Field,
+  IconButton,
+  Input,
+  NumberInput,
+  Select,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
 import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
@@ -165,27 +176,21 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Rent schedule</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {lease.tenantName}: {lease.propertyName} • {lease.unitName}
                 </p>
               </div>
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                className="p-1 rounded-lg hover:bg-secondary cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-4">
               {schedule.isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading…</p>
-              ) : schedule.isError ? (
-                <p className="text-sm text-destructive">{(schedule.error as Error).message}</p>
+                <CardSkeleton lines={3} />
+              ) : schedule.isError && !schedule.data ? (
+                <Alert variant="danger">{(schedule.error as Error).message}</Alert>
               ) : (
                 <>
                   {s ? (
@@ -195,19 +200,13 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                           <CalendarClock className="w-4 h-4 text-primary" />
                           {CYCLE_LABEL[s.cycle]} billing
                         </span>
-                        <span
-                          className={`text-xs rounded-full px-2 py-0.5 ${
-                            s.status === 'ACTIVE'
-                              ? 'bg-success-subtle text-success'
-                              : 'bg-warning-subtle text-warning'
-                          }`}
-                        >
+                        <Badge variant={s.status === 'ACTIVE' ? 'success' : 'warning'}>
                           {s.status === 'ACTIVE'
                             ? 'Active'
                             : s.status === 'PAUSED'
                               ? 'Paused'
                               : 'Ended'}
-                        </span>
+                        </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">{STATUS_COPY[s.status]}</p>
                       {s.status !== 'ENDED' && (
@@ -262,10 +261,11 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                                   <Button
                                     size="sm"
                                     variant="primary"
-                                    disabled={refundCredit.isPending}
+                                    isLoading={refundCredit.isPending}
+                                    loadingText="Refunding…"
                                     onClick={() => refundCredit.mutate()}
                                   >
-                                    {refundCredit.isPending ? 'Refunding…' : 'Yes, refund it'}
+                                    Yes, refund it
                                   </Button>
                                   <Button
                                     size="sm"
@@ -322,50 +322,45 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
 
                   {s?.status !== 'ENDED' && (
                     <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Rent per period (₦)
-                          </label>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <Field label="Rent per period">
                           <CurrencyInput
                             prefix="₦"
                             value={amount}
                             onValueChange={(v) => setAmount(v === 0 ? '' : String(v))}
                           />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-foreground mb-1">
-                            Days before due
-                          </label>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={90}
+                        </Field>
+                        <Field label="Days before due" hint="Up to 90 days.">
+                          <NumberInput
+                            maxLength={2}
                             value={leadDays}
                             placeholder="Default"
-                            onChange={(e) => setLeadDays(e.target.value)}
+                            // The API accepts up to 90 days of notice.
+                            onValueChange={(v) => setLeadDays(v && Number(v) > 90 ? '90' : v)}
                           />
-                        </div>
+                        </Field>
                       </div>
 
                       <div>
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center justify-between gap-2 mb-1">
                           <span className="text-sm font-medium text-foreground">
                             Billed with the rent
                           </span>
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className="text-primary"
                             disabled={items.length >= 10}
+                            icon={<Plus className="w-3.5 h-3.5" />}
                             onClick={() =>
                               setItems([
                                 ...items,
                                 { category: 'SERVICE_CHARGE', label: 'Service charge', amount: 0 },
                               ])
                             }
-                            className="text-xs text-primary flex items-center gap-1 cursor-pointer disabled:opacity-50"
                           >
-                            <Plus className="w-3.5 h-3.5" /> Add extra
-                          </button>
+                            Add extra
+                          </Button>
                         </div>
                         {items.length === 0 ? (
                           <p className="text-xs text-muted-foreground">
@@ -378,27 +373,27 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                                 key={idx}
                                 className="grid grid-cols-[8.75rem_minmax(0,1fr)_7.5rem_auto] items-center gap-2"
                               >
-                                <select
-                                  aria-label="Kind"
+                                <Select
+                                  ariaLabel="Kind"
                                   value={item.category}
-                                  onChange={(e) =>
+                                  searchable={false}
+                                  options={[
+                                    { value: 'SERVICE_CHARGE', label: 'Service charge' },
+                                    { value: 'LEVY', label: 'Levy' },
+                                  ]}
+                                  onValueChange={(value) =>
                                     setItems(
                                       items.map((it, i) =>
                                         i === idx
                                           ? {
                                               ...it,
-                                              category: e.target
-                                                .value as RentScheduleItem['category'],
+                                              category: value as RentScheduleItem['category'],
                                             }
                                           : it
                                       )
                                     )
                                   }
-                                  className="h-10 w-full min-w-0 rounded-lg border border-border bg-background pl-2 pr-6 text-sm cursor-pointer"
-                                >
-                                  <option value="SERVICE_CHARGE">Service charge</option>
-                                  <option value="LEVY">Levy</option>
-                                </select>
+                                />
                                 <Input
                                   aria-label="Label"
                                   value={item.label}
@@ -424,14 +419,11 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                                     }
                                   />
                                 </div>
-                                <button
-                                  type="button"
-                                  aria-label="Remove"
+                                <IconButton
+                                  label="Remove"
+                                  icon={<Trash2 />}
                                   onClick={() => setItems(items.filter((_, i) => i !== idx))}
-                                  className="p-2 rounded-lg hover:bg-secondary cursor-pointer"
-                                >
-                                  <Trash2 className="w-4 h-4 text-muted-foreground" />
-                                </button>
+                                />
                               </li>
                             ))}
                           </ul>
@@ -440,17 +432,13 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                     </>
                   )}
 
-                  {notice && <p className="text-xs text-success">{notice}</p>}
-                  {error && (
-                    <p role="alert" className="text-xs text-destructive">
-                      {error.message}
-                    </p>
-                  )}
+                  {notice && <Alert variant="success">{notice}</Alert>}
+                  {error && <Alert variant="danger">{error.message}</Alert>}
                 </>
               )}
             </div>
 
-            {!schedule.isLoading && !schedule.isError && s?.status !== 'ENDED' && (
+            {!schedule.isLoading && !(schedule.isError && !s) && s?.status !== 'ENDED' && (
               <div className="p-4 border-t border-border flex flex-wrap gap-2">
                 {s && (
                   <>
@@ -458,7 +446,8 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      disabled={busy}
+                      disabled={busy && !togglePause.isPending}
+                      isLoading={togglePause.isPending}
                       onClick={() => togglePause.mutate()}
                     >
                       {s.status === 'ACTIVE' ? (
@@ -475,7 +464,8 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      disabled={busy || s.status !== 'ACTIVE'}
+                      disabled={(busy && !issueNow.isPending) || s.status !== 'ACTIVE'}
+                      isLoading={issueNow.isPending}
                       onClick={() => issueNow.mutate()}
                     >
                       <Receipt className="w-3.5 h-3.5" /> Raise next invoice now
@@ -487,8 +477,11 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                   size="sm"
                   className="ml-auto"
                   disabled={
-                    busy || !Number(amount) || items.some((i) => !i.label.trim() || !i.amount)
+                    (busy && !save.isPending) ||
+                    !Number(amount) ||
+                    items.some((i) => !i.label.trim() || !i.amount)
                   }
+                  isLoading={save.isPending}
                   onClick={() => {
                     setNotice(null);
                     save.mutate();

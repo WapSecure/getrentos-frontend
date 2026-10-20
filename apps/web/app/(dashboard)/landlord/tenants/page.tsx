@@ -1,10 +1,9 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
-
+import { Pagination, EmptyState, SearchInput } from '@getrentos/ui';
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search, Users } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Users } from 'lucide-react';
 import { TenantCard } from '@/components/landlord/tenants/TenantCard';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -31,6 +30,7 @@ export default function LandlordTenantsPage() {
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: [...landlordKeys.tenants, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listTenants({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const tenants = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
@@ -61,20 +61,17 @@ export default function LandlordTenantsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tenants or properties..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search tenants or properties..."
+          className="flex-1 max-w-sm"
+        />
         <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
           {rentStatusFilters.map((option) => (
             <button
               key={option.value}
+              type="button"
               onClick={() => {
                 setRentFilter(option.value);
                 setPage(1);
@@ -82,7 +79,7 @@ export default function LandlordTenantsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 rentFilter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -95,12 +92,7 @@ export default function LandlordTenantsPage() {
         items={filteredTenants}
         query={{ isPending, isError, refetch }}
         errorTitle="We couldn't load your tenants"
-        empty={
-          <div className="bg-card rounded-2xl border border-border p-12 text-center">
-            <Users className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">No tenants match your filters</p>
-          </div>
-        }
+        empty={<EmptyState icon={Users} title="No tenants match your filters" />}
       >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredTenants.map((tenant, index) => (

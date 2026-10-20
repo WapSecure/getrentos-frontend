@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import { Button, DocumentUpload, Field, IconButton, Input, Select } from '@getrentos/ui';
 import type { Gate } from '@/types/estate';
 
 const purposeOptions = [
@@ -68,70 +68,54 @@ export const LogVehicleModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Log Vehicle</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Plate number
-                </label>
-                <LegacyInput
+              <Field label="Plate number">
+                <Input
                   type="text"
                   value={plateNumber}
                   onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
                   placeholder="ABC123XY"
-                  className="uppercase"
+                  inputClassName="uppercase"
                 />
-              </div>
+              </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Description <span className="text-gray-400 font-normal">(optional)</span>
-                  </label>
-                  <LegacyInput
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Description" optionalLabel="(optional)">
+                  <Input
                     type="text"
                     value={vehicleDescription}
                     onChange={(e) => setVehicleDescription(e.target.value)}
                     placeholder="e.g. Black Camry"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Driver <span className="text-gray-400 font-normal">(optional)</span>
-                  </label>
-                  <LegacyInput
+                </Field>
+                <Field label="Driver" optionalLabel="(optional)">
+                  <Input
                     type="text"
                     value={driverName}
                     onChange={(e) => setDriverName(e.target.value)}
                     placeholder="e.g. Tunde"
                   />
-                </div>
+                </Field>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Purpose</label>
+              <Field label="Purpose">
                 <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
-              </div>
+              </Field>
 
               {gateOptions.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
+                <Field label="Gate">
                   <Select
                     value={gateId}
                     onValueChange={setGateId}
                     options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
                   />
-                </div>
+                </Field>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Photo <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
+              <Field label="Photo" optionalLabel="(optional)">
                 <DocumentUpload
                   value={photo ? [{ id: 'photo', file: photo }] : []}
                   onChange={(items) => setPhoto(items[0]?.file ?? null)}
@@ -139,7 +123,7 @@ export const LogVehicleModal = ({
                   multiple={false}
                   label=""
                 />
-              </div>
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -149,7 +133,9 @@ export const LogVehicleModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Logging…"
                 onClick={() =>
                   onSubmit({
                     plateNumber: plateNumber.trim(),
@@ -161,7 +147,7 @@ export const LogVehicleModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Logging…' : 'Log Vehicle'}
+                Log Vehicle
               </Button>
             </div>
           </motion.div>

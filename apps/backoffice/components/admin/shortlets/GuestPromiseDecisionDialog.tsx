@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   CurrencyInput,
   Dialog,
@@ -10,6 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
+  RadioGroup,
   Textarea,
 } from '@getrentos/ui';
 import { formatCurrency, unwrap } from '@getrentos/shared';
@@ -90,30 +92,13 @@ export function GuestPromiseDecisionDialog({
           </DialogDescription>
         </div>
         <div className="space-y-4 border-t border-border p-5">
-          <fieldset className="space-y-2">
-            {OUTCOMES.map((o) => (
-              <label
-                key={o.value}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm ${
-                  outcome === o.value
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:bg-secondary/50'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="outcome"
-                  className="mt-1"
-                  checked={outcome === o.value}
-                  onChange={() => setOutcome(o.value)}
-                />
-                <span>
-                  <span className="font-medium">{o.label}</span>
-                  <span className="block text-xs text-muted-foreground">{o.hint}</span>
-                </span>
-              </label>
-            ))}
-          </fieldset>
+          <RadioGroup
+            variant="card"
+            aria-label="Decision"
+            value={outcome ?? ''}
+            onValueChange={setOutcome}
+            options={OUTCOMES.map((o) => ({ value: o.value, label: o.label, description: o.hint }))}
+          />
           {outcome === 'PARTIAL_REFUND' && (
             <Field label="Refund to the guest" hint={`Less than ${formatCurrency(stayTotal)}`}>
               <CurrencyInput
@@ -129,16 +114,17 @@ export function GuestPromiseDecisionDialog({
               onChange={(e) => setResolution(e.target.value)}
               rows={3}
               maxLength={2000}
+              showCount
               placeholder="e.g. The photos show the generator the listing promises is missing."
             />
           </Field>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose} disabled={decide.isPending}>
               Cancel
             </Button>
-            <Button onClick={submit} disabled={decide.isPending}>
-              {decide.isPending ? 'Deciding…' : 'Confirm decision'}
+            <Button onClick={submit} isLoading={decide.isPending} loadingText="Deciding…">
+              Confirm decision
             </Button>
           </div>
         </div>

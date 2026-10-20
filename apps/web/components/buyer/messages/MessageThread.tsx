@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
@@ -53,7 +53,7 @@ export const MessageThread = ({
         </div>
         <div>
           <p className="text-sm font-semibold text-foreground">{contactName}</p>
-          <p className="text-xs text-gray-400">{contactRole}</p>
+          <p className="text-xs text-muted-foreground">{contactRole}</p>
         </div>
       </div>
 
@@ -61,7 +61,7 @@ export const MessageThread = ({
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <MessageCircle className="w-8 h-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-gray-400">No messages yet: say hello</p>
+            <p className="text-sm text-muted-foreground">No messages yet: say hello</p>
           </div>
         ) : (
           messages.map((message) => {
@@ -80,7 +80,7 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isBuyer ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-[10px] ${isBuyer ? 'text-primary-foreground/60' : 'text-gray-400'}`}
+                      className={`text-[10px] ${isBuyer ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
@@ -100,13 +100,13 @@ export const MessageThread = ({
 
       <div className="p-3 border-t border-border flex items-center gap-2">
         {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
-        <LegacyInput
-          type="text"
+        <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
           placeholder="Type a message..."
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="Message"
+          className="min-w-0 flex-1"
         />
         <button
           type="button"

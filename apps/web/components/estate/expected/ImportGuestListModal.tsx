@@ -2,16 +2,18 @@
 
 import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-  Input,
+  Field,
   Select,
 } from '@getrentos/ui';
+import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -79,7 +81,8 @@ export const ImportGuestListModal = ({
     onOpenChange(next);
   };
 
-  const canSubmit = !!householdId && !!expiresAt && !!file && !importMutation.isPending;
+  const canSubmit =
+    !!householdId && isCompleteDateTime(expiresAt) && !!file && !importMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={close}>
@@ -103,15 +106,13 @@ export const ImportGuestListModal = ({
               if (canSubmit) importMutation.mutate();
             }}
           >
-            <div className="space-y-2">
-              <label
-                htmlFor="guest-household"
-                className="block text-sm font-medium text-foreground"
-              >
-                Whose guests are they?
-              </label>
+            <Field
+              label="Whose guests are they?"
+              htmlFor="guest-household"
+              hint="One household per list, because one resident is having the party."
+            >
               <Select
-                ariaLabel="Whose guests are they?"
+                searchable
                 value={householdId}
                 onValueChange={setHouseholdId}
                 placeholder={
@@ -122,20 +123,14 @@ export const ImportGuestListModal = ({
                   label: `${household.unitLabel} — ${household.residentName}`,
                 }))}
               />
-              <p className="text-xs leading-5 text-muted-foreground">
-                One household per list, because one resident is having the party.
-              </p>
-            </div>
+            </Field>
 
             <div className="space-y-2">
-              <label htmlFor="guest-deadline" className="block text-sm font-medium text-foreground">
-                Valid until
-              </label>
-              <Input
-                id="guest-deadline"
-                type="datetime-local"
+              <DateTimeField
+                label="Valid until"
                 value={expiresAt}
-                onChange={(event) => setExpiresAt(event.target.value)}
+                onChange={setExpiresAt}
+                requireFuture
               />
               <p className="text-xs leading-5 text-muted-foreground">
                 After this, these passes stop working. A pass is a permission with an end, even for
@@ -162,11 +157,11 @@ export const ImportGuestListModal = ({
             </div>
 
             {importMutation.isError && (
-              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
+              <Alert variant="danger">
                 {importMutation.error instanceof Error
                   ? importMutation.error.message
                   : 'That list could not be read'}
-              </p>
+              </Alert>
             )}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -184,8 +179,8 @@ export const ImportGuestListModal = ({
                 rounded="md"
                 isLoading={importMutation.isPending}
                 disabled={!canSubmit}
+                icon={<Upload className="h-4 w-4" />}
               >
-                <Upload className="mr-2 h-4 w-4" />
                 Add guests
               </Button>
             </div>
@@ -213,27 +208,12 @@ const ImportResult = ({
   onDone: () => void;
 }) => (
   <div className="mt-6 space-y-5">
-    <div
-      className={`flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm leading-6 ${
-        result.failed === 0
-          ? 'bg-success/10 text-success'
-          : result.created === 0
-            ? 'bg-destructive/10 text-destructive'
-            : 'bg-warning/10 text-warning'
-      }`}
+    <Alert
+      variant={result.failed === 0 ? 'success' : result.created === 0 ? 'danger' : 'warning'}
+      title={result.label}
     >
-      {result.failed === 0 ? (
-        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-      ) : (
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-      )}
-      <div>
-        <p>{result.label}</p>
-        <p className="text-xs opacity-80">
-          Each guest added holds a pass until {result.deadlineLabel}.
-        </p>
-      </div>
-    </div>
+      <p className="text-xs">Each guest added holds a pass until {result.deadlineLabel}.</p>
+    </Alert>
 
     {result.errors.length > 0 && (
       <div className="space-y-2">

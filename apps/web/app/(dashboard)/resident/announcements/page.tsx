@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Megaphone } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -29,20 +29,18 @@ export default function ResidentAnnouncementsPage() {
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : announcements.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={Megaphone}
-            title="No announcements yet"
-            description="Your estate manager hasn't posted anything yet."
-          />
-        </div>
+        <EmptyState
+          icon={Megaphone}
+          title="No announcements yet"
+          description="Your estate manager hasn't posted anything yet."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {announcements.map((announcement) => (
             <div key={announcement.id} className="p-4">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold text-foreground">{announcement.title}</p>
                 {announcement.priority === 'urgent' && <Badge variant="danger">Urgent</Badge>}
               </div>

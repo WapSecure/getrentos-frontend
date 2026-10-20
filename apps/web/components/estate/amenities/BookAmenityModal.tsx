@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, IconButton } from '@getrentos/ui';
 import {
   DateTimeField,
   isCompleteDateTime,
@@ -56,9 +56,7 @@ export const BookAmenityModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">Book {amenity.name}</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4">
@@ -71,12 +69,16 @@ export const BookAmenityModal = ({
                   minDate={startsAt.split('T')[0] || undefined}
                 />
                 {endsBeforeStart && (
-                  <p role="alert" className="mt-1 text-xs text-red-500">
+                  <p role="alert" className="mt-1 text-xs text-destructive">
                     The end time must be after the start time.
                   </p>
                 )}
               </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              {error && (
+                <p role="alert" className="text-xs text-destructive">
+                  {error}
+                </p>
+              )}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -86,7 +88,9 @@ export const BookAmenityModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Booking…"
                 onClick={() =>
                   onSubmit({
                     amenityId: amenity.id,
@@ -95,7 +99,7 @@ export const BookAmenityModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Booking…' : 'Book'}
+                Book
               </Button>
             </div>
           </motion.div>

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { TriangleAlert } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -51,20 +51,18 @@ export default function ResidentViolationsPage() {
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : !violations || violations.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={TriangleAlert}
-            title="No violations"
-            description="Nothing has been reported against your household."
-          />
-        </div>
+        <EmptyState
+          icon={TriangleAlert}
+          title="No violations"
+          description="Nothing has been reported against your household."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {violations.map((violation) => (
             <div key={violation.id} className="p-4">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm font-semibold text-foreground">
                   {categoryLabels[violation.category]}
                 </p>

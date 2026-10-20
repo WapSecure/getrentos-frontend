@@ -30,7 +30,7 @@ export function GuestSummaryLine({ summary }: { summary: GuestSummary }) {
       </span>
       {summary.ratingAverage != null && (
         <span className="flex items-center gap-1">
-          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+          <Star className="h-3.5 w-3.5 fill-warning text-warning" />
           {summary.ratingAverage.toFixed(1)} from {summary.ratingCount} host
           {summary.ratingCount === 1 ? '' : 's'}
         </span>

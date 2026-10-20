@@ -105,33 +105,32 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
 
           return (
             <button
+              type="button"
               key={option.id}
               onClick={() => handleQuickReport(option)}
               disabled={isSelected || Boolean(pendingOptionId)}
               aria-busy={isPending}
               className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${
                 isSelected
-                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  ? 'bg-success-subtle border-success/20'
                   : 'hover:bg-secondary border-transparent disabled:cursor-not-allowed disabled:opacity-60'
               } border`}
             >
-              <div
-                className={`p-2 rounded-lg ${
-                  isSelected ? 'bg-green-100 dark:bg-green-900/40' : 'bg-secondary'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-green-600' : 'text-gray-500'}`} />
+              <div className={`p-2 rounded-lg ${isSelected ? 'bg-success/10' : 'bg-secondary'}`}>
+                <Icon
+                  className={`w-4 h-4 ${isSelected ? 'text-success' : 'text-muted-foreground'}`}
+                />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-foreground">{option.label}</p>
-                <p className="text-xs text-gray-500">{option.description}</p>
+                <p className="text-xs text-muted-foreground">{option.description}</p>
               </div>
               {isSelected ? (
-                <CheckCircle className="w-4 h-4 text-green-500" />
+                <CheckCircle className="w-4 h-4 text-success" />
               ) : isPending ? (
                 <span className="text-xs font-medium text-muted-foreground">Sending…</span>
               ) : (
-                <ChevronRight className="w-4 h-4 text-gray-400" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               )}
             </button>
           );

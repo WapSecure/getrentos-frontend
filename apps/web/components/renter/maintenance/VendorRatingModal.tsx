@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X, Star } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, IconButton } from '@getrentos/ui';
 
 interface VendorRatingModalProps {
   isOpen: boolean;
@@ -42,15 +42,13 @@ export const VendorRatingModal = ({ isOpen, onClose, onSubmit }: VendorRatingMod
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">How was your experience?</p>
             </div>
-            <button
-              type="button"
+            <IconButton
+              label="Close rating form"
+              icon={<X />}
+              size="sm"
               onClick={onClose}
               disabled={isSubmitting}
-              aria-label="Close rating form"
-              className="flex min-h-9 min-w-9 items-center justify-center rounded-lg hover:bg-secondary disabled:opacity-50"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            />
           </div>
 
           <div className="p-6 space-y-4">
@@ -64,6 +62,7 @@ export const VendorRatingModal = ({ isOpen, onClose, onSubmit }: VendorRatingMod
                     key={star}
                     type="button"
                     aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                    aria-pressed={rating === star}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setRating(star)}
@@ -87,9 +86,11 @@ export const VendorRatingModal = ({ isOpen, onClose, onSubmit }: VendorRatingMod
                 variant="primary"
                 fullWidth
                 onClick={() => void handleSubmit()}
-                disabled={rating === 0 || isSubmitting}
+                disabled={rating === 0}
+                isLoading={isSubmitting}
+                loadingText="Saving…"
               >
-                {isSubmitting ? 'Saving…' : 'Submit rating'}
+                Submit rating
               </Button>
               <Button variant="ghost" fullWidth onClick={onClose} disabled={isSubmitting}>
                 Skip

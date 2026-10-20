@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Pagination } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { EmptyState, Pagination, Skeleton } from '@getrentos/ui';
 import { DiscoverPropertyCard } from './DiscoverPropertyCard';
 import { VirtualTourViewerModal } from './features/VirtualTourViewerModal';
 import { Property } from '@/types/renter';
@@ -68,6 +68,7 @@ export const DiscoverPropertyGrid = ({
     queryKey: renterKeys.listings({ ...listingsFilters, page, pageSize: PAGE_SIZE }),
     queryFn: () =>
       unwrap(renterService.listListings({ ...listingsFilters, page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const properties = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -93,23 +94,33 @@ export const DiscoverPropertyGrid = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div
+        role="status"
+        aria-label="Loading properties"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+      >
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="overflow-hidden rounded-xl border border-border bg-card">
+            <Skeleton className="h-48 w-full rounded-none" />
+            <div className="space-y-3 p-4">
+              <Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-3 w-3/5" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   if (properties.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-          <Home className="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium text-foreground">No properties found</h3>
-        <p className="text-muted-foreground mt-1">
-          Try adjusting your filters to find more properties
-        </p>
-      </div>
+      <EmptyState
+        icon={Home}
+        title="No properties found"
+        description="Try adjusting your filters to find more properties"
+      />
     );
   }
 

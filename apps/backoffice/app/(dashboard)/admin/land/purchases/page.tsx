@@ -3,14 +3,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { AlertTriangle, CircleAlert, FileSignature, RefreshCw, Search, X } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { AlertTriangle, CircleAlert, FileSignature, RefreshCw, X } from 'lucide-react';
 import {
   Button,
   DataTable,
   EmptyState,
-  Input,
   Pagination,
+  SearchInput,
   Select,
   type Column,
 } from '@getrentos/ui';
@@ -70,6 +70,7 @@ export default function AdminLandPurchasesPage() {
     queryKey: landQueryKeys.purchases(params),
     queryFn: () => unwrap(adminLandPurchaseService.list(params)),
     enabled: canView,
+    placeholderData: keepPreviousData,
   });
   const purchases = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -214,12 +215,11 @@ export default function AdminLandPurchasesPage() {
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="w-full max-w-lg">
-          <Input
+          <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onValueChange={setSearch}
             placeholder="Search reference, plot number or buyer…"
-            leadingIcon={<Search className="h-4 w-4" />}
-            aria-label="Search land purchases"
+            label="Search land purchases"
           />
         </div>
         <Select
@@ -247,7 +247,7 @@ export default function AdminLandPurchasesPage() {
         )}
       </div>
 
-      {isError ? (
+      {isError && !data ? (
         <EmptyState
           icon={CircleAlert}
           title="Land purchases could not be loaded"

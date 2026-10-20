@@ -142,7 +142,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
         {/* Back Button */}
         <button
           onClick={handleBack}
-          className="lg:hidden flex items-center gap-2 text-sm text-gray-500 mb-6"
+          className="lg:hidden flex items-center gap-2 text-sm text-muted-foreground mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
@@ -154,7 +154,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
             <Logo size="md" />
           </div>
           <h2 className="text-2xl font-bold text-foreground">Reset Password</h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             We&apos;ll help you get back into your account
           </p>
         </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, UserRoundPlus, UsersRound } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, ConfirmDialog, ListSkeleton, type BadgeVariant } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { InviteLandReviewerInput, LandDiligenceCheck, LandReviewerSeat } from '@/types/land';
@@ -87,8 +87,8 @@ export const LandReviewersPanel = ({
       }
     >
       {seats.isLoading ? (
-        <PanelMessage>Loading reviewers…</PanelMessage>
-      ) : seats.isError ? (
+        <ListSkeleton rows={2} label="Loading reviewers" />
+      ) : seats.isError && !seats.data ? (
         <PanelMessage>
           {seats.error instanceof Error ? seats.error.message : 'Reviewers are unavailable.'}
         </PanelMessage>

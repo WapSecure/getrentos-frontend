@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Store,
   BadgeCheck,
@@ -10,7 +10,6 @@ import {
   Handshake,
   Landmark,
   Lock,
-  Search,
   ArrowUpDown,
   UserRound,
   Building2,
@@ -21,18 +20,24 @@ import {
 import {
   Badge,
   Button,
+  CardSkeleton,
   ConfirmDialog,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
   Pagination,
+  SearchInput,
   StatCard,
-  LegacyInput,
+  StatGridSkeleton,
   Select,
+  Skeleton,
   DocumentPreviewButton,
-  Toast,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import type {
@@ -90,18 +95,16 @@ function useMarketplaceActions() {
   const client = useQueryClient();
   const [action, setAction] = useState<MarketplaceAction | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
   const mutation = useMutation({
     mutationFn: async () => action?.run(reason.trim()),
     onSuccess: async () => {
       setAction(null);
       setReason('');
-      setToast({ message: 'Action completed and audited.', variant: 'success' });
+      toast.success('Action completed and audited.');
       await client.invalidateQueries({ queryKey: ['admin', 'marketplace'] });
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   return {
@@ -122,9 +125,6 @@ function useMarketplaceActions() {
           promptMinLength={10}
           onConfirm={() => mutation.mutate()}
         />
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </>
     ),
   };
@@ -180,28 +180,24 @@ function MarketplaceOverviewView({
             For-sale listings, offer negotiations and escrow deals across the marketplace.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onOffers}>
-            <Handshake className="mr-1.5 h-4 w-4" /> Offer queue
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" icon={<Handshake className="h-4 w-4" />} onClick={onOffers}>
+            Offer queue
           </Button>
-          <Button variant="outline" onClick={onListings}>
-            <Store className="mr-1.5 h-4 w-4" /> Sale listings
+          <Button variant="outline" icon={<Store className="h-4 w-4" />} onClick={onListings}>
+            Sale listings
           </Button>
         </div>
       </div>
 
-      {error ? (
+      {error && !data ? (
         <PageErrorState
           title="Could not load marketplace totals"
           description="Sales pulse is temporarily unavailable. No values are being estimated."
           className="min-h-[220px]"
         />
       ) : loading || !data ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl border border-border bg-card animate-pulse" />
-          ))}
-        </div>
+        <StatGridSkeleton count={6} className="grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6" />
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
@@ -309,23 +305,12 @@ function MarketplaceQueueView({
               : 'Buyer offers across the marketplace with counter-offers and escrow links.'}
           </p>
         </div>
-        <div className="flex gap-1 rounded-lg border border-border bg-card p-1 text-sm">
-          {(['listings', 'offers'] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => onView(v)}
-              className={cn(
-                'rounded-md px-4 py-1.5 font-medium transition-colors',
-                view === v
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-secondary'
-              )}
-            >
-              {v === 'listings' ? 'Listings' : 'Offers'}
-            </button>
-          ))}
-        </div>
+        <Tabs value={view} onValueChange={(v) => onView(v as 'listings' | 'offers')}>
+          <TabsList>
+            <TabsTrigger value="listings">Listings</TabsTrigger>
+            <TabsTrigger value="offers">Offers</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       {view === 'listings' ? <SaleListingsPanel /> : <OfferQueuePanel />}
     </div>
@@ -350,24 +335,23 @@ function SaleListingsPanel() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const items = data?.items ?? [];
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <LegacyInput
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search title, city, or seller..."
-            className="w-full pl-9"
-          />
-        </div>
+        <SearchInput
+          value={search}
+          onValueChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search"
+          placeholder="Search title, city, or seller..."
+          className="flex-1 min-w-[220px] max-w-sm"
+        />
         <Select
           value={status}
           ariaLabel="Filter listings by status"
@@ -375,7 +359,8 @@ function SaleListingsPanel() {
             setStatus(value as ListingStatusFilter);
             setPage(1);
           }}
-          className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+          searchable={false}
+          className="w-full sm:w-48"
           options={[
             { value: 'all', label: 'All statuses' },
             { value: 'PUBLISHED', label: 'Published' },
@@ -387,7 +372,9 @@ function SaleListingsPanel() {
         />
       </div>
 
-      {isError ? (
+      {isLoading ? (
+        <ListSkeleton rows={5} className="rounded-none border-0" />
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load sale listings"
           description="The listing queue is temporarily unavailable."
@@ -395,12 +382,6 @@ function SaleListingsPanel() {
           isRetrying={isFetching}
           className="min-h-[220px] rounded-none border-0"
         />
-      ) : isLoading ? (
-        <div className="space-y-2 p-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-lg bg-secondary" />
-          ))}
-        </div>
       ) : items.length === 0 ? (
         <EmptyState icon={Store} title="No sale listings" description="Try adjusting filters." />
       ) : (
@@ -498,7 +479,7 @@ function ListingDetailDialog({
           </Button>
         </div>
         {isLoading ? (
-          <div className="mt-5 h-40 animate-pulse rounded-xl bg-secondary" />
+          <Skeleton className="mt-5 h-40 w-full rounded-xl" />
         ) : isError || !data ? (
           <PageErrorState
             title="Could not load listing detail"
@@ -508,7 +489,7 @@ function ListingDetailDialog({
         ) : (
           <div className="mt-5 space-y-5">
             <section
-              className={`rounded-xl border p-4 ${data.publishingEligibility.eligible ? 'border-success/30 bg-success/5' : 'border-destructive/30 bg-destructive/5'}`}
+              className={`rounded-xl border p-4 ${data.publishingEligibility.eligible ? 'border-success/30 bg-success-subtle' : 'border-destructive/30 bg-destructive-subtle'}`}
             >
               <h3 className="font-medium">Publishing eligibility</h3>
               <p className="mt-1 text-sm">
@@ -660,24 +641,23 @@ function OfferQueuePanel() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const items = data?.items ?? [];
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm">
       <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-        <div className="relative flex-1 min-w-[220px] max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <LegacyInput
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search buyer, listing..."
-            className="w-full pl-9"
-          />
-        </div>
+        <SearchInput
+          value={search}
+          onValueChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          label="Search"
+          placeholder="Search buyer, listing..."
+          className="flex-1 min-w-[220px] max-w-sm"
+        />
         <Select
           value={status}
           ariaLabel="Filter offers by status"
@@ -685,7 +665,8 @@ function OfferQueuePanel() {
             setStatus(value as OfferStatusFilter);
             setPage(1);
           }}
-          className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+          searchable={false}
+          className="w-full sm:w-48"
           options={[
             { value: 'all', label: 'All statuses' },
             ...(Object.keys(OFFER_STATUS_LABEL) as SaleOfferStatus[]).map((value) => ({
@@ -696,7 +677,9 @@ function OfferQueuePanel() {
         />
       </div>
 
-      {isError ? (
+      {isLoading ? (
+        <ListSkeleton rows={5} className="rounded-none border-0" />
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load offers"
           description="The offer queue is temporarily unavailable."
@@ -704,12 +687,6 @@ function OfferQueuePanel() {
           isRetrying={isFetching}
           className="min-h-[220px] rounded-none border-0"
         />
-      ) : isLoading ? (
-        <div className="space-y-2 p-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-lg bg-secondary" />
-          ))}
-        </div>
       ) : items.length === 0 ? (
         <EmptyState icon={Handshake} title="No offers" description="Try adjusting filters." />
       ) : (
@@ -792,13 +769,16 @@ function OfferDetailDialog({
         onClick={(e) => e.stopPropagation()}
       >
         {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading offer…</div>
+          <div className="space-y-4 p-5">
+            <CardSkeleton lines={2} />
+            <CardSkeleton lines={4} />
+          </div>
         ) : isError || !data ? (
           <div className="p-8 text-center">
             <p className="text-destructive">Could not load the offer case.</p>
-            <button className="mt-3 text-sm text-primary underline" onClick={onClose}>
+            <Button className="mt-3" variant="ghost" onClick={onClose}>
               Close
-            </button>
+            </Button>
           </div>
         ) : (
           <OfferCase360 detail={data} onClose={onClose} actions={actions} />

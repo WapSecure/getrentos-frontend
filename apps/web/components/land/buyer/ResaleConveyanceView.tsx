@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { EmptyState, PageErrorState, Toast } from '@getrentos/ui';
+import { Alert, EmptyState, PageErrorState, Skeleton, useToast } from '@getrentos/ui';
 import { AlertTriangle, ArrowLeft, Lock, ScrollText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -23,9 +23,7 @@ import { landRepresentativeKeys } from '@/services/landRepresentativeService';
 export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   const queryClient = useQueryClient();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: buyerLandKeys.transactionMilestones(txId),
@@ -45,16 +43,14 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
       queryClient.invalidateQueries({
         queryKey: landRepresentativeKeys.coApproval({ transactionId: txId }),
       });
-      setToast({
-        // Under two-person approval the step stays delivered until the representative approves too.
-        message:
-          updated.status === 'DELIVERED'
-            ? 'Your approval is recorded. Waiting for your representative.'
-            : 'Step confirmed.',
-        variant: 'success',
-      });
+      // Under two-person approval the step stays delivered until the representative approves too.
+      toast.success(
+        updated.status === 'DELIVERED'
+          ? 'Your approval is recorded. Waiting for your representative.'
+          : 'Step confirmed.'
+      );
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
     onSettled: () => setPendingKey(null),
   });
   const dispute = useMutation({
@@ -63,9 +59,9 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
     onMutate: ({ key }) => setPendingKey(key),
     onSuccess: () => {
       refresh();
-      setToast({ message: 'Dispute sent to the seller.', variant: 'success' });
+      toast.success('Dispute sent to the seller.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
     onSettled: () => setPendingKey(null),
   });
 
@@ -83,12 +79,9 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
     onMutate: ({ key }) => setPendingKey(key),
     onSuccess: (next, { how }) => {
       queryClient.setQueryData(conditionsKey, next);
-      setToast({
-        message: how === 'confirm' ? 'Condition confirmed.' : 'Condition waived.',
-        variant: 'success',
-      });
+      toast.success(how === 'confirm' ? 'Condition confirmed.' : 'Condition waived.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
     onSettled: () => setPendingKey(null),
   });
   const conditionList = conditions.data ?? [];
@@ -124,8 +117,8 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
       </p>
 
       {isLoading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : isError ? (
+        <Skeleton className="h-48 rounded-2xl" />
+      ) : isError && !data ? (
         <PageErrorState
           description={error instanceof Error ? error.message : undefined}
           onRetry={() => refetch()}
@@ -153,11 +146,10 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
                   : `${openConditions.length} condition${openConditions.length === 1 ? '' : 's'} still open. Your payment is not released while any is.`}
               </p>
               {failedCondition && (
-                <p className="mb-4 flex gap-2 rounded-xl bg-destructive/10 p-3 text-sm text-foreground">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden />
+                <Alert variant="danger" icon={AlertTriangle} className="mb-4">
                   A condition was not met. You may cancel and take a full refund of what GetRentos
                   holds from your transactions page, or keep the purchase.
-                </p>
+                </Alert>
               )}
               <ConditionsPanel
                 conditions={conditionList}
@@ -172,7 +164,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
           <CoApprovalCard
             deal={{ transactionId: txId }}
             labelFor={(key) => milestones.find((m) => m.key === key)?.label ?? key}
-            onChanged={(message, variant) => setToast({ message, variant })}
+            onChanged={(message, variant) => toast.show(message, variant)}
           />
           <section className="rounded-2xl border border-border bg-card p-5">
             <p className="mb-4 text-sm text-muted-foreground" aria-live="polite">
@@ -194,10 +186,6 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
             </p>
           </section>
         </>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

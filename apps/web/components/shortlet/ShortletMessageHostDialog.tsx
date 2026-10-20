@@ -9,8 +9,7 @@ import {
   DialogDescription,
   DialogTitle,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { Send } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -27,12 +26,12 @@ export function ShortletMessageHostDialog({
   onSent: () => void;
 }) {
   const [text, setText] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const send = useMutation({
     mutationFn: () => unwrap(shortletService.startConversation(listing.id, text.trim())),
     onSuccess: () => onSent(),
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -49,6 +48,8 @@ export function ShortletMessageHostDialog({
             placeholder="Hi, is this available on the dates I need?"
             rows={4}
             maxLength={2000}
+            showCount
+            aria-label="Message"
           />
           <p className="text-xs text-muted-foreground">
             Phone numbers, emails and chat links are hidden until the stay is booked and paid, so
@@ -56,16 +57,15 @@ export function ShortletMessageHostDialog({
           </p>
           <Button
             className="w-full"
-            disabled={!text.trim() || send.isPending}
+            disabled={!text.trim()}
+            isLoading={send.isPending}
+            loadingText="Sending…"
             onClick={() => send.mutate()}
+            icon={<Send className="h-4 w-4" />}
           >
-            <Send className="mr-1.5 h-4 w-4" />
-            {send.isPending ? 'Sending…' : 'Send message'}
+            Send message
           </Button>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

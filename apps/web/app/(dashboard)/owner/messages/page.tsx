@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, MessageCircle } from 'lucide-react';
+import { Pagination, EmptyState } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -69,6 +69,7 @@ export default function OwnerMessagesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const conversations = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -166,11 +167,11 @@ export default function OwnerMessagesPage() {
               />
             </>
           ) : (
-            <div className="flex-1 bg-card border border-border rounded-lg flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Select a conversation to start messaging
-              </p>
-            </div>
+            <EmptyState
+              icon={MessageCircle}
+              title="Select a conversation to start messaging"
+              className="flex-1"
+            />
           )}
         </div>
       </div>

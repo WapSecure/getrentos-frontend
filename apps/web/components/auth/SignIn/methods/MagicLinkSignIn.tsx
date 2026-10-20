@@ -56,7 +56,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label className="block text-sm font-medium text-foreground mb-1.5">
           Email Address
         </label>
         <div className="relative">
@@ -65,26 +65,26 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
             {...register('identifier')}
             className={`w-full px-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
               errors.identifier
-                ? 'border-red-500'
+                ? 'border-destructive'
                 : touchedFields.identifier
-                  ? 'border-green-500'
-                  : 'border-gray-300 dark:border-gray-600'
+                  ? 'border-success'
+                  : 'border-border'
             }`}
             placeholder="you@example.com"
           />
           {touchedFields.identifier && !errors.identifier && (
-            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
           )}
           {errors.identifier && (
-            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-destructive" />
           )}
         </div>
         {errors.identifier && (
-          <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
+          <p className="mt-1 text-sm text-destructive">{errors.identifier.message}</p>
         )}
       </div>
 
-      <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-gray-600 dark:text-gray-400">
+      <div className="p-3 rounded-lg bg-secondary text-sm text-muted-foreground">
         <p>We&apos;ll email you a secure magic link. No password needed!</p>
       </div>
 

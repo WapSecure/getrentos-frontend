@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Circle, FileText, AlertCircle } from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { Alert, Checkbox } from '@getrentos/ui';
 
 interface ChecklistItem {
   id: string;
@@ -64,25 +65,27 @@ export const MaintenanceChecklist = () => {
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
         className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-3">
           <FileText className="w-5 h-5 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Maintenance Checklist</h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {completedCount}/{totalCount} items completed
             </p>
           </div>
         </div>
-        <span className="text-xs text-gray-500">{isExpanded ? 'Hide' : 'Show'}</span>
+        <span className="text-xs text-muted-foreground">{isExpanded ? 'Hide' : 'Show'}</span>
       </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
           <div className="mb-3">
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
@@ -96,35 +99,26 @@ export const MaintenanceChecklist = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-start gap-3 p-2 rounded-lg hover:bg-secondary cursor-pointer"
-              onClick={() => toggleItem(item.id)}
+              className="p-2 rounded-lg hover:bg-secondary"
             >
-              <button className="mt-1 shrink-0">
-                {item.completed ? (
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                ) : (
-                  <Circle className="w-5 h-5 text-gray-400" />
-                )}
-              </button>
-              <div>
-                <p
-                  className={`text-sm ${item.completed ? 'text-gray-500 line-through' : 'text-foreground'}`}
-                >
-                  {item.title}
-                </p>
-                <p className="text-xs text-gray-500">{item.description}</p>
-              </div>
+              <Checkbox
+                checked={item.completed}
+                onCheckedChange={() => toggleItem(item.id)}
+                label={
+                  <span
+                    className={item.completed ? 'text-muted-foreground line-through' : undefined}
+                  >
+                    {item.title}
+                  </span>
+                }
+                description={item.description}
+              />
             </motion.div>
           ))}
 
-          <div className="mt-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5" />
-              <p className="text-xs text-blue-700 dark:text-blue-300">
-                💡 Tip: Having photos ready helps vendors diagnose issues faster
-              </p>
-            </div>
-          </div>
+          <Alert variant="info" className="mt-2">
+            💡 Tip: Having photos ready helps vendors diagnose issues faster
+          </Alert>
         </div>
       )}
     </motion.div>

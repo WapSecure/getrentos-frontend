@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Plus } from 'lucide-react';
-import { Button, EmptyState, Pagination } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -27,6 +27,7 @@ export default function EstateStaffPage() {
     queryKey: [...estateKeys.staff(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(estateService.listStaff(estate!.id, { page, pageSize: PAGE_SIZE })),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const staff = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -54,7 +55,7 @@ export default function EstateStaffPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -85,7 +86,7 @@ export default function EstateStaffPage() {
       </div>
 
       {isStaffLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : staff.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState

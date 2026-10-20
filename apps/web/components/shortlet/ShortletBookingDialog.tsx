@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
   Button,
   DatePicker,
@@ -232,7 +233,7 @@ export function ShortletBookingDialog({
               ) : null}
             </div>
           )}
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
           <VerificationRequiredNotice
             error={bookError}
             href={guestRoutes.verification}
@@ -266,17 +267,16 @@ export function ShortletBookingDialog({
               {createdBooking.paymentRequired && (
                 <Button
                   className="w-full"
+                  icon={<CreditCard className="h-4 w-4" />}
                   onClick={() => onPay(createdBooking.id)}
-                  disabled={paying}
+                  isLoading={paying}
+                  loadingText="Opening checkout…"
                 >
-                  <CreditCard className="mr-1.5 h-4 w-4" />
-                  {paying
-                    ? 'Opening checkout…'
-                    : `Pay ${formatCurrency(
-                        (createdBooking.total ?? 0) +
-                          (createdBooking.taxAmount ?? 0) +
-                          (createdBooking.deposit ?? 0)
-                      )}`}
+                  {`Pay ${formatCurrency(
+                    (createdBooking.total ?? 0) +
+                      (createdBooking.taxAmount ?? 0) +
+                      (createdBooking.deposit ?? 0)
+                  )}`}
                 </Button>
               )}
               <Button
@@ -292,12 +292,8 @@ export function ShortletBookingDialog({
             </div>
           ) : (
             <>
-              <Button className="w-full" onClick={submit} disabled={busy}>
-                {busy
-                  ? 'Booking…'
-                  : listing.instantBooking
-                    ? 'Book now: instant confirmation'
-                    : 'Request to book'}
+              <Button className="w-full" onClick={submit} isLoading={busy} loadingText="Booking…">
+                {listing.instantBooking ? 'Book now: instant confirmation' : 'Request to book'}
               </Button>
               <p className="text-center text-xs text-muted-foreground">
                 {listing.instantBooking

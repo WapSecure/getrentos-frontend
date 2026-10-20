@@ -1,14 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
   Check,
   Clock,
   KeyRound,
-  Loader2,
   Lock,
   MapPin,
   RefreshCw,
@@ -16,6 +14,20 @@ import {
   Wallet,
   Wrench,
 } from 'lucide-react';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Input,
+  ListSkeleton,
+  PageErrorState,
+  Select,
+  Textarea,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
 import {
@@ -40,22 +52,16 @@ import { unwrap } from '@/lib/apiHelpers';
  * property, not about which dashboard you happen to be looking at.
  */
 
-const STATUS_STYLES: Record<string, string> = {
-  ACTIVE: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400',
-  PENDING: 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400',
-  REJECTED: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400',
-  REVOKED: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400',
-  EXPIRED: 'bg-muted text-muted-foreground',
+const STATUS_VARIANTS: Record<string, BadgeVariant> = {
+  ACTIVE: 'success',
+  PENDING: 'warning',
+  REJECTED: 'danger',
+  REVOKED: 'danger',
+  EXPIRED: 'neutral',
 };
 
 const statusBadge = (status: string) => (
-  <span
-    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-      STATUS_STYLES[status] ?? 'bg-muted text-muted-foreground'
-    }`}
-  >
-    {status.toLowerCase()}
-  </span>
+  <Badge variant={STATUS_VARIANTS[status] ?? 'neutral'}>{status.toLowerCase()}</Badge>
 );
 
 /**
@@ -76,7 +82,7 @@ const CapabilityChips = ({
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
         canList
-          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          ? 'bg-success-subtle text-success'
           : 'bg-muted text-muted-foreground'
       }`}
       title="May create, publish and pause listings for this property"
@@ -87,7 +93,7 @@ const CapabilityChips = ({
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
         canManage
-          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          ? 'bg-success-subtle text-success'
           : 'bg-muted text-muted-foreground'
       }`}
       title="May run the tenancy: units, tenants, applications, leases and maintenance"
@@ -98,7 +104,7 @@ const CapabilityChips = ({
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
         canTransact
-          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          ? 'bg-success-subtle text-success'
           : 'bg-muted text-muted-foreground'
       }`}
       title="May accept offers, release held payments and act on money for this property"
@@ -116,13 +122,13 @@ const ManagedPropertyCard = ({
   property: ManagedPropertyDto;
   managePath?: string;
 }) => (
-  <div className="bg-card rounded-2xl border border-border p-5">
+  <Card className="p-5">
     <div className="flex items-start justify-between gap-3 mb-3">
-      <div className="flex items-start gap-3">
+      <div className="flex min-w-0 items-start gap-3">
         <div className="p-2.5 rounded-xl bg-accent shrink-0">
           <Building2 className="w-5 h-5 text-primary" />
         </div>
-        <div>
+        <div className="min-w-0">
           <h3 className="font-semibold text-foreground">{property.title}</h3>
           <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
             <MapPin className="w-3.5 h-3.5" />
@@ -152,7 +158,7 @@ const ManagedPropertyCard = ({
       canTransact={property.canTransact}
     />
 
-    <div className="flex items-center justify-between mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
+    <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-border text-xs text-muted-foreground">
       <span>
         {property.listingCount} listing{property.listingCount === 1 ? '' : 's'}
         {property.archived ? ' · archived' : ''}
@@ -166,19 +172,20 @@ const ManagedPropertyCard = ({
     </div>
 
     {managePath && property.canManage && property.status === 'ACTIVE' && (
-      <Link
+      <Button
         href={`${managePath}?propertyId=${property.propertyId}`}
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        icon={<Wrench className="h-4 w-4" />}
+        fullWidth
+        className="mt-4"
       >
-        <Wrench className="h-4 w-4" />
         Manage this property
-      </Link>
+      </Button>
     )}
-  </div>
+  </Card>
 );
 
 const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
-  <div className="flex items-start justify-between gap-3 bg-card rounded-xl border border-border px-4 py-3">
+  <Card className="flex items-start justify-between gap-3 px-4 py-3">
     <div className="min-w-0">
       <p className="text-sm text-foreground truncate">
         {AUTHORITY_RELATIONSHIP_LABELS[claim.relationship as AuthorityRelationship] ??
@@ -195,7 +202,7 @@ const ClaimRow = ({ claim }: { claim: PropertyAuthorityDto }) => (
       )}
     </div>
     <div className="shrink-0">{statusBadge(claim.status)}</div>
-  </div>
+  </Card>
 );
 
 /**
@@ -280,7 +287,7 @@ const ClaimForm = () => {
   const canSubmit = propertyRef.trim().length >= 6 && !mutation.isPending;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-5">
+    <Card className="p-5">
       <h2 className="font-semibold text-foreground mb-1">Ask to act for a property</h2>
       <p className="text-sm text-muted-foreground mb-4">
         Enter the property’s code — the owner can copy it from their property page (it looks like
@@ -289,78 +296,73 @@ const ClaimForm = () => {
       </p>
 
       <div className="grid sm:grid-cols-2 gap-3">
-        <label className="block">
-          <span className="text-sm text-muted-foreground">Property code</span>
-          <input
+        <Field
+          label="Property code"
+          hint={
+            lookup === 'resolving' ? (
+              'Looking up…'
+            ) : resolved ? (
+              <span className="inline-flex items-start gap-1 text-success">
+                <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                {resolved.title} · {resolved.city}
+              </span>
+            ) : lookup === 'notfound' ? (
+              <span className="text-warning">
+                No property found for that code. Check it with the owner.
+              </span>
+            ) : undefined
+          }
+        >
+          <Input
             value={propertyRef}
             onChange={(event) => onRefChange(event.target.value)}
             placeholder="PR-AB7K-9Q"
-            className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+            inputClassName="font-mono"
           />
-          {lookup === 'resolving' && (
-            <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              Looking up…
-            </span>
-          )}
-          {resolved && (
-            <span className="mt-1 flex items-start gap-1 text-xs text-emerald-700 dark:text-emerald-400">
-              <Check className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              {resolved.title} · {resolved.city}
-            </span>
-          )}
-          {lookup === 'notfound' && (
-            <span className="mt-1 block text-xs text-amber-700 dark:text-amber-400">
-              No property found for that code. Check it with the owner.
-            </span>
-          )}
-        </label>
+        </Field>
 
-        <label className="block">
-          <span className="text-sm text-muted-foreground">Your relationship</span>
-          <select
+        <Field label="Your relationship">
+          <Select
             value={relationship}
-            onChange={(event) => setRelationship(event.target.value as AuthorityRelationship)}
-            className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-          >
-            {AUTHORITY_RELATIONSHIPS.map((value) => (
-              <option key={value} value={value}>
-                {AUTHORITY_RELATIONSHIP_LABELS[value]}
-              </option>
-            ))}
-          </select>
-        </label>
+            onValueChange={(value) => setRelationship(value as AuthorityRelationship)}
+            searchable={false}
+            options={AUTHORITY_RELATIONSHIPS.map((value) => ({
+              value,
+              label: AUTHORITY_RELATIONSHIP_LABELS[value],
+            }))}
+          />
+        </Field>
       </div>
 
-      <label className="block mt-3">
-        <span className="text-sm text-muted-foreground">Note for the officer (optional)</span>
-        <textarea
+      <Field label="Note for the officer" optionalLabel="(optional)" className="mt-3">
+        <Textarea
           value={note}
           onChange={(event) => setNote(event.target.value)}
           rows={2}
           placeholder="e.g. managing this block for the owner since March"
-          className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
-      </label>
+      </Field>
 
       {error && (
-        <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
-          <ShieldAlert className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-        </div>
+        <Alert variant="danger" icon={ShieldAlert} className="mt-3">
+          {error}
+        </Alert>
       )}
-      {success && <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-400">{success}</p>}
+      {success && (
+        <Alert variant="success" className="mt-3">
+          {success}
+        </Alert>
+      )}
 
-      <button
-        type="button"
+      <Button
         disabled={!canSubmit}
+        isLoading={mutation.isPending}
         onClick={() => mutation.mutate()}
-        className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-4"
       >
-        {mutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
         File claim
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 };
 
@@ -388,20 +390,23 @@ export const ManagedPropertiesView = ({ managePath }: { managePath?: string } = 
       </div>
 
       {managed.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : managed.isError ? (
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {(managed.error as Error).message || 'Could not load your managed properties.'}
-        </p>
+        <ListSkeleton variant="cards" rows={2} className="mb-6" />
+      ) : managed.isError && !managed.data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="Could not load your managed properties"
+          description={(managed.error as Error).message || undefined}
+          onRetry={() => void managed.refetch()}
+          isRetrying={managed.isFetching}
+          className="min-h-0 py-10 mb-6"
+        />
       ) : properties.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-8 text-center">
-          <ShieldAlert className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="font-medium text-foreground">No mandates yet</p>
-          <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-            You are not acting for anyone else’s property at the moment. If an owner has asked you
-            to manage one, file a claim below and it will be checked by an officer.
-          </p>
-        </div>
+        <EmptyState
+          icon={ShieldAlert}
+          title="No mandates yet"
+          description="You are not acting for anyone else’s property at the moment. If an owner has asked you to manage one, file a claim below and it will be checked by an officer."
+          className="mb-6"
+        />
       ) : (
         <div className="grid lg:grid-cols-2 gap-4 mb-6">
           {properties.map((property) => (

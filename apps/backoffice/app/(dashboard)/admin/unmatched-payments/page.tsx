@@ -1,20 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
 import {
   Badge,
   Button,
   Card,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
   Tabs,
   TabsList,
   TabsTrigger,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -51,11 +51,12 @@ export default function UnmatchedPaymentsPage() {
   const canResolve = hasAdminPermission(user?.roles, 'rentfinance.approve');
   const [filter, setFilter] = useState<Filter>('OPEN');
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const query = useQuery({
     queryKey: ['admin', 'unmatched-payments', filter],
     queryFn: () => unwrap(adminUnmatchedPaymentsService.list(filter)),
+    placeholderData: keepPreviousData,
   });
 
   const resolve = useMutation({
@@ -64,10 +65,9 @@ export default function UnmatchedPaymentsPage() {
     onSuccess: (_r, { id }) => {
       setNotes((n) => ({ ...n, [id]: '' }));
       queryClient.invalidateQueries({ queryKey: ['admin', 'unmatched-payments'] });
-      setToast({ message: 'Marked resolved.', variant: 'success' });
+      toast.success('Marked resolved.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not resolve.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not resolve.'),
   });
 
   const items = query.data?.items ?? [];
@@ -92,14 +92,14 @@ export default function UnmatchedPaymentsPage() {
         </TabsList>
       </Tabs>
 
-      {query.isError ? (
+      {query.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : query.isError && !query.data ? (
         <PageErrorState
           title="Could not load unmatched payments"
           description={(query.error as Error).message}
           onRetry={() => query.refetch()}
         />
-      ) : query.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
         <EmptyState
           icon={CircleAlert}
@@ -117,7 +117,7 @@ export default function UnmatchedPaymentsPage() {
             return (
               <Card key={p.id} className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-medium text-foreground">
                       {KIND_LABEL[p.kind] ?? p.kind} · received {naira(p.receivedAmountKobo)},
                       expected {naira(p.expectedAmountKobo)}
@@ -127,7 +127,7 @@ export default function UnmatchedPaymentsPage() {
                       {p.entityId ? ` · charge ${p.entityId}` : ''}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge variant={diff < 0 ? 'warning' : 'info'}>
                       {diff < 0
                         ? `Short by ${naira(String(-diff))}`
@@ -156,6 +156,7 @@ export default function UnmatchedPaymentsPage() {
                     <Button
                       onClick={() => resolve.mutate({ id: p.id, resolution: notes[p.id] ?? '' })}
                       disabled={(notes[p.id] ?? '').trim().length < 10 || resolve.isPending}
+                      isLoading={resolve.isPending && resolve.variables?.id === p.id}
                     >
                       Mark resolved
                     </Button>
@@ -169,10 +170,6 @@ export default function UnmatchedPaymentsPage() {
             );
           })}
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

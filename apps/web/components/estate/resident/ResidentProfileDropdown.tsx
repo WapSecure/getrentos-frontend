@@ -50,7 +50,7 @@ export const ResidentProfileDropdown = ({ user }: ResidentProfileDropdownProps) 
           <p className="text-xs text-muted-foreground">Resident</p>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -71,8 +71,9 @@ export const ResidentProfileDropdown = ({ user }: ResidentProfileDropdownProps) 
 
             <div className="border-t border-border py-2">
               <button
+                type="button"
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive-subtle transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out

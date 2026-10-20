@@ -2,8 +2,8 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Briefcase, Loader2 } from 'lucide-react';
-import { Button, Card } from '@getrentos/ui';
+import { Briefcase } from 'lucide-react';
+import { Alert, Button, Card, Skeleton } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { agencyTeamService } from '@/services/agencyTeamService';
@@ -53,11 +53,15 @@ export function AgencyJoinView() {
             Open the link from your invitation email.
           </p>
         ) : preview.isLoading ? (
-          <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Checking your invitation…
-          </p>
+          <div role="status" aria-label="Checking your invitation" className="mt-3 space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="mt-2 h-10 w-36" />
+          </div>
         ) : preview.isError ? (
-          <p className="mt-3 text-sm text-destructive">{(preview.error as Error).message}</p>
+          <Alert variant="danger" className="mt-3">
+            {(preview.error as Error).message}
+          </Alert>
         ) : p ? (
           <>
             <p className="mt-3 text-sm text-foreground">
@@ -80,14 +84,15 @@ export function AgencyJoinView() {
                 <Button
                   className="mt-4"
                   onClick={() => accept.mutate()}
-                  disabled={accept.isPending}
+                  isLoading={accept.isPending}
+                  loadingText="Joining…"
                 >
-                  {accept.isPending ? 'Joining…' : `Join ${p.firmName}`}
+                  {`Join ${p.firmName}`}
                 </Button>
                 {accept.isError && (
-                  <p role="alert" className="mt-2 text-sm text-destructive">
+                  <Alert variant="danger" className="mt-2">
                     {(accept.error as Error).message}
-                  </p>
+                  </Alert>
                 )}
               </>
             )}

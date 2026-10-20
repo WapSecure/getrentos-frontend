@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Download, Mail, CalendarDays, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Alert, Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import type { RenewalOffer } from '@/types/lease';
@@ -102,11 +102,12 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             variant="outline"
             className="gap-2"
             size="sm"
-            disabled={isDownloading}
+            isLoading={isDownloading}
+            loadingText="Downloading…"
             onClick={() => void handleDownload()}
           >
             <Download className="h-4 w-4" aria-hidden="true" />
-            {isDownloading ? 'Downloading…' : 'Download lease'}
+            Download lease
           </Button>
           <Button href="/renter/messages" variant="primary" className="gap-2" size="sm">
             <Mail className="h-4 w-4" aria-hidden="true" />
@@ -115,9 +116,9 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
         </div>
       </div>
       {downloadError ? (
-        <p className="mt-3 text-sm text-red-600 dark:text-red-400" role="alert">
+        <Alert variant="danger" className="mt-3">
           {downloadError}
-        </p>
+        </Alert>
       ) : null}
 
       <div className="relative mt-6 rounded-2xl border border-border/70 bg-secondary/40 p-4">
@@ -138,9 +139,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
             </span>
           )}
           {lease.status === 'expiring' && renewalOffer && (
-            <span className="rounded-full bg-warning-subtle px-2.5 py-1 text-xs font-semibold text-warning">
-              Renewal offer available
-            </span>
+            <Badge variant="warning">Renewal offer available</Badge>
           )}
         </div>
       </div>

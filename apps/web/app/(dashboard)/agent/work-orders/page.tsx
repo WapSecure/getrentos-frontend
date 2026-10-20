@@ -13,12 +13,11 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
   Textarea,
-  Toast,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService, type AgentWorkOrder } from '@/services/agentService';
@@ -35,7 +34,7 @@ const STATUS_META: Record<AgentWorkOrder['status'], { label: string; variant: Ba
 
 export default function AgentWorkOrdersPage() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [completing, setCompleting] = useState<AgentWorkOrder | null>(null);
   const [report, setReport] = useState('');
   const [uploadingId, setUploadingId] = useState<string | null>(null);
@@ -51,9 +50,9 @@ export default function AgentWorkOrdersPage() {
     mutationFn: (id: string) => unwrap(agentService.startWorkOrder(id)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Work started.', variant: 'success' });
+      toast.success('Work started.');
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Unable to start.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to start.'),
   });
 
   const complete = useMutation({
@@ -63,10 +62,9 @@ export default function AgentWorkOrdersPage() {
       invalidate();
       setCompleting(null);
       setReport('');
-      setToast({ message: 'Reported done — the owner can review it.', variant: 'success' });
+      toast.success('Reported done — the owner can review it.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Unable to complete.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to complete.'),
   });
 
   const uploadPhoto = async (id: string, file: File | undefined) => {
@@ -76,7 +74,7 @@ export default function AgentWorkOrdersPage() {
       await unwrap(agentService.addWorkOrderPhoto(id, file));
       invalidate();
     } catch (e) {
-      setToast({ message: e instanceof Error ? e.message : 'Upload failed.', variant: 'error' });
+      toast.error(e instanceof Error ? e.message : 'Upload failed.');
     } finally {
       setUploadingId(null);
     }
@@ -93,8 +91,8 @@ export default function AgentWorkOrdersPage() {
       </div>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : workOrdersQuery.isError ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading work orders" />
+      ) : workOrdersQuery.isError && !workOrdersQuery.data ? (
         <PageErrorState
           title="Work orders are unavailable"
           description="We could not load your assigned maintenance jobs. No work order has been changed."
@@ -140,7 +138,7 @@ export default function AgentWorkOrdersPage() {
                         size="sm"
                         icon={<Play className="h-4 w-4" />}
                         onClick={() => start.mutate(wo.id)}
-                        disabled={start.isPending && start.variables === wo.id}
+                        isLoading={start.isPending && start.variables === wo.id}
                       >
                         Start
                       </Button>
@@ -233,17 +231,15 @@ export default function AgentWorkOrdersPage() {
             <Button
               rounded="md"
               onClick={() => completing && complete.mutate({ id: completing.id, note: report })}
-              disabled={complete.isPending || !report.trim()}
+              isLoading={complete.isPending}
+              loadingText="Saving…"
+              disabled={!report.trim()}
             >
-              {complete.isPending ? 'Saving…' : 'Report done'}
+              Report done
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

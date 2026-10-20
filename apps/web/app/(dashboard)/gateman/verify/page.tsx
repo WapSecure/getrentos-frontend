@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
 import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Alert, Button, Card, CardSkeleton, ListSkeleton, NumberInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
@@ -124,7 +124,7 @@ export default function GatemanVerifyPage() {
     refetchInterval: 15_000,
   });
 
-  const { data: checkInsData } = useQuery({
+  const { data: checkInsData, isLoading: isInsideLoading } = useQuery({
     queryKey: [
       ...estateKeys.visitorPasses(estate?.id ?? '', 'checked_in'),
       { page: 1, pageSize: 100, purpose: 'today-check-ins' },
@@ -386,7 +386,7 @@ export default function GatemanVerifyPage() {
   };
 
   if (isPostLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -417,16 +417,13 @@ export default function GatemanVerifyPage() {
           they are at is told plainly: but is never blocked from recording an
           arrival, because a real person is standing in front of them. */}
       {needsGateChoice && (
-        <div className="rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/20 p-4">
-          <p className="text-sm text-amber-800 dark:text-amber-300">
-            This estate has more than one gate. Use the gate picker above to say which one
-            you&apos;re at, so arrivals are recorded against it. You can still check people in
-            without choosing.
-          </p>
-        </div>
+        <Alert variant="warning">
+          This estate has more than one gate. Use the gate picker above to say which one you&apos;re
+          at, so arrivals are recorded against it. You can still check people in without choosing.
+        </Alert>
       )}
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+      <Card className="p-6 space-y-4">
         <input
           ref={scanInputRef}
           type="file"
@@ -442,12 +439,13 @@ export default function GatemanVerifyPage() {
         <Button
           variant="outline"
           fullWidth
-          className="gap-2"
-          disabled={isScanning || verify.isPending}
+          icon={<QrCode className="w-4 h-4" />}
+          disabled={verify.isPending}
+          isLoading={isScanning}
+          loadingText="Reading photo…"
           onClick={() => scanInputRef.current?.click()}
         >
-          <QrCode className="w-4 h-4" />
-          {isScanning ? 'Reading photo…' : 'Scan QR'}
+          Scan QR
         </Button>
 
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -456,25 +454,27 @@ export default function GatemanVerifyPage() {
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        <LegacyInput
-          type="text"
-          inputMode="numeric"
+        <NumberInput
           value={pin}
-          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          onValueChange={(value) => setPin(value.slice(0, 6))}
+          maxLength={6}
           placeholder="000000"
-          className="text-center text-3xl tracking-[0.3em] font-bold"
+          aria-label="Visitor PIN"
+          inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
         />
         <Button
           variant="primary"
           fullWidth
-          disabled={pin.length !== 6 || verify.isPending}
+          disabled={pin.length !== 6}
+          isLoading={verify.isPending}
+          loadingText="Verifying…"
           onClick={() => {
             setResult(null);
             setBlocked(null);
             verify.mutate({ code: pin });
           }}
         >
-          {verify.isPending ? 'Verifying…' : 'Check In'}
+          Check In
         </Button>
 
         {/* The visitor who has nothing arranged. Raising a request is not the
@@ -510,46 +510,31 @@ export default function GatemanVerifyPage() {
         )}
 
         {result?.pass && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
-            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium">
-                {result.pass.visitorName} checked in for {result.pass.unitLabel}
-              </p>
-              <p className="text-xs opacity-80 mt-0.5">{result.pass.residentName}</p>
-              {standingPassNote && <p className="text-xs opacity-80 mt-0.5">{standingPassNote}</p>}
-            </div>
-          </div>
+          <Alert
+            variant="success"
+            icon={CheckCircle2}
+            title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
+          >
+            <p className="text-xs">{result.pass.residentName}</p>
+            {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
+          </Alert>
         )}
         {result?.queued && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
-            <CloudOff className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium">Saved on this device</p>
-              <p className="text-xs opacity-80 mt-0.5">
-                {result.queued} could not reach the estate, so it is stored here and will be sent
-                automatically once there is a connection. The visitor can go through.
-              </p>
-            </div>
-          </div>
+          <Alert variant="warning" icon={CloudOff} title="Saved on this device">
+            <p className="text-xs">
+              {result.queued} could not reach the estate, so it is stored here and will be sent
+              automatically once there is a connection. The visitor can go through.
+            </p>
+          </Alert>
         )}
         {result?.requested && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 text-foreground">
-            <UserPlus className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium">Asked the household</p>
-              <p className="text-xs opacity-80 mt-0.5">{result.requested}</p>
-            </div>
-          </div>
+          <Alert variant="info" icon={UserPlus} title="Asked the household">
+            <p className="text-xs">{result.requested}</p>
+          </Alert>
         )}
         {result?.warning && <WatchlistWarning warning={result.warning} />}
-        {result?.error && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400">
-            <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <p className="text-sm font-medium">{result.error}</p>
-          </div>
-        )}
-      </div>
+        {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
+      </Card>
 
       {/* Walk-ins sit above "inside now": an approved visitor is standing at the
           barrier right now, which is the most urgent thing on the screen. */}
@@ -560,18 +545,15 @@ export default function GatemanVerifyPage() {
           {/* Answered requests come first: the guard is holding the visitor and
               needs to know whether to open the barrier or turn them away. */}
           {decided.map((pass) => (
-            <div
-              key={pass.id}
-              className="bg-card rounded-2xl border border-red-200 dark:border-red-900/40 p-4"
-            >
+            <Card key={pass.id} className="border-destructive/30 p-4">
               <div className="flex items-start gap-3">
-                <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+                <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
                   <p className="text-xs text-muted-foreground">
                     {pass.unitLabel} · {pass.residentName}
                   </p>
-                  <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">
+                  <p className="text-xs text-destructive mt-0.5">
                     {pass.status === 'denied'
                       ? 'Refused: do not admit them.'
                       : 'No answer: do not admit them.'}
@@ -583,22 +565,19 @@ export default function GatemanVerifyPage() {
                   )}
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
 
           {readyToAdmit.map((pass) => (
-            <div
-              key={pass.id}
-              className="bg-card rounded-2xl border border-green-200 dark:border-green-900/40 p-4 space-y-3"
-            >
+            <Card key={pass.id} className="border-success/30 p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-green-600 dark:text-green-400" />
+                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-success" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
                   <p className="text-xs text-muted-foreground">
                     {pass.unitLabel} · {pass.residentName}
                   </p>
-                  <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
+                  <p className="text-xs text-success mt-0.5">
                     Approved
                     {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''}: let them in
                   </p>
@@ -608,15 +587,17 @@ export default function GatemanVerifyPage() {
                 variant="primary"
                 fullWidth
                 disabled={admit.isPending}
+                isLoading={admit.isPending && admit.variables?.pass.id === pass.id}
+                loadingText="Admitting…"
                 onClick={() => admit.mutate({ pass })}
               >
                 Admit
               </Button>
-            </div>
+            </Card>
           ))}
 
           {awaiting.map((pass) => (
-            <div key={pass.id} className="bg-card rounded-2xl border border-border p-4 space-y-3">
+            <Card key={pass.id} className="p-4 space-y-3">
               <div className="flex items-start gap-3">
                 <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
                 <div className="min-w-0">
@@ -634,11 +615,12 @@ export default function GatemanVerifyPage() {
                 variant="outline"
                 size="sm"
                 disabled={cancelWalkIn.isPending}
+                isLoading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
                 onClick={() => cancelWalkIn.mutate(pass)}
               >
                 Cancel request
               </Button>
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -647,7 +629,7 @@ export default function GatemanVerifyPage() {
           the whole app. Each line is a real arrival or departure the estate has
           not been told about yet. */}
       {queue.length > 0 && (
-        <div className="bg-card rounded-2xl border border-border p-4">
+        <Card className="p-4">
           <div className="flex items-start gap-3">
             <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
             <div className="flex-1 min-w-0">
@@ -669,51 +651,44 @@ export default function GatemanVerifyPage() {
                 variant="outline"
                 size="sm"
                 className="mt-3"
-                disabled={isSending}
+                isLoading={isSending}
+                loadingText="Sending…"
                 onClick={() => void sendNow()}
               >
-                {isSending ? 'Sending…' : 'Send now'}
+                Send now
               </Button>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {replaySummary &&
         (replaySummary.unconfirmed.length > 0 || replaySummary.rejected.length > 0) && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
-            <CloudOff className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              {replaySummary.unconfirmed.length > 0 && (
-                <p className="text-sm font-medium">
-                  Couldn&apos;t confirm {replaySummary.unconfirmed.length} saved entr
-                  {replaySummary.unconfirmed.length === 1 ? 'y' : 'ies'} (
-                  {replaySummary.unconfirmed.join(', ')}). Check the pass.
-                </p>
-              )}
-              {replaySummary.rejected.length > 0 && (
-                <p className="text-sm font-medium mt-1">
-                  {replaySummary.rejected.length} saved entr
-                  {replaySummary.rejected.length === 1 ? 'y was' : 'ies were'} refused by the estate
-                  ({replaySummary.rejected.join(', ')}).
-                </p>
-              )}
-              <button
-                type="button"
-                className="text-xs underline mt-2"
-                onClick={() => clearGateReplaySummary()}
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
+          <Alert variant="warning" icon={CloudOff} onDismiss={() => clearGateReplaySummary()}>
+            {replaySummary.unconfirmed.length > 0 && (
+              <p className="font-medium">
+                Couldn&apos;t confirm {replaySummary.unconfirmed.length} saved entr
+                {replaySummary.unconfirmed.length === 1 ? 'y' : 'ies'} (
+                {replaySummary.unconfirmed.join(', ')}). Check the pass.
+              </p>
+            )}
+            {replaySummary.rejected.length > 0 && (
+              <p className="font-medium mt-1">
+                {replaySummary.rejected.length} saved entr
+                {replaySummary.rejected.length === 1 ? 'y was' : 'ies were'} refused by the estate (
+                {replaySummary.rejected.join(', ')}).
+              </p>
+            )}
+          </Alert>
         )}
 
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">
           Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
         </h2>
-        {inside.length === 0 ? (
+        {isInsideLoading ? (
+          <ListSkeleton rows={2} />
+        ) : inside.length === 0 ? (
           <p className="text-sm text-muted-foreground">No visitors are on the estate right now.</p>
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
@@ -729,14 +704,16 @@ export default function GatemanVerifyPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-1.5 shrink-0"
+                  className="shrink-0"
+                  icon={<LogOut className="w-3.5 h-3.5" />}
                   disabled={checkOut.isPending}
+                  isLoading={checkOut.isPending && checkOut.variables?.id === pass.id}
+                  aria-label={`Check out ${pass.visitorName}`}
                   onClick={() => {
                     setResult(null);
                     checkOut.mutate(pass);
                   }}
                 >
-                  <LogOut className="w-3.5 h-3.5" />
                   Check out
                 </Button>
               </div>

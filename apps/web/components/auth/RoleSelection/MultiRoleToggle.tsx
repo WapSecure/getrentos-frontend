@@ -19,7 +19,7 @@ export const MultiRoleToggle = ({ enabled, onToggle, variant = 'card' }: MultiRo
       aria-label="Enable multiple roles"
       onClick={() => onToggle(!enabled)}
       className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-        enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
+        enabled ? 'bg-primary' : 'bg-muted'
       }`}
     >
       <span
@@ -54,7 +54,7 @@ export const MultiRoleToggle = ({ enabled, onToggle, variant = 'card' }: MultiRo
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">Enable multiple roles</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               You can add more roles later with supporting documents
             </p>
           </div>
@@ -72,7 +72,7 @@ export const MultiRoleToggle = ({ enabled, onToggle, variant = 'card' }: MultiRo
         >
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
-            <p className="text-xs text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               You&apos;ll need to verify each role separately with the required documents. Your
               trust score will increase with each successful verification.
             </p>

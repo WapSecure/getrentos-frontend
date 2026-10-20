@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@/lib/format';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Field, Input, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -23,7 +21,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
   const [phone, setPhone] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: profile } = useQuery({
@@ -57,10 +55,9 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsProfile });
-      setToast({ message: 'Profile updated.', variant: 'success' });
+      toast.success('Profile updated.');
     },
-    onError: (error) =>
-      setToast({ message: error.message || 'Unable to update your profile.', variant: 'error' }),
+    onError: (error) => toast.error(error.message || 'Unable to update your profile.'),
   });
 
   const uploadAvatar = useMutation({
@@ -68,9 +65,9 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsProfile });
       setPhotoUrl(result.avatarUrl || null);
-      setToast({ message: 'Photo updated.', variant: 'success' });
+      toast.success('Photo updated.');
     },
-    onError: () => setToast({ message: 'Unable to upload your photo.', variant: 'error' }),
+    onError: () => toast.error('Unable to upload your photo.'),
   });
 
   const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +95,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             {getInitials(fullName || 'User')}
           </div>
         )}
-        <LegacyInput
+        <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
@@ -109,68 +106,48 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           variant="outline"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploadAvatar.isPending}
+          isLoading={uploadAvatar.isPending}
+          loadingText="Uploading…"
         >
-          {uploadAvatar.isPending ? 'Uploading…' : 'Change Photo'}
+          Change Photo
         </Button>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <LegacyInput
+        <Field label="Full Name">
+          <Input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(nameOnly(e.target.value))}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <LegacyInput
-            type="email"
-            value={email}
-            readOnly
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <Field label="Email Address">
+            <Input type="email" value={email} readOnly />
+          </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <LegacyInput
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Agency / Business Name <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
-          <LegacyInput
+        <Field label="Phone Number">
+          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </Field>
+        <Field label="Agency / Business Name" optionalLabel="(optional)">
+          <Input
             type="text"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder="e.g. Prime Realty Partners"
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
       </div>
 
       <Button
         variant="primary"
-        className="mt-6 gap-1.5"
+        className="mt-6"
         isLoading={save.isPending}
-        disabled={save.isPending}
         onClick={() => save.mutate()}
       >
         Save Changes
       </Button>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

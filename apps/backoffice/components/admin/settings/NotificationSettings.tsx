@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ShieldAlert, Gavel, ShieldCheck, AlertTriangle, MessageCircle } from 'lucide-react';
-import { Button, PageErrorState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, CardSkeleton, PageErrorState, Switch, useToast } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -53,7 +53,7 @@ export const NotificationSettings = ({
     queryFn: () => unwrap(adminService.getNotificationPreferences()),
   });
 
-  if (isLoading) return <PageLoadingState />;
+  if (isLoading) return <CardSkeleton lines={5} />;
   if (isError || !fetchedPreferences)
     return (
       <PageErrorState
@@ -82,7 +82,7 @@ const NotificationSettingsForm = ({
 }) => {
   const [preferences, setPreferences] = useState<NotificationPreference[]>(initial);
   const [baseline, setBaseline] = useState(initial);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const isDirty = JSON.stringify(preferences) !== JSON.stringify(baseline);
 
   useEffect(() => {
@@ -105,54 +105,50 @@ const NotificationSettingsForm = ({
       const next = buildPreferences(savedPreferences);
       setPreferences(next);
       setBaseline(next);
-      setToast({ message: 'Notification preferences saved.', variant: 'success' });
+      toast.success('Notification preferences saved.');
     },
     onError: (error: Error) =>
-      setToast({
-        message: error.message || 'Notification preferences could not be saved.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Notification preferences could not be saved.'),
   });
 
   const handleSave = () => saveMutation.mutate();
 
   return (
     <div>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Notifications</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Choose what you want to be notified about
       </p>
 
       <div className="space-y-3">
-        <div className="flex items-center justify-end gap-8 pr-2 text-xs font-medium text-muted-foreground">
+        <div className="flex items-center justify-end gap-8 pr-3 text-xs font-medium text-muted-foreground">
           <span className="w-11 text-center">Email</span>
           <span className="w-11 text-center">Push</span>
         </div>
         {preferences.map((pref) => (
           <div
             key={pref.id}
-            className="flex items-center justify-between p-3 rounded-lg border border-border"
+            className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border"
           >
-            <div className="flex items-center gap-3">
-              <pref.icon className="w-4 h-4 text-gray-400" />
+            <div className="flex min-w-0 items-center gap-3">
+              <pref.icon className="w-4 h-4 shrink-0 text-muted-foreground" />
               <span className="text-sm text-foreground">{pref.label}</span>
             </div>
-            <div className="flex items-center gap-8">
-              <div className="w-10 flex justify-center">
-                <Toggle
-                  label={`${pref.label} email notifications`}
+            <div className="flex shrink-0 items-center gap-8">
+              <div className="w-11 flex justify-center">
+                <Switch
+                  size="sm"
+                  aria-label={`${pref.label} email notifications`}
                   checked={pref.email}
-                  onChange={() => toggle(pref.id, 'email')}
+                  onCheckedChange={() => toggle(pref.id, 'email')}
                 />
               </div>
-              <div className="w-10 flex justify-center">
-                <Toggle
-                  label={`${pref.label} push notifications`}
+              <div className="w-11 flex justify-center">
+                <Switch
+                  size="sm"
+                  aria-label={`${pref.label} push notifications`}
                   checked={pref.push}
-                  onChange={() => toggle(pref.id, 'push')}
+                  onCheckedChange={() => toggle(pref.id, 'push')}
                 />
               </div>
             </div>
@@ -162,7 +158,7 @@ const NotificationSettingsForm = ({
 
       <Button
         variant="primary"
-        className="mt-6 gap-1.5"
+        className="mt-6"
         onClick={handleSave}
         disabled={!isDirty || saveMutation.isPending}
         isLoading={saveMutation.isPending}
@@ -172,28 +168,3 @@ const NotificationSettingsForm = ({
     </div>
   );
 };
-
-const Toggle = ({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: () => void;
-}) => (
-  <button
-    type="button"
-    role="switch"
-    aria-checked={checked}
-    aria-label={label}
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);

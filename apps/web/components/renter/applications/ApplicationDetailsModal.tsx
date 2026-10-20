@@ -15,7 +15,15 @@ import {
   Trash2,
   Shield,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  IconButton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { Application } from '@/types/renter';
 import { pluralize } from '@/lib/format';
 import { ApplicationTimeline } from './ApplicationTimeline';
@@ -73,30 +81,18 @@ export const ApplicationDetailsModal = ({
     return `${formatter.format(price)}/${period === 'month' ? 'mo' : period === 'year' ? 'yr' : 'wk'}`;
   };
 
-  const getStatusConfig = (status: string) => {
+  const getStatusConfig = (status: string): { label: string; variant: BadgeVariant } => {
     switch (status) {
       case 'pending':
-        return {
-          label: 'Pending',
-          color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-        };
+        return { label: 'Pending', variant: 'warning' };
       case 'under_review':
-        return {
-          label: 'Under Review',
-          color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-        };
+        return { label: 'Under Review', variant: 'info' };
       case 'approved':
-        return {
-          label: 'Approved',
-          color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-        };
+        return { label: 'Approved', variant: 'success' };
       case 'rejected':
-        return {
-          label: 'Rejected',
-          color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-        };
+        return { label: 'Rejected', variant: 'danger' };
       default:
-        return { label: 'Unknown', color: 'bg-gray-100 text-gray-800' };
+        return { label: 'Unknown', variant: 'neutral' };
     }
   };
 
@@ -104,8 +100,8 @@ export const ApplicationDetailsModal = ({
 
   const getDocumentStatus = (uploaded: boolean) => {
     return uploaded
-      ? { label: 'Uploaded', color: 'text-green-600' }
-      : { label: 'Missing', color: 'text-red-500' };
+      ? { label: 'Uploaded', color: 'text-success' }
+      : { label: 'Missing', color: 'text-destructive' };
   };
 
   return (
@@ -127,13 +123,9 @@ export const ApplicationDetailsModal = ({
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold text-foreground truncate">{application.title}</h3>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
-                      >
-                        {statusConfig.label}
-                      </span>
-                      <span className="text-xs text-gray-500">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
+                      <span className="text-xs text-muted-foreground">
                         Applied {formatDate(application.applicationDate)}
                       </span>
                     </div>
@@ -143,54 +135,36 @@ export const ApplicationDetailsModal = ({
                   {application.status !== 'approved' &&
                     application.status !== 'rejected' &&
                     onWithdraw && (
-                      <Button
+                      <IconButton
+                        label="Withdraw application"
+                        icon={<Trash2 />}
+                        variant="danger"
                         size="sm"
-                        variant="ghost"
                         onClick={() => setShowWithdrawModal(true)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      />
                     )}
-                  <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                    <X className="w-5 h-5" />
-                  </button>
+                  <IconButton label="Close" icon={<X />} size="sm" onClick={onClose} />
                 </div>
               </div>
 
               {/* Tabs */}
-              <div className="flex border-b border-border shrink-0">
-                <button
-                  onClick={() => setActiveTab('details')}
-                  className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                    activeTab === 'details'
-                      ? 'text-primary border-b-2 border-primary'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Details
-                </button>
-                <button
-                  onClick={() => setActiveTab('timeline')}
-                  className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                    activeTab === 'timeline'
-                      ? 'text-primary border-b-2 border-primary'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Timeline
-                </button>
-                <button
-                  onClick={() => setActiveTab('notes')}
-                  className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-                    activeTab === 'notes'
-                      ? 'text-primary border-b-2 border-primary'
-                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                >
-                  Notes ({notes.length})
-                </button>
-              </div>
+              <Tabs
+                value={activeTab}
+                onValueChange={(v) => setActiveTab(v as 'details' | 'timeline' | 'notes')}
+                className="shrink-0 border-b border-border px-4 py-2"
+              >
+                <TabsList className="w-full">
+                  <TabsTrigger value="details" className="flex-1">
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger value="timeline" className="flex-1">
+                    Timeline
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="flex-1">
+                    Notes ({notes.length})
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
 
               {/* Content */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -200,21 +174,21 @@ export const ApplicationDetailsModal = ({
                     <div>
                       <h4 className="text-sm font-medium text-foreground mb-3">Property Details</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                          <p className="text-xs text-gray-500">Address</p>
+                        <div className="p-3 rounded-lg bg-secondary">
+                          <p className="text-xs text-muted-foreground">Address</p>
                           <div className="flex items-center gap-1 mt-1">
-                            <MapPin className="w-4 h-4 text-gray-400" />
+                            <MapPin className="w-4 h-4 text-muted-foreground" />
                             <span className="text-sm text-foreground">{application.address}</span>
                           </div>
                         </div>
-                        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                          <p className="text-xs text-gray-500">Rent</p>
+                        <div className="p-3 rounded-lg bg-secondary">
+                          <p className="text-xs text-muted-foreground">Rent</p>
                           <p className="text-sm font-semibold text-primary mt-1">
                             {formatPrice(application.price, application.period)}
                           </p>
                         </div>
-                        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                          <p className="text-xs text-gray-500">Property Details</p>
+                        <div className="p-3 rounded-lg bg-secondary">
+                          <p className="text-xs text-muted-foreground">Property Details</p>
                           <div className="flex items-center gap-3 mt-1">
                             <span className="text-sm text-foreground">
                               {pluralize(application.bedrooms, 'bed')}
@@ -225,15 +199,15 @@ export const ApplicationDetailsModal = ({
                             <span className="text-sm text-foreground">{application.size} sqm</span>
                           </div>
                         </div>
-                        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                          <p className="text-xs text-gray-500">Lease Details</p>
+                        <div className="p-3 rounded-lg bg-secondary">
+                          <p className="text-xs text-muted-foreground">Lease Details</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
                             <span className="text-sm text-foreground">
                               Move-in: {formatDate(application.moveInDate)}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             Term: {application.leaseTerm}
                           </p>
                         </div>
@@ -245,7 +219,7 @@ export const ApplicationDetailsModal = ({
                       <h4 className="text-sm font-medium text-foreground mb-3">
                         Landlord Information
                       </h4>
-                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+                      <div className="p-3 rounded-lg bg-secondary">
                         <div className="flex items-start gap-3">
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
                             {application.landlord.name.charAt(0)}
@@ -255,9 +229,9 @@ export const ApplicationDetailsModal = ({
                               <p className="font-medium text-foreground">
                                 {application.landlord.name}
                               </p>
-                              <Shield className="w-4 h-4 text-green-500" />
+                              <Shield className="w-4 h-4 text-success" />
                             </div>
-                            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-gray-500">
+                            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 <Mail className="w-3 h-3" />
                                 <span>{application.landlord.email}</span>
@@ -285,13 +259,13 @@ export const ApplicationDetailsModal = ({
                           return (
                             <div
                               key={index}
-                              className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-white/5"
+                              className="flex items-center justify-between gap-3 p-3 rounded-lg bg-secondary"
                             >
-                              <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-gray-400" />
+                              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                <FileText className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-sm text-foreground">{doc.name}</span>
                                 {doc.required && (
-                                  <span className="text-xs text-red-500">Required</span>
+                                  <span className="text-xs text-destructive">Required</span>
                                 )}
                               </div>
                               <div className="flex items-center gap-2">
@@ -299,11 +273,17 @@ export const ApplicationDetailsModal = ({
                                   {docStatus.label}
                                 </span>
                                 {doc.uploaded ? (
-                                  <button className="text-xs text-primary hover:underline">
+                                  <button
+                                    type="button"
+                                    className="text-xs text-primary hover:underline"
+                                  >
                                     View
                                   </button>
                                 ) : (
-                                  <button className="text-xs text-blue-500 hover:underline">
+                                  <button
+                                    type="button"
+                                    className="text-xs text-primary hover:underline"
+                                  >
                                     Upload
                                   </button>
                                 )}
@@ -325,20 +305,26 @@ export const ApplicationDetailsModal = ({
                         <h4 className="text-sm font-medium text-foreground mb-2">
                           Application Notes
                         </h4>
-                        <p className="text-sm text-muted-foreground p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+                        <p className="text-sm text-muted-foreground p-3 rounded-lg bg-secondary">
                           {application.applicationNotes}
                         </p>
                       </div>
                     )}
 
                     {/* Actions */}
-                    <div className="flex gap-3 pt-2">
-                      <Button variant="primary" className="flex-1 gap-2">
-                        <MessageCircle className="w-4 h-4" />
+                    <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                      <Button
+                        variant="primary"
+                        className="flex-1"
+                        icon={<MessageCircle className="w-4 h-4" />}
+                      >
                         Contact Landlord
                       </Button>
-                      <Button variant="outline" className="flex-1 gap-2">
-                        <Download className="w-4 h-4" />
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        icon={<Download className="w-4 h-4" />}
+                      >
                         Download Application
                       </Button>
                     </div>

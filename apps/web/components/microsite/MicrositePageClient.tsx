@@ -5,7 +5,7 @@ import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { ShieldCheck, Star, MessageCircle, BedDouble, Bath } from 'lucide-react';
-import { Button, Pagination } from '@getrentos/ui';
+import { Button, CardSkeleton, Pagination, Skeleton } from '@getrentos/ui';
 import { micrositeService } from '@/services/micrositeService';
 import { renterService } from '@/services/renterService';
 import { unwrap, isAuthenticated, getStoredUser } from '@/lib/apiHelpers';
@@ -62,7 +62,10 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
 
   if (profileLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16 text-center text-muted-foreground">Loading…</div>
+      <div className="max-w-5xl mx-auto space-y-6 px-4 py-16">
+        <Skeleton className="h-8 w-1/3" />
+        <CardSkeleton lines={4} />
+      </div>
     );
   }
 
@@ -110,7 +113,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
         <div className="flex-1 min-w-0 pb-1 pt-3">
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold text-foreground">{profile.displayName}</h1>
-            {profile.verified && <ShieldCheck className="w-5 h-5 text-green-500" />}
+            {profile.verified && <ShieldCheck className="w-5 h-5 text-success" />}
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
             {profile.reviewCount > 0 && (

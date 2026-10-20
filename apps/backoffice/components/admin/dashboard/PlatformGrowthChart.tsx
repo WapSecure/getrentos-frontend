@@ -15,7 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, Skeleton } from '@getrentos/ui';
 
 interface GrowthPoint {
   month: string;
@@ -55,20 +55,19 @@ export const PlatformGrowthChart = () => {
           </p>
         </div>
         {change !== null && (
-          <div className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-            <TrendingUp className="w-3 h-3" />
+          <Badge
+            variant={change >= 0 ? 'success' : 'danger'}
+            icon={<TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />}
+          >
             {change >= 0 ? '+' : ''}
             {change.toFixed(1)}%
-          </div>
+          </Badge>
         )}
       </div>
 
       {isLoading ? (
-        <div
-          className="h-56 animate-pulse rounded-lg bg-secondary/50"
-          aria-label="Loading platform growth chart"
-        />
-      ) : isError ? (
+        <Skeleton className="h-56 w-full rounded-lg" />
+      ) : isError && !data ? (
         <div className="h-56 flex flex-col items-center justify-center text-center" role="alert">
           <p className="text-sm font-medium text-foreground">Growth data could not be loaded</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -80,10 +79,10 @@ export const PlatformGrowthChart = () => {
             size="sm"
             className="mt-4"
             onClick={() => refetch()}
-            disabled={isFetching}
             isLoading={isFetching}
+            icon={<RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" />}
           >
-            <RefreshCcw className="h-3.5 w-3.5" aria-hidden="true" /> Try again
+            Try again
           </Button>
         </div>
       ) : !hasData ? (

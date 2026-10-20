@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, ConfirmDialog, PageErrorState } from '@getrentos/ui';
+import { Alert, Badge, Button, Card, ConfirmDialog, PageErrorState, Skeleton } from '@getrentos/ui';
 import { AlertTriangle, ArrowLeft, Ban, FileDown } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -62,13 +62,13 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 /** One plot purchase, from the seller's side. */
 export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   const queryClient = useQueryClient();
-  const { notify, toast } = useNotify();
+  const { notify } = useNotify();
   const [delivering, setDelivering] = useState<LandMilestone | null>(null);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [downloading, setDownloading] = useState<LandSaleDocumentKind | null>(null);
 
-  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: landDeveloperKeys.purchase(purchaseId),
     queryFn: () => unwrap(landDeveloperService.getPurchase(purchaseId)),
   });
@@ -160,13 +160,13 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   if (isLoading) {
     return (
       <div className="space-y-4" aria-busy="true">
-        <div className="h-24 animate-pulse rounded-2xl bg-secondary" />
-        <div className="h-64 animate-pulse rounded-2xl bg-secondary" />
+        <Skeleton className="h-24 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
     );
   }
 
-  if (isError || !data) {
+  if (!data) {
     return (
       <PageErrorState
         title="This purchase could not be loaded"
@@ -248,14 +248,11 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
       </div>
 
       {data.status === 'DEFAULTED' && (
-        <div className="mt-4 flex gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
-          <p className="text-foreground">
-            This purchase defaulted{data.defaultedAt ? ` on ${formatDate(data.defaultedAt)}` : ''}.
-            You can revoke it to put the plot back on sale; the buyer is refunded what they paid
-            less the {formatBps(data.terms.revocationChargeBps)} forfeiture.
-          </p>
-        </div>
+        <Alert variant="danger" icon={AlertTriangle} className="mt-4">
+          This purchase defaulted{data.defaultedAt ? ` on ${formatDate(data.defaultedAt)}` : ''}.
+          You can revoke it to put the plot back on sale; the buyer is refunded what they paid less
+          the {formatBps(data.terms.revocationChargeBps)} forfeiture.
+        </Alert>
       )}
       {data.status === 'REVOKED' && (
         <div className="mt-4 rounded-xl border border-border bg-secondary/40 p-3 text-sm text-foreground">
@@ -383,8 +380,6 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           }
         }}
       />
-
-      {toast}
     </>
   );
 };

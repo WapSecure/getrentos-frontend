@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Button, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -52,15 +52,14 @@ export default function ResidentAmenitiesPage() {
 
       <h2 className="text-sm font-semibold text-foreground mb-3">Available</h2>
       {isAmenitiesLoading ? (
-        <div className="h-24 animate-pulse rounded-2xl bg-secondary mb-8" aria-busy="true" />
+        <ListSkeleton rows={2} className="mb-8" />
       ) : !amenities || amenities.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-8 mb-8">
-          <EmptyState
-            icon={CalendarCheck}
-            title="No amenities yet"
-            description="Your estate manager hasn't added any bookable amenities."
-          />
-        </div>
+        <EmptyState
+          icon={CalendarCheck}
+          title="No amenities yet"
+          description="Your estate manager hasn't added any bookable amenities."
+          className="mb-8"
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden mb-8">
           {amenities.map((amenity) => (
@@ -83,9 +82,9 @@ export default function ResidentAmenitiesPage() {
         My Bookings ({bookings?.length ?? 0})
       </h2>
       {isBookingsLoading ? (
-        <div className="h-24 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={2} />
       ) : !bookings || bookings.length === 0 ? (
-        <p className="text-sm text-muted-foreground">You haven&apos;t booked anything yet.</p>
+        <EmptyState icon={CalendarCheck} title="You haven't booked anything yet." size="compact" />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {bookings.map((booking) => (

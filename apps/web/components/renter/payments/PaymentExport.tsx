@@ -1,11 +1,17 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, X, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Download, FileText, FileSpreadsheet, Check } from 'lucide-react';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  RadioGroup,
+  Select,
+} from '@getrentos/ui';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
 interface Payment {
@@ -113,110 +119,77 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Export Payments</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {payments.length} payments available to export
-                </p>
-              </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4">
-              {/* Date Range */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Date Range</label>
-                <LegacySelect
-                  value={dateRange}
-                  onChange={(e) =>
-                    setDateRange(e.target.value as 'all' | 'last3' | 'last6' | 'last12')
-                  }
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">All Time</option>
-                  <option value="last3">Last 3 Months</option>
-                  <option value="last6">Last 6 Months</option>
-                  <option value="last12">Last 12 Months</option>
-                </LegacySelect>
-              </div>
-
-              {/* Export Options */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Format</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setFormat('pdf')}
-                    className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
-                      format === 'pdf'
-                        ? 'border-primary bg-accent'
-                        : 'border-border hover:border-gray-300'
-                    }`}
-                  >
-                    <FileText className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm font-medium">PDF</span>
-                  </button>
-                  <button
-                    onClick={() => setFormat('csv')}
-                    className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
-                      format === 'csv'
-                        ? 'border-primary bg-accent'
-                        : 'border-border hover:border-gray-300'
-                    }`}
-                  >
-                    <FileSpreadsheet className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm font-medium">CSV</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Payment Summary */}
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Total Payments</span>
-                  <span className="font-medium text-foreground">
-                    {getFilteredPayments().length}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm mt-1">
-                  <span className="text-gray-500">Total Amount</span>
-                  <span className="font-medium text-primary">
-                    {formatCurrency(getFilteredPayments().reduce((sum, p) => sum + p.amount, 0))}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={format === 'pdf' ? exportToPDF : exportToCSV}
-                disabled={exporting !== null}
-                className="gap-2"
-              >
-                {exporting ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : completed ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )}
-                {exporting ? 'Exporting...' : completed ? 'Exported!' : 'Export Payments'}
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="p-0 sm:p-0">
+        <div className="p-4 pr-12 border-b border-border">
+          <DialogTitle className="font-semibold text-foreground">Export Payments</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            {payments.length} payments available to export
+          </DialogDescription>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4">
+          <Field label="Date Range">
+            <Select
+              value={dateRange}
+              onValueChange={(value) => setDateRange(value as 'all' | 'last3' | 'last6' | 'last12')}
+              options={[
+                { value: 'all', label: 'All Time' },
+                { value: 'last3', label: 'Last 3 Months' },
+                { value: 'last6', label: 'Last 6 Months' },
+                { value: 'last12', label: 'Last 12 Months' },
+              ]}
+            />
+          </Field>
+
+          <Field label="Format">
+            <RadioGroup
+              variant="card"
+              columns={2}
+              value={format}
+              onValueChange={setFormat}
+              options={[
+                {
+                  value: 'pdf',
+                  label: 'PDF',
+                  icon: <FileText className="w-5 h-5 text-muted-foreground" />,
+                },
+                {
+                  value: 'csv',
+                  label: 'CSV',
+                  icon: <FileSpreadsheet className="w-5 h-5 text-muted-foreground" />,
+                },
+              ]}
+            />
+          </Field>
+
+          {/* Payment Summary */}
+          <div className="p-3 rounded-lg bg-secondary">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Total Payments</span>
+              <span className="font-medium text-foreground">{getFilteredPayments().length}</span>
+            </div>
+            <div className="flex justify-between text-sm mt-1">
+              <span className="text-muted-foreground">Total Amount</span>
+              <span className="font-medium text-primary">
+                {formatCurrency(getFilteredPayments().reduce((sum, p) => sum + p.amount, 0))}
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="primary"
+            fullWidth
+            onClick={format === 'pdf' ? exportToPDF : exportToCSV}
+            disabled={exporting !== null}
+            isLoading={exporting !== null && !completed}
+            loadingText="Exporting..."
+            icon={completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
+          >
+            {completed ? 'Exported!' : 'Export Payments'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

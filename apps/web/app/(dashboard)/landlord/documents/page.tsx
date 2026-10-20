@@ -1,12 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Upload, FolderOpen, Search } from 'lucide-react';
-import { Button, Pagination } from '@getrentos/ui';
-import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
-import { DocumentRowActions } from '@getrentos/ui';
-import { DocumentPreviewButton } from '@getrentos/ui';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileText, Upload, FolderOpen } from 'lucide-react';
+import {
+  Button,
+  Pagination,
+  DocumentUploadDialog,
+  type UploadedDocumentData,
+  DocumentRowActions,
+  DocumentPreviewButton,
+  EmptyState,
+  SearchInput,
+} from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';
@@ -72,6 +78,7 @@ export default function LandlordDocumentsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const documents = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -110,27 +117,27 @@ export default function LandlordDocumentsPage() {
               : `${total} document${total === 1 ? '' : 's'} across your portfolio`}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
-          <Upload className="w-4 h-4" />
+        <Button
+          variant="primary"
+          onClick={() => setIsUploadOpen(true)}
+          icon={<Upload className="w-4 h-4" />}
+        >
           Upload Document
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search documents..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search documents..."
+          className="flex-1 max-w-sm"
+        />
         <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
           {categoryFilters.map((option) => (
             <button
               key={option.value}
+              type="button"
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -138,7 +145,7 @@ export default function LandlordDocumentsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -151,12 +158,7 @@ export default function LandlordDocumentsPage() {
         items={documents}
         query={{ isPending, isError, refetch }}
         errorTitle="We couldn't load your documents"
-        empty={
-          <div className="bg-card rounded-2xl border border-border p-12 text-center">
-            <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">No documents found</p>
-          </div>
-        }
+        empty={<EmptyState icon={FolderOpen} title="No documents found" />}
       >
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {documents.map((doc) => (
@@ -173,7 +175,7 @@ export default function LandlordDocumentsPage() {
                   {categoryLabels[doc.category as DocumentCategory]} • {doc.propertyName}
                 </p>
               </div>
-              <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
+              <div className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
               <div className="flex items-center gap-1 shrink-0">

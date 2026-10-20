@@ -2,8 +2,17 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, Check, Loader2, MapPin, ShieldCheck } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import { Building2, Check, MapPin, ShieldCheck } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Textarea,
+  useToast,
+  ListSkeleton,
+  PageErrorState,
+} from '@getrentos/ui';
 import { estateAgreementService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -21,7 +30,7 @@ export default function OwnerEstateAgreementsPage() {
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const agreements = useQuery({
     queryKey: estateKeys.myAgreements,
@@ -37,35 +46,29 @@ export default function OwnerEstateAgreementsPage() {
   const approve = useMutation({
     mutationFn: (id: string) => unwrap(estateAgreementService.approve(id, {})),
     onSuccess: () => {
-      setToast({
-        message: 'Approved: the estate can now market your property.',
-        variant: 'success',
-      });
+      toast.success('Approved: the estate can now market your property.');
       refresh();
     },
-    onError: (err: Error) => setToast({ message: err.message, variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const decline = useMutation({
     mutationFn: (id: string) => unwrap(estateAgreementService.decline(id, reason.trim())),
     onSuccess: () => {
-      setToast({ message: 'Request declined.', variant: 'success' });
+      toast.success('Request declined.');
       refresh();
     },
-    onError: (err: Error) => setToast({ message: err.message, variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const revoke = useMutation({
     mutationFn: (id: string) =>
       unwrap(estateAgreementService.revoke(id, reason.trim() || 'Authorisation withdrawn')),
     onSuccess: () => {
-      setToast({
-        message: 'Withdrawn: their published listings for this property are now paused.',
-        variant: 'success',
-      });
+      toast.success('Withdrawn: their published listings for this property are now paused.');
       refresh();
     },
-    onError: (err: Error) => setToast({ message: err.message, variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const all = agreements.data ?? [];
@@ -107,12 +110,9 @@ export default function OwnerEstateAgreementsPage() {
                   variant="primary"
                   onClick={() => approve.mutate(agreement.id)}
                   disabled={approve.isPending}
+                  isLoading={approve.isPending && approve.variables === agreement.id}
+                  icon={<Check className="w-4 h-4" />}
                 >
-                  {approve.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Check className="w-4 h-4" />
-                  )}
                   Allow
                 </Button>
                 <Button variant="outline" onClick={() => setExpanded(isOpen ? null : agreement.id)}>
@@ -135,6 +135,7 @@ export default function OwnerEstateAgreementsPage() {
             <Textarea
               value={reason}
               onChange={(event) => setReason(event.target.value)}
+              aria-label={isPending ? 'Reason for declining' : 'Reason for withdrawing'}
               placeholder={
                 isPending
                   ? 'Tell the estate why you are declining (at least 10 characters)'
@@ -147,7 +148,8 @@ export default function OwnerEstateAgreementsPage() {
                   variant="outline"
                   // The API requires a reason of at least 10 characters; an empty
                   // one used to be sent and refused.
-                  disabled={decline.isPending || reason.trim().length < 10}
+                  disabled={reason.trim().length < 10}
+                  isLoading={decline.isPending}
                   onClick={() => decline.mutate(agreement.id)}
                 >
                   Confirm decline
@@ -155,9 +157,8 @@ export default function OwnerEstateAgreementsPage() {
               ) : (
                 <Button
                   variant="outline"
-                  disabled={
-                    revoke.isPending || (reason.trim().length > 0 && reason.trim().length < 10)
-                  }
+                  disabled={reason.trim().length > 0 && reason.trim().length < 10}
+                  isLoading={revoke.isPending}
                   onClick={() => revoke.mutate(agreement.id)}
                 >
                   Confirm withdraw
@@ -193,9 +194,14 @@ export default function OwnerEstateAgreementsPage() {
           </h2>
 
           {agreements.isLoading ? (
-            <p className="text-sm text-muted-foreground mt-4 flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> Loading…
-            </p>
+            <ListSkeleton rows={2} className="mt-4" label="Loading requests" />
+          ) : agreements.isError && !agreements.data ? (
+            <PageErrorState
+              headingLevel="h2"
+              title="We couldn't load your estate requests"
+              onRetry={() => void agreements.refetch()}
+              className="min-h-0 py-10"
+            />
           ) : requests.length === 0 ? (
             <div className="mt-4">
               <EmptyState
@@ -228,10 +234,6 @@ export default function OwnerEstateAgreementsPage() {
             </div>
           </div>
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

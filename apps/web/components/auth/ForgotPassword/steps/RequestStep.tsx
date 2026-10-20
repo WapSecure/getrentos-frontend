@@ -50,8 +50,10 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 p-1 bg-gray-100 dark:bg-white/10 rounded-xl">
+      <div className="flex gap-2 p-1 bg-secondary rounded-xl">
         <button
+          type="button"
+          aria-pressed={method === 'email'}
           onClick={() => {
             setMethod('email');
             setIdentifier('');
@@ -61,13 +63,15 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
             method === 'email'
               ? 'bg-card text-primary shadow-sm'
-              : 'text-gray-600 dark:text-gray-400'
+              : 'text-muted-foreground'
           }`}
         >
           <Mail className="w-4 h-4 inline mr-2" />
           Email
         </button>
         <button
+          type="button"
+          aria-pressed={method === 'phone'}
           onClick={() => {
             setMethod('phone');
             setIdentifier('');
@@ -77,13 +81,15 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
             method === 'phone'
               ? 'bg-card text-primary shadow-sm'
-              : 'text-gray-600 dark:text-gray-400'
+              : 'text-muted-foreground'
           }`}
         >
           <Phone className="w-4 h-4 inline mr-2" />
           Phone
         </button>
         <button
+          type="button"
+          aria-pressed={method === 'whatsapp'}
           onClick={() => {
             setMethod('whatsapp');
             setIdentifier('');
@@ -93,7 +99,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
           className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
             method === 'whatsapp'
               ? 'bg-card text-primary shadow-sm'
-              : 'text-gray-600 dark:text-gray-400'
+              : 'text-muted-foreground'
           }`}
         >
           <MessageCircle className="w-4 h-4 inline mr-2" />
@@ -102,7 +108,7 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label className="block text-sm font-medium text-foreground mb-1.5">
           {method === 'email' ? 'Email Address' : 'Phone Number'}
         </label>
         <div className="relative">
@@ -111,18 +117,18 @@ export const RequestStep = ({ method, setMethod, identifier, setIdentifier }: Re
             value={identifier}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
-            className={touched && error ? 'border-red-500' : undefined}
+            className={touched && error ? 'border-destructive' : undefined}
             inputClassName="py-3"
             placeholder={method === 'email' ? 'you@example.com' : '+234 801 234 5678'}
           />
           {touched && !error && identifier && (
-            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+            <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
           )}
           {touched && error && (
-            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+            <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-destructive" />
           )}
         </div>
-        {touched && error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {touched && error && <p className="mt-1 text-sm text-destructive">{error}</p>}
       </div>
     </div>
   );

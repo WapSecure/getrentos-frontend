@@ -7,7 +7,7 @@ import { BuyerDashboardHeader } from '@/components/buyer/dashboard/BuyerDashboar
 import { BuyerStatsCards } from '@/components/buyer/dashboard/BuyerStatsCards';
 import { BuyerActivityFeed } from '@/components/buyer/dashboard/BuyerActivityFeed';
 import { BuyerQuickActions } from '@/components/buyer/dashboard/BuyerQuickActions';
-import { Button } from '@getrentos/ui';
+import { Button, EmptyState, ListSkeleton, StatGridSkeleton } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -42,20 +42,22 @@ export default function BuyerDashboardPage() {
     <>
       <BuyerDashboardHeader greeting={greeting} firstName={firstName} />
 
-      {!isLoading && !hasActivity ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Search className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">Start your property search</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Browse verified for-sale properties, save your favorites, and track offers all in one
-            place.
-          </p>
-          <Button href={ROUTES.BUYER_DISCOVER} variant="primary" className="mt-6">
-            Discover Properties
-          </Button>
+      {isLoading ? (
+        <div className="space-y-6">
+          <StatGridSkeleton count={6} />
+          <ListSkeleton rows={4} />
         </div>
+      ) : !hasActivity ? (
+        <EmptyState
+          icon={Search}
+          title="Start your property search"
+          description="Browse verified for-sale properties, save your favorites, and track offers all in one place."
+          action={
+            <Button href={ROUTES.BUYER_DISCOVER} variant="primary">
+              Discover Properties
+            </Button>
+          }
+        />
       ) : (
         <>
           <BuyerStatsCards

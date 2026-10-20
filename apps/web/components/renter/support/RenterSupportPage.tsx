@@ -3,7 +3,21 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, LifeBuoy, MessageCircle, Send } from 'lucide-react';
-import { Button, PageErrorState, PageLoadingState, Select, Toast } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  IconButton,
+  ListSkeleton,
+  PageErrorState,
+  PageLoadingState,
+  Select,
+  Textarea,
+  useToast,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
@@ -35,7 +49,7 @@ export const RenterSupportPage = () => {
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('payments');
   const [draft, setDraft] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const toast = useToast();
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ['renter', 'support'] });
@@ -74,7 +88,7 @@ export const RenterSupportPage = () => {
       invalidateAll();
     },
     onError: (error: Error) =>
-      setErrorMessage(error.message || 'Your support conversation could not be started.'),
+      toast.error(error.message || 'Your support conversation could not be started.'),
   });
 
   const sendMessage = useMutation({
@@ -84,20 +98,20 @@ export const RenterSupportPage = () => {
       invalidateAll();
     },
     onError: (error: Error) =>
-      setErrorMessage(error.message || 'Your message could not be sent. Your draft is unchanged.'),
+      toast.error(error.message || 'Your message could not be sent. Your draft is unchanged.'),
   });
 
   const resolveThread = useMutation({
     mutationFn: () => unwrap(renterService.resolveSupportThread(activeThread!.id)),
     onSuccess: invalidateAll,
     onError: (error: Error) =>
-      setErrorMessage(error.message || 'This conversation could not be marked as resolved.'),
+      toast.error(error.message || 'This conversation could not be marked as resolved.'),
   });
 
-  const canSend = activeThread && draft.trim().length > 0 && !sendMessage.isPending;
+  const canSend = !!activeThread && draft.trim().length > 0 && !sendMessage.isPending;
 
   if (threadsQuery.isLoading) return <PageLoadingState />;
-  if (threadsQuery.isError) {
+  if (threadsQuery.isError && !threadsQuery.data) {
     return (
       <PageErrorState
         title="Support is unavailable"
@@ -110,12 +124,9 @@ export const RenterSupportPage = () => {
 
   return (
     <div className="space-y-6">
-      {errorMessage && (
-        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
-      )}
       <div>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          <LifeBuoy className="h-3 w-3" />
+          <LifeBuoy className="h-3 w-3" aria-hidden="true" />
           Support
         </span>
         <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
@@ -132,20 +143,29 @@ export const RenterSupportPage = () => {
         <aside className="space-y-2 lg:col-span-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-foreground">My conversations</p>
-            <Button type="button" size="sm" variant="outline" onClick={() => setComposing(true)}>
-              <MessageCircle className="mr-1.5 h-4 w-4" />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              icon={<MessageCircle className="h-4 w-4" />}
+              onClick={() => setComposing(true)}
+            >
               New
             </Button>
           </div>
           {threads.length === 0 ? (
-            <p className="rounded-xl border border-border/80 bg-card p-4 text-sm text-muted-foreground">
-              No support conversations yet: start one below.
-            </p>
+            <EmptyState
+              icon={MessageCircle}
+              title="No support conversations yet"
+              description="Start one below."
+              size="compact"
+            />
           ) : (
             threads.map((thread) => (
               <button
                 key={thread.id}
                 type="button"
+                aria-current={activeThread?.id === thread.id ? 'true' : undefined}
                 onClick={() => setSelectedId(thread.id)}
                 className={`w-full rounded-xl border bg-card p-3 text-left transition-colors ${
                   activeThread?.id === thread.id
@@ -157,15 +177,12 @@ export const RenterSupportPage = () => {
                   <span className="truncate text-sm font-medium text-foreground">
                     {thread.category ? thread.category : 'General'}
                   </span>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                      thread.status === 'OPEN'
-                        ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
-                        : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                    }`}
+                  <Badge
+                    variant={thread.status === 'OPEN' ? 'warning' : 'success'}
+                    className="shrink-0"
                   >
                     {thread.status === 'OPEN' ? 'Open' : 'Resolved'}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="mt-1 truncate text-xs text-muted-foreground">
                   {thread.lastMessage ?? 'No messages yet'}
@@ -186,16 +203,17 @@ export const RenterSupportPage = () => {
         {/* Active thread / compose */}
         <section className="lg:col-span-3">
           {composing || !activeThread ? (
-            <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
+            <Card className="p-5">
               {composing && (
                 <Button
                   type="button"
                   size="sm"
                   variant="ghost"
+                  icon={<ArrowLeft className="h-4 w-4" />}
                   onClick={() => setComposing(false)}
                   className="mb-3"
                 >
-                  <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
+                  Back
                 </Button>
               )}
               <h2 className="text-base font-semibold text-foreground">Start a conversation</h2>
@@ -203,40 +221,35 @@ export const RenterSupportPage = () => {
                 Tell us what you need help with.
               </p>
               <div className="mt-4 space-y-4">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Category</label>
-                  <Select
-                    value={category}
-                    onValueChange={setCategory}
-                    ariaLabel="Support category"
-                    className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-                    options={CATEGORIES}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Message</label>
-                  <textarea
+                <Field label="Category">
+                  <Select value={category} onValueChange={setCategory} options={CATEGORIES} />
+                </Field>
+                <Field label="Message" required>
+                  <Textarea
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     rows={5}
                     placeholder="Describe the issue…"
-                    className="mt-1 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                    className="resize-none"
                   />
-                </div>
+                </Field>
                 <Button
                   type="button"
                   onClick={() => createThread.mutate()}
-                  disabled={subject.trim().length < 3 || createThread.isPending}
+                  disabled={subject.trim().length < 3}
+                  isLoading={createThread.isPending}
+                  loadingText="Sending…"
+                  icon={<Send className="h-4 w-4" />}
+                  iconPosition="right"
                 >
-                  {createThread.isPending ? 'Sending…' : 'Send to support'}
-                  <Send className="ml-1.5 h-4 w-4" />
+                  Send to support
                 </Button>
               </div>
-            </div>
+            </Card>
           ) : (
-            <div className="flex h-full min-h-[26rem] flex-col overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm">
-              <div className="flex items-center justify-between gap-3 border-b border-border/80 px-4 py-3">
-                <div>
+            <Card className="flex h-full min-h-[26rem] flex-col">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/80 px-4 py-3">
+                <div className="min-w-0">
                   <p className="text-sm font-semibold text-foreground">
                     {activeThread.category ? activeThread.category : 'Support'}
                   </p>
@@ -252,7 +265,7 @@ export const RenterSupportPage = () => {
                     size="sm"
                     variant="secondary"
                     onClick={() => resolveThread.mutate()}
-                    disabled={resolveThread.isPending}
+                    isLoading={resolveThread.isPending}
                   >
                     Mark resolved
                   </Button>
@@ -260,24 +273,24 @@ export const RenterSupportPage = () => {
               </div>
 
               <div className="flex-1 space-y-3 overflow-y-auto p-4">
-                {messagesQuery.isLoading && (
-                  <p className="text-sm text-muted-foreground">Loading conversation…</p>
-                )}
-                {messagesQuery.isError && (
-                  <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-3">
-                    <p className="text-sm text-destructive">
-                      This conversation could not be loaded.
-                    </p>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => void messagesQuery.refetch()}
-                      className="mt-1"
-                    >
-                      Try again
-                    </Button>
-                  </div>
+                {messagesQuery.isLoading && <ListSkeleton rows={3} label="Loading conversation" />}
+                {messagesQuery.isError && !messagesQuery.data && (
+                  <Alert
+                    variant="danger"
+                    action={
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        isLoading={messagesQuery.isFetching}
+                        onClick={() => void messagesQuery.refetch()}
+                      >
+                        Try again
+                      </Button>
+                    }
+                  >
+                    This conversation could not be loaded.
+                  </Alert>
                 )}
                 {!messagesQuery.isLoading && !messagesQuery.isError && messages.length === 0 && (
                   <p className="text-sm text-muted-foreground">No messages yet.</p>
@@ -303,7 +316,8 @@ export const RenterSupportPage = () => {
 
               <div className="border-t border-border/80 p-3">
                 <div className="flex items-end gap-2">
-                  <textarea
+                  <Textarea
+                    aria-label="Reply"
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     rows={2}
@@ -312,7 +326,7 @@ export const RenterSupportPage = () => {
                         ? 'Write a reply…'
                         : 'Send a message to reopen this conversation'
                     }
-                    className="flex-1 resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                    className="min-h-0 flex-1 resize-none"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -320,18 +334,19 @@ export const RenterSupportPage = () => {
                       }
                     }}
                   />
-                  <Button
+                  <IconButton
                     type="button"
+                    variant="secondary"
+                    label="Send message"
                     onClick={() => canSend && sendMessage.mutate(draft.trim())}
-                    disabled={!canSend}
-                    aria-label="Send message"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                    disabled={!canSend && !sendMessage.isPending}
+                    isLoading={sendMessage.isPending}
+                    icon={<Send />}
+                  />
                 </div>
                 <p className="mt-1 text-right text-[10px] text-muted-foreground">Enter to send</p>
               </div>
-            </div>
+            </Card>
           )}
         </section>
       </div>

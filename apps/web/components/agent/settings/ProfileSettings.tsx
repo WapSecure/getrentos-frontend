@@ -1,13 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useRef, useState } from 'react';
 import { getInitials } from '@/lib/format';
-import { Button } from '@getrentos/ui';
-import { SaveButton } from '@getrentos/ui';
+import { Button, Field, Input, SaveButton, Select } from '@getrentos/ui';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
 
@@ -44,7 +39,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
             {getInitials(fullName || 'User')}
           </div>
         )}
-        <LegacyInput
+        <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
@@ -57,47 +52,32 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       </div>
 
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <LegacyInput
+        <Field label="Full Name">
+          <Input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(nameOnly(e.target.value))}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <LegacyInput
-            type="email"
-            value={email}
-            readOnly
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+          <Field label="Email Address">
+            <Input type="email" value={email} readOnly />
+          </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
-          <LegacyInput
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Vehicle Type</label>
-          <LegacySelect
+        <Field label="Phone Number">
+          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </Field>
+        <Field label="Vehicle Type">
+          <Select
             value={vehicleType}
-            onChange={(e) => setVehicleType(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option>Car</option>
-            <option>Motorcycle</option>
-            <option>Public Transport</option>
-            <option>None</option>
-          </LegacySelect>
-        </div>
+            onValueChange={setVehicleType}
+            options={['Car', 'Motorcycle', 'Public Transport', 'None'].map((option) => ({
+              value: option,
+              label: option,
+            }))}
+          />
+        </Field>
       </div>
 
       <SaveButton label="Save Changes" className="mt-6" />

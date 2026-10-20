@@ -42,7 +42,7 @@ export const PropertyPhoto = ({
         />
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
-          <Home className="h-8 w-8 text-gray-400 dark:text-gray-600" />
+          <Home className="h-8 w-8 text-muted-foreground/60" aria-hidden="true" />
           <p className="text-[10px] text-muted-foreground">{isEmptyText}</p>
         </div>
       )}

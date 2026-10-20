@@ -26,7 +26,7 @@ export const DepositCard = ({ deposit, onOpen }: DepositCardProps) => (
   <button
     type="button"
     onClick={() => onOpen(deposit.id)}
-    className="flex w-full flex-col gap-3 rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/40 cursor-pointer"
+    className="flex w-full flex-col gap-3 rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/40 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   >
     <div className="flex items-start justify-between gap-3">
       <div className="flex min-w-0 items-center gap-2">

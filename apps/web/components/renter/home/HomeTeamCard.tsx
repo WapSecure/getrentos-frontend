@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, BadgeCheck, CheckCircle2, ShieldAlert, ShieldCheck } from 'lucide-react';
 import {
+  Alert,
   Button,
   Card,
   Checkbox,
@@ -39,32 +40,29 @@ const CHANNELS: { value: ImpersonationChannel; label: string }[] = [
 const Verdict = ({ result }: { result: CheckResult }) => {
   if (result.verdict === 'VERIFIED') {
     return (
-      <p className="flex items-start gap-1.5 rounded-lg bg-success/10 p-3 text-sm text-foreground">
-        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
+      <Alert variant="success" icon={CheckCircle2}>
         This is {result.name}, {result.role.toLowerCase()} for {result.propertyTitle}. Even so, only
         pay rent in GetRentos.
-      </p>
+      </Alert>
     );
   }
   if (result.verdict === 'NEVER_PAY_OUTSIDE') {
     return (
-      <p className="flex items-start gap-1.5 rounded-lg bg-destructive/10 p-3 text-sm text-foreground">
-        <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden />
+      <Alert variant="danger" icon={ShieldAlert}>
         Do not pay into any bank account, whoever asks. Your landlord and manager are paid by
         GetRentos; you pay only in GetRentos. If someone asked you to pay this account, report it
         below.
-      </p>
+      </Alert>
     );
   }
   if (result.verdict === 'INVALID') {
     return <p className="text-sm text-destructive">{result.message}</p>;
   }
   return (
-    <p className="flex items-start gap-1.5 rounded-lg bg-destructive/10 p-3 text-sm text-foreground">
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden />
+    <Alert variant="danger" icon={AlertTriangle}>
       This is not anyone who manages your home. Do not pay them or share codes or documents. Report
       it below.
-    </p>
+    </Alert>
   );
 };
 
@@ -215,9 +213,7 @@ export const HomeTeamCard = () => {
         </div>
         <div className="mt-2">
           {check.data && <Verdict result={check.data} />}
-          {check.error && (
-            <p className="text-sm text-destructive">{(check.error as Error).message}</p>
-          )}
+          {check.error && <Alert variant="danger">{(check.error as Error).message}</Alert>}
         </div>
       </div>
 
@@ -286,11 +282,8 @@ export const HomeTeamCard = () => {
                 onChange={(e) => setDescription(e.target.value)}
               />
             </Field>
-            <label className="flex items-center gap-2 text-sm text-foreground">
-              <Checkbox checked={paid} onCheckedChange={setPaid} aria-label="I already paid them" />
-              I already paid them
-            </label>
-            <div className="flex gap-2">
+            <Checkbox checked={paid} onCheckedChange={setPaid} label="I already paid them" />
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="danger"
                 isLoading={report.isPending}
@@ -303,9 +296,7 @@ export const HomeTeamCard = () => {
                 Cancel
               </Button>
             </div>
-            {report.error && (
-              <p className="text-sm text-destructive">{(report.error as Error).message}</p>
-            )}
+            {report.error && <Alert variant="danger">{(report.error as Error).message}</Alert>}
           </div>
         )}
       </div>

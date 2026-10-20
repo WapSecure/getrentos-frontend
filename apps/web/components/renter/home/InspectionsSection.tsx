@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck, UserCheck, ChevronRight } from 'lucide-react';
-import { Badge, Card, EmptyState, PageErrorState, PageLoadingState } from '@getrentos/ui';
+import { Badge, Card, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -39,12 +39,13 @@ export function InspectionsSection() {
     },
   });
 
-  if (inspectionsQuery.isLoading) return <PageLoadingState />;
-  if (inspectionsQuery.isError) {
+  if (inspectionsQuery.isLoading) return <ListSkeleton rows={3} />;
+  if (inspectionsQuery.isError && !inspectionsQuery.data) {
     return (
       <PageErrorState
         title="Inspections are unavailable"
         description="We could not load the inspection records for your home. Please try again."
+        headingLevel="h2"
         onRetry={() => void inspectionsQuery.refetch()}
         isRetrying={inspectionsQuery.isFetching}
       />

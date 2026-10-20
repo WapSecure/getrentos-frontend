@@ -3,10 +3,10 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, UserCheck } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationCard } from '@/components/agent/verifications/VerificationCard';
 import { NewVerificationModal } from '@/components/agent/verifications/NewVerificationModal';
-import { Button, Pagination } from '@getrentos/ui';
+import { Alert, Button, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import type { VerificationVisit } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -33,9 +33,14 @@ function AgentVerificationsPageContent() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
-  const { data: visitsData, error } = useQuery({
+  const {
+    data: visitsData,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: [...agentKeys.verifications, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(agentService.listVerifications({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const visits = visitsData?.items ?? [];
   const total = visitsData?.total ?? 0;
@@ -93,28 +98,29 @@ function AgentVerificationsPageContent() {
             {total} visit{total === 1 ? '' : 's'} recorded
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setIsModalOpen(true)}
+        >
           Log Verification
         </Button>
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-red-600" role="alert">
+        <Alert variant="danger" className="mb-4">
           Unable to save verification changes. Please try again.
-        </p>
+        </Alert>
       )}
 
-      {visits.length === 0 ? (
-        <div className="bg-card border border-border rounded-lg p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <UserCheck className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">No verification visits yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Log an identity or address verification for one of your assigned tasks.
-          </p>
-        </div>
+      {isLoading ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading verification visits" />
+      ) : visits.length === 0 ? (
+        <EmptyState
+          icon={UserCheck}
+          title="No verification visits yet"
+          description="Log an identity or address verification for one of your assigned tasks."
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {visits.map((visit, index) => (

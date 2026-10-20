@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Landmark, CheckCircle2 } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Card, Field, NumberInput, SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
@@ -63,14 +63,14 @@ export const PayoutSettings = () => {
       </p>
 
       {savedAccountNumber && (
-        <div className="rounded-lg border border-border p-3 mb-6">
+        <Card className="p-3 mb-6">
           <p className="text-sm font-medium text-foreground">
             {savedBankName} · {savedAccountNumber} · {savedAccountName}
           </p>
           {verified ? (
             <div className="flex items-center gap-2 mt-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 dark:text-green-400">
+              <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+              <p className="text-xs text-success">
                 {holdUntil
                   ? 'Bank account verified'
                   : 'Bank account verified and active for payouts'}
@@ -85,35 +85,27 @@ export const PayoutSettings = () => {
           <p className="mt-2 text-xs text-muted-foreground">
             To change it, enter new details below and save. {PAYOUT_CHANGE_COOLDOWN_HINT}
           </p>
-        </div>
+        </Card>
       )}
 
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Bank Code</label>
-          <div className="relative">
-            <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={bankCode}
-              onChange={(e) => setBankCode(e.target.value)}
-              placeholder="e.g. 058 for GTBank"
-              maxLength={6}
-              className="w-full pl-10 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Account Number</label>
-          <input
-            type="text"
+        <Field label="Bank Code">
+          <NumberInput
+            value={bankCode}
+            onValueChange={setBankCode}
+            placeholder="e.g. 058 for GTBank"
+            maxLength={6}
+            leadingIcon={<Landmark className="w-4 h-4" />}
+          />
+        </Field>
+        <Field label="Account Number">
+          <NumberInput
             value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+            onValueChange={setAccountNumber}
             placeholder="0123456789"
             maxLength={10}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
       </div>
 
       <div className="mt-6 space-y-3">

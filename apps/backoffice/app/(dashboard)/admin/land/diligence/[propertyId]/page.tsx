@@ -5,7 +5,15 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, CircleAlert, MapPin, RefreshCw, UserRound } from 'lucide-react';
-import { Button, EmptyState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardSkeleton,
+  EmptyState,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -39,7 +47,7 @@ export default function AdminLandDiligenceCasePage() {
   const canReview = hasAdminPermission(user?.roles, 'verifications.review');
   const canApprove = hasAdminPermission(user?.roles, 'verifications.approve');
   const canSearchUsers = hasAdminPermission(user?.roles, 'users.view');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [stale, setStale] = useState(false);
 
   const detailQuery = useQuery({
@@ -49,7 +57,7 @@ export default function AdminLandDiligenceCasePage() {
   });
   const detail = detailQuery.data;
 
-  const onSuccess = useCallback((message: string) => setToast({ message, variant: 'success' }), []);
+  const onSuccess = useCallback((message: string) => toast.success(message), [toast]);
   const refetchDetail = detailQuery.refetch;
   const onError = useCallback(
     (error: unknown, fallback: string, options?: { versioned?: boolean }) => {
@@ -60,16 +68,15 @@ export default function AdminLandDiligenceCasePage() {
       if (options?.versioned && (info.status === 400 || info.status === 403)) {
         void refetchDetail();
       }
-      setToast({
-        message: isStale
+      toast.error(
+        isStale
           ? 'This case changed since you loaded it. Reload it and review again before deciding.'
           : info.blockers.length
             ? `${info.message}: ${info.blockers.join('; ')}`
-            : info.message,
-        variant: 'error',
-      });
+            : info.message
+      );
     },
-    [refetchDetail]
+    [refetchDetail, toast]
   );
 
   const reload = async () => {
@@ -82,9 +89,9 @@ export default function AdminLandDiligenceCasePage() {
     return refreshed.data?.documents.find((document) => document.id === documentId)?.url ?? null;
   };
 
-  if (detailQuery.isLoading) return <PageLoadingState />;
+  if (detailQuery.isLoading) return <CaseSkeleton />;
 
-  if (detailQuery.isError || !detail) {
+  if (!detail) {
     return (
       <EmptyState
         icon={CircleAlert}
@@ -96,11 +103,13 @@ export default function AdminLandDiligenceCasePage() {
         }
         action={
           <div className="flex gap-2">
-            <Link href="/admin/land/diligence">
-              <Button variant="ghost" icon={<ArrowLeft className="h-4 w-4" />}>
-                Back to queue
-              </Button>
-            </Link>
+            <Button
+              href="/admin/land/diligence"
+              variant="ghost"
+              icon={<ArrowLeft className="h-4 w-4" />}
+            >
+              Back to queue
+            </Button>
             <Button
               variant="outline"
               onClick={() => detailQuery.refetch()}
@@ -119,10 +128,6 @@ export default function AdminLandDiligenceCasePage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
       <Link
         href="/admin/land/diligence"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -185,14 +190,16 @@ export default function AdminLandDiligenceCasePage() {
               canSearchUsers={canSearchUsers}
             />
             {detail.diligence.findings && (
-              <section className="rounded-2xl border border-border bg-card p-5 text-sm shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  Findings on record
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-foreground">
-                  {detail.diligence.findings}
-                </p>
-              </section>
+              <Card>
+                <CardContent className="text-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Findings on record
+                  </p>
+                  <p className="mt-2 whitespace-pre-wrap text-foreground">
+                    {detail.diligence.findings}
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </div>
         </div>
@@ -206,5 +213,27 @@ export default function AdminLandDiligenceCasePage() {
         />
       </div>
     </>
+  );
+}
+
+function CaseSkeleton() {
+  return (
+    <div role="status" aria-label="Loading case" className="space-y-5">
+      <Skeleton className="h-4 w-32" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-72 max-w-full" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 space-y-5">
+          <CardSkeleton lines={4} />
+          <CardSkeleton lines={6} />
+        </div>
+        <div className="min-w-0 space-y-5">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -3,11 +3,11 @@
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, ClipboardCheck } from 'lucide-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';
 import { InspectionDetailModal } from '@/components/agent/inspections/InspectionDetailModal';
-import { Button, Pagination } from '@getrentos/ui';
+import { Alert, Button, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import type { PropertyInspection } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -23,9 +23,14 @@ function AgentInspectionsPageContent() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
-  const { data: inspectionsData, error } = useQuery({
+  const {
+    data: inspectionsData,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: [...agentKeys.inspections, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(agentService.listInspections({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const inspections = inspectionsData?.items ?? [];
   const total = inspectionsData?.total ?? 0;
@@ -91,28 +96,29 @@ function AgentInspectionsPageContent() {
             {total} inspection{total === 1 ? '' : 's'} recorded
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setIsModalOpen(true)}
+        >
           New Inspection
         </Button>
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-red-600" role="alert">
+        <Alert variant="danger" className="mb-4">
           Unable to save inspection changes. Please try again.
-        </p>
+        </Alert>
       )}
 
-      {inspections.length === 0 ? (
-        <div className="bg-card border border-border rounded-lg p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <ClipboardCheck className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">No inspections yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Record a room-by-room inspection for one of your assigned tasks.
-          </p>
-        </div>
+      {isLoading ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading inspections" />
+      ) : inspections.length === 0 ? (
+        <EmptyState
+          icon={ClipboardCheck}
+          title="No inspections yet"
+          description="Record a room-by-room inspection for one of your assigned tasks."
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {inspections.map((inspection, index) => (

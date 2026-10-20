@@ -17,14 +17,14 @@ const statusConfig: Record<
   FraudAlertStatus,
   { label: string; icon: React.ElementType; className: string }
 > = {
-  flagged: { label: 'Flagged', icon: AlertTriangle, className: 'text-red-600 dark:text-red-400' },
+  flagged: { label: 'Flagged', icon: AlertTriangle, className: 'text-destructive' },
   investigating: {
     label: 'Investigating',
     icon: Search,
-    className: 'text-blue-600 dark:text-blue-400',
+    className: 'text-info',
   },
-  cleared: { label: 'Cleared', icon: ShieldCheck, className: 'text-green-600 dark:text-green-400' },
-  confirmed: { label: 'Confirmed', icon: ShieldAlert, className: 'text-red-600 dark:text-red-400' },
+  cleared: { label: 'Cleared', icon: ShieldCheck, className: 'text-success' },
+  confirmed: { label: 'Confirmed', icon: ShieldAlert, className: 'text-destructive' },
 };
 
 interface FraudAlertCardProps {
@@ -76,8 +76,8 @@ export const FraudAlertCard = ({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 shrink-0">
-            <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+          <div className="p-2.5 rounded-xl bg-destructive-subtle shrink-0">
+            <AlertTriangle className="w-4 h-4 text-destructive" />
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{alert.subjectName}</h3>
@@ -117,7 +117,7 @@ export const FraudAlertCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="flex-1 text-green-600 dark:text-green-400"
+            className="flex-1 text-success"
             onClick={(e) => {
               e.stopPropagation();
               onClear();
@@ -128,7 +128,7 @@ export const FraudAlertCard = ({
           <Button
             variant="outline"
             size="sm"
-            className="flex-1 text-red-600 dark:text-red-400"
+            className="flex-1 text-destructive"
             onClick={(e) => {
               e.stopPropagation();
               onConfirm();

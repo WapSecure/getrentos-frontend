@@ -3,10 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, AlertTriangle, FileText } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { LegacyInput } from '@getrentos/ui';
-import { LegacySelect } from '@getrentos/ui';
-import { Textarea } from '@getrentos/ui';
+import { Alert, Button, Field, IconButton, Input, Select, Switch, Textarea } from '@getrentos/ui';
 import type {
   CreateMaintenanceRequestInput,
   MaintenanceCategory,
@@ -205,22 +202,20 @@ export const ReportMaintenanceModal = ({
                   Provide details about the issue you&apos;re experiencing
                 </p>
               </div>
-              <button
-                type="button"
+              <IconButton
+                label="Close maintenance report"
+                icon={<X />}
+                size="sm"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                aria-label="Close maintenance report"
-                className="rounded-lg p-1 hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="space-y-4 p-4">
               <section
                 className={`rounded-xl border p-4 transition-colors ${
                   formData.isEmergency
-                    ? 'border-red-300 bg-red-50 dark:border-red-900 dark:bg-red-950/30'
+                    ? 'border-destructive/30 bg-destructive-subtle'
                     : 'border-border bg-secondary/30'
                 }`}
                 aria-labelledby="emergency-maintenance-title"
@@ -230,7 +225,7 @@ export const ReportMaintenanceModal = ({
                     <span
                       className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
                         formData.isEmergency
-                          ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                          ? 'bg-destructive/10 text-destructive'
                           : 'bg-secondary text-muted-foreground'
                       }`}
                     >
@@ -249,27 +244,17 @@ export const ReportMaintenanceModal = ({
                       </p>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={formData.isEmergency}
+                  <Switch
                     aria-label="Mark this as emergency maintenance"
-                    onClick={handleEmergencyToggle}
+                    checked={formData.isEmergency}
+                    onCheckedChange={handleEmergencyToggle}
                     disabled={isSubmitting}
-                    className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:ring-offset-2 focus:ring-offset-card disabled:cursor-not-allowed disabled:opacity-60 ${
-                      formData.isEmergency ? 'bg-red-600' : 'bg-muted-foreground/30'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                        formData.isEmergency ? 'translate-x-5' : 'translate-x-0.5'
-                      }`}
-                    />
-                  </button>
+                    className="mt-0.5"
+                  />
                 </div>
 
                 {formData.isEmergency && (
-                  <div className="mt-3 rounded-lg border border-red-200 bg-card/70 p-3 text-xs leading-5 text-red-800 dark:border-red-900 dark:bg-red-950/20 dark:text-red-200">
+                  <div className="mt-3 rounded-lg border border-destructive/20 bg-card/70 p-3 text-xs leading-5 text-destructive">
                     <p className="font-medium">Submitted as an urgent emergency request.</p>
                     <p className="mt-1">
                       For fire, medical emergencies, a gas smell, or any immediate threat to life,
@@ -279,95 +264,64 @@ export const ReportMaintenanceModal = ({
                 )}
               </section>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Issue Title <span className="text-red-500">*</span>
-                </label>
-                <LegacyInput
+              <Field label="Issue Title" required error={errors.title}>
+                <Input
                   type="text"
                   value={formData.title}
                   onChange={(event) => handleChange('title', event.target.value)}
                   disabled={isSubmitting}
                   placeholder="Brief description of the issue"
-                  className={errors.title ? 'border-red-500' : undefined}
                 />
-                {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
-              </div>
+              </Field>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <LegacySelect
+                <Field label="Category" required error={errors.category}>
+                  <Select
                     value={formData.category}
-                    onChange={(event) =>
-                      handleChange('category', event.target.value as MaintenanceCategory | '')
+                    onValueChange={(value) =>
+                      handleChange('category', value as MaintenanceCategory | '')
                     }
                     disabled={isSubmitting}
-                    aria-label="Maintenance category"
-                    className={errors.category ? 'border-red-500' : undefined}
-                  >
-                    <option value="">Select category</option>
-                    {categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.icon} {category.label}
-                      </option>
-                    ))}
-                  </LegacySelect>
-                  {errors.category && (
-                    <p className="mt-1 text-xs text-red-500">{errors.category}</p>
-                  )}
-                </div>
+                    placeholder="Select category"
+                    options={categories.map((category) => ({
+                      value: category.value,
+                      label: `${category.icon} ${category.label}`,
+                    }))}
+                  />
+                </Field>
 
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-foreground">
-                    Priority <span className="text-red-500">*</span>
-                  </label>
-                  <LegacySelect
+                <Field
+                  label="Priority"
+                  required
+                  hint={
+                    formData.isEmergency ? 'Emergency requests are submitted as urgent.' : undefined
+                  }
+                  error={formData.isEmergency ? undefined : errors.priority}
+                >
+                  <Select
                     value={formData.isEmergency ? 'urgent' : formData.priority}
-                    onChange={(event) =>
-                      handleChange('priority', event.target.value as MaintenancePriority | '')
+                    onValueChange={(value) =>
+                      handleChange('priority', value as MaintenancePriority | '')
                     }
                     disabled={isSubmitting || formData.isEmergency}
-                    aria-label="Maintenance priority"
-                    className={errors.priority ? 'border-red-500' : undefined}
-                  >
-                    <option value="">Select priority</option>
-                    {priorities.map((priority) => (
-                      <option key={priority.value} value={priority.value}>
-                        {priority.label} - {priority.description}
-                      </option>
-                    ))}
-                  </LegacySelect>
-                  {formData.isEmergency ? (
-                    <p className="mt-1 text-xs font-medium text-red-600 dark:text-red-300">
-                      Emergency requests are submitted as urgent.
-                    </p>
-                  ) : (
-                    errors.priority && (
-                      <p className="mt-1 text-xs text-red-500">{errors.priority}</p>
-                    )
-                  )}
-                </div>
+                    placeholder="Select priority"
+                    options={priorities.map((priority) => ({
+                      value: priority.value,
+                      label: `${priority.label} - ${priority.description}`,
+                    }))}
+                  />
+                </Field>
               </div>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Description <span className="text-red-500">*</span>
-                </label>
+              <Field label="Description" required error={errors.description}>
                 <Textarea
                   value={formData.description}
                   onChange={(event) => handleChange('description', event.target.value)}
                   disabled={isSubmitting}
                   placeholder="Include what happened, where it is, and whether it is getting worse."
                   rows={4}
-                  className={errors.description ? 'border-red-500' : undefined}
                 />
-                {errors.description && (
-                  <p className="mt-1 text-xs text-red-500">{errors.description}</p>
-                )}
-              </div>
+              </Field>
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-foreground">
@@ -397,7 +351,7 @@ export const ReportMaintenanceModal = ({
                     PNG, JPG up to 10MB: up to {MAX_PHOTOS} photos
                   </p>
                 </button>
-                {photoError && <p className="mt-1 text-xs text-red-500">{photoError}</p>}
+                {photoError && <p className="mt-1 text-xs text-destructive">{photoError}</p>}
                 {photos.length > 0 && (
                   <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
                     {photos.map((photo, index) => (
@@ -426,14 +380,7 @@ export const ReportMaintenanceModal = ({
                 )}
               </div>
 
-              {submitError && (
-                <div
-                  className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"
-                  role="alert"
-                >
-                  {submitError}
-                </div>
-              )}
+              {submitError && <Alert variant="danger">{submitError}</Alert>}
 
               <div className="flex gap-3 pt-2">
                 <Button

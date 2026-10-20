@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Siren, X } from 'lucide-react';
-import { Button, LegacyInput, Select } from '@getrentos/ui';
+import { Alert, Button, Field, IconButton, Input, Select, Textarea } from '@getrentos/ui';
 import type { EmergencyKind } from '@/types/estate';
 
 /** The API's floor on a description, kept in step so the form cannot under-run it. */
@@ -123,71 +123,53 @@ export const DeclareMusterModal = ({
                   stands right now.
                 </p>
               </div>
-              <button onClick={handleClose} aria-label="Close" className="text-muted-foreground">
-                <X className="w-5 h-5" />
-              </button>
+              <IconButton label="Close" icon={<X />} onClick={handleClose} />
             </div>
 
             <div className="p-5 space-y-4 overflow-y-auto">
-              {(localError || error) && (
-                <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
-                  <p className="text-sm text-destructive">{localError ?? error}</p>
-                </div>
-              )}
+              {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  What is happening?
-                </label>
+              <Field
+                label="What is happening?"
+                hint="This decides the words every resident is sent, so it is worth a second before the tap."
+              >
                 <Select
                   value={kind}
                   onValueChange={(value) => setKind(value as EmergencyKind)}
                   options={KIND_OPTIONS}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  This decides the words every resident is sent, so it is worth a second before the
-                  tap.
-                </p>
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  What did you see?
-                </label>
-                <textarea
+              <Field
+                label="What did you see?"
+                hint="In your own words. This is the line a fire officer, an insurer or a family reads afterwards, and it is the only place your account of it survives."
+              >
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
                   maxLength={1000}
+                  showCount
                   placeholder="e.g. Smoke on the third floor of Block C, coming from the stairwell."
-                  className="w-full rounded-lg border border-border bg-transparent p-3 text-sm"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  In your own words. This is the line a fire officer, an insurer or a family reads
-                  afterwards, and it is the only place your account of it survives.
-                </p>
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Where should everybody gather?{' '}
-                  <span className="text-muted-foreground">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field
+                label="Where should everybody gather?"
+                optionalLabel="(optional)"
+                hint="Leave it blank if you have not decided. Residents are told to leave by the nearest exit instead: nobody is kept waiting on a form field."
+              >
+                <Input
                   type="text"
                   value={assemblyPoint}
                   onChange={(e) => setAssemblyPoint(e.target.value)}
                   maxLength={160}
                   placeholder="e.g. the car park by the second gate"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Leave it blank if you have not decided. Residents are told to leave by the nearest
-                  exit instead: nobody is kept waiting on a form field.
-                </p>
-              </div>
+              </Field>
             </div>
 
-            <div className="flex items-center justify-between gap-3 p-5 border-t border-border">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-5 border-t border-border">
               <p className="text-xs text-muted-foreground">
                 You can stand the roll down once the estate is out.
               </p>
@@ -195,8 +177,13 @@ export const DeclareMusterModal = ({
                 <Button variant="ghost" onClick={handleClose}>
                   Cancel
                 </Button>
-                <Button variant="primary" onClick={submit} disabled={isSubmitting}>
-                  {isSubmitting ? 'Raising…' : 'Raise the alarm'}
+                <Button
+                  variant="primary"
+                  onClick={submit}
+                  isLoading={isSubmitting}
+                  loadingText="Raising…"
+                >
+                  Raise the alarm
                 </Button>
               </div>
             </div>

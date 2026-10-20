@@ -2,12 +2,13 @@
 
 import {
   Button,
+  CardSkeleton,
   ConfirmDialog,
+  Field,
   NumberInput,
   PageErrorState,
-  PageLoadingState,
-  Toast,
-  type ToastVariant,
+  Switch,
+  useToast,
 } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
@@ -42,7 +43,7 @@ export const PlatformConfigSettings = ({
     queryFn: () => unwrap(adminService.getPlatformConfig()),
   });
 
-  if (isLoading) return <PageLoadingState />;
+  if (isLoading) return <CardSkeleton lines={6} />;
   if (isError || !platformConfig)
     return (
       <PageErrorState
@@ -77,7 +78,7 @@ const PlatformConfigSettingsForm = ({
     initial.roleRequirements
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const current = { minTrustScore, escrowHoldDays, autoFlagFraud, roleRequirements };
   const isDirty = JSON.stringify(current) !== JSON.stringify(baseline);
   const isValid =
@@ -113,88 +114,62 @@ const PlatformConfigSettingsForm = ({
       ),
     onSuccess: (savedConfig) => {
       setBaseline(savedConfig);
-      setToast({ message: 'Platform configuration updated.', variant: 'success' });
+      toast.success('Platform configuration updated.');
     },
     onError: (error: Error) =>
-      setToast({
-        message: error.message || 'Platform configuration could not be saved.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Platform configuration could not be saved.'),
   });
 
   const handleSave = () => saveMutation.mutate();
 
   return (
     <div>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Platform Configuration</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Default thresholds and role verification rules applied platform-wide
       </p>
 
       <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="minimum-trust-score"
-            className="block text-sm font-medium text-foreground mb-1"
-          >
-            Minimum Trust Score for Auto-Approval
-          </label>
+        <Field
+          label="Minimum Trust Score for Auto-Approval"
+          error={
+            !Number.isInteger(minTrustScore) || minTrustScore < 0 || minTrustScore > 100
+              ? 'Enter a whole number from 0 to 100.'
+              : undefined
+          }
+        >
           <NumberInput
-            id="minimum-trust-score"
             min={0}
             max={100}
             value={minTrustScore}
             onValueChange={(v) => setMinTrustScore(Number(v) || 0)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          {!Number.isInteger(minTrustScore) || minTrustScore < 0 || minTrustScore > 100 ? (
-            <p className="mt-1 text-xs text-destructive" role="alert">
-              Enter a whole number from 0 to 100.
-            </p>
-          ) : null}
-        </div>
+        </Field>
 
-        <div>
-          <label
-            htmlFor="escrow-hold-days"
-            className="block text-sm font-medium text-foreground mb-1"
-          >
-            Escrow Verification Hold Period (days)
-          </label>
+        <Field
+          label="Escrow Verification Hold Period (days)"
+          error={
+            !Number.isInteger(escrowHoldDays) || escrowHoldDays < 0 || escrowHoldDays > 30
+              ? 'Enter a whole number from 0 to 30 days.'
+              : undefined
+          }
+        >
           <NumberInput
-            id="escrow-hold-days"
             min={0}
             max={30}
             value={escrowHoldDays}
             onValueChange={(v) => setEscrowHoldDays(Number(v) || 0)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          {!Number.isInteger(escrowHoldDays) || escrowHoldDays < 0 || escrowHoldDays > 30 ? (
-            <p className="mt-1 text-xs text-destructive" role="alert">
-              Enter a whole number from 0 to 30 days.
-            </p>
-          ) : null}
-        </div>
+        </Field>
 
-        <div className="flex items-center justify-between p-3 rounded-lg border border-border">
+        <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border">
           <span className="text-sm text-foreground">Auto-flag suspicious activity for review</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={autoFlagFraud}
+          <Switch
+            size="sm"
             aria-label="Automatically flag suspicious activity for review"
-            onClick={() => setAutoFlagFraud((prev) => !prev)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              autoFlagFraud ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${autoFlagFraud ? 'translate-x-6' : 'translate-x-1'}`}
-            />
-          </button>
+            checked={autoFlagFraud}
+            onCheckedChange={setAutoFlagFraud}
+          />
         </div>
 
         <div>
@@ -205,23 +180,15 @@ const PlatformConfigSettingsForm = ({
             {roleRequirements.map((r) => (
               <div
                 key={r.role}
-                className="flex items-center justify-between p-3 rounded-lg border border-border"
+                className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border"
               >
                 <span className="text-sm text-foreground">{ROLE_LABELS[r.role]}</span>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={r.requiresVerification}
+                <Switch
+                  size="sm"
                   aria-label={`Require manual verification for ${ROLE_LABELS[r.role]}`}
-                  onClick={() => toggleRole(r.role)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    r.requiresVerification ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${r.requiresVerification ? 'translate-x-6' : 'translate-x-1'}`}
-                  />
-                </button>
+                  checked={r.requiresVerification}
+                  onCheckedChange={() => toggleRole(r.role)}
+                />
               </div>
             ))}
           </div>
@@ -230,7 +197,7 @@ const PlatformConfigSettingsForm = ({
 
       <Button
         variant="primary"
-        className="mt-6 gap-1.5"
+        className="mt-6"
         onClick={() => setConfirmOpen(true)}
         disabled={!isDirty || !isValid || saveMutation.isPending}
         isLoading={saveMutation.isPending}

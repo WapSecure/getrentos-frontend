@@ -1,5 +1,6 @@
 'use client';
 
+import { Skeleton } from '@getrentos/ui';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef, useState } from 'react';
@@ -212,9 +213,8 @@ export const PropertyMap = ({
       style={{ height }}
     >
       {!ready && (
-        <div className="flex h-full w-full items-center justify-center rounded-2xl bg-secondary/40 text-sm text-muted-foreground">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <span className="ml-2">Loading map…</span>
+        <div role="status" aria-label="Loading map" className="h-full w-full">
+          <Skeleton className="h-full w-full rounded-2xl" />
         </div>
       )}
     </div>

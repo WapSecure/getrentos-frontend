@@ -3,8 +3,17 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Building2, Clock, FileText, Loader2, ShieldAlert, Upload } from 'lucide-react';
-import { Badge, Button, Card, Input, Select, Toast, type ToastVariant } from '@getrentos/ui';
+import { BadgeCheck, Building2, Clock, FileText, ShieldAlert, Upload } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  Field,
+  Input,
+  Select,
+  useToast,
+} from '@getrentos/ui';
 import { NIGERIA_STATES } from '@/lib/constants/locations';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
@@ -50,9 +59,7 @@ export function AgencySetupView() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<AgencyProfileInput | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const notify = (message: string, variant: ToastVariant = 'success') =>
-    setToast({ message, variant });
+  const toast = useToast();
 
   const firmQuery = useQuery({
     queryKey: KEY,
@@ -70,7 +77,7 @@ export function AgencySetupView() {
   const onSaved = (next: AgencyOnboarding | undefined, message: string) => {
     queryClient.setQueryData(KEY, next ?? null);
     setDraft(null);
-    notify(message);
+    toast.success(message);
   };
 
   const save = useMutation({
@@ -97,7 +104,7 @@ export function AgencySetupView() {
         firm ? 'Details saved.' : 'Your firm is set up. Next, upload the CAC certificate.'
       );
     },
-    onError: (e: Error) => notify(e.message, 'error'),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const upload = useMutation({
@@ -107,7 +114,7 @@ export function AgencySetupView() {
       return res.data;
     },
     onSuccess: (next) => onSaved(next, 'Certificate uploaded.'),
-    onError: (e: Error) => notify(e.message, 'error'),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const submit = useMutation({
@@ -117,14 +124,15 @@ export function AgencySetupView() {
       return res.data;
     },
     onSuccess: (next) => onSaved(next, 'Sent to GetRentos for verification.'),
-    onError: (e: Error) => notify(e.message, 'error'),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (firmQuery.isLoading) {
     return (
-      <p className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-      </p>
+      <div className="mx-auto max-w-3xl space-y-6 p-6">
+        <CardSkeleton lines={2} />
+        <CardSkeleton lines={6} />
+      </div>
     );
   }
 
@@ -189,7 +197,7 @@ export function AgencySetupView() {
                 placeholder="e.g. RC 1234567"
               />
             </Field>
-            <Field label="Registered address" wide>
+            <Field label="Registered address" className="sm:col-span-2">
               <Input
                 value={form.registeredAddress}
                 onChange={(e) => set({ registeredAddress: e.target.value })}
@@ -210,7 +218,7 @@ export function AgencySetupView() {
                 placeholder="+234…"
               />
             </Field>
-            <Field label="Business email" wide>
+            <Field label="Business email" className="sm:col-span-2">
               <Input
                 type="email"
                 value={form.contactEmail}
@@ -219,8 +227,13 @@ export function AgencySetupView() {
               />
             </Field>
           </div>
-          <Button onClick={() => save.mutate()} disabled={!complete || save.isPending}>
-            {save.isPending ? 'Saving…' : firm ? 'Save details' : 'Create my firm'}
+          <Button
+            onClick={() => save.mutate()}
+            disabled={!complete}
+            isLoading={save.isPending}
+            loadingText="Saving…"
+          >
+            {firm ? 'Save details' : 'Create my firm'}
           </Button>
 
           {firm && (
@@ -252,22 +265,21 @@ export function AgencySetupView() {
                 <Button
                   variant="secondary"
                   onClick={() => fileRef.current?.click()}
-                  disabled={upload.isPending}
+                  isLoading={upload.isPending}
+                  loadingText="Uploading…"
+                  icon={<Upload className="h-4 w-4" />}
                 >
-                  <Upload className="h-4 w-4" />
-                  {upload.isPending
-                    ? 'Uploading…'
-                    : firm.profile?.certificateFileName
-                      ? 'Replace'
-                      : 'Upload'}
+                  {firm.profile?.certificateFileName ? 'Replace' : 'Upload'}
                 </Button>
               </div>
               <Button
                 className="mt-4"
                 onClick={() => submit.mutate()}
-                disabled={!firm.profile?.certificateFileName || submit.isPending || draft !== null}
+                disabled={!firm.profile?.certificateFileName || draft !== null}
+                isLoading={submit.isPending}
+                loadingText="Submitting…"
               >
-                {submit.isPending ? 'Submitting…' : 'Submit for verification'}
+                Submit for verification
               </Button>
               {draft !== null && (
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -278,10 +290,6 @@ export function AgencySetupView() {
           )}
         </Card>
       ) : null}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }
@@ -345,22 +353,5 @@ function StatusCard({ firm }: { firm: AgencyOnboarding }) {
         </Link>
       </div>
     </Card>
-  );
-}
-
-function Field({
-  label,
-  wide,
-  children,
-}: {
-  label: string;
-  wide?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className={`block space-y-1.5 ${wide ? 'sm:col-span-2' : ''}`}>
-      <span className="text-sm font-medium text-foreground">{label}</span>
-      {children}
-    </label>
   );
 }

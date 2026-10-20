@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Download, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Field, IconButton } from '@getrentos/ui';
 import type { ImportHouseholdsResult } from '@/types/estate';
 
 const TEMPLATE_CSV =
@@ -47,9 +47,7 @@ export const ImportHouseholdsModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Import Households</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
@@ -67,23 +65,21 @@ export const ImportHouseholdsModal = ({
                     <Download className="w-3.5 h-3.5" />
                     Download CSV template
                   </a>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      CSV file
-                    </label>
+                  <Field label="CSV file" htmlFor="households-csv">
                     <input
+                      id="households-csv"
                       ref={inputRef}
                       type="file"
                       accept=".csv,text/csv"
                       onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                       className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-accent"
                     />
-                  </div>
+                  </Field>
                 </>
               ) : (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
                     <p className="text-sm font-medium text-foreground">
                       {result.created} household{result.created === 1 ? '' : 's'} imported
                       {result.failed > 0 ? `, ${result.failed} failed` : ''}
@@ -93,7 +89,7 @@ export const ImportHouseholdsModal = ({
                     <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
                       {result.errors.map((error, index) => (
                         <div key={index} className="p-3 flex items-start gap-2 text-sm">
-                          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                           <div className="min-w-0">
                             <p className="text-foreground">
                               Row {error.row}
@@ -118,10 +114,12 @@ export const ImportHouseholdsModal = ({
                   <Button
                     variant="primary"
                     fullWidth
-                    disabled={!file || isSubmitting}
+                    disabled={!file}
+                    isLoading={isSubmitting}
+                    loadingText="Importing…"
                     onClick={() => file && onSubmit(file)}
                   >
-                    {isSubmitting ? 'Importing…' : 'Import'}
+                    Import
                   </Button>
                 </>
               ) : (

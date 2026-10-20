@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, Field, IconButton, Input } from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface HouseholdModalProps {
@@ -47,56 +47,42 @@ export const HouseholdModal = ({
               <h3 className="font-semibold text-foreground">
                 {household ? 'Edit Household' : 'Add Household'}
               </h3>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Unit / Plot Label
-                </label>
-                <LegacyInput
+              <Field label="Unit / Plot Label">
+                <Input
                   type="text"
                   value={unitLabel}
                   onChange={(e) => setUnitLabel(e.target.value)}
                   placeholder="e.g. Block A, Plot 12"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Resident Name
-                </label>
-                <LegacyInput
+              <Field label="Resident Name">
+                <Input
                   type="text"
                   value={residentName}
                   onChange={(e) => setResidentName(e.target.value)}
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Phone <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field label="Phone" optionalLabel="(optional)">
+                <Input
                   type="text"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Email <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field label="Email" optionalLabel="(optional)">
+                <Input
                   type="email"
                   value={contactEmail}
                   onChange={(e) => setContactEmail(e.target.value)}
                 />
-              </div>
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -106,7 +92,9 @@ export const HouseholdModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Saving…"
                 onClick={() =>
                   onSubmit({
                     unitLabel: unitLabel.trim(),
@@ -116,7 +104,7 @@ export const HouseholdModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Saving…' : household ? 'Save Changes' : 'Add Household'}
+                {household ? 'Save Changes' : 'Add Household'}
               </Button>
             </div>
           </motion.div>

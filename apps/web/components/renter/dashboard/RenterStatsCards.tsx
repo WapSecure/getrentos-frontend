@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Heart, FileText, MessageCircle, Calendar, Home, CreditCard } from 'lucide-react';
+import { StatGridSkeleton } from '@getrentos/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -59,28 +60,28 @@ const StatCard = ({
 
   const colorClasses = {
     pink: {
-      bg: 'bg-pink-50 dark:bg-pink-950/20',
-      icon: 'text-pink-600 dark:text-pink-400',
+      bg: 'bg-destructive-subtle',
+      icon: 'text-destructive',
     },
     blue: {
-      bg: 'bg-blue-50 dark:bg-blue-950/20',
-      icon: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-info-subtle',
+      icon: 'text-info',
     },
     green: {
-      bg: 'bg-green-50 dark:bg-green-950/20',
-      icon: 'text-green-600 dark:text-green-400',
+      bg: 'bg-success-subtle',
+      icon: 'text-success',
     },
     orange: {
-      bg: 'bg-orange-50 dark:bg-orange-950/20',
-      icon: 'text-orange-600 dark:text-orange-400',
+      bg: 'bg-warning-subtle',
+      icon: 'text-warning',
     },
     purple: {
-      bg: 'bg-purple-50 dark:bg-purple-950/20',
-      icon: 'text-purple-600 dark:text-purple-400',
+      bg: 'bg-purple-subtle',
+      icon: 'text-purple',
     },
     emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-      icon: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-primary/10',
+      icon: 'text-primary',
     },
   };
 
@@ -114,7 +115,7 @@ const StatCard = ({
 export const RenterStatsCards = () => {
   const { t } = useLanguage();
 
-  const { data: dashboardStats } = useQuery({
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery({
     queryKey: renterKeys.dashboardStats,
     queryFn: () => unwrap(renterService.getDashboardStats()),
   });
@@ -192,6 +193,10 @@ export const RenterStatsCards = () => {
       isCurrency: true,
     },
   ];
+
+  if (statsLoading) {
+    return <StatGridSkeleton count={6} className="gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" />;
+  }
 
   return (
     <section

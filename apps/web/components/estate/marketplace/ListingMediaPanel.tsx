@@ -2,8 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { ImagePlus, Trash2 } from 'lucide-react';
+import { Button, IconButton } from '@getrentos/ui';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -100,14 +100,11 @@ export const ListingMediaPanel = ({
           />
           <Button
             variant="outline"
+            icon={<ImagePlus className="w-4 h-4" />}
             onClick={() => inputRef.current?.click()}
             disabled={busy || atCap}
+            isLoading={upload.isPending}
           >
-            {upload.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <ImagePlus className="w-4 h-4" />
-            )}
             {atCap ? 'Limit reached' : 'Add photos'}
           </Button>
         </div>
@@ -134,22 +131,18 @@ export const ListingMediaPanel = ({
                   Cover
                 </span>
               )}
-              <button
-                type="button"
-                aria-label={`Remove photo ${index + 1}`}
+              <IconButton
+                label={`Remove photo ${index + 1}`}
+                icon={<Trash2 />}
+                size="sm"
                 disabled={busy}
+                isLoading={remove.isPending && remove.variables === photo.key}
                 onClick={() => {
                   setStatus(null);
                   remove.mutate(photo.key);
                 }}
-                className="absolute -right-1.5 -top-1.5 rounded-full bg-background p-1 shadow ring-1 ring-border transition-colors hover:text-red-600 disabled:opacity-40"
-              >
-                {remove.isPending && remove.variables === photo.key ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Trash2 className="h-3.5 w-3.5" />
-                )}
-              </button>
+                className="absolute -right-1.5 -top-1.5 h-6 w-6 rounded-full bg-background text-foreground shadow ring-1 ring-border hover:text-destructive [&_svg]:h-3.5 [&_svg]:w-3.5"
+              />
             </div>
           ))}
         </div>
@@ -162,7 +155,10 @@ export const ListingMediaPanel = ({
       )}
 
       {status && (
-        <p className={`mt-2 text-xs ${status.failed ? 'text-red-600' : 'text-primary'}`}>
+        <p
+          role={status.failed ? 'alert' : 'status'}
+          className={`mt-2 text-xs ${status.failed ? 'text-destructive' : 'text-primary'}`}
+        >
           {status.text}
         </p>
       )}

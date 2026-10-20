@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, Field, IconButton, Input } from '@getrentos/ui';
 
 /** The API's floor. Kept in step so the form never allows what the server will reject. */
 const REASON_MIN_LENGTH = 10;
@@ -53,9 +53,7 @@ export const LiftWatchlistEntryModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">Take {label} off the list</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-3">
@@ -63,11 +61,8 @@ export const LiftWatchlistEntryModal = ({
                 They will be admitted normally from the next arrival onward. The entry stays on the
                 record, so the estate can still see that they were listed and who lifted it.
               </p>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Why is it being lifted?
-                </label>
-                <LegacyInput
+              <Field label="Why is it being lifted?">
+                <Input
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
@@ -76,8 +71,8 @@ export const LiftWatchlistEntryModal = ({
                 <p className="text-xs text-muted-foreground mt-1">
                   Kept with the entry. At least {REASON_MIN_LENGTH} characters.
                 </p>
-              </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              </Field>
+              {error && <p className="text-xs text-destructive">{error}</p>}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -87,10 +82,12 @@ export const LiftWatchlistEntryModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={reason.trim().length < REASON_MIN_LENGTH || isSubmitting}
+                disabled={reason.trim().length < REASON_MIN_LENGTH}
+                isLoading={isSubmitting}
+                loadingText="Lifting…"
                 onClick={() => onSubmit(reason.trim())}
               >
-                {isSubmitting ? 'Lifting…' : 'Take off the list'}
+                Take off the list
               </Button>
             </div>
           </motion.div>

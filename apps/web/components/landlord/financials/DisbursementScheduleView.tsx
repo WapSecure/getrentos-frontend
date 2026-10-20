@@ -11,9 +11,10 @@ import {
   EmptyState,
   Field,
   Select,
+  Skeleton,
   Switch,
-  Toast,
-  type ToastVariant,
+  TableSkeleton,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -44,7 +45,7 @@ const STATUS_BADGE: Record<
 
 export function DisbursementScheduleView() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const [enabled, setEnabled] = useState(false);
   const [frequency, setFrequency] = useState<DisbursementFrequency>('MONTHLY');
@@ -71,10 +72,10 @@ export function DisbursementScheduleView() {
       unwrap(disbursementScheduleService.set({ frequency, reserveAmount, enabled })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: landlordKeys.disbursementSchedule });
-      setToast({ message: 'Automatic payouts updated.', variant: 'success' });
+      toast.success('Automatic payouts updated.');
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to save these settings.', variant: 'error' });
+      toast.error(error.message || 'Unable to save these settings.');
     },
   });
 
@@ -91,7 +92,11 @@ export function DisbursementScheduleView() {
             <Banknote className="h-4 w-4" />
             <span className="text-sm">Held by GetRentos for you</span>
           </div>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{formatCurrency(balance)}</p>
+          {isLoading ? (
+            <Skeleton className="mt-2 h-8 w-32" />
+          ) : (
+            <p className="mt-2 text-2xl font-semibold text-foreground">{formatCurrency(balance)}</p>
+          )}
           <p className="mt-1 text-xs text-muted-foreground">
             Rent and other receipts we are holding on your behalf.
           </p>
@@ -102,9 +107,13 @@ export function DisbursementScheduleView() {
             <CalendarClock className="h-4 w-4" />
             <span className="text-sm">Next automatic payout</span>
           </div>
-          <p className="mt-2 text-2xl font-semibold text-foreground">
-            {enabled && nextRunAt ? formatDate(nextRunAt, 'long') : 'Off'}
-          </p>
+          {isLoading ? (
+            <Skeleton className="mt-2 h-8 w-32" />
+          ) : (
+            <p className="mt-2 text-2xl font-semibold text-foreground">
+              {enabled && nextRunAt ? formatDate(nextRunAt, 'long') : 'Off'}
+            </p>
+          )}
           <p className="mt-1 text-xs text-muted-foreground">
             {enabled
               ? `About ${formatCurrency(payableNow)} would go out, keeping ${formatCurrency(reserveAmount)} back.`
@@ -115,7 +124,7 @@ export function DisbursementScheduleView() {
 
       <Card static className="p-5">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h3 className="text-base font-semibold text-foreground">Automatic payouts</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Sweep your held balance to your verified bank account on a schedule, keeping a reserve
@@ -154,8 +163,8 @@ export function DisbursementScheduleView() {
         </div>
 
         <div className="mt-5 flex justify-end">
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? 'Saving…' : 'Save settings'}
+          <Button onClick={() => save.mutate()} isLoading={save.isPending}>
+            Save settings
           </Button>
         </div>
       </Card>
@@ -163,7 +172,9 @@ export function DisbursementScheduleView() {
       <Card static className="p-5">
         <h3 className="text-base font-semibold text-foreground">Recent automatic payouts</h3>
         {isLoading ? (
-          <div className="mt-4 h-24 animate-pulse rounded-xl bg-secondary/50" />
+          <div className="mt-4">
+            <TableSkeleton rows={3} columns={4} />
+          </div>
         ) : recent.length === 0 ? (
           <div className="mt-4">
             <EmptyState
@@ -214,10 +225,6 @@ export function DisbursementScheduleView() {
           </div>
         )}
       </Card>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

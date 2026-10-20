@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query';
 import { Download, ClipboardList, AlertTriangle, FileBarChart } from 'lucide-react';
-import { Button, DatePicker, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, DatePicker, EmptyState, Field, TableSkeleton, useToast } from '@getrentos/ui';
 import { reportService } from '@/services/reportService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -19,7 +19,7 @@ function monthsAgo(n: number): string {
 export function ReportsView() {
   const [from, setFrom] = useState(monthsAgo(12));
   const [to, setTo] = useState(new Date().toISOString().slice(0, 10));
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: rentRoll, isLoading: loadingRoll } = useQuery({
     queryKey: ['landlord', 'reports', 'rent-roll'],
@@ -29,14 +29,15 @@ export function ReportsView() {
   const { data: pnl, isLoading: loadingPnl } = useQuery({
     queryKey: ['landlord', 'reports', 'pnl', from, to],
     queryFn: () => unwrap(reportService.pnl({ from, to })),
+    placeholderData: keepPreviousData,
   });
 
   const download = useMutation({
     mutationFn: (fn: () => Promise<{ success: boolean; message?: string }>) => fn(),
     onSuccess: (res) => {
-      if (!res.success) setToast({ message: res.message || 'Download failed.', variant: 'error' });
+      if (!res.success) toast.error(res.message || 'Download failed.');
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Download failed.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Download failed.'),
   });
   const runDownload = (fn: () => Promise<{ success: boolean; message?: string }>) =>
     download.mutate(fn);
@@ -45,7 +46,7 @@ export function ReportsView() {
     <div className="space-y-8">
       {/* Rent roll */}
       <section>
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground">Rent roll</h2>
@@ -61,11 +62,9 @@ export function ReportsView() {
           </Button>
         </div>
         {loadingRoll ? (
-          <PageLoadingState />
+          <TableSkeleton rows={4} columns={5} />
         ) : (rentRoll ?? []).length === 0 ? (
-          <p className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
-            No units yet.
-          </p>
+          <EmptyState icon={ClipboardList} title="No units yet." size="compact" />
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -119,15 +118,13 @@ export function ReportsView() {
             <FileBarChart className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground">Income &amp; expenses</h2>
           </div>
-          <div className="flex items-end gap-2">
-            <div className="w-36">
-              <label className="text-xs text-muted-foreground">From</label>
+          <div className="flex flex-wrap items-end gap-2">
+            <Field label="From" className="w-36">
               <DatePicker value={from} onChange={setFrom} max={to} />
-            </div>
-            <div className="w-36">
-              <label className="text-xs text-muted-foreground">To</label>
+            </Field>
+            <Field label="To" className="w-36">
               <DatePicker value={to} onChange={setTo} min={from} />
-            </div>
+            </Field>
             <Button
               variant="outline"
               size="sm"
@@ -140,7 +137,7 @@ export function ReportsView() {
           </div>
         </div>
         {loadingPnl ? (
-          <PageLoadingState />
+          <TableSkeleton rows={4} columns={4} />
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
@@ -217,10 +214,6 @@ export function ReportsView() {
           </Button>
         </div>
       </section>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

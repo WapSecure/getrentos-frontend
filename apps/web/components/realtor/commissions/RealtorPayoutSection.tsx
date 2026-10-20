@@ -1,9 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Banknote, CheckCircle2, Landmark } from 'lucide-react';
-import { Button, Pagination } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Field,
+  NumberInput,
+  Pagination,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
@@ -14,19 +23,10 @@ import type { RealtorPayoutStatus } from '@/types/realtor';
 
 const PAGE_SIZE = 5;
 
-const PAYOUT_STATUS: Record<RealtorPayoutStatus, { label: string; className: string }> = {
-  pending: {
-    label: 'Processing',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  success: {
-    label: 'Paid',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  failed: {
-    label: 'Failed',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
+const PAYOUT_STATUS: Record<RealtorPayoutStatus, { label: string; variant: BadgeVariant }> = {
+  pending: { label: 'Processing', variant: 'warning' },
+  success: { label: 'Paid', variant: 'success' },
+  failed: { label: 'Failed', variant: 'danger' },
 };
 
 /**
@@ -60,6 +60,7 @@ export const RealtorPayoutSection = () => {
   const { data: payouts } = useQuery({
     queryKey: [...realtorKeys.payouts, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(realtorService.listPayouts({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
 
   const save = useMutation({
@@ -90,8 +91,7 @@ export const RealtorPayoutSection = () => {
   const rows = payouts?.items ?? [];
   const total = payouts?.total ?? 0;
   const blocked = summary?.canWithdraw === false;
-  const withdrawDisabled =
-    !summary?.accountSet || !summary.available || blocked || withdraw.isPending;
+  const withdrawDisabled = !summary?.accountSet || !summary.available || blocked;
 
   return (
     <div className="space-y-6">
@@ -100,7 +100,7 @@ export const RealtorPayoutSection = () => {
       </div>
 
       {/* Payout account */}
-      <div className="rounded-2xl bg-card border border-border p-5">
+      <Card className="p-5">
         <div className="flex items-center gap-2 mb-3">
           <Landmark className="w-4 h-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold text-foreground">Payout account</h3>
@@ -112,8 +112,8 @@ export const RealtorPayoutSection = () => {
               {account.bankName} · {account.accountNumber} · {account.accountName}
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 dark:text-green-400">
+              <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+              <p className="text-xs text-success">
                 Commission for closed deals is paid into this account
               </p>
             </div>
@@ -131,31 +131,37 @@ export const RealtorPayoutSection = () => {
               Replace it by entering a new account below.
             </p>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3">
-            <input
-              inputMode="numeric"
-              placeholder="Bank code (e.g. 058)"
-              value={bankCode}
-              onChange={(e) => setBankCode(e.target.value)}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-            />
-            <input
-              inputMode="numeric"
-              placeholder="10-digit account number"
-              value={accountNumber}
-              maxLength={10}
-              onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
-              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] sm:items-end gap-3">
+            <Field label="Bank code">
+              <NumberInput
+                placeholder="Bank code (e.g. 058)"
+                value={bankCode}
+                onValueChange={setBankCode}
+              />
+            </Field>
+            <Field label="Account number">
+              <NumberInput
+                placeholder="10-digit account number"
+                value={accountNumber}
+                maxLength={10}
+                onValueChange={setAccountNumber}
+              />
+            </Field>
             <Button
               onClick={() => save.mutate()}
-              disabled={!canSave || save.isPending}
+              isLoading={save.isPending}
+              loadingText="Saving…"
+              disabled={!canSave}
               variant={account ? 'outline' : 'primary'}
             >
-              {save.isPending ? 'Saving…' : account ? 'Replace' : 'Save account'}
+              {account ? 'Replace' : 'Save account'}
             </Button>
           </div>
-          {saveError && <p className="text-xs text-red-600 mt-2">{saveError}</p>}
+          {saveError && (
+            <Alert variant="danger" className="mt-2">
+              {saveError}
+            </Alert>
+          )}
           {/* Saving an account needs identity verification (tier 2). */}
           <div className="mt-3 empty:mt-0">
             <VerificationRequiredNotice
@@ -166,10 +172,10 @@ export const RealtorPayoutSection = () => {
             />
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Balance + withdraw */}
-      <div className="rounded-2xl bg-card border border-border p-5">
+      <Card className="p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="inline-flex p-2.5 rounded-xl bg-accent">
@@ -183,7 +189,10 @@ export const RealtorPayoutSection = () => {
             </div>
           </div>
           <Button
+            icon={<Banknote className="h-4 w-4" />}
             onClick={() => withdraw.mutate()}
+            isLoading={withdraw.isPending}
+            loadingText="Withdrawing…"
             disabled={withdrawDisabled}
             title={
               blocked
@@ -193,13 +202,12 @@ export const RealtorPayoutSection = () => {
                   : undefined
             }
           >
-            <Banknote className="mr-1.5 h-4 w-4" />
-            {withdraw.isPending ? 'Withdrawing…' : 'Withdraw'}
+            Withdraw
           </Button>
         </div>
 
         {justPaid != null && !withdraw.isPending && (
-          <p className="text-xs text-green-700 dark:text-green-400 mt-3">
+          <p className="text-xs text-success mt-3">
             {formatCurrency(justPaid)} is on its way to your bank.
           </p>
         )}
@@ -228,10 +236,10 @@ export const RealtorPayoutSection = () => {
             scoreHref={ROUTES.REALTOR_TRUST_PROFILE}
           />
         </div>
-      </div>
+      </Card>
 
       {/* Payout history */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+      <Card>
         <div className="px-5 pt-5">
           <h3 className="text-sm font-semibold text-foreground">Payout history</h3>
         </div>
@@ -267,11 +275,7 @@ export const RealtorPayoutSection = () => {
                         {formatCurrency(p.amount, { compact: true })}
                       </td>
                       <td className="p-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${meta.className}`}
-                        >
-                          {meta.label}
-                        </span>
+                        <Badge variant={meta.variant}>{meta.label}</Badge>
                         {/* A failed transfer is money the bank sent back, so say why
                             rather than leaving the realtor to guess. */}
                         {p.status === 'failed' && p.failureReason && (
@@ -292,7 +296,7 @@ export const RealtorPayoutSection = () => {
             <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

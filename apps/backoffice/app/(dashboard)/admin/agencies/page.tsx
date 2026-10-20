@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Briefcase, FileText, BadgeCheck } from 'lucide-react';
 import {
   Badge,
@@ -9,13 +9,13 @@ import {
   Card,
   ConfirmDialog,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
   Tabs,
   TabsList,
   TabsTrigger,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -53,7 +53,7 @@ export default function AdminAgenciesPage() {
   const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
   const [filter, setFilter] = useState<Filter>('SUBMITTED');
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [pendingAction, setPendingAction] = useState<{
     agency: AdminAgency;
     action: 'APPROVE' | 'REJECT' | 'SUSPENDED' | 'ACTIVE';
@@ -62,11 +62,11 @@ export default function AdminAgenciesPage() {
   const query = useQuery({
     queryKey: ['admin', 'agencies', filter],
     queryFn: () => unwrap(adminAgencyService.list(filter)),
+    placeholderData: keepPreviousData,
   });
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['admin', 'agencies'] });
-  const onError = (e: Error) =>
-    setToast({ message: e.message || 'Something went wrong.', variant: 'error' });
+  const onError = (e: Error) => toast.error(e.message || 'Something went wrong.');
 
   const decide = useMutation({
     mutationFn: ({ id, decision }: { id: string; decision: 'APPROVE' | 'REJECT' }) =>
@@ -75,10 +75,7 @@ export default function AdminAgenciesPage() {
       setPendingAction(null);
       setNotes((n) => ({ ...n, [id]: '' }));
       refresh();
-      setToast({
-        message: decision === 'APPROVE' ? 'Firm verified.' : 'Sent back to the firm.',
-        variant: 'success',
-      });
+      toast.success(decision === 'APPROVE' ? 'Firm verified.' : 'Sent back to the firm.');
     },
     onError,
   });
@@ -90,10 +87,7 @@ export default function AdminAgenciesPage() {
       setPendingAction(null);
       setNotes((n) => ({ ...n, [id]: '' }));
       refresh();
-      setToast({
-        message: status === 'SUSPENDED' ? 'Firm suspended.' : 'Firm restored.',
-        variant: 'success',
-      });
+      toast.success(status === 'SUSPENDED' ? 'Firm suspended.' : 'Firm restored.');
     },
     onError,
   });
@@ -131,14 +125,14 @@ export default function AdminAgenciesPage() {
         </TabsList>
       </Tabs>
 
-      {query.isError ? (
+      {query.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : query.isError && !query.data ? (
         <PageErrorState
           title="Could not load agencies"
           description={(query.error as Error).message}
           onRetry={() => query.refetch()}
         />
-      ) : query.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
         <EmptyState
           icon={Briefcase}
@@ -180,7 +174,7 @@ export default function AdminAgenciesPage() {
                     />
                     {p.verifiedLegalName ? (
                       <div className="sm:col-span-2 flex items-start gap-1.5">
-                        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                        <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                         <p className="text-sm text-foreground">
                           CAC-verified: <span className="font-medium">{p.verifiedLegalName}</span>
                           {p.cacVerifiedAt ? (
@@ -285,9 +279,6 @@ export default function AdminAgenciesPage() {
         </div>
       )}
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <ConfirmDialog
         open={pendingAction !== null}
         onOpenChange={(open) => !open && !actionPending && setPendingAction(null)}

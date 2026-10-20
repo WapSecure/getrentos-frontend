@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
-import { LegacyInput } from '@getrentos/ui';
+import { Button, Card, EmptyState, IconButton, Input } from '@getrentos/ui';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 
@@ -44,21 +44,25 @@ export const MessageThread = ({
     }
   };
   return (
-    <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
+    <Card className="flex-1 flex flex-col">
       <div className="p-4 border-b border-border flex items-center gap-3">
         <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">
           {getInitials(contactName)}
         </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{contactName}</p>
-          <p className="text-xs text-gray-400">{contactRole}</p>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate">{contactName}</p>
+          <p className="text-xs text-muted-foreground">{contactRole}</p>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center">
-            <MessageCircle className="w-8 h-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-gray-400">No messages yet: say hello</p>
+          <div className="h-full flex items-center justify-center">
+            <EmptyState
+              icon={MessageCircle}
+              title="No messages yet: say hello"
+              size="compact"
+              bare
+            />
           </div>
         ) : (
           messages.map((message) => {
@@ -76,7 +80,7 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isRealtor ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-[10px] ${isRealtor ? 'text-primary-foreground/60' : 'text-gray-400'}`}
+                      className={`text-[10px] ${isRealtor ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
@@ -99,6 +103,8 @@ export const MessageThread = ({
             {files.map((file) => (
               <button
                 key={`${file.name}-${file.lastModified}`}
+                type="button"
+                aria-label={`Remove ${file.name}`}
                 onClick={() => setFiles((current) => current.filter((item) => item !== file))}
                 className="rounded bg-secondary px-2 py-1 text-xs"
               >
@@ -108,7 +114,7 @@ export const MessageThread = ({
           </div>
         )}
         <div className="flex items-center gap-2">
-          <LegacyInput
+          <input
             ref={fileInputRef}
             type="file"
             multiple
@@ -120,29 +126,31 @@ export const MessageThread = ({
               event.target.value = '';
             }}
           />
-          <button
+          <IconButton
+            label="Attach a file"
+            icon={<Paperclip />}
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 rounded-lg text-gray-400 hover:bg-secondary shrink-0"
-          >
-            <Paperclip className="w-4 h-4" />
-          </button>
-          <LegacyInput
+          />
+          <Input
             type="text"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => event.key === 'Enter' && handleSend()}
             placeholder="Type a message..."
-            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Message"
+            className="min-w-0 flex-1"
           />
-          <button
+          <Button
             onClick={handleSend}
-            disabled={isSending || (!draft.trim() && files.length === 0)}
-            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+            isLoading={isSending}
+            disabled={!draft.trim() && files.length === 0}
+            aria-label="Send message"
+            className="shrink-0 px-3"
           >
             <Send className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

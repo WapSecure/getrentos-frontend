@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import { DataTable, type Column } from '@getrentos/ui';
-import { EmptyState, Input, PageErrorState, Pagination, Select } from '@getrentos/ui';
+import { EmptyState, PageErrorState, Pagination, SearchInput, Select } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -60,6 +59,7 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const items = data?.items ?? [];
@@ -83,7 +83,7 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
     [config.statusOptions]
   );
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title={`Could not load ${config.eyebrow.toLowerCase()}`}
@@ -110,15 +110,14 @@ export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> })
           )}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Input
+          <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onValueChange={setSearch}
             placeholder="Search…"
-            aria-label={`Search ${config.eyebrow.toLowerCase()}`}
-            leadingIcon={<Search className="h-4 w-4" />}
-            className="w-56"
+            label={`Search ${config.eyebrow.toLowerCase()}`}
+            className="w-full sm:w-56"
           />
-          <div className="w-44">
+          <div className="w-full sm:w-44">
             <Select
               value={status}
               onValueChange={(value) => {

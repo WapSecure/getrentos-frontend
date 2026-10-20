@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { DiscoverFilters } from '@/components/renter/discover/DiscoverFilters';
 import { DiscoverSearchBar } from '@/components/renter/discover/DiscoverSearchBar';
 import { DiscoverPropertyGrid } from '@/components/renter/discover/DiscoverPropertyGrid';
@@ -13,10 +13,16 @@ import { DiscoverApplicationAssistant } from '@/components/renter/discover/Disco
 import { RecentlyViewed } from '@/components/renter/discover/features/RecentlyViewed';
 import { DocumentChecklist } from '@/components/renter/discover/features/DocumentChecklist';
 import { SavedSearchAlert } from '@/components/renter/discover/features/SavedSearchAlert';
-import { PageErrorState, PageLoadingState, Toast, ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  PageErrorState,
+  PageLoadingState,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
 import { Property } from '@/types/renter';
-import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { renterService, type SavedListingItem } from '@/services/renterService';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { LayoutGrid, Map, Search } from 'lucide-react';
@@ -29,11 +35,9 @@ export default function DiscoverPage() {
   // Arriving from an estate microsite (`?estate=<slug>`). Carried in the filters so
   // every listing query on this page: grid AND map: stays scoped to that estate.
   const estateFromUrl = searchParams.get('estate')?.trim() ?? '';
-  const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [compareList, setCompareList] = useState<Property[]>([]);
   const [showCompareDrawer, setShowCompareDrawer] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const [filterOptions, setFilterOptions] = useState(() => ({
     location: searchParams.get('location')?.trim() ?? '',
     minPrice: searchParams.get('minPrice')?.trim() ?? '',
@@ -67,35 +71,34 @@ export default function DiscoverPage() {
   const savedListings = savedListingsData?.items ?? [];
   const savedProperties = savedListings.map((p) => p.id);
 
-  const showToast = (message: string, variant: ToastVariant) => {
-    setToast({ message, variant });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  const saveMutation = useMutation({
-    mutationFn: (propertyId: string) => unwrap(renterService.saveListing(propertyId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
-      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
-      showToast('Property saved successfully!', 'success');
-    },
-  });
-
-  const unsaveMutation = useMutation({
-    mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
-      queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
-      showToast('Property removed from saved', 'info');
-    },
+  const toast = useToast();
+  const saveMutation = useOptimisticMutation({
+    mutationFn: ({ propertyId, save }: { propertyId: string; save: boolean }) =>
+      unwrap(
+        save ? renterService.saveListing(propertyId) : renterService.unsaveListing(propertyId)
+      ),
+    patches: ({ propertyId, save }) => [
+      {
+        queryKey: renterKeys.savedListings,
+        update: (old) => {
+          const page = old as Paginated<SavedListingItem>;
+          const items = save
+            ? [...page.items, { id: propertyId } as SavedListingItem]
+            : page.items.filter((item) => item.id !== propertyId);
+          return { ...page, items };
+        },
+      },
+    ],
+    invalidate: [renterKeys.dashboardStats],
+    errorMessage: 'Your saved properties did not update. Please try again.',
+    onSuccess: (_data, { save }) =>
+      save
+        ? toast.success('Property saved successfully!')
+        : toast.info('Property removed from saved'),
   });
 
   const handleSaveProperty = (propertyId: string) => {
-    if (savedProperties.includes(propertyId)) {
-      unsaveMutation.mutate(propertyId);
-    } else {
-      saveMutation.mutate(propertyId);
-    }
+    saveMutation.mutate({ propertyId, save: !savedProperties.includes(propertyId) });
   };
 
   const handleCompare = (property: Property) => {
@@ -123,7 +126,7 @@ export default function DiscoverPage() {
   };
 
   if (savedListingsQuery.isLoading) return <PageLoadingState />;
-  if (savedListingsQuery.isError) {
+  if (savedListingsQuery.isError && !savedListingsData) {
     return (
       <PageErrorState
         title="Property discovery is unavailable"
@@ -136,10 +139,6 @@ export default function DiscoverPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
       <RenterPageHeader
         eyebrow="Property marketplace"
         icon={Search}
@@ -203,13 +202,9 @@ export default function DiscoverPage() {
                 </span>
                 .
               </p>
-              <button
-                type="button"
-                onClick={() => router.replace('/renter/discover')}
-                className="text-sm font-medium text-primary hover:underline"
-              >
+              <Button variant="ghost" size="sm" onClick={() => router.replace('/renter/discover')}>
                 Show all properties
-              </button>
+              </Button>
             </div>
           )}
 

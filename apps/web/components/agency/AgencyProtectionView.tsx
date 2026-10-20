@@ -7,16 +7,18 @@ import { ArrowLeft, Plus, ShieldCheck } from 'lucide-react';
 import {
   Badge,
   Button,
+  Card,
   Checkbox,
+  CurrencyInput,
   DatePicker,
+  EmptyState,
+  Field,
   Input,
-  NumberInput,
   Textarea,
   PageLoadingState,
   PageErrorState,
-  Toast,
   type BadgeVariant,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -51,9 +53,9 @@ export function AgencyProtectionView() {
   const queryKey = ['agency', 'protection'];
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey,
     queryFn: () => unwrap(agencyProtectionService.list()),
   });
@@ -75,25 +77,22 @@ export function AgencyProtectionView() {
       queryClient.invalidateQueries({ queryKey });
       setAdding(false);
       setForm(emptyForm);
-      setToast({ message: 'Attestation recorded.', variant: 'success' });
+      toast.success('Attestation recorded.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not record the attestation.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not record the attestation.'),
   });
 
   const revokeMutation = useMutation({
     mutationFn: (id: string) => unwrap(agencyProtectionService.revoke(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      setToast({ message: 'Attestation revoked.', variant: 'success' });
+      toast.success('Attestation revoked.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not revoke.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not revoke.'),
   });
 
   if (isLoading) return <PageLoadingState />;
-  if (isError || !data)
-    return <PageErrorState title="Couldn’t load attestations" onRetry={() => refetch()} />;
+  if (!data) return <PageErrorState title="Couldn’t load attestations" onRetry={() => refetch()} />;
 
   const canSave = form.schemeName.trim().length >= 2 && !!form.effectiveFrom;
 
@@ -107,7 +106,7 @@ export function AgencyProtectionView() {
         All clients
       </Link>
 
-      <div className="mb-6 flex items-start justify-between gap-3">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
             <ShieldCheck className="h-6 w-6 text-primary" />
@@ -119,89 +118,75 @@ export function AgencyProtectionView() {
           </p>
         </div>
         {!adding && (
-          <Button onClick={() => setAdding(true)}>
-            <Plus className="h-4 w-4" />
+          <Button onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" />}>
             Add attestation
           </Button>
         )}
       </div>
 
       {adding && (
-        <div className="mb-6 rounded-2xl border border-border bg-card p-5">
+        <Card className="mb-6 rounded-2xl p-5">
           <h2 className="mb-4 text-sm font-semibold text-foreground">New attestation</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block sm:col-span-2">
-              <span className="text-xs text-muted-foreground">Scheme name</span>
+            <Field label="Scheme name" required className="sm:col-span-2">
               <Input
                 value={form.schemeName}
                 onChange={(e) => setForm((f) => ({ ...f, schemeName: e.target.value }))}
                 placeholder="e.g. GetRentos Client Money Protection"
-                className="mt-1"
               />
-            </label>
-            <label className="block">
-              <span className="text-xs text-muted-foreground">Membership / policy number</span>
+            </Field>
+            <Field label="Membership / policy number">
               <Input
                 value={form.schemeReference}
                 onChange={(e) => setForm((f) => ({ ...f, schemeReference: e.target.value }))}
                 placeholder="Optional"
-                className="mt-1"
               />
-            </label>
-            <label className="block">
-              <span className="text-xs text-muted-foreground">Cover amount (₦)</span>
-              <NumberInput
+            </Field>
+            <Field label="Cover amount">
+              <CurrencyInput
                 value={form.coverageAmount}
-                onValueChange={(v) => setForm((f) => ({ ...f, coverageAmount: v }))}
+                onValueChange={(v) =>
+                  setForm((f) => ({ ...f, coverageAmount: v ? String(v) : '' }))
+                }
                 placeholder="Optional"
-                className="mt-1"
               />
-            </label>
-            <div className="block">
-              <span className="text-xs text-muted-foreground">Effective from</span>
-              <div className="mt-1">
-                <DatePicker
-                  value={form.effectiveFrom}
-                  onChange={(v) => setForm((f) => ({ ...f, effectiveFrom: v }))}
-                  max={form.effectiveTo || undefined}
-                />
-              </div>
-            </div>
-            <div className="block">
-              <span className="text-xs text-muted-foreground">Effective to (optional)</span>
-              <div className="mt-1">
-                <DatePicker
-                  value={form.effectiveTo || undefined}
-                  onChange={(v) => setForm((f) => ({ ...f, effectiveTo: v }))}
-                  min={form.effectiveFrom || undefined}
-                  placeholder="Open-ended"
-                />
-              </div>
-            </div>
-            <label className="block sm:col-span-2">
-              <span className="text-xs text-muted-foreground">Note</span>
+            </Field>
+            <Field label="Effective from" required>
+              <DatePicker
+                value={form.effectiveFrom}
+                onChange={(v) => setForm((f) => ({ ...f, effectiveFrom: v }))}
+                max={form.effectiveTo || undefined}
+              />
+            </Field>
+            <Field label="Effective to (optional)">
+              <DatePicker
+                value={form.effectiveTo || undefined}
+                onChange={(v) => setForm((f) => ({ ...f, effectiveTo: v }))}
+                min={form.effectiveFrom || undefined}
+                placeholder="Open-ended"
+                clearable
+              />
+            </Field>
+            <Field label="Note" className="sm:col-span-2">
               <Textarea
                 value={form.note}
                 onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
                 rows={2}
                 placeholder="Optional"
               />
-            </label>
-            <label className="flex items-center gap-2 sm:col-span-2">
-              <Checkbox
-                checked={form.segregationConfirmed}
-                onCheckedChange={(c) => setForm((f) => ({ ...f, segregationConfirmed: c }))}
-                aria-label="Client money is held in a segregated account"
-              />
-              <span className="text-sm text-foreground">
-                Client money is held in a segregated client account
-              </span>
-            </label>
+            </Field>
+            <Checkbox
+              className="sm:col-span-2"
+              checked={form.segregationConfirmed}
+              onCheckedChange={(c) => setForm((f) => ({ ...f, segregationConfirmed: c }))}
+              label="Client money is held in a segregated client account"
+            />
           </div>
           <div className="mt-4 flex gap-2">
             <Button
               onClick={() => createMutation.mutate()}
-              disabled={!canSave || createMutation.isPending}
+              disabled={!canSave}
+              isLoading={createMutation.isPending}
             >
               Record attestation
             </Button>
@@ -216,19 +201,17 @@ export function AgencyProtectionView() {
               Cancel
             </Button>
           </div>
-        </div>
+        </Card>
       )}
 
       {data.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
-          <ShieldCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="text-muted-foreground">No protection attestations yet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Record how you protect client money before marketing your agency.
-          </p>
-        </div>
+        <EmptyState
+          icon={ShieldCheck}
+          title="No protection attestations yet."
+          description="Record how you protect client money before marketing your agency."
+        />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
@@ -271,6 +254,7 @@ export function AgencyProtectionView() {
                         size="sm"
                         onClick={() => revokeMutation.mutate(a.id)}
                         disabled={revokeMutation.isPending}
+                        isLoading={revokeMutation.isPending && revokeMutation.variables === a.id}
                       >
                         Revoke
                       </Button>
@@ -281,10 +265,6 @@ export function AgencyProtectionView() {
             </tbody>
           </table>
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

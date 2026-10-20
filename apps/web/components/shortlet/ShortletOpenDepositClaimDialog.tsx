@@ -12,8 +12,7 @@ import {
   DocumentUpload,
   Field,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
   type PendingUpload,
 } from '@getrentos/ui';
 import { ShieldAlert } from 'lucide-react';
@@ -39,7 +38,7 @@ export function ShortletOpenDepositClaimDialog({
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   const [evidence, setEvidence] = useState<PendingUpload[]>([]);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const open = useMutation({
     // Evidence stays local until the host confirms: they can preview/zoom/rotate
@@ -61,12 +60,11 @@ export function ShortletOpenDepositClaimDialog({
       );
     },
     onSuccess: () => onOpened(),
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const amountNum = Number(amount);
-  const canSubmit =
-    amountNum > 0 && amountNum <= held && reason.trim().length >= 10 && !open.isPending;
+  const canSubmit = amountNum > 0 && amountNum <= held && reason.trim().length >= 10;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -103,6 +101,7 @@ export function ShortletOpenDepositClaimDialog({
               placeholder="e.g. Broken kitchen counter and stained sofa during the stay…"
               rows={4}
               maxLength={2000}
+              showCount
             />
           </Field>
           <div>
@@ -120,14 +119,16 @@ export function ShortletOpenDepositClaimDialog({
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={() => open.mutate()} disabled={!canSubmit}>
-              {open.isPending ? 'Filing claim…' : 'File claim'}
+            <Button
+              onClick={() => open.mutate()}
+              isLoading={open.isPending}
+              loadingText="Filing claim…"
+              disabled={!canSubmit}
+            >
+              File claim
             </Button>
           </div>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BadgeCheck,
   CalendarClock,
@@ -19,12 +19,13 @@ import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { CurrencyInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { getStoredUser } from '@/lib/authStorage';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -121,7 +122,7 @@ export function HomeManagementWorkOrderQuotes({
     () => getStoredUser<{ id?: string }>()?.id ?? null
   );
   const [now] = useState(() => Date.now());
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const quotesQuery = useQuery({
     enabled: isExpanded,
@@ -133,6 +134,7 @@ export function HomeManagementWorkOrderQuotes({
       unwrap(
         homeManagementService.listWorkOrderQuotes(workOrder.id, { page, pageSize: QUOTE_PAGE_SIZE })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const quotes = useMemo(() => quotesQuery.data?.items ?? [], [quotesQuery.data]);
@@ -171,13 +173,10 @@ export function HomeManagementWorkOrderQuotes({
       setPage(1);
       setForm(initialQuoteForm);
       setIsCreateOpen(false);
-      setToast({
-        message: 'Vendor quote recorded in the work-order audit trail.',
-        variant: 'success',
-      });
+      toast.success('Vendor quote recorded in the work-order audit trail.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to record this quote.', variant: 'error' });
+      toast.error(error.message || 'Unable to record this quote.');
     },
   });
 
@@ -188,13 +187,10 @@ export function HomeManagementWorkOrderQuotes({
       await invalidateQuoteViews();
       setPage(1);
       setActionDialog(null);
-      setToast({
-        message: 'Quote selected, budget approved, and vendor assignment recorded.',
-        variant: 'success',
-      });
+      toast.success('Quote selected, budget approved, and vendor assignment recorded.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to approve this quote.', variant: 'error' });
+      toast.error(error.message || 'Unable to approve this quote.');
     },
   });
 
@@ -210,10 +206,10 @@ export function HomeManagementWorkOrderQuotes({
       setPage(1);
       setActionDialog(null);
       setRejectionReason('');
-      setToast({ message: 'Quote rejected and the decision was recorded.', variant: 'success' });
+      toast.success('Quote rejected and the decision was recorded.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to reject this quote.', variant: 'error' });
+      toast.error(error.message || 'Unable to reject this quote.');
     },
   });
 
@@ -337,10 +333,10 @@ export function HomeManagementWorkOrderQuotes({
           {quotesQuery.isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 2 }, (_, index) => (
-                <div key={index} className="h-28 animate-pulse rounded-xl bg-card" />
+                <Skeleton key={index} className="h-28 rounded-xl" />
               ))}
             </div>
-          ) : quotesQuery.isError ? (
+          ) : quotesQuery.isError && !quotesQuery.data ? (
             <EmptyState
               className="border-dashed bg-card p-6"
               icon={CircleAlert}
@@ -441,7 +437,7 @@ export function HomeManagementWorkOrderQuotes({
                           </p>
                         )}
                         {quote.status === 'APPROVED' && quote.approvedBy?.legalName && (
-                          <p className="mt-3 rounded-xl bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-800 dark:text-emerald-300">
+                          <p className="mt-3 rounded-xl bg-success-subtle px-3 py-2 text-xs leading-5 text-foreground">
                             Selected by {quote.approvedBy.legalName}
                             {quote.approvedAt ? ` on ${formatOptionalDate(quote.approvedAt)}` : ''}.
                           </p>
@@ -463,7 +459,7 @@ export function HomeManagementWorkOrderQuotes({
                               Link a vendor to a new quote before it can be selected for work.
                             </p>
                           ) : expired ? (
-                            <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-800 dark:text-amber-300">
+                            <p className="rounded-xl bg-warning-subtle px-3 py-2 text-xs leading-5 text-foreground">
                               This quote has expired and cannot be approved.
                             </p>
                           ) : currentUserId === null ? (
@@ -714,10 +710,6 @@ export function HomeManagementWorkOrderQuotes({
           )}
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

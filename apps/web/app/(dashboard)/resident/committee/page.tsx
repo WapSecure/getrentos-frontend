@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Landmark } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -38,15 +38,13 @@ export default function ResidentCommitteePage() {
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : !members || members.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={Landmark}
-            title="No committee appointed yet"
-            description="Once your estate manager appoints a board, they'll show up here."
-          />
-        </div>
+        <EmptyState
+          icon={Landmark}
+          title="No committee appointed yet"
+          description="Once your estate manager appoints a board, they'll show up here."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {members.map((member) => (

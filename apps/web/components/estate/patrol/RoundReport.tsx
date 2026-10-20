@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, Clock, Route as RouteIcon } from 'lucide-react';
-import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { Alert, Badge, Card, EmptyState, ListSkeleton, StatGridSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -49,10 +49,16 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
   const reportQuery = useQuery({
     queryKey: estateKeys.patrolReport(estateId, from),
     queryFn: () => unwrap(estateService.getPatrolReport(estateId, { from })),
+    placeholderData: keepPreviousData,
   });
 
   if (reportQuery.isLoading) {
-    return <Skeleton className="h-40 w-full rounded-2xl" />;
+    return (
+      <div className="space-y-4">
+        <StatGridSkeleton count={3} className="lg:grid-cols-3" />
+        <ListSkeleton variant="cards" rows={3} />
+      </div>
+    );
   }
 
   const report = reportQuery.data;
@@ -155,7 +161,7 @@ const Stat = ({
         tone === 'danger'
           ? 'text-destructive'
           : tone === 'success'
-            ? 'text-green-600 dark:text-green-400'
+            ? 'text-success'
             : 'text-foreground'
       }`}
     >
@@ -209,15 +215,15 @@ const RoundCard = ({ round }: { round: PatrolRound }) => {
       </div>
 
       {round.status === 'MISSED' && round.missing.length > 0 && (
-        <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2">
-          <p className="text-sm text-foreground">
+        <Alert variant="danger" className="mt-3">
+          <p>
             Nobody reached{' '}
             <span className="font-medium">{round.missing.map((row) => row.name).join(', ')}</span>
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {round.scanned} of {round.expected} checkpoints were scanned.
           </p>
-        </div>
+        </Alert>
       )}
 
       {round.scans.length > 0 && (

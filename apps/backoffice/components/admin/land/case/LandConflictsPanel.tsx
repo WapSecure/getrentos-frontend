@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { CheckCircle2, ShieldAlert, XCircle } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, ConfirmDialog, ListSkeleton, type BadgeVariant } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminLandService } from '@/services/adminLandService';
 import type { LandConflict } from '@/types/land';
@@ -85,8 +85,8 @@ export const LandConflictsPanel = ({
       }
     >
       {conflicts.isLoading ? (
-        <PanelMessage>Loading conflicts…</PanelMessage>
-      ) : conflicts.isError ? (
+        <ListSkeleton rows={2} label="Loading conflicts" />
+      ) : conflicts.isError && !conflicts.data ? (
         <PanelMessage>
           {conflicts.error instanceof Error
             ? conflicts.error.message

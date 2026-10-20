@@ -1,24 +1,24 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { ClipboardCheck, CloudOff, Cloud, Camera, UserCheck } from 'lucide-react';
+import { Badge, Card, type BadgeVariant } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { PropertyInspection, RoomCondition, InspectionType } from '@/types/agent';
 
-const conditionConfig: Record<RoomCondition, { label: string; className: string }> = {
-  excellent: {
-    label: 'Excellent',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  good: {
-    label: 'Good',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  fair: {
-    label: 'Fair',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  poor: { label: 'Poor', className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20' },
+const conditionConfig: Record<RoomCondition, { label: string; variant: BadgeVariant }> = {
+  excellent: { label: 'Excellent', variant: 'success' },
+  good: { label: 'Good', variant: 'info' },
+  fair: { label: 'Fair', variant: 'warning' },
+  poor: { label: 'Poor', variant: 'danger' },
+};
+
+const syncConfig: Record<
+  PropertyInspection['syncStatus'],
+  { label: string; variant: BadgeVariant }
+> = {
+  synced: { label: 'Synced', variant: 'success' },
+  pending: { label: 'Pending Sync', variant: 'warning' },
+  failed: { label: 'Sync Failed', variant: 'danger' },
 };
 
 const typeConfig: Record<InspectionType, string> = {
@@ -34,52 +34,48 @@ interface InspectionCardProps {
   delay?: number;
 }
 
-export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCardProps) => {
+export const InspectionCard = ({ inspection, onClick }: InspectionCardProps) => {
   const totalPhotos = inspection.rooms.reduce((sum, r) => sum + r.photoCount, 0);
   const condition = inspection.overallCondition
     ? conditionConfig[inspection.overallCondition]
     : null;
+  const sync = syncConfig[inspection.syncStatus] ?? syncConfig.failed;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
-    >
+    <Card interactive className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2.5 rounded-xl bg-accent shrink-0">
             <ClipboardCheck className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-foreground truncate">{inspection.propertyAddress}</h3>
+            <h3 className="font-semibold text-foreground truncate">
+              <button
+                type="button"
+                onClick={onClick}
+                className="text-left after:absolute after:inset-0 focus:outline-none"
+              >
+                {inspection.propertyAddress}
+              </button>
+            </h3>
             <p className="text-xs text-muted-foreground truncate">
               {typeConfig[inspection.type]} · {inspection.clientName}
             </p>
           </div>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
-            inspection.syncStatus === 'synced'
-              ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-              : inspection.syncStatus === 'pending'
-                ? 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20'
-                : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
-          }`}
+        <Badge
+          variant={sync.variant}
+          icon={
+            inspection.syncStatus === 'synced' ? (
+              <Cloud className="w-3 h-3" />
+            ) : (
+              <CloudOff className="w-3 h-3" />
+            )
+          }
+          className="shrink-0 whitespace-nowrap"
         >
-          {inspection.syncStatus === 'synced' ? (
-            <Cloud className="w-3 h-3" />
-          ) : (
-            <CloudOff className="w-3 h-3" />
-          )}
-          {inspection.syncStatus === 'synced'
-            ? 'Synced'
-            : inspection.syncStatus === 'pending'
-              ? 'Pending Sync'
-              : 'Sync Failed'}
-        </span>
+          {sync.label}
+        </Badge>
       </div>
 
       <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
@@ -91,21 +87,16 @@ export const InspectionCard = ({ inspection, onClick, delay = 0 }: InspectionCar
       </div>
 
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-        <p className="text-xs text-gray-400">{formatDate(inspection.scheduledDate)}</p>
-        <div className="flex items-center gap-2">
+        <p className="text-xs text-muted-foreground">{formatDate(inspection.scheduledDate)}</p>
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {inspection.acknowledgedAt && (
-            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-              <UserCheck className="w-3 h-3" />
+            <Badge variant="success" icon={<UserCheck className="w-3 h-3" />}>
               Tenant signed off
-            </span>
+            </Badge>
           )}
-          {condition && (
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${condition.className}`}>
-              {condition.label}
-            </span>
-          )}
+          {condition && <Badge variant={condition.variant}>{condition.label}</Badge>}
         </div>
       </div>
-    </motion.div>
+    </Card>
   );
 };

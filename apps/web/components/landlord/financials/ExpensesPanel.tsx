@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Receipt, Trash2 } from 'lucide-react';
 import {
   Button,
@@ -12,12 +12,13 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  IconButton,
   Input,
+  ListSkeleton,
   DatePicker,
   Select,
   Pagination,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -65,11 +66,12 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<ExpenseForm>(initialForm);
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data: expensesData } = useQuery({
+  const { data: expensesData, isPending } = useQuery({
     queryKey: [...landlordKeys.expenses(), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listExpenses({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const expenses = expensesData?.items ?? [];
   const total = expensesData?.total ?? 0;
@@ -93,17 +95,14 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
       setPage(1);
       setForm(initialForm);
       setIsCreateOpen(false);
-      setToast(
+      toast.success(
         result.status === 'pending_approval'
-          ? {
-              message: 'This is above the owner’s approval limit. We sent it to them for approval.',
-              variant: 'success',
-            }
-          : { message: 'Expense recorded.', variant: 'success' }
+          ? 'This is above the owner’s approval limit. We sent it to them for approval.'
+          : 'Expense recorded.'
       );
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to record this expense.', variant: 'error' });
+      toast.error(error.message || 'Unable to record this expense.');
     },
   });
 
@@ -112,10 +111,10 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
     onSuccess: () => {
       invalidate();
       if (expenses.length === 1 && page > 1) setPage((current) => current - 1);
-      setToast({ message: 'Expense removed.', variant: 'success' });
+      toast.success('Expense removed.');
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to remove this expense.', variant: 'error' });
+      toast.error(error.message || 'Unable to remove this expense.');
     },
   });
 
@@ -136,8 +135,8 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
 
   return (
     <section className="mt-8 bg-card rounded-2xl border border-border overflow-hidden">
-      <div className="p-5 border-b border-border flex items-center justify-between">
-        <div>
+      <div className="p-5 border-b border-border flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="font-semibold text-foreground">Expenses</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
             Utilities, insurance, tax, and repairs: subtracted from net profit above.
@@ -155,7 +154,9 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
         </Button>
       </div>
 
-      {expenses.length === 0 ? (
+      {isPending ? (
+        <ListSkeleton rows={3} className="rounded-none border-0" />
+      ) : expenses.length === 0 ? (
         <div className="p-8">
           <EmptyState
             icon={Receipt}
@@ -180,13 +181,14 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                 <span className="text-sm font-semibold text-foreground">
                   {formatCurrency(expense.amount)}
                 </span>
-                <button
+                <IconButton
+                  label="Remove expense"
+                  variant="danger"
+                  size="sm"
+                  icon={<Trash2 />}
                   onClick={() => deleteExpense.mutate(expense.id)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-secondary hover:text-destructive"
-                  aria-label="Remove expense"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  isLoading={deleteExpense.isPending && deleteExpense.variables === expense.id}
+                />
               </div>
             </div>
           ))}
@@ -233,9 +235,8 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                   options={categoryOptions}
                 />
               </Field>
-              <Field label="Amount (₦)" htmlFor="expense-amount" required>
+              <Field label="Amount" required>
                 <CurrencyInput
-                  id="expense-amount"
                   prefix="₦"
                   min={1}
                   value={form.amount}
@@ -251,9 +252,8 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                   onChange={(value) => setForm((current) => ({ ...current, incurredAt: value }))}
                 />
               </Field>
-              <Field label="Note" htmlFor="expense-note" className="sm:col-span-2">
+              <Field label="Note" className="sm:col-span-2">
                 <Input
-                  id="expense-note"
                   value={form.note}
                   onChange={(event) =>
                     setForm((current) => ({ ...current, note: event.target.value }))
@@ -284,10 +284,6 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </section>
   );
 }

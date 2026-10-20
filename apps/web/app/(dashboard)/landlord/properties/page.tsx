@@ -1,11 +1,19 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
+import {
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  PageErrorState,
+  Pagination,
+  SearchInput,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Building2 } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import {
   AddPropertyModal,
@@ -13,8 +21,6 @@ import {
 } from '@/components/landlord/properties/AddPropertyModal';
 import { EditPropertyModal } from '@/components/landlord/properties/EditPropertyModal';
 import { LandlordVerificationStatusModal } from '@/components/landlord/properties/LandlordVerificationStatusModal';
-import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
-import { ConfirmDialog } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { landService } from '@/services/landService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -59,7 +65,7 @@ export default function LandlordPropertiesPage() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
   const [verifyingProperty, setVerifyingProperty] = useState<Property | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const {
     data,
@@ -85,6 +91,7 @@ export default function LandlordPropertiesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const properties = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -132,24 +139,21 @@ export default function LandlordPropertiesPage() {
     },
     onSuccess: ({ failedProofs }) => {
       invalidateProperties();
-      setToast({
-        variant: failedProofs ? 'warning' : 'success',
-        message: failedProofs
+      toast.show(
+        failedProofs
           ? `Property created, but ${failedProofs} verification document${failedProofs === 1 ? '' : 's'} must be retried from Verification Status.`
           : 'Property media and verification documents uploaded successfully.',
-      });
+        failedProofs ? 'warning' : 'success'
+      );
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
-      setToast({
-        variant: 'error',
-        message: error.message || 'We could not create this property. Please try again.',
-      });
+      toast.error(error.message || 'We could not create this property. Please try again.');
     },
   });
 
   const notifyPropertyError = (fallback: string) => (error: Error) =>
-    setToast({ variant: 'error', message: error.message || fallback });
+    toast.error(error.message || fallback);
 
   const editMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: PropertyUpdatePayload }) =>
@@ -200,32 +204,34 @@ export default function LandlordPropertiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Properties</h1>
           <p className="text-muted-foreground mt-1">
-            {isLoadingProperties || propertiesFailed
+            {isLoadingProperties || (propertiesFailed && !data)
               ? 'Loading your portfolio…'
               : `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          onClick={() => setIsAddModalOpen(true)}
+          icon={<Plus className="w-4 h-4" />}
+        >
           Add Property
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name or city..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by name or city..."
+          label="Search properties"
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -233,7 +239,7 @@ export default function LandlordPropertiesPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -245,50 +251,38 @@ export default function LandlordPropertiesPage() {
       {isLoadingProperties ? (
         <div
           className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          role="status"
           aria-busy="true"
           aria-label="Loading properties"
         >
           {[0, 1, 2].map((index) => (
-            <div
-              key={index}
-              className="h-72 animate-pulse rounded-2xl border border-border bg-card"
-            />
+            <Skeleton key={index} className="h-72 rounded-2xl" />
           ))}
         </div>
-      ) : propertiesFailed ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            We couldn&apos;t load your properties
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Your portfolio is safe: this was a connection problem. Try again.
-          </p>
-          <Button variant="primary" className="mt-6" onClick={() => refetchProperties()}>
-            Try again
-          </Button>
-        </div>
+      ) : propertiesFailed && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your properties"
+          description="Your portfolio is safe: this was a connection problem. Try again."
+          onRetry={() => void refetchProperties()}
+        />
       ) : properties.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No properties match your filters' : 'No properties yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={Building2}
+          title={hasActiveFilters ? 'No properties match your filters' : 'No properties yet'}
+          description={
+            hasActiveFilters
               ? 'Try adjusting your search or filter.'
-              : 'Add your first property to start managing units, tenants, and rent collection.'}
-          </p>
-          {!hasActiveFilters && (
-            <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
-              Add Your First Property
-            </Button>
-          )}
-        </div>
+              : 'Add your first property to start managing units, tenants, and rent collection.'
+          }
+          action={
+            !hasActiveFilters ? (
+              <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
+                Add Your First Property
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {properties.map((property, index) => (
@@ -342,9 +336,6 @@ export default function LandlordPropertiesPage() {
         description="This will permanently remove the property and all of its unit records. This cannot be undone."
         onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
 
       <UpgradeToProModal
         isOpen={planGate.isOpen}

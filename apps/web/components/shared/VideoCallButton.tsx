@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, Video } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { videoCallState, type VideoCallJoin } from '@getrentos/shared';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';
@@ -66,11 +66,20 @@ export const VideoCallButton = ({
 
   return (
     <div className="space-y-1">
-      <Button variant="primary" size="sm" className="gap-1.5" onClick={() => void open()}>
-        {joining ? <Loader2 className="h-4 w-4 animate-spin" /> : <Video className="h-4 w-4" />}
+      <Button
+        variant="primary"
+        size="sm"
+        icon={<Video className="h-4 w-4" />}
+        isLoading={joining}
+        onClick={() => void open()}
+      >
         {label}
       </Button>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

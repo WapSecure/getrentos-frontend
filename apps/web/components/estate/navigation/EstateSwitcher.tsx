@@ -28,6 +28,9 @@ export const EstateSwitcher = () => {
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-secondary transition-colors max-w-[10rem] sm:max-w-[14rem]"
       >
@@ -57,6 +60,7 @@ export const EstateSwitcher = () => {
               {estates.map((option) => (
                 <button
                   key={option.id}
+                  type="button"
                   onClick={() => {
                     selectEstate(option.id);
                     setIsOpen(false);

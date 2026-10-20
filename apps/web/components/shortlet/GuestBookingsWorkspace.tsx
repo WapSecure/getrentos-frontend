@@ -1,19 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  Card,
   ConfirmDialog,
   Dialog,
   DialogContent,
   EmptyState,
   Pagination,
-  Skeleton,
-  Toast,
+  ListSkeleton,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import {
   CalendarX,
@@ -110,32 +110,31 @@ function DepositClaimBadges({ b }: { b: ShortletBooking }) {
   return (
     <div className="mt-1 flex flex-col items-end gap-1">
       {b.depositStatus === 'HELD' && (
-        <Badge variant="info">
-          <ShieldCheck className="mr-1 h-3 w-3" /> Deposit held {formatCurrency(b.deposit)}
+        <Badge variant="info" icon={<ShieldCheck className="h-3 w-3" />}>
+          Deposit held {formatCurrency(b.deposit)}
         </Badge>
       )}
       {b.depositClaimStatus === 'PENDING' && b.depositClaimAmount != null && (
-        <Badge variant="warning">
-          <ShieldAlert className="mr-1 h-3 w-3" /> Claim pending{' '}
-          {formatCurrency(b.depositClaimAmount)}
+        <Badge variant="warning" icon={<ShieldAlert className="h-3 w-3" />}>
+          Claim pending {formatCurrency(b.depositClaimAmount)}
         </Badge>
       )}
       {decided && (
-        <Badge variant="danger">
-          <ShieldAlert className="mr-1 h-3 w-3" /> Claim {b.depositClaimStatus?.toLowerCase()} ·{' '}
-          {formatCurrency(withheld ?? b.deposit)} withheld
+        <Badge variant="danger" icon={<ShieldAlert className="h-3 w-3" />}>
+          Claim {b.depositClaimStatus?.toLowerCase()} · {formatCurrency(withheld ?? b.deposit)}{' '}
+          withheld
         </Badge>
       )}
       {b.depositClaimStatus === 'REJECTED' && b.depositStatus === 'REFUNDED' && (
-        <Badge variant="success">
-          <ShieldAlert className="mr-1 h-3 w-3" /> Claim rejected · deposit refunded in full
+        <Badge variant="success" icon={<ShieldAlert className="h-3 w-3" />}>
+          Claim rejected · deposit refunded in full
         </Badge>
       )}
       {b.depositStatus === 'REFUNDED' &&
         b.depositClaimStatus !== 'REJECTED' &&
         refunded != null && (
-          <Badge variant="success">
-            <RotateCcw className="mr-1 h-3 w-3" /> Deposit refunded {formatCurrency(refunded)}
+          <Badge variant="success" icon={<RotateCcw className="h-3 w-3" />}>
+            Deposit refunded {formatCurrency(refunded)}
           </Badge>
         )}
       {b.taxAmount != null && b.taxAmount > 0 && (
@@ -156,11 +155,12 @@ export const GuestBookingsWorkspace = () => {
   const [disputeTarget, setDisputeTarget] = useState<ShortletBooking | null>(null);
   const [promiseTarget, setPromiseTarget] = useState<ShortletBooking | null>(null);
   const [wishlistOpen, setWishlistOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data, isLoading, isPending } = useQuery({
     queryKey: [...shortletKeys.guestBookings, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(shortletService.myBookings({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const bookings = data?.items ?? [];
 
@@ -187,15 +187,12 @@ export const GuestBookingsWorkspace = () => {
           ? cancelled.deposit
           : 0);
       if (totalRefund > 0) {
-        setToast({
-          message: `Booking cancelled: ${formatCurrency(totalRefund)} refunded.`,
-          variant: 'success',
-        });
+        toast.success(`Booking cancelled: ${formatCurrency(totalRefund)} refunded.`);
       } else {
-        setToast({ message: 'Booking cancelled.', variant: 'success' });
+        toast.success('Booking cancelled.');
       }
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const pay = useMutation({
@@ -207,9 +204,9 @@ export const GuestBookingsWorkspace = () => {
         return;
       }
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
-      setToast({ message: 'Payment received: your stay is confirmed.', variant: 'success' });
+      toast.success('Payment received: your stay is confirmed.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -231,7 +228,7 @@ export const GuestBookingsWorkspace = () => {
             </p>
             {guestRatingAverage != null && (
               <p className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
-                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <Star className="h-4 w-4 fill-warning text-warning" />
                 Your guest rating:{' '}
                 <span className="font-medium text-foreground">{guestRatingAverage.toFixed(1)}</span>
                 <span>
@@ -241,28 +238,44 @@ export const GuestBookingsWorkspace = () => {
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setMessagesOpen(true)}>
-              <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMessagesOpen(true)}
+              icon={<MessageSquare className="h-4 w-4" />}
+            >
+              Messages
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setDisputesOpen(true)}>
-              <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDisputesOpen(true)}
+              icon={<Gavel className="h-4 w-4" />}
+            >
+              Disputes
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setClaimsOpen(true)}>
-              <ShieldAlert className="mr-1.5 h-4 w-4" /> Deposit claims
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setClaimsOpen(true)}
+              icon={<ShieldAlert className="h-4 w-4" />}
+            >
+              Deposit claims
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setWishlistOpen(true)}>
-              <Heart className="mr-1.5 h-4 w-4" /> Saved
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setWishlistOpen(true)}
+              icon={<Heart className="h-4 w-4" />}
+            >
+              Saved
             </Button>
           </div>
         </div>
       </header>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 w-full rounded-xl" />
-          ))}
-        </div>
+        <ListSkeleton variant="cards" rows={3} label="Loading bookings" />
       ) : bookings.length === 0 ? (
         <EmptyState
           icon={CalendarX}
@@ -272,12 +285,9 @@ export const GuestBookingsWorkspace = () => {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <div
-              key={b.id}
-              className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-            >
+            <Card key={b.id} hover className="p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <h3 className="font-medium">{b.propertyTitle}</h3>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin className="h-3.5 w-3.5" /> {b.city}
@@ -329,15 +339,14 @@ export const GuestBookingsWorkspace = () => {
                     </p>
                   )}
                   {b.refundAmount != null && b.refundAmount > 0 && (
-                    <Badge variant="info" className="mt-1">
-                      <RotateCcw className="mr-1 h-3 w-3" /> Refunded{' '}
-                      {formatCurrency(b.refundAmount)}
+                    <Badge variant="info" className="mt-1" icon={<RotateCcw className="h-3 w-3" />}>
+                      Refunded {formatCurrency(b.refundAmount)}
                     </Badge>
                   )}
                   <DepositClaimBadges b={b} />
                   {b.status === 'COMPLETED' && b.reviewed && (
-                    <Badge variant="success" className="mt-1">
-                      <Star className="mr-1 h-3 w-3" /> Reviewed
+                    <Badge variant="success" className="mt-1" icon={<Star className="h-3 w-3" />}>
+                      Reviewed
                     </Badge>
                   )}
                 </div>
@@ -375,33 +384,48 @@ export const GuestBookingsWorkspace = () => {
                     <Button
                       variant="primary"
                       size="sm"
+                      icon={<CreditCard className="h-4 w-4" />}
                       onClick={() => pay.mutate(b.id)}
+                      isLoading={pay.isPending && pay.variables === b.id}
+                      loadingText="Processing…"
                       disabled={pay.isPending}
                     >
-                      <CreditCard className="mr-1.5 h-4 w-4" />
-                      {pay.isPending
-                        ? 'Processing…'
-                        : `Pay ${formatCurrency((b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0))}`}
+                      {`Pay ${formatCurrency((b.total ?? 0) + (b.taxAmount ?? 0) + (b.deposit ?? 0))}`}
                     </Button>
                   )}
                   {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
-                    <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
-                      <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setDisputeTarget(b)}
+                      icon={<Gavel className="h-4 w-4" />}
+                    >
+                      Open dispute
                     </Button>
                   )}
                   {b.status === 'COMPLETED' && !b.reviewed && (
-                    <Button variant="outline" size="sm" onClick={() => setReviewTarget(b)}>
-                      <Star className="mr-1.5 h-4 w-4" /> Leave a review
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setReviewTarget(b)}
+                      icon={<Star className="h-4 w-4" />}
+                    >
+                      Leave a review
                     </Button>
                   )}
                   {canCancel(b) && (
-                    <Button variant="ghost" size="sm" onClick={() => setCancelTarget(b)}>
-                      <CalendarX className="mr-1.5 h-4 w-4" /> Cancel booking
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCancelTarget(b)}
+                      icon={<CalendarX className="h-4 w-4" />}
+                    >
+                      Cancel booking
                     </Button>
                   )}
                 </div>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -419,6 +443,7 @@ export const GuestBookingsWorkspace = () => {
         title="Cancel this booking?"
         description={cancelTarget ? cancelDescription(cancelTarget) : ''}
         confirmLabel="Cancel booking"
+        isLoading={cancel.isPending}
         onConfirm={() => cancelTarget && cancel.mutate(cancelTarget.id)}
       />
       {reviewTarget && (
@@ -429,7 +454,7 @@ export const GuestBookingsWorkspace = () => {
             setReviewTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
             queryClient.invalidateQueries({ queryKey: shortletKeys.public });
-            setToast({ message: 'Thanks! Your review was published.', variant: 'success' });
+            toast.success('Thanks! Your review was published.');
           }}
         />
       )}
@@ -455,10 +480,7 @@ export const GuestBookingsWorkspace = () => {
           onClose={() => setPromiseTarget(null)}
           onReported={() => {
             setPromiseTarget(null);
-            setToast({
-              message: "Report sent. The host's payment is on hold while support checks.",
-              variant: 'success',
-            });
+            toast.success("Report sent. The host's payment is on hold while support checks.");
           }}
         />
       )}
@@ -469,15 +491,9 @@ export const GuestBookingsWorkspace = () => {
           onOpened={() => {
             setDisputeTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
-            setToast({
-              message: 'Dispute opened: the other party has been notified.',
-              variant: 'success',
-            });
+            toast.success('Dispute opened: the other party has been notified.');
           }}
         />
-      )}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

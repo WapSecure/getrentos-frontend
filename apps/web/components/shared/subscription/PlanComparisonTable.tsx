@@ -8,7 +8,7 @@ function Cell({ value }: { value: boolean | string }) {
     return <span className="text-sm text-foreground">{value}</span>;
   }
   return value ? (
-    <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-label="Included" />
+    <Check className="h-4 w-4 text-success" aria-label="Included" />
   ) : (
     <X className="h-4 w-4 text-muted-foreground/50" aria-label="Not included" />
   );

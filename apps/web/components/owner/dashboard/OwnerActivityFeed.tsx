@@ -1,6 +1,7 @@
 'use client';
 
 import { Users, Handshake, ShieldCheck, FileCheck } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { OwnerDashboard } from '@/services/ownerService';
 
@@ -9,19 +10,19 @@ type ActivityType = 'inquiry' | 'offer' | 'escrow' | 'document';
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
   inquiry: {
     icon: Users,
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-primary/10',
+    color: 'text-primary',
   },
   offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
   escrow: {
     icon: ShieldCheck,
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    color: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-info-subtle',
+    color: 'text-info',
   },
   document: {
     icon: FileCheck,
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    color: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-success-subtle',
+    color: 'text-success',
   },
 };
 
@@ -61,7 +62,7 @@ interface OwnerActivityFeedProps {
 
 export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
+    <Card className="rounded-2xl">
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Recent Activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -71,12 +72,7 @@ export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
 
       <div className="divide-y divide-border">
         {activity.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No activity yet</p>
-          </div>
+          <EmptyState icon={ShieldCheck} title="No activity yet" size="compact" bare />
         ) : (
           activity.map((item) => {
             const type = typeFor(item.type);
@@ -102,6 +98,6 @@ export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
           })
         )}
       </div>
-    </div>
+    </Card>
   );
 };

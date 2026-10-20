@@ -3,8 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, BellOff, Trash2, Clock, ChevronRight } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Search,
+  Bell,
+  BellOff,
+  Trash2,
+  Clock,
+  ChevronRight,
+  MapPin,
+  Bed,
+  Wallet,
+} from 'lucide-react';
+import { Badge, Button, Card, EmptyState, IconButton, useToast } from '@getrentos/ui';
 import { renterService, type SavedSearch } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -12,6 +22,7 @@ export const SavedSearchesList = () => {
   const router = useRouter();
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const load = async () => {
@@ -22,10 +33,16 @@ export const SavedSearchesList = () => {
   }, []);
 
   const toggleAlerts = async (id: string) => {
+    const flip = (prev: SavedSearch[]) =>
+      prev.map((s) => (s.id === id ? { ...s, alertsEnabled: !s.alertsEnabled } : s));
+    setSavedSearches(flip);
     const res = await renterService.toggleSavedSearchAlerts(id);
     if (res.success && res.data) {
       const updated = res.data;
       setSavedSearches((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    } else {
+      setSavedSearches(flip);
+      toast.error('Search alerts did not update. Please try again.');
     }
   };
 
@@ -47,70 +64,77 @@ export const SavedSearchesList = () => {
     router.push(query ? `${ROUTES.RENTER_DISCOVER}?${query}` : ROUTES.RENTER_DISCOVER);
   };
 
-  if (savedSearches.length === 0) {
-    return (
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="p-4 border-b border-border">
+  const header = (
+    <div className="p-4 border-b border-border">
+      <div className="flex flex-wrap justify-between items-center gap-2">
+        <div className="min-w-0">
           <h3 className="font-semibold text-foreground">Saved Searches</h3>
-          <p className="text-xs text-gray-500">Get notified for new matches</p>
-        </div>
-        <div className="p-8 text-center">
-          <Search className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">No saved searches yet</p>
-          <p className="text-xs text-gray-400 mt-1">
-            Save a search from the Discover page to get alerts
+          <p className="text-xs text-muted-foreground">
+            {savedSearches.length === 0
+              ? 'Get notified for new matches'
+              : `${savedSearches.length} active searches`}
           </p>
         </div>
+        {savedSearches.length > 0 && (
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Search className="w-3 h-3" />}
+            href={ROUTES.RENTER_DISCOVER}
+          >
+            New Search
+          </Button>
+        )}
       </div>
+    </div>
+  );
+
+  if (savedSearches.length === 0) {
+    return (
+      <Card>
+        {header}
+        <EmptyState
+          icon={Search}
+          title="No saved searches yet"
+          description="Save a search from the Discover page to get alerts"
+          size="compact"
+          bare
+        />
+      </Card>
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border">
-        <div className="flex justify-between items-center">
-          <div>
-            <h3 className="font-semibold text-foreground">Saved Searches</h3>
-            <p className="text-xs text-gray-500">{savedSearches.length} active searches</p>
-          </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            className="gap-1"
-            onClick={() => router.push(ROUTES.RENTER_DISCOVER)}
-          >
-            <Search className="w-3 h-3" />
-            New Search
-          </Button>
-        </div>
-      </div>
+    <Card>
+      {header}
 
       <div className="divide-y divide-border">
         {savedSearches.map((search) => (
           <div key={search.id} className="p-3">
             <button
+              type="button"
+              aria-expanded={expandedId === search.id}
               onClick={() => setExpandedId(expandedId === search.id ? null : search.id)}
-              className="w-full flex items-center justify-between"
+              className="w-full flex items-center justify-between gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20"
             >
-              <div className="flex-1 text-left">
-                <div className="flex items-center gap-2">
-                  <Search className="w-3 h-3 text-gray-400" />
+              <div className="min-w-0 flex-1 text-left">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Search className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
                   <span className="text-sm font-medium text-foreground">{search.name}</span>
                   {search.newMatches > 0 && (
-                    <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs rounded-full">
-                      {search.newMatches} new
-                    </span>
+                    <Badge variant="success">{search.newMatches} new</Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <Clock className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs text-gray-500">
+                  <Clock className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+                  <span className="text-xs text-muted-foreground">
                     Last run: {new Date(search.lastRun).toLocaleDateString()}
                   </span>
                 </div>
               </div>
               <ChevronRight
-                className={`w-4 h-4 text-gray-400 transition-transform ${expandedId === search.id ? 'rotate-90' : ''}`}
+                aria-hidden="true"
+                className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform ${expandedId === search.id ? 'rotate-90' : ''}`}
               />
             </button>
 
@@ -123,42 +147,52 @@ export const SavedSearchesList = () => {
                   className="mt-3 pt-3 border-t border-border"
                 >
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-4 text-xs text-gray-500">
-                        {search.filters.location && <span>📍 {search.filters.location}</span>}
-                        {search.filters.bedrooms && <span>🛏️ {search.filters.bedrooms} beds</span>}
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        {search.filters.location && (
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="w-3 h-3" aria-hidden="true" />
+                            {search.filters.location}
+                          </span>
+                        )}
+                        {search.filters.bedrooms && (
+                          <span className="inline-flex items-center gap-1">
+                            <Bed className="w-3 h-3" aria-hidden="true" />
+                            {search.filters.bedrooms} beds
+                          </span>
+                        )}
                         {search.filters.maxPrice && (
-                          <span>💰 Up to ₦{search.filters.maxPrice.toLocaleString()}</span>
+                          <span className="inline-flex items-center gap-1">
+                            <Wallet className="w-3 h-3" aria-hidden="true" />
+                            Up to ₦{search.filters.maxPrice.toLocaleString()}
+                          </span>
                         )}
                       </div>
-                      <div className="flex gap-1">
-                        <button
+                      <div className="flex shrink-0 gap-1">
+                        <IconButton
+                          size="sm"
+                          label={search.alertsEnabled ? 'Disable alerts' : 'Enable alerts'}
+                          aria-pressed={search.alertsEnabled}
                           onClick={() => toggleAlerts(search.id)}
-                          className={`p-1 rounded ${search.alertsEnabled ? 'text-green-600' : 'text-gray-400'}`}
-                          title={search.alertsEnabled ? 'Disable alerts' : 'Enable alerts'}
-                        >
-                          {search.alertsEnabled ? (
-                            <Bell className="w-3 h-3" />
-                          ) : (
-                            <BellOff className="w-3 h-3" />
-                          )}
-                        </button>
-                        <button
+                          className={search.alertsEnabled ? 'text-success' : undefined}
+                          icon={search.alertsEnabled ? <Bell /> : <BellOff />}
+                        />
+                        <IconButton
+                          size="sm"
+                          variant="danger"
+                          label={`Delete saved search ${search.name}`}
                           onClick={() => deleteSearch(search.id)}
-                          className="p-1 rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                          icon={<Trash2 />}
+                        />
                       </div>
                     </div>
                     <Button
                       size="sm"
                       variant="outline"
                       fullWidth
-                      className="gap-1"
+                      icon={<Search className="w-3 h-3" />}
                       onClick={() => runSearch(search)}
                     >
-                      <Search className="w-3 h-3" />
                       Run Search Again
                     </Button>
                   </div>
@@ -168,6 +202,6 @@ export const SavedSearchesList = () => {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

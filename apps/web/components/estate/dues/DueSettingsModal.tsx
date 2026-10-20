@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, CurrencyInput, NumberInput } from '@getrentos/ui';
+import { Button, CurrencyInput, Field, IconButton, NumberInput } from '@getrentos/ui';
 
 /** Mirrors MAX_GRACE_DAYS on the API, which rejects anything larger. */
 const MAX_GRACE_DAYS = 90;
@@ -49,51 +49,47 @@ export const DueSettingsModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">Due settings</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
-            <div className="p-4 space-y-3">
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Flat late fee (₦)
-              </label>
-              <CurrencyInput
-                prefix="₦"
-                min={0}
-                value={String(lateFeeAmount)}
-                onValueChange={(v) => setLateFeeAmount(v)}
-                placeholder="e.g. 1000"
-              />
-              <p className="text-xs text-muted-foreground">
-                Added once to a due the moment it becomes overdue. Set to ₦0 to disable late fees.
-              </p>
-            </div>
+            <div className="p-4 space-y-4">
+              <Field
+                label="Flat late fee"
+                hint="Added once to a due the moment it becomes overdue. Set to ₦0 to disable late fees."
+              >
+                <CurrencyInput
+                  prefix="₦"
+                  min={0}
+                  value={String(lateFeeAmount)}
+                  onValueChange={(v) => setLateFeeAmount(v)}
+                  placeholder="e.g. 1000"
+                />
+              </Field>
 
-            <div className="px-4 pb-4 space-y-3">
-              <label className="block text-sm font-medium text-foreground mb-1" htmlFor="graceDays">
-                Grace period (days)
-              </label>
-              <NumberInput
-                id="graceDays"
-                min={0}
-                max={MAX_GRACE_DAYS}
-                value={graceDays}
-                // NumberInput hands back the digit string; keep the state numeric
-                // so the payload satisfies the API's integer validation.
-                onValueChange={(v) => setGraceDays(Number(v) || 0)}
-                placeholder="e.g. 5"
-              />
-              <p className="text-xs text-muted-foreground">
-                {graceDays === 0
-                  ? 'A due is flagged the moment its date passes: no grace at all.'
-                  : `A due may run ${graceDays} day${graceDays === 1 ? '' : 's'} past its date before it is flagged overdue and the late fee applies.`}
-              </p>
-              {isBeyondGraceLimit && (
-                <p className="text-xs text-destructive">
-                  {MAX_GRACE_DAYS} days is the maximum: beyond that a due would never be flagged.
-                </p>
-              )}
+              <Field
+                label="Grace period (days)"
+                htmlFor="graceDays"
+                hint={
+                  graceDays === 0
+                    ? 'A due is flagged the moment its date passes: no grace at all.'
+                    : `A due may run ${graceDays} day${graceDays === 1 ? '' : 's'} past its date before it is flagged overdue and the late fee applies.`
+                }
+                error={
+                  isBeyondGraceLimit
+                    ? `${MAX_GRACE_DAYS} days is the maximum: beyond that a due would never be flagged.`
+                    : undefined
+                }
+              >
+                <NumberInput
+                  min={0}
+                  max={MAX_GRACE_DAYS}
+                  value={graceDays}
+                  // NumberInput hands back the digit string; keep the state numeric
+                  // so the payload satisfies the API's integer validation.
+                  onValueChange={(v) => setGraceDays(Number(v) || 0)}
+                  placeholder="e.g. 5"
+                />
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">

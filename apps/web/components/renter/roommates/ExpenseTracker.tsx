@@ -1,13 +1,21 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Receipt } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CurrencyInput,
+  EmptyState,
+  Field,
+  IconButton,
+  Input,
+  Select,
+  type BadgeVariant,
+} from '@getrentos/ui';
 
 interface Expense {
   id: string;
@@ -30,12 +38,19 @@ interface ExpenseTrackerProps {
   onAddExpense: (expense: Expense) => Promise<void>;
 }
 
-const categoryColors: Record<string, string> = {
-  rent: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-  utilities: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-  groceries: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-  other: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+const categoryVariants: Record<string, BadgeVariant> = {
+  rent: 'info',
+  utilities: 'warning',
+  groceries: 'success',
+  other: 'neutral',
 };
+
+const categoryOptions = [
+  { value: 'rent', label: 'Rent' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'groceries', label: 'Groceries' },
+  { value: 'other', label: 'Other' },
+];
 
 type CategoryType = 'rent' | 'utilities' | 'groceries' | 'other';
 
@@ -115,8 +130,8 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border flex justify-between items-center">
+    <Card>
+      <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           <NairaSign className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Expense Tracker</h3>
@@ -125,34 +140,38 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
           <span className="text-xs font-medium text-muted-foreground">
             Total: {formatCurrency(totalExpenses)}
           </span>
-          <Button size="sm" variant="primary" onClick={() => setShowAddExpense(!showAddExpense)}>
-            <Plus className="w-3 h-3" />
+          <Button
+            size="sm"
+            variant="primary"
+            icon={<Plus className="w-3 h-3" />}
+            onClick={() => setShowAddExpense(!showAddExpense)}
+          >
             Add
           </Button>
-          <Button
-            variant="ghost"
+          <IconButton
             size="sm"
+            label={isExpanded ? 'Collapse expenses' : 'Expand expenses'}
+            aria-expanded={isExpanded}
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 h-auto"
-          >
-            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </Button>
+            icon={isExpanded ? <ChevronUp /> : <ChevronDown />}
+          />
         </div>
       </div>
 
       {isExpanded && (
-        <div className="p-4 pt-0">
+        <div className="p-4">
           {showAddExpense && (
-            <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
-              <LegacyInput
-                type="text"
-                value={newExpense.description}
-                onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                placeholder="Description"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <div className="flex gap-2">
-                <div className="flex-1">
+            <div className="mb-4 p-3 rounded-lg bg-secondary/60 border border-border space-y-3">
+              <Field label="Description">
+                <Input
+                  type="text"
+                  value={newExpense.description}
+                  onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+                  placeholder="Description"
+                />
+              </Field>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Field label="Amount">
                   <CurrencyInput
                     prefix="₦"
                     value={newExpense.amount}
@@ -160,43 +179,33 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                       setNewExpense({ ...newExpense, amount: v === 0 ? '' : String(v) })
                     }
                     placeholder="Amount"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </div>
-                <LegacySelect
-                  value={newExpense.category}
-                  onChange={(e) =>
-                    setNewExpense({ ...newExpense, category: handleCategoryChange(e.target.value) })
-                  }
-                  className="px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="rent">Rent</option>
-                  <option value="utilities">Utilities</option>
-                  <option value="groceries">Groceries</option>
-                  <option value="other">Other</option>
-                </LegacySelect>
+                </Field>
+                <Field label="Category">
+                  <Select
+                    value={newExpense.category}
+                    onValueChange={(value) =>
+                      setNewExpense({ ...newExpense, category: handleCategoryChange(value) })
+                    }
+                    options={categoryOptions}
+                  />
+                </Field>
               </div>
-              <LegacySelect
-                value={newExpense.paidBy}
-                onChange={(e) => setNewExpense({ ...newExpense, paidBy: e.target.value })}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Paid by</option>
-                {roommates.map((r) => (
-                  <option key={r.id} value={r.name}>
-                    {r.name}
-                  </option>
-                ))}
-              </LegacySelect>
-              <div className="flex gap-2">
-                {errorMessage && <p className="w-full text-sm text-destructive">{errorMessage}</p>}
+              <Field label="Paid by">
+                <Select
+                  value={newExpense.paidBy}
+                  onValueChange={(value) => setNewExpense({ ...newExpense, paidBy: value })}
+                  placeholder="Paid by"
+                  options={roommates.map((r) => ({ value: r.name, label: r.name }))}
+                />
+              </Field>
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="primary"
                   onClick={() => void handleAddExpense()}
-                  disabled={
-                    !newExpense.description || !newExpense.amount || !newExpense.paidBy || isSaving
-                  }
+                  disabled={!newExpense.description || !newExpense.amount || !newExpense.paidBy}
                   isLoading={isSaving}
                 >
                   Add Expense
@@ -210,24 +219,22 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
 
           <div className="divide-y divide-border max-h-64 overflow-y-auto">
             {expenses.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">No expenses recorded</p>
+              <EmptyState icon={Receipt} title="No expenses recorded" size="compact" bare />
             ) : (
               expenses.map((expense) => (
-                <div key={expense.id} className="flex items-center justify-between py-3">
-                  <div>
+                <div key={expense.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">{expense.description}</p>
-                    <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+                    <div className="flex flex-wrap items-center gap-2 mt-0.5 text-xs text-muted-foreground">
                       <span>Paid by {expense.paidBy}</span>
-                      <span>•</span>
+                      <span aria-hidden="true">•</span>
                       <span>{formatDate(expense.date)}</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded-full ${categoryColors[expense.category]}`}
-                      >
+                      <Badge variant={categoryVariants[expense.category]} className="capitalize">
                         {expense.category}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-primary">
+                  <span className="shrink-0 text-sm font-semibold text-primary">
                     {formatCurrency(expense.amount)}
                   </span>
                 </div>
@@ -236,6 +243,6 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

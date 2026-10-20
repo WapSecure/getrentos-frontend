@@ -47,11 +47,11 @@ export const NotificationsHeader = ({
     >
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
+          <div className="p-2 rounded-lg bg-info-subtle">
             {unreadCount > 0 ? (
-              <Bell className="w-5 h-5 text-blue-600" />
+              <Bell className="w-5 h-5 text-info" />
             ) : (
-              <BellOff className="w-5 h-5 text-blue-600" />
+              <BellOff className="w-5 h-5 text-info" />
             )}
           </div>
           <div>

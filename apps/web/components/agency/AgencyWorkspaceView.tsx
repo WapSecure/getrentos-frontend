@@ -3,7 +3,16 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Building2, FileSignature, KeyRound, MapPin, ShieldAlert } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, PageErrorState } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  EmptyState,
+  PageErrorState,
+  Skeleton,
+} from '@getrentos/ui';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -45,13 +54,13 @@ export function AgencyWorkspaceView() {
   if (loading) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <div className="h-6 w-64 animate-pulse rounded bg-muted" />
-        <div className="mt-4 h-40 animate-pulse rounded-2xl bg-muted" />
+        <Skeleton className="h-6 w-64" />
+        <CardSkeleton className="mt-4" />
       </div>
     );
   }
 
-  if (error) {
+  if (error && live.length === 0) {
     return <PageErrorState description={error} />;
   }
 
@@ -102,16 +111,13 @@ export function AgencyWorkspaceView() {
       </header>
 
       {grantsNothing(selected) && (
-        <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
-          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <span>
-            This mandate is agreed but its scope grants no access yet, so there is nothing to act
-            on. That is the scope rather than missing data.
-          </span>
-        </div>
+        <Alert variant="neutral" icon={ShieldAlert}>
+          This mandate is agreed but its scope grants no access yet, so there is nothing to act on.
+          That is the scope rather than missing data.
+        </Alert>
       )}
 
-      {propertiesError && (
+      {propertiesError && !managed && (
         <PageErrorState
           description={(propertiesError as Error).message}
           onRetry={() => void refetch()}
@@ -119,7 +125,7 @@ export function AgencyWorkspaceView() {
       )}
 
       {loadingProperties ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-muted" />
+        <CardSkeleton />
       ) : properties.length === 0 ? (
         <EmptyState
           icon={Building2}

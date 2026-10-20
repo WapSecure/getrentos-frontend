@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Trash2, X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, IconButton, Input, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -71,14 +71,12 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Manage Gates</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="overflow-y-auto flex-1">
               {isLoading ? (
-                <p className="px-4 py-6 text-sm text-muted-foreground">Loading gates…</p>
+                <ListSkeleton rows={2} label="Loading gates" className="rounded-none border-0" />
               ) : !gates || gates.length === 0 ? (
                 <p className="px-4 py-6 text-sm text-muted-foreground">
                   No gates configured yet. Add one below if this estate has more than one entrance.
@@ -93,13 +91,14 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
                           <p className="text-xs text-muted-foreground truncate">{gate.location}</p>
                         )}
                       </div>
-                      <button
+                      <IconButton
+                        label={`Delete ${gate.name}`}
+                        icon={<Trash2 />}
+                        variant="danger"
+                        size="sm"
                         onClick={() => deleteGate.mutate(gate.id)}
                         disabled={deleteGate.isPending}
-                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      />
                     </div>
                   ))}
                 </div>
@@ -107,27 +106,31 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
             </div>
 
             <div className="p-4 border-t border-border space-y-3 shrink-0">
-              <div className="grid grid-cols-2 gap-3">
-                <LegacyInput
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Gate name (e.g. Main Gate)"
+                  aria-label="Gate name"
                 />
-                <LegacyInput
+                <Input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Location (optional)"
+                  aria-label="Location"
                 />
               </div>
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!name.trim() || createGate.isPending}
+                disabled={!name.trim()}
+                isLoading={createGate.isPending}
+                loadingText="Adding…"
                 onClick={() => createGate.mutate()}
               >
-                {createGate.isPending ? 'Adding…' : 'Add Gate'}
+                Add Gate
               </Button>
             </div>
           </motion.div>

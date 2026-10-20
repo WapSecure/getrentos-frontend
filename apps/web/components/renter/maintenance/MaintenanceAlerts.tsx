@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, BellOff, AlertCircle, Clock, Wrench, User } from 'lucide-react';
+import { Button, EmptyState, IconButton } from '@getrentos/ui';
 
 interface Alert {
   id: string;
@@ -20,10 +21,10 @@ interface MaintenanceAlertsProps {
 }
 
 const alertIcons = {
-  status_update: { icon: Wrench, color: 'text-blue-500' },
-  vendor_assigned: { icon: User, color: 'text-purple-500' },
-  sla_breach: { icon: AlertCircle, color: 'text-red-500' },
-  scheduled: { icon: Clock, color: 'text-green-500' },
+  status_update: { icon: Wrench, color: 'text-info' },
+  vendor_assigned: { icon: User, color: 'text-purple' },
+  sla_breach: { icon: AlertCircle, color: 'text-destructive' },
+  scheduled: { icon: Clock, color: 'text-success' },
 };
 
 const formatDate = (dateString: string) => {
@@ -43,15 +44,15 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
 
   return (
     <div className="relative">
-      <button
+      <IconButton
+        label={unreadCount > 0 ? `Maintenance alerts, ${unreadCount} unread` : 'Maintenance alerts'}
+        icon={<Bell />}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-      >
-        <Bell className="w-5 h-5 text-muted-foreground" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        )}
-      </button>
+        aria-expanded={isOpen}
+      />
+      {unreadCount > 0 && (
+        <span className="pointer-events-none absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+      )}
 
       <AnimatePresence>
         {isOpen && (
@@ -59,39 +60,34 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+            className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
           >
             <div className="p-3 border-b border-border flex justify-between items-center">
               <div>
                 <h3 className="font-semibold text-foreground">Maintenance Alerts</h3>
-                <p className="text-xs text-gray-500">{unreadCount} unread</p>
+                <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
               </div>
               {unreadCount > 0 && (
-                <button
-                  onClick={onClearAll}
-                  className="text-xs text-primary hover:text-primary-hover"
-                >
+                <Button variant="ghost" size="xs" onClick={onClearAll}>
                   Mark all read
-                </button>
+                </Button>
               )}
             </div>
 
-            <div className="max-h-96 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="max-h-96 overflow-y-auto divide-y divide-border">
               {alerts.length === 0 ? (
-                <div className="p-4 text-center">
-                  <BellOff className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">No alerts</p>
-                </div>
+                <EmptyState icon={BellOff} title="No alerts" size="compact" bare />
               ) : (
                 alerts.map((alert) => {
                   const config = alertIcons[alert.type];
                   const Icon = config.icon;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={alert.id}
-                      className={`p-3 hover:bg-secondary transition-colors cursor-pointer ${
-                        !alert.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                      className={`block w-full p-3 text-left hover:bg-secondary transition-colors ${
+                        !alert.read ? 'bg-info-subtle/50' : ''
                       }`}
                       onClick={() => onMarkAsRead(alert.id)}
                     >
@@ -102,13 +98,15 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground">{alert.title}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">{alert.message}</p>
-                          <p className="text-xs text-gray-400 mt-1">{formatDate(alert.date)}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDate(alert.date)}
+                          </p>
                         </div>
                         {!alert.read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 shrink-0" />
+                          <span className="w-2 h-2 bg-info rounded-full mt-2 shrink-0" />
                         )}
                       </div>
-                    </div>
+                    </button>
                   );
                 })
               )}

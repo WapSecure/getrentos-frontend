@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search, UserRound, X } from 'lucide-react';
-import { Button, Input } from '@getrentos/ui';
+import { Button, Input, Skeleton } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import type { PlatformUser } from '@/types/admin';
@@ -53,6 +53,7 @@ export const UserLookup = ({
     queryFn: () => unwrap(adminService.listUsers({ search: debounced, pageSize: 8 })),
     enabled: canSearch && debounced.length >= 2 && !isId,
     staleTime: 30_000,
+    placeholderData: keepPreviousData,
   });
   const results = (search.data?.items ?? []).filter(
     (user: PlatformUser) => !staffOnly || user.roles.includes('admin')
@@ -101,8 +102,11 @@ export const UserLookup = ({
       {canSearch && debounced.length >= 2 && !isId && (
         <div className="max-h-56 overflow-y-auto rounded-xl border border-border">
           {search.isLoading ? (
-            <p className="px-3 py-2 text-xs text-muted-foreground">Searching…</p>
-          ) : search.isError ? (
+            <div role="status" aria-label="Searching" className="space-y-2 px-3 py-2.5">
+              <Skeleton className="h-3.5 w-2/5" />
+              <Skeleton className="h-3 w-3/5" />
+            </div>
+          ) : search.isError && !search.data ? (
             <p className="px-3 py-2 text-xs text-destructive">
               {search.error instanceof Error ? search.error.message : 'Search failed.'}
             </p>

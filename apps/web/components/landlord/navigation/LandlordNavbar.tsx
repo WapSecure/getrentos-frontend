@@ -1,15 +1,20 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Menu, X } from 'lucide-react';
+import { Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  SearchInput,
+  ThemeToggle,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 import { LandlordProfileDropdown } from './LandlordProfileDropdown';
 import { navGroups } from '../dashboard/LandlordSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -45,13 +50,26 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
     queryFn: () => unwrap(landlordService.getNotifications()),
   });
 
-  const markRead = useMutation({
+  const markRead = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(landlordService.markNotificationRead(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.notifications }),
+    patches: (id) => [
+      {
+        queryKey: landlordKeys.notifications,
+        update: (old) =>
+          (old as typeof notifications).map((n) => (n.id === id ? { ...n, read: true } : n)),
+      },
+    ],
+    invalidate: [landlordKeys.notifications],
   });
-  const markAllRead = useMutation({
+  const markAllRead = useOptimisticMutation<unknown, void>({
     mutationFn: () => unwrap(landlordService.markAllNotificationsRead()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: landlordKeys.notifications }),
+    patches: () => [
+      {
+        queryKey: landlordKeys.notifications,
+        update: (old) => (old as typeof notifications).map((n) => ({ ...n, read: true })),
+      },
+    ],
+    invalidate: [landlordKeys.notifications],
   });
 
   // Real-time: refresh the bell when the backend pushes a new notification.
@@ -121,32 +139,32 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
             </div>
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-                <LegacyInput
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearchSubmit}
-                  placeholder="Search properties, tenants..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-secondary border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <SearchInput
+                className="w-full"
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                onKeyDown={handleSearchSubmit}
+                placeholder="Search properties, tenants..."
+                label="Search properties and tenants"
+              />
             </div>
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
 
               <div className="relative">
-                <button
+                <IconButton
+                  label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+                  aria-expanded={showNotifications}
+                  icon={<Bell />}
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-                >
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-                  )}
-                </button>
+                />
+                {unreadCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full"
+                  />
+                )}
 
                 <AnimatePresence>
                   {showNotifications && (
@@ -154,29 +172,30 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
                     >
                       <div className="p-3 border-b border-border flex justify-between items-center">
                         <h3 className="font-semibold text-foreground">Notifications</h3>
                         {unreadCount > 0 && (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className="text-primary"
                             onClick={handleMarkAllAsRead}
-                            className="text-xs text-primary hover:text-primary-hover"
                           >
                             Mark all as read
-                          </button>
+                          </Button>
                         )}
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-muted-foreground">
-                            No notifications
-                          </div>
+                          <EmptyState icon={Bell} title="No notifications" size="compact" bare />
                         ) : (
                           notifications.map((notification) => (
-                            <div
+                            <button
+                              type="button"
                               key={notification.id}
-                              className={`p-3 border-b border-border hover:bg-secondary cursor-pointer transition-colors ${
+                              className={`block w-full text-left p-3 border-b border-border hover:bg-secondary cursor-pointer transition-colors focus-visible:outline-none focus-visible:bg-secondary ${
                                 !notification.read ? 'bg-accent' : ''
                               }`}
                               onClick={() => handleOpenNotification(notification)}
@@ -190,7 +209,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground">{notification.body}</p>
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>
@@ -210,27 +229,24 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
               <LandlordProfileDropdown user={user} />
 
-              <button
+              <IconButton
+                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
+                className="lg:hidden"
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+              />
             </div>
           </div>
 
           <div className="md:hidden py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
-              <LegacyInput
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchSubmit}
-                placeholder="Search properties, tenants..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-secondary border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Search properties, tenants..."
+              label="Search properties and tenants"
+            />
           </div>
         </div>
       </nav>

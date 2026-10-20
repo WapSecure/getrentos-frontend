@@ -42,7 +42,7 @@ export const StarRating = ({
             disabled={disabled}
             onClick={() => onRate(star)}
             aria-label={`${star} star${star === 1 ? '' : 's'}`}
-            className="rounded p-0.5 hover:scale-110 transition-transform disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded p-0.5 hover:scale-110 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
           >
             {icon}
           </button>

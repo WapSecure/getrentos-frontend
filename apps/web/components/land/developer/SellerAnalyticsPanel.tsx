@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Card, EmptyState } from '@getrentos/ui';
+import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { BarChart3, Bookmark, CalendarCheck, Eye, Handshake, TrendingUp } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -113,15 +113,15 @@ const MarketPosition = ({ market }: { market: NonNullable<LandSellerAnalytics['m
 
 /** How the property's sale listings are doing, and how its price sits against the market. */
 export const SellerAnalyticsPanel = ({ propertyId }: { propertyId: string }) => {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.analytics(propertyId),
     queryFn: () => unwrap(landDeveloperService.getSellerAnalytics(propertyId)),
   });
 
   if (isLoading) {
-    return <div className="h-64 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <Skeleton className="h-64 rounded-2xl" />;
   }
-  if (isError || !data) {
+  if (!data) {
     return (
       <Card static className="p-5 text-sm text-destructive">
         {errorMessage(error, 'Analytics could not be loaded.')}

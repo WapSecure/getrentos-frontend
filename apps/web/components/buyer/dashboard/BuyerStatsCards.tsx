@@ -20,21 +20,21 @@ interface StatCardProps {
 }
 
 const colorClasses = {
-  blue: { bg: 'bg-blue-50 dark:bg-blue-950/20', icon: 'text-blue-600 dark:text-blue-400' },
+  blue: { bg: 'bg-info-subtle', icon: 'text-info' },
   orange: {
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    icon: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-warning-subtle',
+    icon: 'text-warning',
   },
   purple: {
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    icon: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-secondary',
+    icon: 'text-foreground',
   },
   gold: { bg: 'bg-accent', icon: 'text-primary' },
   emerald: {
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    icon: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-success-subtle',
+    icon: 'text-success',
   },
-  green: { bg: 'bg-green-50 dark:bg-green-950/20', icon: 'text-green-600 dark:text-green-400' },
+  green: { bg: 'bg-success-subtle', icon: 'text-success' },
 } as const;
 
 const StatCard = ({ icon: Icon, label, value, subtitle, color, delay }: StatCardProps) => {

@@ -8,6 +8,8 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
+  RadioGroup,
 } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 
@@ -41,8 +43,8 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
 
   return (
     <Dialog open={!!payment} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="p-0">
-        <div className="p-4 border-b border-border">
+      <DialogContent className="p-0 sm:p-0">
+        <div className="p-4 pr-12 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">Make a payment</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {payment?.propertyName}: {formatCurrency(owed)} owed on this charge.
@@ -50,41 +52,29 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
         </div>
 
         <div className="p-4 space-y-3">
-          <div role="radiogroup" aria-label="How much to pay" className="grid grid-cols-2 gap-2">
-            {(['full', 'part'] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="radio"
-                aria-checked={mode === m}
-                onClick={() => setMode(m)}
-                className={`rounded-lg border p-3 text-left text-sm cursor-pointer ${
-                  mode === m ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary'
-                }`}
-              >
-                <span className="block font-medium text-foreground">
-                  {m === 'full' ? 'Pay in full' : 'Pay part'}
-                </span>
-                <span className="block text-xs text-muted-foreground">
-                  {m === 'full' ? formatCurrency(owed) : 'Choose an amount'}
-                </span>
-              </button>
-            ))}
-          </div>
+          <RadioGroup
+            aria-label="How much to pay"
+            variant="card"
+            columns={2}
+            value={mode}
+            onValueChange={setMode}
+            options={[
+              { value: 'full', label: 'Pay in full', description: formatCurrency(owed) },
+              { value: 'part', label: 'Pay part', description: 'Choose an amount' },
+            ]}
+          />
 
           {mode === 'part' && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Amount (₦)</label>
+            <Field
+              label="Amount"
+              hint={`At least ${formatCurrency(Math.min(MIN_PART_PAYMENT, owed))}. The rest stays owed on this charge. The first rent on a new lease has to be paid in full.`}
+            >
               <CurrencyInput
                 prefix="₦"
                 value={amount}
                 onValueChange={(v) => setAmount(v === 0 ? '' : String(v))}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                At least {formatCurrency(Math.min(MIN_PART_PAYMENT, owed))}. The rest stays owed on
-                this charge. The first rent on a new lease has to be paid in full.
-              </p>
-            </div>
+            </Field>
           )}
 
           <Button

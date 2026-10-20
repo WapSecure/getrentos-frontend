@@ -7,6 +7,7 @@ import {
   DialogTitle,
   Button,
   Select,
+  Skeleton,
   Badge,
   type BadgeVariant,
 } from '@getrentos/ui';
@@ -98,7 +99,12 @@ export const FraudAlertDetailModal = ({
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {loading ? (
-            <p className="text-sm text-muted-foreground text-center py-6">Loading alert detail…</p>
+            <div className="space-y-3" role="status" aria-label="Loading alert detail">
+              <Skeleton className="h-3 w-1/4" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/3" />
+              <Skeleton className="h-16 w-full" />
+            </div>
           ) : (
             <>
               <div>
@@ -184,7 +190,7 @@ export const FraudAlertDetailModal = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1 text-green-600 dark:text-green-400"
+                  className="flex-1 text-success"
                   isLoading={isUpdating}
                   disabled={isUpdating}
                   onClick={() => onStatusChange(alert.id, 'cleared')}
@@ -195,7 +201,7 @@ export const FraudAlertDetailModal = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 text-red-600 dark:text-red-400"
+                  className="flex-1 text-destructive"
                   isLoading={isUpdating}
                   disabled={isUpdating}
                   onClick={() => onStatusChange(alert.id, 'confirmed')}

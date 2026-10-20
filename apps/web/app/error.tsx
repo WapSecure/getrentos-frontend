@@ -24,19 +24,19 @@ export default function Error({
       </div>
 
       <div className="relative z-10 text-center max-w-md">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/20 mb-6">
-          <AlertTriangle className="w-8 h-8 text-red-500" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-destructive-subtle mb-6">
+          <AlertTriangle className="w-8 h-8 text-destructive" />
         </div>
 
         <p className="text-7xl font-bold text-primary tracking-tight">500</p>
         <h1 className="mt-3 text-2xl font-bold text-foreground">Something went wrong</h1>
-        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           An unexpected error occurred on our end. Please try again, and reach out if the problem
           persists.
         </p>
 
         {(error.requestId || error.digest) && (
-          <p className="mt-2 text-xs text-gray-400 dark:text-gray-600 font-mono">
+          <p className="mt-2 text-xs text-muted-foreground font-mono">
             Error reference: {error.requestId ?? error.digest}
           </p>
         )}

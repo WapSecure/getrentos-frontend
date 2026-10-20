@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
 } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 
 interface Category {
   id: string;
@@ -37,20 +38,22 @@ interface HelpCategoriesProps {
 
 export const HelpCategories = ({ selectedCategory, onSelectCategory }: HelpCategoriesProps) => {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Categories</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Browse by topic</p>
       </div>
 
       <div className="p-2">
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
           {categories.map((category) => {
             const Icon = category.icon;
             const isSelected = selectedCategory === category.id;
             return (
               <button
                 key={category.id}
+                type="button"
+                aria-pressed={isSelected}
                 onClick={() => onSelectCategory(category.id)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                   isSelected ? 'bg-accent text-primary' : 'text-foreground hover:bg-secondary'
@@ -59,13 +62,13 @@ export const HelpCategories = ({ selectedCategory, onSelectCategory }: HelpCateg
                 <Icon className="w-4 h-4" />
                 <span className="flex-1 text-left">{category.name}</span>
                 {category.count > 0 && (
-                  <span className="text-xs text-gray-500">{category.count}</span>
+                  <span className="text-xs text-muted-foreground">{category.count}</span>
                 )}
               </button>
             );
           })}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

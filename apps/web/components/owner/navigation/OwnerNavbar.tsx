@@ -1,15 +1,19 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Menu, X } from 'lucide-react';
+import { Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import {
+  Button,
+  IconButton,
+  SearchInput,
+  ThemeToggle,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 import { OwnerProfileDropdown } from './OwnerProfileDropdown';
 import { navGroups } from '../dashboard/OwnerSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -42,19 +46,34 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
   // The navbar is intentionally a bounded preview; the endpoint itself is
   // paginated so a future full notifications workspace can page every record.
+  const notificationsKey = [...ownerKeys.notifications, { page: 1, pageSize: 50 }];
   const { data: notificationsPage } = useQuery({
-    queryKey: [...ownerKeys.notifications, { page: 1, pageSize: 50 }],
+    queryKey: notificationsKey,
     queryFn: () => unwrap(ownerService.getNotifications({ page: 1, pageSize: 50 })),
   });
   const notifications = notificationsPage?.items ?? [];
+  type NotificationsPage = NonNullable<typeof notificationsPage>;
+  const markItemsRead = (old: unknown, isTarget: (id: string) => boolean) => {
+    const page = old as NotificationsPage;
+    return {
+      ...page,
+      items: page.items.map((n) => (isTarget(n.id) ? { ...n, read: true } : n)),
+    };
+  };
 
-  const markRead = useMutation({
+  const markRead = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(ownerService.markNotificationRead(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ownerKeys.notifications }),
+    patches: () => [
+      { queryKey: notificationsKey, update: (old, id) => markItemsRead(old, (n) => n === id) },
+    ],
+    invalidate: [ownerKeys.notifications],
   });
-  const markAllRead = useMutation({
+  const markAllRead = useOptimisticMutation({
     mutationFn: () => unwrap(ownerService.markAllNotificationsRead()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ownerKeys.notifications }),
+    patches: () => [
+      { queryKey: notificationsKey, update: (old) => markItemsRead(old, () => true) },
+    ],
+    invalidate: [ownerKeys.notifications],
   });
 
   // Real-time: refresh the bell when the backend pushes a new notification.
@@ -124,32 +143,33 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
             </div>
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <LegacyInput
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearchSubmit}
-                  placeholder="Search properties, buyers..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <SearchInput
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                onKeyDown={handleSearchSubmit}
+                placeholder="Search properties, buyers..."
+                className="w-full"
+              />
             </div>
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
 
               <div className="relative">
-                <button
+                <IconButton
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-                >
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                  )}
-                </button>
+                  label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+                  aria-expanded={showNotifications}
+                  className="relative"
+                  icon={
+                    <>
+                      <Bell />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
+                      )}
+                    </>
+                  }
+                />
 
                 <AnimatePresence>
                   {showNotifications && (
@@ -157,28 +177,28 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
                     >
                       <div className="p-3 border-b border-border flex justify-between items-center">
                         <h3 className="font-semibold text-foreground">Notifications</h3>
                         {unreadCount > 0 && (
-                          <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-primary hover:text-primary-hover"
-                          >
+                          <Button variant="ghost" size="xs" onClick={handleMarkAllAsRead}>
                             Mark all as read
-                          </button>
+                          </Button>
                         )}
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-gray-500">No notifications</div>
+                          <div className="p-4 text-center text-muted-foreground">
+                            No notifications
+                          </div>
                         ) : (
                           notifications.map((notification) => (
-                            <div
+                            <button
+                              type="button"
                               key={notification.id}
-                              className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
-                                !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                              className={`block w-full p-3 text-left border-b border-border hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                                !notification.read ? 'bg-primary/5' : ''
                               }`}
                               onClick={() => handleOpenNotification(notification)}
                             >
@@ -186,12 +206,12 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
-                                <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                                   {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground">{notification.body}</p>
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>
@@ -211,27 +231,23 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
 
               <OwnerProfileDropdown user={user} />
 
-              <button
+              <IconButton
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
+                className="lg:hidden"
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
+              />
             </div>
           </div>
 
           <div className="md:hidden py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <LegacyInput
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchSubmit}
-                placeholder="Search properties, buyers..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Search properties, buyers..."
+            />
           </div>
         </div>
       </nav>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotificationsHeader } from '@/components/renter/notifications/NotificationsHeader';
 import { NotificationsStats } from '@/components/renter/notifications/NotificationsStats';
 import { NotificationsList } from '@/components/renter/notifications/NotificationsList';
@@ -10,18 +10,27 @@ import { NotificationPreferences } from '@/components/renter/notifications/Notif
 import { NotificationAnalytics } from '@/components/renter/notifications/NotificationAnalytics';
 import { NotificationSearch } from '@/components/renter/notifications/NotificationSearch';
 import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
+import type { Notification } from '@/types/notification';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
+import {
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
 
 export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
+  const notificationsQueryKey = [...renterKeys.notifications, { page, pageSize: PAGE_SIZE }];
   const notificationsQuery = useQuery({
-    queryKey: [...renterKeys.notifications, { page, pageSize: PAGE_SIZE }],
+    queryKey: notificationsQueryKey,
     queryFn: () => unwrap(renterService.listNotifications({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const data = notificationsQuery.data;
   const notifications = data?.items ?? [];
@@ -29,7 +38,7 @@ export default function NotificationsPage() {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterRead, setFilterRead] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const toast = useToast();
 
   const invalidateNotifications = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
@@ -39,28 +48,38 @@ export default function NotificationsPage() {
     invalidateNotifications();
   });
 
-  const markAsReadMutation = useMutation({
+  const markRead = (old: unknown, id?: string) => {
+    const page = old as Paginated<Notification>;
+    return {
+      ...page,
+      items: page.items.map((n) => (id === undefined || n.id === id ? { ...n, read: true } : n)),
+    };
+  };
+
+  const markAsReadMutation = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),
-    onSuccess: invalidateNotifications,
-    onError: () => setErrorMessage('The notification could not be marked as read.'),
+    patches: (id) => [{ queryKey: notificationsQueryKey, update: (old) => markRead(old, id) }],
+    invalidate: [renterKeys.notifications],
+    errorMessage: 'The notification could not be marked as read.',
   });
 
-  const markAllAsReadMutation = useMutation({
+  const markAllAsReadMutation = useOptimisticMutation<unknown, void>({
     mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
-    onSuccess: invalidateNotifications,
-    onError: () => setErrorMessage('Notifications could not be marked as read.'),
+    patches: () => [{ queryKey: notificationsQueryKey, update: (old) => markRead(old) }],
+    invalidate: [renterKeys.notifications],
+    errorMessage: 'Notifications could not be marked as read.',
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.deleteNotification(id)),
     onSuccess: invalidateNotifications,
-    onError: () => setErrorMessage('The notification could not be deleted.'),
+    onError: () => toast.error('The notification could not be deleted.'),
   });
 
   const clearAllMutation = useMutation({
     mutationFn: () => unwrap(renterService.clearAllNotifications()),
     onSuccess: invalidateNotifications,
-    onError: () => setErrorMessage('Notifications could not be cleared.'),
+    onError: () => toast.error('Notifications could not be cleared.'),
   });
 
   const handleMarkAsRead = (id: string) => markAsReadMutation.mutate(id);
@@ -83,7 +102,7 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   if (notificationsQuery.isLoading) return <PageLoadingState />;
-  if (notificationsQuery.isError) {
+  if (notificationsQuery.isError && !data) {
     return (
       <PageErrorState
         title="Notifications are unavailable"
@@ -95,9 +114,6 @@ export default function NotificationsPage() {
 
   return (
     <>
-      {errorMessage && (
-        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
-      )}
       <NotificationsHeader
         unreadCount={unreadCount}
         totalCount={notifications.length}

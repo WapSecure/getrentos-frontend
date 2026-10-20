@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Building2, Percent, PiggyBank, TrendingUp, Users } from 'lucide-react';
-import { EmptyState, PageErrorState, PageLoadingState } from '@getrentos/ui';
+import {
+  Alert,
+  EmptyState,
+  PageErrorState,
+  Select,
+  StatCard,
+  StatGridSkeleton,
+  TableSkeleton,
+} from '@getrentos/ui';
 import { PropertyValueModal } from '@/components/landlord/properties/PropertyValueModal';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import { usePlanTier } from '@/hooks/usePlanTier';
@@ -97,8 +105,13 @@ export function PortfolioView() {
 
   let body;
   if (query.isPending) {
-    body = <PageLoadingState />;
-  } else if (query.isError) {
+    body = (
+      <>
+        <StatGridSkeleton className="mb-6 grid-cols-2" />
+        <TableSkeleton rows={4} columns={6} />
+      </>
+    );
+  } else if (!query.data) {
     body = (
       <PageErrorState
         title="Portfolio figures are unavailable"
@@ -120,43 +133,39 @@ export function PortfolioView() {
       <>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {cards.map((card) => (
-            <div key={card.label} className="bg-card rounded-2xl border border-border p-4">
-              <div className="inline-flex p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/20 mb-3">
-                <card.icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">{card.label}</p>
-              <p className="text-xl font-bold text-foreground tracking-tight tabular-nums">
-                {card.value}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{card.hint}</p>
-            </div>
+            <StatCard
+              key={card.label}
+              icon={card.icon}
+              label={card.label}
+              value={card.value}
+              subtitle={card.hint}
+            />
           ))}
         </div>
 
         {unvalued > 0 && (
-          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300">
+          <Alert variant="warning" className="mb-4">
             {unvalued === 1 ? '1 property has' : `${unvalued} properties have`} no current value, so{' '}
             {unvalued === 1 ? 'it is' : 'they are'} left out of the cap rate. Use “Add value” in the
             table below.
-          </p>
+          </Alert>
         )}
 
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-foreground">Properties compared</h2>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            Sort by
-            <select
-              value={sortKey}
-              onChange={(event) => setSortKey(event.target.value as SortKey)}
-              className="rounded-lg border border-border bg-card px-2 py-1 text-sm text-foreground"
-            >
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span aria-hidden="true">Sort by</span>
+            <div className="w-40">
+              <Select
+                value={sortKey}
+                onValueChange={(value) => setSortKey(value as SortKey)}
+                options={SORT_OPTIONS}
+                ariaLabel="Sort by"
+                searchable={false}
+                controlSize="sm"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-border bg-card">
@@ -202,9 +211,7 @@ export function PortfolioView() {
                     <td className="px-3 py-3 text-right">{money(row.operatingExpenses)}</td>
                     <td
                       className={`px-3 py-3 text-right font-medium ${
-                        row.netOperatingIncome < 0
-                          ? 'text-red-600 dark:text-red-400'
-                          : 'text-foreground'
+                        row.netOperatingIncome < 0 ? 'text-destructive' : 'text-foreground'
                       }`}
                     >
                       {money(row.netOperatingIncome)}
@@ -226,9 +233,7 @@ export function PortfolioView() {
                           {row.capRateVsPortfolio !== null && (
                             <p
                               className={`text-xs ${
-                                row.capRateVsPortfolio < 0
-                                  ? 'text-red-600 dark:text-red-400'
-                                  : 'text-emerald-600 dark:text-emerald-400'
+                                row.capRateVsPortfolio < 0 ? 'text-destructive' : 'text-success'
                               }`}
                             >
                               {row.capRateVsPortfolio > 0 ? '+' : ''}

@@ -9,6 +9,9 @@ export interface ButtonProps extends Omit<
   'children' | 'type' | 'onClick'
 > {
   children: ReactNode;
+  /** With `href`: open in a new tab ("_blank") and the link's rel. External tabs get noopener by default. */
+  target?: string;
+  rel?: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
@@ -65,6 +68,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       autoFocus = false,
       'aria-label': ariaLabel,
       loadingText,
+      target,
+      rel,
       ...rest
     },
     ref
@@ -164,6 +169,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           aria-label={ariaLabel}
           id={rest.id}
           aria-current={rest['aria-current']}
+          target={target}
+          rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
         >
           {content}
         </Link>

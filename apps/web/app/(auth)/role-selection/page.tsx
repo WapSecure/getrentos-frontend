@@ -63,11 +63,11 @@ export default function RoleSelectionPage() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
         onClick={handleBack}
-        className="fixed left-6 top-6 z-30 flex items-center gap-2 rounded-lg border border-border bg-white/80 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-gray-100 dark:bg-white/10 dark:hover:bg-white/20"
+        className="fixed left-6 top-6 z-30 flex items-center gap-2 rounded-lg border border-border bg-card/80 px-3 py-2 shadow-sm backdrop-blur-sm transition-all hover:bg-secondary"
         aria-label="Go back"
       >
-        <ArrowLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-        <span className="text-sm text-gray-700 dark:text-gray-300">Back</span>
+        <ArrowLeft className="w-4 h-4 text-foreground" />
+        <span className="text-sm text-foreground">Back</span>
       </motion.button>
 
       <div className="fixed right-6 top-6 z-30">
@@ -89,10 +89,10 @@ export default function RoleSelectionPage() {
               <Logo size="lg" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Choose your role(s)</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
+            <p className="text-lg text-muted-foreground">
               Select how you&apos;ll use GetRentos to get a personalized experience
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               You can add more roles later with supporting documents
             </p>
           </motion.div>

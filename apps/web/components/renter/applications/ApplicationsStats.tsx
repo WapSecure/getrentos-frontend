@@ -12,26 +12,22 @@ export const ApplicationsStats = ({ applications }: ApplicationsStatsProps) => {
     {
       label: 'Total Applications',
       value: applications.length,
-      color: 'text-blue-600 dark:text-blue-400',
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      color: 'text-info',
     },
     {
       label: 'Under Review',
       value: applications.filter((a) => a.status === 'under_review').length,
-      color: 'text-yellow-600 dark:text-yellow-400',
-      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+      color: 'text-warning',
     },
     {
       label: 'Approved',
       value: applications.filter((a) => a.status === 'approved').length,
-      color: 'text-green-600 dark:text-green-400',
-      bg: 'bg-green-50 dark:bg-green-900/20',
+      color: 'text-success',
     },
     {
       label: 'Rejected',
       value: applications.filter((a) => a.status === 'rejected').length,
-      color: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-50 dark:bg-red-900/20',
+      color: 'text-destructive',
     },
   ];
 
