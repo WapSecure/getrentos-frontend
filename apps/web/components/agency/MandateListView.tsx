@@ -17,6 +17,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
 import {
+  MANDATE_SCOPE_CHIP,
   MANDATE_SCOPE_LABELS,
   MANDATE_STATUS_LABELS,
   formatDay,
@@ -113,9 +114,7 @@ export function MandateListView() {
         </Button>
       </header>
 
-      {act.isError && (
-        <Alert variant="danger">{(act.error as Error).message}</Alert>
-      )}
+      {act.isError && <Alert variant="danger">{(act.error as Error).message}</Alert>}
 
       {mandates.length === 0 ? (
         <EmptyState
@@ -200,7 +199,7 @@ function MandateCard({
             title={MANDATE_SCOPE_LABELS[scope]}
             className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground"
           >
-            {scope}
+            {MANDATE_SCOPE_CHIP[scope]}
           </span>
         ))}
         <CapabilityChip on={mandate.capabilities.canList} label="list" />
@@ -231,9 +230,7 @@ function CapabilityChip({ on, label }: { on: boolean; label: string }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        on
-          ? 'bg-success-subtle text-success'
-          : 'bg-muted text-muted-foreground line-through'
+        on ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground line-through'
       }`}
     >
       {label}

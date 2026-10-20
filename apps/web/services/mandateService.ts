@@ -28,6 +28,15 @@ export const MANDATE_SCOPE_LABELS: Record<MandateScope, string> = {
   COMPLIANCE: 'Statutory notices and documents',
 };
 
+/** Short chip labels, in the same lowercase as the capability chips beside them. */
+export const MANDATE_SCOPE_CHIP: Record<MandateScope, string> = {
+  RENT: 'rent',
+  MAINTENANCE: 'maintenance',
+  LISTINGS: 'listings',
+  LEGAL: 'legal',
+  COMPLIANCE: 'compliance',
+};
+
 /** Mirrors the backend's `MandateStatus`. */
 export const MANDATE_STATUSES = [
   'DRAFT',

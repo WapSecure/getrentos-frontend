@@ -147,6 +147,41 @@ const FeeCardColumn = ({ card, highlight }: { card: ManagedTierCard; highlight: 
   </div>
 );
 
+/**
+ * Picker labels that tell properties apart: the name, then the address when two
+ * share a name, then a number when even that is the same.
+ */
+function distinctLabels(
+  list: { id: string; name: string; address?: string | null; city?: string | null }[]
+) {
+  const count = (keyOf: (p: (typeof list)[number]) => string) => {
+    const seen = new Map<string, number>();
+    for (const p of list) seen.set(keyOf(p), (seen.get(keyOf(p)) ?? 0) + 1);
+    return seen;
+  };
+  const withPlace = (p: (typeof list)[number]) =>
+    [p.name, [p.address, p.city].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+  const names = count((p) => p.name);
+  const places = count(withPlace);
+  const nth = new Map<string, number>();
+  const labels = new Map<string, string>();
+  for (const p of list) {
+    if ((names.get(p.name) ?? 0) < 2) {
+      labels.set(p.id, p.name);
+      continue;
+    }
+    const place = withPlace(p);
+    if ((places.get(place) ?? 0) < 2) {
+      labels.set(p.id, place);
+      continue;
+    }
+    const n = (nth.get(place) ?? 0) + 1;
+    nth.set(place, n);
+    labels.set(p.id, `${place} (${n})`);
+  }
+  return labels;
+}
+
 export const GetRentosManagedView = () => {
   const queryClient = useQueryClient();
   const [intakeFor, setIntakeFor] = useState<{ id: string; name: string } | null>(null);
@@ -248,6 +283,7 @@ export const GetRentosManagedView = () => {
 
   const cards = feeCard.data ?? [];
   const propertyList = properties.data?.items ?? [];
+  const pickerLabels = distinctLabels(propertyList);
 
   return (
     <>
@@ -677,7 +713,10 @@ export const GetRentosManagedView = () => {
                           onValueChange={(value) =>
                             setFirmPropertyByFirm((prev) => ({ ...prev, [firm.id]: value }))
                           }
-                          options={openProperties.map((p) => ({ value: p.id, label: p.name }))}
+                          options={openProperties.map((p) => ({
+                            value: p.id,
+                            label: pickerLabels.get(p.id) ?? p.name,
+                          }))}
                         />
                       </div>
                       <Button

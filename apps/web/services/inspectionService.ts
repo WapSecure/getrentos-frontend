@@ -73,6 +73,8 @@ export interface InspectionListItem {
 export interface InspectionDetail extends InspectionListItem {
   mandateId: string | null;
   summaryNotes: string | null;
+  /** A manager under a mandate may release the report to the owner; never the owner. */
+  canShareWithOwner: boolean;
   sharedAt: string | null;
   conductedById: string;
   conductedByName: string | null;
