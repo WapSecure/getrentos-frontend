@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { env } from '@/lib/env';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Land I watch: inspection reports, incidents and reminders. */
 export default function LandWatch() {
@@ -46,7 +47,7 @@ export default function LandWatch() {
           eyebrow="Land"
           title="Land Watch"
           subtitle="Independent eyes on land you own"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
@@ -72,6 +73,7 @@ export default function LandWatch() {
             <Pressable
               key={w.id}
               accessibilityRole="button"
+              accessibilityLabel={`${w.land.label}, ${w.land.city}, ${w.land.state}`}
               onPress={() =>
                 router.push({ pathname: '/(app)/land-watch-detail/[id]', params: { id: w.id } })
               }

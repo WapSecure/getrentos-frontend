@@ -1,8 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Share, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, Share2, Ticket } from 'lucide-react-native';
@@ -37,6 +43,7 @@ import { gatemanApi } from '@/lib/api/gateman';
 import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 type View_ =
   | 'CHECKED_IN'
@@ -106,6 +113,7 @@ export default function EstateVisitors() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<VisitorPass[]>(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
@@ -158,7 +166,7 @@ export default function EstateVisitors() {
                     : `${total.toLocaleString('en-NG')} passes`
               : undefined
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Issue a visitor pass"
@@ -196,6 +204,7 @@ export default function EstateVisitors() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(p) => p.id}
           refreshControl={refresh}
@@ -388,11 +397,17 @@ function IssueForm({ estateId, onDone }: { estateId: string; onDone: () => void 
         onChange={setHousehold}
         label="Who are they visiting"
       />
-      <TextField label="Visitor’s name" value={name} onChangeText={setName} maxLength={120} />
+      <TextField
+        label="Visitor’s name"
+        required
+        value={name}
+        onChangeText={setName}
+        maxLength={120}
+      />
       <TextField
         label="Visitor’s phone (optional)"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
         keyboardType="phone-pad"
         maxLength={30}
       />
@@ -438,7 +453,7 @@ function IdCheckView({ estateId, pass }: { estateId: string; pass: VisitorPass }
   });
 
   if (check.isPending) return <Skeleton height={220} radius={radius.lg} />;
-  if (check.isError) {
+  if (check.isError && check.data === undefined) {
     return <FormAlert message={errorText(check.error, 'Could not load the ID for this visit.')} />;
   }
   const doc = check.data;

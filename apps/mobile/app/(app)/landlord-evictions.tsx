@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Download, Gavel, TriangleAlert, Plus } from 'lucide-react-native';
 import {
   Badge,
+  Button,
   Card,
   EmptyState,
   ErrorState,
@@ -28,6 +29,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function tone(status: string) {
   return EVICTION_TONE[status.toLowerCase() as EvictionStatus] ?? 'neutral';
@@ -98,7 +100,7 @@ export default function LandlordEvictions() {
               : 'No active cases'
             : 'Notices, filings and resolutions'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setCreating(true)}
@@ -108,7 +110,7 @@ export default function LandlordEvictions() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
@@ -124,6 +126,7 @@ export default function LandlordEvictions() {
             <CaseCard
               kase={item}
               busy={busyId === item.id}
+              acting={busyId === item.id && act.isPending ? act.variables?.action : undefined}
               onAct={(action, label) =>
                 Alert.alert(`${label}?`, `${item.tenantName} · ${item.propertyName}`, [
                   { text: 'Cancel', style: 'cancel' },
@@ -166,11 +169,14 @@ export default function LandlordEvictions() {
 function CaseCard({
   kase: e,
   busy,
+  acting,
   onAct,
   onDownloadNotice,
 }: {
   kase: EvictionCase;
   busy: boolean;
+  /** The case action being sent, so its button shows progress. */
+  acting?: 'file' | 'resolve' | 'withdraw';
   onAct: (action: 'file' | 'resolve' | 'withdraw', label: string) => void;
   onDownloadNotice: () => void;
 }) {
@@ -234,12 +240,14 @@ function CaseCard({
               label="Withdraw"
               onPress={() => onAct('withdraw', 'Withdraw')}
               busy={busy}
+              loading={acting === 'withdraw'}
             />
             {status === 'issued' ? (
               <ActionButton
                 label="File"
                 onPress={() => onAct('file', 'File')}
                 busy={busy}
+                loading={acting === 'file'}
                 tone="destructive"
               />
             ) : null}
@@ -247,6 +255,7 @@ function CaseCard({
               label="Resolve"
               onPress={() => onAct('resolve', 'Resolve')}
               busy={busy}
+              loading={acting === 'resolve'}
               tone="primary"
             />
           </View>
@@ -260,45 +269,25 @@ function ActionButton({
   label,
   onPress,
   busy,
+  loading,
   tone: t,
 }: {
   label: string;
   onPress: () => void;
   busy: boolean;
+  loading?: boolean;
   tone?: 'primary' | 'destructive';
 }) {
-  const { colors, spacing, radius } = useTheme();
-  const filled = t === 'primary';
   return (
-    <Pressable
+    <Button
+      label={label}
       onPress={onPress}
       disabled={busy}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        paddingVertical: spacing.md,
-        borderRadius: radius.md,
-        borderWidth: filled ? 0 : 1,
-        borderColor: colors.border,
-        backgroundColor: filled ? colors.primary : 'transparent',
-        opacity: busy ? 0.5 : 1,
-      }}
-    >
-      <Text
-        variant="caption"
-        style={{
-          fontWeight: '600',
-          color: filled
-            ? colors.primaryForeground
-            : t === 'destructive'
-              ? colors.destructive
-              : colors.mutedForeground,
-        }}
-      >
-        {label}
-      </Text>
-    </Pressable>
+      loading={loading}
+      size="sm"
+      fullWidth={false}
+      variant={t ?? 'outline'}
+      style={{ flex: 1 }}
+    />
   );
 }

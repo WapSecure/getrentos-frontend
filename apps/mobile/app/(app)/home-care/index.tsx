@@ -15,7 +15,15 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
-import { ErrorState, IconButton, Price, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import {
+  ErrorState,
+  IconButton,
+  Price,
+  Skeleton,
+  StatSkeleton,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -23,6 +31,7 @@ import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { isUpgradeError } from '@/components/host/HostUI';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
 import { HomeCareProGate } from '@/components/homecare/HomeCareProGate';
+import { goBack } from '@/lib/goBack';
 
 /**
  * Keeping the homes in shape: what's broken, what's due, and what's overdue,
@@ -81,7 +90,7 @@ export default function HomeCare() {
         eyebrow="Home care"
         title="Maintenance"
         subtitle="Repairs, assets and upkeep across your homes"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           d ? (
             <IconButton
@@ -98,7 +107,7 @@ export default function HomeCare() {
         <ErrorState onRetry={() => dashboard.refetch()} />
       ) : !d ? (
         <>
-          <Skeleton height={160} radius={radius.lg} />
+          <StatSkeleton />
           <Skeleton height={120} radius={radius.lg} />
         </>
       ) : (

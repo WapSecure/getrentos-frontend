@@ -1,22 +1,15 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Star } from 'lucide-react-native';
-import {
-  Card,
-  Divider,
-  EmptyState,
-  ErrorState,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Card, Divider, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorReview } from '@/lib/api/realtor';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** What clients say, with the rating spread. */
 export default function RealtorReviews() {
@@ -50,7 +43,7 @@ export default function RealtorReviews() {
               ? `${summaryQuery.data.averageRating.toFixed(1)} average from ${summaryQuery.data.reviewCount} review${summaryQuery.data.reviewCount === 1 ? '' : 's'}`
               : 'Client feedback and rating trends'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 
@@ -59,9 +52,7 @@ export default function RealtorReviews() {
           <Card elevated>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.lg }}>
               <View style={{ alignItems: 'center' }}>
-                <Text variant="title" style={{ fontSize: 32 }}>
-                  {summaryQuery.data.averageRating.toFixed(1)}
-                </Text>
+                <Text variant="display">{summaryQuery.data.averageRating.toFixed(1)}</Text>
                 <View style={{ flexDirection: 'row', gap: 1 }}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <Star
@@ -116,21 +107,22 @@ export default function RealtorReviews() {
         </View>
       ) : null}
 
-      {listQuery.isError ? (
-        <ErrorState onRetry={() => listQuery.refetch()} />
-      ) : listQuery.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={80} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Star size={34} color={colors.mutedForeground} />}
-          title="No reviews yet"
-          description="Reviews from your clients will appear here."
-        />
-      ) : (
+      <QueryState
+        query={listQuery}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={80} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Star size={34} color={colors.mutedForeground} />,
+          title: 'No reviews yet',
+          description: 'Reviews from your clients will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -185,7 +177,7 @@ export default function RealtorReviews() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

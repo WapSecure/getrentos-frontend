@@ -1,9 +1,9 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { Calendar } from 'lucide-react-native';
-import { Badge, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   viewingsApi,
@@ -14,6 +14,7 @@ import {
 import { formatDate, formatTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
+import { goBack } from '@/lib/goBack';
 
 export default function Viewings() {
   const { colors, spacing, radius } = useTheme();
@@ -26,24 +27,25 @@ export default function Viewings() {
         eyebrow="Property discovery"
         title="Viewings"
         subtitle="Requests, confirmations and tour dates"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={78} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Calendar size={34} color={colors.mutedForeground} />}
-          title="No viewings requested"
-          description="Request a viewing from any listing to see it here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={78} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Calendar size={34} color={colors.mutedForeground} />,
+          title: 'No viewings requested',
+          description: 'Request a viewing from any listing to see it here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -61,7 +63,7 @@ export default function Viewings() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

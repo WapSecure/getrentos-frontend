@@ -14,6 +14,7 @@ import { ChevronLeft, Send } from 'lucide-react-native';
 import {
   Badge,
   ErrorState,
+  LinkButton,
   Skeleton,
   Text,
   TextField,
@@ -129,19 +130,17 @@ export default function SupportThreadScreen() {
           <Badge label={resolved ? 'Resolved' : 'Open'} tone={resolved ? 'success' : 'warning'} />
         ) : null}
         {!resolved && thread ? (
-          <Pressable
+          <LinkButton
+            label="Resolve"
             onPress={() => resolveMutation.mutate()}
-            hitSlop={8}
+            disabled={resolveMutation.isPending}
+            accessibilityHint="Marks this conversation as resolved"
             style={{ marginLeft: spacing.sm }}
-          >
-            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-              Resolve
-            </Text>
-          </Pressable>
+          />
         ) : null}
       </View>
 
-      {messagesQuery.isError ? (
+      {messagesQuery.isError && !messagesQuery.data ? (
         <ErrorState onRetry={() => messagesQuery.refetch()} />
       ) : !messagesQuery.data ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
@@ -173,6 +172,7 @@ export default function SupportThreadScreen() {
         <View style={{ flex: 1 }}>
           <TextField
             placeholder={resolved ? 'Send a message to reopen this conversation' : 'Message'}
+            accessibilityLabel="Message"
             value={text}
             onChangeText={setText}
             multiline
@@ -182,6 +182,12 @@ export default function SupportThreadScreen() {
         <Pressable
           onPress={() => sendMutation.mutate()}
           disabled={!text.trim() || sendMutation.isPending}
+          accessibilityRole="button"
+          accessibilityLabel="Send message"
+          accessibilityState={{
+            disabled: !text.trim() || sendMutation.isPending,
+            busy: sendMutation.isPending,
+          }}
           style={{
             width: 40,
             height: 40,

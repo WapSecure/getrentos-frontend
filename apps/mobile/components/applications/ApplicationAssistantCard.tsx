@@ -6,13 +6,13 @@ import { qk } from '@/lib/query/keys';
 import { applicationAssistantApi, type AssistantStep } from '@/lib/api/applicationAssistant';
 
 export function ApplicationAssistantCard() {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const query = useQuery({
     queryKey: qk.renter.applicationAssistant,
     queryFn: applicationAssistantApi.get,
   });
 
-  if (query.isLoading) return <Skeleton height={160} radius={16} />;
+  if (query.isLoading) return <Skeleton height={160} radius={radius.xl} />;
   if (!query.data) return null;
 
   const { steps, suggestion } = query.data;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowRightLeft } from 'lucide-react-native';
@@ -10,6 +10,7 @@ import {
   EmptyState,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -31,6 +32,7 @@ import { formatDate, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 /**
  * One negotiation: every amount on the table in order, and a counter for the
@@ -68,7 +70,7 @@ export default function RealtorOfferDetail() {
           eyebrow="Offer"
           title={o ? o.listing.listingTitle || o.listing.property.title : 'Offer'}
           subtitle={o ? `From ${o.buyer.legalName || o.buyer.email}` : undefined}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {offers.isError && !offers.data ? (
           <ErrorState onRetry={() => offers.refetch()} />
@@ -187,11 +189,13 @@ function CounterForm({
       <Text variant="bodyStrong" accessibilityRole="header">
         Counter
       </Text>
-      <TextField
-        label="Your counter (₦)"
-        keyboardType="number-pad"
-        value={n ? n.toLocaleString('en-NG') : ''}
-        onChangeText={setAmount}
+      <NumberField
+        label="Your counter"
+        currency
+        required
+        placeholder="0"
+        value={amount}
+        onValueChange={setAmount}
         hint={
           n && asking
             ? (vsAsking(n, asking) ?? undefined)

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Plus, Trash2, Waves } from 'lucide-react-native';
@@ -32,6 +32,7 @@ import {
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 type View_ = 'bookings' | 'amenities';
 
@@ -118,7 +119,7 @@ export default function EstateAmenities() {
           eyebrow={estate?.name ?? 'Community'}
           title="Amenities"
           subtitle="Shared spaces residents can book"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add an amenity"
@@ -339,6 +340,7 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Name"
+        required
         value={name}
         onChangeText={setName}
         maxLength={80}

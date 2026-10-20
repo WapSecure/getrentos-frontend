@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react-native';
 import {
@@ -10,6 +10,8 @@ import {
   Divider,
   FormAlert,
   IconButton,
+  LinkButton,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -200,14 +202,10 @@ function QuoteForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
         <VendorPicker value={vendorId} onChange={setVendorId} />
-        <TextField
-          label="Amount (₦)"
-          keyboardType="number-pad"
-          value={value ? value.toLocaleString('en-NG') : ''}
-          onChangeText={setAmount}
-        />
+        <NumberField label="Amount" required currency value={amount} onValueChange={setAmount} />
         <TextField
           label="Scope of work"
+          required
           value={scope}
           onChangeText={setScope}
           multiline
@@ -505,7 +503,8 @@ function InvoiceForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
           From {w.assignedVendor?.name}. {budget != null ? `Budget ${naira(budget)}.` : ''}
         </Text>
         <TextField
-          label="Vendor’s invoice number (optional)"
+          label="Vendor’s invoice number"
+          optional
           value={number}
           onChangeText={setNumber}
           maxLength={120}
@@ -516,6 +515,7 @@ function InvoiceForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
               <View style={{ flex: 1 }}>
                 <TextField
                   label={`Item ${i + 1}`}
+                  required
                   value={l.description}
                   onChangeText={(description) => setLine(i, { description })}
                 />
@@ -530,36 +530,31 @@ function InvoiceForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
             </View>
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <View style={{ width: 90 }}>
-                <TextField
+                <NumberField
                   label="Qty"
-                  keyboardType="number-pad"
+                  required
                   value={String(l.quantity || '')}
-                  onChangeText={(v) => setLine(i, { quantity: Number(v.replace(/\D/g, '')) || 0 })}
+                  onValueChange={(v) => setLine(i, { quantity: Number(v) || 0 })}
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <TextField
-                  label="Unit price (₦)"
-                  keyboardType="number-pad"
-                  value={l.unitAmount ? l.unitAmount.toLocaleString('en-NG') : ''}
-                  onChangeText={(v) =>
-                    setLine(i, { unitAmount: Number(v.replace(/\D/g, '')) || 0 })
-                  }
+                <NumberField
+                  label="Unit price"
+                  required
+                  currency
+                  value={l.unitAmount ? String(l.unitAmount) : ''}
+                  onValueChange={(v) => setLine(i, { unitAmount: Number(v) || 0 })}
                 />
               </View>
             </View>
           </Card>
         ))}
-        <Pressable
+        <LinkButton
+          label="Add item"
+          icon={<Plus size={16} color={colors.primary} />}
           onPress={() => setLines((ls) => [...ls, { description: '', quantity: 1, unitAmount: 0 }])}
-          accessibilityRole="button"
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}
-        >
-          <Plus size={16} color={colors.primary} />
-          <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-            Add item
-          </Text>
-        </Pressable>
+          style={{ alignSelf: 'flex-start' }}
+        />
         <Divider />
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text variant="bodyStrong" style={{ flex: 1 }}>
@@ -573,12 +568,7 @@ function InvoiceForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
             message={`That’s ${naira(total - budget)} over the approved budget; it won’t be approvable.`}
           />
         ) : null}
-        <TextField
-          label="Completion note (optional)"
-          value={note}
-          onChangeText={setNote}
-          multiline
-        />
+        <TextField label="Completion note" optional value={note} onChangeText={setNote} multiline />
         {add.error ? <FormAlert message={err(add.error, 'Could not save the invoice.')} /> : null}
         <Button
           label="Save draft"
@@ -626,12 +616,13 @@ function VendorPayoutForm({ vendorId, onDone }: { vendorId: string; onDone: () =
             />
           ))}
         </View>
-        <TextField
+        <NumberField
           label="Account number"
-          keyboardType="number-pad"
+          required
+          code
           maxLength={10}
           value={accountNumber}
-          onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
+          onValueChange={setAccountNumber}
         />
         {save.error ? (
           <FormAlert message={err(save.error, 'We couldn’t check that account.')} />

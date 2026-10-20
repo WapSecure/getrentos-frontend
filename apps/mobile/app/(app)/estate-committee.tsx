@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Landmark, Plus } from 'lucide-react-native';
@@ -36,6 +36,7 @@ import {
 } from '@/lib/api/estateGovernance';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type Panel = { kind: 'appoint' } | { kind: 'edit'; member: CommitteeMember } | null;
 
@@ -83,7 +84,7 @@ export default function EstateCommittee() {
               ? `${query.data.length} ${query.data.length === 1 ? 'seat' : 'seats'} filled`
               : 'The board running the estate'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Appoint a household"

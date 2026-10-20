@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Lock, BadgeCheck, Wallet } from 'lucide-react-native';
@@ -30,6 +30,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const PLAN_LENGTHS: FinancingPlanLength[] = [3, 6, 12];
 const INSTALLMENT_STATUS_TONE: Record<
@@ -53,14 +54,14 @@ export default function Financing() {
         eyebrow="Flexible rent"
         title="GetRentos Flex"
         subtitle="Eligibility, plans and installments"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           <Skeleton height={180} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>
@@ -187,6 +188,9 @@ function ApplyPanel({ rentAmount, onClose }: { rentAmount: number; onClose: () =
             <Pressable
               key={m}
               onPress={() => setMonths(m)}
+              accessibilityRole="radio"
+              accessibilityLabel={`${m} months, ${feePercent}% fee`}
+              accessibilityState={{ checked: selected }}
               style={({ pressed }) => ({
                 flexDirection: 'row',
                 alignItems: 'center',

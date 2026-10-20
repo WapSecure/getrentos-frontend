@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+import { ScrollView, View } from 'react-native';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -8,7 +8,9 @@ import {
   Card,
   Chip,
   ErrorState,
+  NumberField,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -21,6 +23,7 @@ import {
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Duplex', 'Bungalow', 'Land', 'Commercial'];
 
@@ -37,30 +40,31 @@ export default function BuyerSearchPreferences() {
         eyebrow="Property discovery"
         title="Search preferences"
         subtitle="Tune budgets, locations and match alerts"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        <SearchPreferencesForm data={query.data} />
+      ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={260} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <SearchPreferencesForm data={query.data} />
+        <ErrorState onRetry={() => query.refetch()} />
       )}
     </View>
   );
 }
 
 function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
 
-  const [minBudget, setMinBudget] = useState(String(data.minBudget ?? ''));
-  const [maxBudget, setMaxBudget] = useState(String(data.maxBudget ?? ''));
+  // 0 means no limit, so it shows as an empty field rather than a typed "0".
+  const [minBudget, setMinBudget] = useState(data.minBudget ? String(data.minBudget) : '');
+  const [maxBudget, setMaxBudget] = useState(data.maxBudget ? String(data.maxBudget) : '');
   const [preferredLocations, setPreferredLocations] = useState(data.preferredLocations ?? '');
   const [preferredTypes, setPreferredTypes] = useState<string[]>(data.preferredTypes ?? []);
   const [notifyOnMatch, setNotifyOnMatch] = useState(data.notifyOnMatch ?? true);
@@ -100,19 +104,21 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
       <Card elevated style={{ gap: spacing.md }}>
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
-            <TextField
+            <NumberField
               label="Min budget"
               value={minBudget}
-              onChangeText={setMinBudget}
-              keyboardType="number-pad"
+              onValueChange={setMinBudget}
+              placeholder="No minimum"
+              currency
             />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField
+            <NumberField
               label="Max budget"
               value={maxBudget}
-              onChangeText={setMaxBudget}
-              keyboardType="number-pad"
+              onValueChange={setMaxBudget}
+              placeholder="No maximum"
+              currency
             />
           </View>
         </View>
@@ -139,21 +145,12 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
         </View>
       </View>
 
-      <Card
-        elevated
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Notify me on match</Text>
-          <Text variant="caption" color="mutedForeground">
-            Get alerted when a new listing matches these preferences.
-          </Text>
-        </View>
-        <Switch
+      <Card elevated>
+        <SwitchRow
+          label="Notify me on match"
+          description="Get alerted when a new listing matches these preferences."
           value={notifyOnMatch}
           onValueChange={setNotifyOnMatch}
-          trackColor={{ true: colors.primary, false: colors.secondary }}
-          thumbColor={colors.card}
         />
       </Card>
 

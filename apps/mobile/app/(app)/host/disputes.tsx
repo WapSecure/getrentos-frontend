@@ -24,6 +24,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill, type Tone } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 const DISPUTE_STATUS: Record<string, { label: string; tone: Tone }> = {
   OPEN: { label: 'Open', tone: 'warning' },
@@ -75,7 +76,7 @@ export default function HostDisputes() {
         eyebrow="Hosting"
         title="Disputes & claims"
         subtitle="Open one from the booking it’s about"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <SegmentedControl
         accessibilityLabel="Disputes or deposit claims"

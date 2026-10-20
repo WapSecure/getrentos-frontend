@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react-native';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, NumberField, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordUnit } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
@@ -107,12 +107,14 @@ function BulkPriceForm({
         })}
       </View>
 
-      <TextField
-        label="New rent per year (₦)"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="New rent per year"
+        placeholder="0"
         value={rent}
-        onChangeText={(v) => setRent(v.replace(/\D/g, ''))}
+        onValueChange={setRent}
         editable={!save.isPending}
+        required
       />
 
       <Button

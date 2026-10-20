@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from 'lucide-react-native';
@@ -8,9 +8,9 @@ import {
   type BadgeTone,
   Button,
   Card,
-  EmptyState,
+  ListSkeleton,
+  QueryState,
   Screen,
-  Skeleton,
   Text,
   useTheme,
   useToast,
@@ -19,6 +19,7 @@ import { residentApi, type Due, type DueCategory, type DueStatus } from '@/lib/a
 import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_LABEL: Record<DueStatus, string> = {
   pending: 'Pending',
@@ -44,7 +45,7 @@ const CATEGORY_LABEL: Record<DueCategory, string> = {
 };
 
 export default function ResidentDues() {
-  const { colors, spacing } = useTheme();
+  const { colors } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -79,30 +80,28 @@ export default function ResidentDues() {
         eyebrow="Estate finance"
         title="Dues"
         subtitle="Charges, payments and recurring obligations"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={90} radius={16} />
-            <Skeleton height={90} radius={16} />
-          </View>
-        ) : dues.length > 0 ? (
-          dues.map((due) => (
+        <QueryState
+          query={query}
+          skeleton={<ListSkeleton variant="card" rows={2} height={90} />}
+          isEmpty={dues.length === 0}
+          empty={{
+            icon: <ReceiptText size={34} color={colors.mutedForeground} />,
+            title: 'No dues yet',
+            description: "Your estate manager hasn't charged any dues to your household.",
+          }}
+        >
+          {dues.map((due) => (
             <DueCard
               key={due.id}
               due={due}
               onPay={pay.mutate}
               paying={pay.isPending && pay.variables === due.id}
             />
-          ))
-        ) : (
-          <EmptyState
-            icon={<ReceiptText size={34} color={colors.mutedForeground} />}
-            title="No dues yet"
-            description="Your estate manager hasn't charged any dues to your household."
-          />
-        )}
+          ))}
+        </QueryState>
       </Screen>
     </View>
   );

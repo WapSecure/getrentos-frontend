@@ -6,10 +6,9 @@ import {
   RefreshControl,
   ScrollView,
   Share,
-  Switch,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -21,6 +20,7 @@ import {
   ErrorState,
   FormAlert,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -45,6 +45,7 @@ import {
 } from '@/lib/api/estateGovernance';
 import { pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 /**
  * The estate's public page on the website: one link to share with residents
@@ -95,7 +96,7 @@ export default function EstateMicrosite() {
           eyebrow={estate?.name ?? 'Public page'}
           title="Microsite"
           subtitle="The estate’s page on the web"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             query.data ? (
               <StatusPill label={live ? 'Live' : 'Draft'} tone={live ? 'success' : 'neutral'} />
@@ -239,22 +240,19 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
         </View>
       </Pressable>
 
-      <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <Globe size={20} color={enabled ? colors.success : colors.mutedForeground} />
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Publish the page</Text>
-          <Text variant="caption" color="mutedForeground">
-            {enabled ? 'Live: anyone with the link can see it' : 'Draft: hidden from the public'}
-          </Text>
-        </View>
-        <Switch
+      <Card elevated>
+        <SwitchRow
+          icon={<Globe size={20} color={enabled ? colors.success : colors.mutedForeground} />}
+          label="Publish the page"
+          description={
+            enabled ? 'Live: anyone with the link can see it' : 'Draft: hidden from the public'
+          }
           value={enabled}
           disabled={publish.isPending}
           onValueChange={(v) => {
             setEnabled(v);
             publish.mutate(v);
           }}
-          accessibilityLabel="Publish the microsite"
         />
       </Card>
 
@@ -311,7 +309,7 @@ function MicrositeForm({ estateId, initial }: { estateId: string; initial: Micro
         multiline
         maxLength={MICROSITE_BIO_MAX}
         placeholder="What it’s like to live here: security, amenities, the community…"
-        hint={`${bio.length} / ${MICROSITE_BIO_MAX}`}
+        showCount
       />
       {save.error ? (
         <FormAlert message={errorText(save.error, 'Could not save these changes.')} />

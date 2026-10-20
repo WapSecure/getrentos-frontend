@@ -59,6 +59,7 @@ function InviteClientForm({
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
+        required
         editable={!mutation.isPending}
       />
       <Button

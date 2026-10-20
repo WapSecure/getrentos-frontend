@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +29,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Inspections() {
   const { colors, spacing, radius } = useTheme();
@@ -43,10 +44,10 @@ export default function Inspections() {
         eyebrow="Property condition"
         title="Inspection reports"
         subtitle="Review move-in, periodic and move-out records"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -66,7 +67,12 @@ export default function Inspections() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Inspection }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => setSelected(item)}>
+              <Pressable
+                onPress={() => setSelected(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`${INSPECTION_TYPE_LABEL[item.type]} inspection, ${item.property.title}, ${item.acknowledgedAt ? 'Reviewed' : 'Needs review'}`}
+                accessibilityHint="Opens the report"
+              >
                 <Card elevated>
                   <View
                     style={{

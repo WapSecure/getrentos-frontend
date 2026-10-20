@@ -17,6 +17,7 @@ import {
   DateField,
   FormAlert,
   Price,
+  Skeleton,
   Text,
   TextField,
   TimeField,
@@ -318,6 +319,7 @@ function AddLeadForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Full name"
+        required
         value={fullName}
         onChangeText={setFullName}
         editable={!save.isPending}
@@ -326,7 +328,8 @@ function AddLeadForm({
       <TextField
         label="Phone"
         value={phone}
-        onChangeText={setPhone}
+        // Digits and one leading "+" only.
+        onChangeText={(v) => setPhone(v.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
         keyboardType="phone-pad"
         editable={!save.isPending}
         hint="So you can call or WhatsApp them from here"
@@ -475,7 +478,9 @@ function ScheduleViewingForm({
         </Text>
       ) : null}
       {!lockedToLead ? (
-        choices.length ? (
+        listings.isPending ? (
+          <Skeleton height={72} />
+        ) : choices.length ? (
           <View style={{ gap: spacing.sm }}>
             <Text variant="bodyStrong">Which listing</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -580,6 +585,7 @@ function InviteClientForm({
       </Text>
       <TextField
         label="Client’s email"
+        required
         value={email}
         onChangeText={(v) => {
           setEmail(v);

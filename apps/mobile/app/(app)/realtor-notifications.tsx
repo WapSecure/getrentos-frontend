@@ -1,6 +1,6 @@
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router, type Href } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -13,21 +13,22 @@ import {
   Star,
 } from 'lucide-react-native';
 import {
+  Button,
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorNotification } from '@/lib/api/realtor';
 import type { Paginated } from '@/lib/api/properties';
 import { routeForNotification } from '@/lib/notificationRoutes';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 /**
  * The API's `type` is an open string, so match on the meaningful prefix and
@@ -46,8 +47,6 @@ function iconFor(type: string) {
 export default function RealtorNotifications() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
-  const toast = useToast();
 
   const query = useQuery({
     queryKey: qk.realtor.notifications,
@@ -57,31 +56,25 @@ export default function RealtorNotifications() {
   const items = query.data?.items ?? [];
   const unread = items.filter((n) => !n.read).length;
 
-  const readOne = useMutation({
+  // Marking read shows at once and rolls back with a toast if the server refuses.
+  const markRead = (old: unknown, id?: string) => {
+    const page = old as Paginated<RealtorNotification>;
+    return {
+      ...page,
+      items: page.items.map((n) => (!id || n.id === id ? { ...n, read: true } : n)),
+    };
+  };
+
+  const readOne = useOptimisticMutation({
     mutationFn: (id: string) => realtorApi.readNotification(id),
-    onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: qk.realtor.notifications });
-      const previous = qc.getQueryData<Paginated<RealtorNotification>>(qk.realtor.notifications);
-      qc.setQueryData<Paginated<RealtorNotification>>(qk.realtor.notifications, (old) =>
-        old
-          ? { ...old, items: old.items.map((n) => (n.id === id ? { ...n, read: true } : n)) }
-          : old
-      );
-      return { previous };
-    },
-    onError: (_e, _id, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.realtor.notifications, ctx.previous);
-    },
+    patches: (id) => [{ queryKey: qk.realtor.notifications, update: (old) => markRead(old, id) }],
   });
 
-  const readAll = useMutation({
-    mutationFn: realtorApi.readAllNotifications,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: qk.realtor.notifications });
-      toast.show('All caught up.', 'success');
-    },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not mark those as read.', 'error'),
+  const readAll = useOptimisticMutation({
+    mutationFn: () => realtorApi.readAllNotifications(),
+    patches: () => [{ queryKey: qk.realtor.notifications, update: (old) => markRead(old) }],
+    successMessage: 'All caught up.',
+    errorMessage: 'Could not mark those as read.',
   });
 
   return (
@@ -92,35 +85,31 @@ export default function RealtorNotifications() {
         subtitle={
           unread > 0 ? `${unread} unread update${unread === 1 ? '' : 's'}` : 'You are all caught up'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           unread > 0 ? (
-            <Pressable
+            <Button
+              label="Mark all read"
+              variant="ghost"
+              size="sm"
+              fullWidth={false}
+              icon={<CheckCheck size={16} color={colors.primary} />}
               onPress={() => readAll.mutate()}
-              disabled={readAll.isPending}
-              accessibilityRole="button"
-              accessibilityLabel="Mark all read"
-              hitSlop={10}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-            >
-              <CheckCheck size={16} color={colors.primary} />
-              <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-                Mark all read
-              </Text>
-            </Pressable>
+            />
           ) : null
         }
       />
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} height={86} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} height={86} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(n) => n.id}
@@ -206,7 +195,7 @@ export default function RealtorNotifications() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

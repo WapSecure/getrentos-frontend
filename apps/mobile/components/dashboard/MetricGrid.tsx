@@ -51,7 +51,7 @@ export function MetricGrid({ metrics, loading }: { metrics: DashboardMetric[]; l
                   {metric.label}
                 </Text>
               </View>
-              <Text variant="title" style={{ fontSize: 21, lineHeight: 25 }}>
+              <Text variant="heading" style={{ fontWeight: '800' }}>
                 {metric.value}
               </Text>
             </>

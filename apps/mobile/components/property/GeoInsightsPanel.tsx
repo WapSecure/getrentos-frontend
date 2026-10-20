@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Car, Footprints, MapPinned, TrainFront } from 'lucide-react-native';
 import { Button, Card, Chip, Skeleton, Text, TextField, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
@@ -30,6 +30,8 @@ export function GeoInsightsPanel({ listingId }: Props) {
   const query = useQuery({
     queryKey: qk.listings.geoInsights(listingId, destination),
     queryFn: () => geoInsightsApi.get(listingId, destination),
+    // Keep the panel while a new destination's commute loads.
+    placeholderData: keepPreviousData,
   });
 
   if (query.isLoading) {

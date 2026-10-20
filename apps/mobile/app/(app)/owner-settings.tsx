@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+import { ScrollView, View } from 'react-native';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -9,6 +9,7 @@ import {
   Chip,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -17,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerPreferences } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const FLOORS = [50, 70, 80, 90];
 
@@ -39,7 +41,7 @@ export default function OwnerSettings() {
         eyebrow="Settings"
         title="Selling preferences"
         subtitle="How offers reach you"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
@@ -92,20 +94,20 @@ function Form({ initial }: { initial: OwnerPreferences }) {
             />
           ))}
         </View>
-        <Row
+        <SwitchRow
           label="Decline offers below that automatically"
           value={prefs.autoDeclineLowOffers}
           disabled={save.isPending}
-          onChange={(v) => setPrefs((p) => ({ ...p, autoDeclineLowOffers: v }))}
+          onValueChange={(v) => setPrefs((p) => ({ ...p, autoDeclineLowOffers: v }))}
         />
       </Card>
       <Card elevated>
-        <Row
+        <SwitchRow
           label="Open to renting the property out instead"
-          hint="Buyers and agents may suggest a rental arrangement."
+          description="Buyers and agents may suggest a rental arrangement."
           value={prefs.allowRentalConversion}
           disabled={save.isPending}
-          onChange={(v) => setPrefs((p) => ({ ...p, allowRentalConversion: v }))}
+          onValueChange={(v) => setPrefs((p) => ({ ...p, allowRentalConversion: v }))}
         />
       </Card>
       <Button
@@ -115,41 +117,5 @@ function Form({ initial }: { initial: OwnerPreferences }) {
         onPress={() => save.mutate()}
       />
     </>
-  );
-}
-
-function Row({
-  label,
-  hint,
-  value,
-  disabled = false,
-  onChange,
-}: {
-  label: string;
-  hint?: string;
-  value: boolean;
-  disabled?: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  const { colors, spacing } = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 44 }}>
-      <View style={{ flex: 1 }}>
-        <Text variant="callout">{label}</Text>
-        {hint ? (
-          <Text variant="caption" color="mutedForeground">
-            {hint}
-          </Text>
-        ) : null}
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-        accessibilityLabel={label}
-        accessibilityState={{ disabled }}
-        trackColor={{ true: colors.primary, false: colors.border }}
-      />
-    </View>
   );
 }

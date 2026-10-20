@@ -244,6 +244,7 @@ function RouteForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Name"
+        required
         value={draft.name}
         onChangeText={(name) => set({ name })}
         maxLength={80}

@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { TriangleAlert } from 'lucide-react-native';
-import { Button, DateField, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  DateField,
+  FormAlert,
+  NumberField,
+  Text,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type LandlordLease, type RenewalCheck } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
@@ -39,7 +46,7 @@ function RenewForm({
   onClose: () => void;
   onSubmittingChange: (submitting: boolean) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -82,12 +89,12 @@ function RenewForm({
         {lease.tenantName} currently pays {formatNaira(lease.rentAmount)}.
       </Text>
 
-      <TextField
-        label="New rent (₦)"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="New rent"
         value={rentAmount}
-        onChangeText={(v) => {
-          setRentAmount(v.replace(/\D/g, ''));
+        onValueChange={(v) => {
+          setRentAmount(v);
           setCheck(null);
         }}
         onBlur={() => {
@@ -99,25 +106,10 @@ function RenewForm({
             ? `${increase > 0 ? '+' : ''}${increase}% on the current rent`
             : undefined
         }
+        required
       />
 
-      {check?.message ? (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.sm,
-            padding: spacing.md,
-            borderRadius: radius.md,
-            backgroundColor: colors.warning + '1f',
-          }}
-        >
-          <TriangleAlert size={15} color={colors.warning} />
-          <Text variant="caption" style={{ flex: 1, color: colors.warning }}>
-            {check.message}
-          </Text>
-        </View>
-      ) : null}
+      {check?.message ? <FormAlert tone="warning" message={check.message} /> : null}
 
       <DateField
         label="New end date"

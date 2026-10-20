@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { UserCheck } from 'lucide-react-native';
@@ -33,6 +33,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS = {
   PENDING: { label: 'Wants access', tone: 'warning' },
@@ -81,7 +82,7 @@ export default function Representatives() {
           eyebrow="Your team"
           title="Realtors & agents"
           subtitle="Approve who represents you and what they can touch"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <SegmentedControl
           accessibilityLabel="Kind of representative"
@@ -349,9 +350,11 @@ function AgentTaskForm({ rep, onDone }: { rep: Representative; onDone: () => voi
               onPress={() => setPropertyId(p.id)}
             />
           ))
+        ) : properties.isPending ? (
+          [0, 1, 2].map((i) => <Skeleton key={i} height={32} width={96} radius={16} />)
         ) : (
           <Text variant="caption" color="mutedForeground">
-            {properties.isPending ? 'Loading…' : 'No properties to choose from.'}
+            No properties to choose from.
           </Text>
         )}
       </View>
@@ -367,7 +370,7 @@ function AgentTaskForm({ rep, onDone }: { rep: Representative; onDone: () => voi
           />
         ))}
       </View>
-      <TextField label="What should they do?" value={title} onChangeText={setTitle} />
+      <TextField label="What should they do?" required value={title} onChangeText={setTitle} />
       <TextField label="Notes (optional)" value={notes} onChangeText={setNotes} multiline />
       <Text variant="bodyStrong">Priority</Text>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>

@@ -1,15 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import {
   BookmarkPlus,
@@ -90,6 +83,8 @@ export default function Discover() {
     queryFn: ({ pageParam }) => propertiesApi.list({ ...filters, sortBy }, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    // Old results stay up while a new search or filter loads.
+    placeholderData: keepPreviousData,
   });
 
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
@@ -99,6 +94,7 @@ export default function Discover() {
     queryKey: qk.listings.search({ ...filters, sortBy, mode: 'map' } as Record<string, unknown>),
     queryFn: () => propertiesApi.list({ ...filters, sortBy }, 1, MAP_PAGE_SIZE),
     enabled: viewMode === 'map',
+    placeholderData: keepPreviousData,
   });
 
   const mapMarkers: PropertyMapMarker[] = useMemo(
@@ -292,12 +288,15 @@ export default function Discover() {
       </View>
 
       {viewMode === 'map' ? (
-        mapQuery.isLoading ? (
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <ActivityIndicator color={colors.mutedForeground} />
-          </View>
-        ) : mapQuery.isError ? (
-          <ErrorState onRetry={() => mapQuery.refetch()} />
+        mapQuery.data === undefined ? (
+          mapQuery.isError ? (
+            <ErrorState onRetry={() => mapQuery.refetch()} />
+          ) : (
+            <View style={{ flex: 1, padding: spacing.xl, paddingTop: spacing.md, gap: spacing.sm }}>
+              <Skeleton height={12} width="35%" />
+              <Skeleton height={420} radius={radius.lg} />
+            </View>
+          )
         ) : mapMarkers.length === 0 ? (
           <EmptyState
             icon={<MapIcon size={34} color={colors.mutedForeground} />}
@@ -341,6 +340,7 @@ export default function Discover() {
         />
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
@@ -363,11 +363,8 @@ export default function Discover() {
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <View style={{ paddingVertical: spacing.xl }}>
-                <ActivityIndicator
-                  color={colors.mutedForeground}
-                  accessibilityLabel="Loading more homes"
-                />
+              <View accessible accessibilityLabel="Loading more homes">
+                <LoadingList count={1} />
               </View>
             ) : (
               <View style={{ height: spacing['3xl'] }} />
@@ -449,11 +446,11 @@ function FilterButton({ count, onPress }: { count: number; onPress: () => void }
   );
 }
 
-function LoadingList() {
+function LoadingList({ count = 4 }: { count?: number }) {
   const { spacing, radius } = useTheme();
   return (
     <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md, gap: spacing.lg }}>
-      {[0, 1, 2, 3].map((i) => (
+      {Array.from({ length: count }, (_, i) => (
         <View key={i} style={{ gap: spacing.sm }}>
           <Skeleton height={176} radius={radius.md} />
           <Skeleton height={16} width="45%" />

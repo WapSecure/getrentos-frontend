@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCheck, ChevronRight, Landmark, Sparkles, Wallet } from 'lucide-react-native';
 import {
@@ -18,10 +18,10 @@ import {
   Chip,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -37,6 +37,7 @@ import { Sheet } from '@/components/Sheet';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { CommissionRow } from '@/components/realtor/CommissionRow';
+import { goBack } from '@/lib/goBack';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -96,7 +97,7 @@ export default function RealtorCommissions() {
           gap: spacing.xl,
         }}
       >
-        <DetailHeader eyebrow="Getting paid" title="Commissions" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Getting paid" title="Commissions" onBack={() => goBack()} />
 
         {isUpgradeError(summary.error) ? (
           <ProGate />
@@ -308,6 +309,8 @@ function Ledger() {
   const query = useQuery({
     queryKey: qk.realtor.commissions(filter),
     queryFn: () => realtorApi.commissions(filter === 'all' ? undefined : filter),
+    // Keep the last list on screen while another filter loads.
+    placeholderData: keepPreviousData,
   });
   return (
     <View style={{ gap: spacing.sm }}>
@@ -336,10 +339,10 @@ function Ledger() {
           />
         ))}
       </ScrollView>
-      {query.isPending ? (
-        <Skeleton height={72} radius={radius.lg} />
-      ) : query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
+      ) : !query.data ? (
+        <Skeleton height={72} radius={radius.lg} />
       ) : !query.data.items.length ? (
         <Text variant="callout" color="mutedForeground">
           {filter === 'all'
@@ -428,20 +431,22 @@ function AccountForm({ onDone }: { onDone: () => void }) {
         />
       </View>
       {other ? (
-        <TextField
+        <NumberField
           label="Bank code"
-          keyboardType="number-pad"
+          code
+          required
           value={bankCode}
-          onChangeText={(v) => setBankCode(v.replace(/\D/g, ''))}
+          onValueChange={setBankCode}
           maxLength={6}
           hint="Your bank’s code, e.g. 058 for GTBank"
         />
       ) : null}
-      <TextField
+      <NumberField
         label="Account number"
-        keyboardType="number-pad"
+        code
+        required
         value={accountNumber}
-        onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
+        onValueChange={setAccountNumber}
         maxLength={10}
         hint="We check the name on the account with your bank"
       />

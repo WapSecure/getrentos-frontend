@@ -25,6 +25,7 @@ import { supportApi, SUPPORT_CATEGORIES, type SupportThread } from '@/lib/api/su
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Support() {
   const { colors, spacing, radius } = useTheme();
@@ -44,7 +45,7 @@ export default function Support() {
         eyebrow="GetRentos care"
         title="Support"
         subtitle="Track conversations with our support team"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setComposeOpen(true)}
@@ -54,7 +55,7 @@ export default function Support() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -74,7 +75,14 @@ export default function Support() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: SupportThread }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => router.push(`/(app)/support-thread/${item.id}`)}>
+              <Pressable
+                onPress={() => router.push(`/(app)/support-thread/${item.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${
+                  SUPPORT_CATEGORIES.find((c) => c.value === item.category)?.label ??
+                  'Support request'
+                }, ${item.status === 'OPEN' ? 'open' : 'resolved'}`}
+              >
                 <Card elevated>
                   <View
                     style={{
@@ -183,6 +191,7 @@ function ComposeForm({
       </View>
       <TextField
         label="Message"
+        required
         placeholder="Tell us what's going on"
         multiline
         numberOfLines={4}

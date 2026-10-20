@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BookOpen,
@@ -51,6 +51,7 @@ import {
 } from '@/lib/api/estateGovernance';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type Panel =
   | { kind: 'upload'; newVersionOf?: GovernanceRecord }
@@ -75,6 +76,7 @@ export default function EstateGovernance() {
     queryKey: governanceKeys.records(estateId, filter),
     queryFn: () => estateGovernanceApi.governance(estateId, filter),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const records = query.data ?? [];
 
@@ -131,7 +133,7 @@ export default function EstateGovernance() {
           eyebrow={estate?.name ?? 'Community'}
           title="Governance"
           subtitle="Bylaws, minutes and signed decisions"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Upload a record"

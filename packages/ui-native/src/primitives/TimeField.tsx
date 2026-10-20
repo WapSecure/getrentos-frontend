@@ -27,6 +27,8 @@ export interface TimeFieldProps {
   endHour?: number;
   error?: string | null;
   hint?: string;
+  /** Adds an asterisk to the label and tells screen readers the field is required. */
+  required?: boolean;
   disabled?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -55,6 +57,7 @@ export function TimeField({
   value,
   onChange,
   label,
+  required,
   placeholder = 'Select time',
   stepMinutes = 30,
   startHour = 8,
@@ -79,13 +82,18 @@ export function TimeField({
           style={{ marginLeft: 4, fontWeight: '600' }}
         >
           {label}
+          {required ? (
+            <Text variant="callout" color="destructive">
+              {' *'}
+            </Text>
+          ) : null}
         </Text>
       ) : null}
 
       <Pressable
         onPress={() => !disabled && setOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel={label ?? placeholder}
+        accessibilityLabel={required && label ? `${label}, required` : (label ?? placeholder)}
         accessibilityHint={error ? `Error: ${error}` : hint}
         accessibilityState={{ disabled }}
         aria-invalid={!!error}

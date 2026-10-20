@@ -144,7 +144,7 @@ export default function Shortlets() {
           accessibilityLabel="Go back"
           onPress={() => router.back()}
           icon={<ChevronLeft size={22} color={colors.foreground} />}
-          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+          variant="ghost"
         />
         <Text variant="title" style={{ flex: 1 }} accessibilityRole="header">
           Stays
@@ -153,19 +153,19 @@ export default function Shortlets() {
           accessibilityLabel="Messages with hosts"
           onPress={() => router.push('/(app)/shortlet-messages')}
           icon={<MessageSquare size={20} color={colors.foreground} />}
-          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+          variant="ghost"
         />
         <IconButton
           accessibilityLabel="Wishlist"
           onPress={() => router.push('/(app)/shortlet-wishlist')}
           icon={<Heart size={20} color={colors.foreground} />}
-          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+          variant="ghost"
         />
         <IconButton
           accessibilityLabel="My stays"
           onPress={() => router.push('/(app)/shortlet-bookings')}
           icon={<CalendarCheck size={20} color={colors.foreground} />}
-          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+          variant="ghost"
         />
       </View>
 

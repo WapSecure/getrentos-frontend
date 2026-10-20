@@ -19,10 +19,10 @@ import {
   Divider,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -37,6 +37,7 @@ import { Sheet } from '@/components/Sheet';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { HostFeeNote } from '@/components/host/HostUI';
 import { WITHHELD } from '@/lib/withdrawal';
+import { goBack } from '@/lib/goBack';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -89,7 +90,7 @@ export default function HostEarnings() {
         gap: spacing.xl,
       }}
     >
-      <DetailHeader eyebrow="Hosting" title="Earnings & payouts" onBack={() => router.back()} />
+      <DetailHeader eyebrow="Hosting" title="Earnings & payouts" onBack={() => goBack()} />
 
       {summary.isError && !summary.data ? (
         <ErrorState onRetry={() => summary.refetch()} />
@@ -119,9 +120,14 @@ export default function HostEarnings() {
                       {account.data.accountNumber} · {account.data.accountName}
                     </Text>
                   </>
+                ) : account.isPending ? (
+                  <View style={{ gap: 6 }}>
+                    <Skeleton height={14} width="50%" />
+                    <Skeleton height={11} width="70%" />
+                  </View>
                 ) : (
                   <Text variant="callout" color="mutedForeground">
-                    {account.isPending ? 'Loading…' : 'No account yet. Add one to withdraw.'}
+                    No account yet. Add one to withdraw.
                   </Text>
                 )}
               </View>
@@ -500,19 +506,21 @@ function AccountForm({ onDone }: { onDone: () => void }) {
           />
         </View>
         {other ? (
-          <TextField
+          <NumberField
             label="Bank code"
-            keyboardType="number-pad"
+            required
+            code
             value={bankCode}
-            onChangeText={(v) => setBankCode(v.replace(/\D/g, ''))}
+            onValueChange={setBankCode}
             maxLength={6}
           />
         ) : null}
-        <TextField
+        <NumberField
           label="Account number"
-          keyboardType="number-pad"
+          required
+          code
           value={accountNumber}
-          onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
+          onValueChange={setAccountNumber}
           maxLength={10}
         />
         {save.error ? (

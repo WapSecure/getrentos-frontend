@@ -184,12 +184,17 @@ export default function SubmitInspection() {
                 <View style={{ flex: 1 }}>
                   <TextField
                     label="Room"
+                    required
                     value={room.room}
                     onChangeText={(v) => updateRoom(room.key, { room: v })}
                   />
                 </View>
                 <Pressable
                   onPress={() => removeRoom(room.key)}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    room.room.trim() ? `Remove ${room.room.trim()}` : 'Remove room'
+                  }
                   hitSlop={8}
                   style={{ paddingBottom: 12 }}
                 >
@@ -245,6 +250,7 @@ export default function SubmitInspection() {
                           <Pressable
                             onPress={() => removePhoto(photo.id)}
                             hitSlop={8}
+                            accessibilityRole="button"
                             accessibilityLabel="Remove photo"
                             style={{
                               position: 'absolute',
@@ -258,7 +264,7 @@ export default function SubmitInspection() {
                               justifyContent: 'center',
                             }}
                           >
-                            <X size={12} color="#fff" />
+                            <X size={12} color={colors.destructiveForeground} />
                           </Pressable>
                         </View>
                       ))}

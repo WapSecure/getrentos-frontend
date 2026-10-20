@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check } from 'lucide-react-native';
-import { Button, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, RadioGroup, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletBooking } from '@/lib/api/shortlets';
@@ -35,7 +34,7 @@ function Inner({
   booking: ShortletBooking;
   defaultCategory?: DisputeCategory;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [category, setCategory] = useState<DisputeCategory | null>(defaultCategory ?? null);
@@ -81,44 +80,27 @@ function Inner({
           A person at GetRentos reads every dispute and hears from you and the host before deciding.
         </Text>
 
-        <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+        <View style={{ gap: spacing.sm }}>
           <Text variant="subheading">What is it about?</Text>
-          {GUEST_DISPUTE_CATEGORIES.map((c) => {
-            const on = c.value === category;
-            return (
-              <Pressable
-                key={c.value}
-                onPress={() => {
-                  void haptics.tap();
-                  setCategory(c.value);
-                }}
-                disabled={submit.isPending}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: on, disabled: submit.isPending }}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.md,
-                  padding: spacing.md,
-                  borderRadius: radius.lg,
-                  borderWidth: on ? 2 : 1,
-                  borderColor: on ? colors.foreground : colors.border,
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text variant="bodyStrong">{c.label}</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {c.hint}
-                  </Text>
-                </View>
-                {on ? <Check size={18} color={colors.foreground} /> : null}
-              </Pressable>
-            );
-          })}
+          <RadioGroup
+            variant="card"
+            value={category}
+            onChange={(next) => {
+              void haptics.tap();
+              setCategory(next);
+            }}
+            options={GUEST_DISPUTE_CATEGORIES.map((c) => ({
+              value: c.value,
+              label: c.label,
+              description: c.hint,
+              disabled: submit.isPending,
+            }))}
+          />
         </View>
 
         <TextField
           label="What happened?"
+          required
           value={description}
           onChangeText={setDescription}
           editable={!submit.isPending}

@@ -55,6 +55,7 @@ function Form({
         </Text>
         <TextField
           label="Reason"
+          required
           value={reason}
           onChangeText={setReason}
           multiline

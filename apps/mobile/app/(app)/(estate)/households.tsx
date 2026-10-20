@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, Search, Users, X } from 'lucide-react-native';
@@ -44,6 +44,7 @@ export default function EstateHouseholds() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<Household[]>(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
@@ -137,6 +138,7 @@ export default function EstateHouseholds() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(h) => h.id}
           keyboardDismissMode="on-drag"

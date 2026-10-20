@@ -1,5 +1,5 @@
 import { router, type Href } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   Bell,
   CalendarClock,
@@ -8,12 +8,11 @@ import {
   ShieldCheck,
   Wallet,
 } from 'lucide-react-native';
-import { useToast } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { routeForNotification } from '@/lib/notificationRoutes';
 import { buyerSettingsApi, type BuyerNotification } from '@/lib/api/buyerSettings';
 import type { Paginated } from '@/lib/api/buyer';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { NotificationsInbox } from '@/components/notifications/NotificationsInbox';
 
 const KEY = qk.buyer.notifications(1, 50);
@@ -31,36 +30,39 @@ function iconFor(type: string) {
 
 /** What has happened on the buyer's offers, viewings and purchases. */
 export default function BuyerNotificationInbox() {
-  const qc = useQueryClient();
-  const toast = useToast();
-
   const query = useQuery({ queryKey: KEY, queryFn: () => buyerSettingsApi.notifications(1, 50) });
 
-  const readOne = useMutation({
+  const readOne = useOptimisticMutation({
     mutationFn: (id: string) => buyerSettingsApi.readNotification(id),
-    onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: KEY });
-      const previous = qc.getQueryData<Paginated<BuyerNotification>>(KEY);
-      qc.setQueryData<Paginated<BuyerNotification>>(KEY, (old) =>
-        old
-          ? { ...old, items: old.items.map((n) => (n.id === id ? { ...n, read: true } : n)) }
-          : old
-      );
-      return { previous };
-    },
-    onError: (_e, _id, ctx) => {
-      if (ctx?.previous) qc.setQueryData(KEY, ctx.previous);
-    },
+    patches: (id) => [
+      {
+        queryKey: KEY,
+        update: (old) => {
+          const page = old as Paginated<BuyerNotification>;
+          return {
+            ...page,
+            items: page.items.map((n) => (n.id === id ? { ...n, read: true } : n)),
+          };
+        },
+      },
+    ],
+    errorMessage: 'Could not mark that as read.',
   });
 
-  const readAll = useMutation({
-    mutationFn: buyerSettingsApi.readAllNotifications,
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['buyer', 'notifications'] });
-      toast.show('All caught up.', 'success');
-    },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not mark those as read.', 'error'),
+  const readAll = useOptimisticMutation({
+    mutationFn: () => buyerSettingsApi.readAllNotifications(),
+    patches: () => [
+      {
+        queryKey: KEY,
+        update: (old) => {
+          const page = old as Paginated<BuyerNotification>;
+          return { ...page, items: page.items.map((n) => ({ ...n, read: true })) };
+        },
+      },
+    ],
+    invalidate: [['buyer', 'notifications']],
+    errorMessage: 'Could not mark those as read.',
+    successMessage: 'All caught up.',
   });
 
   return (
@@ -68,7 +70,7 @@ export default function BuyerNotificationInbox() {
       eyebrow="Buying"
       items={query.data?.items ?? []}
       loading={query.isPending}
-      error={query.isError}
+      error={query.isError && !query.data}
       refreshing={query.isRefetching}
       onRefresh={() => query.refetch()}
       onOpen={(n) => {

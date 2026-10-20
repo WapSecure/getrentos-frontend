@@ -1,12 +1,12 @@
-import { ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+import { ScrollView, View } from 'react-native';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -20,6 +20,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerNotificationSettings() {
   const { colors, spacing } = useTheme();
@@ -64,83 +65,58 @@ export default function BuyerNotificationSettings() {
         eyebrow="Buyer alerts"
         title="Notifications"
         subtitle="Choose how purchase updates reach you"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={70} />
-          <Skeleton height={70} />
-        </View>
-      ) : query.isError ? (
-        <ErrorState
-          description="Couldn't load your notification preferences."
-          onRetry={() => query.refetch()}
-        />
-      ) : !query.data?.length ? (
-        <EmptyState
-          title="No preferences yet"
-          description="Preferences will appear here once your account is set up."
-        />
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.md,
+      <View style={{ flex: 1 }}>
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ padding: spacing.xl, gap: spacing.md }}>
+              <Skeleton height={70} />
+              <Skeleton height={70} />
+            </View>
+          }
+          errorDescription="Couldn't load your notification preferences."
+          isEmpty={!query.data?.length}
+          empty={{
+            title: 'No preferences yet',
+            description: 'Preferences will appear here once your account is set up.',
           }}
         >
-          {query.data.map((pref) => (
-            <Card key={pref.id} elevated>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
+          <ScrollView
+            contentContainerStyle={{
+              padding: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.md,
+            }}
+          >
+            {(query.data ?? []).map((pref) => (
+              <Card key={pref.id} elevated>
                 <Text variant="bodyStrong">
                   {BUYER_NOTIFICATION_CATEGORY_LABEL[pref.id] ?? pref.id}
                 </Text>
-              </View>
-              <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Text variant="callout">Push</Text>
-                  <Switch
+                <View style={{ marginTop: spacing.sm }}>
+                  <SwitchRow
+                    label="Push"
+                    accessibilityLabel={`${BUYER_NOTIFICATION_CATEGORY_LABEL[pref.id] ?? pref.id}: push notifications`}
                     value={pref.push}
                     onValueChange={(value) => setChannel(pref.id, 'push', value)}
-                    trackColor={{ true: colors.primary, false: colors.secondary }}
-                    thumbColor={colors.card}
                   />
-                </View>
-                {categorySendsEmail(pref.id) ? (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text variant="callout">Email</Text>
-                    <Switch
+                  {categorySendsEmail(pref.id) ? (
+                    <SwitchRow
+                      label="Email"
+                      accessibilityLabel={`${BUYER_NOTIFICATION_CATEGORY_LABEL[pref.id] ?? pref.id}: email`}
                       value={pref.email}
                       onValueChange={(value) => setChannel(pref.id, 'email', value)}
-                      trackColor={{ true: colors.primary, false: colors.secondary }}
-                      thumbColor={colors.card}
                     />
-                  </View>
-                ) : null}
-              </View>
-            </Card>
-          ))}
-        </ScrollView>
-      )}
+                  ) : null}
+                </View>
+              </Card>
+            ))}
+          </ScrollView>
+        </QueryState>
+      </View>
     </View>
   );
 }

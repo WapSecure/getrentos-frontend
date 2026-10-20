@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   EmptyState,
+  ErrorState,
   Screen,
   Skeleton,
   Text,
@@ -108,6 +109,9 @@ export default function ResidentEmergency() {
             <Skeleton height={140} radius={16} />
             <Skeleton height={200} radius={16} />
           </View>
+        ) : !data && query.isError ? (
+          // Never fall through to "not calling the roll" when we simply could not ask.
+          <ErrorState onRetry={() => query.refetch()} />
         ) : !data ? (
           <EmptyState
             icon={<ShieldCheck size={34} color={colors.mutedForeground} />}

@@ -96,14 +96,21 @@ function AddVendor({ onAdded }: { onAdded: (id: string) => void }) {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
-        <TextField label="Name or business" value={name} onChangeText={setName} />
+        <TextField label="Name or business" required value={name} onChangeText={setName} />
         <TextField
           label="What they do"
+          required
           value={serviceType}
           onChangeText={setServiceType}
           hint="e.g. Plumber, Electrician, AC repair"
         />
-        <TextField label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <TextField
+          label="Phone"
+          required
+          value={phone}
+          onChangeText={(t) => setPhone(t.replace(/(?!^\+)[^\d]/g, ''))}
+          keyboardType="phone-pad"
+        />
         {add.error ? (
           <FormAlert
             message={

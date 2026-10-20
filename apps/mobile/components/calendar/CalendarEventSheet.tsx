@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Switch, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   Chip,
   DateField,
+  SwitchRow,
   Text,
   TextField,
   TimeField,
@@ -51,7 +52,7 @@ export function CalendarEventSheet({ open, onClose, event }: Props) {
 }
 
 function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
 
@@ -132,6 +133,7 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
     <View style={{ gap: spacing.lg }}>
       <TextField
         label="Title"
+        required
         placeholder="e.g. Landlord viewing"
         value={title}
         onChangeText={setTitle}
@@ -187,15 +189,7 @@ function CalendarEventForm({ onClose, event }: Omit<Props, 'open'>) {
         </View>
       </View>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text variant="bodyStrong">Remind me</Text>
-        <Switch
-          value={reminder}
-          onValueChange={setReminder}
-          trackColor={{ true: colors.primary, false: colors.secondary }}
-          thumbColor={colors.card}
-        />
-      </View>
+      <SwitchRow label="Remind me" value={reminder} onValueChange={setReminder} />
 
       <Button
         label={event ? 'Save changes' : 'Add event'}

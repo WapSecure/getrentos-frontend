@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,6 +21,7 @@ import { landlordApi, LANDLORD_PAYMENT_TONE, type LandlordPayment } from '@/lib/
 import { formatDate } from '@/lib/format';
 import { ChargeRentSheet } from '@/components/landlord/ChargeRentSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordPayments() {
   const { colors, spacing, radius } = useTheme();
@@ -56,7 +57,7 @@ export default function LandlordPayments() {
           eyebrow="Financials"
           title="Payments"
           subtitle="Collections, payouts and arrears"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               onPress={() => setCharging(true)}
@@ -67,7 +68,9 @@ export default function LandlordPayments() {
         />
       </View>
 
-      {query.isError || stats.isError || arrears.isError ? (
+      {(query.isError && !query.data) ||
+      (stats.isError && !stats.data) ||
+      (arrears.isError && !arrears.data) ? (
         <ErrorState
           onRetry={() => {
             query.refetch();
@@ -102,7 +105,7 @@ export default function LandlordPayments() {
                     gap: spacing.sm,
                     padding: spacing.lg,
                     borderRadius: radius.md,
-                    backgroundColor: colors.destructive + '14',
+                    backgroundColor: colors.destructiveSubtle,
                   }}
                 >
                   <MessageSquareWarning size={17} color={colors.destructive} />

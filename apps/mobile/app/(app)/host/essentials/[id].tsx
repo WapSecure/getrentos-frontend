@@ -10,6 +10,7 @@ import {
   Chip,
   EmptyState,
   FormAlert,
+  NumberField,
   SegmentedControl,
   Skeleton,
   Text,
@@ -29,6 +30,7 @@ import { ApiError } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Stepper } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 type Tri = 'unset' | 'yes' | 'no';
 const toTri = (v?: boolean): Tri => (v == null ? 'unset' : v ? 'yes' : 'no');
@@ -134,7 +136,7 @@ function Form({ listing: l }: { listing: HostListing }) {
           eyebrow="Essentials"
           title="House rules & basics"
           subtitle={l.title}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         <Section title="House rules">
@@ -223,12 +225,13 @@ function Form({ listing: l }: { listing: HostListing }) {
             ))}
           </View>
           {f.internet && f.internet !== 'NONE' ? (
-            <TextField
-              label="Usual speed (Mbps)"
-              keyboardType="number-pad"
+            <NumberField
+              label="Usual speed"
+              optional
+              unit="Mbps"
               value={f.speed}
-              onChangeText={(speed) => set({ speed: speed.replace(/\D/g, '') })}
-              hint="Optional. Remote workers look for this."
+              onValueChange={(speed) => set({ speed })}
+              hint="Remote workers look for this."
             />
           ) : null}
         </Section>

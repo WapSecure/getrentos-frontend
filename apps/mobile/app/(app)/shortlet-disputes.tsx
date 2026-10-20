@@ -21,6 +21,7 @@ import { qk } from '@/lib/query/keys';
 import { shortletsApi, type GuestDepositClaim, type ShortletDispute } from '@/lib/api/shortlets';
 import { GUEST_DISPUTE_CATEGORIES, OUTCOME_LABEL } from '@/lib/stays';
 import { formatDate } from '@/lib/format';
+import { goBack } from '@/lib/goBack';
 
 const DISPUTE_STATUS: Record<string, { label: string; tone: Tone }> = {
   OPEN: { label: 'Open', tone: 'warning' },
@@ -74,7 +75,7 @@ export default function GuestDisputes() {
         eyebrow="Short stays"
         title="Disputes & claims"
         subtitle="Open one from the stay it’s about"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <SegmentedControl
         accessibilityLabel="Disputes or deposit claims"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+import { Alert, RefreshControl, View } from 'react-native';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { AddExpenseSheet } from '@/components/landlord/AddExpenseSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordExpenses() {
   const { colors, spacing, radius } = useTheme();
@@ -60,7 +61,7 @@ export default function LandlordExpenses() {
             ? `${items.length} logged on this page`
             : 'Track property operating costs'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setAdding(true)}
@@ -70,7 +71,7 @@ export default function LandlordExpenses() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList
@@ -146,14 +147,11 @@ function ExpenseRow({ expense: e, onRemove }: { expense: LandlordExpense; onRemo
           <Badge label={EXPENSE_CATEGORY_LABEL[e.category]} tone="neutral" />
           <View style={{ flex: 1 }} />
           <Price amount={e.amount} variant="bodyStrong" />
-          <Pressable
+          <IconButton
             onPress={onRemove}
-            accessibilityRole="button"
             accessibilityLabel={`Remove ${EXPENSE_CATEGORY_LABEL[e.category]} expense`}
-            hitSlop={10}
-          >
-            <Trash2 size={16} color={colors.mutedForeground} />
-          </Pressable>
+            icon={<Trash2 size={16} color={colors.mutedForeground} />}
+          />
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>

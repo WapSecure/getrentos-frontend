@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Send } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
+  ErrorState,
   FormAlert,
   IconButton,
   Skeleton,
@@ -21,6 +22,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate, relativeTime } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /**
  * One dispute, for either side: what was raised, where it stands, and the
@@ -86,17 +88,20 @@ export function DisputeThread({
           eyebrow="Dispute"
           title={d?.guestPromise ? 'Guest Promise report' : (d?.title ?? 'Dispute')}
           subtitle={d?.listingTitle}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {disputes.isPending ? (
           <Skeleton height={140} radius={radius.lg} />
+        ) : disputes.isError && !disputes.data ? (
+          <ErrorState onRetry={() => disputes.refetch()} />
         ) : !d ? (
           <EmptyState title="Dispute not found" />
         ) : (
           <>
             <Card elevated style={{ gap: spacing.sm }}>
               <Text variant="caption" color="mutedForeground">
-                {d.guestPromise ? 'Guest Promise' : categoryLabel(d.category)} · opened {formatDate(d.createdAt, 'medium')}
+                {d.guestPromise ? 'Guest Promise' : categoryLabel(d.category)} · opened{' '}
+                {formatDate(d.createdAt, 'medium')}
               </Text>
               <Text variant="body">{d.description}</Text>
             </Card>
@@ -191,7 +196,8 @@ export function DisputeThread({
           </View>
           <IconButton
             onPress={() => send.mutate()}
-            disabled={!text.trim() || send.isPending}
+            disabled={!text.trim()}
+            loading={send.isPending}
             accessibilityLabel="Send reply"
             icon={
               <Send

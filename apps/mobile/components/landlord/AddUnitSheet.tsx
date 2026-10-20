@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, NumberField, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
@@ -26,8 +26,6 @@ export function AddUnitSheet({ open, onClose, propertyId }: Props) {
     </Sheet>
   );
 }
-
-const digits = (v: string) => v.replace(/\D/g, '');
 
 function AddUnitForm({
   propertyId,
@@ -77,32 +75,35 @@ function AddUnitForm({
         value={unitName}
         onChangeText={setUnitName}
         editable={!create.isPending}
+        required
       />
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>
-          <TextField
+          <NumberField
             label="Bedrooms"
-            keyboardType="number-pad"
             value={bedrooms}
-            onChangeText={(v) => setBedrooms(digits(v))}
+            onValueChange={setBedrooms}
             editable={!create.isPending}
+            required
           />
         </View>
         <View style={{ flex: 1 }}>
-          <TextField
+          <NumberField
             label="Bathrooms"
-            keyboardType="number-pad"
             value={bathrooms}
-            onChangeText={(v) => setBathrooms(digits(v))}
+            onValueChange={setBathrooms}
             editable={!create.isPending}
+            required
           />
         </View>
       </View>
-      <TextField
-        label="Asking rent per year (₦, optional)"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="Asking rent per year"
+        optional
+        placeholder="0"
         value={askingRent}
-        onChangeText={(v) => setAskingRent(digits(v))}
+        onValueChange={setAskingRent}
         editable={!create.isPending}
       />
       <Button

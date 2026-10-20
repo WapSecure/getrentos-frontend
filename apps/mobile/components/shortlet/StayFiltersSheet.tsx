@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Button, Chip, SegmentedControl, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Button, Chip, NumberField, SegmentedControl, Text, useTheme } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 import { AMENITIES } from '@/lib/api/hostShortlets';
@@ -122,19 +122,19 @@ function Form({
         <View style={{ gap: spacing.sm }}>
           <Text variant="subheading">Nightly price</Text>
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <TextField
-              label="Minimum (₦)"
+            <NumberField
+              label="Minimum"
+              currency
               value={minText}
-              onChangeText={setMinText}
-              keyboardType="number-pad"
+              onValueChange={setMinText}
               placeholder="Any"
               containerStyle={{ flex: 1 }}
             />
-            <TextField
-              label="Maximum (₦)"
+            <NumberField
+              label="Maximum"
+              currency
               value={maxText}
-              onChangeText={setMaxText}
-              keyboardType="number-pad"
+              onValueChange={setMaxText}
               placeholder="Any"
               containerStyle={{ flex: 1 }}
               error={badRange ? 'Below the minimum' : undefined}

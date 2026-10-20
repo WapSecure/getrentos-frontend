@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CircleCheck, HardHat, TriangleAlert, Wrench } from 'lucide-react-native';
 import {
   Badge,
+  Button,
   Card,
   EmptyState,
   ErrorState,
@@ -27,6 +28,7 @@ import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Requests still needing the landlord to act. */
 const OPEN = ['pending', 'acknowledged', 'in_progress'];
@@ -96,11 +98,11 @@ export default function LandlordMaintenanceScreen() {
                 : 'Nothing open'
               : 'Track repairs and vendor work'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
@@ -116,6 +118,7 @@ export default function LandlordMaintenanceScreen() {
             <RequestCard
               request={item}
               busy={busyId === item.id}
+              pending={resolve.isPending ? 'resolve' : escalate.isPending ? 'escalate' : null}
               onResolve={() =>
                 Alert.alert('Mark resolved?', `"${item.issueTitle}" will be closed.`, [
                   { text: 'Cancel', style: 'cancel' },
@@ -159,17 +162,20 @@ export default function LandlordMaintenanceScreen() {
 function RequestCard({
   request: m,
   busy,
+  pending,
   onResolve,
   onEscalate,
   onAssign,
 }: {
   request: LandlordMaintenance;
   busy: boolean;
+  /** Which action is in flight, so that button shows progress. */
+  pending: 'resolve' | 'escalate' | null;
   onResolve: () => void;
   onEscalate: () => void;
   onAssign: () => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const actionable = OPEN.includes(m.status);
 
   return (
@@ -225,55 +231,29 @@ function RequestCard({
 
         {actionable ? (
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: 2 }}>
-            <Pressable
+            <Button
+              label="Escalate"
+              variant="outline"
+              size="sm"
+              fullWidth={false}
               onPress={onEscalate}
               disabled={busy}
-              accessibilityRole="button"
+              loading={busy && pending === 'escalate'}
               accessibilityLabel={`Escalate ${m.issueTitle}`}
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                paddingVertical: spacing.md,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderColor: colors.border,
-                opacity: busy ? 0.5 : 1,
-              }}
-            >
-              <TriangleAlert size={14} color={colors.warning} />
-              <Text variant="caption" style={{ fontWeight: '600', color: colors.warning }}>
-                Escalate
-              </Text>
-            </Pressable>
-
-            <Pressable
+              icon={<TriangleAlert size={14} color={colors.warning} />}
+              style={{ flex: 1 }}
+            />
+            <Button
+              label="Resolve"
+              size="sm"
+              fullWidth={false}
               onPress={onResolve}
               disabled={busy}
-              accessibilityRole="button"
+              loading={busy && pending === 'resolve'}
               accessibilityLabel={`Resolve ${m.issueTitle}`}
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                paddingVertical: spacing.md,
-                borderRadius: radius.md,
-                backgroundColor: colors.primary,
-                opacity: busy ? 0.5 : 1,
-              }}
-            >
-              <CircleCheck size={14} color={colors.primaryForeground} />
-              <Text
-                variant="caption"
-                style={{ color: colors.primaryForeground, fontWeight: '600' }}
-              >
-                Resolve
-              </Text>
-            </Pressable>
+              icon={<CircleCheck size={14} color={colors.primaryForeground} />}
+              style={{ flex: 1 }}
+            />
           </View>
         ) : null}
       </View>

@@ -2,19 +2,10 @@ import { useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClipboardList } from 'lucide-react-native';
-import {
-  Badge,
-  Card,
-  Chip,
-  EmptyState,
-  ErrorState,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Badge, Card, Chip, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agentApi,
@@ -36,6 +27,8 @@ export default function AgentTasks() {
   const query = useQuery({
     queryKey: qk.agent.tasks(1, 50, status),
     queryFn: () => agentApi.tasks(1, 50, { status }),
+    // Switching the filter keeps the last list on screen until the new one arrives.
+    placeholderData: keepPreviousData,
   });
   const items = query.data?.items ?? [];
 
@@ -72,26 +65,26 @@ export default function AgentTasks() {
         </ScrollView>
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.md} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<ClipboardList size={34} color={colors.mutedForeground} />}
-          title="No tasks"
-          description={
-            status
-              ? 'No tasks match this filter.'
-              : 'Tasks your clients assign you will show up here.'
-          }
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={90} radius={radius.md} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <ClipboardList size={34} color={colors.mutedForeground} />,
+          title: 'No tasks',
+          description: status
+            ? 'No tasks match this filter.'
+            : 'Tasks your clients assign you will show up here.',
+        }}
+      >
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(task) => task.id}
           contentContainerStyle={{
@@ -142,7 +135,7 @@ export default function AgentTasks() {
             </Pressable>
           )}
         />
-      )}
+      </QueryState>
     </View>
   );
 }

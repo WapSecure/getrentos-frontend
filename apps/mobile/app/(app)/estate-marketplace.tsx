@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,6 +44,7 @@ import {
   type MarketingAgreement,
 } from '@/lib/api/estateMarketplace';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type Tab = 'listings' | 'properties';
 
@@ -235,7 +236,7 @@ export default function EstateMarketplace() {
           eyebrow={estate?.name ?? 'Estate'}
           title="Marketplace"
           subtitle="Advertise the homes in your estate"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel={tab === 'listings' ? 'New listing' : 'Add a property'}

@@ -1,8 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Camera, Car, Plus, ShieldBan, UserRound } from 'lucide-react-native';
@@ -41,6 +46,7 @@ import { pickPhoto } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 type View_ = 'ACTIVE' | 'LIFTED' | 'ALL';
 
@@ -65,6 +71,7 @@ export default function EstateWatchlist() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<WatchlistEntry[]>(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
@@ -105,7 +112,7 @@ export default function EstateWatchlist() {
           eyebrow={estate?.name ?? 'Gate'}
           title="Watch list"
           subtitle="Who the gate should stop or flag"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add to the watch list"
@@ -139,6 +146,7 @@ export default function EstateWatchlist() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(e) => e.id}
           refreshControl={refresh}
@@ -325,6 +333,7 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
       />
       <TextField
         label={vehicle ? 'Vehicle (make, colour)' : 'Full name'}
+        required
         value={label}
         onChangeText={setLabel}
         maxLength={120}
@@ -343,7 +352,7 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
         <TextField
           label="Phone (optional)"
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
           keyboardType="phone-pad"
           maxLength={30}
           hint="A number is a surer match than a name, which other people share"

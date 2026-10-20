@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+import { Alert, RefreshControl, View } from 'react-native';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { Briefcase, Check, FileText, ShieldCheck, X } from 'lucide-react-native'
 import {
   Avatar,
   Badge,
+  Button,
   Card,
   EmptyState,
   ErrorState,
@@ -29,6 +30,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Statuses that still await the landlord's decision. */
 const OPEN_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
@@ -100,11 +102,11 @@ export default function LandlordApplications() {
                 : 'Nothing awaiting a decision'
               : 'Review prospective tenants'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
@@ -119,7 +121,7 @@ export default function LandlordApplications() {
           renderItem={({ item }: { item: LandlordApplication }) => (
             <ApplicationCard
               application={item}
-              busy={busyId === item.id}
+              deciding={busyId === item.id ? (decide.variables?.status ?? null) : null}
               onApprove={() => confirm(item, 'approved')}
               onReject={() => confirm(item, 'rejected')}
             />
@@ -150,12 +152,13 @@ export default function LandlordApplications() {
 
 function ApplicationCard({
   application: a,
-  busy,
+  deciding,
   onApprove,
   onReject,
 }: {
   application: LandlordApplication;
-  busy: boolean;
+  /** The decision being sent for this application, if any. */
+  deciding: ApplicationStatus | null;
   onApprove: () => void;
   onReject: () => void;
 }) {
@@ -218,55 +221,29 @@ function ApplicationCard({
 
         {decidable ? (
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Pressable
+            <Button
+              label="Reject"
+              variant="outline"
+              size="sm"
+              fullWidth={false}
               onPress={onReject}
-              disabled={busy}
-              accessibilityRole="button"
+              disabled={deciding !== null}
+              loading={deciding === 'rejected'}
               accessibilityLabel={`Reject ${a.applicantName}`}
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                paddingVertical: spacing.md,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderColor: colors.border,
-                opacity: busy ? 0.5 : 1,
-              }}
-            >
-              <X size={15} color={colors.destructive} />
-              <Text variant="caption" color="destructive" style={{ fontWeight: '600' }}>
-                Reject
-              </Text>
-            </Pressable>
-
-            <Pressable
+              icon={<X size={15} color={colors.destructive} />}
+              style={{ flex: 1 }}
+            />
+            <Button
+              label="Approve"
+              size="sm"
+              fullWidth={false}
               onPress={onApprove}
-              disabled={busy}
-              accessibilityRole="button"
+              disabled={deciding !== null}
+              loading={deciding === 'approved'}
               accessibilityLabel={`Approve ${a.applicantName}`}
-              style={{
-                flex: 1,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                paddingVertical: spacing.md,
-                borderRadius: radius.md,
-                backgroundColor: colors.primary,
-                opacity: busy ? 0.5 : 1,
-              }}
-            >
-              <Check size={15} color={colors.primaryForeground} />
-              <Text
-                variant="caption"
-                style={{ color: colors.primaryForeground, fontWeight: '600' }}
-              >
-                Approve
-              </Text>
-            </Pressable>
+              icon={<Check size={15} color={colors.primaryForeground} />}
+              style={{ flex: 1 }}
+            />
           </View>
         ) : null}
       </View>
@@ -277,7 +254,7 @@ function ApplicationCard({
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <View style={{ flex: 1, gap: 2 }}>
-      <Text variant="caption" color="mutedForeground" style={{ fontSize: 10 }}>
+      <Text variant="caption" color="mutedForeground">
         {label}
       </Text>
       {children}

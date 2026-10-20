@@ -101,7 +101,13 @@ function UploadForm({
         </Text>
       </Pressable>
 
-      <TextField label="Name" value={name} onChangeText={setName} editable={!mutation.isPending} />
+      <TextField
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        editable={!mutation.isPending}
+        required
+      />
 
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Type</Text>

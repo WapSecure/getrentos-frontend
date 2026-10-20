@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,6 +35,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
+import { goBack } from '@/lib/goBack';
 
 /** Agency agreements, listing contracts, closing papers and the realtor's licence. */
 export default function RealtorDocuments() {
@@ -83,7 +84,7 @@ export default function RealtorDocuments() {
           eyebrow="Paperwork"
           title="Documents"
           subtitle="Private to you; open any to share it"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Upload a document"
@@ -254,7 +255,13 @@ function UploadForm({
           {file ? file.name : 'Choose a file (up to 20 MB)'}
         </Text>
       </Pressable>
-      <TextField label="Name" value={name} onChangeText={setName} editable={!upload.isPending} />
+      <TextField
+        label="Name"
+        required
+        value={name}
+        onChangeText={setName}
+        editable={!upload.isPending}
+      />
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Type</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>

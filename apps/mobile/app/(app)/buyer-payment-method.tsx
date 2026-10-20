@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import {
   Button,
   Card,
   ErrorState,
+  NumberField,
   Skeleton,
   Text,
   TextField,
@@ -21,6 +22,7 @@ import {
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerPaymentMethod() {
   const { colors, spacing } = useTheme();
@@ -35,17 +37,17 @@ export default function BuyerPaymentMethod() {
         eyebrow="Buyer finance"
         title="Payment method"
         subtitle="The account you pay deposits from"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        <PaymentMethodForm data={query.data} />
+      ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={200} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <PaymentMethodForm data={query.data} />
+        <ErrorState onRetry={() => query.refetch()} />
       )}
     </View>
   );
@@ -109,14 +111,21 @@ function PaymentMethodForm({ data }: { data: BuyerPaymentMethodData }) {
       ) : null}
 
       <Card elevated style={{ gap: spacing.md }}>
-        <TextField label="Bank name" value={bankName} onChangeText={setBankName} />
-        <TextField
+        <TextField label="Bank name" value={bankName} onChangeText={setBankName} required />
+        <NumberField
           label="Account number"
           value={accountNumber}
-          onChangeText={setAccountNumber}
-          keyboardType="number-pad"
+          onValueChange={setAccountNumber}
+          code
+          maxLength={10}
+          required
         />
-        <TextField label="Account name" value={accountName} onChangeText={setAccountName} />
+        <TextField
+          label="Account name"
+          value={accountName}
+          onChangeText={setAccountName}
+          required
+        />
       </Card>
 
       <Button

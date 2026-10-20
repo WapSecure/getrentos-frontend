@@ -1,4 +1,4 @@
-import { Alert, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,8 +18,10 @@ import {
   Divider,
   EmptyState,
   ErrorState,
+  LinkButton,
   Price,
   Skeleton,
+  SwitchRow,
   Text,
   formatTimeLabel,
   useTheme,
@@ -37,6 +39,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { StatusPill, listingStatus } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 /** Everything about one listing, one tap from each tool. */
 export default function HostListingDetail() {
@@ -116,7 +119,7 @@ export default function HostListingDetail() {
           eyebrow="Listing"
           title={l?.title ?? 'Listing'}
           subtitle={l ? `${l.city}, ${l.state}` : undefined}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 
@@ -218,34 +221,33 @@ function LiveCard({
   busy: boolean;
   onChange: (s: 'PUBLISHED' | 'PAUSED') => void;
 }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const s = listingStatus(l.status);
   const togglable = l.status === 'PUBLISHED' || l.status === 'PAUSED';
+  const note =
+    l.status === 'PUBLISHED'
+      ? 'Guests can find and book it.'
+      : l.status === 'PAUSED'
+        ? 'Hidden from search. Existing stays go ahead.'
+        : l.status === 'PENDING_VERIFICATION'
+          ? 'We’re checking the property. It goes live when approved.'
+          : 'Closed. Create a new listing to host here again.';
   return (
     <Card elevated style={{ gap: spacing.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <StatusPill label={s.label} tone={s.tone} />
-          <Text variant="caption" color="mutedForeground">
-            {l.status === 'PUBLISHED'
-              ? 'Guests can find and book it.'
-              : l.status === 'PAUSED'
-                ? 'Hidden from search. Existing stays go ahead.'
-                : l.status === 'PENDING_VERIFICATION'
-                  ? 'We’re checking the property. It goes live when approved.'
-                  : 'Closed. Create a new listing to host here again.'}
-          </Text>
-        </View>
-        {togglable ? (
-          <Switch
-            value={l.status === 'PUBLISHED'}
-            disabled={busy}
-            onValueChange={(v) => onChange(v ? 'PUBLISHED' : 'PAUSED')}
-            accessibilityLabel="Listing live"
-            trackColor={{ true: colors.success, false: colors.border }}
-          />
-        ) : null}
-      </View>
+      <StatusPill label={s.label} tone={s.tone} />
+      {togglable ? (
+        <SwitchRow
+          label="Listing live"
+          description={note}
+          value={l.status === 'PUBLISHED'}
+          disabled={busy}
+          onValueChange={(v) => onChange(v ? 'PUBLISHED' : 'PAUSED')}
+        />
+      ) : (
+        <Text variant="caption" color="mutedForeground">
+          {note}
+        </Text>
+      )}
     </Card>
   );
 }
@@ -283,20 +285,14 @@ function PriceCard({ l, upcoming }: { l: HostListing; upcoming?: number }) {
               .join(' · ') || 'No extra fees'}
           </Text>
         </View>
-        <Pressable
+        <LinkButton
+          label="Edit"
+          icon={<Pencil size={15} color={colors.primary} />}
+          accessibilityLabel="Edit price and details"
           onPress={() =>
             router.push({ pathname: '/(app)/host/listing-editor', params: { id: l.id } })
           }
-          accessibilityRole="button"
-          accessibilityLabel="Edit price and details"
-          hitSlop={8}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}
-        >
-          <Pencil size={15} color={colors.primary} />
-          <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-            Edit
-          </Text>
-        </Pressable>
+        />
       </View>
       <Divider />
       {facts.map(([k, v]) => (

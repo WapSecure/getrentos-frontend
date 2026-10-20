@@ -1,8 +1,19 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { Button, Card, Divider, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Card,
+  Divider,
+  ErrorState,
+  IconButton,
+  Skeleton,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { applicationsApi, type ApplicationNote } from '@/lib/api/applications';
 import { ApiError } from '@/lib/api/client';
@@ -13,7 +24,7 @@ interface Props {
 }
 
 export function ApplicationNotesSection({ applicationId }: Props) {
-  const { colors, spacing } = useTheme();
+  const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const query = useQuery({
@@ -63,16 +74,15 @@ export function ApplicationNotesSection({ applicationId }: Props) {
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text variant="bodyStrong">Your private notes</Text>
         {!composing ? (
-          <Pressable
+          <Button
+            label="Add"
+            variant="ghost"
+            size="sm"
+            fullWidth={false}
+            accessibilityLabel="Add a note"
+            icon={<Plus size={14} color={colors.primary} />}
             onPress={() => setComposing(true)}
-            hitSlop={8}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-          >
-            <Plus size={14} color={colors.primary} />
-            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-              Add
-            </Text>
-          </Pressable>
+          />
         ) : null}
       </View>
       <Text variant="caption" color="mutedForeground">
@@ -112,7 +122,13 @@ export function ApplicationNotesSection({ applicationId }: Props) {
         </View>
       ) : null}
 
-      {query.data && query.data.length > 0 ? (
+      {query.data === undefined ? (
+        query.isError ? (
+          <ErrorState title="Your notes did not load" onRetry={() => void query.refetch()} />
+        ) : (
+          <Skeleton height={72} radius={radius.lg} />
+        )
+      ) : query.data.length > 0 ? (
         <Card elevated padding="none">
           {query.data.map((note: ApplicationNote, i) => (
             <View key={note.id}>
@@ -158,18 +174,19 @@ export function ApplicationNotesSection({ applicationId }: Props) {
                         {formatDate(note.updatedAt, 'short')}
                       </Text>
                       <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                        <Pressable
+                        <IconButton
+                          accessibilityLabel="Edit note"
+                          icon={<Pencil size={14} color={colors.mutedForeground} />}
                           onPress={() => {
                             setEditingId(note.id);
                             setEditingDraft(note.content);
                           }}
-                          hitSlop={8}
-                        >
-                          <Pencil size={14} color={colors.mutedForeground} />
-                        </Pressable>
-                        <Pressable onPress={() => removeMutation.mutate(note.id)} hitSlop={8}>
-                          <Trash2 size={14} color={colors.destructive} />
-                        </Pressable>
+                        />
+                        <IconButton
+                          accessibilityLabel="Delete note"
+                          icon={<Trash2 size={14} color={colors.destructive} />}
+                          onPress={() => removeMutation.mutate(note.id)}
+                        />
                       </View>
                     </View>
                   </>

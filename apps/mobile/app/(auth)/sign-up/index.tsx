@@ -164,6 +164,8 @@ function Referral({
     <PressableScale
       haptic={false}
       onPress={() => setShowReferral(true)}
+      accessibilityRole="button"
+      accessibilityLabel="Have a referral code?"
       style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}
     >
       <Gift size={15} color={colors.primary} />
@@ -475,7 +477,8 @@ function PhoneForm(props: Shared) {
                 textContentType="telephoneNumber"
                 returnKeyType="next"
                 value={value}
-                onChangeText={onChange}
+                // Digits and a leading '+' only.
+                onChangeText={(t) => onChange(t.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, ''))}
                 onBlur={onBlur}
                 onSubmitEditing={() => pwRef.current?.focus()}
                 error={errors.phone?.message}

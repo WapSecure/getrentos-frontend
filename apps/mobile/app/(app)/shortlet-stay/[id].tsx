@@ -22,11 +22,12 @@ import {
 import {
   Button,
   Card,
+  DetailSkeleton,
   Divider,
   EmptyState,
+  ErrorState,
   PressableScale,
   Price,
-  Skeleton,
   Text,
   useTheme,
   useToast,
@@ -57,13 +58,14 @@ import {
   stayRefund,
   tripDay,
 } from '@/lib/stays';
+import { goBack } from '@/lib/goBack';
 
 type SheetName = 'message' | 'dispute' | 'review' | null;
 
 /** One booked stay, from the guest's side: where it stands, how to get in, the money. */
 export default function StayDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -120,12 +122,11 @@ export default function StayDetail() {
           gap: spacing.lg,
         }}
       >
-        <DetailHeader eyebrow="Your stay" title="Stay" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Your stay" title="Stay" onBack={() => goBack()} />
         {stays.isPending ? (
-          <>
-            <Skeleton height={120} radius={radius.lg} />
-            <Skeleton height={200} radius={radius.lg} />
-          </>
+          <DetailSkeleton />
+        ) : stays.isError && !stays.data ? (
+          <ErrorState onRetry={() => stays.refetch()} />
         ) : (
           <EmptyState
             title="Stay not found"
@@ -164,7 +165,7 @@ export default function StayDetail() {
           eyebrow="Your stay"
           title={b.propertyTitle}
           subtitle={b.city}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {/* Where it stands */}

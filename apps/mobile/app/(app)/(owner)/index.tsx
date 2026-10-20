@@ -60,7 +60,7 @@ export default function OwnerHome() {
       accessory={
         <IconButton
           onPress={() => router.push('/(app)/owner-notifications')}
-          accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          accessibilityLabel="Notifications"
           badge={unread}
           icon={<Bell size={21} color={colors.foreground} />}
         />

@@ -1,5 +1,5 @@
 import { Share, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { Database, Download } from 'lucide-react-native';
 import {
@@ -17,6 +17,7 @@ import { qk } from '@/lib/query/keys';
 import { dataExportApi } from '@/lib/api/dataExport';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function DataExport() {
   const { colors, spacing } = useTheme();
@@ -61,10 +62,10 @@ export default function DataExport() {
         eyebrow="Data portability"
         title="Export your data"
         subtitle="Prepare a secure copy of your GetRentos records"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>
@@ -79,7 +80,7 @@ export default function DataExport() {
             </Text>
           </Card>
 
-          {query.isFetching ? (
+          {query.isFetching && !query.data ? (
             <View style={{ gap: spacing.md }}>
               <Skeleton height={140} radius={16} />
             </View>

@@ -7,7 +7,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, CheckCircle2, Plus } from 'lucide-react-native';
@@ -20,7 +20,7 @@ import {
   ErrorState,
   FormAlert,
   IconButton,
-  Skeleton,
+  ListSkeleton,
   Text,
   TextField,
   toISODate,
@@ -44,6 +44,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill } from '@/components/host/HostUI';
 import { VendorPicker } from '@/components/homecare/VendorPicker';
+import { goBack } from '@/lib/goBack';
 
 const FREQUENCIES = [
   { days: 30, label: 'Monthly' },
@@ -56,7 +57,7 @@ const everyLabel = (d: number) => FREQUENCIES.find((f) => f.days === d)?.label ?
 
 /** Servicing on a schedule, so things are fixed before they break. */
 export default function Plans() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -96,7 +97,7 @@ export default function Plans() {
           eyebrow="Home care"
           title="Preventive maintenance"
           subtitle="Servicing before things break"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add a plan"
@@ -108,7 +109,7 @@ export default function Plans() {
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : query.isPending ? (
-          <Skeleton height={100} radius={radius.lg} />
+          <ListSkeleton variant="card" rows={3} height={120} />
         ) : !plans.length ? (
           <EmptyState
             icon={<CalendarClock size={34} color={colors.mutedForeground} />}
@@ -251,6 +252,7 @@ function AddPlan({ onDone }: { onDone: () => void }) {
         ) : null}
         <TextField
           label="What to do"
+          required
           value={title}
           onChangeText={setTitle}
           hint="e.g. Service the generator"

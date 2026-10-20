@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Switch, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   DateField,
+  NumberField,
   Skeleton,
-  Text,
+  SwitchRow,
   TextField,
   toISODate,
   useTheme,
@@ -34,8 +35,6 @@ export function CreateListingSheet({ open, onClose }: Props) {
     </Sheet>
   );
 }
-
-const digits = (v: string) => v.replace(/\D/g, '');
 
 function CreateListingForm({
   onClose,
@@ -133,14 +132,17 @@ function CreateListingForm({
         value={title}
         onChangeText={setTitle}
         editable={!create.isPending}
+        required
       />
 
-      <TextField
-        label="Rent (₦)"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="Rent"
+        placeholder="0"
         value={rent}
-        onChangeText={(v) => setRent(digits(v))}
+        onValueChange={setRent}
         editable={!create.isPending}
+        required
       />
 
       <ChipSelect
@@ -160,16 +162,16 @@ function CreateListingForm({
         disabled={create.isPending}
       />
 
-      <Toggle
+      <SwitchRow
         label="Furnished"
         value={furnished}
-        onChange={setFurnished}
+        onValueChange={setFurnished}
         disabled={create.isPending}
       />
-      <Toggle
+      <SwitchRow
         label="Pets allowed"
         value={allowPets}
-        onChange={setAllowPets}
+        onValueChange={setAllowPets}
         disabled={create.isPending}
       />
 
@@ -178,30 +180,6 @@ function CreateListingForm({
         loading={create.isPending}
         disabled={!valid || create.isPending}
         onPress={() => create.mutate()}
-      />
-    </View>
-  );
-}
-
-function Toggle({
-  label,
-  value,
-  onChange,
-  disabled = false,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Text variant="callout">{label}</Text>
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        disabled={disabled}
-        accessibilityLabel={label}
       />
     </View>
   );

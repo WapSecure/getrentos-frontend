@@ -138,7 +138,7 @@ export function OwnerPhotosField({
                     }}
                   >
                     <Star size={10} color={colors.warning} fill={colors.warning} />
-                    <Text variant="caption" style={{ fontSize: 10, fontWeight: '700' }}>
+                    <Text variant="caption" style={{ fontWeight: '700' }}>
                       Cover
                     </Text>
                   </View>
@@ -157,12 +157,12 @@ export function OwnerPhotosField({
                   width: 24,
                   height: 24,
                   borderRadius: 12,
-                  backgroundColor: 'rgba(0,0,0,0.55)',
+                  backgroundColor: colors.scrim,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <X size={13} color="#fff" />
+                <X size={13} color={colors.primaryForeground} />
               </Pressable>
             </View>
           ))}

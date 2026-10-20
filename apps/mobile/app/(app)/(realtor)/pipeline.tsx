@@ -1,7 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Plus, Search, Users } from 'lucide-react-native';
@@ -106,6 +112,8 @@ function Leads({ onAdd }: { onAdd: () => void }) {
     queryFn: ({ pageParam }) => realtorApi.leads({ status, search: term, page: pageParam }),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    // Keep the last results on screen while a new search or stage loads.
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<RealtorLead[]>(() => {
     const all = query.data?.pages.flatMap((p) => p.items) ?? [];
@@ -162,6 +170,7 @@ function Leads({ onAdd }: { onAdd: () => void }) {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(l) => l.id}
           refreshControl={refresh}

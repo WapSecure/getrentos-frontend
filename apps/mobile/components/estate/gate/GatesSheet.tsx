@@ -104,7 +104,7 @@ function GatesBody({ estateId }: { estateId: string }) {
               </View>
               <IconButton
                 accessibilityLabel={`Remove ${g.name}`}
-                disabled={remove.isPending}
+                disabled={remove.isPending && remove.variables?.id === g.id}
                 icon={<Trash2 size={18} color={colors.destructive} />}
                 onPress={() =>
                   Alert.alert(
@@ -123,6 +123,7 @@ function GatesBody({ estateId }: { estateId: string }) {
       )}
       <TextField
         label="New gate"
+        required
         value={name}
         onChangeText={setName}
         maxLength={80}

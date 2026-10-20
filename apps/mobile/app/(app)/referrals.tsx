@@ -1,5 +1,5 @@
 import { Pressable, Share, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gift, Share2, Users } from 'lucide-react-native';
@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { referralsApi, type ReferredUser } from '@/lib/api/referrals';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Referrals() {
   const { colors, spacing, radius } = useTheme();
@@ -48,7 +49,7 @@ export default function Referrals() {
           eyebrow="Rewards"
           title="Referrals"
           subtitle="Invite trusted people and track earnings"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           style={{ flex: 1 }}
         />
       </View>
@@ -57,7 +58,7 @@ export default function Referrals() {
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           <Skeleton height={180} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>
@@ -100,12 +101,14 @@ export default function Referrals() {
                 borderColor: colors.border,
               }}
             >
-              <Text variant="title" style={{ fontSize: 22, letterSpacing: 2 }}>
+              <Text variant="heading" style={{ fontWeight: '800', letterSpacing: 2 }}>
                 {query.data.code}
               </Text>
               <Pressable
                 onPress={share}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                accessibilityRole="button"
+                accessibilityLabel="Share your referral code"
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}
                 hitSlop={8}
               >
                 <Share2 size={16} color={colors.primary} />
@@ -174,7 +177,7 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
   return (
     <Card elevated style={{ flex: 1 }}>
       {icon}
-      <Text variant="title" style={{ fontSize: 20, marginTop: spacing.sm }}>
+      <Text variant="heading" style={{ fontWeight: '800', marginTop: spacing.sm }}>
         {value}
       </Text>
       <Text variant="caption" color="mutedForeground">

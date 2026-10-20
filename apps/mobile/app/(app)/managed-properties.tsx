@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check, KeyRound, Minus } from 'lucide-react-native';
@@ -30,6 +30,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const TONE: Record<AuthorityStatus, 'success' | 'warning' | 'danger' | 'neutral'> = {
   ACTIVE: 'success',
@@ -78,7 +79,7 @@ export default function ManagedProperties() {
           eyebrow="Authority"
           title="Properties I manage"
           subtitle="What you can do for other owners’ properties"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {managed.isError && !managed.data ? (
@@ -217,6 +218,7 @@ function ClaimForm() {
       </Text>
       <TextField
         label="Property ID"
+        required
         value={propertyId}
         onChangeText={setPropertyId}
         autoCapitalize="none"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,7 @@ import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
 import { SignLeaseSheet } from '@/components/landlord/SignLeaseSheet';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordLeases() {
   const { colors, spacing, radius } = useTheme();
@@ -90,7 +91,7 @@ export default function LandlordLeases() {
               ? `${query.data.total} lease${query.data.total === 1 ? '' : 's'}${awaitingSignature > 0 ? ` · ${awaitingSignature} awaiting signature` : ''}`
               : 'Create, sign and renew agreements'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               onPress={() => setCreating(true)}
@@ -101,7 +102,7 @@ export default function LandlordLeases() {
         />
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
@@ -284,33 +285,10 @@ function LeaseAction({
 }
 
 function SignatureChip({ label, signed }: { label: string; signed: boolean }) {
-  const { colors, spacing, radius } = useTheme();
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
-        paddingHorizontal: spacing.md,
-        paddingVertical: 5,
-        borderRadius: radius.full,
-        backgroundColor: signed ? colors.success + '1f' : colors.secondary,
-      }}
-    >
-      <View
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: 3,
-          backgroundColor: signed ? colors.success : colors.mutedForeground,
-        }}
-      />
-      <Text
-        variant="caption"
-        style={{ fontSize: 11, color: signed ? colors.success : colors.mutedForeground }}
-      >
-        {label} {signed ? 'signed' : 'pending'}
-      </Text>
-    </View>
+    <Badge
+      label={`${label} ${signed ? 'signed' : 'pending'}`}
+      tone={signed ? 'success' : 'neutral'}
+    />
   );
 }

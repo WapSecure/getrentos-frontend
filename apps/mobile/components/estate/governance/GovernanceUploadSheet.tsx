@@ -154,6 +154,7 @@ function UploadForm({
       ) : null}
       <TextField
         label="Title"
+        required
         value={title}
         onChangeText={setTitle}
         maxLength={GOVERNANCE_TITLE_MAX}

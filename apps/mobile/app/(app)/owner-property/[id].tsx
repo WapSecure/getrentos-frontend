@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, ScrollView, useWindowDimensions, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertTriangle, MapPin } from 'lucide-react-native';
@@ -11,6 +11,7 @@ import {
   ErrorState,
   FormAlert,
   LinkButton,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -40,6 +41,7 @@ import { VideoTourField } from '@/components/video/VideoTourField';
 import type { VideoOnSiteReport } from '@/lib/filmedOnSite';
 import { OwnerPhotosField } from '@/components/owner/OwnerPhotosField';
 import type { PickedVideo } from '@/lib/filePicker';
+import { goBack } from '@/lib/goBack';
 
 export default function OwnerPropertyDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -157,7 +159,7 @@ export default function OwnerPropertyDetail() {
           <DetailHeader
             eyebrow="Your property"
             title={p?.name ?? 'Property'}
-            onBack={() => router.back()}
+            onBack={() => goBack()}
           />
 
           {property.isError && !p ? (
@@ -450,11 +452,12 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
   return (
     <View style={{ gap: spacing.lg }}>
       <TextField label="Listing title" value={title} onChangeText={setTitle} maxLength={120} />
-      <TextField
-        label="Asking price (₦)"
-        keyboardType="number-pad"
-        value={value ? value.toLocaleString('en-NG') : ''}
-        onChangeText={setPrice}
+      <NumberField
+        label="Asking price"
+        currency
+        required
+        value={price}
+        onValueChange={setPrice}
         hint="Buyers can offer above or below this."
       />
       {m && m.comparables.length >= 3 && m.suggested > 0 ? (

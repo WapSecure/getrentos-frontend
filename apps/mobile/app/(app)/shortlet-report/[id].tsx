@@ -4,11 +4,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Camera, Check, Clock, ImagePlus, X } from 'lucide-react-native';
+import { Camera, Clock, ImagePlus, X } from 'lucide-react-native';
 import {
   Button,
   EmptyState,
   FormAlert,
+  RadioGroup,
   Skeleton,
   Text,
   TextField,
@@ -25,6 +26,7 @@ import { ApiError } from '@/lib/api/client';
 import { capturePhoto, pickPhotos } from '@/lib/filePicker';
 import { PROBLEM_OPTIONS, formatDeadline, promiseState } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 const MAX_PHOTOS = 6;
 const MIN_DESCRIPTION = 20;
@@ -104,7 +106,7 @@ export default function GuestPromiseReport() {
           eyebrow="Guest Promise"
           title="Report a problem"
           subtitle={b?.propertyTitle}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {!b ? (
@@ -150,40 +152,21 @@ export default function GuestPromiseReport() {
               </Text>
             </View>
 
-            <View style={{ gap: spacing.sm }} accessibilityRole="radiogroup">
+            <View style={{ gap: spacing.sm }}>
               <Text variant="heading">What’s wrong?</Text>
-              {PROBLEM_OPTIONS.map((o) => {
-                const on = o.value === problem;
-                return (
-                  <Pressable
-                    key={o.value}
-                    onPress={() => {
-                      void haptics.tap();
-                      setProblem(o.value);
-                    }}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: on }}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: spacing.md,
-                      padding: spacing.lg,
-                      borderRadius: radius.lg,
-                      borderWidth: on ? 2 : 1,
-                      borderColor: on ? colors.foreground : colors.border,
-                      backgroundColor: colors.card,
-                    }}
-                  >
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong">{o.label}</Text>
-                      <Text variant="callout" color="mutedForeground">
-                        {o.hint}
-                      </Text>
-                    </View>
-                    {on ? <Check size={20} color={colors.foreground} /> : null}
-                  </Pressable>
-                );
-              })}
+              <RadioGroup
+                variant="card"
+                value={problem}
+                onChange={(next) => {
+                  void haptics.tap();
+                  setProblem(next);
+                }}
+                options={PROBLEM_OPTIONS.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                  description: o.hint,
+                }))}
+              />
             </View>
 
             <View style={{ gap: spacing.sm }}>
@@ -240,7 +223,7 @@ export default function GuestPromiseReport() {
                         backgroundColor: 'rgba(0,0,0,0.6)',
                       }}
                     >
-                      <X size={14} color="#ffffff" />
+                      <X size={14} color={colors.primaryForeground} />
                     </Pressable>
                   </View>
                 ))}
@@ -272,9 +255,10 @@ export default function GuestPromiseReport() {
 
             <View style={{ gap: spacing.sm }}>
               <Button
-                label={progress ?? 'Send report'}
+                label="Send report"
                 size="lg"
                 loading={send.isPending}
+                loadingLabel={progress ?? undefined}
                 disabled={!valid || send.isPending}
                 onPress={() => send.mutate()}
               />

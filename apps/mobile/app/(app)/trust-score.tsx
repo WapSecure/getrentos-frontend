@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -28,6 +28,7 @@ import { qk } from '@/lib/query/keys';
 import { trustScoreApi, type TrustBadge, type VerificationItem } from '@/lib/api/trustScore';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const ICONS: Record<string, typeof Shield> = {
   User,
@@ -67,7 +68,7 @@ export default function TrustScore() {
           eyebrow="Renter reputation"
           title="Trust score"
           subtitle="Verification, payment behavior and earned badges"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           style={{ flex: 1 }}
         />
       </View>
@@ -77,7 +78,7 @@ export default function TrustScore() {
           <Skeleton height={120} radius={16} />
           <Skeleton height={200} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
+      ) : !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <Screen padded>

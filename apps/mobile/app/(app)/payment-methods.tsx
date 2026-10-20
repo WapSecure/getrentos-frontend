@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -31,6 +31,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { AddPaymentMethodSheet } from '@/components/payments/AddPaymentMethodSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const TYPE_ICON: Record<SavedPaymentMethod['type'], typeof CreditCard> = {
   card: CreditCard,
@@ -85,7 +86,7 @@ export default function PaymentMethods() {
         eyebrow="Wallet"
         title="Payment methods"
         subtitle="Cards, bank accounts and preferred checkout"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <ScrollView
@@ -104,7 +105,7 @@ export default function PaymentMethods() {
       >
         {query.isLoading ? (
           [0, 1].map((i) => <Skeleton key={i} height={84} radius={radius.lg} />)
-        ) : query.isError ? (
+        ) : query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : methods.length === 0 ? (
           <EmptyState
@@ -155,22 +156,18 @@ export default function PaymentMethods() {
                 </View>
 
                 {m.isDefault ? null : (
-                  <Pressable
-                    onPress={() => setDefault.mutate(m.id)}
+                  <Button
+                    label="Set as default"
+                    variant="ghost"
+                    size="sm"
+                    fullWidth={false}
+                    icon={<Check size={15} color={colors.primary} />}
+                    accessibilityLabel={`Set ${m.name} as default`}
+                    loading={setDefault.isPending && setDefault.variables === m.id}
                     disabled={setDefault.isPending}
-                    accessibilityRole="button"
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 6,
-                      marginTop: spacing.md,
-                    }}
-                  >
-                    <Check size={15} color={colors.primary} />
-                    <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-                      Set as default
-                    </Text>
-                  </Pressable>
+                    onPress={() => setDefault.mutate(m.id)}
+                    style={{ alignSelf: 'flex-start', marginTop: spacing.sm, paddingHorizontal: 0 }}
+                  />
                 )}
               </Card>
             );
@@ -181,6 +178,7 @@ export default function PaymentMethods() {
           <Pressable
             onPress={() => setAdding(true)}
             accessibilityRole="button"
+            accessibilityLabel="Add another method"
             style={{
               flexDirection: 'row',
               alignItems: 'center',

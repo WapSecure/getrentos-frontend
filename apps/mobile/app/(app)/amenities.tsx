@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck } from 'lucide-react-native';
 import {
@@ -21,6 +21,7 @@ import { residentApi, type Amenity } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const HOUR_SLOTS = Array.from({ length: 14 }, (_, i) => 8 + i); // 8am–9pm
 const DURATIONS = [
@@ -95,7 +96,7 @@ export default function ResidentAmenities() {
         eyebrow="Estate living"
         title="Amenities"
         subtitle="Reserve shared spaces and facilities"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen>
         <View style={{ gap: spacing.sm }}>
@@ -179,7 +180,7 @@ export default function ResidentAmenities() {
                   variant="outline"
                   size="sm"
                   fullWidth={false}
-                  loading={cancel.isPending}
+                  loading={cancel.isPending && cancel.variables === b.id}
                   onPress={() => cancel.mutate(b.id)}
                   style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
                 />
@@ -294,7 +295,8 @@ function BookAmenityForm({
         </View>
       </Field>
       <Button
-        label={submitting ? 'Booking…' : 'Book'}
+        label="Book"
+        loadingLabel="Booking…"
         disabled={submitting || !canSubmit}
         loading={submitting}
         fullWidth

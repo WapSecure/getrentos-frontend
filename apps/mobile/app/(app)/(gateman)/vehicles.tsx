@@ -170,6 +170,7 @@ export default function GatemanVehicles() {
       <Card elevated>
         <TextField
           label="Plate number"
+          required
           value={plateNumber}
           onChangeText={(t) => setPlateNumber(t.toUpperCase())}
           placeholder="ABC123XY"
@@ -279,7 +280,8 @@ export default function GatemanVehicles() {
         </View>
 
         <Button
-          label={logEntry.isPending ? 'Logging…' : 'Log Vehicle'}
+          label="Log Vehicle"
+          loadingLabel="Logging…"
           loading={logEntry.isPending}
           fullWidth
           disabled={!plateNumber.trim()}
@@ -342,7 +344,7 @@ export default function GatemanVehicles() {
                   variant="outline"
                   size="sm"
                   fullWidth={false}
-                  loading={markExited.isPending}
+                  loading={markExited.isPending && markExited.variables === log.id}
                   icon={<LogOut size={14} color={colors.foreground} />}
                   onPress={() => markExited.mutate(log.id)}
                 />

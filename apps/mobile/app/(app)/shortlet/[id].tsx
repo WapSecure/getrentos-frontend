@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CalendarClock,
@@ -18,12 +18,14 @@ import {
   Chip,
   Divider,
   ErrorState,
+  LinkButton,
   Price,
   Skeleton,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi } from '@/lib/api/shortlets';
 import { CANCELLATION_POLICIES } from '@/lib/api/hostShortlets';
 import { nightsLabel, seasonRange } from '@/lib/stays';
@@ -65,7 +67,6 @@ export default function ShortletDetail() {
   const id = params.id;
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
 
   const [dates, setDates] = useState<StayDates | null>(
     params.checkIn && params.checkOut
@@ -114,19 +115,18 @@ export default function ShortletDetail() {
     });
   }, [id]);
 
-  const wishlist = useMutation({
+  const wishlist = useOptimisticMutation({
     mutationFn: (next: boolean) =>
       next ? shortletsApi.addToWishlist(id) : shortletsApi.removeFromWishlist(id),
-    onMutate: (next) => {
-      void haptics.tap();
-      qc.setQueryData<string[]>(qk.shortlets.wishlistIds, (old = []) =>
-        next ? [...old, id] : old.filter((x) => x !== id)
-      );
-    },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlistIds });
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlist });
-    },
+    patches: (next) => [
+      {
+        queryKey: qk.shortlets.wishlistIds,
+        update: (old) =>
+          next ? [...(old as string[]), id] : (old as string[]).filter((x) => x !== id),
+      },
+    ],
+    invalidate: [qk.shortlets.wishlist],
+    errorMessage: 'Your wishlist didn’t update. Please try again.',
   });
 
   const openDates = (thenBook: boolean) => {
@@ -152,7 +152,7 @@ export default function ShortletDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {query.isError ? (
+      {query.isError && !listing ? (
         <View style={{ flex: 1, paddingTop: insets.top + 56 }}>
           <ErrorState onRetry={() => query.refetch()} />
         </View>
@@ -254,15 +254,11 @@ export default function ShortletDetail() {
                     {listing.description}
                   </Text>
                   {listing.description.length > 240 ? (
-                    <Pressable
+                    <LinkButton
+                      label={aboutOpen ? 'Show less' : 'Read more'}
                       onPress={() => setAboutOpen((o) => !o)}
-                      accessibilityRole="button"
-                      hitSlop={8}
-                    >
-                      <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                        {aboutOpen ? 'Show less' : 'Read more'}
-                      </Text>
-                    </Pressable>
+                      style={{ alignSelf: 'flex-start' }}
+                    />
                   ) : null}
                 </Section>
               ) : null}
@@ -389,7 +385,10 @@ export default function ShortletDetail() {
               {listing.title}
             </Text>
             <Pressable
-              onPress={() => wishlist.mutate(!saved)}
+              onPress={() => {
+                void haptics.tap();
+                wishlist.mutate(!saved);
+              }}
               accessibilityRole="button"
               accessibilityLabel={saved ? 'Remove from wishlist' : 'Save to wishlist'}
               hitSlop={6}

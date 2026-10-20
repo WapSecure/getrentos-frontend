@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react-native';
@@ -16,6 +16,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerInvestmentMetric } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const pct = (n: number) => `${n > 0 ? '+' : ''}${n.toFixed(1)}%`;
 
@@ -54,7 +55,7 @@ export default function OwnerAnalytics() {
         eyebrow="Portfolio"
         title="Analytics"
         subtitle="Value, growth and return"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {upgrade ? (

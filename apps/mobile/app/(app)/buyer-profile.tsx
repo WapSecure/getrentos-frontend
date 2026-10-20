@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck } from 'lucide-react-native';
@@ -19,6 +19,7 @@ import { qk } from '@/lib/query/keys';
 import { buyerApi, type BuyerProfile as BuyerProfileData } from '@/lib/api/buyer';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerProfileScreen() {
   const { colors, spacing } = useTheme();
@@ -30,17 +31,17 @@ export default function BuyerProfileScreen() {
         eyebrow="Buyer account"
         title="Profile"
         subtitle="Identity and contact details"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isLoading ? (
+      {query.data ? (
+        <ProfileForm data={query.data} />
+      ) : query.isLoading ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
           <Skeleton height={220} radius={16} />
         </View>
-      ) : query.isError || !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <ProfileForm data={query.data} />
+        <ErrorState onRetry={() => query.refetch()} />
       )}
     </View>
   );
@@ -88,8 +89,13 @@ function ProfileForm({ data }: { data: BuyerProfileData }) {
       </View>
 
       <Card elevated style={{ gap: spacing.md }}>
-        <TextField label="Full name" value={legalName} onChangeText={setLegalName} />
-        <TextField label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <TextField label="Full name" value={legalName} onChangeText={setLegalName} required />
+        <TextField
+          label="Phone"
+          value={phone}
+          onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
+          keyboardType="phone-pad"
+        />
       </Card>
 
       <Button

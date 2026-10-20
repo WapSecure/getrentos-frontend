@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import NetInfo from '@react-native-community/netinfo';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +19,7 @@ import {
   Card,
   Chip,
   ErrorState,
+  NumberField,
   Skeleton,
   Text,
   TextField,
@@ -46,6 +47,7 @@ import {
   useCaptureQueue,
 } from '@/lib/inspectionCaptureQueue';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const CONDITIONS: LandBoundaryCondition[] = ['INTACT', 'DISTURBED', 'ENCROACHED', 'INCONCLUSIVE'];
 const OPEN = new Set(['ASSIGNED', 'QUERIED']);
@@ -134,7 +136,7 @@ export default function LandInspectionJob() {
           eyebrow={job ? job.reference : 'Inspection'}
           title={job?.land.label ?? 'Land inspection'}
           subtitle={job ? `${LAND_INSPECTION_KIND_LABELS[job.kind]} · ${job.land.city}` : undefined}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !job ? (
           <ErrorState onRetry={() => query.refetch()} />
@@ -313,24 +315,15 @@ function ReportForm({
         </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
-            <TextField
-              label="Beacons on survey"
-              value={expected}
-              onChangeText={setExpected}
-              keyboardType="number-pad"
-            />
+            <NumberField label="Beacons on survey" value={expected} onValueChange={setExpected} />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField
-              label="Beacons found"
-              value={found}
-              onChangeText={setFound}
-              keyboardType="number-pad"
-            />
+            <NumberField label="Beacons found" value={found} onValueChange={setFound} />
           </View>
         </View>
         <TextField
           label="What you found"
+          required
           value={summary}
           onChangeText={setSummary}
           multiline

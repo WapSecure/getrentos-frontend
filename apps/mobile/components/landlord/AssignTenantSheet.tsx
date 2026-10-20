@@ -70,6 +70,7 @@ function AssignForm({
         value={tenantName}
         onChangeText={setTenantName}
         editable={!assign.isPending}
+        required
       />
 
       <Button

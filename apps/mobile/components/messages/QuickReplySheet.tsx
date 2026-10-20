@@ -48,6 +48,7 @@ function QuickReplyForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Trigger"
+        required
         placeholder="thanks"
         autoCapitalize="none"
         maxLength={50}
@@ -59,6 +60,7 @@ function QuickReplyForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Expands to"
+        required
         placeholder="Thanks: I'll get back to you shortly."
         multiline
         numberOfLines={3}

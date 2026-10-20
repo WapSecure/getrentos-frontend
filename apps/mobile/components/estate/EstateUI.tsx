@@ -339,17 +339,23 @@ function HouseholdForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Unit"
+        required
         value={unitLabel}
         onChangeText={setUnitLabel}
         placeholder="Block A, Plot 12"
         autoFocus={!household}
         hint="How the gate and neighbours know the home"
       />
-      <TextField label="Resident’s name" value={residentName} onChangeText={setResidentName} />
+      <TextField
+        label="Resident’s name"
+        required
+        value={residentName}
+        onChangeText={setResidentName}
+      />
       <TextField
         label="Phone (optional)"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
         keyboardType="phone-pad"
       />
       <TextField
@@ -441,6 +447,7 @@ function LinkResidentForm({
       </Text>
       <TextField
         label="Resident’s GetRentos email"
+        required
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -538,6 +545,7 @@ function AnnouncementForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label="Title"
+        required
         value={title}
         onChangeText={setTitle}
         maxLength={150}
@@ -545,11 +553,12 @@ function AnnouncementForm({
       />
       <TextField
         label="Message"
+        required
         value={body}
         onChangeText={setBody}
         multiline
         maxLength={5000}
-        hint={`${body.length.toLocaleString('en-NG')} / 5,000`}
+        showCount
       />
       <SegmentedControl
         accessibilityLabel="Priority"

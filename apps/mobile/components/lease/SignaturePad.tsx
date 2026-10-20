@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { PanResponder, Pressable, View, type GestureResponderEvent } from 'react-native';
+import { PanResponder, View, type GestureResponderEvent } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { LinkButton, Text, useTheme } from '@getrentos/ui-native';
 
 const PAD_HEIGHT = 180;
 
@@ -120,11 +120,12 @@ export function SignaturePad({ onChange }: { onChange: (dataUri: string | null) 
         ) : null}
       </View>
       {!empty ? (
-        <Pressable onPress={clear} hitSlop={8} style={{ alignSelf: 'flex-end' }}>
-          <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-            Clear
-          </Text>
-        </Pressable>
+        <LinkButton
+          label="Clear"
+          onPress={clear}
+          accessibilityHint="Erases the signature"
+          style={{ alignSelf: 'flex-end' }}
+        />
       ) : null}
     </View>
   );

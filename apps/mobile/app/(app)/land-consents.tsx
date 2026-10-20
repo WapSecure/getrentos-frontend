@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Inbox, ShieldCheck } from 'lucide-react-native';
@@ -29,6 +29,7 @@ import { landConsentsApi, MIN_OBJECTION } from '@/lib/api/landConsents';
 import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const TONE: Record<LandSignatoryConsent, BadgeTone> = {
   PENDING: 'warning',
@@ -66,7 +67,7 @@ export default function LandConsents() {
           eyebrow="Land"
           title="Sale consents"
           subtitle="Land sales that need your consent"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <Card style={{ flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.secondary }}>
           <ShieldCheck size={18} color={colors.primary} />
@@ -187,6 +188,7 @@ function ObjectionForm({ item, onDone }: { item: LandConsentRequest; onDone: () 
           value={reason}
           onChangeText={setReason}
           multiline
+          required
           error={
             submit.error
               ? submit.error instanceof ApiError

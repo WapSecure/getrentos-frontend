@@ -26,6 +26,7 @@ import { DownloadLeaseButton } from '@/components/lease/DownloadLeaseButton';
 import { LeaseTerminationSheet } from '@/components/lease/LeaseTerminationSheet';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const LEASE_STATUS_TONE = { active: 'success', expiring: 'warning', expired: 'danger' } as const;
 const PAYMENT_ROW_TONE = { paid: 'success', pending: 'warning', overdue: 'danger' } as const;
@@ -69,7 +70,7 @@ export default function LeaseScreen() {
       eyebrow="Your tenancy"
       title="Lease"
       subtitle="Agreement, payments and renewal"
-      onBack={() => router.back()}
+      onBack={() => goBack()}
     />
   );
 
@@ -85,7 +86,7 @@ export default function LeaseScreen() {
     );
   }
 
-  if (leaseQuery.isError && !noActiveLease) {
+  if (leaseQuery.isError && !noActiveLease && !leaseQuery.data) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         {header}

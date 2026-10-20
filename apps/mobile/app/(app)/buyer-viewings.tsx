@@ -1,5 +1,5 @@
 import { Alert, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,8 +8,7 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -26,6 +25,7 @@ import { formatDate, formatTime } from '@/lib/format';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerViewings() {
   const { colors, spacing, radius } = useTheme();
@@ -77,25 +77,26 @@ export default function BuyerViewings() {
               ? `${items.length} scheduled request${items.length === 1 ? '' : 's'}`
               : 'Your property tour schedule'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={100} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Calendar size={34} color={colors.mutedForeground} />}
-          title="No viewings requested"
-          description="Request a viewing from a listing to see it here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={100} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Calendar size={34} color={colors.mutedForeground} />,
+          title: 'No viewings requested',
+          description: 'Request a viewing from a listing to see it here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -146,7 +147,7 @@ export default function BuyerViewings() {
                     variant="outline"
                     size="sm"
                     style={{ marginTop: spacing.md }}
-                    loading={cancelMutation.isPending}
+                    loading={cancelMutation.isPending && cancelMutation.variables === item.id}
                     onPress={() => confirmCancel(item)}
                   />
                 ) : null}
@@ -165,7 +166,7 @@ export default function BuyerViewings() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ import {
 import { UploadBuyerDocumentSheet } from '@/components/buyer/UploadBuyerDocumentSheet';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -76,7 +77,7 @@ export default function BuyerDocuments() {
               ? `${items.length} secure file${items.length === 1 ? '' : 's'}`
               : 'Proof of funds and purchase files'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               onPress={() => setUploadOpen(true)}
@@ -87,7 +88,7 @@ export default function BuyerDocuments() {
         />
       </View>
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -107,7 +108,11 @@ export default function BuyerDocuments() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: BuyerDocument }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => openDocument(item)}>
+              <Pressable
+                onPress={() => openDocument(item)}
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${item.name}`}
+              >
                 <Card elevated>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
                     <FileText size={18} color={colors.mutedForeground} style={{ marginTop: 2 }} />
@@ -127,6 +132,8 @@ export default function BuyerDocuments() {
                     </View>
                     <Pressable
                       onPress={() => confirmRemove(item)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove ${item.name}`}
                       hitSlop={8}
                       style={{ padding: 4 }}
                     >

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Route as RouteIcon } from 'lucide-react-native';
 import { Card, Chip, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { StatTile } from '@/components/estate/gate/GateUI';
@@ -37,6 +37,7 @@ export function PatrolReport({ estateId }: { estateId: string }) {
     queryFn: () => estateGateApi.patrolReport(estateId, { from }),
     enabled: !!estateId,
     retry: retryUnlessPlanGate,
+    placeholderData: keepPreviousData,
   });
 
   return (

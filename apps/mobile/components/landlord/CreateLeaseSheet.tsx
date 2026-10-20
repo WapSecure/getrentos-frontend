@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Switch, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
   DateField,
+  NumberField,
   Skeleton,
-  Text,
+  SwitchRow,
   TextField,
   toISODate,
   useTheme,
@@ -35,8 +36,6 @@ export function CreateLeaseSheet({ open, onClose }: Props) {
     </Sheet>
   );
 }
-
-const digits = (v: string) => v.replace(/\D/g, '');
 
 /** One year on from a yyyy-MM-dd date: the usual Nigerian tenancy term. */
 function yearAfter(iso: string): string {
@@ -120,6 +119,7 @@ function CreateLeaseForm({
         value={tenantName}
         onChangeText={setTenantName}
         editable={!create.isPending}
+        required
       />
 
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
@@ -146,35 +146,32 @@ function CreateLeaseForm({
         </View>
       </View>
 
-      <TextField
-        label="Rent per year (₦)"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="Rent per year"
+        placeholder="0"
         value={rent}
-        onChangeText={(v) => setRent(digits(v))}
+        onValueChange={setRent}
         editable={!create.isPending}
+        required
       />
-      <TextField
-        label="Security deposit (₦, optional)"
-        keyboardType="number-pad"
+      <NumberField
+        currency
+        label="Security deposit"
+        optional
+        placeholder="0"
         value={deposit}
-        onChangeText={(v) => setDeposit(digits(v))}
+        onValueChange={setDeposit}
         editable={!create.isPending}
       />
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-        <View style={{ flex: 1 }}>
-          <Text variant="callout">Send to the tenant now</Text>
-          <Text variant="caption" color="mutedForeground">
-            Off saves a draft you can send later.
-          </Text>
-        </View>
-        <Switch
-          value={sendNow}
-          onValueChange={setSendNow}
-          disabled={create.isPending}
-          accessibilityLabel="Send now"
-        />
-      </View>
+      <SwitchRow
+        label="Send to the tenant now"
+        description="Off saves a draft you can send later."
+        value={sendNow}
+        onValueChange={setSendNow}
+        disabled={create.isPending}
+      />
 
       <Button
         label={sendNow ? 'Create and send' : 'Save draft'}

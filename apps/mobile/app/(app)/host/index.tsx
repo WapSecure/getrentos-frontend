@@ -27,6 +27,7 @@ import { hostShortletsApi } from '@/lib/api/hostShortlets';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { HostFeeNote, StayCard } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 /**
  * The host's morning view: what needs a reply, who's arriving, and what's
@@ -99,7 +100,7 @@ export default function HostingHome() {
             ? `${live} live listing${live === 1 ? '' : 's'}${pending ? ` · ${pending} to answer` : ''}`
             : 'Nightly stays in your furnished homes'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           ready && !noListings ? (
             <IconButton

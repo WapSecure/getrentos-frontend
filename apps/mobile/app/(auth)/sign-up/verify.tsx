@@ -18,6 +18,7 @@ import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
 import { useCountdown } from '@/hooks/useCountdown';
+import { goBack } from '@/lib/goBack';
 
 const RESEND_SECONDS = 60;
 
@@ -77,7 +78,7 @@ export default function SignUpVerify() {
       subtitle={`Enter the 6-digit code we sent to ${target ?? 'you'}.`}
       progress={2 / 3}
       progressLabel="Sign-up step 2 of 3"
-      onBack={() => router.back()}
+      onBack={() => goBack()}
       footer={
         <>
           <Button

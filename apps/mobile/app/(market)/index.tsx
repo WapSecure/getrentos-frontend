@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { FlashList } from '@shopify/flash-list';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import {
   BedDouble,
   Building2,
@@ -26,6 +26,7 @@ import {
   EmptyState,
   ErrorState,
   IconButton,
+  ListSkeleton,
   PropertyCard,
   Skeleton,
   Text,
@@ -309,10 +310,19 @@ function Listings({
     queryFn: ({ pageParam }) => publicMarketApi.list(kind, filters, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
 
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const total = query.data?.pages[0]?.total ?? 0;
+
+  // A new search, sort or filter starts from the top. The list stays mounted
+  // while results load (keepPreviousData), so it would otherwise stay anchored
+  // to whichever card was in view, which may now sit at the bottom.
+  const listRef = useRef<FlashListRef<MarketCard>>(null);
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [filters]);
 
   const onEndReached = useCallback(() => {
     if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
@@ -521,6 +531,10 @@ function Listings({
   return (
     <>
       <FlashList
+        ref={listRef}
+        // Results are replaced wholesale on a new search or sort; anchoring to
+        // the card that was in view would leave the user at the bottom.
+        maintainVisibleContentPosition={{ disabled: true }}
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
@@ -549,9 +563,12 @@ function Listings({
         }
         ListFooterComponent={
           query.isFetchingNextPage ? (
-            <View style={{ paddingVertical: spacing.xl }}>
-              <ActivityIndicator color={colors.mutedForeground} accessibilityLabel="Loading more" />
-            </View>
+            <ListSkeleton
+              variant="card"
+              rows={1}
+              height={176}
+              style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
+            />
           ) : (
             <View style={{ height: 120 }} />
           )
@@ -638,6 +655,7 @@ function EstatesDirectory({
     queryFn: ({ pageParam }) => publicMarketApi.estates(search || undefined, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
 
@@ -681,6 +699,7 @@ function EstatesDirectory({
 
   return (
     <FlashList
+      maintainVisibleContentPosition={{ disabled: true }}
       data={items}
       keyExtractor={(e) => e.estateId}
       keyboardDismissMode="on-drag"

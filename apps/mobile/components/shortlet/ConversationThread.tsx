@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +8,7 @@ import {
   Avatar,
   ErrorState,
   IconButton,
+  LinkButton,
   Skeleton,
   Text,
   TextField,
@@ -162,8 +156,8 @@ export function ConversationThread<C extends ThreadConversation>({
           onPress={() => router.back()}
           haptic={false}
           accessibilityLabel={backLabel}
+          variant="ghost"
           icon={<ChevronLeft size={22} color={colors.foreground} />}
-          style={{ borderWidth: 0, backgroundColor: 'transparent' }}
         />
         <Avatar name={c?.participantName} size={36} />
         <View style={{ flex: 1 }} accessible accessibilityRole="header">
@@ -272,21 +266,16 @@ export function ConversationThread<C extends ThreadConversation>({
                     <Text variant="caption" style={{ color: colors.destructive }}>
                       {item.error}
                     </Text>
-                    <Pressable
+                    <LinkButton
+                      label="Retry"
+                      accessibilityLabel="Retry sending"
                       onPress={() => {
                         setPending((rows) =>
                           rows.map((x) => (x.key === item.key ? { ...x, error: undefined } : x))
                         );
                         send.mutate({ key: item.key, text: item.text });
                       }}
-                      accessibilityRole="button"
-                      accessibilityLabel="Retry sending"
-                      hitSlop={12}
-                    >
-                      <Text variant="caption" color="primary" style={{ fontWeight: '700' }}>
-                        Retry
-                      </Text>
-                    </Pressable>
+                    />
                   </View>
                 ) : (
                   <Text

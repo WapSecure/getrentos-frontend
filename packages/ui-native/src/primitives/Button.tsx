@@ -14,6 +14,8 @@ export interface ButtonProps extends Omit<PressableScaleProps, 'style' | 'childr
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  /** Shown beside the spinner while loading ("Saving…"). Without it the label keeps its space, hidden. */
+  loadingLabel?: string;
   fullWidth?: boolean;
   icon?: React.ReactNode;
   iconRight?: React.ReactNode;
@@ -28,6 +30,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   loading = false,
+  loadingLabel,
   fullWidth = true,
   icon,
   iconRight,
@@ -55,28 +58,48 @@ export function Button({
     }
   }, [variant, colors]);
 
-  const body = (
-    <View style={styles.content}>
-      {loading ? (
+  const textStyle = {
+    color: palette.fg,
+    fontWeight: '700' as const,
+    flexShrink: 1,
+    textAlign: 'center' as const,
+  };
+  const textVariant = size === 'sm' ? 'callout' : 'bodyStrong';
+
+  // While loading, the label stays laid out (invisible) under the spinner so the
+  // button keeps its size. A loading label replaces it instead, since it may be longer.
+  const content = (
+    <View style={[styles.content, loading && styles.hidden]}>
+      {icon}
+      <Text variant={textVariant} style={textStyle} numberOfLines={2}>
+        {label}
+      </Text>
+      {iconRight}
+    </View>
+  );
+  const body =
+    loading && loadingLabel ? (
+      <View style={styles.content}>
         <ActivityIndicator color={palette.fg} />
-      ) : (
+        <Text variant={textVariant} style={textStyle} numberOfLines={1}>
+          {loadingLabel}
+        </Text>
+      </View>
+    ) : (
+      <View style={styles.content}>
         <Animated.View
           entering={reduceMotion ? undefined : FadeIn.duration(120)}
           style={styles.content}
         >
-          {icon}
-          <Text
-            variant={size === 'sm' ? 'callout' : 'bodyStrong'}
-            style={{ color: palette.fg, fontWeight: '700', flexShrink: 1, textAlign: 'center' }}
-            numberOfLines={2}
-          >
-            {label}
-          </Text>
-          {iconRight}
+          {content}
         </Animated.View>
-      )}
-    </View>
-  );
+        {loading ? (
+          <View style={[StyleSheet.absoluteFill, styles.content]}>
+            <ActivityIndicator color={palette.fg} />
+          </View>
+        ) : null}
+      </View>
+    );
 
   const frame: StyleProp<ViewStyle> = [
     styles.base,
@@ -96,7 +119,7 @@ export function Button({
   return (
     <PressableScale
       accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityLabel={loading && loadingLabel ? loadingLabel : (accessibilityLabel ?? label)}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       hitSlop={6}
@@ -118,4 +141,5 @@ const styles = StyleSheet.create({
     gap: 8,
     flexShrink: 1,
   },
+  hidden: { opacity: 0 },
 });

@@ -7,6 +7,7 @@ import {
   Card,
   Chip,
   EmptyState,
+  NumberField,
   Screen,
   SectionHeader,
   Skeleton,
@@ -165,7 +166,7 @@ export default function GatemanDeliveries() {
                   variant="outline"
                   size="sm"
                   fullWidth={false}
-                  loading={markCollected.isPending}
+                  loading={markCollected.isPending && markCollected.variables === log.id}
                   onPress={() => markCollected.mutate(log.id)}
                 />
               </View>
@@ -314,21 +315,23 @@ function LogDeliveryForm({
   return (
     <View style={{ gap: spacing.lg }}>
       <View style={{ gap: spacing.sm }}>
-        <TextField
+        <NumberField
           label="Courier's code"
+          code
+          maxLength={6}
           value={code}
-          onChangeText={(next) => {
+          onValueChange={(next) => {
             setCode(next);
             // Any edit clears the last answer: a stale "this is for Block C"
             // beside a code the guard has since changed is worse than nothing.
             if (screen) setScreen(null);
           }}
           placeholder="The six digits the household sent"
-          keyboardType="number-pad"
           hint="Optional: use it instead of picking a household"
         />
         <Button
-          label={checkCode.isPending ? 'Checking…' : 'Check code'}
+          label="Check code"
+          loadingLabel="Checking…"
           variant="outline"
           size="sm"
           fullWidth={false}
@@ -515,7 +518,8 @@ function LogDeliveryForm({
       </View>
 
       <Button
-        label={submitting ? 'Logging…' : 'Log Delivery'}
+        label="Log Delivery"
+        loadingLabel="Logging…"
         loading={submitting}
         fullWidth
         disabled={!matched && householdId.length === 0}

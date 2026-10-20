@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -185,13 +185,7 @@ export default function Messages() {
       ) : query.isPending ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
           {[0, 1, 2, 3].map((i) => (
-            <View key={i} style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
-              <Skeleton height={48} width={48} radius={24} />
-              <View style={{ flex: 1, gap: 6 }}>
-                <Skeleton height={14} width="50%" />
-                <Skeleton height={12} width="80%" />
-              </View>
-            </View>
+            <ConversationRowSkeleton key={i} />
           ))}
         </View>
       ) : (
@@ -223,11 +217,12 @@ export default function Messages() {
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <View style={{ paddingVertical: spacing.lg }}>
-                <ActivityIndicator
-                  color={colors.mutedForeground}
-                  accessibilityLabel="Loading more conversations"
-                />
+              <View
+                accessible
+                accessibilityLabel="Loading more conversations"
+                style={{ paddingHorizontal: spacing.xl, paddingVertical: spacing.md }}
+              >
+                <ConversationRowSkeleton />
               </View>
             ) : (
               <View style={{ height: spacing['3xl'] }} />
@@ -236,6 +231,20 @@ export default function Messages() {
           refreshControl={refresh}
         />
       )}
+    </View>
+  );
+}
+
+/** A conversation row's shape while it loads. */
+function ConversationRowSkeleton() {
+  const { spacing } = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
+      <Skeleton height={48} width={48} radius={24} />
+      <View style={{ flex: 1, gap: 6 }}>
+        <Skeleton height={14} width="50%" />
+        <Skeleton height={12} width="80%" />
+      </View>
     </View>
   );
 }

@@ -89,6 +89,8 @@ export default function PropertyDetail() {
 
   const saved = savedIds.has(id);
   const p = query.data;
+  // The sticky bar's square actions sit beside a full-height button.
+  const actionStyle = { width: 52, height: 52, borderRadius: 14, backgroundColor: 'transparent' };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -99,7 +101,7 @@ export default function PropertyDetail() {
         <PropertyGallery images={toGallery(p?.image, p?.images)} height={300} />
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
-          {query.isError ? (
+          {query.isError && !p ? (
             <ErrorState onRetry={() => query.refetch()} />
           ) : !p ? (
             <View style={{ gap: spacing.md }}>
@@ -395,64 +397,34 @@ export default function PropertyDetail() {
             borderTopColor: colors.border,
           }}
         >
-          <Pressable
+          <IconButton
             onPress={() => toggle(id)}
-            accessibilityRole="button"
             accessibilityLabel={saved ? 'Remove from saved' : 'Save this home'}
-            accessibilityState={{ selected: saved }}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: colors.border,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Heart
-              size={20}
-              color={saved ? colors.destructive : colors.foreground}
-              fill={saved ? colors.destructive : 'transparent'}
-            />
-          </Pressable>
+            selected={saved}
+            style={actionStyle}
+            icon={
+              <Heart
+                size={20}
+                color={saved ? colors.destructive : colors.foreground}
+                fill={saved ? colors.destructive : 'transparent'}
+              />
+            }
+          />
           {p.landlordId ? (
-            <Pressable
+            <IconButton
               onPress={() => messageMutation.mutate()}
               disabled={messageMutation.isPending}
-              accessibilityRole="button"
               accessibilityLabel={`Message ${p.landlordName ?? 'the landlord'}`}
-              accessibilityState={{ busy: messageMutation.isPending }}
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: colors.border,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: messageMutation.isPending ? 0.6 : 1,
-              }}
-            >
-              <MessageCircle size={20} color={colors.foreground} />
-            </Pressable>
+              style={[actionStyle, { opacity: messageMutation.isPending ? 0.6 : 1 }]}
+              icon={<MessageCircle size={20} color={colors.foreground} />}
+            />
           ) : null}
-          <Pressable
+          <IconButton
             onPress={() => setViewingSheetOpen(true)}
-            accessibilityRole="button"
             accessibilityLabel="Book a viewing"
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 14,
-              borderWidth: 1,
-              borderColor: colors.border,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Calendar size={20} color={colors.foreground} />
-          </Pressable>
+            style={actionStyle}
+            icon={<Calendar size={20} color={colors.foreground} />}
+          />
           <View style={{ flex: 1 }}>
             <Button
               label="Apply to rent"

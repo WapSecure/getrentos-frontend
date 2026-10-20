@@ -57,6 +57,7 @@ function MessageReminderForm({ onClose }: { onClose: () => void }) {
 
       <TextField
         label="Remind me to"
+        required
         placeholder="e.g. Chase the landlord about the lease"
         value={message}
         onChangeText={setMessage}

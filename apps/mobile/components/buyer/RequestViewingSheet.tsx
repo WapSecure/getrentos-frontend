@@ -110,7 +110,8 @@ function RequestForm({ onClose, listing }: { onClose: () => void; listing: Buyer
         </View>
       ) : null}
       <TextField
-        label="Notes (optional)"
+        label="Notes"
+        optional
         value={notes}
         onChangeText={setNotes}
         multiline

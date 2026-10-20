@@ -29,6 +29,14 @@ export function ChecklistSection({ title, items, onToggle, pendingKey }: Props) 
             key={item.key}
             onPress={() => onToggle(item.key)}
             disabled={pendingKey === item.key}
+            accessibilityRole="checkbox"
+            accessibilityLabel={item.required ? item.title : `${item.title}, optional`}
+            accessibilityHint={item.description}
+            accessibilityState={{
+              checked: item.completed,
+              disabled: pendingKey === item.key,
+              busy: pendingKey === item.key,
+            }}
             style={{
               flexDirection: 'row',
               alignItems: 'flex-start',

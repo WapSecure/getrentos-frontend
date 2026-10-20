@@ -28,6 +28,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
 import { InviteClientSheet } from '@/components/realtor/RealtorUI';
+import { goBack } from '@/lib/goBack';
 
 const GROUPS: { status: RelationshipStatus; title: string }[] = [
   { status: 'ACTIVE', title: 'Active' },
@@ -65,7 +66,7 @@ export default function RealtorClients() {
           eyebrow="Your book"
           title="Clients"
           subtitle="Owners and landlords you represent"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Invite a client"

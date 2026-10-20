@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import { qk } from '@/lib/query/keys';
 import { buyerReviewsApi, type BuyerReview } from '@/lib/api/buyerReviews';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -34,10 +35,10 @@ export default function BuyerReviews() {
         eyebrow="Buyer activity"
         title="Reviews"
         subtitle="Feedback you have shared after transactions"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {listQuery.isError ? (
+      {listQuery.isError && !listQuery.data ? (
         <ErrorState onRetry={() => listQuery.refetch()} />
       ) : listQuery.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>

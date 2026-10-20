@@ -39,6 +39,7 @@ export function SegmentedControl<T extends string>({
             accessibilityRole="tab"
             accessibilityLabel={`${opt.label}, ${i + 1} of ${options.length}`}
             accessibilityState={{ selected: active }}
+            aria-selected={active}
             onPress={() => {
               if (!active) onChange(opt.value);
             }}

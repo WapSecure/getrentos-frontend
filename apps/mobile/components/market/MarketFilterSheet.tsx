@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Button, Checkbox, Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Button, Checkbox, Chip, CurrencyField, Text, useTheme } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   activeFilterCount,
@@ -296,16 +296,12 @@ function NairaField({
   error?: string;
 }) {
   return (
-    <TextField
+    <CurrencyField
       label={label}
-      placeholder="₦ Any"
-      keyboardType="number-pad"
-      value={value ? value.toLocaleString('en-NG') : ''}
+      placeholder="Any"
+      value={value || null}
       error={error}
-      onChangeText={(t) => {
-        const digits = t.replace(/\D/g, '');
-        onChange(digits ? Number(digits) : undefined);
-      }}
+      onValueChange={(v) => onChange(v ?? undefined)}
     />
   );
 }

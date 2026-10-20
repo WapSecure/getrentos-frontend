@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { Heart, ImageOff, Search } from 'lucide-react-native';
@@ -10,6 +10,7 @@ import {
   Chip,
   EmptyState,
   ErrorState,
+  ListSkeleton,
   Price,
   Skeleton,
   Text,
@@ -61,6 +62,7 @@ export default function BuyerDiscover() {
     queryFn: ({ pageParam }) => buyerApi.listings(filters, pageParam, PAGE_SIZE),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
   });
 
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
@@ -242,6 +244,7 @@ export default function BuyerDiscover() {
         />
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
@@ -262,9 +265,12 @@ export default function BuyerDiscover() {
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <View style={{ paddingVertical: spacing.xl }}>
-                <ActivityIndicator color={colors.mutedForeground} />
-              </View>
+              <ListSkeleton
+                variant="card"
+                rows={1}
+                height={140}
+                style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
+              />
             ) : (
               <View style={{ height: spacing['3xl'] }} />
             )

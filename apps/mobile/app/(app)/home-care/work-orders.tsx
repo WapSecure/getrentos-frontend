@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, Wrench } from 'lucide-react-native';
@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { homeCareApi, type WorkOrder, type WorkOrderView } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
+import { goBack } from '@/lib/goBack';
 
 const RANK: Record<string, number> = { URGENT: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 
@@ -46,6 +47,7 @@ export default function WorkOrders() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: view !== 'open',
+    placeholderData: keepPreviousData,
   });
 
   const items = useMemo<WorkOrder[]>(() => {
@@ -61,7 +63,7 @@ export default function WorkOrders() {
   const active = view === 'open' ? open : closed;
   const refresh = (
     <RefreshControl
-      refreshing={active.isRefetching}
+      refreshing={active.isRefetching && !active.isPlaceholderData}
       onRefresh={() => active.refetch()}
       tintColor={colors.mutedForeground}
     />
@@ -80,7 +82,7 @@ export default function WorkOrders() {
         <DetailHeader
           eyebrow="Home care"
           title="Work orders"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="New work order"
@@ -112,6 +114,7 @@ export default function WorkOrders() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(w) => w.id}
           refreshControl={refresh}

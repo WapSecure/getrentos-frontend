@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import {
   BadgeCheck,
   Cake,
@@ -14,7 +14,17 @@ import {
   X,
   Zap,
 } from 'lucide-react-native';
-import { Avatar, Button, Card, Chip, Divider, Price, Text, useTheme } from '@getrentos/ui-native';
+import {
+  Avatar,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  LinkButton,
+  Price,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
 import type { ShortletListing } from '@/lib/api/shortlets';
 import {
   CONDITION_LABEL,
@@ -159,11 +169,11 @@ export function RulesBlock({ listing }: { listing: ShortletListing }) {
               {rules}
             </Text>
             {rules.length > 180 ? (
-              <Pressable onPress={() => setMore((m) => !m)} accessibilityRole="button" hitSlop={8}>
-                <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                  {more ? 'Show less' : 'Read all rules'}
-                </Text>
-              </Pressable>
+              <LinkButton
+                label={more ? 'Show less' : 'Read all rules'}
+                onPress={() => setMore((m) => !m)}
+                style={{ alignSelf: 'flex-start' }}
+              />
             ) : null}
           </>
         ) : null}

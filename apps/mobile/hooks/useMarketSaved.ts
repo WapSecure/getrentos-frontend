@@ -7,11 +7,13 @@ import type { MarketKind } from '@/lib/api/publicMarket';
 import { report, track } from '@/lib/analytics';
 import { rememberListing } from '@/lib/pendingListing';
 import { qk } from '@/lib/query/keys';
+import { useToast } from '@getrentos/ui-native';
 
 /** One saved-listing state for rent, sale, shortlet and land. */
 export function useMarketSaved(kind: MarketKind) {
   const { status } = useAuth();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const signedIn = status === 'authenticated';
   const query = useQuery({
     queryKey: qk.market.saved,
@@ -33,8 +35,9 @@ export function useMarketSaved(kind: MarketKind) {
       );
       return { previous };
     },
-    onError: (error, _variables, context) => {
+    onError: (error, { next }, context) => {
       queryClient.setQueryData(qk.market.saved, context?.previous ?? []);
+      toast.show(next ? 'Could not save that listing.' : 'Could not remove that listing.', 'error');
       report(error, { action: 'toggle_market_save' });
     },
     onSuccess: (_data, { id, next }) => {

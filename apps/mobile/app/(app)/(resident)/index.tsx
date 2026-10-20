@@ -95,7 +95,7 @@ export default function ResidentHome() {
         }
       />
 
-      {dues.isError ? (
+      {dues.isError && !dues.data ? (
         <Card elevated>
           <ErrorState
             title="We couldn't load your dues"
@@ -145,7 +145,7 @@ export default function ResidentHome() {
           onAction={() => router.push('/(app)/(resident)/announcements')}
         />
         <View style={{ marginTop: spacing.md, gap: spacing.md }}>
-          {announcements.isError ? (
+          {announcements.isError && !announcements.data ? (
             <ErrorState
               title="Announcements are unavailable"
               description="Try again to load the latest updates from your estate team."

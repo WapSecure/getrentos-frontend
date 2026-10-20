@@ -1,13 +1,14 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Building2, ShieldCheck } from 'lucide-react-native';
-import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentAssignedProperty } from '@/lib/api/agent';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function AgentProperties() {
   const { colors, spacing, radius } = useTheme();
@@ -36,25 +37,26 @@ export default function AgentProperties() {
               ? `${items.length} assigned propert${items.length === 1 ? 'y' : 'ies'}`
               : 'Client properties under your care'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Building2 size={34} color={colors.mutedForeground} />}
-          title="No properties assigned"
-          description="Properties your clients assign to you will appear here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={90} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Building2 size={34} color={colors.mutedForeground} />,
+          title: 'No properties assigned',
+          description: 'Properties your clients assign to you will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -99,7 +101,7 @@ export default function AgentProperties() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

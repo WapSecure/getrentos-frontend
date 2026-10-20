@@ -1,7 +1,12 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, UserCheck } from 'lucide-react-native';
@@ -48,6 +53,7 @@ import {
 } from '@/lib/api/estateGate';
 import type { Household } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type Filter = ContractorPassStatus | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
@@ -90,6 +96,7 @@ export default function EstateContractors() {
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
     enabled: !!estateId,
+    placeholderData: keepPreviousData,
   });
   const items = useMemo<ContractorPass[]>(
     () => query.data?.pages.flatMap((p) => p.items) ?? [],
@@ -156,7 +163,7 @@ export default function EstateContractors() {
               ? `${total} ${total === 1 ? 'authorisation' : 'authorisations'}`
               : 'People allowed to keep coming back'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             locked ? undefined : (
               <IconButton
@@ -192,6 +199,7 @@ export default function EstateContractors() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(p) => p.id}
           refreshControl={refresh}
@@ -383,6 +391,7 @@ function AuthoriseForm({
       />
       <TextField
         label="Full name"
+        required
         value={name}
         onChangeText={setName}
         maxLength={120}
@@ -391,7 +400,7 @@ function AuthoriseForm({
       <TextField
         label="Phone (optional)"
         value={phone}
-        onChangeText={setPhone}
+        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
         keyboardType="phone-pad"
         maxLength={30}
         hint="With only a first name, a phone is needed to check them against the watch list"

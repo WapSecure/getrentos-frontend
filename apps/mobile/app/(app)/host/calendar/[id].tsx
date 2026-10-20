@@ -27,6 +27,7 @@ import {
   shiftDay,
   type DayState,
 } from '@/components/host/MonthCalendar';
+import { goBack } from '@/lib/goBack';
 
 const MONTHS_AHEAD = 12;
 
@@ -177,7 +178,7 @@ export default function HostCalendar() {
           eyebrow="Calendar"
           title="Availability"
           subtitle="Tap two open nights to block them"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <CalendarLegend />
       </View>

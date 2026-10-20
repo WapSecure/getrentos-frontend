@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -19,6 +19,7 @@ import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
 import { CommissionRow } from '@/components/realtor/CommissionRow';
+import { goBack } from '@/lib/goBack';
 
 const LABEL = {
   pending: { label: 'On its way', tone: 'info' },
@@ -58,7 +59,7 @@ export default function RealtorPayoutDetail() {
       <DetailHeader
         eyebrow="Payout"
         title={p ? formatDate(p.createdAt, 'medium') : 'Payout'}
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {notFound ? (
         <EmptyState title="Payout not found" />

@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileStack, FileText, Plus } from 'lucide-react-native';
 import {
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -24,6 +23,7 @@ import {
 import { UploadAgentDocumentSheet } from '@/components/agent/UploadAgentDocumentSheet';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -58,7 +58,7 @@ export default function AgentDocuments() {
         eyebrow="Field operations"
         title="Documents"
         subtitle="Inspection, verification and identity files"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setUploadOpen(true)}
@@ -68,27 +68,33 @@ export default function AgentDocuments() {
         }
       />
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={70} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<FileStack size={34} color={colors.mutedForeground} />}
-          title="No documents yet"
-          description="Inspection reports, verification forms and IDs you upload will appear here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={70} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <FileStack size={34} color={colors.mutedForeground} />,
+          title: 'No documents yet',
+          description:
+            'Inspection reports, verification forms and IDs you upload will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: AgentDocument }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <Pressable onPress={() => openDocument(item.id)}>
+              <Pressable
+                onPress={() => openDocument(item.id)}
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${item.name}`}
+              >
                 <Card elevated>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
                     <FileText size={18} color={colors.mutedForeground} style={{ marginTop: 2 }} />
@@ -123,7 +129,7 @@ export default function AgentDocuments() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <UploadAgentDocumentSheet open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </View>

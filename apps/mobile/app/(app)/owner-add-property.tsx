@@ -12,7 +12,16 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileText, Upload, X } from 'lucide-react-native';
-import { Button, Chip, FormAlert, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Chip,
+  FormAlert,
+  NumberField,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   ownerApi,
@@ -28,6 +37,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { LocationFields } from '@/components/forms/LocationFields';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
+import { goBack } from '@/lib/goBack';
 
 const TYPES: { value: CreateOwnerPropertyInput['propertyType']; label: string }[] = [
   { value: 'APARTMENT', label: 'Apartment' },
@@ -144,7 +154,7 @@ export default function OwnerAddProperty() {
           eyebrow="Your portfolio"
           title="Add a property"
           subtitle="Verified ownership lets you list it for sale"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         <TextField
@@ -153,6 +163,7 @@ export default function OwnerAddProperty() {
           value={name}
           onChangeText={setName}
           error={err('name')}
+          required
         />
 
         <View style={{ gap: spacing.sm }}>
@@ -177,6 +188,7 @@ export default function OwnerAddProperty() {
           onChangeText={setAddress}
           autoComplete="street-address"
           error={err('address')}
+          required
         />
         <LocationFields
           country={country}
@@ -190,19 +202,20 @@ export default function OwnerAddProperty() {
         <LocationPicker address={address} city={city} state={state} value={pin} onChange={setPin} />
         <View style={{ flexDirection: stackFieldPairs ? 'column' : 'row', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
-            <TextField
-              label="Estimated value (₦)"
-              keyboardType="number-pad"
-              value={digits(estimatedValue)?.toLocaleString('en-NG') ?? ''}
-              onChangeText={setEstimatedValue}
+            <NumberField
+              label="Estimated value"
+              currency
+              value={estimatedValue}
+              onValueChange={setEstimatedValue}
             />
           </View>
           <View style={{ flex: 1 }}>
-            <TextField
-              label="Bought for (₦, optional)"
-              keyboardType="number-pad"
-              value={digits(purchasePrice)?.toLocaleString('en-NG') ?? ''}
-              onChangeText={setPurchasePrice}
+            <NumberField
+              label="Bought for"
+              optional
+              currency
+              value={purchasePrice}
+              onValueChange={setPurchasePrice}
             />
           </View>
         </View>

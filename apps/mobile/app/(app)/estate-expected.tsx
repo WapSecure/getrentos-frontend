@@ -18,6 +18,7 @@ import { useEstate } from '@/hooks/useEstate';
 import { gatemanApi } from '@/lib/api/gateman';
 import { formatTime } from '@/lib/format';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 /**
  * Who the estate expects today: visitors, contractors and parcels. A planning
@@ -60,7 +61,7 @@ export default function EstateExpected() {
         subtitle={
           d ? `${d.tally.label} · as of ${formatTime(d.asOf)}` : 'Who the estate is expecting'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {isUpgradeError(query.error) ? (
         <Card elevated style={{ gap: spacing.md }}>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PartyPopper, Plus, Trash2 } from 'lucide-react-native';
@@ -12,6 +12,7 @@ import {
   EmptyState,
   FormAlert,
   IconButton,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -32,6 +33,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 /**
  * How the price moves: discounts for long and last-minute stays, notice and
@@ -61,7 +63,7 @@ export default function HostPricing() {
         eyebrow="Pricing"
         title="Rules & seasons"
         subtitle={l?.title}
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {listings.isPending ? (
         <Skeleton height={260} radius={radius.lg} />
@@ -369,7 +371,7 @@ function SeasonForm({
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
-        <TextField label="Name" value={name} onChangeText={setName} maxLength={60} />
+        <TextField label="Name" required value={name} onChangeText={setName} maxLength={60} />
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
             <DateField
@@ -384,11 +386,12 @@ function SeasonForm({
           </View>
         </View>
         {l.pricingMode === 'PER_NIGHT' ? (
-          <TextField
-            label="Nightly rate (₦)"
-            keyboardType="number-pad"
-            value={value ? value.toLocaleString('en-NG') : ''}
-            onChangeText={setRate}
+          <NumberField
+            label="Nightly rate"
+            optional
+            currency
+            value={rate}
+            onValueChange={setRate}
             hint={
               l.nightlyRate
                 ? `Your usual rate is ₦${l.nightlyRate.toLocaleString('en-NG')}. Blank keeps it.`

@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { Button, Divider, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Button,
+  Divider,
+  IconButton,
+  LinkButton,
+  Skeleton,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { qk } from '@/lib/query/keys';
 import { wishlistsApi, type Wishlist } from '@/lib/api/wishlists';
 import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 
 interface Props {
   open: boolean;
@@ -47,17 +58,16 @@ function WishlistManageBody() {
       ),
   });
 
-  const renameMutation = useMutation({
+  // A rename shows at once; a refusal puts the old name back.
+  const renameMutation = useOptimisticMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => wishlistsApi.rename(id, name),
-    onSuccess: () => {
-      setEditingId(null);
-      invalidate();
-    },
-    onError: (err) =>
-      toast.show(
-        err instanceof ApiError ? err.message : 'Could not rename that wishlist.',
-        'error'
-      ),
+    patches: ({ id, name }) => [
+      {
+        queryKey: qk.renter.wishlists,
+        update: (old) => (old as Wishlist[]).map((w) => (w.id === id ? { ...w, name } : w)),
+      },
+    ],
+    errorMessage: 'Could not rename that wishlist.',
   });
 
   const removeMutation = useMutation({
@@ -87,7 +97,10 @@ function WishlistManageBody() {
                 setEditingName(w.name);
               }}
               onChangeEditingName={setEditingName}
-              onConfirmEdit={() => renameMutation.mutate({ id: w.id, name: editingName.trim() })}
+              onConfirmEdit={() => {
+                renameMutation.mutate({ id: w.id, name: editingName.trim() });
+                setEditingId(null);
+              }}
               onCancelEdit={() => setEditingId(null)}
               onDelete={() => removeMutation.mutate(w.id)}
               busy={renameMutation.isPending || removeMutation.isPending}
@@ -95,6 +108,12 @@ function WishlistManageBody() {
             <Divider style={{ marginTop: spacing.sm }} />
           </View>
         ))}
+        {query.isPending ? (
+          <>
+            <Skeleton height={40} />
+            <Skeleton height={40} />
+          </>
+        ) : null}
         {query.data?.length === 0 ? (
           <Text variant="callout" color="mutedForeground">
             No wishlists yet: create one below.
@@ -106,6 +125,7 @@ function WishlistManageBody() {
         <View style={{ flex: 1 }}>
           <TextField
             placeholder="New wishlist name"
+            accessibilityLabel="New wishlist name"
             value={newName}
             onChangeText={setNewName}
             returnKeyType="done"
@@ -152,6 +172,7 @@ function WishlistRow({
       <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <TextField
+            accessibilityLabel="Wishlist name"
             value={editingName}
             onChangeText={onChangeEditingName}
             autoFocus
@@ -159,16 +180,8 @@ function WishlistRow({
             onSubmitEditing={onConfirmEdit}
           />
         </View>
-        <Pressable onPress={onConfirmEdit} hitSlop={8}>
-          <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-            Save
-          </Text>
-        </Pressable>
-        <Pressable onPress={onCancelEdit} hitSlop={8}>
-          <Text variant="callout" color="mutedForeground">
-            Cancel
-          </Text>
-        </Pressable>
+        <LinkButton label="Save" onPress={onConfirmEdit} />
+        <LinkButton label="Cancel" tone="muted" onPress={onCancelEdit} />
       </View>
     );
   }
@@ -181,13 +194,19 @@ function WishlistRow({
           {w.count} {w.count === 1 ? 'home' : 'homes'}
         </Text>
       </View>
-      <Pressable onPress={onStartEdit} disabled={busy} hitSlop={8}>
-        <Pencil size={16} color={colors.mutedForeground} />
-      </Pressable>
+      <IconButton
+        accessibilityLabel={`Rename ${w.name}`}
+        icon={<Pencil size={16} color={colors.mutedForeground} />}
+        onPress={onStartEdit}
+        disabled={busy}
+      />
       {!w.isDefault ? (
-        <Pressable onPress={onDelete} disabled={busy} hitSlop={8}>
-          <Trash2 size={16} color={colors.destructive} />
-        </Pressable>
+        <IconButton
+          accessibilityLabel={`Delete ${w.name}`}
+          icon={<Trash2 size={16} color={colors.destructive} />}
+          onPress={onDelete}
+          disabled={busy}
+        />
       ) : null}
     </View>
   );

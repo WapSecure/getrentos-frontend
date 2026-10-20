@@ -21,6 +21,7 @@ import { IncomeExpenseChart } from '@/components/landlord/IncomeExpenseChart';
 import { ApiError } from '@/lib/api/client';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordFinancials() {
   const { colors, spacing } = useTheme();
@@ -57,7 +58,7 @@ export default function LandlordFinancials() {
         eyebrow="Portfolio performance"
         title="Financials"
         subtitle="Income, expenses and net returns"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={exportCsv}
@@ -70,7 +71,7 @@ export default function LandlordFinancials() {
         }
       />
 
-      {stats.isError || chart.isError ? (
+      {(stats.isError && !stats.data) || (chart.isError && !chart.data) ? (
         <ErrorState
           onRetry={() => {
             stats.refetch();

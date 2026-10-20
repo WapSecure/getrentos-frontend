@@ -11,10 +11,10 @@ import {
   Divider,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -193,20 +193,22 @@ function PayoutAccountForm({
         />
       </View>
       {other ? (
-        <TextField
+        <NumberField
           label="Bank code"
+          required
+          code
           value={bankCode}
-          onChangeText={(v) => setBankCode(v.replace(/\D/g, ''))}
-          keyboardType="number-pad"
+          onValueChange={setBankCode}
           maxLength={6}
           hint="Your bank’s code, e.g. 058 for GTBank"
         />
       ) : null}
-      <TextField
+      <NumberField
         label="Account number"
+        required
+        code
         value={accountNumber}
-        onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
-        keyboardType="number-pad"
+        onValueChange={setAccountNumber}
         maxLength={10}
         hint="We check the name on the account with the bank"
       />

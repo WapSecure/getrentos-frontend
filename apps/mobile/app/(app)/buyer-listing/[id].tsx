@@ -19,10 +19,10 @@ import {
   Badge,
   Button,
   Card,
+  DetailSkeleton,
   Divider,
   ErrorState,
   Price,
-  Skeleton,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
@@ -40,7 +40,7 @@ import { FilmedOnSite } from '@/components/video/FilmedOnSite';
 
 export default function BuyerListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { savedIds, toggle } = useBuyerSaved();
   const [viewingOpen, setViewingOpen] = useState(false);
@@ -94,7 +94,8 @@ export default function BuyerListingDetail() {
             <Pressable
               onPress={() => toggle(listing.id)}
               accessibilityRole="button"
-              accessibilityLabel="Save listing"
+              accessibilityLabel={isSaved ? 'Remove from saved' : 'Save listing'}
+              accessibilityState={{ selected: isSaved }}
               hitSlop={10}
             >
               <Heart
@@ -107,12 +108,10 @@ export default function BuyerListingDetail() {
         ) : null}
       </View>
 
-      {query.isError ? (
+      {query.isError && !listing ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : !listing ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={200} radius={radius.lg} />
-        </View>
+        <DetailSkeleton style={{ paddingHorizontal: spacing.xl }} />
       ) : (
         <>
           <ScrollView

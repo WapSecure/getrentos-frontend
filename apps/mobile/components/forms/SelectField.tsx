@@ -14,6 +14,9 @@ export function SelectField({
   placeholder = 'Select an option',
   disabled = false,
   error,
+  hint,
+  required = false,
+  optional = false,
 }: {
   label: string;
   value: string;
@@ -22,6 +25,12 @@ export function SelectField({
   placeholder?: string;
   disabled?: boolean;
   error?: string;
+  /** Help shown under the field while there is no error. */
+  hint?: string;
+  /** Adds an asterisk to the label and tells screen readers the field is required. */
+  required?: boolean;
+  /** Shows "Optional" beside the label, for forms where most fields are required. */
+  optional?: boolean;
 }) {
   const { colors, spacing, radius } = useTheme();
   const [open, setOpen] = useState(false);
@@ -34,14 +43,30 @@ export function SelectField({
 
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
-        {label}
-      </Text>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+        importantForAccessibility="no-hide-descendants"
+      >
+        <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
+          {label}
+          {required ? (
+            <Text variant="callout" color="destructive">
+              {' *'}
+            </Text>
+          ) : null}
+        </Text>
+        {optional && !required ? (
+          <Text variant="caption" color="mutedForeground">
+            Optional
+          </Text>
+        ) : null}
+      </View>
       <Pressable
         onPress={() => setOpen(true)}
         disabled={disabled}
         accessibilityRole="button"
-        accessibilityLabel={`${label}, ${selected?.label ?? placeholder}`}
+        accessibilityLabel={`${label}${required ? ', required' : ''}, ${selected?.label ?? placeholder}`}
+        accessibilityHint={error ? `Error: ${error}` : hint}
         accessibilityState={{ disabled, expanded: open }}
         style={{
           minHeight: 54,
@@ -62,8 +87,12 @@ export function SelectField({
         <ChevronDown size={18} color={colors.mutedForeground} />
       </Pressable>
       {error ? (
-        <Text variant="caption" color="destructive">
+        <Text variant="caption" color="destructive" accessibilityLiveRegion="polite">
           {error}
+        </Text>
+      ) : hint ? (
+        <Text variant="caption" color="mutedForeground">
+          {hint}
         </Text>
       ) : null}
       <Sheet
@@ -89,6 +118,7 @@ export function SelectField({
                 setOpen(false);
               }}
               accessibilityRole="radio"
+              accessibilityLabel={option.label}
               accessibilityState={{ checked: option.value === value }}
               style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
             >

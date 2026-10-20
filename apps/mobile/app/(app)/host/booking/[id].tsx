@@ -23,9 +23,11 @@ import {
   Button,
   Card,
   Chip,
+  DetailSkeleton,
   Divider,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
@@ -48,6 +50,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { BOOKING_STATUS, StatusPill, Thumb } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 type Panel = 'cancel' | 'claim' | 'dispute' | 'review' | null;
 
@@ -56,7 +59,7 @@ const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
 export default function HostBookingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -117,15 +120,12 @@ export default function HostBookingDetail() {
           eyebrow="Booking"
           title={b?.guestName ?? 'Guest'}
           subtitle={b?.propertyTitle}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !b ? (
           <ErrorState onRetry={() => query.refetch()} />
         ) : !b ? (
-          <>
-            <Skeleton height={150} radius={radius.lg} />
-            <Skeleton height={200} radius={radius.lg} />
-          </>
+          <DetailSkeleton />
         ) : (
           <>
             <StayHero b={b} />
@@ -567,6 +567,7 @@ function CancelForm({ b, onDone }: { b: HostBooking; onDone: (next: HostBooking)
           <>
             <TextField
               label="Tell the guest why"
+              required
               value={reason}
               onChangeText={setReason}
               multiline
@@ -612,15 +613,17 @@ function ClaimForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
           Up to {naira(max)} held. Explain what was damaged or missing; an admin decides, and the
           rest goes back to the guest.
         </Text>
-        <TextField
-          label="Amount (₦)"
-          keyboardType="number-pad"
-          value={value ? value.toLocaleString('en-NG') : ''}
-          onChangeText={setAmount}
+        <NumberField
+          label="Amount"
+          required
+          currency
+          value={amount}
+          onValueChange={setAmount}
           error={value > max ? `The deposit is ${naira(max)}.` : null}
         />
         <TextField
           label="What happened"
+          required
           value={reason}
           onChangeText={setReason}
           multiline
@@ -675,9 +678,16 @@ function DisputeForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
             />
           ))}
         </View>
-        <TextField label="In a few words" value={title} onChangeText={setTitle} maxLength={120} />
+        <TextField
+          label="In a few words"
+          required
+          value={title}
+          onChangeText={setTitle}
+          maxLength={120}
+        />
         <TextField
           label="What happened"
+          required
           value={description}
           onChangeText={setDescription}
           multiline
@@ -738,7 +748,8 @@ function ReviewForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
           ))}
         </View>
         <TextField
-          label="How was hosting them? (optional)"
+          label="How was hosting them?"
+          optional
           value={comment}
           onChangeText={setComment}
           multiline

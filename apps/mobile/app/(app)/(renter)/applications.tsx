@@ -103,7 +103,7 @@ export default function Applications() {
         ) : null}
       </View>
 
-      {query.isError && all.length === 0 ? (
+      {query.isError && !query.data ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
           <ErrorState onRetry={() => query.refetch()} />
         </ScrollView>

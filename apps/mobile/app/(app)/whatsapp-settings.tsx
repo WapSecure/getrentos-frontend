@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+import { ScrollView, View } from 'react-native';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageCircle } from 'lucide-react-native';
@@ -11,6 +11,7 @@ import {
   Divider,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -25,6 +26,7 @@ import {
 } from '@/lib/api/preferences';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function WhatsAppSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -37,19 +39,11 @@ export default function WhatsAppSettings() {
         eyebrow="Communication"
         title="WhatsApp"
         subtitle="Manage important updates outside the app"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={saved?.connected ? <Badge label="Connected" tone="success" /> : null}
       />
 
-      {query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={140} radius={radius.lg} />
-          ))}
-        </View>
-      ) : query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
+      {query.data ? (
         /* Mounted only once the stored bag has arrived, so the form can seed its
            own state from props instead of syncing it in an effect. */
         <WhatsAppForm
@@ -59,6 +53,14 @@ export default function WhatsAppSettings() {
             preferences: { ...DEFAULT_WHATSAPP_TOPICS, ...(saved?.preferences ?? {}) },
           }}
         />
+      ) : query.isError ? (
+        <ErrorState onRetry={() => query.refetch()} />
+      ) : (
+        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+          {[0, 1].map((i) => (
+            <Skeleton key={i} height={140} radius={radius.lg} />
+          ))}
+        </View>
       )}
     </View>
   );
@@ -118,8 +120,13 @@ function WhatsAppForm({ initial }: { initial: WhatsAppPreferences }) {
         label="WhatsApp number"
         placeholder="+234 801 234 5678"
         keyboardType="phone-pad"
+        required
         value={state.phone}
-        onChangeText={(phone) => setState((s) => ({ ...s, phone }))}
+        onChangeText={(text) => {
+          // Digits and a leading '+' only.
+          const phone = text.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
+          setState((s) => ({ ...s, phone }));
+        }}
       />
 
       <View style={{ gap: spacing.sm }}>
@@ -130,28 +137,17 @@ function WhatsAppForm({ initial }: { initial: WhatsAppPreferences }) {
           {WHATSAPP_TOPIC_LABEL.map((topic, i) => (
             <View key={topic.id}>
               {i > 0 ? <Divider /> : null}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.md,
-                  padding: spacing.lg,
-                }}
-              >
-                <Text variant="callout" style={{ flex: 1 }}>
-                  {topic.label}
-                </Text>
-                <Switch
-                  value={state.preferences[topic.id] === true}
-                  onValueChange={(value) =>
-                    setState((s) => ({
-                      ...s,
-                      preferences: { ...s.preferences, [topic.id]: value },
-                    }))
-                  }
-                  accessibilityLabel={topic.label}
-                />
-              </View>
+              <SwitchRow
+                label={topic.label}
+                value={state.preferences[topic.id] === true}
+                onValueChange={(value) =>
+                  setState((s) => ({
+                    ...s,
+                    preferences: { ...s.preferences, [topic.id]: value },
+                  }))
+                }
+                style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
+              />
             </View>
           ))}
         </Card>

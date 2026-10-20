@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCheck, Landmark } from 'lucide-react-native';
@@ -11,10 +11,10 @@ import {
   Chip,
   ErrorState,
   FormAlert,
+  NumberField,
   Price,
   Skeleton,
   Text,
-  TextField,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
@@ -28,6 +28,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS: Record<SellerPayoutStatus, { label: string; tone: 'info' | 'success' | 'danger' }> = {
   PENDING: { label: 'Queued', tone: 'info' },
@@ -78,7 +79,7 @@ export default function SellerPayout() {
           eyebrow="Getting paid"
           title="Payout account"
           subtitle="Where your sale money goes once the sale completes"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {account.isError && !a ? (
@@ -182,21 +183,23 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
         />
       </View>
       {other ? (
-        <TextField
+        <NumberField
           label="Bank code"
           value={bankCode}
-          onChangeText={(v) => setBankCode(v.replace(/\D/g, ''))}
-          keyboardType="number-pad"
+          onValueChange={setBankCode}
+          code
           maxLength={6}
+          required
           hint="Your bank’s code, e.g. 058 for GTBank"
         />
       ) : null}
-      <TextField
+      <NumberField
         label="Account number"
         value={accountNumber}
-        onChangeText={(v) => setAccountNumber(v.replace(/\D/g, ''))}
-        keyboardType="number-pad"
+        onValueChange={setAccountNumber}
+        code
         maxLength={10}
+        required
       />
       {save.error ? (
         <FormAlert

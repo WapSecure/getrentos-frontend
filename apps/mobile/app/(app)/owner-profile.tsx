@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerProfile } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function OwnerProfileScreen() {
   const { colors, spacing, radius } = useTheme();
@@ -42,7 +43,7 @@ export default function OwnerProfileScreen() {
           eyebrow="Account"
           title="Profile"
           subtitle="How buyers and realtors see you"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />
@@ -93,11 +94,13 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
           label="Full name"
           value={legalName}
           onChangeText={setLegalName}
+          required
           autoComplete="name"
           textContentType="name"
         />
         <TextField
-          label="Company (optional)"
+          label="Company"
+          optional
           value={companyName}
           onChangeText={setCompanyName}
           textContentType="organizationName"
@@ -106,7 +109,7 @@ function ProfileForm({ initial }: { initial: OwnerProfile }) {
           <TextField
             label="Phone number"
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
             keyboardType="phone-pad"
             autoComplete="tel"
             textContentType="telephoneNumber"

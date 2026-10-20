@@ -26,6 +26,7 @@ import {
   Divider,
   EmptyState,
   ErrorState,
+  IconButton,
   Price,
   Skeleton,
   Text,
@@ -172,14 +173,11 @@ export default function LandlordPropertyDetail() {
           paddingBottom: spacing.sm,
         }}
       >
-        <Pressable
+        <IconButton
           onPress={() => router.back()}
-          accessibilityRole="button"
           accessibilityLabel="Go back"
-          hitSlop={10}
-        >
-          <ChevronLeft size={26} color={colors.foreground} />
-        </Pressable>
+          icon={<ChevronLeft size={22} color={colors.foreground} />}
+        />
         <View style={{ flex: 1 }}>
           <Text variant="title" numberOfLines={1}>
             {p?.name ?? 'Property'}
@@ -187,33 +185,26 @@ export default function LandlordPropertyDetail() {
         </View>
         {p && !p.archived ? (
           <>
-            <Pressable
+            <IconButton
               onPress={() => setEditing(true)}
-              accessibilityRole="button"
               accessibilityLabel="Edit property"
-              hitSlop={10}
-              style={{ marginRight: spacing.lg }}
-            >
-              <Pencil size={19} color={colors.foreground} />
-            </Pressable>
-            <Pressable
+              icon={<Pencil size={19} color={colors.foreground} />}
+            />
+            <IconButton
               onPress={() =>
                 Alert.alert('Archive property?', 'It will stop appearing in your active list.', [
                   { text: 'Cancel', style: 'cancel' },
                   { text: 'Archive', style: 'destructive', onPress: () => archive.mutate() },
                 ])
               }
-              accessibilityRole="button"
               accessibilityLabel="Archive property"
-              hitSlop={10}
-            >
-              <Archive size={19} color={colors.mutedForeground} />
-            </Pressable>
+              icon={<Archive size={19} color={colors.mutedForeground} />}
+            />
           </>
         ) : null}
       </View>
 
-      {property.isError ? (
+      {property.isError && !property.data ? (
         <ErrorState onRetry={() => property.refetch()} />
       ) : !property.isLoading && !p ? (
         <EmptyState

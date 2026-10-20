@@ -231,6 +231,7 @@ function ReportForm({ estateId, onDone }: { estateId: string; onDone: () => void
       </View>
       <TextField
         label="What happened"
+        required
         value={description}
         onChangeText={setDescription}
         placeholder="What, where, and who’s involved"

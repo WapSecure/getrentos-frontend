@@ -56,6 +56,7 @@ function InviteRoommateForm({
       </Text>
       <TextField
         label="Email address"
+        required
         placeholder="roommate@example.com"
         autoCapitalize="none"
         keyboardType="email-address"
@@ -64,7 +65,8 @@ function InviteRoommateForm({
         editable={!mutation.isPending}
       />
       <TextField
-        label="Personal message (optional)"
+        label="Personal message"
+        optional
         placeholder="Hey, join our flat on GetRentos"
         multiline
         numberOfLines={3}

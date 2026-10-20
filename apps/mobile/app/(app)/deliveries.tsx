@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Image, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react-native';
 import {
@@ -27,6 +27,7 @@ import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 /**
  * A household's parcels: what is coming, and what has already been taken in.
@@ -78,7 +79,7 @@ export default function ResidentDeliveries() {
         eyebrow="Household activity"
         title="Deliveries"
         subtitle="Parcels received at the gate, and ones on their way"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen
         refreshing={query.isRefetching || expectedQuery.isRefetching}
@@ -145,7 +146,7 @@ export default function ResidentDeliveries() {
                       variant="ghost"
                       size="sm"
                       fullWidth={false}
-                      loading={withdraw.isPending}
+                      loading={withdraw.isPending && withdraw.variables === row.id}
                       onPress={() => withdraw.mutate(row.id)}
                     />
                   ) : null}
@@ -328,6 +329,7 @@ function DeclareDeliverySheet({ open, onClose }: { open: boolean; onClose: () =>
         <View style={{ gap: spacing.lg }}>
           <TextField
             label="Who is bringing it?"
+            required
             value={courier}
             onChangeText={setCourier}
             placeholder="e.g. Amazon, DHL"
@@ -343,7 +345,8 @@ function DeclareDeliverySheet({ open, onClose }: { open: boolean; onClose: () =>
             The code works for 2 days, or until you withdraw it, and it only works once.
           </Text>
           <Button
-            label={declare.isPending ? 'Getting code…' : 'Get code'}
+            label="Get code"
+            loadingLabel="Getting code…"
             loading={declare.isPending}
             fullWidth
             disabled={courier.trim().length === 0}

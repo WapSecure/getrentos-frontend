@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Banknote, Camera } from 'lucide-react-native';
@@ -12,6 +12,7 @@ import {
   Divider,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   TextField,
   useTheme,
@@ -32,6 +33,7 @@ import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -54,10 +56,10 @@ export default function LandlordSettings() {
         eyebrow="Landlord workspace"
         title="Settings"
         subtitle="Profile, payout and portfolio automation"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {profile.isError ? (
+      {profile.isError && !profile.data ? (
         <ErrorState onRetry={() => profile.refetch()} />
       ) : (
         <ScrollView
@@ -225,16 +227,18 @@ function ProfileForm({ initial }: { initial: LandlordProfile }) {
         </View>
       </Pressable>
 
-      <TextField label="Full name" value={fullName} onChangeText={setFullName} />
+      <TextField label="Full name" required value={fullName} onChangeText={setFullName} />
       <TextField
         label="Phone"
         placeholder="+234 801 234 5678"
         keyboardType="phone-pad"
         value={phone}
-        onChangeText={setPhone}
+        // Digits only, with an optional leading +.
+        onChangeText={(v) => setPhone(v.replace(/(?!^\+)\D/g, ''))}
       />
       <TextField
-        label="Company (optional)"
+        label="Company"
+        optional
         placeholder="e.g. Adeyemi Properties"
         value={companyName}
         onChangeText={setCompanyName}
@@ -276,31 +280,18 @@ function AutomationCard({ initial }: { initial: AutomationSettings }) {
       {keys.map((k, i) => (
         <View key={k}>
           {i > 0 ? <Divider /> : null}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              padding: spacing.lg,
+          <SwitchRow
+            label={AUTOMATION_LABEL[k]}
+            description={AUTOMATION_DESCRIPTION[k]}
+            value={state[k]}
+            onValueChange={(v) => {
+              const previous = state;
+              const next = { ...state, [k]: v };
+              setState(next);
+              save.mutate({ next, previous });
             }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text variant="bodyStrong">{AUTOMATION_LABEL[k]}</Text>
-              <Text variant="caption" color="mutedForeground">
-                {AUTOMATION_DESCRIPTION[k]}
-              </Text>
-            </View>
-            <Switch
-              value={state[k]}
-              onValueChange={(v) => {
-                const previous = state;
-                const next = { ...state, [k]: v };
-                setState(next);
-                save.mutate({ next, previous });
-              }}
-              accessibilityLabel={AUTOMATION_LABEL[k]}
-            />
-          </View>
+            style={{ paddingHorizontal: spacing.lg, paddingVertical: spacing.md }}
+          />
         </View>
       ))}
     </Card>
@@ -314,11 +305,12 @@ function PreferencesCard({ initial }: { initial: LandlordNotificationPreference[
   const [prefs, setPrefs] = useState(initial);
 
   const save = useMutation({
-    mutationFn: (next: LandlordNotificationPreference[]) =>
+    // Carries the pre-change list so a failure undoes only this toggle.
+    mutationFn: ({ next }: { next: LandlordNotificationPreference[]; previous: typeof prefs }) =>
       landlordApi.updateNotificationPreferences(next),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.landlord.notificationPreferences }),
-    onError: (e) => {
-      setPrefs(initial);
+    onError: (e, { previous }) => {
+      setPrefs(previous);
       toast.show(e instanceof ApiError ? e.message : 'Could not save that preference.', 'error');
     },
   });
@@ -326,7 +318,7 @@ function PreferencesCard({ initial }: { initial: LandlordNotificationPreference[
   const set = (id: string, channel: 'email' | 'push', value: boolean) => {
     const next = prefs.map((p) => (p.id === id ? { ...p, [channel]: value } : p));
     setPrefs(next);
-    save.mutate(next);
+    save.mutate({ next, previous: prefs });
   };
 
   return (
@@ -370,13 +362,20 @@ function Channel({
   onChange: (v: boolean) => void;
   category: string;
 }) {
-  const { spacing } = useTheme();
+  const { colors, spacing } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
       <Text variant="caption" color="mutedForeground">
         {label}
       </Text>
-      <Switch value={value} onValueChange={onChange} accessibilityLabel={`${category} ${label}`} />
+      {/* Two channels share a row, so this stays a bare switch with a full spoken label. */}
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        accessibilityLabel={`${category} ${label}`}
+        trackColor={{ true: colors.primary, false: colors.border }}
+        ios_backgroundColor={colors.border}
+      />
     </View>
   );
 }

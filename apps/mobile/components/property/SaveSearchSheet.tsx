@@ -61,6 +61,7 @@ function SaveSearchForm({ onClose, filters }: Omit<Props, 'open'>) {
         value={name}
         onChangeText={setName}
         returnKeyType="done"
+        required
       />
       <Button
         label="Save search"

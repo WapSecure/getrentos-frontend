@@ -1,11 +1,12 @@
 import { Pressable, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Vote } from 'lucide-react-native';
 import {
   Badge,
   Card,
   EmptyState,
+  ErrorState,
   Screen,
   Skeleton,
   Text,
@@ -15,6 +16,7 @@ import {
 import { residentApi, type Poll } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function PollCard({
   poll,
@@ -51,6 +53,9 @@ function PollCard({
               key={opt.id}
               disabled={!canVote || voting}
               onPress={() => onVote(opt.id)}
+              accessibilityRole="radio"
+              accessibilityLabel={canVote ? opt.label : `${opt.label}, ${pct}%`}
+              accessibilityState={{ checked: mine, disabled: !canVote || voting }}
               style={{
                 borderRadius: radius.md,
                 borderWidth: 1,
@@ -126,7 +131,7 @@ export default function ResidentPolls() {
         eyebrow="Community voice"
         title="Polls"
         subtitle="Vote on decisions that affect your estate"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         {query.isLoading ? (
@@ -134,6 +139,8 @@ export default function ResidentPolls() {
             <Skeleton height={140} radius={16} />
             <Skeleton height={140} radius={16} />
           </View>
+        ) : query.isError && !query.data ? (
+          <ErrorState onRetry={() => query.refetch()} />
         ) : query.data && query.data.length > 0 ? (
           query.data.map((poll) => (
             <PollCard

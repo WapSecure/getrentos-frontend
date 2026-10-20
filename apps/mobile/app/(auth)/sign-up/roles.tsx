@@ -26,6 +26,7 @@ import { ApiError } from '@/lib/api/client';
 import { useSignup } from '@/lib/auth/SignupContext';
 import { haptics } from '@/lib/haptics';
 import { SIGNUP_ROLES, VERIFICATION_LABEL, type SignupRoleId } from '@/lib/roles';
+import { goBack } from '@/lib/goBack';
 
 const ICONS: Record<string, LucideIcon> = {
   Home,
@@ -71,7 +72,7 @@ export default function SignUpRoles() {
       subtitle="Pick what fits today: you can add more roles later, with supporting documents."
       progress={1}
       progressLabel="Sign-up step 3 of 3"
-      onBack={() => router.back()}
+      onBack={() => goBack()}
       footer={
         <>
           <PressableScale

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -20,6 +20,7 @@ import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { relativeTime } from '@/lib/format';
 import type { Tone } from '@/lib/api/estateManager';
+import { goBack } from '@/lib/goBack';
 
 export type QueueView = 'open' | 'closed';
 
@@ -80,7 +81,7 @@ export function QueueScreen<T extends { id: string }>({
           eyebrow={eyebrow}
           title={title}
           subtitle={subtitle}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={accessory}
         />
         <SegmentedControl
@@ -241,6 +242,7 @@ function CloseForm({
     <View style={{ gap: spacing.md }}>
       <TextField
         label={dismissing ? 'Why it’s being dismissed' : 'What was done (optional)'}
+        required={dismissing}
         value={notes}
         onChangeText={setNotes}
         editable={!busy}

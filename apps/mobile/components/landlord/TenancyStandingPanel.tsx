@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, ChevronDown, Lock, XCircle } from 'lucide-react-native';
-import { Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { LinkButton, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { landlordApi } from '@/lib/api/landlord';
 
 /**
@@ -42,6 +42,13 @@ export function TenancyStandingPanel({ applicationId }: { applicationId: string 
 
       {!open ? null : query.isLoading ? (
         <Skeleton height={48} />
+      ) : query.isError && !s ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Text variant="caption" color="mutedForeground">
+            This did not load.
+          </Text>
+          <LinkButton label="Try again" onPress={() => void query.refetch()} />
+        </View>
       ) : !s?.shared ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <Lock size={13} color={colors.mutedForeground} />

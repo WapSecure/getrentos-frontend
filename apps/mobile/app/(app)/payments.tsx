@@ -2,15 +2,17 @@ import { useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { AlertTriangle, FileStack, ReceiptText as ReceiptIcon, Wallet } from 'lucide-react-native';
 import {
   Badge,
+  Button,
   Card,
   EmptyState,
   ErrorState,
   IconButton,
+  LinkButton,
   Price,
   Skeleton,
   Text,
@@ -28,6 +30,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Payments() {
   const { colors, spacing, radius } = useTheme();
@@ -38,6 +41,7 @@ export default function Payments() {
   const query = useQuery({
     queryKey: qk.renter.payments(1, 50),
     queryFn: () => paymentsApi.list(1, 50),
+    placeholderData: keepPreviousData,
   });
   const items = query.data?.items ?? [];
 
@@ -74,7 +78,7 @@ export default function Payments() {
         eyebrow="Renter finance"
         title="Payments"
         subtitle="Rent, receipts and payment history"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             <IconButton
@@ -91,7 +95,7 @@ export default function Payments() {
         }
       />
 
-      {query.isError ? (
+      {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : query.isLoading ? (
         <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
@@ -107,6 +111,7 @@ export default function Payments() {
         />
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Payment }) => (
@@ -185,28 +190,16 @@ function PaymentRow({
           marginTop: spacing.md,
         }}
       >
-        <Price amount={p.amount} variant="title" style={{ fontSize: 20 }} />
+        <Price amount={p.amount} variant="heading" />
         {payable ? (
-          <Pressable
+          <Button
+            label="Pay now"
+            size="sm"
+            fullWidth={false}
+            loading={paying}
+            loadingLabel="Paying…"
             onPress={onPay}
-            disabled={paying}
-            accessibilityRole="button"
-            accessibilityLabel={paying ? 'Paying' : 'Pay now'}
-            accessibilityState={{ disabled: paying, busy: paying }}
-            style={{
-              minHeight: 44,
-              justifyContent: 'center',
-              paddingVertical: 8,
-              paddingHorizontal: 16,
-              borderRadius: 999,
-              backgroundColor: colors.primary,
-              opacity: paying ? 0.7 : 1,
-            }}
-          >
-            <Text variant="callout" style={{ color: colors.primaryForeground, fontWeight: '700' }}>
-              {paying ? 'Paying…' : 'Pay now'}
-            </Text>
-          </Pressable>
+          />
         ) : p.receiptUrl ? (
           <Pressable
             onPress={() => Linking.openURL(p.receiptUrl!)}
@@ -230,20 +223,12 @@ function PaymentRow({
           </Text>
         </View>
       ) : disputable ? (
-        <Pressable
+        <LinkButton
+          label="Dispute this payment"
+          tone="muted"
           onPress={onDispute}
-          accessibilityRole="button"
-          accessibilityLabel="Dispute this payment"
-          style={{ marginTop: spacing.xs, minHeight: 44, justifyContent: 'center' }}
-        >
-          <Text
-            variant="caption"
-            color="mutedForeground"
-            style={{ textDecorationLine: 'underline' }}
-          >
-            Dispute this payment
-          </Text>
-        </Pressable>
+          style={{ marginTop: spacing.xs, alignSelf: 'flex-start' }}
+        />
       ) : null}
     </Card>
   );

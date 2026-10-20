@@ -1,27 +1,20 @@
 import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, ImageOff } from 'lucide-react-native';
-import {
-  Card,
-  EmptyState,
-  ErrorState,
-  Price,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Card, ListSkeleton, Price, QueryState, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function ShortletWishlist() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
 
   const query = useQuery({
     queryKey: qk.shortlets.wishlist,
@@ -29,12 +22,23 @@ export default function ShortletWishlist() {
   });
   const items = query.data?.items ?? [];
 
-  const removeMutation = useMutation({
+  // The stay leaves the list at once and comes back if the server refuses.
+  const removeMutation = useOptimisticMutation({
     mutationFn: (id: string) => shortletsApi.removeFromWishlist(id),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlist });
-      qc.invalidateQueries({ queryKey: qk.shortlets.wishlistIds });
-    },
+    patches: (id) => [
+      {
+        queryKey: qk.shortlets.wishlist,
+        update: (old) => {
+          const page = old as { items: ShortletListing[] };
+          return { ...page, items: page.items.filter((x) => x.id !== id) };
+        },
+      },
+      {
+        queryKey: qk.shortlets.wishlistIds,
+        update: (old) => (old as string[]).filter((x) => x !== id),
+      },
+    ],
+    errorMessage: 'Could not remove that stay. Please try again.',
   });
 
   return (
@@ -43,24 +47,20 @@ export default function ShortletWishlist() {
         eyebrow="Shortlet shortlist"
         title="Saved stays"
         subtitle="Favorite stays ready for comparison"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
-      {query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={200} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Heart size={34} color={colors.mutedForeground} />}
-          title="Nothing saved yet"
-          description="Tap the heart on a stay to save it here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={<ListSkeleton variant="card" rows={2} height={200} />}
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Heart size={34} color={colors.mutedForeground} />,
+          title: 'Nothing saved yet',
+          description: 'Tap the heart on a stay to save it here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -155,7 +155,7 @@ export default function ShortletWishlist() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }
