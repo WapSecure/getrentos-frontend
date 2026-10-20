@@ -6,10 +6,11 @@ import { Wrench } from 'lucide-react';
 import {
   Button,
   Card,
+  DocumentUpload,
   EmptyState,
   Field,
-  Input,
   ListSkeleton,
+  type PendingUpload,
   Select,
   Textarea,
 } from '@getrentos/ui';
@@ -38,7 +39,7 @@ export default function ResidentMaintenancePage() {
   const [category, setCategory] = useState('OTHER');
   const [priority, setPriority] = useState('MEDIUM');
   const [description, setDescription] = useState('');
-  const [photo, setPhoto] = useState<File | null>(null);
+  const [photo, setPhoto] = useState<PendingUpload[]>([]);
 
   const { data: tickets, isLoading } = useQuery({
     queryKey: estateResidentKeys.maintenanceTickets,
@@ -52,7 +53,7 @@ export default function ResidentMaintenancePage() {
       setCategory('OTHER');
       setPriority('MEDIUM');
       setDescription('');
-      setPhoto(null);
+      setPhoto([]);
       queryClient.invalidateQueries({ queryKey: estateResidentKeys.maintenanceTickets });
     },
   });
@@ -86,11 +87,13 @@ export default function ResidentMaintenancePage() {
         </Field>
 
         <Field label="Photo" optionalLabel="(optional)">
-          <Input
-            type="file"
+          <DocumentUpload
+            value={photo}
+            onChange={setPhoto}
             accept="image/*"
             capture="environment"
-            onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+            label=""
+            hint="A clear photo helps the estate send the right person."
           />
         </Field>
 
@@ -110,7 +113,7 @@ export default function ResidentMaintenancePage() {
                 | 'COMMON_AREA'
                 | 'OTHER',
               priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
-              photo: photo ?? undefined,
+              photo: photo[0]?.file,
             })
           }
         >
