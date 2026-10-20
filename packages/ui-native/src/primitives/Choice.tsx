@@ -77,8 +77,12 @@ export function SwitchRow({
           true: tone === 'destructive' ? colors.destructive : colors.primary,
           false: colors.border,
         }}
-        thumbColor={colors.card}
+        // White in both themes, like the platform switch; a card-coloured thumb
+        // disappears into a dark track.
+        thumbColor={colors.primaryForeground}
         ios_backgroundColor={colors.border}
+        // react-native-web paints the on thumb with its own teal unless told otherwise.
+        {...({ activeThumbColor: colors.primaryForeground } as object)}
       />
     </Pressable>
   );
