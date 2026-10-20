@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Field, IconButton, Textarea } from '@getrentos/ui';
 
 interface CloseViolationModalProps {
   isOpen: boolean;
@@ -42,27 +42,25 @@ export const CloseViolationModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">{title}</h3>
-              <button
+              <IconButton
+                label="Close"
+                icon={<X />}
+                size="sm"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="p-1 rounded-lg hover:bg-secondary disabled:opacity-50"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="p-4">
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Notes <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <textarea
-                value={resolutionNotes}
-                onChange={(e) => setResolutionNotes(e.target.value)}
-                disabled={isSubmitting}
-                rows={3}
-                placeholder="How this was handled…"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
+              <Field label="Notes" optionalLabel="(optional)">
+                <Textarea
+                  value={resolutionNotes}
+                  onChange={(e) => setResolutionNotes(e.target.value)}
+                  disabled={isSubmitting}
+                  rows={3}
+                  placeholder="How this was handled…"
+                />
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -72,10 +70,11 @@ export const CloseViolationModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                loadingText="Saving…"
                 onClick={() => onConfirm(resolutionNotes.trim() || undefined)}
               >
-                {isSubmitting ? 'Saving…' : title}
+                {title}
               </Button>
             </div>
           </motion.div>

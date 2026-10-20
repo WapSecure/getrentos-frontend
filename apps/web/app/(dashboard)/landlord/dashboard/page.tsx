@@ -8,7 +8,14 @@ import { LandlordDashboardHeader } from '@/components/landlord/dashboard/Landlor
 import { LandlordStatsCards } from '@/components/landlord/dashboard/LandlordStatsCards';
 import { LandlordActivityFeed } from '@/components/landlord/dashboard/LandlordActivityFeed';
 import { LandlordQuickActions } from '@/components/landlord/dashboard/LandlordQuickActions';
-import { Button, PageLoadingState } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  PageErrorState,
+  Skeleton,
+  StatGridSkeleton,
+} from '@getrentos/ui';
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -22,7 +29,7 @@ const LandlordRevenueChart = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 rounded-xl" />,
   }
 );
 
@@ -39,10 +46,11 @@ const EMPTY_STATS: LandlordDashboardStats = {
 
 export default function LandlordDashboardPage() {
   const user = useLandlordUser();
-  const { data: stats = EMPTY_STATS, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: landlordKeys.dashboardStats,
     queryFn: () => unwrap(landlordService.getDashboardStats()),
   });
+  const stats = data ?? EMPTY_STATS;
 
   const firstName = user?.fullName?.split(' ')[0] || 'User';
   const currentHour = new Date().getHours();
@@ -69,21 +77,31 @@ export default function LandlordDashboardPage() {
           property" while the request was still in flight, so an established
           landlord was told their portfolio was empty on every load. */}
       {isLoading ? (
-        <PageLoadingState />
-      ) : totalProperties === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
+        <div className="space-y-6">
+          <StatGridSkeleton count={4} />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <Skeleton className="h-64 rounded-xl lg:col-span-2" />
+            <CardSkeleton lines={4} />
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No properties yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Add your first property to start managing units, tenants, and rent collection in one
-            place.
-          </p>
-          <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary" className="mt-6">
-            Add Your First Property
-          </Button>
         </div>
+      ) : isError && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your dashboard"
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : totalProperties === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title="No properties yet"
+          description="Add your first property to start managing units, tenants, and rent collection in one place."
+          action={
+            <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary">
+              Add Your First Property
+            </Button>
+          }
+        />
       ) : (
         <>
           <LandlordStatsCards

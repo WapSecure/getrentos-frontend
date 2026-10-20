@@ -46,8 +46,9 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
   return (
     <div className="space-y-6">
       <button
+        type="button"
         onClick={onBack}
-        className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
+        className="flex items-center gap-2 text-sm text-muted-foreground"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -64,7 +65,7 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         <h3 className="text-xl font-semibold text-foreground mb-2">
           Verify Your {method === 'whatsapp' ? 'WhatsApp' : method}
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           We sent a verification code to your{' '}
           <span className="font-medium">{method === 'whatsapp' ? 'WhatsApp' : method}</span> at{' '}
           <span className="font-medium">{identifier}</span>
@@ -75,9 +76,10 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
 
       <div className="text-center">
         {!canResend ? (
-          <p className="text-sm text-gray-500">Resend code in {formatTime(timeLeft)}</p>
+          <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
         ) : (
           <button
+            type="button"
             onClick={handleResend}
             className="text-sm text-primary hover:text-primary-hover transition-colors"
           >

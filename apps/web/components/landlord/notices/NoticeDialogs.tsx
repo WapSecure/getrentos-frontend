@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
 import {
+  Alert,
   Button,
   DatePicker,
   Dialog,
@@ -131,20 +131,17 @@ export function RaiseNoticeDialog({
           </Field>
 
           {missing && (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-warning/30 bg-warning-subtle p-3.5 text-sm text-foreground">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
-              <div>
-                <p className="font-medium">
-                  No period is recorded for this step in {missing.jurisdiction}
-                </p>
-                <p className="mt-0.5 text-muted-foreground">{missing.basis}</p>
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  Record it under Notice periods, or enter a number for this one notice below. This
-                  platform does not supply a default, because a wrong number here looks procedurally
-                  sound while invalidating the claim.
-                </p>
-              </div>
-            </div>
+            <Alert
+              variant="warning"
+              title={`No period is recorded for this step in ${missing.jurisdiction}`}
+            >
+              <p>{missing.basis}</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Record it under Notice periods, or enter a number for this one notice below. This
+                platform does not supply a default, because a wrong number here looks procedurally
+                sound while invalidating the claim.
+              </p>
+            </Alert>
           )}
 
           <Field label="What the tenant is being told" required>
@@ -156,7 +153,7 @@ export function RaiseNoticeDialog({
             />
           </Field>
           {blockedByReason && reason.length > 0 && (
-            <p className="text-xs text-destructive">
+            <p role="alert" className="text-xs text-destructive">
               Enter at least {MIN_REASON} characters. This becomes part of the service record.
             </p>
           )}

@@ -1,15 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Users, CheckCircle2, Clock, ShieldAlert, Ban } from 'lucide-react';
 import { UserDetailModal } from '@/components/admin/users/UserDetailModal';
-import { ConfirmDialog, DataTable, PageErrorState, Toast, type Column } from '@getrentos/ui';
+import {
+  ConfirmDialog,
+  DataTable,
+  PageErrorState,
+  SearchInput,
+  useToast,
+  type Column,
+} from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { getInitials, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -59,7 +65,7 @@ export default function AdminUsersPage() {
     user: PlatformUser;
     tier: PlanTier;
   } | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -87,6 +93,7 @@ export default function AdminUsersPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const users = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -94,14 +101,13 @@ export default function AdminUsersPage() {
   const changeStatusMutation = useMutation({
     mutationFn: ({ userId, status }: { userId: string; status: UserAccountStatus }) =>
       unwrap(adminService.updateUserStatus(userId, status)),
-    onMutate: () => setActionError(null),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setPendingStatus(null);
       setActiveUser(null);
     },
     onError: (error) =>
-      setActionError(error instanceof Error ? error.message : 'Could not update account status.'),
+      toast.error(error instanceof Error ? error.message : 'Could not update account status.'),
   });
 
   const handleChangeStatus = (userId: string, status: UserAccountStatus) => {
@@ -113,14 +119,13 @@ export default function AdminUsersPage() {
   const changeSubscriptionMutation = useMutation({
     mutationFn: ({ userId, tier }: { userId: string; tier: PlanTier }) =>
       unwrap(adminService.updateUserSubscription(userId, tier)),
-    onMutate: () => setActionError(null),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       setPendingSubscription(null);
       setActiveUser(updated);
     },
     onError: (error) =>
-      setActionError(error instanceof Error ? error.message : 'Could not update the subscription.'),
+      toast.error(error instanceof Error ? error.message : 'Could not update the subscription.'),
   });
 
   const statusOptions: { value: StatusFilter; label: string }[] = [
@@ -218,18 +223,16 @@ export default function AdminUsersPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by name or email..."
-            leadingIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          label="Search users"
+          placeholder="Search by name or email..."
+          className="flex-1 max-w-sm"
+        />
         <Select
           value={roleFilter}
           onValueChange={(value) => {
@@ -237,6 +240,8 @@ export default function AdminUsersPage() {
             setPage(1);
           }}
           options={roleOptions}
+          ariaLabel="Filter by role"
+          searchable={false}
           className="w-full sm:w-44"
         />
       </div>
@@ -258,7 +263,7 @@ export default function AdminUsersPage() {
         </TabsList>
       </Tabs>
 
-      {isError ? (
+      {isError && !data ? (
         <PageErrorState
           title="Could not load users"
           description="The user directory is temporarily unavailable. Your filters have been preserved."
@@ -286,7 +291,9 @@ export default function AdminUsersPage() {
         onClose={() => setActiveUser(null)}
         onChangeStatus={handleChangeStatus}
         isChangingStatus={changeStatusMutation.isPending}
-        pendingStatus={changeStatusMutation.variables?.status}
+        pendingStatus={
+          changeStatusMutation.isPending ? changeStatusMutation.variables?.status : undefined
+        }
         onChangeSubscription={(userId, tier) => {
           const user = users.find((item) => item.id === userId) ?? activeUser;
           if (user && !changeSubscriptionMutation.isPending) {
@@ -352,9 +359,6 @@ export default function AdminUsersPage() {
           }
         }}
       />
-      {actionError && (
-        <Toast message={actionError} variant="error" onClose={() => setActionError(null)} />
-      )}
     </>
   );
 }

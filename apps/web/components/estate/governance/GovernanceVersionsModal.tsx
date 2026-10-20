@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
+import { IconButton, ListSkeleton } from '@getrentos/ui';
 
 interface GovernanceVersionsModalProps {
   estateId: string;
@@ -41,14 +42,12 @@ export const GovernanceVersionsModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Version History</h3>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={onClose} />
             </div>
 
             <div className="overflow-y-auto flex-1">
               {isLoading ? (
-                <div className="h-24 animate-pulse bg-secondary m-4 rounded-lg" aria-busy="true" />
+                <ListSkeleton rows={2} className="m-4" />
               ) : (
                 <div className="divide-y divide-border">
                   {versions.map((version) => (

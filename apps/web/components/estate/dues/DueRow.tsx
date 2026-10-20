@@ -61,7 +61,7 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
             {formatCurrency(due.amount)}
           </span>
           {due.lateFeeApplied > 0 && (
-            <p className="text-[11px] text-red-600 dark:text-red-400">
+            <p className="text-[11px] text-destructive">
               incl. {formatCurrency(due.lateFeeApplied)} late fee
             </p>
           )}

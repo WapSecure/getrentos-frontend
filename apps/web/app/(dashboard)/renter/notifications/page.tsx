@@ -63,8 +63,8 @@ export default function NotificationsPage() {
     errorMessage: 'The notification could not be marked as read.',
   });
 
-  const markAllAsReadMutation = useOptimisticMutation({
-    mutationFn: (_vars: void) => unwrap(renterService.markAllNotificationsAsRead()),
+  const markAllAsReadMutation = useOptimisticMutation<unknown, void>({
+    mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
     patches: () => [{ queryKey: notificationsQueryKey, update: (old) => markRead(old) }],
     invalidate: [renterKeys.notifications],
     errorMessage: 'Notifications could not be marked as read.',

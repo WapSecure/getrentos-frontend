@@ -2,16 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  Check,
-  Upload,
-  FileText,
-  Eye,
-  X,
-  User,
-  Briefcase,
-  ClipboardCheck,
-} from 'lucide-react';
+import { Check, Upload, FileText, Eye, X, User, Briefcase, ClipboardCheck } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -505,7 +496,9 @@ export const ApplicationWizard = ({
                 { label: 'Employer', value: data.employer || 'Not given' },
                 {
                   label: 'Monthly income',
-                  value: data.monthlyIncome ? nairaFormatter.format(Number(data.monthlyIncome)) : '',
+                  value: data.monthlyIncome
+                    ? nairaFormatter.format(Number(data.monthlyIncome))
+                    : '',
                 },
                 { label: 'Move-in / Term', value: `${data.moveInDate || '—'} · ${data.leaseTerm}` },
                 {

@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Info, Percent } from 'lucide-react';
-import { Button, PageErrorState, Toast } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  Field,
+  NumberInput,
+  PageErrorState,
+  Skeleton,
+  useToast,
+} from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 
@@ -24,9 +33,7 @@ export const RealtorCommissionRates = () => {
   // cascades renders, and can briefly show one value while the inputs hold
   // another. `null` means "not edited yet, show what the server says".
   const [draft, setDraft] = useState<{ listing: string; buyer: string } | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ['admin', 'realtor-commission-rates'],
@@ -45,19 +52,19 @@ export const RealtorCommissionRates = () => {
         })
       ),
     onSuccess: async () => {
-      setToast({ message: 'Commission split updated and audited.', variant: 'success' });
+      toast.success('Commission split updated and audited.');
       // Drop the draft so the inputs follow the value the server now holds.
       setDraft(null);
       await client.invalidateQueries({ queryKey: ['admin', 'realtor-commission-rates'] });
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const total = (Number(listingSidePct) || 0) + (Number(buyerSidePct) || 0);
   const tooMuch = total > 100;
   const bothNumbers = listingSidePct.trim() !== '' && buyerSidePct.trim() !== '';
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title="Could not load the commission split"
@@ -79,60 +86,56 @@ export const RealtorCommissionRates = () => {
         </p>
       </div>
 
-      <div className="max-w-xl rounded-xl border border-border bg-card p-5 shadow-sm">
+      <Card className="max-w-xl p-5">
         <div className="flex items-center gap-2">
           <Percent className="h-4 w-4 text-muted-foreground" />
           <h2 className="text-sm font-semibold">Rates in force</h2>
         </div>
 
         {isLoading ? (
-          <div className="mt-4 h-24 animate-pulse rounded-lg bg-secondary" />
+          <div
+            className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2"
+            role="status"
+            aria-label="Loading"
+          >
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
         ) : (
           <>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-sm text-muted-foreground">Listing side (%)</span>
-                <input
-                  inputMode="numeric"
+              <Field label="Listing side (%)" hint="Paid to the realtor who listed the property">
+                <NumberInput
+                  integer={false}
                   value={listingSidePct}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setDraft((d) => ({
-                      listing: e.target.value.replace(/[^\d.]/g, ''),
+                      listing: value,
                       buyer: d?.buyer ?? String(data?.buyerSidePct ?? ''),
                     }))
                   }
-                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                 />
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  Paid to the realtor who listed the property
-                </span>
-              </label>
-              <label className="block">
-                <span className="text-sm text-muted-foreground">Buyer side (%)</span>
-                <input
-                  inputMode="numeric"
+              </Field>
+              <Field label="Buyer side (%)" hint="Paid to the realtor who represented the buyer">
+                <NumberInput
+                  integer={false}
                   value={buyerSidePct}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setDraft((d) => ({
-                      buyer: e.target.value.replace(/[^\d.]/g, ''),
+                      buyer: value,
                       listing: d?.listing ?? String(data?.listingSidePct ?? ''),
                     }))
                   }
-                  className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                 />
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  Paid to the realtor who represented the buyer
-                </span>
-              </label>
+              </Field>
             </div>
 
-            <div className="mt-4 flex items-start gap-2 rounded-lg border border-border p-3">
-              <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">
+            <Alert variant={tooMuch ? 'danger' : 'neutral'} icon={Info} className="mt-4">
+              <p>
                 Total <span className="font-semibold text-foreground">{total}%</span> of the deal
                 value.
                 {tooMuch && (
-                  <span className="block mt-1 text-red-600 dark:text-red-400">
+                  <span className="block mt-1 text-destructive">
                     The two sides together cannot exceed 100%: that would pay out more than the sale
                     was worth.
                   </span>
@@ -142,14 +145,16 @@ export const RealtorCommissionRates = () => {
                   rate it was earned at, so re-pricing never rewrites money already owed.
                 </span>
               </p>
-            </div>
+            </Alert>
 
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button
                 onClick={() => save.mutate()}
-                disabled={save.isPending || tooMuch || !bothNumbers}
+                disabled={tooMuch || !bothNumbers}
+                isLoading={save.isPending}
+                loadingText="Saving…"
               >
-                {save.isPending ? 'Saving…' : 'Save split'}
+                Save split
               </Button>
               {data && (
                 <span className="text-xs text-muted-foreground">
@@ -159,11 +164,7 @@ export const RealtorCommissionRates = () => {
             </div>
           </>
         )}
-      </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
+      </Card>
     </div>
   );
 };

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, Plus } from 'lucide-react';
 import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -62,6 +62,7 @@ export default function EstateVisitorPassesPage() {
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const households = householdsData?.items ?? [];
   const householdsTotal = householdsData?.total ?? 0;
@@ -83,6 +84,7 @@ export default function EstateVisitorPassesPage() {
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const passes = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -148,6 +150,7 @@ export default function EstateVisitorPassesPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => {
               setStatusFilter(filter.value);
               setPage(1);

@@ -122,9 +122,7 @@ export const ConversationItem = ({
           size="sm"
           label={conversation.isArchived ? 'Unarchive' : 'Archive'}
           title={conversation.isArchived ? 'Unarchive' : 'Archive'}
-          icon={
-            conversation.isArchived ? <ArchiveRestore className="text-info" /> : <Archive />
-          }
+          icon={conversation.isArchived ? <ArchiveRestore className="text-info" /> : <Archive />}
           onClick={(e) => {
             e.stopPropagation();
             onArchive();

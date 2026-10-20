@@ -80,8 +80,8 @@ const STEP_STATUS_META: Record<string, { label: string; color: string; bg: strin
   },
   WAITING_FOR_PROVIDER: {
     label: 'Waiting on provider',
-    color: 'text-purple-700 dark:text-purple-400',
-    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    color: 'text-primary',
+    bg: 'bg-accent',
   },
 };
 

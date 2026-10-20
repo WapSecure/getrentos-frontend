@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Send } from 'lucide-react';
-import {
-  Button,
-  Card,
-  Field,
-  Input,
-  Select,
-  Textarea,
-  useToast,
-} from '@getrentos/ui';
+import { Button, Card, Field, Input, Select, Textarea, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';

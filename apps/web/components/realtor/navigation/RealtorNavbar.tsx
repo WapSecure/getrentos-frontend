@@ -1,15 +1,21 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Menu, X } from 'lucide-react';
+import { Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { Pagination, ThemeToggle } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  Pagination,
+  SearchInput,
+  ThemeToggle,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
 import { navGroups } from '../dashboard/RealtorSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -29,7 +35,6 @@ const NOTIFICATIONS_PAGE_SIZE = 50;
 
 export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { t } = useLanguage();
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,17 +59,44 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
           pageSize: NOTIFICATIONS_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const notifications = notificationsPage?.items ?? [];
   const notificationsTotal = notificationsPage?.total ?? 0;
 
-  const markRead = useMutation({
+  const notificationsKey = [
+    ...realtorKeys.notifications,
+    { page: notificationPage, pageSize: NOTIFICATIONS_PAGE_SIZE },
+  ];
+  type NotificationsPage = NonNullable<typeof notificationsPage>;
+  const markRead = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(realtorService.markNotificationRead(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.notifications }),
+    patches: (id) => [
+      {
+        queryKey: notificationsKey,
+        update: (old) => {
+          const page = old as NotificationsPage;
+          return {
+            ...page,
+            items: page.items.map((n) => (n.id === id ? { ...n, read: true } : n)),
+          };
+        },
+      },
+    ],
+    invalidate: [realtorKeys.notifications],
   });
-  const markAllRead = useMutation({
+  const markAllRead = useOptimisticMutation({
     mutationFn: () => unwrap(realtorService.markAllNotificationsRead()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.notifications }),
+    patches: () => [
+      {
+        queryKey: notificationsKey,
+        update: (old) => {
+          const page = old as NotificationsPage;
+          return { ...page, items: page.items.map((n) => ({ ...n, read: true })) };
+        },
+      },
+    ],
+    invalidate: [realtorKeys.notifications],
   });
 
   useEffect(() => {
@@ -129,35 +161,37 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
             </div>
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <LegacyInput
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearchSubmit}
-                  placeholder="Search clients, listings, leads..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <SearchInput
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                onKeyDown={handleSearchSubmit}
+                placeholder="Search clients, listings, leads..."
+                label="Search clients, listings and leads"
+                className="w-full"
+              />
             </div>
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
 
               <div className="relative">
-                <button
+                <IconButton
+                  label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+                  aria-expanded={showNotifications}
                   onClick={() => {
                     if (!showNotifications) setNotificationPage(1);
                     setShowNotifications(!showNotifications);
                   }}
-                  className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-                >
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                  )}
-                </button>
+                  className="relative"
+                  icon={
+                    <>
+                      <Bell />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+                      )}
+                    </>
+                  }
+                />
 
                 <AnimatePresence>
                   {showNotifications && (
@@ -165,28 +199,26 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
                     >
                       <div className="p-3 border-b border-border flex justify-between items-center">
                         <h3 className="font-semibold text-foreground">Notifications</h3>
                         {unreadCount > 0 && (
-                          <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-primary hover:text-primary-hover"
-                          >
+                          <Button variant="ghost" size="xs" onClick={handleMarkAllAsRead}>
                             Mark all as read
-                          </button>
+                          </Button>
                         )}
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-gray-500">No notifications</div>
+                          <EmptyState icon={Bell} title="No notifications" size="compact" bare />
                         ) : (
                           notifications.map((notification) => (
-                            <div
+                            <button
+                              type="button"
                               key={notification.id}
-                              className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
-                                !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                              className={`block w-full text-left p-3 border-b border-border hover:bg-secondary transition-colors ${
+                                !notification.read ? 'bg-info-subtle/50' : ''
                               }`}
                               onClick={() => handleOpenNotification(notification)}
                             >
@@ -194,12 +226,12 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
-                                <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                                   {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground">{notification.body}</p>
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>
@@ -227,27 +259,25 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
               <RealtorProfileDropdown user={user} />
 
-              <button
+              <IconButton
+                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                className="lg:hidden"
+              />
             </div>
           </div>
 
           <div className="md:hidden py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <LegacyInput
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchSubmit}
-                placeholder="Search clients, listings, leads..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Search clients, listings, leads..."
+              label="Search clients, listings and leads"
+              className="w-full"
+            />
           </div>
         </div>
       </nav>

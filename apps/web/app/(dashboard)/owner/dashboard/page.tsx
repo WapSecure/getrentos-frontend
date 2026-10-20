@@ -8,7 +8,14 @@ import { OwnerDashboardHeader } from '@/components/owner/dashboard/OwnerDashboar
 import { OwnerStatsCards } from '@/components/owner/dashboard/OwnerStatsCards';
 import { OwnerActivityFeed } from '@/components/owner/dashboard/OwnerActivityFeed';
 import { OwnerQuickActions } from '@/components/owner/dashboard/OwnerQuickActions';
-import { Button } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  CardSkeleton,
+  PageErrorState,
+  Skeleton,
+  StatGridSkeleton,
+} from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -20,14 +27,14 @@ const OwnerPortfolioChart = dynamic(
     import('@/components/owner/dashboard/OwnerPortfolioChart').then((m) => m.OwnerPortfolioChart),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 rounded-xl" />,
   }
 );
 
 export default function OwnerDashboardPage() {
   const user = useOwnerUser();
 
-  const { data: dashboard, isLoading } = useQuery({
+  const { data: dashboard, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ownerKeys.dashboard,
     queryFn: () => unwrap(ownerService.getDashboard()),
   });
@@ -44,20 +51,32 @@ export default function OwnerDashboardPage() {
     <>
       <OwnerDashboardHeader greeting={greeting} firstName={firstName} />
 
-      {!isLoading && totalProperties === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
+      {isLoading ? (
+        <div className="space-y-6">
+          <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <Skeleton className="h-64 rounded-xl lg:col-span-2" />
+            <CardSkeleton lines={4} />
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No properties yet</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Add your first property to verify ownership, list it for sale, and track its investment
-            performance.
-          </p>
-          <Button href={ROUTES.OWNER_PROPERTIES} variant="primary" className="mt-6">
-            Add Your First Property
-          </Button>
         </div>
+      ) : isError && !dashboard ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your dashboard"
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
+      ) : totalProperties === 0 ? (
+        <EmptyState
+          icon={Building2}
+          title="No properties yet"
+          description="Add your first property to verify ownership, list it for sale, and track its investment performance."
+          action={
+            <Button href={ROUTES.OWNER_PROPERTIES} variant="primary">
+              Add Your First Property
+            </Button>
+          }
+        />
       ) : (
         <>
           <OwnerStatsCards

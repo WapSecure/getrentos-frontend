@@ -10,38 +10,19 @@ import {
   BedDouble,
   Bath,
 } from 'lucide-react';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 
 const statusConfig: Record<
   RealtorListingStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
-  draft: {
-    label: 'Draft',
-    icon: FileEdit,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
-  },
-  pending_approval: {
-    label: 'Pending Approval',
-    icon: ShieldAlert,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  },
-  published: {
-    label: 'Published',
-    icon: Megaphone,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  paused: {
-    label: 'Paused',
-    icon: Pause,
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
-  },
-  closed: {
-    label: 'Closed',
-    icon: XCircle,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
+  draft: { label: 'Draft', icon: FileEdit, variant: 'neutral' },
+  pending_approval: { label: 'Pending Approval', icon: ShieldAlert, variant: 'warning' },
+  published: { label: 'Published', icon: Megaphone, variant: 'success' },
+  paused: { label: 'Paused', icon: Pause, variant: 'warning' },
+  closed: { label: 'Closed', icon: XCircle, variant: 'danger' },
 };
 
 interface RealtorListingCardProps {
@@ -57,18 +38,19 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
     <button
       type="button"
       onClick={onClick}
-      className="group w-full overflow-hidden rounded-xl border border-border bg-card text-left shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm"
+      className="group w-full overflow-hidden rounded-xl border border-border bg-card text-left shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="relative h-40 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
           <Megaphone className="w-12 h-12 text-muted-foreground" />
         </div>
-        <div
-          className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.className}`}
+        <Badge
+          variant={status.variant}
+          icon={<StatusIcon className="w-3 h-3" />}
+          className="absolute top-3 left-3"
         >
-          <StatusIcon className="w-3 h-3" />
           {status.label}
-        </div>
+        </Badge>
         <div className="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-primary bg-accent">
           {listing.category === 'sale' ? 'For Sale' : 'For Rent'}
         </div>
@@ -80,7 +62,7 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
           <MapPin className="w-3 h-3" />
           {listing.city}, {listing.state}
         </p>
-        <p className="text-xs text-gray-400 mt-0.5">Client: {listing.clientName}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Client: {listing.clientName}</p>
 
         <p className="text-lg font-bold text-primary mt-3">
           {formatCurrency(listing.price, { compact: true })}

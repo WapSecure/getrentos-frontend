@@ -1,14 +1,21 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
+import { Check, FileText, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  CurrencyInput,
+  DatePicker,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { OwnerProperty } from '@/types/owner';
 import { PROPERTY_TYPE_OPTIONS } from '@/lib/propertyTypes';
@@ -169,313 +176,245 @@ export const AddOwnerPropertyModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="font-semibold text-foreground">Add Property</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Step {step + 1} of {steps.length}: {steps[step]}
-                </p>
-              </div>
-              <button
-                onClick={handleClose}
-                disabled={isSubmitting}
-                className="p-1 rounded-lg hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="px-4 pt-3 shrink-0">
-              <div className="flex gap-1.5">
-                {steps.map((label, index) => (
-                  <div
-                    key={label}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      index <= step ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {step === 0 && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Property Name <span className="text-red-500">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={form.name}
-                      onChange={(e) => update('name', e.target.value)}
-                      placeholder="e.g. Lekki Waterfront Duplex"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Property Type
-                    </label>
-                    <LegacySelect
-                      value={form.propertyType}
-                      onChange={(e) => update('propertyType', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {propertyTypes.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </LegacySelect>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Registered Owner Name <span className="text-red-500">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={form.ownerName}
-                      onChange={(e) => update('ownerName', e.target.value)}
-                      placeholder="Full legal name as on title document"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Address <span className="text-red-500">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={form.address}
-                      onChange={(e) => update('address', e.target.value)}
-                      placeholder="Street address"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-
-                  <LocationFields
-                    country={form.country}
-                    state={form.state}
-                    city={form.city}
-                    onCountryChange={(c) => update('country', c)}
-                    onStateChange={(s) => update('state', s)}
-                    onCityChange={(c) => update('city', c)}
-                    required
-                  />
-
-                  <LocationPicker
-                    address={form.address}
-                    city={form.city}
-                    state={form.state}
-                    country={form.country}
-                    value={form.pin}
-                    onChange={(pin) => update('pin', pin)}
-                  />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Purchase Price (₦)
-                      </label>
-                      <CurrencyInput
-                        prefix="₦"
-                        min={0}
-                        value={form.purchasePrice}
-                        onValueChange={(v) => update('purchasePrice', v === 0 ? '' : String(v))}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Estimated Value (₦)
-                      </label>
-                      <CurrencyInput
-                        prefix="₦"
-                        min={0}
-                        value={form.estimatedValue}
-                        onValueChange={(v) => update('estimatedValue', v === 0 ? '' : String(v))}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Purchase Date
-                    </label>
-                    <DatePicker
-                      value={form.purchaseDate}
-                      onChange={(v) => update('purchaseDate', v)}
-                      max={new Date().toISOString().slice(0, 10)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {step === 1 && (
-                <>
-                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                    <ShieldAlert className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
-                      Upload at least one proof of ownership. Our compliance team verifies documents
-                      before your property can be listed for sale.
-                    </p>
-                  </div>
-                  <UploadField
-                    label="Title Deed"
-                    file={form.titleDeed}
-                    onSelect={(file) => update('titleDeed', file)}
-                  />
-                  <UploadField
-                    label="Certificate of Occupancy (C of O)"
-                    file={form.certificateOfOccupancy}
-                    onSelect={(file) => update('certificateOfOccupancy', file)}
-                  />
-                  <UploadField
-                    label="Deed of Assignment"
-                    file={form.deedOfAssignment}
-                    onSelect={(file) => update('deedOfAssignment', file)}
-                  />
-                  <UploadField
-                    label="Government Registry Extract"
-                    file={form.govtRegistryExtract}
-                    onSelect={(file) => update('govtRegistryExtract', file)}
-                  />
-                  {!hasAnyDocument && (
-                    <p className="text-xs text-red-500">
-                      At least one document is required to proceed.
-                    </p>
-                  )}
-                </>
-              )}
-
-              {step === 2 && (
-                <div className="space-y-4">
-                  <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-                    <SummaryRow label="Property" value={form.name || '—'} />
-                    <SummaryRow label="Owner" value={form.ownerName || '—'} />
-                    <SummaryRow
-                      label="Address"
-                      value={`${form.address}, ${form.city}, ${form.state}`}
-                    />
-                    <SummaryRow
-                      label="Documents"
-                      value={hasAnyDocument ? 'Submitted' : 'None uploaded'}
-                    />
-                  </div>
-                  <label className="flex items-start gap-3 p-3 rounded-lg border border-border cursor-pointer">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={form.declared}
-                      onChange={(e) => update('declared', e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm text-foreground">
-                      I declare that I am the legal and rightful owner of this property, that the
-                      documents provided are authentic, and that all information submitted is
-                      accurate to the best of my knowledge.
-                    </span>
-                  </label>
-                </div>
-              )}
-
-              {submitError && (
-                <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                  {submitError}
-                </p>
-              )}
-
-              {step === 3 && (
-                <div className="text-center py-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
-                    <Clock className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-foreground">Pending Review</h4>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                    Your ownership documents for <strong>{form.name}</strong> have been submitted.
-                    Our compliance team typically completes review within 24–48 hours.
-                  </p>
-                  {uploadWarning && (
-                    <p className="mt-3 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-foreground">
-                      {uploadWarning}
-                    </p>
-                  )}
-                  {form.propertyType === 'LAND' && (
-                    <Button
-                      href={ROUTES.OWNER_LAND}
-                      variant="outline"
-                      size="sm"
-                      rounded="lg"
-                      className="mt-4"
-                    >
-                      Complete parcel record
-                    </Button>
-                  )}
-                  <div className="mt-5 flex items-center justify-center gap-2 text-xs text-gray-400">
-                    <FileText className="w-3.5 h-3.5" />
-                    You&apos;ll be notified as soon as a decision is made
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              {step > 0 && !submitted && (
-                <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
-                  Back
-                </Button>
-              )}
-              <div className="flex-1" />
-              {step === 0 && (
-                <Button
-                  variant="primary"
-                  onClick={() => setStep(1)}
-                  disabled={!canProceedFromStep1}
-                >
-                  Continue
-                </Button>
-              )}
-              {step === 1 && (
-                <Button variant="primary" onClick={() => setStep(2)} disabled={!hasAnyDocument}>
-                  Continue
-                </Button>
-              )}
-              {step === 2 && (
-                <Button
-                  variant="primary"
-                  className="gap-2"
-                  onClick={handleSubmitForVerification}
-                  disabled={!form.declared || isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  {isSubmitting ? 'Submitting…' : 'Submit for Verification'}
-                </Button>
-              )}
-              {step === 3 && (
-                <Button variant="primary" className="gap-2" onClick={handleClose}>
-                  <Check className="w-4 h-4" />
-                  Done
-                </Button>
-              )}
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && handleClose()}>
+      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0">
+        <div className="shrink-0 border-b border-border p-4 pr-12">
+          <DialogTitle className="font-semibold text-foreground">Add Property</DialogTitle>
+          <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+            Step {step + 1} of {steps.length}: {steps[step]}
+          </DialogDescription>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="shrink-0 px-4 pt-3">
+          <div className="flex gap-1.5" aria-hidden="true">
+            {steps.map((label, index) => (
+              <div
+                key={label}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  index <= step ? 'bg-primary' : 'bg-secondary'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          {step === 0 && (
+            <>
+              <Field label="Property Name" required>
+                <Input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => update('name', e.target.value)}
+                  placeholder="e.g. Lekki Waterfront Duplex"
+                />
+              </Field>
+
+              <Field label="Property Type">
+                <Select
+                  value={form.propertyType}
+                  onValueChange={(v) => update('propertyType', v)}
+                  options={propertyTypes.map((type) => ({ value: type.value, label: type.label }))}
+                />
+              </Field>
+
+              <Field label="Registered Owner Name" required>
+                <Input
+                  type="text"
+                  value={form.ownerName}
+                  onChange={(e) => update('ownerName', e.target.value)}
+                  placeholder="Full legal name as on title document"
+                />
+              </Field>
+
+              <Field label="Address" required>
+                <Input
+                  type="text"
+                  value={form.address}
+                  onChange={(e) => update('address', e.target.value)}
+                  placeholder="Street address"
+                />
+              </Field>
+
+              <LocationFields
+                country={form.country}
+                state={form.state}
+                city={form.city}
+                onCountryChange={(c) => update('country', c)}
+                onStateChange={(s) => update('state', s)}
+                onCityChange={(c) => update('city', c)}
+                required
+              />
+
+              <LocationPicker
+                address={form.address}
+                city={form.city}
+                state={form.state}
+                country={form.country}
+                value={form.pin}
+                onChange={(pin) => update('pin', pin)}
+              />
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Purchase Price (₦)">
+                  <CurrencyInput
+                    prefix="₦"
+                    min={0}
+                    value={form.purchasePrice}
+                    onValueChange={(v) => update('purchasePrice', v === 0 ? '' : String(v))}
+                  />
+                </Field>
+                <Field label="Estimated Value (₦)">
+                  <CurrencyInput
+                    prefix="₦"
+                    min={0}
+                    value={form.estimatedValue}
+                    onValueChange={(v) => update('estimatedValue', v === 0 ? '' : String(v))}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Purchase Date">
+                <DatePicker
+                  value={form.purchaseDate}
+                  onChange={(v) => update('purchaseDate', v)}
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+              </Field>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <Alert variant="info" icon={ShieldAlert}>
+                Upload at least one proof of ownership. Our compliance team verifies documents
+                before your property can be listed for sale.
+              </Alert>
+              <UploadField
+                label="Title Deed"
+                file={form.titleDeed}
+                onSelect={(file) => update('titleDeed', file)}
+              />
+              <UploadField
+                label="Certificate of Occupancy (C of O)"
+                file={form.certificateOfOccupancy}
+                onSelect={(file) => update('certificateOfOccupancy', file)}
+              />
+              <UploadField
+                label="Deed of Assignment"
+                file={form.deedOfAssignment}
+                onSelect={(file) => update('deedOfAssignment', file)}
+              />
+              <UploadField
+                label="Government Registry Extract"
+                file={form.govtRegistryExtract}
+                onSelect={(file) => update('govtRegistryExtract', file)}
+              />
+              {!hasAnyDocument && (
+                <p className="text-xs text-destructive">
+                  At least one document is required to proceed.
+                </p>
+              )}
+            </>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-4">
+              <div className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+                <SummaryRow label="Property" value={form.name || '—'} />
+                <SummaryRow label="Owner" value={form.ownerName || '—'} />
+                <SummaryRow
+                  label="Address"
+                  value={`${form.address}, ${form.city}, ${form.state}`}
+                />
+                <SummaryRow
+                  label="Documents"
+                  value={hasAnyDocument ? 'Submitted' : 'None uploaded'}
+                />
+              </div>
+              <div className="rounded-lg border border-border p-3">
+                <Checkbox
+                  checked={form.declared}
+                  onCheckedChange={(checked) => update('declared', checked)}
+                  label="I declare that I am the legal and rightful owner of this property, that the documents provided are authentic, and that all information submitted is accurate to the best of my knowledge."
+                />
+              </div>
+            </div>
+          )}
+
+          {submitError && <Alert variant="danger">{submitError}</Alert>}
+
+          {step === 3 && (
+            <div className="py-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-warning-subtle">
+                <Clock className="h-8 w-8 text-warning" />
+              </div>
+              <h4 className="text-lg font-semibold text-foreground">Pending Review</h4>
+              <p className="mx-auto mt-1 max-w-xs text-sm text-muted-foreground">
+                Your ownership documents for <strong>{form.name}</strong> have been submitted. Our
+                compliance team typically completes review within 24–48 hours.
+              </p>
+              {uploadWarning && (
+                <Alert variant="warning" className="mt-3 text-left">
+                  {uploadWarning}
+                </Alert>
+              )}
+              {form.propertyType === 'LAND' && (
+                <Button
+                  href={ROUTES.OWNER_LAND}
+                  variant="outline"
+                  size="sm"
+                  rounded="lg"
+                  className="mt-4"
+                >
+                  Complete parcel record
+                </Button>
+              )}
+              <div className="mt-5 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                You&apos;ll be notified as soon as a decision is made
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex shrink-0 gap-3 border-t border-border p-4">
+          {step > 0 && !submitted && (
+            <Button variant="ghost" onClick={() => setStep((s) => s - 1)} disabled={isSubmitting}>
+              Back
+            </Button>
+          )}
+          <div className="flex-1" />
+          {step === 0 && (
+            <Button variant="primary" onClick={() => setStep(1)} disabled={!canProceedFromStep1}>
+              Continue
+            </Button>
+          )}
+          {step === 1 && (
+            <Button variant="primary" onClick={() => setStep(2)} disabled={!hasAnyDocument}>
+              Continue
+            </Button>
+          )}
+          {step === 2 && (
+            <Button
+              variant="primary"
+              onClick={handleSubmitForVerification}
+              disabled={!form.declared}
+              isLoading={isSubmitting}
+              loadingText="Submitting…"
+              icon={<ShieldCheck className="h-4 w-4" />}
+            >
+              Submit for Verification
+            </Button>
+          )}
+          {step === 3 && (
+            <Button variant="primary" onClick={handleClose} icon={<Check className="h-4 w-4" />}>
+              Done
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -489,20 +428,21 @@ const UploadField = ({
   onSelect: (file: File | null) => void;
 }) => {
   return (
-    <div>
-      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
-      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-        <LegacyInput
+    <div className="space-y-1.5">
+      <p className="text-sm font-medium text-foreground">{label}</p>
+      <label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-border px-3 py-3 transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary">
+        <input
           type="file"
-          className="hidden"
+          aria-label={label}
+          className="sr-only"
           accept=".pdf,.jpg,.jpeg,.png,.webp"
           onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
-        <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="text-sm text-muted-foreground truncate">
           {file?.name || 'Click to upload'}
         </span>
-        {file && <Check className="w-4 h-4 text-green-500 shrink-0 ml-auto" />}
+        {file && <Check className="ml-auto h-4 w-4 shrink-0 text-success" />}
       </label>
     </div>
   );

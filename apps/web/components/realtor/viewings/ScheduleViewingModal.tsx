@@ -1,14 +1,18 @@
 'use client';
 
-import { Textarea } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, CalendarClock } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
-import { TimePicker } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { CalendarClock } from 'lucide-react';
+import {
+  Button,
+  DatePicker,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  Textarea,
+  TimePicker,
+} from '@getrentos/ui';
 import type { RealtorLead, ViewingAppointment } from '@/types/realtor';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -62,6 +66,7 @@ export const ScheduleViewingModal = ({
         })
       ),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
   });
   const { data: defaultLead } = useQuery({
     queryKey: [...realtorKeys.leads, 'detail', defaultLeadId],
@@ -103,101 +108,73 @@ export const ScheduleViewingModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <h3 className="font-semibold text-foreground">Schedule Viewing</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Lead <span className="text-red-500">*</span>
-                </label>
-                <PaginatedSelect
-                  value={leadId}
-                  onValueChange={(value) => {
-                    setLeadId(value);
-                    setSelectedLeadState(leads.find((lead) => lead.id === value) ?? null);
-                  }}
-                  items={leads}
-                  selectedItem={selectedLeadApi}
-                  getItemValue={(lead) => lead.id}
-                  getItemLabel={(lead) =>
-                    `${lead.fullName}: ${lead.listing?.listingTitle || 'Untitled listing'}`
-                  }
-                  search={leadSearch}
-                  onSearchChange={(value) => {
-                    setLeadSearch(value);
-                    setLeadPage(1);
-                  }}
-                  searchPlaceholder="Search leads with listings"
-                  page={leadPage}
-                  pageSize={LEAD_SELECTOR_PAGE_SIZE}
-                  total={leadsPage?.total ?? 0}
-                  onPageChange={setLeadPage}
-                  placeholder="Select a lead"
-                  emptyMessage="No leads with listings match this search."
-                  isLoading={isLeadsLoading}
-                  ariaLabel="lead"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Date</label>
-                <DatePicker value={date} onChange={setDate} />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Time</label>
-                <TimePicker value={time} onChange={setTime} />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Notes <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={2}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3">
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="flex-1"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1 gap-1.5"
-                onClick={() => void handleSubmit()}
-                disabled={!selectedLead?.listingId || !date || !time || isSubmitting}
-              >
-                <CalendarClock className="w-4 h-4" />
-                {isSubmitting ? 'Scheduling…' : 'Schedule'}
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="p-0 sm:max-w-sm sm:p-0">
+        <div className="p-4 pr-12 border-b border-border">
+          <DialogTitle className="font-semibold text-foreground">Schedule Viewing</DialogTitle>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4">
+          <Field label="Lead" required>
+            <PaginatedSelect
+              value={leadId}
+              onValueChange={(value) => {
+                setLeadId(value);
+                setSelectedLeadState(leads.find((lead) => lead.id === value) ?? null);
+              }}
+              items={leads}
+              selectedItem={selectedLeadApi}
+              getItemValue={(lead) => lead.id}
+              getItemLabel={(lead) =>
+                `${lead.fullName}: ${lead.listing?.listingTitle || 'Untitled listing'}`
+              }
+              search={leadSearch}
+              onSearchChange={(value) => {
+                setLeadSearch(value);
+                setLeadPage(1);
+              }}
+              searchPlaceholder="Search leads with listings"
+              page={leadPage}
+              pageSize={LEAD_SELECTOR_PAGE_SIZE}
+              total={leadsPage?.total ?? 0}
+              onPageChange={setLeadPage}
+              placeholder="Select a lead"
+              emptyMessage="No leads with listings match this search."
+              isLoading={isLeadsLoading}
+              ariaLabel="lead"
+            />
+          </Field>
+
+          <Field label="Date" required>
+            <DatePicker value={date} onChange={setDate} />
+          </Field>
+
+          <Field label="Time" required>
+            <TimePicker value={time} onChange={setTime} />
+          </Field>
+
+          <Field label="Notes" optionalLabel="(optional)">
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+          </Field>
+        </div>
+
+        <div className="p-4 border-t border-border flex gap-3">
+          <Button variant="ghost" onClick={handleClose} className="flex-1" disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1"
+            icon={<CalendarClock className="w-4 h-4" />}
+            onClick={() => void handleSubmit()}
+            isLoading={isSubmitting}
+            loadingText="Scheduling…"
+            disabled={!selectedLead?.listingId || !date || !time}
+          >
+            Schedule
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

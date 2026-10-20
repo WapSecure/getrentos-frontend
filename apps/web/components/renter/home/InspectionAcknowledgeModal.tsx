@@ -2,14 +2,14 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Camera, UserCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, IconButton, type BadgeVariant } from '@getrentos/ui';
 import type { RenterInspection, RenterRoomCondition } from '@/types/renter';
 
-const conditionConfig: Record<RenterRoomCondition, string> = {
-  excellent: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  good: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  fair: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-  poor: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
+const conditionConfig: Record<RenterRoomCondition, BadgeVariant> = {
+  excellent: 'success',
+  good: 'info',
+  fair: 'warning',
+  poor: 'danger',
 };
 
 const typeLabels: Record<RenterInspection['type'], string> = {
@@ -47,32 +47,28 @@ export const InspectionAcknowledgeModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">{typeLabels[inspection.type]}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {inspection.propertyAddress} · {formatDate(inspection.scheduledDate)}
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-3 overflow-y-auto flex-1">
               {inspection.rooms.map((room, index) => (
                 <div key={index} className="p-3 rounded-lg border border-border">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-foreground">{room.room}</p>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${conditionConfig[room.condition]}`}
-                    >
+                    <Badge variant={conditionConfig[room.condition]}>
                       {room.condition.charAt(0).toUpperCase() + room.condition.slice(1)}
-                    </span>
+                    </Badge>
                   </div>
                   {room.notes && <p className="text-xs text-muted-foreground mt-1">{room.notes}</p>}
                   {!!room.photoCount && (
-                    <p className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
                       <Camera className="w-3 h-3" />
                       {room.photoCount} photo{room.photoCount === 1 ? '' : 's'}
                     </p>
@@ -92,12 +88,12 @@ export const InspectionAcknowledgeModal = ({
                   <Button
                     variant="primary"
                     fullWidth
-                    className="gap-1.5"
                     onClick={() => onAcknowledge(inspection.id)}
-                    disabled={isAcknowledging}
+                    isLoading={isAcknowledging}
+                    loadingText="Saving…"
+                    icon={<UserCheck className="h-4 w-4" />}
                   >
-                    <UserCheck className="w-4 h-4" />
-                    {isAcknowledging ? 'Saving…' : 'Confirm I reviewed this record'}
+                    Confirm I reviewed this record
                   </Button>
                   <p className="mt-2 text-xs text-muted-foreground text-center">
                     Acknowledging confirms you reviewed the recorded room conditions. It does not

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Users } from 'lucide-react';
-import { Button, NumberInput } from '@getrentos/ui';
+import { Users } from 'lucide-react';
+import { Button, ListSkeleton, NumberInput } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import type { AgencyTeam } from '@/services/agencyCommissionService';
 
@@ -31,11 +31,9 @@ export function AgencyTeamSection({
         <Users className="h-4 w-4 text-muted-foreground" />
         Team &amp; splits
       </h2>
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card">
         {isLoading ? (
-          <p className="flex items-center gap-2 p-5 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading your team…
-          </p>
+          <ListSkeleton rows={3} label="Loading your team" className="rounded-none border-0" />
         ) : !team || team.members.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">No team members yet.</p>
         ) : (
@@ -68,12 +66,13 @@ export function AgencyTeamSection({
                           value={value}
                           onValueChange={(v) => setEdits((e) => ({ ...e, [m.userId]: v }))}
                           className="w-20"
+                          aria-label={`Split % for ${m.name ?? m.email ?? 'agent'}`}
                         />
                         {dirty && (
                           <Button
                             size="sm"
                             onClick={() => onSetSplit(m.userId, Number(value))}
-                            disabled={savingUserId === m.userId}
+                            isLoading={savingUserId === m.userId}
                           >
                             Save
                           </Button>

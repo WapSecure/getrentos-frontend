@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
   DocumentUpload,
   Field,
+  RadioGroup,
   Textarea,
   type PendingUpload,
 } from '@getrentos/ui';
@@ -99,34 +101,21 @@ export function GuestPromiseReportDialog({
           </DialogDescription>
         </div>
         <div className="max-h-[70vh] space-y-4 overflow-y-auto border-t border-border p-5">
-          <fieldset className="space-y-2">
-            <legend className="mb-1 text-sm font-medium">What went wrong?</legend>
-            {PROBLEM_OPTIONS.map((option) => (
-              <label
-                key={option.value}
-                className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm transition-colors ${
-                  problem === option.value
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:bg-secondary/50'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="problem"
-                  className="mt-1 accent-[var(--primary)]"
-                  checked={problem === option.value}
-                  onChange={() => {
-                    setProblem(option.value);
-                    setError(null);
-                  }}
-                />
-                <span>
-                  <span className="font-medium">{option.label}</span>
-                  <span className="block text-xs text-muted-foreground">{option.hint}</span>
-                </span>
-              </label>
-            ))}
-          </fieldset>
+          <Field label="What went wrong?">
+            <RadioGroup
+              value={problem ?? ''}
+              onValueChange={(value) => {
+                setProblem(value);
+                setError(null);
+              }}
+              options={PROBLEM_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.label,
+                description: option.hint,
+              }))}
+              variant="card"
+            />
+          </Field>
 
           <Field label="Tell us what happened">
             <Textarea
@@ -137,6 +126,7 @@ export function GuestPromiseReportDialog({
               }}
               rows={4}
               maxLength={2000}
+              showCount
               placeholder="e.g. The listing shows a pool and a generator. There is no pool and the generator doesn't work."
             />
           </Field>
@@ -162,13 +152,13 @@ export function GuestPromiseReportDialog({
             lead="Stuck at the gate or need help right now? Talk to us:"
             context={`Guest Promise, booking ${booking.paymentReference ?? booking.id}`}
           />
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose} disabled={send.isPending}>
               Cancel
             </Button>
-            <Button onClick={submit} disabled={send.isPending}>
-              {send.isPending ? 'Sending…' : 'Send report'}
+            <Button onClick={submit} isLoading={send.isPending} loadingText="Sending…">
+              Send report
             </Button>
           </div>
         </div>

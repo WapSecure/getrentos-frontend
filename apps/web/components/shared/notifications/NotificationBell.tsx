@@ -55,8 +55,8 @@ export function NotificationBell({
       },
     ],
   });
-  const markAllRead = useOptimisticMutation({
-    mutationFn: (_: void) =>
+  const markAllRead = useOptimisticMutation<unknown, void>({
+    mutationFn: () =>
       unwrap(safeCall(() => authFetch(`${basePath}/read-all`, { method: 'POST' }))),
     patches: () => [
       {

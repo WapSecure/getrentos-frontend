@@ -121,8 +121,7 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
         <Alert variant="neutral" icon={Clock} className="mx-5 mt-5">
           <p className="text-xs">
             Read the terms, then sign. Nothing is owed until your signature is on the lease: after
-            that, you pay the first rent to GetRentos, which holds it while the landlord hands
-            over.
+            that, you pay the first rent to GetRentos, which holds it while the landlord hands over.
           </p>
         </Alert>
       )}

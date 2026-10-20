@@ -1,14 +1,22 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Download, RefreshCcw, BarChart3, X, Check } from 'lucide-react';
+import { Download, RefreshCcw, BarChart3, Check } from 'lucide-react';
 import { InvestmentStatsCards } from '@/components/owner/analytics/InvestmentStatsCards';
-import { Button } from '@getrentos/ui';
+import {
+  Button,
+  Alert,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Skeleton,
+  TableSkeleton,
+} from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { updateStoredUser } from '@/lib/authStorage';
@@ -24,13 +32,13 @@ const ROIComparisonChart = dynamic(
   () => import('@/components/owner/analytics/ROIComparisonChart').then((m) => m.ROIComparisonChart),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 rounded-xl" />,
   }
 );
 
 export default function OwnerAnalyticsPage() {
   const { isPro } = usePlanTier();
-  const { data: metrics = [] } = useQuery({
+  const { data: metrics = [], isLoading: isLoadingMetrics } = useQuery({
     queryKey: ownerKeys.analytics,
     queryFn: () => unwrap(ownerService.getAnalyticsMetrics()),
     enabled: isPro,
@@ -84,25 +92,26 @@ export default function OwnerAnalyticsPage() {
           <div className="flex gap-2">
             <Button
               variant={isComparing ? 'primary' : 'outline'}
-              className="gap-2"
               onClick={() => setIsComparing((v) => !v)}
+              aria-pressed={isComparing}
+              icon={<BarChart3 className="w-4 h-4" />}
             >
-              <BarChart3 className="w-4 h-4" />
               Compare
             </Button>
             <Button
               variant="outline"
-              className="gap-2"
               onClick={() => {
                 setExported(true);
                 window.setTimeout(() => setExported(false), 2500);
               }}
+              icon={
+                exported ? (
+                  <Check className="w-4 h-4 text-success" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )
+              }
             >
-              {exported ? (
-                <Check className="w-4 h-4 text-green-500" />
-              ) : (
-                <Download className="w-4 h-4" />
-              )}
               {exported ? 'Exported' : 'Export'}
             </Button>
           </div>
@@ -126,26 +135,23 @@ export default function OwnerAnalyticsPage() {
 
         {isComparing && compareMetrics.length > 0 && (
           <div className="mb-6 bg-accent border border-primary/30 rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between gap-2 mb-3">
               <h3 className="text-sm font-semibold text-foreground">
                 Comparing {compareMetrics.length} propert
                 {compareMetrics.length === 1 ? 'y' : 'ies'}
               </h3>
-              <button
-                onClick={() => setCompareIds([])}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
+              <Button variant="ghost" size="xs" onClick={() => setCompareIds([])}>
                 Clear
-              </button>
+              </Button>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {compareMetrics.map((m) => (
                 <div key={m.propertyId} className="bg-card rounded-xl p-3 border border-border">
                   <p className="text-sm font-medium text-foreground truncate">{m.propertyName}</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Purchase: {formatCurrency(m.purchasePrice, { compact: true })}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     Current: {formatCurrency(m.currentValue, { compact: true })}
                   </p>
                   <p className="text-sm font-bold text-primary mt-1">
@@ -157,92 +163,83 @@ export default function OwnerAnalyticsPage() {
           </div>
         )}
 
-        <div className="bg-card rounded-2xl border border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  {isComparing && <th className="p-4 font-medium w-10"></th>}
-                  <th className="p-4 font-medium">Property</th>
-                  <th className="p-4 font-medium">Purchase Price</th>
-                  <th className="p-4 font-medium">Current Value</th>
-                  <th className="p-4 font-medium">Appreciation</th>
-                  <th className="p-4 font-medium">Rental Yield</th>
-                  <th className="p-4 font-medium">ROI</th>
-                  <th className="p-4 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {metrics.map((m) => (
-                  <tr key={m.propertyId} className="hover:bg-secondary transition-colors">
-                    {isComparing && (
-                      <td className="p-4">
-                        <LegacyInput
-                          type="checkbox"
-                          checked={compareIds.includes(m.propertyId)}
-                          onChange={() => toggleCompare(m.propertyId)}
-                          className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                        />
-                      </td>
-                    )}
-                    <td className="p-4 font-medium text-foreground whitespace-nowrap">
-                      {m.propertyName}
-                    </td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">
-                      {formatCurrency(m.purchasePrice, { compact: true })}
-                    </td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">
-                      {formatCurrency(m.currentValue, { compact: true })}
-                    </td>
-                    <td
-                      className={`p-4 font-medium whitespace-nowrap ${m.appreciationRate >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
-                    >
-                      {m.appreciationRate >= 0 ? '+' : ''}
-                      {m.appreciationRate.toFixed(1)}%
-                    </td>
-                    <td className="p-4 text-muted-foreground whitespace-nowrap">
-                      {m.rentalYield !== undefined ? `${m.rentalYield.toFixed(1)}%` : '—'}
-                    </td>
-                    <td className="p-4 font-bold text-primary whitespace-nowrap">
-                      {m.roiPercentage.toFixed(1)}%
-                    </td>
-                    <td className="p-4 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="gap-1.5 text-gray-500"
-                        onClick={() => setConvertingProperty(m)}
-                      >
-                        <RefreshCcw className="w-3.5 h-3.5" />
-                        Rent it out
-                      </Button>
-                    </td>
+        {isLoadingMetrics ? (
+          <TableSkeleton rows={4} columns={6} />
+        ) : (
+          <div className="bg-card rounded-2xl border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                    {isComparing && <th className="p-4 font-medium w-10"></th>}
+                    <th className="p-4 font-medium">Property</th>
+                    <th className="p-4 font-medium">Purchase Price</th>
+                    <th className="p-4 font-medium">Current Value</th>
+                    <th className="p-4 font-medium">Appreciation</th>
+                    <th className="p-4 font-medium">Rental Yield</th>
+                    <th className="p-4 font-medium">ROI</th>
+                    <th className="p-4 font-medium text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {metrics.map((m) => (
+                    <tr key={m.propertyId} className="hover:bg-secondary transition-colors">
+                      {isComparing && (
+                        <td className="p-4">
+                          <Checkbox
+                            checked={compareIds.includes(m.propertyId)}
+                            onCheckedChange={() => toggleCompare(m.propertyId)}
+                            aria-label={`Compare ${m.propertyName}`}
+                          />
+                        </td>
+                      )}
+                      <td className="p-4 font-medium text-foreground whitespace-nowrap">
+                        {m.propertyName}
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {formatCurrency(m.purchasePrice, { compact: true })}
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {formatCurrency(m.currentValue, { compact: true })}
+                      </td>
+                      <td
+                        className={`p-4 font-medium whitespace-nowrap ${m.appreciationRate >= 0 ? 'text-success' : 'text-destructive'}`}
+                      >
+                        {m.appreciationRate >= 0 ? '+' : ''}
+                        {m.appreciationRate.toFixed(1)}%
+                      </td>
+                      <td className="p-4 text-muted-foreground whitespace-nowrap">
+                        {m.rentalYield !== undefined ? `${m.rentalYield.toFixed(1)}%` : '—'}
+                      </td>
+                      <td className="p-4 font-bold text-primary whitespace-nowrap">
+                        {m.roiPercentage.toFixed(1)}%
+                      </td>
+                      <td className="p-4 text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground"
+                          onClick={() => setConvertingProperty(m)}
+                          icon={<RefreshCcw className="w-3.5 h-3.5" />}
+                        >
+                          Rent it out
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
 
         {convertingProperty && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="convert-title"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-          >
-            <div className="bg-card rounded-xl max-w-sm w-full overflow-hidden">
-              <div className="p-4 border-b border-border flex justify-between items-center">
-                <h3 id="convert-title" className="font-semibold text-foreground">
+          <Dialog open onOpenChange={(open) => !open && closeConvert()}>
+            <DialogContent className="max-w-sm p-0">
+              <div className="p-4 pr-12 border-b border-border">
+                <DialogTitle className="font-semibold text-foreground">
                   {convert.isSuccess ? 'Ready to rent out' : 'Rent this property out'}
-                </h3>
-                <button
-                  onClick={closeConvert}
-                  aria-label="Close"
-                  className="p-1 rounded-lg hover:bg-secondary"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                </DialogTitle>
               </div>
               <div className="p-4 space-y-2">
                 {convert.isSuccess ? (
@@ -259,11 +256,11 @@ export default function OwnerAnalyticsPage() {
                   </p>
                 )}
                 {convert.error ? (
-                  <p role="alert" className="text-sm text-destructive">
+                  <Alert variant="danger">
                     {convert.error instanceof Error
                       ? convert.error.message
                       : 'Could not set this up. Try again.'}
-                  </p>
+                  </Alert>
                 ) : null}
               </div>
               <div className="p-4 border-t border-border flex gap-3">
@@ -285,8 +282,8 @@ export default function OwnerAnalyticsPage() {
                   </Button>
                 )}
               </div>
-            </div>
-          </div>
+            </DialogContent>
+          </Dialog>
         )}
       </ProFeatureGate>
     </>

@@ -43,11 +43,14 @@ export const PostSwitcher = () => {
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         disabled={isLoading}
         className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors max-w-[10rem] sm:max-w-[14rem] ${
           needsGateChoice && !isLoading
-            ? 'border-amber-400 bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300'
+            ? 'border-warning/40 bg-warning-subtle text-warning'
             : 'border-border hover:bg-secondary'
         } ${isLoading ? 'opacity-60' : ''}`}
       >
@@ -77,6 +80,7 @@ export const PostSwitcher = () => {
                   {estates.map((option) => (
                     <button
                       key={option.id}
+                      type="button"
                       onClick={() => selectEstate(option.id)}
                       className="w-full flex items-center justify-between gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors text-left"
                     >
@@ -105,6 +109,7 @@ export const PostSwitcher = () => {
                 gates.map((option) => (
                   <button
                     key={option.id}
+                    type="button"
                     onClick={() => {
                       selectGate(option.id);
                       setIsOpen(false);
@@ -122,8 +127,8 @@ export const PostSwitcher = () => {
             </div>
 
             {needsGateChoice && (
-              <div className="border-t border-border px-4 py-3 bg-amber-50 dark:bg-amber-900/20">
-                <p className="text-xs text-amber-800 dark:text-amber-300">
+              <div className="border-t border-border px-4 py-3 bg-warning-subtle">
+                <p className="text-xs text-warning">
                   This estate has more than one gate. Pick the one you&apos;re standing at so
                   arrivals are recorded against it.
                 </p>

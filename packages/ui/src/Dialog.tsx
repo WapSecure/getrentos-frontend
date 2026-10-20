@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -26,6 +26,12 @@ interface DialogContentProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   /** Set false for full-bleed content (image previews, sectioned layouts). */
   padded?: boolean;
+  /**
+   * Whether a click outside closes the dialog. By default it does until the
+   * user types into it; after that a stray click cannot throw away a half-
+   * filled form (Escape and the close button still work).
+   */
+  closeOnOutsideClick?: boolean | 'until-edited';
 }
 
 // Written out in full: Tailwind only generates classes it finds as literals.
@@ -42,7 +48,10 @@ export const DialogContent = ({
   showClose = true,
   size = 'md',
   padded = true,
-}: DialogContentProps) => (
+  closeOnOutsideClick = 'until-edited',
+}: DialogContentProps) => {
+  const edited = useRef(false);
+  return (
   <RadixDialog.Portal forceMount>
     <RadixDialog.Overlay asChild forceMount>
       <motion.div
@@ -52,11 +61,22 @@ export const DialogContent = ({
         className="fixed inset-0 z-50 bg-black/55"
       />
     </RadixDialog.Overlay>
-    <RadixDialog.Content asChild forceMount>
+    <RadixDialog.Content
+      asChild
+      forceMount
+      onInteractOutside={(event) => {
+        if (closeOnOutsideClick === false || (closeOnOutsideClick === 'until-edited' && edited.current)) {
+          event.preventDefault();
+        }
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 8 }}
+        onInputCapture={() => {
+          edited.current = true;
+        }}
         className={cn(
           // p-6 is the default so a modal is never flush to the edge; a full-bleed
           // modal (image preview, section layout with full-width dividers) opts out
@@ -79,7 +99,8 @@ export const DialogContent = ({
       </motion.div>
     </RadixDialog.Content>
   </RadixDialog.Portal>
-);
+  );
+};
 
 export const DialogTitle = RadixDialog.Title;
 export const DialogDescription = RadixDialog.Description;

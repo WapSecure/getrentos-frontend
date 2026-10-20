@@ -1,14 +1,20 @@
 'use client';
 
-import { LegacyInput, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
-
+import {
+  PageErrorState,
+  Pagination,
+  Button,
+  SearchInput,
+  EmptyState,
+  ListSkeleton,
+  Skeleton,
+} from '@getrentos/ui';
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Megaphone } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Megaphone } from 'lucide-react';
 import { SaleListingCard } from '@/components/owner/listings/SaleListingCard';
 import { CreateSaleListingModal } from '@/components/owner/listings/CreateSaleListingModal';
 import { ManageListingModal } from '@/components/owner/listings/ManageListingModal';
-import { Button } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -56,6 +62,7 @@ export default function OwnerListingsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = listingsQuery;
   const listings = data?.items ?? [];
@@ -112,14 +119,19 @@ export default function OwnerListingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Sale Listings</h1>
-          <p className="text-muted-foreground mt-1">
-            {isLoading
-              ? 'Loading…'
-              : `${total} listing${total === 1 ? '' : 's'} across your portfolio`}
-          </p>
+          <div className="text-muted-foreground mt-1">
+            {isLoading ? (
+              <Skeleton className="h-5 w-48" />
+            ) : (
+              `${total} listing${total === 1 ? '' : 's'} across your portfolio`
+            )}
+          </div>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          onClick={() => setIsCreateModalOpen(true)}
+          icon={<Plus className="w-4 h-4" />}
+        >
           New Listing
         </Button>
       </div>
@@ -136,17 +148,13 @@ export default function OwnerListingsPage() {
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title or property..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by title or property..."
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
@@ -159,7 +167,7 @@ export default function OwnerListingsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -169,8 +177,8 @@ export default function OwnerListingsPage() {
       </div>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : listingsQuery.isError ? (
+        <ListSkeleton rows={6} variant="cards" label="Loading listings" />
+      ) : listingsQuery.isError && !data ? (
         <PageErrorState
           title="Sale listings are unavailable"
           description="We could not load your sale listings. Please try again."
@@ -178,26 +186,22 @@ export default function OwnerListingsPage() {
           isRetrying={listingsQuery.isFetching}
         />
       ) : listings.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <Megaphone className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No listings match your filters' : 'No sale listings yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={Megaphone}
+          title={hasActiveFilters ? 'No listings match your filters' : 'No sale listings yet'}
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to your full portfolio.'
-              : 'Create a sale listing for one of your verified properties to start reaching buyers.'}
-          </p>
-          {!hasActiveFilters ? (
-            <Button variant="primary" className="mt-6" onClick={() => setIsCreateModalOpen(true)}>
+              : 'Create a sale listing for one of your verified properties to start reaching buyers.'
+          }
+          action={
+            !hasActiveFilters ? (
+            <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
               Create your first listing
             </Button>
           ) : (
             <Button
               variant="outline"
-              className="mt-6"
               onClick={() => {
                 setSearchQuery('');
                 setDebouncedSearch('');
@@ -207,8 +211,9 @@ export default function OwnerListingsPage() {
             >
               Clear filters
             </Button>
-          )}
-        </div>
+            )
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {listings.map((listing, index) => (

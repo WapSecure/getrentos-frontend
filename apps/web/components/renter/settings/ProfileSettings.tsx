@@ -1,14 +1,11 @@
 'use client';
 
 import { SafeImage } from '@/components/shared/media/SafeImage';
-import { LegacyInput } from '@getrentos/ui';
-
-import { Textarea } from '@getrentos/ui';
 
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, User, Mail, Phone, MapPin, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Badge, Button, Field, IconButton, Input, SaveButton, Textarea } from '@getrentos/ui';
 import { OTPModal } from '@/components/auth/OTPModal';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -148,7 +145,7 @@ const ProfileSettingsForm = ({
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 sm:gap-6">
           <div className="relative">
             <SafeImage
               src={avatarUrl}
@@ -163,13 +160,15 @@ const ProfileSettingsForm = ({
                 </div>
               }
             />
-            <button
+            <IconButton
               type="button"
+              size="sm"
+              label="Change profile photo"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-white hover:bg-primary-hover transition-colors"
-            >
-              <Camera className="w-4 h-4" />
-            </button>
+              isLoading={avatarMutation.isPending}
+              className="absolute -bottom-1 -right-1 rounded-full bg-primary text-primary-foreground hover:bg-primary-hover hover:text-primary-foreground"
+              icon={<Camera />}
+            />
             <input
               ref={fileInputRef}
               type="file"
@@ -181,93 +180,84 @@ const ProfileSettingsForm = ({
           <div>
             <p className="text-sm font-medium text-foreground">Profile Photo</p>
             <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max 5MB.</p>
-            {avatarMutation.isPending && <p className="text-xs text-primary mt-1">Uploading…</p>}
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
-              type="text"
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
+        <Field label="Full Name">
+          <Input
+            leadingIcon={<User className="w-4 h-4" />}
+            type="text"
+            value={formData.fullName}
+            onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
+          />
+        </Field>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
+          <Field label="Email Address">
+            <Input
+              leadingIcon={<Mail className="w-4 h-4" />}
               type="email"
               value={formData.email}
               readOnly
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
-          </div>
+          </Field>
+          <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Phone Number
-            {phoneVerified && (
-              <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Verified
-              </span>
-            )}
-          </label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <LegacyInput
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-            {!phoneVerified && (
-              <button
-                type="button"
-                onClick={handleVerifyPhone}
-                disabled={isSendingOtp}
-                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-sm font-medium text-primary hover:bg-secondary disabled:opacity-50 transition-colors"
+        <Field
+          label="Phone Number"
+          error={otpError || undefined}
+          labelAside={
+            phoneVerified && (
+              <Badge
+                variant="success"
+                icon={<CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />}
               >
-                <ShieldCheck className="w-4 h-4" />
-                {isSendingOtp ? 'Sending…' : 'Verify'}
-              </button>
+                Verified
+              </Badge>
+            )
+          }
+        >
+          <div className="flex gap-2">
+            <Input
+              leadingIcon={<Phone className="w-4 h-4" />}
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="min-w-0 flex-1"
+            />
+            {!phoneVerified && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleVerifyPhone}
+                isLoading={isSendingOtp}
+                loadingText="Sending…"
+                icon={<ShieldCheck className="w-4 h-4" />}
+                className="shrink-0"
+              >
+                Verify
+              </Button>
             )}
           </div>
-          {otpError && <p className="mt-1 text-xs text-red-500">{otpError}</p>}
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Location</label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <LegacyInput
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
+        <Field label="Location">
+          <Input
+            leadingIcon={<MapPin className="w-4 h-4" />}
+            type="text"
+            value={formData.location}
+            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+          />
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Bio</label>
+        <Field label="Bio">
           <Textarea
             value={formData.bio}
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             rows={3}
-            className="w-full px-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
 
         <SaveButton type="submit" label="Save Changes" />
       </form>

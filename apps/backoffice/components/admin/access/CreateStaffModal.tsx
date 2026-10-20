@@ -147,7 +147,12 @@ export const CreateStaffModal = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1" isLoading={submitting} loadingText="Creating…">
+              <Button
+                type="submit"
+                className="flex-1"
+                isLoading={submitting}
+                loadingText="Creating…"
+              >
                 Create staff
               </Button>
             </div>

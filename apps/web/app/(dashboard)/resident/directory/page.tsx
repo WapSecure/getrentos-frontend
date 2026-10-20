@@ -1,15 +1,13 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Contact } from 'lucide-react';
-import { EmptyState, Switch } from '@getrentos/ui';
+import { EmptyState, ListSkeleton, Switch, useOptimisticMutation } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
 
 export default function ResidentDirectoryPage() {
-  const queryClient = useQueryClient();
-
   const { data: household } = useQuery({
     queryKey: estateResidentKeys.myHousehold,
     queryFn: () => unwrap(estateResidentService.getMyHousehold()),
@@ -20,12 +18,16 @@ export default function ResidentDirectoryPage() {
     queryFn: () => unwrap(estateResidentService.getDirectory()),
   });
 
-  const setOptIn = useMutation({
+  const setOptIn = useOptimisticMutation({
     mutationFn: (optIn: boolean) => unwrap(estateResidentService.setDirectoryOptIn(optIn)),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: estateResidentKeys.myHousehold });
-      queryClient.invalidateQueries({ queryKey: estateResidentKeys.directory });
-    },
+    patches: (optIn) => [
+      {
+        queryKey: estateResidentKeys.myHousehold,
+        update: (old) => ({ ...(old as object), directoryOptIn: optIn }),
+      },
+    ],
+    invalidate: [estateResidentKeys.directory],
+    errorMessage: 'Your directory preference did not save. Please try again.',
   });
 
   return (
@@ -36,7 +38,7 @@ export default function ResidentDirectoryPage() {
       </div>
 
       <div className="bg-card rounded-2xl border border-border p-4 mb-6 flex items-center justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-medium text-foreground">Show my household in the directory</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             Neighbors will see your unit, name, phone, and email.
@@ -45,21 +47,18 @@ export default function ResidentDirectoryPage() {
         <Switch
           checked={household?.directoryOptIn ?? false}
           onCheckedChange={(checked) => setOptIn.mutate(checked)}
-          disabled={setOptIn.isPending}
           aria-label="Show my household in the directory"
         />
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : !directory || directory.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={Contact}
-            title="No households listed yet"
-            description="Households appear here once they opt in to the directory."
-          />
-        </div>
+        <EmptyState
+          icon={Contact}
+          title="No households listed yet"
+          description="Households appear here once they opt in to the directory."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {directory.map((entry) => (

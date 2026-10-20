@@ -70,12 +70,7 @@ export const LandlordRevenueChart = () => {
         <Skeleton className="h-56 w-full" />
       ) : !hasData ? (
         <div className="h-56 flex items-center justify-center">
-          <EmptyState
-            icon={TrendingUp}
-            title="No rent collection data yet"
-            size="compact"
-            bare
-          />
+          <EmptyState icon={TrendingUp} title="No rent collection data yet" size="compact" bare />
         </div>
       ) : (
         <div className="h-56">
@@ -87,11 +82,7 @@ export const LandlordRevenueChart = () => {
                   <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                vertical={false}
-                stroke="currentColor"
-                className="text-border"
-              />
+              <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
               <XAxis
                 dataKey="month"
                 axisLine={false}

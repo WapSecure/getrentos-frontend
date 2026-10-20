@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  ArrowLeft,
   BellRing,
   CalendarClock,
   Camera,
@@ -19,16 +20,18 @@ import {
   Badge,
   Button,
   Card,
+  Checkbox,
+  CurrencyInput,
+  DatePicker,
   EmptyState,
   Field,
   Input,
+  RadioGroup,
   Select,
+  Skeleton,
   Textarea,
-  Toast,
   type ToastVariant,
-  DatePicker,
-  Checkbox,
-  CurrencyInput,
+  useToast,
 } from '@getrentos/ui';
 import {
   LAND_INCIDENT_KIND_LABELS,
@@ -63,16 +66,13 @@ export const LandWatchWorkspace = () => {
   const params = useSearchParams();
   const router = useRouter();
   const selected = params.get('id');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const notify: Notify = (message, variant = 'success') => setToast({ message, variant });
+  const toast = useToast();
+  const notify: Notify = (message, variant = 'success') => toast.show(message, variant);
   const open = (id: string | null) =>
     router.push(id ? `/land/watch?id=${encodeURIComponent(id)}` : '/land/watch');
 
   return (
     <div className="space-y-6">
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       {selected ? (
         <WatchDetail id={selected} onBack={() => open(null)} notify={notify} />
       ) : (
@@ -120,8 +120,8 @@ const WatchList = ({ onOpen, notify }: { onOpen: (id: string) => void; notify: N
         />
       )}
       {watches.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : watches.isError ? (
+        <Skeleton className="h-40 rounded-2xl" />
+      ) : watches.isError && !watches.data ? (
         <EmptyState
           icon={CircleAlert}
           title="Your watched land could not be loaded"
@@ -265,35 +265,26 @@ const SubscribeCard = ({
         />
       </Field>
       <Field label="Level">
-        <div role="radiogroup" aria-label="Level" className="grid gap-3 sm:grid-cols-3">
-          {TIERS.map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="radio"
-              aria-checked={tier === t}
-              onClick={() => setTier(t)}
-              className={`rounded-xl border p-3 text-left text-sm transition-colors ${tier === t ? 'border-primary bg-primary/5' : 'border-border hover:border-foreground/20'}`}
-            >
-              <span className="block font-medium text-foreground">
-                {LAND_WATCH_TIER_LABELS[t].label}
-              </span>
-              <span className="mt-1 block text-muted-foreground">
-                {LAND_WATCH_TIER_LABELS[t].description}
-              </span>
-            </button>
-          ))}
-        </div>
+        <RadioGroup
+          value={tier}
+          onValueChange={setTier}
+          variant="card"
+          columns={3}
+          options={TIERS.map((t) => ({
+            value: t,
+            label: LAND_WATCH_TIER_LABELS[t].label,
+            description: LAND_WATCH_TIER_LABELS[t].description,
+          }))}
+        />
       </Field>
       {terms.data && (
-        <div className="flex items-start gap-2 rounded-xl bg-secondary/50 p-3 text-sm text-foreground">
+        <div className="rounded-xl bg-secondary/50 p-3">
           <Checkbox
             id="land-watch-disclaimer"
             checked={accepted}
             onCheckedChange={setAccepted}
-            className="mt-0.5"
+            label={terms.data.disclaimer}
           />
-          <label htmlFor="land-watch-disclaimer">{terms.data.disclaimer}</label>
         </div>
       )}
       <div className="flex gap-2">
@@ -335,9 +326,8 @@ const WatchDetail = ({
   const failed = (error: unknown, fallback: string) =>
     notify(errorMessage(error, fallback), 'error');
 
-  if (query.isLoading)
-    return <div className="h-96 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
-  if (query.isError || !query.data) {
+  if (query.isLoading) return <Skeleton className="h-96 rounded-2xl" />;
+  if (!query.data) {
     return (
       <EmptyState
         icon={CircleAlert}
@@ -350,13 +340,15 @@ const WatchDetail = ({
   return (
     <>
       <div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<ArrowLeft className="h-4 w-4" />}
           onClick={onBack}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="-ml-2"
         >
-          ← Land Watch
-        </button>
+          Land Watch
+        </Button>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-foreground">{w.land.label}</h1>

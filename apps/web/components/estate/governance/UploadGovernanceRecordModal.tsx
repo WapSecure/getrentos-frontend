@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lock, X } from 'lucide-react';
-import { Button, Checkbox, DatePicker, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import {
+  Button,
+  Checkbox,
+  DatePicker,
+  DocumentUpload,
+  Field,
+  IconButton,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 
 interface UploadGovernanceRecordModalProps {
@@ -67,9 +76,7 @@ export const UploadGovernanceRecordModal = ({
               <h3 className="font-semibold text-foreground">
                 {newVersionOf ? 'Upload New Version' : 'Upload Governance Record'}
               </h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
@@ -80,32 +87,27 @@ export const UploadGovernanceRecordModal = ({
                 </p>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Title</label>
-                <LegacyInput
+              <Field label="Title" required>
+                <Input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. 2026 Bylaws Amendment"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Type</label>
+              <Field label="Type">
                 <Select value={type} onValueChange={setType} options={typeOptions} />
-              </div>
+              </Field>
 
               {type === 'MEETING_MINUTES' && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Meeting Date <span className="text-gray-400 font-normal">(optional)</span>
-                  </label>
-                  <DatePicker value={meetingDate} onChange={setMeetingDate} />
-                </div>
+                <Field label="Meeting Date" optionalLabel="(optional)">
+                  <DatePicker value={meetingDate} onChange={setMeetingDate} clearable />
+                </Field>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">File</label>
+                <p className="block text-sm font-medium text-foreground mb-1">File</p>
                 <DocumentUpload
                   value={file ? [{ id: 'file', file }] : []}
                   onChange={(items) => setFile(items[0]?.file ?? null)}
@@ -116,16 +118,21 @@ export const UploadGovernanceRecordModal = ({
                 />
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <Checkbox checked={requiresSignatures} onCheckedChange={setRequiresSignatures} />
-                Require every committee member to sign before it&apos;s approved
-                {!isPro && (
-                  <Lock
-                    className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
-                    aria-label="Pro plan feature"
-                  />
-                )}
-              </label>
+              <Checkbox
+                checked={requiresSignatures}
+                onCheckedChange={setRequiresSignatures}
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    Require every committee member to sign before it&apos;s approved
+                    {!isPro && (
+                      <Lock
+                        className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
+                        aria-label="Pro plan feature"
+                      />
+                    )}
+                  </span>
+                }
+              />
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -135,7 +142,9 @@ export const UploadGovernanceRecordModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Uploading…"
                 onClick={() =>
                   file &&
                   onSubmit({
@@ -148,7 +157,7 @@ export const UploadGovernanceRecordModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Uploading…' : 'Upload'}
+                Upload
               </Button>
             </div>
           </motion.div>

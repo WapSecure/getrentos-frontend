@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, Field, IconButton, Input } from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface LinkResidentModalProps {
@@ -43,28 +43,22 @@ export const LinkResidentModal = ({
                 <h3 className="font-semibold text-foreground">Link Resident</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{household.unitLabel}</p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Platform account email
-                </label>
-                <LegacyInput
+              <Field
+                label="Platform account email"
+                hint="They must already have a GetRentos account with this email. Linking gives them their own dashboard for this household."
+              >
+                <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="resident@example.com"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  They must already have a GetRentos account with this email. Linking gives them
-                  their own dashboard for this household.
-                </p>
-              </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              </Field>
+              {error && <p className="text-xs text-destructive">{error}</p>}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -74,10 +68,12 @@ export const LinkResidentModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!email.trim() || isSubmitting}
+                disabled={!email.trim()}
+                isLoading={isSubmitting}
+                loadingText="Linking…"
                 onClick={() => onSubmit(email.trim())}
               >
-                {isSubmitting ? 'Linking…' : 'Link Resident'}
+                Link Resident
               </Button>
             </div>
           </motion.div>

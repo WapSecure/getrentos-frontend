@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, MessageSquarePlus } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, type BadgeVariant, Button, Card, Textarea } from '@getrentos/ui';
 import type { MusterRollEntry, MusterRollState } from '@/types/estate';
 
 /**
@@ -17,7 +17,7 @@ const STATE_ACTIONS: { state: MusterRollState; label: string; active: string }[]
   {
     state: 'ACCOUNTED',
     label: 'Accounted for',
-    active: 'border-emerald-600 bg-emerald-600/10 text-foreground',
+    active: 'border-success bg-success-subtle text-foreground',
   },
   {
     state: 'NOT_ON_SITE',
@@ -36,11 +36,11 @@ const STATE_ACTIONS: { state: MusterRollState; label: string; active: string }[]
   },
 ];
 
-const stateTone: Record<MusterRollState, string> = {
-  ACCOUNTED: 'text-emerald-600',
-  NOT_ON_SITE: 'text-foreground',
-  NEEDS_HELP: 'text-destructive',
-  UNACCOUNTED: 'text-amber-600',
+const stateTone: Record<MusterRollState, BadgeVariant> = {
+  ACCOUNTED: 'success',
+  NOT_ON_SITE: 'neutral',
+  NEEDS_HELP: 'danger',
+  UNACCOUNTED: 'warning',
 };
 
 interface RollEntryRowProps {
@@ -73,14 +73,12 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
   const answered = entry.state !== 'UNACCOUNTED';
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4">
+    <Card className="p-4">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-foreground">{entry.personName}</p>
-            <span className={`text-xs font-medium ${stateTone[entry.state]}`}>
-              {entry.stateLabel}
-            </span>
+            <Badge variant={stateTone[entry.state]}>{entry.stateLabel}</Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-0.5">
             {entry.unitLabel} · {entry.basisLabel}
@@ -124,22 +122,23 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
               );
             })}
 
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<MessageSquarePlus className="w-3.5 h-3.5" />}
               onClick={() => {
                 setNote(entry.stateNote ?? '');
                 setIsNoting((open) => !open);
               }}
-              className="px-3 py-1.5 rounded-lg text-sm text-muted-foreground inline-flex items-center gap-1.5"
             >
-              <MessageSquarePlus className="w-3.5 h-3.5" />
               {entry.stateNote ? 'Edit note' : 'Add a note'}
-            </button>
+            </Button>
           </div>
 
           {isNoting && (
             <div className="mt-3">
-              <textarea
+              <Textarea
+                aria-label="Note"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={2}
@@ -149,7 +148,7 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
                     ? 'What is needed, and where they are'
                     : 'Why, or where they were reached'
                 }
-                className="w-full rounded-lg border border-border bg-transparent p-3 text-sm"
+                showCount
               />
               <div className="flex justify-end gap-2 mt-2">
                 <Button variant="ghost" onClick={() => setIsNoting(false)}>
@@ -157,7 +156,7 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
                 </Button>
                 <Button
                   variant="secondary"
-                  disabled={isSaving}
+                  isLoading={isSaving}
                   onClick={async () => {
                     // Saves the note against whatever the person is currently
                     // marked as, so adding a note can never silently re-answer them.
@@ -172,6 +171,6 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
           )}
         </div>
       ) : null}
-    </div>
+    </Card>
   );
 };

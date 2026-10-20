@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck } from 'lucide-react';
 import {
   Badge,
@@ -12,8 +12,10 @@ import {
   DialogTitle,
   EmptyState,
   PageErrorState,
-  PageLoadingState,
   Pagination,
+  Alert,
+  ListSkeleton,
+  Skeleton,
 } from '@getrentos/ui';
 import { ownerService, type OwnerViewing } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -56,6 +58,7 @@ export default function OwnerViewingsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ownerKeys.viewings });
 
@@ -77,8 +80,18 @@ export default function OwnerViewingsPage() {
     onSuccess: refresh,
   });
 
-  if (query.isLoading) return <PageLoadingState />;
-  if (query.isError) {
+  if (query.isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-4 w-80 max-w-full" />
+        </div>
+        <ListSkeleton rows={5} label="Loading viewings" />
+      </div>
+    );
+  }
+  if (query.isError && !query.data) {
     return (
       <PageErrorState
         title="Viewings are unavailable"
@@ -118,9 +131,9 @@ export default function OwnerViewingsPage() {
       </div>
 
       {failed && (
-        <p className="text-sm text-destructive">
+        <Alert variant="danger">
           {failed instanceof Error ? failed.message : 'That did not work. Please try again.'}
-        </p>
+        </Alert>
       )}
 
       {items.length === 0 ? (
@@ -170,6 +183,7 @@ export default function OwnerViewingsPage() {
                         <Button
                           variant="primary"
                           disabled={confirm.isPending}
+                          isLoading={confirm.isPending && confirm.variables?.id === viewing.id}
                           onClick={() => confirm.mutate({ id: viewing.id })}
                         >
                           Confirm this time
@@ -187,6 +201,7 @@ export default function OwnerViewingsPage() {
                       <Button
                         variant="ghost"
                         disabled={decline.isPending}
+                        isLoading={decline.isPending && decline.variables === viewing.id}
                         onClick={() => decline.mutate(viewing.id)}
                       >
                         Decline
@@ -204,6 +219,7 @@ export default function OwnerViewingsPage() {
                         <Button
                           variant="ghost"
                           disabled={complete.isPending}
+                          isLoading={complete.isPending && complete.variables === viewing.id}
                           onClick={() => complete.mutate(viewing.id)}
                         >
                           Mark as done
@@ -245,7 +261,8 @@ export default function OwnerViewingsPage() {
             </Button>
             <Button
               variant="primary"
-              disabled={!isCompleteDateTime(newTime) || confirm.isPending}
+              disabled={!isCompleteDateTime(newTime)}
+              isLoading={confirm.isPending}
               onClick={() =>
                 rescheduling &&
                 confirm.mutate({ id: rescheduling.id, at: new Date(newTime).toISOString() })

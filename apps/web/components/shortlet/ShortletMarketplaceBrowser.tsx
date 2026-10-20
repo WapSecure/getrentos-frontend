@@ -3,18 +3,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { getAuthToken } from '@getrentos/shared';
 import {
+  Alert,
   Badge,
   Button,
   Checkbox,
   CurrencyInput,
   DatePicker,
   EmptyState,
-  Input,
   NumberInput,
   Pagination,
+  SearchInput,
   Select,
   Skeleton,
 } from '@getrentos/ui';
@@ -123,6 +124,7 @@ export const ShortletMarketplaceBrowser = ({
   const { data, isLoading, isPending, isError } = useQuery({
     queryKey: [...shortletKeys.public, queryParams],
     queryFn: () => unwrap(shortletService.listPublic(queryParams)),
+    placeholderData: keepPreviousData,
   });
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -156,16 +158,15 @@ export const ShortletMarketplaceBrowser = ({
       )}
 
       <div className="mb-3">
-        <Input
+        <SearchInput
           id="shortlet-search"
           value={search}
-          onChange={(event) => {
-            setSearch(event.target.value);
+          onValueChange={(value) => {
+            setSearch(value);
             setPage(1);
           }}
           placeholder="Search by area, street, estate or title"
-          aria-label="Search shortlets"
-          leadingIcon={<Search className="h-4 w-4" />}
+          label="Search shortlets"
         />
       </div>
 
@@ -246,50 +247,38 @@ export const ShortletMarketplaceBrowser = ({
             ]}
           />
         </div>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-          <Checkbox
-            checked={instantOnly}
-            onCheckedChange={(v) => {
-              setInstantOnly(v);
-              setPage(1);
-            }}
-            aria-label="Instant booking only"
-          />
-          Instant booking
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-          <Checkbox
-            checked={verifiedOnly}
-            onCheckedChange={(v) => {
-              setVerifiedOnly(v);
-              setPage(1);
-            }}
-            aria-label="Verified only"
-          />
-          Verified only
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-          <Checkbox
-            checked={power24h}
-            onCheckedChange={(v) => {
-              setPower24h(v);
-              setPage(1);
-            }}
-            aria-label="Power 24 hours a day"
-          />
-          24-hour power
-        </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-          <Checkbox
-            checked={petsOnly}
-            onCheckedChange={(v) => {
-              setPetsOnly(v);
-              setPage(1);
-            }}
-            aria-label="Pets allowed"
-          />
-          Pets allowed
-        </label>
+        <Checkbox
+          checked={instantOnly}
+          onCheckedChange={(v) => {
+            setInstantOnly(v);
+            setPage(1);
+          }}
+          label="Instant booking"
+        />
+        <Checkbox
+          checked={verifiedOnly}
+          onCheckedChange={(v) => {
+            setVerifiedOnly(v);
+            setPage(1);
+          }}
+          label="Verified only"
+        />
+        <Checkbox
+          checked={power24h}
+          onCheckedChange={(v) => {
+            setPower24h(v);
+            setPage(1);
+          }}
+          label="24-hour power"
+        />
+        <Checkbox
+          checked={petsOnly}
+          onCheckedChange={(v) => {
+            setPetsOnly(v);
+            setPage(1);
+          }}
+          label="Pets allowed"
+        />
       </div>
       <div className="-mt-3 mb-6 flex flex-wrap gap-2" role="group" aria-label="Amenities">
         {SHORTLET_AMENITIES.filter((a) => a !== '24/7 Power').map((amenity) => {
@@ -318,22 +307,24 @@ export const ShortletMarketplaceBrowser = ({
       </div>
 
       {estateFromUrl && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
-          <p className="text-sm text-muted-foreground">
+        <Alert
+          variant="neutral"
+          icon={null}
+          className="mb-4"
+          action={
+            <Button variant="ghost" size="sm" onClick={() => router.replace('/shortlets')}>
+              Show all shortlets
+            </Button>
+          }
+        >
+          <span className="text-muted-foreground">
             Showing only short-stays inside{' '}
             <span className="font-medium text-foreground">
               {estateFromUrl.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
             </span>
             .
-          </p>
-          <button
-            type="button"
-            onClick={() => router.replace('/shortlets')}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Show all shortlets
-          </button>
-        </div>
+          </span>
+        </Alert>
       )}
 
       {isLoading ? (
@@ -342,7 +333,7 @@ export const ShortletMarketplaceBrowser = ({
             <Skeleton key={i} className="h-64 w-full rounded-xl" />
           ))}
         </div>
-      ) : isError ? (
+      ) : isError && !data ? (
         <EmptyState
           icon={Search}
           title="Could not load shortlets"
@@ -382,8 +373,11 @@ export const ShortletMarketplaceBrowser = ({
                 />
                 <div className="absolute left-3 top-3 flex gap-2">
                   {listing.instantBooking && (
-                    <Badge className="bg-primary text-primary-foreground">
-                      <Zap className="mr-1 h-3 w-3" /> Instant
+                    <Badge
+                      className="bg-primary text-primary-foreground"
+                      icon={<Zap className="h-3 w-3" />}
+                    >
+                      Instant
                     </Badge>
                   )}
                   {listing.isVerified && <Badge variant="info">Verified host</Badge>}
@@ -395,8 +389,8 @@ export const ShortletMarketplaceBrowser = ({
                     </span>
                   )}
                   {listing.inspection && (
-                    <Badge variant="success">
-                      <ClipboardCheck className="mr-1 h-3 w-3" /> Inspected
+                    <Badge variant="success" icon={<ClipboardCheck className="h-3 w-3" />}>
+                      Inspected
                     </Badge>
                   )}
                 </div>
@@ -422,7 +416,7 @@ export const ShortletMarketplaceBrowser = ({
                   <MapPin className="h-3.5 w-3.5" /> {listing.city}, {listing.state}
                   {listing.reviewCount > 0 && listing.ratingAverage != null && (
                     <span className="ml-1 flex items-center gap-0.5">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                       {listing.ratingAverage.toFixed(1)}
                       <span className="text-muted-foreground/70">({listing.reviewCount})</span>
                     </span>
@@ -486,12 +480,12 @@ export const ShortletMarketplaceBrowser = ({
                   <Button
                     size="sm"
                     className="opacity-90 group-hover:opacity-100"
+                    icon={<CalendarCheck className="h-4 w-4" />}
                     onClick={(e) => {
                       e.stopPropagation();
                       openListing(listing);
                     }}
                   >
-                    <CalendarCheck className="mr-1.5 h-4 w-4" />{' '}
                     {isSignedIn ? 'Book' : 'View details'}
                   </Button>
                 </div>

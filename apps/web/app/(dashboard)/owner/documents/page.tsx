@@ -1,17 +1,20 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
-
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText, Upload, FolderOpen, Search, Check } from 'lucide-react';
 import {
+  Pagination,
   Button,
   DocumentUploadDialog,
   DocumentRowActions,
   DocumentPreviewButton,
   type UploadedDocumentData,
+  EmptyState,
+  SearchInput,
+  ListSkeleton,
+  PageErrorState,
 } from '@getrentos/ui';
+import { useEffect, useState } from 'react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileText, Upload, FolderOpen, Check } from 'lucide-react';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -55,7 +58,7 @@ export default function OwnerDocumentsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [
       ...ownerKeys.documents,
       {
@@ -74,6 +77,7 @@ export default function OwnerDocumentsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const documents = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -124,27 +128,28 @@ export default function OwnerDocumentsPage() {
             {total} document{total === 1 ? '' : 's'} across your portfolio
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsUploadOpen(true)}>
-          <Upload className="w-4 h-4" />
+        <Button
+          variant="primary"
+          onClick={() => setIsUploadOpen(true)}
+          icon={<Upload className="w-4 h-4" />}
+        >
           Upload Document
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search documents..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search documents..."
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {categoryFilters.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -152,7 +157,7 @@ export default function OwnerDocumentsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -161,11 +166,16 @@ export default function OwnerDocumentsPage() {
         </div>
       </div>
 
-      {documents.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <FolderOpen className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No documents found</p>
-        </div>
+      {isLoading ? (
+        <ListSkeleton rows={5} label="Loading documents" />
+      ) : isError && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your documents"
+          onRetry={() => void refetch()}
+        />
+      ) : documents.length === 0 ? (
+        <EmptyState icon={FolderOpen} title="No documents found" />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {documents.map((doc) => (
@@ -182,15 +192,18 @@ export default function OwnerDocumentsPage() {
                   {categoryLabels[doc.category]} • {doc.propertyName}
                 </p>
               </div>
-              <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
+              <div className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
               <button
+                type="button"
                 onClick={() => toggleShare(doc.id)}
-                className={`hidden md:inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap transition-colors ${
+                aria-pressed={doc.sharedWithBuyer}
+                disabled={shareMutation.isPending && shareMutation.variables?.id === doc.id}
+                className={`hidden md:inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60 ${
                   doc.sharedWithBuyer
-                    ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-                    : 'text-gray-500 bg-gray-100 dark:text-gray-400 dark:bg-white/10'
+                    ? 'text-success bg-success-subtle'
+                    : 'text-muted-foreground bg-secondary'
                 }`}
               >
                 {doc.sharedWithBuyer && <Check className="w-3 h-3" />}

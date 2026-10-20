@@ -3,16 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, AlertTriangle, FileText } from 'lucide-react';
-import {
-  Alert,
-  Button,
-  Field,
-  IconButton,
-  Input,
-  Select,
-  Switch,
-  Textarea,
-} from '@getrentos/ui';
+import { Alert, Button, Field, IconButton, Input, Select, Switch, Textarea } from '@getrentos/ui';
 import type {
   CreateMaintenanceRequestInput,
   MaintenanceCategory,
@@ -389,9 +380,7 @@ export const ReportMaintenanceModal = ({
                 )}
               </div>
 
-              {submitError && (
-                <Alert variant="danger">{submitError}</Alert>
-              )}
+              {submitError && <Alert variant="danger">{submitError}</Alert>}
 
               <div className="flex gap-3 pt-2">
                 <Button

@@ -2,9 +2,17 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, UserPlus, Mail, CheckCircle2, Loader2 } from 'lucide-react';
-import { Button, Field, Input } from '@getrentos/ui';
+import { UserPlus, Mail, CheckCircle2 } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Input,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
@@ -105,115 +113,84 @@ export const AddClientModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Add Client</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Add an owner or landlord by their GetRentos account email
-                </p>
-              </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4">
-              <VerificationRequiredNotice
-                error={submitError}
-                href={`${ROUTES.REALTOR_SETTINGS}?tab=verification`}
-              />
-              <Field
-                label="Email"
-                htmlFor="realtor-client-email"
-                required
-                error={shownError ?? undefined}
-              >
-                <Input
-                  id="realtor-client-email"
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  placeholder="client@example.com"
-                  leadingIcon={<Mail className="h-4 w-4" />}
-                  value={email}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    setEmail(next);
-                    if (localError) setLocalError(null);
-                    if (next.trim() !== checkedEmail) setCheckState('idle');
-                  }}
-                  onBlur={() => {
-                    if (email.trim() !== checkedEmail && email.trim()) runCheck();
-                  }}
-                  disabled={isSubmitting || check.isPending}
-                />
-              </Field>
-
-              {checkState === 'checking' ? (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  Checking account…
-                </div>
-              ) : verifiedEligible ? (
-                <div className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20 px-3 py-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
-                  <div className="text-xs">
-                    <p className="font-medium text-green-700 dark:text-green-400">
-                      Verified as an owner or landlord
-                    </p>
-                    <p className="text-muted-foreground mt-0.5">
-                      {checkedName || email} is ready to receive an invitation.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Enter the client’s email and we’ll verify their account before sending an
-                  invitation. They must be registered as an owner or landlord on GetRentos.
-                </p>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border flex justify-end gap-3">
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                disabled={isSubmitting || check.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="gap-1.5"
-                onClick={handlePrimary}
-                isLoading={isSubmitting || check.isPending}
-                disabled={!email.trim()}
-              >
-                {verifiedEligible ? (
-                  <>
-                    <UserPlus className="w-3.5 h-3.5" />
-                    Send Invitation
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Verify & Send Invitation
-                  </>
-                )}
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="p-0 sm:max-w-sm sm:p-0">
+        <div className="p-4 pr-12 border-b border-border">
+          <DialogTitle className="font-semibold text-foreground">Add Client</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            Add an owner or landlord by their GetRentos account email
+          </DialogDescription>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4">
+          <VerificationRequiredNotice
+            error={submitError}
+            href={`${ROUTES.REALTOR_SETTINGS}?tab=verification`}
+          />
+          <Field
+            label="Email"
+            htmlFor="realtor-client-email"
+            required
+            error={shownError ?? undefined}
+          >
+            <Input
+              id="realtor-client-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              placeholder="client@example.com"
+              leadingIcon={<Mail className="h-4 w-4" />}
+              value={email}
+              onChange={(e) => {
+                const next = e.target.value;
+                setEmail(next);
+                if (localError) setLocalError(null);
+                if (next.trim() !== checkedEmail) setCheckState('idle');
+              }}
+              onBlur={() => {
+                if (email.trim() !== checkedEmail && email.trim()) runCheck();
+              }}
+              disabled={isSubmitting || check.isPending}
+            />
+          </Field>
+
+          {checkState === 'checking' ? (
+            <p role="status" className="text-xs text-muted-foreground">
+              Checking account…
+            </p>
+          ) : verifiedEligible ? (
+            <Alert variant="success" title="Verified as an owner or landlord">
+              {checkedName || email} is ready to receive an invitation.
+            </Alert>
+          ) : (
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Enter the client’s email and we’ll verify their account before sending an invitation.
+              They must be registered as an owner or landlord on GetRentos.
+            </p>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-border flex flex-wrap justify-end gap-3">
+          <Button variant="ghost" onClick={handleClose} disabled={isSubmitting || check.isPending}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            icon={
+              verifiedEligible ? (
+                <UserPlus className="w-3.5 h-3.5" />
+              ) : (
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              )
+            }
+            onClick={handlePrimary}
+            isLoading={isSubmitting || check.isPending}
+            disabled={!email.trim()}
+          >
+            {verifiedEligible ? 'Send Invitation' : 'Verify & Send Invitation'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -1,6 +1,7 @@
 'use client';
 
 import { Handshake, CalendarClock, ShieldCheck, Heart } from 'lucide-react';
+import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import type { BuyerDashboard } from '@/services/buyerService';
 
@@ -10,18 +11,18 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
   offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
   viewing: {
     icon: CalendarClock,
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    color: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-warning-subtle',
+    color: 'text-warning',
   },
   escrow: {
     icon: ShieldCheck,
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    color: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-info-subtle',
+    color: 'text-info',
   },
   saved: {
     icon: Heart,
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-secondary',
+    color: 'text-foreground',
   },
 };
 
@@ -57,22 +58,15 @@ interface BuyerActivityFeedProps {
 
 export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Recent Activity</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Offers, viewings, payments, and saved property updates
-        </p>
-      </div>
+    <Card className="rounded-2xl">
+      <CardHeader className="border-b border-border pb-4">
+        <CardTitle as="h3">Recent Activity</CardTitle>
+        <CardDescription>Offers, viewings, payments, and saved property updates</CardDescription>
+      </CardHeader>
 
       <div className="divide-y divide-border">
         {activity.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <Heart className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No activity yet</p>
-          </div>
+          <EmptyState icon={Heart} title="No activity yet" size="compact" bare />
         ) : (
           activity.map((item) => {
             const config = typeConfig[typeFor(item.type)];
@@ -97,6 +91,6 @@ export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
           })
         )}
       </div>
-    </div>
+    </Card>
   );
 };

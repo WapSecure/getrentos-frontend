@@ -1,6 +1,19 @@
 'use client';
 
-import { LegacyInput, Dialog, DialogContent, DialogTitle, Button, Select } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Button,
+  IconButton,
+  Input,
+  Select,
+  Skeleton,
+  Textarea,
+  type BadgeVariant,
+} from '@getrentos/ui';
 
 import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from 'lucide-react';
@@ -8,11 +21,11 @@ import { cn, formatCurrency } from '@getrentos/shared';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { Dispute, DisputeDetail, DisputeMessage, DisputeResolveOutcome } from '@/types/admin';
 
-const STATUS_PILL: Record<Dispute['status'], string> = {
-  open: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-  under_review: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
-  escalated: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  resolved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+const STATUS_VARIANT: Record<Dispute['status'], BadgeVariant> = {
+  open: 'warning',
+  under_review: 'info',
+  escalated: 'danger',
+  resolved: 'success',
 };
 
 const ESCROW_LABEL: Record<string, string> = {
@@ -129,14 +142,9 @@ export const DisputeCaseModal = ({
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span
-                className={cn(
-                  'rounded-full px-2.5 py-1 text-xs font-medium capitalize',
-                  STATUS_PILL[dispute.status]
-                )}
-              >
+              <Badge variant={STATUS_VARIANT[dispute.status]} className="capitalize">
                 {dispute.status.replace('_', ' ')}
-              </span>
+              </Badge>
               <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-muted-foreground capitalize">
                 {dispute.category.replace('_', ' ')}
               </span>
@@ -148,7 +156,14 @@ export const DisputeCaseModal = ({
           <div className="p-4 bg-secondary/50 border-b border-border">
             <p className="text-sm text-muted-foreground">{dispute.description}</p>
             {detailLoading ? (
-              <p className="text-xs text-muted-foreground mt-2">Loading case context…</p>
+              <div
+                className="mt-3 grid gap-2 sm:grid-cols-2"
+                role="status"
+                aria-label="Loading case context"
+              >
+                <Skeleton className="h-3 w-3/4" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-xs">
                 {detail?.raisedBy && (
@@ -196,8 +211,8 @@ export const DisputeCaseModal = ({
           />
 
           {detail?.resolution && (
-            <div className="px-4 py-3 bg-emerald-50 dark:bg-emerald-900/20 border-b border-border text-sm">
-              <p className="font-medium text-emerald-700 dark:text-emerald-300">
+            <div className="px-4 py-3 bg-success-subtle border-b border-border text-sm">
+              <p className="font-medium text-success">
                 Resolution
                 {detail.resolvedAt ? ` · ${new Date(detail.resolvedAt).toLocaleString()}` : ''}
               </p>
@@ -315,15 +330,18 @@ export const DisputeCaseModal = ({
                     value={outcome}
                     onValueChange={(value) => setOutcome(value as DisputeResolveOutcome)}
                     options={outcomeOptions}
+                    ariaLabel="Resolution outcome"
+                    searchable={false}
                     className="w-full"
                   />
                 </div>
-                <textarea
+                <Textarea
                   value={resolutionText}
                   onChange={(e) => setResolutionText(e.target.value)}
                   placeholder="Resolution note shown to both parties (optional)"
+                  aria-label="Resolution note"
                   rows={2}
-                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  className="flex-1 resize-none"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
@@ -382,23 +400,28 @@ export const DisputeCaseModal = ({
             </div>
           )}
           <div>
-            {messageError && <p className="mb-2 text-xs text-destructive">{messageError}</p>}
+            {messageError && (
+              <Alert variant="danger" className="mb-2">
+                {messageError}
+              </Alert>
+            )}
             <div className="flex gap-2">
-              <LegacyInput
+              <Input
                 type="text"
                 value={messageText}
                 onChange={(e) => setMessageText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
                 placeholder="Send a message to both parties..."
-                className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Message to both parties"
+                className="flex-1"
               />
-              <Button
+              <IconButton
                 variant="secondary"
+                label="Send message"
+                icon={<Send />}
                 onClick={() => void handleSend()}
                 disabled={!messageText.trim() || isSendingMessage}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
+              />
             </div>
           </div>
         </div>

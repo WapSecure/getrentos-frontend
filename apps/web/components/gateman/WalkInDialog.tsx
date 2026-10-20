@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Alert, Button, Field, IconButton, Input, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
@@ -186,30 +186,22 @@ export const WalkInDialog = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Visitor with no pass</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Who have they come to see?
-                </label>
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <LegacyInput
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search unit or resident"
-                    className="pl-9"
-                  />
-                </div>
-              </div>
+              <Field label="Who have they come to see?">
+                <Input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search unit or resident"
+                  leadingIcon={<Search className="w-4 h-4" />}
+                />
+              </Field>
 
               {isLoading ? (
-                <p className="text-sm text-muted-foreground">Loading households…</p>
+                <ListSkeleton rows={3} variant="cards" label="Loading households" />
               ) : matches.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No household matches that.</p>
               ) : (
@@ -221,6 +213,7 @@ export const WalkInDialog = ({
                       <button
                         key={h.id}
                         type="button"
+                        aria-pressed={selected}
                         disabled={!reachable}
                         onClick={() => setHousehold(h)}
                         className={`w-full text-left rounded-lg border p-3 transition-colors ${
@@ -240,44 +233,35 @@ export const WalkInDialog = ({
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Visitor name
-                </label>
-                <LegacyInput
+              <Field
+                label="Visitor name"
+                hint="The household decides based on this, so use their real name."
+              >
+                <Input
                   type="text"
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   placeholder="e.g. Tola Ade"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  The household decides based on this, so use their real name.
-                </p>
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Phone <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
-                <LegacyInput
-                  type="text"
+              <Field label="Phone" optionalLabel="(optional)">
+                <Input
+                  type="tel"
                   value={visitorPhone}
                   onChange={(e) => setVisitorPhone(e.target.value)}
                   placeholder="e.g. 08012345678"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Reason <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field label="Reason" optionalLabel="(optional)">
+                <Input
                   type="text"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
                   placeholder="e.g. Plumbing repair"
                 />
-              </div>
+              </Field>
 
               {refusal && (
                 <WatchlistBlockedNotice
@@ -296,21 +280,19 @@ export const WalkInDialog = ({
                   variant="outline"
                   fullWidth
                   disabled={!canCheck}
+                  isLoading={check.isPending}
+                  loadingText="Checking…"
                   onClick={() => {
                     setScreening(null);
                     check.mutate();
                   }}
                 >
-                  {check.isPending ? 'Checking…' : 'Check the watch list'}
+                  Check the watch list
                 </Button>
                 {screening && <WatchlistCheckResult screening={screening} />}
               </div>
 
-              {error && (
-                <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                  {error}
-                </p>
-              )}
+              {error && <Alert variant="danger">{error}</Alert>}
             </div>
 
             <div className="p-4 border-t border-border shrink-0 space-y-2">
@@ -328,9 +310,11 @@ export const WalkInDialog = ({
                     variant="primary"
                     fullWidth
                     disabled={!canSubmit}
+                    isLoading={request.isPending}
+                    loadingText="Asking…"
                     onClick={() => request.mutate({})}
                   >
-                    {request.isPending ? 'Asking…' : 'Ask for approval'}
+                    Ask for approval
                   </Button>
                   <p className="text-xs text-muted-foreground text-center">
                     The gate stays closed until the household answers. They have 10 minutes.

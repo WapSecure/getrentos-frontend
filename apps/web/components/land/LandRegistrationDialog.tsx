@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import {
+  Alert,
   Button,
   CurrencyInput,
   Dialog,
@@ -302,11 +303,7 @@ export const LandRegistrationDialog = ({
             </div>
           </div>
 
-          {error && (
-            <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-              {error}
-            </p>
-          )}
+          {error && <Alert variant="danger">{error}</Alert>}
         </div>
 
         <div className="flex justify-end gap-3 border-t border-border p-5">

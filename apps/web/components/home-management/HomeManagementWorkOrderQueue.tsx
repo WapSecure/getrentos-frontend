@@ -25,8 +25,12 @@ import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { useToast } from '@getrentos/ui';
-import { HomeManagementWorkOrderInvoices } from '@/components/home-management/HomeManagementWorkOrderInvoices';
-import { HomeManagementWorkOrderQuotes } from '@/components/home-management/HomeManagementWorkOrderQuotes';
+import {
+  HomeManagementWorkOrderInvoices,
+} from '@/components/home-management/HomeManagementWorkOrderInvoices';
+import {
+  HomeManagementWorkOrderQuotes,
+} from '@/components/home-management/HomeManagementWorkOrderQuotes';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';

@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, ConfirmDialog, PageErrorState, Textarea, Toast } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  PageErrorState,
+  Skeleton,
+  Textarea,
+  useToast,
+} from '@getrentos/ui';
 import { ArrowLeft, CalendarClock, MapPin } from 'lucide-react';
 import { boundaryCorners } from '@getrentos/shared';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
@@ -46,11 +54,9 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
   const [savingKey, setSavingKey] = useState<string | null>(null);
   const [report, setReport] = useState('');
   const [confirmReport, setConfirmReport] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
-  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: landReviewKeys.seat(seatId),
     queryFn: () => unwrap(landReviewerService.getSeat(seatId)),
   });
@@ -72,10 +78,10 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
     onMutate: (v) => setSavingKey(v.key),
     onSuccess: (next) => {
       store(next);
-      setToast({ message: 'Decision saved.', variant: 'success' });
+      toast.success('Decision saved.');
     },
     onError: (reason: Error) => {
-      setToast({ message: reason.message, variant: 'error' });
+      toast.error(reason.message);
       // Someone else changed the case: load the current version to decide against.
       if (reason instanceof ApiError && reason.status === 409) refetch();
     },
@@ -90,12 +96,9 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
       setEvidenceKey(key);
       try {
         store(await call(input));
-        setToast({ message: done, variant: 'success' });
+        toast.success(done);
       } catch (reason) {
-        setToast({
-          message: reason instanceof Error ? reason.message : 'That did not go through.',
-          variant: 'error',
-        });
+        toast.error(reason instanceof Error ? reason.message : 'That did not go through.');
         throw reason;
       } finally {
         setEvidenceKey(null);
@@ -128,16 +131,13 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
       if (v.declaration === 'DECLARED') {
         // The seat is withdrawn; reload what the API still shows of it.
         queryClient.invalidateQueries({ queryKey: landReviewKeys.all });
-        setToast({
-          message: 'Conflict recorded. You have stepped aside from this case.',
-          variant: 'success',
-        });
+        toast.success('Conflict recorded. You have stepped aside from this case.');
         return;
       }
       store(next);
-      setToast({ message: 'Declaration recorded. Your checks are open.', variant: 'success' });
+      toast.success('Declaration recorded. Your checks are open.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const submit = useMutation({
@@ -145,15 +145,15 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
     onSuccess: (next) => {
       store(next);
       setReport('');
-      setToast({ message: 'Report filed. Thank you.', variant: 'success' });
+      toast.success('Report filed. Thank you.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   if (isLoading) {
-    return <div className="h-72 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <Skeleton className="h-72 rounded-2xl" />;
   }
-  if (isError || !data) {
+  if (!data) {
     return (
       <PageErrorState
         title="This review is not available"
@@ -384,9 +384,6 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
         isLoading={submit.isPending}
         onConfirm={() => submit.mutateAsync().catch(() => undefined)}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

@@ -192,7 +192,11 @@ export default function TierGrantsPage() {
           )}
 
           <div className="mt-4">
-            <Button onClick={submitGrant} isLoading={grantMutation.isPending} loadingText="Recording…">
+            <Button
+              onClick={submitGrant}
+              isLoading={grantMutation.isPending}
+              loadingText="Recording…"
+            >
               Grant tier 3
             </Button>
           </div>

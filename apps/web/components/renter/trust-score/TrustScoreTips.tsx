@@ -1,6 +1,7 @@
 'use client';
 
 import { Lightbulb, BadgeCheck } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 
 const tips = [
   'Complete all verifications to maximize your trust score',
@@ -12,7 +13,7 @@ const tips = [
 
 export const TrustScoreTips = () => {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-4 h-4 text-primary" />
@@ -32,6 +33,6 @@ export const TrustScoreTips = () => {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

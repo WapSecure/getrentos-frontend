@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useMemo, useState } from 'react';
-import { Button, DocumentPreviewButton, Field, Select } from '@getrentos/ui';
+import { Button, DocumentPreviewButton, Field, IconButton, Select } from '@getrentos/ui';
 import { Upload, X } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDocumentType } from '@/types/landDocument';
@@ -176,15 +176,13 @@ export const LandDocumentPicker = ({
           <div className="space-y-3 rounded-xl border border-border bg-secondary/30 p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-foreground">Upload a document</p>
-              <button
-                type="button"
+              <IconButton
+                label="Cancel upload"
+                size="sm"
+                icon={<X />}
                 onClick={closeUpload}
                 disabled={upload.isPending}
-                className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                aria-label="Cancel upload"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              />
             </div>
             <LandDocumentUploadFields
               id={`${id}-upload`}

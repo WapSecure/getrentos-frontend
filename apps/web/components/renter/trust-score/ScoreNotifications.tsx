@@ -1,6 +1,7 @@
 'use client';
 
 import { Bell, CheckCircle, Clock, AlertCircle, Inbox } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 import { format } from 'date-fns';
 import { humanizeScoreReason } from '@/components/renter/trust-score/reasonLabels';
 
@@ -17,7 +18,7 @@ interface ScoreNotificationsProps {
 
 export const ScoreNotifications = ({ history }: ScoreNotificationsProps) => {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-primary" />
@@ -28,33 +29,30 @@ export const ScoreNotifications = ({ history }: ScoreNotificationsProps) => {
 
       <div className="divide-y divide-border">
         {history.length === 0 ? (
-          <div className="p-4 text-center text-muted-foreground">
-            <Inbox className="w-6 h-6 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No score activity yet</p>
-          </div>
+          <EmptyState icon={Inbox} title="No score activity yet" size="compact" bare />
         ) : (
           history.slice(0, 5).map((item, index) => (
             <div key={index} className="p-3 hover:bg-secondary transition-colors">
               <div className="flex items-start gap-3">
                 {item.change > 0 && (
-                  <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-success mt-0.5 shrink-0" />
                 )}
-                {item.change === 0 && <Clock className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />}
+                {item.change === 0 && <Clock className="w-4 h-4 text-info mt-0.5 shrink-0" />}
                 {item.change < 0 && (
-                  <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
                 )}
                 <div>
                   <p className="text-sm text-foreground">
                     {humanizeScoreReason(item.reason)}
                     {item.change !== 0 && (
-                      <span className={item.change > 0 ? ' text-green-600' : ' text-red-600'}>
+                      <span className={item.change > 0 ? 'text-success' : 'text-destructive'}>
                         {' '}
                         ({item.change > 0 ? '+' : ''}
                         {item.change})
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {format(new Date(item.date), 'MMM d, yyyy')} · Score {item.score}
                   </p>
                 </div>
@@ -63,6 +61,6 @@ export const ScoreNotifications = ({ history }: ScoreNotificationsProps) => {
           ))
         )}
       </div>
-    </div>
+    </Card>
   );
 };

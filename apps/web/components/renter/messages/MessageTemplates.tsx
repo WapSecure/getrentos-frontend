@@ -253,11 +253,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                     />
                   </Field>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleSaveEdit}
-                      isLoading={updateMutation.isPending}
-                    >
+                    <Button size="sm" onClick={handleSaveEdit} isLoading={updateMutation.isPending}>
                       Save
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
@@ -312,7 +308,9 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                         label="Delete template"
                         title="Delete template"
                         icon={<Trash2 />}
-                        isLoading={deleteMutation.isPending && deleteMutation.variables === template.id}
+                        isLoading={
+                          deleteMutation.isPending && deleteMutation.variables === template.id
+                        }
                         onClick={() => handleDeleteTemplate(template.id)}
                       />
                     </div>

@@ -8,10 +8,13 @@ import {
   Button,
   Card,
   EmptyState,
+  Field,
+  Input,
+  ListSkeleton,
   PageErrorState,
+  Skeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -63,7 +66,7 @@ export default function RentReconciliationPage() {
   const [csv, setCsv] = useState<{ name: string; text: string } | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const list = useQuery({
     queryKey: ['admin', 'reconciliations'],
@@ -81,8 +84,7 @@ export default function RentReconciliationPage() {
     queryClient.invalidateQueries({ queryKey: ['admin', 'journal'] });
     setOpenId(r.id);
   };
-  const fail = (e: Error) =>
-    setToast({ message: e.message || 'That did not work.', variant: 'error' });
+  const fail = (e: Error) => toast.error(e.message || 'That did not work.');
   const exceptions = (r: Reconciliation) =>
     (r.items ?? []).filter((i) => i.kind !== 'MATCHED').length;
 
@@ -91,10 +93,8 @@ export default function RentReconciliationPage() {
     onSuccess: (r) => {
       done(r);
       setCsv(null);
-      setToast({
-        message: exceptions(r) ? `${exceptions(r)} line(s) need a look.` : 'Everything matched.',
-        variant: exceptions(r) ? 'error' : 'success',
-      });
+      if (exceptions(r)) toast.error(`${exceptions(r)} line(s) need a look.`);
+      else toast.success('Everything matched.');
     },
     onError: fail,
   });
@@ -132,58 +132,55 @@ export default function RentReconciliationPage() {
 
       {canAct && (
         <Card className="mb-6 flex flex-wrap items-end gap-3 p-5">
-          <div>
-            <label htmlFor="rec-month" className="block text-sm font-medium text-foreground">
-              Month
-            </label>
-            <input
-              id="rec-month"
+          <Field label="Month">
+            <Input
               value={period}
               onChange={(e) => setPeriod(e.target.value.trim())}
               placeholder="YYYY-MM"
-              className="mt-1 h-10 w-32 rounded-lg border border-border bg-background px-3 text-sm"
+              inputMode="numeric"
+              className="w-32"
             />
-          </div>
-          <div>
-            <label htmlFor="rec-file" className="block text-sm font-medium text-foreground">
-              Gateway export (CSV)
-            </label>
+          </Field>
+          <Field label="Gateway export (CSV)">
             <input
-              id="rec-file"
               type="file"
               accept=".csv,text/csv"
               onChange={async (e) => {
                 const f = e.target.files?.[0];
                 setCsv(f ? { name: f.name, text: await f.text() } : null);
               }}
-              className="mt-1 block text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border file:border-border file:bg-secondary file:px-3 file:py-2 file:text-sm file:text-foreground"
+              className="block max-w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border file:border-border file:bg-secondary file:px-3 file:py-2 file:text-sm file:text-foreground"
             />
-          </div>
+          </Field>
           <Button
             variant="primary"
-            disabled={!csv || upload.isPending || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            disabled={!csv || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            isLoading={upload.isPending}
+            loadingText="Matching…"
             onClick={() => upload.mutate()}
           >
-            {upload.isPending ? 'Matching…' : 'Reconcile export'}
+            Reconcile export
           </Button>
           <Button
             variant="outline"
-            disabled={pull.isPending || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            disabled={!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            isLoading={pull.isPending}
+            loadingText="Pulling…"
             onClick={() => pull.mutate()}
           >
-            {pull.isPending ? 'Pulling…' : 'Pull from gateway'}
+            Pull from gateway
           </Button>
         </Card>
       )}
 
-      {list.isError ? (
+      {list.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : list.isError && !list.data ? (
         <PageErrorState
           title="Could not load reconciliations"
           description={(list.error as Error).message}
           onRetry={() => list.refetch()}
         />
-      ) : list.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : !list.data?.length ? (
         <EmptyState
           icon={GitCompareArrows}
@@ -208,7 +205,7 @@ export default function RentReconciliationPage() {
                       : ''}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={x.status === 'RESOLVED' ? 'success' : 'warning'}>
                     {x.status === 'RESOLVED'
                       ? 'Reconciled'
@@ -224,6 +221,16 @@ export default function RentReconciliationPage() {
                 </div>
               </div>
 
+              {openId === x.id && !r && detail.isLoading && (
+                <div
+                  className="mt-4 space-y-2 border-t border-border pt-4"
+                  role="status"
+                  aria-label="Loading lines"
+                >
+                  <Skeleton className="h-14 w-full rounded-lg" />
+                  <Skeleton className="h-14 w-full rounded-lg" />
+                </div>
+              )}
               {openId === x.id && r && (
                 <ul className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
                   {(r.items ?? []).map((i) => (
@@ -261,6 +268,7 @@ export default function RentReconciliationPage() {
                               size="sm"
                               variant="primary"
                               disabled={(notes[i.id] ?? '').trim().length < 10 || resolve.isPending}
+                              isLoading={resolve.isPending && resolve.variables?.itemId === i.id}
                               onClick={() =>
                                 resolve.mutate({ itemId: i.id, text: notes[i.id].trim() })
                               }
@@ -276,10 +284,6 @@ export default function RentReconciliationPage() {
             </Card>
           ))}
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

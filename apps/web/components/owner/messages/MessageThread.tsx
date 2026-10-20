@@ -1,8 +1,7 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
+import { Alert, Button, Input } from '@getrentos/ui';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
@@ -53,7 +52,7 @@ export const MessageThread = ({
         </div>
         <div>
           <p className="text-sm font-semibold text-foreground">{contactName}</p>
-          <p className="text-xs text-gray-400">{contactRole}</p>
+          <p className="text-xs text-muted-foreground">{contactRole}</p>
         </div>
       </div>
 
@@ -61,7 +60,7 @@ export const MessageThread = ({
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <MessageCircle className="w-8 h-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-gray-400">No messages yet: say hello</p>
+            <p className="text-sm text-muted-foreground">No messages yet: say hello</p>
           </div>
         ) : (
           messages.map((message) => {
@@ -80,7 +79,7 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isOwner ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-[10px] ${isOwner ? 'text-primary-foreground/60' : 'text-gray-400'}`}
+                      className={`text-[10px] ${isOwner ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
@@ -99,25 +98,31 @@ export const MessageThread = ({
       </div>
 
       <div className="border-t border-border p-3">
-        {errorMessage && <p className="mb-2 text-xs text-destructive">{errorMessage}</p>}
+        {errorMessage && (
+          <Alert variant="danger" className="mb-2">
+            {errorMessage}
+          </Alert>
+        )}
         <div className="flex items-center gap-2">
-          <LegacyInput
+          <Input
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
             placeholder="Type a message..."
-            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Message"
+            className="flex-1"
           />
-          <button
-            type="button"
+          <Button
             onClick={() => void handleSend()}
-            disabled={!draft.trim() || isSending}
+            disabled={!draft.trim()}
+            isLoading={isSending}
             aria-label={isSending ? 'Sending message' : 'Send message'}
-            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+            icon={<Send className="w-4 h-4" />}
+            className="shrink-0 px-3"
           >
-            <Send className="w-4 h-4" />
-          </button>
+            <span className="sr-only">Send message</span>
+          </Button>
         </div>
       </div>
     </div>

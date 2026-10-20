@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Plus } from 'lucide-react';
 import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -27,6 +27,7 @@ export default function EstateStaffPage() {
     queryKey: [...estateKeys.staff(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(estateService.listStaff(estate!.id, { page, pageSize: PAGE_SIZE })),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const staff = data?.items ?? [];
   const total = data?.total ?? 0;

@@ -1,15 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Gavel } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Gavel } from 'lucide-react';
 import { DisputeCard } from '@/components/admin/disputes/DisputeCard';
 import { DisputeCaseModal } from '@/components/admin/disputes/DisputeCaseModal';
-import { EmptyState, PageErrorState } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import {
+  CardSkeleton,
+  EmptyState,
+  PageErrorState,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -65,6 +71,7 @@ export default function AdminDisputesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const disputes = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -240,18 +247,16 @@ export default function AdminDisputesPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by title or party..."
-            leadingIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          label="Search disputes"
+          placeholder="Search by title or party..."
+          className="flex-1 max-w-sm"
+        />
         <Select
           value={categoryFilter}
           onValueChange={(value) => {
@@ -259,41 +264,41 @@ export default function AdminDisputesPage() {
             setPage(1);
           }}
           options={categoryOptions}
+          ariaLabel="Filter by category"
           className="w-full sm:w-48"
         />
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
-        {statusOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => {
-              setStatusFilter(option.value);
-              setPage(1);
-            }}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-              statusFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(value) => {
+          setStatusFilter(value as StatusFilter);
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList className="max-w-full">
+          {statusOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {isError ? (
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardSkeleton key={index} />
+          ))}
+        </div>
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load disputes"
           description="The dispute queue is temporarily unavailable. Your filters have been preserved."
           onRetry={() => void refetch()}
           isRetrying={isFetching}
         />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
       ) : disputes.length === 0 ? (
         <EmptyState icon={Gavel} title="No disputes match your filters" />
       ) : (

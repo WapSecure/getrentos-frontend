@@ -140,9 +140,7 @@ export function ClientAgentAccess() {
                       <Button
                         size="sm"
                         variant="outline"
-                        isLoading={
-                          assign.isPending && assign.variables?.propertyId === property.id
-                        }
+                        isLoading={assign.isPending && assign.variables?.propertyId === property.id}
                         onClick={() =>
                           assign.mutate({ id: assignment.id, propertyId: property.id })
                         }

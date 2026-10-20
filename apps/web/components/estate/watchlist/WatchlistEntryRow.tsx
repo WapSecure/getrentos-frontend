@@ -1,7 +1,7 @@
 'use client';
 
 import { ImageIcon, ShieldAlert, ShieldCheck, Undo2 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
 import type { WatchlistEntry } from '@/types/estate';
 
 const formatDate = (value: string) =>
@@ -43,15 +43,13 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
         <div className="flex items-center gap-2 flex-wrap">
           <p className="text-sm font-medium text-foreground truncate">{entry.label}</p>
           {isBlock ? (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-              <ShieldAlert className="w-3 h-3" />
+            <Badge variant="danger" icon={<ShieldAlert className="w-3 h-3" />}>
               Do not admit
-            </span>
+            </Badge>
           ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-              <ShieldCheck className="w-3 h-3" />
+            <Badge variant="warning" icon={<ShieldCheck className="w-3 h-3" />}>
               Watch only
-            </span>
+            </Badge>
           )}
           <span className="text-xs text-muted-foreground">
             {entry.subjectType === 'VEHICLE' ? 'Vehicle' : 'Person'}
@@ -81,7 +79,7 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
         )}
 
         {isExpired && (
-          <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+          <p className="text-xs text-warning mt-1">
             Lapsed on {formatDate(entry.expiresAt!)}. Not enforced: extend it or add it again if the
             estate still needs it.
           </p>
@@ -96,6 +94,7 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
             rel="noreferrer"
             className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
             title="Photo on file"
+            aria-label={`Photo on file for ${entry.label}`}
           >
             <ImageIcon className="w-4 h-4" />
           </a>

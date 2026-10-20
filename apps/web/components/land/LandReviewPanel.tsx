@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@getrentos/ui';
+import { Alert, Button } from '@getrentos/ui';
 import { AlertTriangle, CheckCircle2, Circle, Clock3, Send, XCircle } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheck, OwnerLandRecord } from '@/types/land';
@@ -111,10 +111,9 @@ export const LandReviewPanel = ({
       )}
 
       {diligence?.findings && (status === 'ACTION_REQUIRED' || status === 'REJECTED') && (
-        <div className="mt-3 rounded-xl border border-warning/30 bg-warning/5 p-3 text-sm text-foreground">
-          <p className="font-medium">Findings from compliance</p>
-          <p className="mt-1 whitespace-pre-line text-muted-foreground">{diligence.findings}</p>
-        </div>
+        <Alert variant="warning" title="Findings from compliance" className="mt-3">
+          <p className="whitespace-pre-line">{diligence.findings}</p>
+        </Alert>
       )}
 
       {checks.length > 0 && (

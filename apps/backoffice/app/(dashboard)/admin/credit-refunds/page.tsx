@@ -9,13 +9,13 @@ import {
   Card,
   ConfirmDialog,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
   Tabs,
   TabsList,
   TabsTrigger,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -58,7 +58,7 @@ export default function CreditRefundsPage() {
   const canRefund = hasAdminPermission(user?.roles, 'rentfinance.approve');
   const [filter, setFilter] = useState<Filter>('ATTENTION');
   const [notes, setNotes] = useState<Record<string, string>>({});
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [retryTarget, setRetryTarget] = useState<CreditRefund | null>(null);
 
   const query = useQuery({
@@ -75,16 +75,13 @@ export default function CreditRefundsPage() {
         setRetryTarget(null);
       }
       queryClient.invalidateQueries({ queryKey: ['admin', 'credit-refunds'] });
-      setToast({
-        message:
-          r.status === 'REFUNDED'
-            ? `${formatCurrency(r.refundedAmount)} refunded.`
-            : `Refund ${STATUS[r.status].label.toLowerCase()}: ${r.lastError ?? 'see the record'}`,
-        variant: r.status === 'REFUNDED' ? 'success' : 'error',
-      });
+      if (r.status === 'REFUNDED') toast.success(`${formatCurrency(r.refundedAmount)} refunded.`);
+      else
+        toast.error(
+          `Refund ${STATUS[r.status].label.toLowerCase()}: ${r.lastError ?? 'see the record'}`
+        );
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not refund.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not refund.'),
   });
 
   const all = query.data ?? [];
@@ -112,14 +109,14 @@ export default function CreditRefundsPage() {
         </TabsList>
       </Tabs>
 
-      {query.isError ? (
+      {query.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : query.isError && !query.data ? (
         <PageErrorState
           title="Could not load credit refunds"
           description={(query.error as Error).message}
           onRetry={() => query.refetch()}
         />
-      ) : query.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : items.length === 0 ? (
         <EmptyState
           icon={RotateCcw}
@@ -138,7 +135,7 @@ export default function CreditRefundsPage() {
             return (
               <Card key={r.id} className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <p className="font-medium text-foreground">
                       {r.tenantName} · {formatCurrency(r.refundedAmount)} of{' '}
                       {formatCurrency(r.amount)} refunded
@@ -192,9 +189,6 @@ export default function CreditRefundsPage() {
         </div>
       )}
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <ConfirmDialog
         open={retryTarget !== null}
         onOpenChange={(open) => !open && !retry.isPending && setRetryTarget(null)}

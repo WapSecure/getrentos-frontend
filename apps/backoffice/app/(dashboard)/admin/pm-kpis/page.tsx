@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Gauge } from 'lucide-react';
-import { Button, Field, PageErrorState, PmKpiPack, Select, Skeleton } from '@getrentos/ui';
+import { Button, Field, PageErrorState, PmKpiPack, Select, StatGridSkeleton } from '@getrentos/ui';
 import { recentMonthOptions, unwrap } from '@getrentos/shared';
 
 import { adminPmKpiService, type PmKpiScopeKind } from '@/services/adminManagedService';
@@ -31,6 +31,7 @@ export default function PmKpisPage() {
     queryKey: ['admin', 'pm-kpis', from, to, scope, firmId],
     queryFn: () => unwrap(adminPmKpiService.report(from, to, scope, firmId)),
     enabled: ready,
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -90,18 +91,14 @@ export default function PmKpisPage() {
 
       {scope === 'FIRM' && !firmId ? (
         <p className="text-sm text-muted-foreground">Choose a firm to see its book.</p>
-      ) : report.isError ? (
+      ) : report.isError && !report.data ? (
         <PageErrorState
           title="Could not load the KPIs"
           description={(report.error as Error).message}
           onRetry={() => void report.refetch()}
         />
       ) : !ready ? null : report.isLoading || !report.data ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
-          ))}
-        </div>
+        <StatGridSkeleton className="xl:grid-cols-4 lg:grid-cols-2" />
       ) : (
         <PmKpiPack
           report={report.data}

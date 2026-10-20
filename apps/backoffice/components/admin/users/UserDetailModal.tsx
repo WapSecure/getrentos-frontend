@@ -56,12 +56,9 @@ export const UserDetailModal = ({
               <p className="text-xs text-muted-foreground mb-1.5">Roles</p>
               <div className="flex flex-wrap gap-1.5">
                 {user.roles.map((role) => (
-                  <span
-                    key={role}
-                    className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground"
-                  >
+                  <Badge key={role} variant="neutral">
                     {roleLabels[role] || role}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             </div>
@@ -139,7 +136,7 @@ export const UserDetailModal = ({
             {user.status !== 'banned' && (
               <Button
                 variant="ghost"
-                className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
+                className="flex-1 gap-1.5 text-destructive"
                 onClick={() => onChangeStatus(user.id, 'banned')}
                 isLoading={pendingStatus === 'banned'}
                 disabled={isChangingStatus}

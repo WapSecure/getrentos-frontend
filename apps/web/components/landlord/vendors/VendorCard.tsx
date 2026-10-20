@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CalendarClock, Pencil, Phone, Power, Trash2 } from 'lucide-react';
+import { Badge, IconButton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { StarRating } from '@/components/landlord/vendors/StarRating';
 import type { Vendor } from '@/types/landlord';
@@ -23,9 +24,6 @@ interface VendorCardProps {
   onToggleActive: (vendor: Vendor) => void;
   onRemove: (id: string) => void;
 }
-
-const iconButton =
-  'p-1.5 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors';
 
 export const VendorCard = ({
   vendor,
@@ -54,42 +52,44 @@ export const VendorCard = ({
       className={`bg-card rounded-2xl border border-border p-4 ${vendor.isActive ? '' : 'opacity-70'}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <button type="button" onClick={() => onOpen(vendor)} className="min-w-0 text-left">
+        <button
+          type="button"
+          onClick={() => onOpen(vendor)}
+          className="min-w-0 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <h3 className="font-semibold text-foreground truncate hover:underline">{vendor.name}</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {vendor.serviceType}
             {!vendor.isActive && (
-              <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 font-medium">
+              <Badge variant="neutral" className="ml-2">
                 Inactive
-              </span>
+              </Badge>
             )}
           </p>
         </button>
         <div className="flex shrink-0 items-center">
-          <button
-            type="button"
-            onClick={() => onEdit(vendor)}
-            className={iconButton}
+          <IconButton
+            label={`Edit ${vendor.name}`}
             title="Edit vendor"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onToggleActive(vendor)}
-            className={iconButton}
+            size="sm"
+            icon={<Pencil />}
+            onClick={() => onEdit(vendor)}
+          />
+          <IconButton
+            label={`${vendor.isActive ? 'Deactivate' : 'Reactivate'} ${vendor.name}`}
             title={vendor.isActive ? 'Deactivate vendor' : 'Reactivate vendor'}
-          >
-            <Power className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => onRemove(vendor.id)}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            size="sm"
+            icon={<Power />}
+            onClick={() => onToggleActive(vendor)}
+          />
+          <IconButton
+            label={`Remove ${vendor.name}`}
             title="Remove vendor"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+            variant="danger"
+            size="sm"
+            icon={<Trash2 />}
+            onClick={() => onRemove(vendor.id)}
+          />
         </div>
       </div>
 

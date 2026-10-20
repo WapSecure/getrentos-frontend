@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2 } from 'lucide-react';
-import { Button, LegacyInput, NumberInput } from '@getrentos/ui';
+import { Alert, Button, Card, Field, Input, NumberInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -62,60 +62,53 @@ export default function EstateSetupPage() {
         </p>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Estate Name</label>
-          <LegacyInput
+      <Card className="p-6 space-y-4">
+        <Field label="Estate Name" required>
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Sunrise Gardens Estate"
           />
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Address</label>
-          <LegacyInput
+        <Field label="Address" required>
+          <Input
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="e.g. 1 Garden Close"
           />
+        </Field>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="City" required>
+            <Input type="text" value={city} onChange={(e) => setCity(e.target.value)} />
+          </Field>
+          <Field label="State" required>
+            <Input type="text" value={state} onChange={(e) => setState(e.target.value)} />
+          </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">City</label>
-            <LegacyInput type="text" value={city} onChange={(e) => setCity(e.target.value)} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">State</label>
-            <LegacyInput type="text" value={state} onChange={(e) => setState(e.target.value)} />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Number of Gates <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
+        <Field label="Number of Gates" optionalLabel="(optional)">
           <NumberInput value={gateCount} onValueChange={setGateCount} min={1} max={50} />
-        </div>
+        </Field>
 
         {genericError && (
-          <p className="text-sm text-red-600" role="alert">
-            Unable to create your estate. Please try again.
-          </p>
+          <Alert variant="danger">Unable to create your estate. Please try again.</Alert>
         )}
 
         <Button
           variant="primary"
           fullWidth
-          disabled={!canSubmit || createEstate.isPending}
+          disabled={!canSubmit}
+          isLoading={createEstate.isPending}
+          loadingText="Creating…"
           onClick={() => createEstate.mutate()}
         >
-          {createEstate.isPending ? 'Creating…' : 'Create Estate'}
+          Create Estate
         </Button>
-      </div>
+      </Card>
 
       <UpgradeToProModal
         isOpen={planGate.isOpen}

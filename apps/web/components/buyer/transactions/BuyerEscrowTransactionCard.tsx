@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Badge } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
 
@@ -46,31 +47,41 @@ export const BuyerEscrowTransactionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="bg-card rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-semibold text-foreground truncate">{transaction.propertyTitle}</h3>
           <p className="text-xs text-muted-foreground truncate">Owner: {transaction.ownerName}</p>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
+        <Badge
+          variant={
             isFrozen
-              ? 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
+              ? 'danger'
               : isRefunded
-                ? 'text-muted-foreground bg-secondary'
+                ? 'neutral'
                 : transaction.escrowStatus === 'released'
-                  ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-                  : 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20'
-          }`}
+                  ? 'success'
+                  : 'info'
+          }
+          icon={
+            isFrozen || isRefunded ? (
+              <ShieldAlert className="w-3 h-3" />
+            ) : (
+              <ShieldCheck className="w-3 h-3" />
+            )
+          }
         >
-          {isFrozen || isRefunded ? (
-            <ShieldAlert className="w-3 h-3" />
-          ) : (
-            <ShieldCheck className="w-3 h-3" />
-          )}
           {statusLabels[transaction.escrowStatus]}
-        </span>
+        </Badge>
       </div>
 
       <p className="text-lg font-bold text-primary mt-3">
@@ -81,12 +92,14 @@ export const BuyerEscrowTransactionCard = ({
         <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              isFrozen ? 'bg-red-500' : isRefunded ? 'bg-muted-foreground' : 'bg-primary'
+              isFrozen ? 'bg-destructive' : isRefunded ? 'bg-muted-foreground' : 'bg-primary'
             }`}
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <p className="text-xs text-muted-foreground mt-1.5">Opened {formatDate(transaction.createdAt)}</p>
+        <p className="text-xs text-muted-foreground mt-1.5">
+          Opened {formatDate(transaction.createdAt)}
+        </p>
       </div>
     </motion.div>
   );

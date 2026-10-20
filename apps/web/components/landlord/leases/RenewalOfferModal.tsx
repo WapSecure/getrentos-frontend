@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCcw, TriangleAlert } from 'lucide-react';
-import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
+import { Alert, Button, CurrencyInput, DatePicker, Field, IconButton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import { landlordService } from '@/services/landlordService';
@@ -72,64 +72,48 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-md w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Send Renewal Offer</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   To {lease.tenantName}: {lease.unitName}
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-4">
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 text-sm text-muted-foreground">
+              <div className="p-3 rounded-lg bg-secondary text-sm text-muted-foreground">
                 Current rent:{' '}
                 <span className="font-medium text-foreground">
                   {formatCurrency(lease.rentAmount)}
                 </span>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  New{' '}
-                  {leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()}{' '}
-                  (₦)
-                </label>
+              <Field
+                label={`New ${leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)`}
+                required
+                hint={`${Number(increasePct) >= 0 ? '+' : ''}${increasePct}% vs current rent`}
+              >
                 <CurrencyInput
                   prefix="₦"
                   value={newRent}
                   onValueChange={(v) => setNewRent(v === 0 ? '' : String(v))}
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  {Number(increasePct) >= 0 ? '+' : ''}
-                  {increasePct}% vs current rent
-                </p>
-              </div>
+              </Field>
 
               {activeCheck && (
-                <div
-                  className={`p-3 rounded-lg border flex gap-2 text-xs ${
-                    activeCheck.exceedsGuidance
-                      ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-300'
-                      : 'bg-gray-50 dark:bg-white/5 border-border text-muted-foreground'
-                  }`}
+                <Alert
+                  variant={activeCheck.exceedsGuidance ? 'warning' : 'neutral'}
+                  icon={activeCheck.exceedsGuidance ? TriangleAlert : null}
                 >
-                  {activeCheck.exceedsGuidance && (
-                    <TriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />
-                  )}
-                  <p>{activeCheck.advisory}</p>
-                </div>
+                  {activeCheck.advisory}
+                </Alert>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  New Lease End Date
-                </label>
+              <Field label="New Lease End Date" required>
                 <DatePicker value={newEndDate} onChange={setNewEndDate} />
-              </div>
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -141,16 +125,18 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
                 fullWidth
                 className="gap-1.5"
                 onClick={() => void handleSend()}
-                disabled={!newRent || !newEndDate || isSubmitting}
+                disabled={!newRent || !newEndDate}
+                isLoading={isSubmitting}
+                loadingText="Sending…"
               >
                 <RefreshCcw className="w-3.5 h-3.5" />
-                {isSubmitting ? 'Sending…' : 'Send Offer'}
+                Send Offer
               </Button>
             </div>
             {errorMessage && (
-              <p className="px-4 pb-4 text-sm text-destructive" role="alert">
-                {errorMessage}
-              </p>
+              <div className="px-4 pb-4">
+                <Alert variant="danger">{errorMessage}</Alert>
+              </div>
             )}
           </motion.div>
         </div>

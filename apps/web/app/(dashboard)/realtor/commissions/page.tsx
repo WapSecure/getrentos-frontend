@@ -1,9 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Wallet, Clock, CheckCircle2, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
-import { Button, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  PageErrorState,
+  Pagination,
+  StatCard,
+  StatGridSkeleton,
+  TableSkeleton,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
@@ -21,19 +31,10 @@ const PAGE_SIZE = 10;
  * `paid` has reached the bank; `void` is a sale reversed before any payout
  * claimed it, so it keeps its reason rather than disappearing.
  */
-const statusConfig: Record<CommissionStatus, { label: string; className: string }> = {
-  available: {
-    label: 'Available',
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
-  },
-  paid: {
-    label: 'Paid',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-  },
-  void: {
-    label: 'Void',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-  },
+const statusConfig: Record<CommissionStatus, { label: string; variant: BadgeVariant }> = {
+  available: { label: 'Available', variant: 'info' },
+  paid: { label: 'Paid', variant: 'success' },
+  void: { label: 'Void', variant: 'danger' },
 };
 
 const SIDE_LABEL: Record<CommissionSide, string> = {
@@ -48,6 +49,7 @@ export default function RealtorCommissionsPage() {
     queryKey: [...realtorKeys.commissions, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(realtorService.getCommissions({ page, pageSize: PAGE_SIZE })),
     enabled: isPro,
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = commissionsQuery;
   const summaryQuery = useQuery({
@@ -103,38 +105,38 @@ export default function RealtorCommissionsPage() {
       icon: Wallet,
       label: 'Available to withdraw',
       value: formatCurrency(summary?.available ?? 0, { compact: true }),
-      color: 'gold',
+      accent: 'primary',
     },
     {
       icon: Clock,
       label: 'Pending',
       value: formatCurrency(summary?.pending ?? 0, { compact: true }),
-      color: 'blue',
+      accent: 'blue',
     },
     {
       icon: CheckCircle2,
       label: 'Paid',
       value: formatCurrency(summary?.paid ?? 0, { compact: true }),
-      color: 'green',
+      accent: 'green',
     },
-    { icon: TrendingUp, label: 'Deals Closed', value: summary?.dealsClosed ?? 0, color: 'emerald' },
-  ];
-
-  const colorClasses = {
-    blue: { bg: 'bg-blue-50 dark:bg-blue-950/20', icon: 'text-blue-600 dark:text-blue-400' },
-    gold: { bg: 'bg-accent', icon: 'text-primary' },
-    green: { bg: 'bg-green-50 dark:bg-green-950/20', icon: 'text-green-600 dark:text-green-400' },
-    emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-      icon: 'text-emerald-600 dark:text-emerald-400',
+    {
+      icon: TrendingUp,
+      label: 'Deals Closed',
+      value: summary?.dealsClosed ?? 0,
+      accent: 'emerald',
     },
-  } as const;
+  ] as const;
 
   if (isPlanLoading || (isPro && isLoading)) {
-    return <PageLoadingState />;
+    return (
+      <div className="space-y-6">
+        <StatGridSkeleton />
+        <TableSkeleton rows={5} columns={6} />
+      </div>
+    );
   }
 
-  if (isPro && (commissionsQuery.isError || summaryQuery.isError)) {
+  if (isPro && ((commissionsQuery.isError && !data) || (summaryQuery.isError && !summary))) {
     return (
       <PageErrorState
         title="Commission records are unavailable"
@@ -158,12 +160,18 @@ export default function RealtorCommissionsPage() {
           </p>
         </div>
         {isPro && (
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExport}>
-            {exported ? (
-              <Check className="w-3.5 h-3.5 text-green-500" />
-            ) : (
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-            )}
+          <Button
+            variant="outline"
+            size="sm"
+            icon={
+              exported ? (
+                <Check className="w-3.5 h-3.5 text-success" />
+              ) : (
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+              )
+            }
+            onClick={handleExport}
+          >
             {exported ? 'Exported' : 'Export current page'}
           </Button>
         )}
@@ -174,26 +182,14 @@ export default function RealtorCommissionsPage() {
         description="Upgrade to Pro to track earnings from closed deals, see totals by status, and export your commission report."
       >
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {stats.map((stat) => {
-            const colors = colorClasses[stat.color as keyof typeof colorClasses];
-            return (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-border bg-card p-4 shadow-xs"
-              >
-                <div className={`mb-3 inline-flex rounded-lg p-2.5 ${colors.bg}`}>
-                  <stat.icon className={`w-5 h-5 ${colors.icon}`} />
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
-              </div>
-            );
-          })}
+          {stats.map((stat) => (
+            <StatCard key={stat.label} {...stat} />
+          ))}
         </div>
 
         <RealtorPayoutSection />
 
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+        <Card>
           <div className="px-5 pt-5">
             <h3 className="text-sm font-semibold text-foreground">Earned commission</h3>
           </div>
@@ -243,11 +239,7 @@ export default function RealtorCommissionsPage() {
                           {formatCurrency(c.amount, { compact: true })}
                         </td>
                         <td className="p-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium ${status.className}`}
-                          >
-                            {status.label}
-                          </span>
+                          <Badge variant={status.variant}>{status.label}</Badge>
                           {/* A reversed sale keeps its reason, rather than vanishing. */}
                           {c.status === 'void' && c.voidReason && (
                             <span className="block text-xs text-muted-foreground mt-1">
@@ -265,7 +257,7 @@ export default function RealtorCommissionsPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
 
         {total > 0 && (
           <Pagination

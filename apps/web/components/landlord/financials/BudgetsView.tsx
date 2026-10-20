@@ -113,8 +113,7 @@ export function BudgetsView() {
       setIsOpen(false);
       toast.success(editingId ? 'Budget updated.' : 'Budget set.');
     },
-    onError: (error: Error) =>
-      toast.error(error.message || 'Unable to save this budget.'),
+    onError: (error: Error) => toast.error(error.message || 'Unable to save this budget.'),
   });
 
   const remove = useMutation({
@@ -123,8 +122,7 @@ export function BudgetsView() {
       queryClient.invalidateQueries({ queryKey: landlordKeys.budgets() });
       toast.success('Budget removed.');
     },
-    onError: (error: Error) =>
-      toast.error(error.message || 'Unable to remove this budget.'),
+    onError: (error: Error) => toast.error(error.message || 'Unable to remove this budget.'),
   });
 
   const openCreate = () => {

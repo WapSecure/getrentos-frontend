@@ -1,8 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Shield, Building2, Award, Clock, HelpCircle, FileText } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button, Card } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import type { VerificationRequest, VerificationRequestType } from '@/types/admin';
 
@@ -21,19 +20,14 @@ interface VerificationRequestCardProps {
 export const VerificationRequestCard = ({
   request,
   onReview,
-  delay = 0,
+  delay,
 }: VerificationRequestCardProps) => {
   const type = typeConfig[request.type];
   const TypeIcon = type.icon;
   const isPending = request.status === 'pending_review';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm transition-shadow duration-300 hover:shadow-md"
-    >
+    <Card hover delay={delay} className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2.5 rounded-xl bg-accent shrink-0">
@@ -58,7 +52,7 @@ export const VerificationRequestCard = ({
         )}
       </div>
 
-      <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           <FileText className="w-3.5 h-3.5" />
           {request.documentCount} document{request.documentCount === 1 ? '' : 's'}
@@ -73,6 +67,6 @@ export const VerificationRequestCard = ({
           </Button>
         </div>
       )}
-    </motion.div>
+    </Card>
   );
 };

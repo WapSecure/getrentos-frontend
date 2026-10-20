@@ -1,11 +1,19 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
-import { Button, DocumentUpload, Select } from '@getrentos/ui';
+import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  DescriptionList,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DocumentUpload,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { trustService } from '@/services/trustService';
@@ -27,32 +35,32 @@ const statusConfig: Record<
   verified: {
     label: 'Verified',
     icon: ShieldCheck,
-    bg: 'bg-green-50 dark:bg-green-900/20',
-    color: 'text-green-600 dark:text-green-400',
+    bg: 'bg-success-subtle',
+    color: 'text-success',
     message:
       'Ownership has been confirmed. This property is eligible for sale listing and ownership transfer.',
   },
   pending_review: {
     label: 'Pending Review',
     icon: ShieldAlert,
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
-    color: 'text-yellow-600 dark:text-yellow-400',
+    bg: 'bg-warning-subtle',
+    color: 'text-warning',
     message:
       'Our compliance team is reviewing your submitted documents. This typically takes 24–48 hours.',
   },
   needs_clarification: {
     label: 'Needs Clarification',
     icon: HelpCircle,
-    bg: 'bg-orange-50 dark:bg-orange-900/20',
-    color: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-warning-subtle',
+    color: 'text-warning',
     message:
       'Additional information or clearer documents are required before we can complete verification.',
   },
   rejected: {
     label: 'Rejected',
     icon: ShieldX,
-    bg: 'bg-red-50 dark:bg-red-900/20',
-    color: 'text-red-600 dark:text-red-400',
+    bg: 'bg-destructive-subtle',
+    color: 'text-destructive',
     message: 'Verification could not be completed with the documents provided.',
   },
 };
@@ -150,193 +158,166 @@ export const OwnerVerificationStatusModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {property && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="font-semibold text-foreground">Verification Status</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{property.name}</p>
-              </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="flex max-h-[90vh] max-w-md flex-col overflow-hidden p-0">
+        <div className="shrink-0 border-b border-border p-4 pr-12">
+          <DialogTitle className="font-semibold text-foreground">Verification Status</DialogTitle>
+          <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+            {property.name}
+          </DialogDescription>
+        </div>
+
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+          <div className="text-center py-4">
+            <div
+              className={`w-14 h-14 mx-auto mb-3 rounded-2xl ${config.bg} flex items-center justify-center`}
+            >
+              <Icon className={`w-7 h-7 ${config.color}`} />
             </div>
+            <h4 className="font-semibold text-foreground">{config.label}</h4>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
+              {config.message}
+            </p>
+          </div>
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div className="text-center py-4">
-                <div
-                  className={`w-14 h-14 mx-auto mb-3 rounded-2xl ${config.bg} flex items-center justify-center`}
-                >
-                  <Icon className={`w-7 h-7 ${config.color}`} />
-                </div>
-                <h4 className="font-semibold text-foreground">{config.label}</h4>
-                <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-                  {config.message}
-                </p>
-              </div>
+          {property.rejectionReason && (
+            <Alert variant="danger" title="Reviewer note">
+              {property.rejectionReason}
+            </Alert>
+          )}
 
-              {property.rejectionReason && (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                  <p className="text-xs font-medium text-red-700 dark:text-red-400 mb-1">
-                    Reviewer note
-                  </p>
-                  <p className="text-xs text-red-600 dark:text-red-300">
-                    {property.rejectionReason}
-                  </p>
-                </div>
-              )}
+          <DescriptionList
+            layout="rows"
+            className="rounded-lg border border-border px-3 [&>div]:py-2"
+            items={[
+              { label: 'Owner on record', value: property.ownerName },
+              ...(typeof property.purchasePrice === 'number'
+                ? [{ label: 'Purchase price', value: formatCurrency(property.purchasePrice) }]
+                : []),
+              ...(property.purchaseDate
+                ? [{ label: 'Purchase date', value: formatDate(property.purchaseDate) }]
+                : []),
+            ]}
+          />
 
-              <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span className="text-muted-foreground">Owner on record</span>
-                  <span className="text-foreground font-medium">{property.ownerName}</span>
-                </div>
-                {typeof property.purchasePrice === 'number' && (
-                  <div className="flex items-center justify-between px-3 py-2 text-sm">
-                    <span className="text-muted-foreground">Purchase price</span>
-                    <span className="text-foreground font-medium">
-                      {formatCurrency(property.purchasePrice)}
-                    </span>
-                  </div>
-                )}
-                {property.purchaseDate && (
-                  <div className="flex items-center justify-between px-3 py-2 text-sm">
-                    <span className="text-muted-foreground">Purchase date</span>
-                    <span className="text-foreground font-medium">
-                      {formatDate(property.purchaseDate)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {canResubmit && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Upload ownership evidence
-                  </label>
-                  <DocumentUpload
-                    value={resubmitFile ? [{ id: 'file', file: resubmitFile }] : []}
-                    onChange={(items) => setResubmitFile(items[0]?.file ?? null)}
-                    accept=".pdf,.jpg,.jpeg,.png,.webp"
-                    multiple={false}
-                    label=""
-                    hint="PDF or image: preview before submitting"
-                  />
-                  <div className="mt-3">
-                    <Select
-                      value={documentType}
-                      onValueChange={(value) =>
-                        setDocumentType(value as LandOwnershipProofInput['documentType'])
-                      }
-                      options={[
-                        { value: 'C_OF_O', label: 'Certificate of Occupancy (C of O)' },
-                        { value: 'DEED', label: 'Deed' },
-                        { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
-                        { value: 'GOVERNOR_CONSENT', label: "Governor's Consent" },
-                        { value: 'ALLOCATION_LETTER', label: 'Allocation Letter' },
-                        { value: 'EXCISION_GAZETTE', label: 'Excision Gazette' },
-                        { value: 'REGISTERED_CONVEYANCE', label: 'Registered Conveyance' },
-                        { value: 'SURVEY_PLAN', label: 'Survey plan' },
-                        { value: 'LAND_USE_PERMIT', label: 'Land use permit' },
-                        {
-                          value: 'GOVERNMENT_RECEIPT',
-                          label: 'Government receipt / registry extract',
-                        },
-                        { value: 'OTHER', label: 'Other supporting evidence' },
-                      ]}
-                      ariaLabel="Ownership proof type"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {error && <p className="text-sm text-destructive">{error}</p>}
-
-              {/* Orchestrated verification: address -> title document -> ownership. */}
-              <div className="rounded-lg border border-border p-3 space-y-3">
-                <div className="flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Automated verification</p>
-                    <p className="text-xs text-muted-foreground">
-                      Runs the address, title-document and ownership checks. Passing all three
-                      verifies this property immediately.
-                    </p>
-                  </div>
-                </div>
-
+          {canResubmit && (
+            <div>
+              <p className="mb-1 text-sm font-medium text-foreground">
+                Upload ownership evidence
+              </p>
+              <DocumentUpload
+                value={resubmitFile ? [{ id: 'file', file: resubmitFile }] : []}
+                onChange={(items) => setResubmitFile(items[0]?.file ?? null)}
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                multiple={false}
+                label=""
+                hint="PDF or image: preview before submitting"
+              />
+              <div className="mt-3">
                 <Select
-                  value={titleDocumentType}
-                  onValueChange={setTitleDocumentType}
+                  value={documentType}
+                  onValueChange={(value) =>
+                    setDocumentType(value as LandOwnershipProofInput['documentType'])
+                  }
                   options={[
                     { value: 'C_OF_O', label: 'Certificate of Occupancy (C of O)' },
+                    { value: 'DEED', label: 'Deed' },
                     { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
-                    { value: 'GOVERNORS_CONSENT', label: "Governor's Consent" },
+                    { value: 'GOVERNOR_CONSENT', label: "Governor's Consent" },
+                    { value: 'ALLOCATION_LETTER', label: 'Allocation Letter' },
+                    { value: 'EXCISION_GAZETTE', label: 'Excision Gazette' },
+                    { value: 'REGISTERED_CONVEYANCE', label: 'Registered Conveyance' },
                     { value: 'SURVEY_PLAN', label: 'Survey plan' },
-                    { value: 'RECEIPT', label: 'Government receipt' },
+                    { value: 'LAND_USE_PERMIT', label: 'Land use permit' },
+                    {
+                      value: 'GOVERNMENT_RECEIPT',
+                      label: 'Government receipt / registry extract',
+                    },
+                    { value: 'OTHER', label: 'Other supporting evidence' },
                   ]}
-                  ariaLabel="Title document type"
+                  ariaLabel="Ownership proof type"
                 />
+              </div>
+            </div>
+          )}
 
-                <LegacyInput
-                  type="text"
-                  value={titleDocumentNumber}
-                  onChange={(e) => setTitleDocumentNumber(e.target.value)}
-                  placeholder="Document number, e.g. C-OF-O/2026/00123"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+          {error && <Alert variant="danger">{error}</Alert>}
 
-                <LegacyInput
-                  type="text"
-                  value={documentOwnerName}
-                  onChange={(e) => setDocumentOwnerName(e.target.value)}
-                  placeholder={`Name printed on the document (e.g. ${property.ownerName})`}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-
-                {trustMessage && (
-                  <p className="text-sm text-green-600 dark:text-green-400">{trustMessage}</p>
-                )}
-                {trustError && <p className="text-sm text-destructive">{trustError}</p>}
-
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={handleRunTrustVerification}
-                  disabled={isRunning || titleDocumentNumber.trim().length < 6}
-                  isLoading={isRunning}
-                >
-                  Run verification
-                </Button>
+          {/* Orchestrated verification: address -> title document -> ownership. */}
+          <div className="rounded-lg border border-border p-3 space-y-3">
+            <div className="flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Automated verification</p>
+                <p className="text-xs text-muted-foreground">
+                  Runs the address, title-document and ownership checks. Passing all three
+                  verifies this property immediately.
+                </p>
               </div>
             </div>
 
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" onClick={onClose} className="flex-1">
-                Close
-              </Button>
-              {canResubmit && (
-                <Button
-                  variant="primary"
-                  onClick={handleResubmit}
-                  disabled={!resubmitFile || isResubmitting}
-                  isLoading={isResubmitting}
-                  className="flex-1"
-                >
-                  {isResubmitting ? 'Submitting…' : 'Submit Documents'}
-                </Button>
-              )}
-            </div>
-          </motion.div>
+            <Select
+              value={titleDocumentType}
+              onValueChange={setTitleDocumentType}
+              options={[
+                { value: 'C_OF_O', label: 'Certificate of Occupancy (C of O)' },
+                { value: 'DEED_OF_ASSIGNMENT', label: 'Deed of Assignment' },
+                { value: 'GOVERNORS_CONSENT', label: "Governor's Consent" },
+                { value: 'SURVEY_PLAN', label: 'Survey plan' },
+                { value: 'RECEIPT', label: 'Government receipt' },
+              ]}
+              ariaLabel="Title document type"
+            />
+
+            <Input
+              type="text"
+              value={titleDocumentNumber}
+              onChange={(e) => setTitleDocumentNumber(e.target.value)}
+              placeholder="Document number, e.g. C-OF-O/2026/00123"
+              aria-label="Title document number"
+            />
+
+            <Input
+              type="text"
+              value={documentOwnerName}
+              onChange={(e) => setDocumentOwnerName(e.target.value)}
+              placeholder={`Name printed on the document (e.g. ${property.ownerName})`}
+              aria-label="Name printed on the document"
+            />
+
+            {trustMessage && <Alert variant="success">{trustMessage}</Alert>}
+            {trustError && <Alert variant="danger">{trustError}</Alert>}
+
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={handleRunTrustVerification}
+              disabled={titleDocumentNumber.trim().length < 6}
+              isLoading={isRunning}
+            >
+              Run verification
+            </Button>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 border-t border-border flex gap-3 shrink-0">
+          <Button variant="ghost" onClick={onClose} className="flex-1">
+            Close
+          </Button>
+          {canResubmit && (
+            <Button
+              variant="primary"
+              onClick={handleResubmit}
+              disabled={!resubmitFile}
+              isLoading={isResubmitting}
+              loadingText="Submitting…"
+              className="flex-1"
+            >
+              Submit Documents
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

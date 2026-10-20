@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
+  type Column,
   DataTable,
   EmptyState,
   Input,
   Pagination,
   Select,
-  type Column,
 } from '@getrentos/ui';
 import { Receipt, Search } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -289,10 +290,10 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
         </div>
       </div>
 
-      {isError ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+      {isError && !data ? (
+        <Alert variant="danger">
           {error instanceof Error ? error.message : 'Purchases could not be loaded.'}
-        </p>
+        </Alert>
       ) : (
         <DataTable
           columns={columns}

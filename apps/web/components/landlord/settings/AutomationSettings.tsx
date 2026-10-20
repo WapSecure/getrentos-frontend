@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BellRing, AlertOctagon, CalendarClock, CalendarDays, Coins } from 'lucide-react';
-import { NumberInput } from '@getrentos/ui';
+import { Field, NumberInput, Switch } from '@getrentos/ui';
 import { landlordService, type LandlordAutomationSettings } from '@/services/landlordService';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
 import type { PlanGateReason } from '@/lib/planGate';
@@ -158,29 +158,21 @@ export const AutomationSettings = () => {
             key={item.id}
             className="flex items-start justify-between gap-4 p-4 rounded-lg border border-border"
           >
-            <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="p-2 rounded-lg bg-secondary shrink-0">
                 <item.icon className="w-4 h-4 text-muted-foreground" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">{item.label}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
               </div>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings[item.id]}
+            <Switch
+              className="shrink-0"
+              checked={settings[item.id]}
+              onCheckedChange={() => void toggle(item.id)}
               aria-label={item.label}
-              onClick={() => toggle(item.id)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${
-                settings[item.id] ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.id] ? 'translate-x-6' : 'translate-x-1'}`}
-              />
-            </button>
+            />
           </div>
         ))}
       </div>
@@ -190,7 +182,7 @@ export const AutomationSettings = () => {
           <div className="p-2 rounded-lg bg-secondary shrink-0">
             <CalendarDays className="w-4 h-4 text-muted-foreground" />
           </div>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-foreground">
               Grace period before rent counts as late
             </p>
@@ -199,9 +191,16 @@ export const AutomationSettings = () => {
                 ? 'Rent is flagged overdue the moment its due date passes.'
                 : `Rent may run ${graceDays} day${graceDays === 1 ? '' : 's'} past its due date before it is flagged overdue and alerts go out.`}
             </p>
-            <div className="mt-3 w-40">
+            <Field
+              label="Grace days"
+              className="mt-3 w-40"
+              error={
+                graceDays > MAX_GRACE_DAYS
+                  ? `${MAX_GRACE_DAYS} days is the maximum: beyond that rent would never be flagged.`
+                  : undefined
+              }
+            >
               <NumberInput
-                id="graceDays"
                 min={0}
                 max={MAX_GRACE_DAYS}
                 value={graceDays}
@@ -211,12 +210,7 @@ export const AutomationSettings = () => {
                 onBlur={() => void saveGraceDays(graceDays)}
                 placeholder="e.g. 5"
               />
-            </div>
-            {graceDays > MAX_GRACE_DAYS && (
-              <p className="text-xs text-destructive mt-1">
-                {MAX_GRACE_DAYS} days is the maximum: beyond that rent would never be flagged.
-              </p>
-            )}
+            </Field>
           </div>
         </div>
       </div>
@@ -227,7 +221,7 @@ export const AutomationSettings = () => {
             <div className="p-2 rounded-lg bg-secondary shrink-0">
               <Coins className="w-4 h-4 text-muted-foreground" />
             </div>
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground">Late fee rule</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 A fee of {lateFeePercent}% of the overdue rent is charged once a payment is{' '}
@@ -235,12 +229,8 @@ export const AutomationSettings = () => {
                 grace period.
               </p>
               <div className="mt-3 flex flex-wrap gap-4">
-                <div className="w-32">
-                  <label className="text-xs text-muted-foreground" htmlFor="lateFeePercent">
-                    Fee (% of rent)
-                  </label>
+                <Field label="Fee (% of rent)" className="w-32">
                   <NumberInput
-                    id="lateFeePercent"
                     min={0}
                     max={MAX_LATE_FEE_PERCENT}
                     value={lateFeePercent}
@@ -249,13 +239,9 @@ export const AutomationSettings = () => {
                       void saveLateFeeField('lateFeePercent', lateFeePercent, MAX_LATE_FEE_PERCENT)
                     }
                   />
-                </div>
-                <div className="w-32">
-                  <label className="text-xs text-muted-foreground" htmlFor="lateFeeAfterDays">
-                    Days past due
-                  </label>
+                </Field>
+                <Field label="Days past due" className="w-32">
                   <NumberInput
-                    id="lateFeeAfterDays"
                     min={0}
                     max={MAX_LATE_FEE_AFTER_DAYS}
                     value={lateFeeAfterDays}
@@ -268,7 +254,7 @@ export const AutomationSettings = () => {
                       )
                     }
                   />
-                </div>
+                </Field>
               </div>
             </div>
           </div>

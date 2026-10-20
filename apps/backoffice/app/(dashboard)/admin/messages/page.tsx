@@ -1,9 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { ConfirmDialog, PageErrorState, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  ConfirmDialog,
+  PageErrorState,
+  Pagination,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
 import { ConversationList } from '@/components/admin/messages/ConversationList';
 import { MessageThread } from '@/components/admin/messages/MessageThread';
 import { cn } from '@getrentos/shared';
@@ -20,7 +27,7 @@ export default function AdminMessagesPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const [showResolveConfirm, setShowResolveConfirm] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,8 +37,13 @@ export default function AdminMessagesPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  const conversationsKey = adminKeys.conversations({
+    search: debouncedSearch,
+    page,
+    pageSize: PAGE_SIZE,
+  });
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
-    queryKey: adminKeys.conversations({ search: debouncedSearch, page, pageSize: PAGE_SIZE }),
+    queryKey: conversationsKey,
     queryFn: () =>
       unwrap(
         adminService.listConversations({
@@ -41,6 +53,7 @@ export default function AdminMessagesPage() {
         })
       ),
     refetchInterval: 20_000,
+    placeholderData: keepPreviousData,
   });
   const conversations = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -57,9 +70,24 @@ export default function AdminMessagesPage() {
     enabled: !!activeId,
   });
 
-  const markReadMutation = useMutation({
+  const markReadMutation = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(adminService.markConversationRead(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] }),
+    patches: (id) => [
+      {
+        queryKey: conversationsKey,
+        update: (old) => {
+          const page = old as typeof data;
+          return page
+            ? {
+                ...page,
+                items: page.items.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c)),
+              }
+            : old;
+        },
+      },
+    ],
+    invalidate: [['admin', 'conversations']],
+    errorMessage: 'The conversation could not be marked as read.',
   });
 
   const sendMutation = useMutation({
@@ -70,23 +98,17 @@ export default function AdminMessagesPage() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] });
     },
     onError: (error: Error) =>
-      setToast({
-        message: error.message || 'The message could not be sent. Please try again.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'The message could not be sent. Please try again.'),
   });
 
   const resolveMutation = useMutation({
     mutationFn: (id: string) => unwrap(adminService.resolveConversation(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'conversations'] });
-      setToast({ message: 'Conversation marked as resolved.', variant: 'success' });
+      toast.success('Conversation marked as resolved.');
     },
     onError: (error: Error) =>
-      setToast({
-        message: error.message || 'The conversation could not be resolved.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'The conversation could not be resolved.'),
   });
 
   const handleSelect = (id: string) => {
@@ -108,9 +130,6 @@ export default function AdminMessagesPage() {
 
   return (
     <div className="min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)]">
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Messages</h1>
         <p className="text-muted-foreground mt-1">
@@ -118,7 +137,7 @@ export default function AdminMessagesPage() {
         </p>
       </div>
 
-      {isError ? (
+      {isError && !data ? (
         <PageErrorState
           title="Could not load conversations"
           description="The support inbox is temporarily unavailable. Your search has been preserved."
@@ -157,14 +176,15 @@ export default function AdminMessagesPage() {
           <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
             {activeConversation ? (
               <>
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<ArrowLeft className="w-4 h-4" aria-hidden="true" />}
                   onClick={() => setActiveId(null)}
-                  className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+                  className="mb-2 self-start sm:hidden"
                 >
-                  <ArrowLeft className="w-4 h-4" aria-hidden="true" />
                   Back to conversations
-                </button>
+                </Button>
                 <MessageThread
                   contactName={activeConversation.participantName}
                   contactRole={activeConversation.participantRole}

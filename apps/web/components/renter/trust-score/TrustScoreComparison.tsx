@@ -1,6 +1,7 @@
 'use client';
 
 import { Users, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Alert, Card } from '@getrentos/ui';
 
 interface TrustScoreComparisonProps {
   currentScore: number;
@@ -11,7 +12,7 @@ export const TrustScoreComparison = ({ currentScore, averageScore }: TrustScoreC
   const difference = currentScore - averageScore;
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-primary" />
@@ -32,35 +33,15 @@ export const TrustScoreComparison = ({ currentScore, averageScore }: TrustScoreC
           </div>
         </div>
 
-        <div
-          className={`p-3 rounded-lg ${
-            difference > 0
-              ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-              : difference < 0
-                ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                : 'bg-gray-50 dark:bg-gray-800 border border-border'
-          }`}
+        <Alert
+          variant={difference > 0 ? 'success' : difference < 0 ? 'danger' : 'neutral'}
+          icon={difference > 0 ? TrendingUp : difference < 0 ? TrendingDown : Minus}
         >
-          <div className="flex items-center gap-2">
-            {difference > 0 && <TrendingUp className="w-4 h-4 text-green-600" />}
-            {difference < 0 && <TrendingDown className="w-4 h-4 text-red-600" />}
-            {difference === 0 && <Minus className="w-4 h-4 text-gray-500" />}
-            <span
-              className={`text-sm font-medium ${
-                difference > 0
-                  ? 'text-green-800 dark:text-green-300'
-                  : difference < 0
-                    ? 'text-red-800 dark:text-red-300'
-                    : 'text-foreground'
-              }`}
-            >
-              {difference > 0 && `You're ${Math.abs(difference)} points above average`}
-              {difference < 0 && `You're ${Math.abs(difference)} points below average`}
-              {difference === 0 && `You're at the average score`}
-            </span>
-          </div>
-        </div>
+          {difference > 0 && `You're ${Math.abs(difference)} points above average`}
+          {difference < 0 && `You're ${Math.abs(difference)} points below average`}
+          {difference === 0 && `You're at the average score`}
+        </Alert>
       </div>
-    </div>
+    </Card>
   );
 };

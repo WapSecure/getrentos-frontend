@@ -112,9 +112,7 @@ const ReportCard = ({ report }: { report: ImpersonationReport }) => {
               Close
             </Button>
           </div>
-          {review.error && (
-            <Alert variant="danger">{(review.error as Error).message}</Alert>
-          )}
+          {review.error && <Alert variant="danger">{(review.error as Error).message}</Alert>}
         </div>
       )}
     </Card>

@@ -1,14 +1,21 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, Handshake } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Handshake } from 'lucide-react';
 import { RealtorOfferCard } from '@/components/realtor/offers/RealtorOfferCard';
 import { RealtorOfferNegotiationModal } from '@/components/realtor/offers/RealtorOfferNegotiationModal';
 import type { RealtorOfferStatus } from '@/types/realtor';
-import { Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorOffer, realtorService } from '@/services/realtorService';
@@ -33,7 +40,7 @@ export default function RealtorOffersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const queryClient = useQueryClient();
   const offerStatus = filter === 'all' ? undefined : OFFER_STATUS_TO_API_STATUS[filter];
   const { data, isLoading } = useQuery({
@@ -52,6 +59,7 @@ export default function RealtorOffersPage() {
       );
       return { ...result, items: result.items.map(mapRealtorOffer) };
     },
+    placeholderData: keepPreviousData,
   });
   const offers = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -60,10 +68,7 @@ export default function RealtorOffersPage() {
       unwrap(realtorService.counterOffer(id, { amount, message })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.offers }),
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to submit the counter offer. Please try again.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to submit the counter offer. Please try again.'),
   });
 
   const handleCounter = async (offerId: string, amount: number, note: string) => {
@@ -96,57 +101,45 @@ export default function RealtorOffersPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by listing..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
-          {filterOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search by listing..."
+          label="Search offers"
+          className="flex-1 max-w-sm"
+        />
+        <Tabs
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value as StatusFilter);
+            setPage(1);
+          }}
+        >
+          <TabsList className="max-w-full">
+            {filterOptions.map((option) => (
+              <TabsTrigger key={option.value} value={option.value}>
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {isLoading ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center text-sm text-muted-foreground">
-          Loading offers…
-        </div>
+        <ListSkeleton variant="cards" rows={3} label="Loading offers" />
       ) : offers.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Handshake className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No offers yet' : 'No offers match your filters'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
+        <EmptyState
+          icon={Handshake}
+          title={total === 0 ? 'No offers yet' : 'No offers match your filters'}
+          description={
+            total === 0
               ? 'Offers submitted by leads on your listings will appear here for you to negotiate.'
-              : 'Try adjusting your search or filter.'}
-          </p>
-        </div>
+              : 'Try adjusting your search or filter.'
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {offers.map((offer, index) => (
@@ -176,10 +169,6 @@ export default function RealtorOffersPage() {
         onClose={() => setActiveOfferId(null)}
         onCounter={handleCounter}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

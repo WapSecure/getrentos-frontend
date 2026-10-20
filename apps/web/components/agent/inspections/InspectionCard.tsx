@@ -94,9 +94,7 @@ export const InspectionCard = ({ inspection, onClick }: InspectionCardProps) => 
               Tenant signed off
             </Badge>
           )}
-          {condition && (
-            <Badge variant={condition.variant}>{condition.label}</Badge>
-          )}
+          {condition && <Badge variant={condition.variant}>{condition.label}</Badge>}
         </div>
       </div>
     </Card>

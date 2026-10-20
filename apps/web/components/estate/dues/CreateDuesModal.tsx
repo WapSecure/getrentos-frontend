@@ -8,7 +8,10 @@ import {
   Checkbox,
   CurrencyInput,
   DatePicker,
-  LegacyInput,
+  Field,
+  IconButton,
+  Input,
+  ListSkeleton,
   Pagination,
   Select,
 } from '@getrentos/ui';
@@ -105,87 +108,79 @@ export const CreateDuesModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Charge Dues</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Amount (₦)</label>
+              <Field label="Amount (₦)" required>
                 <CurrencyInput
                   prefix="₦"
                   value={amount}
                   onValueChange={(v) => setAmount(v === 0 ? '' : String(v))}
                   min={1}
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Due Date</label>
+              <Field label="Due Date" required>
                 <DatePicker value={dueDate} onChange={setDueDate} />
-              </div>
+              </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Category">
                   <Select value={category} onValueChange={setCategory} options={categoryOptions} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Billing Cycle
-                  </label>
+                </Field>
+                <Field label="Billing Cycle">
                   <Select
                     value={billingCycle}
                     onValueChange={setBillingCycle}
                     options={billingCycleOptions}
                   />
-                </div>
+                </Field>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <Checkbox checked={isRecurring} onCheckedChange={setIsRecurring} />
-                Repeat automatically every billing cycle
-              </label>
+              <Checkbox
+                checked={isRecurring}
+                onCheckedChange={setIsRecurring}
+                label="Repeat automatically every billing cycle"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Description <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field label="Description" optionalLabel="(optional)">
+                <Input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="e.g. Q3 estate maintenance levy"
                 />
-              </div>
+              </Field>
 
               <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                  <Checkbox checked={chargeAll} onCheckedChange={setChargeAll} />
-                  Charge all active households ({householdTotal})
-                </label>
+                <Checkbox
+                  checked={chargeAll}
+                  onCheckedChange={setChargeAll}
+                  label={`Charge all active households (${householdTotal})`}
+                />
 
                 {!chargeAll && (
                   <div className="max-h-40 overflow-y-auto rounded-lg border border-border divide-y divide-border">
                     {isHouseholdsLoading ? (
-                      <p className="px-3 py-4 text-sm text-muted-foreground">Loading households…</p>
+                      <ListSkeleton
+                        rows={3}
+                        label="Loading households"
+                        className="rounded-none border-0"
+                      />
                     ) : activeHouseholds.length === 0 ? (
                       <p className="px-3 py-4 text-sm text-muted-foreground">
                         No active households on this page.
                       </p>
                     ) : (
                       activeHouseholds.map((household) => (
-                        <label
+                        <Checkbox
                           key={household.id}
-                          className="flex items-center gap-2 px-3 py-2 text-sm text-foreground cursor-pointer"
-                        >
-                          <Checkbox
-                            checked={selectedHouseholdIds.includes(household.id)}
-                            onCheckedChange={() => toggleHousehold(household.id)}
-                          />
-                          {household.unitLabel}: {household.residentName}
-                        </label>
+                          className="px-3 py-2"
+                          checked={selectedHouseholdIds.includes(household.id)}
+                          onCheckedChange={() => toggleHousehold(household.id)}
+                          label={`${household.unitLabel}: ${household.residentName}`}
+                        />
                       ))
                     )}
                     {householdTotal > 0 && (
@@ -214,7 +209,9 @@ export const CreateDuesModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Charging…"
                 onClick={() =>
                   onSubmit({
                     amount: Number(amount),
@@ -227,7 +224,7 @@ export const CreateDuesModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Charging…' : 'Charge Dues'}
+                Charge Dues
               </Button>
             </div>
           </motion.div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { StatCard } from '@getrentos/ui';
+import { Alert, Skeleton, StatCard } from '@getrentos/ui';
 import { AlertTriangle, Banknote, Landmark, Lock, Wallet } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
@@ -9,7 +9,7 @@ import { landDeveloperService } from '@/services/landDeveloperService';
 
 /** Collected, held, released, outstanding and overdue across plot purchases. */
 export const CollectionsSummaryCards = ({ layoutId }: { layoutId?: string }) => {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.collections(layoutId),
     queryFn: () => unwrap(landDeveloperService.getCollections(layoutId)),
   });
@@ -18,17 +18,17 @@ export const CollectionsSummaryCards = ({ layoutId }: { layoutId?: string }) => 
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5" aria-busy="true">
         {Array.from({ length: 5 }, (_, i) => (
-          <div key={i} className="h-32 animate-pulse rounded-2xl bg-secondary" />
+          <Skeleton key={i} className="h-32 rounded-2xl" />
         ))}
       </div>
     );
   }
 
-  if (isError || !data) {
+  if (!data) {
     return (
-      <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+      <Alert variant="danger">
         {error instanceof Error ? error.message : 'Collections could not be loaded.'}
-      </p>
+      </Alert>
     );
   }
 

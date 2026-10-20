@@ -8,9 +8,8 @@ import {
   EmptyState,
   Input,
   Skeleton,
-  Toast,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import { Gavel, Send } from 'lucide-react';
 import { cn } from '@getrentos/shared';
@@ -35,7 +34,7 @@ export function ShortletDisputesInbox() {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery({
@@ -64,7 +63,7 @@ export function ShortletDisputesInbox() {
       queryClient.invalidateQueries({ queryKey: ['shortlets', 'disputes', activeId, 'messages'] });
       setDraft('');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -89,6 +88,7 @@ export function ShortletDisputesInbox() {
               <button
                 key={d.id}
                 type="button"
+                aria-current={activeId === d.id ? 'true' : undefined}
                 onClick={() => setActiveId(d.id)}
                 className={cn(
                   'w-full p-3 text-left transition-colors hover:bg-secondary',
@@ -163,23 +163,23 @@ export function ShortletDisputesInbox() {
                     }
                   }}
                   placeholder="Add a message…"
+                  aria-label="Message"
+                  className="min-w-0 flex-1"
                 />
                 <Button
                   size="sm"
                   onClick={() => draft.trim() && send.mutate(draft.trim())}
-                  disabled={!draft.trim() || send.isPending}
+                  isLoading={send.isPending}
+                  disabled={!draft.trim()}
+                  icon={<Send className="h-3.5 w-3.5" />}
                 >
-                  <Send className="mr-1 h-3.5 w-3.5" /> Send
+                  Send
                 </Button>
               </div>
             )}
           </>
         )}
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

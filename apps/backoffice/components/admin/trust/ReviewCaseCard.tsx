@@ -10,7 +10,7 @@ import type {
 } from '@/types/trust';
 import { REVIEW_CASE_PRIORITY_META, REVIEW_CASE_STATUS_META } from './trustMeta';
 
-const STATUS_VARIANT: Record<TrustReviewCaseStatus, BadgeVariant> = {
+export const REVIEW_CASE_STATUS_VARIANT: Record<TrustReviewCaseStatus, BadgeVariant> = {
   OPEN: 'warning',
   ASSIGNED: 'info',
   ESCALATED: 'warning',
@@ -18,7 +18,7 @@ const STATUS_VARIANT: Record<TrustReviewCaseStatus, BadgeVariant> = {
   CLOSED: 'neutral',
 };
 
-const PRIORITY_VARIANT: Record<TrustReviewCasePriority, BadgeVariant> = {
+export const REVIEW_CASE_PRIORITY_VARIANT: Record<TrustReviewCasePriority, BadgeVariant> = {
   LOW: 'neutral',
   MEDIUM: 'info',
   HIGH: 'warning',
@@ -48,7 +48,7 @@ export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProp
           <ShieldCheck className="h-4 w-4 text-primary" />
           <span className="text-xs font-medium uppercase tracking-wide">Review case</span>
         </div>
-        <Badge variant={STATUS_VARIANT[caseItem.status]}>{statusMeta.label}</Badge>
+        <Badge variant={REVIEW_CASE_STATUS_VARIANT[caseItem.status]}>{statusMeta.label}</Badge>
       </div>
 
       <div>
@@ -82,7 +82,9 @@ export const ReviewCaseCard = ({ caseItem, delay, onReview }: ReviewCaseCardProp
 
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
         <div className="flex items-center gap-2">
-          <Badge variant={PRIORITY_VARIANT[caseItem.priority]}>{priorityMeta.label}</Badge>
+          <Badge variant={REVIEW_CASE_PRIORITY_VARIANT[caseItem.priority]}>
+            {priorityMeta.label}
+          </Badge>
           <span className="text-xs text-muted-foreground">{formatDate(caseItem.createdAt)}</span>
         </div>
         <Button size="xs" variant="ghost" className="text-primary" onClick={onReview}>

@@ -1,9 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck } from 'lucide-react';
 import {
+  Alert,
   Badge,
   type BadgeVariant,
   Button,
@@ -11,6 +12,7 @@ import {
   DatePicker,
   EmptyState,
   Field,
+  ListSkeleton,
   PageErrorState,
   Select,
   Tabs,
@@ -318,7 +320,11 @@ const IntakeCard = ({
               Book visit
             </Button>
           </div>
-          {schedule.error && <p className="mt-2 text-sm text-destructive">{schedule.error}</p>}
+          {schedule.error && (
+            <Alert variant="danger" className="mt-2">
+              {schedule.error}
+            </Alert>
+          )}
         </Section>
       )}
 
@@ -375,7 +381,11 @@ const IntakeCard = ({
           >
             Save assessment
           </Button>
-          {assess.error && <p className="mt-2 text-sm text-destructive">{assess.error}</p>}
+          {assess.error && (
+            <Alert variant="danger" className="mt-2">
+              {assess.error}
+            </Alert>
+          )}
         </Section>
       )}
 
@@ -412,7 +422,11 @@ const IntakeCard = ({
           >
             Send proposal
           </Button>
-          {propose.error && <p className="mt-2 text-sm text-destructive">{propose.error}</p>}
+          {propose.error && (
+            <Alert variant="danger" className="mt-2">
+              {propose.error}
+            </Alert>
+          )}
         </Section>
       )}
 
@@ -434,7 +448,9 @@ const IntakeCard = ({
             {intake.openingPositionConfirmedAt ? 'Update' : 'Confirm opening position'}
           </Button>
           {confirmOpening.error && (
-            <p className="mt-2 text-sm text-destructive">{confirmOpening.error}</p>
+            <Alert variant="danger" className="mt-2">
+              {confirmOpening.error}
+            </Alert>
           )}
         </Section>
       )}
@@ -456,7 +472,11 @@ const IntakeCard = ({
           >
             Decline request
           </Button>
-          {decline.error && <p className="mt-2 text-sm text-destructive">{decline.error}</p>}
+          {decline.error && (
+            <Alert variant="danger" className="mt-2">
+              {decline.error}
+            </Alert>
+          )}
         </Section>
       )}
     </Card>
@@ -471,6 +491,7 @@ export default function AdminManagedIntakesPage() {
   const intakes = useQuery({
     queryKey: ['admin', 'managed-intakes', filter],
     queryFn: () => unwrap(adminManagedIntakeService.list(filter === 'open' ? undefined : filter)),
+    placeholderData: keepPreviousData,
   });
   const staff = useQuery({
     queryKey: ['admin', 'staff', 'for-managed'],
@@ -500,7 +521,7 @@ export default function AdminManagedIntakesPage() {
       </div>
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-        <TabsList>
+        <TabsList className="max-w-full">
           <TabsTrigger value="open">In progress</TabsTrigger>
           <TabsTrigger value="SUBMITTED">New</TabsTrigger>
           <TabsTrigger value="ASSESSMENT_SCHEDULED">Visits</TabsTrigger>
@@ -509,13 +530,13 @@ export default function AdminManagedIntakesPage() {
         </TabsList>
       </Tabs>
 
-      {intakes.isError ? (
+      {intakes.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : intakes.isError && !intakes.data ? (
         <PageErrorState
           title="Could not load the intake pipeline"
           onRetry={() => void intakes.refetch()}
         />
-      ) : intakes.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (intakes.data ?? []).length === 0 ? (
         <EmptyState
           icon={ClipboardCheck}

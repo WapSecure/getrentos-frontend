@@ -1,10 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, Send } from 'lucide-react';
-import { Button, CurrencyInput, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  CurrencyInput,
+  Field,
+  IconButton,
+  RadioGroup,
+  Textarea,
+} from '@getrentos/ui';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -63,6 +72,7 @@ export const MakeOfferModal = ({
         })
       ),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
   });
   const { data: defaultListing } = useQuery({
     queryKey: [...buyerKeys.listings, 'detail', defaultPropertyId],
@@ -128,6 +138,9 @@ export const MakeOfferModal = ({
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Make an Offer"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -135,22 +148,25 @@ export const MakeOfferModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Make an Offer</h3>
-              <button
-                type="button"
+              <IconButton
+                label="Close offer dialog"
+                size="sm"
+                icon={<X />}
                 onClick={handleClose}
                 disabled={isSubmitting}
-                aria-label="Close offer dialog"
-                className="p-1 rounded-lg hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Property <span className="text-red-500">*</span>
-                </label>
+              <Field
+                label="Property"
+                required
+                hint={
+                  selectedListing
+                    ? `Asking price: ₦${selectedListing.askingPrice.toLocaleString()}`
+                    : undefined
+                }
+              >
                 <PaginatedSelect
                   value={propertyId}
                   onValueChange={(value) => {
@@ -179,95 +195,64 @@ export const MakeOfferModal = ({
                   isLoading={isListingsLoading}
                   ariaLabel="property"
                 />
-                {selectedListing && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Asking price: ₦{selectedListing.askingPrice.toLocaleString()}
-                  </p>
-                )}
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Offer Amount (₦) <span className="text-red-500">*</span>
-                </label>
+              <Field label="Offer Amount (₦)" required>
                 <CurrencyInput
                   prefix="₦"
                   min={0}
                   value={offerAmount}
                   onValueChange={(v) => setOfferAmount(v === 0 ? '' : String(v))}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Financing Type
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {financingOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setFinancingType(option.value)}
-                      className={`px-2 py-2 rounded-lg border text-sm transition-colors ${
-                        financingType === option.value
-                          ? 'border-primary bg-accent text-primary'
-                          : 'border-border text-muted-foreground'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Field label="Financing Type">
+                <RadioGroup
+                  value={financingType}
+                  onValueChange={setFinancingType}
+                  options={financingOptions}
+                  orientation="horizontal"
+                />
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Deposit Amount (₦) <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
+              <Field label="Deposit Amount (₦)" optionalLabel="(optional)">
                 <CurrencyInput
                   prefix="₦"
                   min={0}
                   value={depositAmount}
                   onValueChange={(v) => setDepositAmount(v === 0 ? '' : String(v))}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Message to Owner <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
+              <Field label="Message to Owner" optionalLabel="(optional)">
                 <Textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={2}
                   placeholder="e.g. Pre-approved and ready to close quickly"
                 />
-              </div>
+              </Field>
             </div>
 
             {isLand && notVerified.length > 0 && (
-              <div className="mx-4 mb-3 rounded-xl border border-warning/40 bg-warning/5 p-3">
-                <p className="text-sm font-semibold text-foreground">
-                  What was not verified on this land
-                </p>
+              <Alert
+                variant="warning"
+                title="What was not verified on this land"
+                className="mx-4 mb-3"
+              >
                 <div className="mt-2">
                   <TrustLabelsList notVerified={notVerified} />
                 </div>
-                <label className="mt-2 flex cursor-pointer items-start gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-4 w-4"
-                    checked={acceptedRisks}
-                    onChange={(event) => setAcceptedRisks(event.target.checked)}
-                  />
-                  <span>I have read what was not verified and accept it before offering.</span>
-                </label>
-              </div>
+                <Checkbox
+                  className="mt-2"
+                  checked={acceptedRisks}
+                  onCheckedChange={setAcceptedRisks}
+                  label="I have read what was not verified and accept it before offering."
+                />
+              </Alert>
             )}
 
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
+            <div className="p-4 border-t border-border flex flex-wrap gap-3 shrink-0">
               {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
               <Button
                 variant="ghost"
@@ -279,12 +264,12 @@ export const MakeOfferModal = ({
               </Button>
               <Button
                 variant="primary"
-                className="flex-1 gap-1.5"
+                className="flex-1"
+                icon={<Send className="w-3.5 h-3.5" />}
                 onClick={() => void handleSubmit()}
                 disabled={!propertyId || !offerAmount || needsAcceptance || isSubmitting}
                 isLoading={isSubmitting}
               >
-                <Send className="w-3.5 h-3.5" />
                 Submit Offer
               </Button>
             </div>

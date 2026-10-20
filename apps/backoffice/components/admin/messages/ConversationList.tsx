@@ -1,8 +1,6 @@
 'use client';
 
-import { LegacyInput, Skeleton } from '@getrentos/ui';
-
-import { Search } from 'lucide-react';
+import { SearchInput, Skeleton } from '@getrentos/ui';
 import { getInitials, formatRelativeTime } from '@getrentos/shared';
 
 export interface Conversation {
@@ -34,20 +32,12 @@ export const ConversationList = ({
   return (
     <div className="w-full sm:w-80 shrink-0 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
       <div className="p-3 border-b border-border">
-        <div className="relative">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearch(e.target.value)}
-            placeholder="Search conversations..."
-            aria-label="Search conversations"
-            className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={onSearch}
+          placeholder="Search conversations..."
+          label="Search conversations"
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto divide-y divide-border">

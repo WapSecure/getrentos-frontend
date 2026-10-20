@@ -9,6 +9,7 @@ import { estateResidentKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { EmergencyBanner } from '@/components/estate/resident/EmergencyBanner';
+import { EmptyState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-NG', {
@@ -65,7 +66,12 @@ export default function ResidentDashboardPage() {
   const announcements = announcementsData?.items ?? [];
 
   if (isHouseholdLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return (
+      <div className="space-y-6" aria-busy="true">
+        <Skeleton className="h-28 w-full rounded-2xl" />
+        <StatGridSkeleton count={2} className="lg:grid-cols-2" />
+      </div>
+    );
   }
 
   return (
@@ -147,7 +153,7 @@ export default function ResidentDashboardPage() {
           <h2 className="text-sm font-semibold text-foreground">Recent announcements</h2>
         </div>
         {announcements.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">No announcements yet.</p>
+          <EmptyState icon={Megaphone} title="No announcements yet." size="compact" bare />
         ) : (
           <div className="divide-y divide-border">
             {announcements.map((announcement) => (

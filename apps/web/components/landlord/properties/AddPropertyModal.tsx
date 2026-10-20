@@ -1,10 +1,6 @@
 'use client';
 
-import { LegacyInput, NumberInput } from '@getrentos/ui';
-
-import { Textarea } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
+import { Alert, Field, IconButton, Input, NumberInput, Select, Textarea } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -178,21 +174,20 @@ export const AddPropertyModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Add Property</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Step {step + 1} of {steps.length}: {steps[step]}
                 </p>
               </div>
-              <button
+              <IconButton
+                label="Close add property"
+                size="sm"
+                icon={<X />}
                 onClick={handleClose}
                 disabled={isSubmitting}
-                aria-label="Close add property"
-                className="p-1 rounded-lg hover:bg-secondary disabled:opacity-50"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="px-4 pt-3 shrink-0">
@@ -211,48 +206,31 @@ export const AddPropertyModal = ({
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               {step === 0 && (
                 <>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Property Name <span className="text-destructive">*</span>
-                    </label>
-                    <LegacyInput
+                  <Field label="Property Name" required>
+                    <Input
                       type="text"
                       value={form.name}
                       onChange={(e) => update('name', e.target.value)}
                       placeholder="e.g. Sunrise Apartments"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                  </div>
+                  </Field>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Property Type
-                    </label>
-                    <LegacySelect
+                  <Field label="Property Type">
+                    <Select
                       value={form.type}
-                      onChange={(e) => update('type', e.target.value as PropertyType)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      {propertyTypes.map((t) => (
-                        <option key={t.value} value={t.value}>
-                          {t.label}
-                        </option>
-                      ))}
-                    </LegacySelect>
-                  </div>
+                      onValueChange={(value) => update('type', value as PropertyType)}
+                      options={propertyTypes.map((t) => ({ value: t.value, label: t.label }))}
+                    />
+                  </Field>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Address <span className="text-destructive">*</span>
-                    </label>
-                    <LegacyInput
+                  <Field label="Address" required>
+                    <Input
                       type="text"
                       value={form.address}
                       onChange={(e) => update('address', e.target.value)}
                       placeholder="Street address"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                  </div>
+                  </Field>
 
                   <LocationFields
                     country={form.country}
@@ -273,30 +251,22 @@ export const AddPropertyModal = ({
                     onChange={(pin) => update('pin', pin)}
                   />
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Number of Units
-                    </label>
+                  <Field label="Number of Units">
                     <NumberInput
                       min={1}
                       value={form.totalUnits}
                       onValueChange={(v) => update('totalUnits', v)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                  </div>
+                  </Field>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Description
-                    </label>
+                  <Field label="Description">
                     <Textarea
                       value={form.description}
                       onChange={(e) => update('description', e.target.value)}
                       rows={2}
                       placeholder="Optional description"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                  </div>
+                  </Field>
                 </>
               )}
 
@@ -311,16 +281,16 @@ export const AddPropertyModal = ({
                     onSelect={(file) => update('coverImage', file)}
                   />
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
+                    <p className="block text-sm font-medium text-foreground mb-1">
                       Gallery Images{' '}
                       <span className="text-muted-foreground/60 font-normal">(optional)</span>
-                    </label>
-                    <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors">
-                      <LegacyInput
+                    </p>
+                    <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring transition-colors">
+                      <input
                         type="file"
                         multiple
                         accept="image/jpeg,image/png,image/webp"
-                        className="hidden"
+                        className="sr-only"
                         onChange={(event) =>
                           update(
                             'galleryImages',
@@ -364,14 +334,11 @@ export const AddPropertyModal = ({
 
               {step === 2 && (
                 <>
-                  <div className="p-3 rounded-xl bg-info-subtle border border-info/30 flex items-start gap-2">
-                    <ShieldCheck className="w-4 h-4 text-info mt-0.5 shrink-0" />
-                    <p className="text-xs text-muted-foreground">
-                      Verification documents are optional at this stage, but properties without at
-                      least one document will show as unverified to renters and buyers until
-                      submitted.
-                    </p>
-                  </div>
+                  <Alert variant="info" icon={ShieldCheck}>
+                    Verification documents are optional at this stage, but properties without at
+                    least one document will show as unverified to renters and buyers until
+                    submitted.
+                  </Alert>
                   <UploadField
                     label="Title Deed"
                     icon={FileText}
@@ -424,14 +391,7 @@ export const AddPropertyModal = ({
                     This creates the property in your portfolio. Public listing remains locked until
                     identity and ownership verification are approved.
                   </p>
-                  {submitError && (
-                    <p
-                      role="alert"
-                      className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
-                    >
-                      {submitError}
-                    </p>
-                  )}
+                  {submitError && <Alert variant="danger">{submitError}</Alert>}
                 </div>
               )}
             </div>
@@ -467,11 +427,12 @@ export const AddPropertyModal = ({
                     variant="primary"
                     className="gap-2"
                     onClick={() => handlePublish(true)}
-                    disabled={isSubmitting || !hasAnyVerificationDoc}
+                    disabled={!hasAnyVerificationDoc}
                     isLoading={isSubmitting}
+                    loadingText="Uploading…"
                   >
                     <Check className="w-4 h-4" />
-                    {isSubmitting ? 'Uploading…' : 'Submit for publishing'}
+                    Submit for publishing
                   </Button>
                 </>
               )}
@@ -500,13 +461,14 @@ const UploadField = ({
 }) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-foreground mb-1">
+      <p className="block text-sm font-medium text-foreground mb-1">
         {label} {required && <span className="text-destructive">*</span>}
-      </label>
-      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer">
-        <LegacyInput
+      </p>
+      <label className="flex items-center gap-3 px-3 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary focus-within:ring-2 focus-within:ring-ring transition-colors cursor-pointer">
+        <input
           type="file"
-          className="hidden"
+          aria-label={label}
+          className="sr-only"
           accept={accept}
           onChange={(e) => onSelect(e.target.files?.[0] ?? null)}
         />
@@ -572,21 +534,20 @@ const FileList = ({ files, onRemove }: { files: File[]; onRemove: (index: number
       >
         <ImageIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
         <span className="min-w-0 flex-1 truncate">{file.name}</span>
-        <button
-          type="button"
-          aria-label={`Remove ${file.name}`}
+        <IconButton
+          label={`Remove ${file.name}`}
+          variant="danger"
+          size="sm"
+          icon={<Trash2 />}
           onClick={() => onRemove(index)}
-          className="rounded p-1 text-muted-foreground hover:bg-card hover:text-destructive"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+        />
       </li>
     ))}
   </ul>
 );
 
 const SummaryRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between px-3 py-2 text-sm">
+  <div className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
     <span className="text-muted-foreground">{label}</span>
     <span className="text-foreground font-medium text-right truncate max-w-[60%]">{value}</span>
   </div>

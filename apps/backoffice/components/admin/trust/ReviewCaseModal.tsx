@@ -12,8 +12,17 @@ import {
   UserRoundCheck,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
-import { Button, Select, Textarea } from '@getrentos/ui';
-import { cn, formatDate, unwrap } from '@getrentos/shared';
+import {
+  Alert,
+  Badge,
+  Button,
+  CardSkeleton,
+  PageErrorState,
+  Select,
+  Textarea,
+  type BadgeVariant,
+} from '@getrentos/ui';
+import { formatDate, unwrap } from '@getrentos/shared';
 import { trustService } from '@/services/trustService';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -23,6 +32,7 @@ import {
   REVIEW_CASE_STATUS_META,
   TRUST_STEP_STATUS_META,
 } from './trustMeta';
+import { REVIEW_CASE_PRIORITY_VARIANT, REVIEW_CASE_STATUS_VARIANT } from './ReviewCaseCard';
 import { DIMENSION_LABELS, nonScoreCodes, parseScoreCodes } from './scoreCodes';
 
 /**
@@ -68,8 +78,7 @@ const ScoreAtDecisionCodes = ({ reasonCodes }: { reasonCodes: string[] }) => {
   );
 };
 
-const RESOLVE_OPTIONS: { value: TrustReviewDecision | ''; label: string }[] = [
-  { value: '', label: 'Select a decision…' },
+const RESOLVE_OPTIONS: { value: TrustReviewDecision; label: string }[] = [
   { value: 'PASS', label: 'Pass (approve verification)' },
   { value: 'REJECT', label: 'Reject (blocking)' },
   { value: 'RESTRICT', label: 'Restrict (blocking)' },
@@ -92,27 +101,20 @@ const STEP_TYPE_LABEL: Record<string, string> = {
   BANK_ACCOUNT_CHECK: 'Bank account',
 };
 
-const DECISION_META: Record<string, { label: string; text: string; bg: string }> = {
-  PASS: {
-    label: 'Pass',
-    text: 'text-green-700 dark:text-green-400',
-    bg: 'bg-green-100 dark:bg-green-900/30',
-  },
-  REVIEW: {
-    label: 'Review',
-    text: 'text-yellow-700 dark:text-yellow-400',
-    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-  },
-  REJECT: {
-    label: 'Reject',
-    text: 'text-red-700 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/30',
-  },
-  RESTRICT: {
-    label: 'Restrict',
-    text: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
-  },
+const DECISION_META: Record<string, { label: string; variant: BadgeVariant }> = {
+  PASS: { label: 'Pass', variant: 'success' },
+  REVIEW: { label: 'Review', variant: 'warning' },
+  REJECT: { label: 'Reject', variant: 'danger' },
+  RESTRICT: { label: 'Restrict', variant: 'warning' },
+};
+
+const STEP_VARIANT: Record<string, BadgeVariant> = {
+  PASSED: 'success',
+  FAILED: 'danger',
+  REVIEW_REQUIRED: 'warning',
+  IN_PROGRESS: 'info',
+  WAITING_FOR_USER: 'info',
+  WAITING_FOR_PROVIDER: 'info',
 };
 
 const shortId = (id?: string | null) => (id ? `${id.slice(0, 8)}…` : '—');
@@ -131,7 +133,12 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
   const id = caseItem?.id;
 
-  const { data: detail, isLoading: detailLoading } = useQuery({
+  const {
+    data: detail,
+    isLoading: detailLoading,
+    isFetching: detailFetching,
+    refetch: refetchDetail,
+  } = useQuery({
     queryKey: adminKeys.reviewCaseDetail(id ?? ''),
     queryFn: () => (id ? unwrap(trustService.getReviewCaseDetail(id)) : null),
     enabled: Boolean(id),
@@ -212,24 +219,12 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
             </DialogTitle>
             {detail && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                    REVIEW_CASE_STATUS_META[detail.status].bg,
-                    REVIEW_CASE_STATUS_META[detail.status].text
-                  )}
-                >
+                <Badge variant={REVIEW_CASE_STATUS_VARIANT[detail.status]}>
                   {REVIEW_CASE_STATUS_META[detail.status].label}
-                </span>
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                    REVIEW_CASE_PRIORITY_META[detail.priority].bg,
-                    REVIEW_CASE_PRIORITY_META[detail.priority].text
-                  )}
-                >
+                </Badge>
+                <Badge variant={REVIEW_CASE_PRIORITY_VARIANT[detail.priority]}>
                   {REVIEW_CASE_PRIORITY_META[detail.priority].label} priority
-                </span>
+                </Badge>
                 {officerName && (
                   <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                     <UserRoundCheck className="h-3.5 w-3.5" />
@@ -247,8 +242,9 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
           <div className="max-h-[70vh] overflow-y-auto px-0">
             {detailLoading ? (
-              <div className="flex justify-center py-14">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="space-y-4 p-4">
+                <CardSkeleton lines={4} />
+                <CardSkeleton lines={3} />
               </div>
             ) : detail ? (
               <div className="space-y-5 p-4">
@@ -308,11 +304,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                   ) : (
                     <div className="mt-3 space-y-2">
                       {detail.verification.steps.map((step) => {
-                        const meta = TRUST_STEP_STATUS_META[step.status] ?? {
-                          label: step.status,
-                          text: 'text-muted-foreground',
-                          bg: 'bg-secondary',
-                        };
+                        const label = TRUST_STEP_STATUS_META[step.status]?.label ?? step.status;
                         let resultText: string | null = null;
                         if (step.result && typeof step.result === 'object') {
                           try {
@@ -333,15 +325,12 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                                   {step.attempts} attempt{step.attempts === 1 ? '' : 's'}
                                 </p>
                               </div>
-                              <span
-                                className={cn(
-                                  'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                                  meta.bg,
-                                  meta.text
-                                )}
+                              <Badge
+                                variant={STEP_VARIANT[step.status] ?? 'neutral'}
+                                className="shrink-0"
                               >
-                                {meta.label}
-                              </span>
+                                {label}
+                              </Badge>
                             </div>
                             {resultText && (
                               <pre className="mt-1.5 max-h-24 overflow-auto rounded-md bg-muted/60 px-2 py-1 font-mono text-[10px] leading-snug text-muted-foreground">
@@ -373,15 +362,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                           >
                             <div className="min-w-0">
                               <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
-                                <span
-                                  className={cn(
-                                    'rounded-full px-2 py-0.5 text-[11px] font-semibold',
-                                    m.bg,
-                                    m.text
-                                  )}
-                                >
-                                  {m.label}
-                                </span>
+                                <Badge variant={m.variant}>{m.label}</Badge>
                                 {d.decidedBy && (
                                   <span className="text-xs font-normal text-muted-foreground">
                                     by {shortId(d.decidedBy)}
@@ -440,10 +421,9 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                 </div>
 
                 {actionError && (
-                  <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
-                    <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-                    <span>{actionError}</span>
-                  </div>
+                  <Alert variant="danger" icon={ShieldAlert}>
+                    {actionError}
+                  </Alert>
                 )}
 
                 {/* Actions */}
@@ -461,25 +441,25 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                           setAssigneeId(value);
                           setActionError(null);
                         }}
-                        options={[
-                          {
-                            value: '',
-                            label: detail.assigneeId ? 'Reassign reviewer…' : 'Assign a reviewer…',
-                          },
-                          ...officers.map((o) => ({
-                            value: o.id,
-                            label: `${o.legalName} (${o.email ?? 'no email'})`,
-                          })),
-                        ]}
+                        placeholder={
+                          detail.assigneeId ? 'Reassign reviewer…' : 'Assign a reviewer…'
+                        }
+                        ariaLabel="Reviewer"
+                        options={officers.map((o) => ({
+                          value: o.id,
+                          label: `${o.legalName} (${o.email ?? 'no email'})`,
+                        }))}
                         className="w-full"
                       />
                       <Button
                         variant="outline"
                         size="sm"
                         disabled={!assigneeId || busy}
+                        isLoading={assignMutation.isPending}
+                        loadingText="Assigning…"
                         onClick={() => assignMutation.mutate(assigneeId)}
                       >
-                        {assignMutation.isPending ? 'Assigning…' : 'Assign'}
+                        Assign
                       </Button>
                     </div>
 
@@ -492,6 +472,9 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                           setActionError(null);
                         }}
                         options={RESOLVE_OPTIONS}
+                        placeholder="Select a decision…"
+                        ariaLabel="Decision"
+                        searchable={false}
                         className="w-full"
                       />
                       <Textarea
@@ -499,34 +482,33 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                         onChange={(e) => setNote(e.target.value)}
                         rows={2}
                         placeholder="Note for the case record (optional)"
-                        className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        aria-label="Case note"
                       />
                       {isBlocking && (
-                        <p className="flex items-start gap-1.5 text-xs text-orange-600 dark:text-orange-400">
-                          <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        <Alert variant="warning" icon={ShieldAlert}>
                           Four-eyes: blocking decisions are confirmed by a second officer: the
                           reviewer assigned to this case cannot be the resolver.
-                        </p>
+                        </Alert>
                       )}
                       <div className="flex flex-wrap items-center gap-2 pt-1">
                         <Button
                           size="sm"
                           disabled={!decision || busy}
+                          isLoading={resolveMutation.isPending}
+                          loadingText="Resolving…"
                           onClick={() => resolveMutation.mutate()}
                         >
-                          {resolveMutation.isPending
-                            ? 'Resolving…'
-                            : isBlocking
-                              ? 'Confirm blocking decision'
-                              : 'Approve (pass)'}
+                          {isBlocking ? 'Confirm blocking decision' : 'Approve (pass)'}
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           disabled={busy}
+                          isLoading={escalateMutation.isPending}
+                          loadingText="Escalating…"
                           onClick={() => escalateMutation.mutate()}
                         >
-                          {escalateMutation.isPending ? 'Escalating…' : 'Escalate'}
+                          Escalate
                         </Button>
                       </div>
                     </div>
@@ -534,16 +516,19 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
                 )}
 
                 {isResolved && (
-                  <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300">
-                    <CheckCircle2 className="h-4 w-4" />
+                  <Alert variant="success" icon={CheckCircle2}>
                     This case is {detail.status.toLowerCase()}. It can no longer be changed.
-                  </div>
+                  </Alert>
                 )}
               </div>
             ) : (
-              <div className="p-8 text-center text-sm text-muted-foreground">
-                Could not load case detail.
-              </div>
+              <PageErrorState
+                title="Could not load case detail"
+                onRetry={() => void refetchDetail()}
+                isRetrying={detailFetching}
+                headingLevel="h2"
+                className="min-h-0 py-10"
+              />
             )}
           </div>
         </DialogContent>

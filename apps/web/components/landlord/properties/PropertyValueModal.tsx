@@ -2,7 +2,14 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@getrentos/ui';
 import {
   PropertyValueFields,
   toOptionalAmount,
@@ -82,21 +89,18 @@ const PropertyValueForm = ({
           onPurchasePriceChange={setPurchasePrice}
         />
         {save.isError && (
-          <p role="alert" className="text-xs text-red-600 dark:text-red-400">
+          <Alert variant="danger">
             {save.error instanceof Error
               ? save.error.message
               : 'We could not save those figures. Please try again.'}
-          </p>
+          </Alert>
         )}
         <Button
           variant="primary"
           fullWidth
           onClick={() => save.mutate()}
           isLoading={save.isPending}
-          disabled={
-            save.isPending ||
-            (!toOptionalAmount(estimatedValue) && !toOptionalAmount(purchasePrice))
-          }
+          disabled={!toOptionalAmount(estimatedValue) && !toOptionalAmount(purchasePrice)}
         >
           Save
         </Button>

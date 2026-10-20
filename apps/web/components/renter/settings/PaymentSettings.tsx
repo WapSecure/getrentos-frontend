@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, Building2, Wallet, Plus, Trash2 } from 'lucide-react';
-import { Button, PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
+import { Badge, Button, IconButton, ListSkeleton, PageErrorState, useToast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -11,7 +10,7 @@ import { ROUTES } from '@/lib/constants/auth';
 
 export const PaymentSettings = () => {
   const queryClient = useQueryClient();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const toast = useToast();
   const methodsQuery = useQuery({
     queryKey: renterKeys.paymentMethods,
     queryFn: () => unwrap(renterService.listPaymentMethods()),
@@ -24,34 +23,32 @@ export const PaymentSettings = () => {
   const setDefaultMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
     onSuccess: invalidateMethods,
-    onError: () => setErrorMessage('The default payment method could not be updated.'),
+    onError: () => toast.error('The default payment method could not be updated.'),
   });
 
   const removeMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
     onSuccess: invalidateMethods,
-    onError: () => setErrorMessage('The payment method could not be removed.'),
+    onError: () => toast.error('The payment method could not be removed.'),
   });
 
   const handleSetDefault = (id: string) => setDefaultMutation.mutate(id);
   const handleRemove = (id: string) => removeMutation.mutate(id);
 
-  if (methodsQuery.isLoading) return <PageLoadingState />;
-  if (methodsQuery.isError) {
+  if (methodsQuery.isLoading) return <ListSkeleton rows={3} />;
+  if (methodsQuery.isError && !methodsQuery.data) {
     return (
       <PageErrorState
         title="Payment methods are unavailable"
         onRetry={() => void methodsQuery.refetch()}
         isRetrying={methodsQuery.isFetching}
+        headingLevel="h2"
       />
     );
   }
 
   return (
     <div>
-      {errorMessage && (
-        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
-      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">Payment Settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage your payment methods and billing information
@@ -64,21 +61,17 @@ export const PaymentSettings = () => {
           return (
             <div
               key={method.id}
-              className="flex items-center justify-between p-4 rounded-lg border border-border"
+              className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-lg border border-border"
             >
-              <div className="flex items-center gap-3">
-                <Icon className="w-5 h-5 text-gray-500" />
-                <div>
+              <div className="flex min-w-0 items-center gap-3">
+                <Icon className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+                <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{method.name}</p>
                   {method.expiry && (
-                    <p className="text-xs text-gray-500">Expires {method.expiry}</p>
+                    <p className="text-xs text-muted-foreground">Expires {method.expiry}</p>
                   )}
                 </div>
-                {method.isDefault && (
-                  <span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-600 rounded-full">
-                    Default
-                  </span>
-                )}
+                {method.isDefault && <Badge variant="success">Default</Badge>}
               </div>
               <div className="flex gap-2">
                 {!method.isDefault && (
@@ -86,28 +79,36 @@ export const PaymentSettings = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleSetDefault(method.id)}
-                    disabled={setDefaultMutation.isPending}
+                    disabled={
+                      setDefaultMutation.isPending && setDefaultMutation.variables !== method.id
+                    }
+                    isLoading={
+                      setDefaultMutation.isPending && setDefaultMutation.variables === method.id
+                    }
                   >
                     Set Default
                   </Button>
                 )}
-                <Button
-                  variant="ghost"
+                <IconButton
+                  variant="danger"
                   size="sm"
-                  className="text-red-500 hover:text-red-700"
+                  label={`Remove ${method.name}`}
                   onClick={() => handleRemove(method.id)}
-                  disabled={removeMutation.isPending}
-                  aria-label={`Remove ${method.name}`}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                  isLoading={removeMutation.isPending && removeMutation.variables === method.id}
+                  disabled={removeMutation.isPending && removeMutation.variables !== method.id}
+                  icon={<Trash2 />}
+                />
               </div>
             </div>
           );
         })}
 
-        <Button href={ROUTES.RENTER_PAYMENTS} variant="outline" fullWidth className="gap-2">
-          <Plus className="w-4 h-4" />
+        <Button
+          href={ROUTES.RENTER_PAYMENTS}
+          variant="outline"
+          fullWidth
+          icon={<Plus className="w-4 h-4" />}
+        >
           Add Payment Method
         </Button>
       </div>

@@ -1,11 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
-import { Button, DocumentUpload } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, DocumentUpload, Field, Input } from '@getrentos/ui';
 import { kycService } from '@/services/kycService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -16,26 +15,26 @@ const statusConfig: Record<
   APPROVED: {
     label: 'Verified',
     icon: ShieldCheck,
-    color: 'text-green-600 dark:text-green-400',
-    bg: 'bg-green-50 dark:bg-green-900/20',
+    color: 'text-success',
+    bg: 'bg-success-subtle',
   },
   PENDING_REVIEW: {
     label: 'Pending Review',
     icon: ShieldAlert,
-    color: 'text-yellow-600 dark:text-yellow-400',
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   NEEDS_CLARIFICATION: {
     label: 'Needs Clarification',
     icon: HelpCircle,
-    color: 'text-orange-600 dark:text-orange-400',
-    bg: 'bg-orange-50 dark:bg-orange-900/20',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   REJECTED: {
     label: 'Rejected',
     icon: ShieldX,
-    color: 'text-red-600 dark:text-red-400',
-    bg: 'bg-red-50 dark:bg-red-900/20',
+    color: 'text-destructive',
+    bg: 'bg-destructive-subtle',
   },
 };
 
@@ -69,7 +68,7 @@ export const LicenseVerificationSettings = () => {
     !license || license.status === 'REJECTED' || license.status === 'NEEDS_CLARIFICATION';
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading verification status…</p>;
+    return <CardSkeleton lines={3} />;
   }
 
   return (
@@ -95,16 +94,14 @@ export const LicenseVerificationSettings = () => {
 
       {canSubmit && (
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">License number</label>
-            <LegacyInput
+          <Field label="License number" required>
+            <Input
               type="text"
               value={licenseNumber}
               onChange={(e) => setLicenseNumber(e.target.value)}
               placeholder="RC-2024-001234"
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </div>
+          </Field>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
@@ -120,15 +117,16 @@ export const LicenseVerificationSettings = () => {
             />
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
 
           <Button
             variant="primary"
             onClick={() => submitMutation.mutate()}
-            disabled={!licenseNumber.trim() || submitMutation.isPending}
+            disabled={!licenseNumber.trim()}
             isLoading={submitMutation.isPending}
+            loadingText="Submitting…"
           >
-            {submitMutation.isPending ? 'Submitting…' : 'Submit for Verification'}
+            Submit for Verification
           </Button>
         </div>
       )}

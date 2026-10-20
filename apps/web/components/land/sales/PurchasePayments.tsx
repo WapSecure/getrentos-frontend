@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Badge } from '@getrentos/ui';
+import { Alert, Badge } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { sellerPayoutKeys } from '@/lib/queryKeys';
@@ -109,7 +109,7 @@ export const PurchasePayments = ({
           </ul>
         )}
         {needsAccount && (
-          <p className="mt-3 rounded-xl bg-warning/10 p-3 text-sm text-foreground">
+          <Alert variant="warning" className="mt-3">
             Add your sale-proceeds bank account so released money can be paid to you.{' '}
             <Link
               href="/owner/settings?tab=payouts"
@@ -117,7 +117,7 @@ export const PurchasePayments = ({
             >
               Set up payout account
             </Link>
-          </p>
+          </Alert>
         )}
       </div>
     </div>

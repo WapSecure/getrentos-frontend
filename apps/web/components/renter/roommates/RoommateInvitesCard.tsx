@@ -31,12 +31,12 @@ export const RoommateInvitesCard = ({ invites, onAccept, onDecline }: RoommateIn
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-6 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/20"
+      className="mb-6 rounded-xl border border-warning/25 bg-warning-subtle"
     >
       <div className="p-4">
         <div className="flex items-center gap-2">
-          <Mail className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <h3 className="font-semibold text-amber-900 dark:text-amber-200">
+          <Mail className="h-4 w-4 text-warning" aria-hidden="true" />
+          <h3 className="font-semibold text-foreground">
             {invites.length === 1
               ? 'You have a roommate invite'
               : `You have ${invites.length} roommate invites`}
@@ -51,7 +51,7 @@ export const RoommateInvitesCard = ({ invites, onAccept, onDecline }: RoommateIn
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex flex-col gap-3 rounded-lg border border-amber-200/70 bg-card p-3 dark:border-amber-900/60 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-lg border border-warning/20 bg-card p-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <p className="text-sm text-foreground">
                   <span className="font-medium">{invite.name}</span> invited you to share rent and
@@ -61,22 +61,20 @@ export const RoommateInvitesCard = ({ invites, onAccept, onDecline }: RoommateIn
                   <Button
                     variant="primary"
                     size="sm"
-                    className="gap-1"
-                    disabled={pendingId === invite.id}
+                    icon={<Check className="h-3.5 w-3.5" />}
+                    disabled={pendingId !== null && pendingId !== invite.id}
                     isLoading={pendingId === invite.id}
                     onClick={() => respond(invite.id, onAccept)}
                   >
-                    <Check className="h-3.5 w-3.5" />
                     Accept
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-1"
-                    disabled={pendingId === invite.id}
+                    icon={<X className="h-3.5 w-3.5" />}
+                    disabled={pendingId !== null}
                     onClick={() => respond(invite.id, onDecline)}
                   >
-                    <X className="h-3.5 w-3.5" />
                     Decline
                   </Button>
                 </div>

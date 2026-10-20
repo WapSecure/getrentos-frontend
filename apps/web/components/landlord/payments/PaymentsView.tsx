@@ -1,10 +1,17 @@
 'use client';
 
-import { LegacyInput, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
-
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import {
+  PageErrorState,
+  Pagination,
+  SearchInput,
+  StatGridSkeleton,
+  TableSkeleton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@getrentos/ui';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
 import { PaymentsTable } from '@/components/landlord/payments/PaymentsTable';
 import { PaymentDetailsModal } from '@/components/landlord/payments/PaymentDetailsModal';
@@ -51,6 +58,7 @@ export function PaymentsView() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data } = paymentsQuery;
   // Memoised so the filter below has a stable dependency. A bare `?? []` fallback
@@ -87,51 +95,48 @@ export function PaymentsView() {
         </p>
       </div>
 
-      {!statsQuery.isLoading && !statsQuery.isError && (
-        <RentCollectionStats
-          totalCollected={totalCollected}
-          outstandingBalance={outstandingBalance}
-          escrowPending={escrowPending}
-          upcomingPayments={upcomingPayments}
-        />
+      {statsQuery.isLoading ? (
+        <StatGridSkeleton className="mb-6 grid-cols-2" />
+      ) : (
+        statsQuery.data && (
+          <RentCollectionStats
+            totalCollected={totalCollected}
+            outstandingBalance={outstandingBalance}
+            escrowPending={escrowPending}
+            upcomingPayments={upcomingPayments}
+          />
+        )
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search this page by tenant or property..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
-          {statusFilters.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SearchInput
+          className="flex-1 max-w-sm"
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search this page by tenant or property..."
+          label="Search this page by tenant or property"
+        />
+        <Tabs
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value as 'all' | RentPaymentStatus);
+            setPage(1);
+          }}
+          className="max-w-full"
+        >
+          <TabsList className="max-w-full">
+            {statusFilters.map((option) => (
+              <TabsTrigger key={option.value} value={option.value}>
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
-      {paymentsQuery.isLoading || statsQuery.isLoading ? (
-        <PageLoadingState />
-      ) : paymentsQuery.isError || statsQuery.isError ? (
+      {paymentsQuery.isLoading ? (
+        <TableSkeleton rows={5} columns={6} />
+      ) : !data || (statsQuery.isError && !statsQuery.data) ? (
         <PageErrorState
           title="Payment records are unavailable"
           description="We could not load your collections and balances. No figures have been changed."

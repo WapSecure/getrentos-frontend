@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react';
-import { Button, LegacyInput, Select } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Input,
+  ListSkeleton,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -57,45 +66,40 @@ export default function ResidentMaintenancePage() {
         </p>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-4 mb-8">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+      <Card className="p-6 space-y-4 mb-8">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Category">
             <Select value={category} onValueChange={setCategory} options={categoryOptions} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
+          </Field>
+          <Field label="Priority">
             <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
-          </div>
+          </Field>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-          <textarea
+        <Field label="Description" required>
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="What's wrong, and where…"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Photo <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
-          <LegacyInput
+        <Field label="Photo" optionalLabel="(optional)">
+          <Input
             type="file"
             accept="image/*"
             capture="environment"
             onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
           />
-        </div>
+        </Field>
 
         <Button
           variant="primary"
           fullWidth
-          disabled={!description.trim() || reportTicket.isPending}
+          disabled={!description.trim()}
+          isLoading={reportTicket.isPending}
+          loadingText="Reporting…"
           onClick={() =>
             reportTicket.mutate({
               description: description.trim(),
@@ -110,20 +114,17 @@ export default function ResidentMaintenancePage() {
             })
           }
         >
-          {reportTicket.isPending ? 'Reporting…' : 'Report Ticket'}
+          Report Ticket
         </Button>
-      </div>
+      </Card>
 
       <h2 className="text-sm font-semibold text-foreground mb-3">
         Your Tickets ({tickets?.length ?? 0})
       </h2>
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : !tickets || tickets.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 flex flex-col items-center text-center">
-          <Wrench className="w-8 h-8 text-muted-foreground mb-2" />
-          <p className="text-sm text-muted-foreground">No maintenance tickets reported yet.</p>
-        </div>
+        <EmptyState icon={Wrench} title="No maintenance tickets reported yet." />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {tickets.map((ticket) => (

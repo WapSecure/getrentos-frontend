@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 import {
   VERIFICATION_REASONS,
   TRUST_WITHHELD_REASONS,
@@ -164,17 +165,14 @@ export const VerificationRequiredNotice = ({
   }
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
-      <ShieldAlert className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
-      <div className="flex-1">
-        <p className="text-sm text-orange-800 dark:text-orange-300">{message}</p>
-        <Link
-          href={destination}
-          className="inline-block mt-1 text-sm font-medium text-orange-700 dark:text-orange-300 underline hover:no-underline"
-        >
-          {cta}
-        </Link>
-      </div>
-    </div>
+    <Alert variant="warning" icon={ShieldAlert}>
+      <p>{message}</p>
+      <Link
+        href={destination}
+        className="inline-block mt-1 font-medium text-foreground underline hover:no-underline"
+      >
+        {cta}
+      </Link>
+    </Alert>
   );
 };

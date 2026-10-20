@@ -1,17 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, ShieldAlert } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, ShieldAlert } from 'lucide-react';
 import { FraudAlertCard } from '@/components/admin/fraud/FraudAlertCard';
 import { FraudAlertDetailModal } from '@/components/admin/fraud/FraudAlertDetailModal';
 import { NewFraudAlertModal } from '@/components/admin/fraud/NewFraudAlertModal';
-import { EmptyState, PageErrorState } from '@getrentos/ui';
+import {
+  CardSkeleton,
+  EmptyState,
+  PageErrorState,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -62,6 +68,7 @@ export default function AdminFraudPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const alerts = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -171,25 +178,26 @@ export default function AdminFraudPage() {
               : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
           </p>
         </div>
-        <Button className="gap-1.5 shrink-0" onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          className="shrink-0"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setShowCreate(true)}
+        >
           New alert
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by subject or entity..."
-            leadingIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          label="Search fraud alerts"
+          placeholder="Search by subject or entity..."
+          className="flex-1 max-w-sm"
+        />
         <Select
           value={severityFilter}
           onValueChange={(value) => {
@@ -197,41 +205,42 @@ export default function AdminFraudPage() {
             setPage(1);
           }}
           options={severityOptions}
+          ariaLabel="Filter by severity"
+          searchable={false}
           className="w-full sm:w-48"
         />
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
-        {statusOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => {
-              setStatusFilter(option.value);
-              setPage(1);
-            }}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-              statusFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(value) => {
+          setStatusFilter(value as StatusFilter);
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList className="max-w-full">
+          {statusOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {isError ? (
+      {isLoading ? (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardSkeleton key={index} />
+          ))}
+        </div>
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load fraud alerts"
           description="The risk-review queue is temporarily unavailable. Your filters have been preserved."
           onRetry={() => void refetch()}
           isRetrying={isFetching}
         />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
       ) : alerts.length === 0 ? (
         <EmptyState icon={ShieldAlert} title="No alerts match your filters" />
       ) : (

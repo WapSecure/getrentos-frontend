@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
-import { Button, DocumentUpload, Select } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, DocumentUpload, Field, Select } from '@getrentos/ui';
 import {
   kycService,
   IDENTITY_DOCUMENT_TYPES,
@@ -27,26 +27,26 @@ const statusConfig: Record<
   APPROVED: {
     label: 'Verified',
     icon: ShieldCheck,
-    color: 'text-green-600 dark:text-green-400',
-    bg: 'bg-green-50 dark:bg-green-900/20',
+    color: 'text-success',
+    bg: 'bg-success-subtle',
   },
   PENDING_REVIEW: {
     label: 'Pending Review',
     icon: ShieldAlert,
-    color: 'text-yellow-600 dark:text-yellow-400',
-    bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   NEEDS_CLARIFICATION: {
     label: 'Needs Clarification',
     icon: HelpCircle,
-    color: 'text-orange-600 dark:text-orange-400',
-    bg: 'bg-orange-50 dark:bg-orange-900/20',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   REJECTED: {
     label: 'Rejected',
     icon: ShieldX,
-    color: 'text-red-600 dark:text-red-400',
-    bg: 'bg-red-50 dark:bg-red-900/20',
+    color: 'text-destructive',
+    bg: 'bg-destructive-subtle',
   },
 };
 
@@ -99,7 +99,7 @@ export const IdentityVerificationSettings = ({
     (!identity || identity.status === 'REJECTED' || identity.status === 'NEEDS_CLARIFICATION');
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading verification status…</p>;
+    return <CardSkeleton lines={3} />;
   }
 
   return (
@@ -123,8 +123,7 @@ export const IdentityVerificationSettings = ({
 
       {canSubmit && (
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Document type</label>
+          <Field label="Document type">
             <Select
               value={documentType}
               onValueChange={(value) => setDocumentType(value as IdentityDocumentType)}
@@ -134,7 +133,7 @@ export const IdentityVerificationSettings = ({
               }))}
               ariaLabel="Identity document type"
             />
-          </div>
+          </Field>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">Document photo</label>
@@ -165,15 +164,16 @@ export const IdentityVerificationSettings = ({
             />
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
 
           <Button
             variant="primary"
             onClick={() => submitMutation.mutate()}
-            disabled={!document || submitMutation.isPending}
+            disabled={!document}
             isLoading={submitMutation.isPending}
+            loadingText="Submitting…"
           >
-            {submitMutation.isPending ? 'Submitting…' : 'Submit for Verification'}
+            Submit for Verification
           </Button>
         </div>
       )}

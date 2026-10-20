@@ -1,8 +1,12 @@
 'use client';
 
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
+  DatePicker,
+  Field,
+  NumberInput,
   Button,
   Dialog,
   DialogContent,
@@ -10,7 +14,7 @@ import {
   DialogTitle,
   Input,
   Select,
-  Toast,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
@@ -32,7 +36,7 @@ export function MaintenanceCreateDialog({
     category: 'OTHER',
     emergency: 'false',
   });
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const options = useQuery({
     queryKey: ['admin', 'maintenance', 'configuration-options'],
     queryFn: () => unwrap(adminMaintenanceService.configurationOptions()),
@@ -81,7 +85,7 @@ export function MaintenanceCreateDialog({
       setForm({ priority: 'MEDIUM', category: 'OTHER', emergency: 'false' });
       onClose();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
   const propertyOptions = useMemo(
     () =>
@@ -171,28 +175,13 @@ export function MaintenanceCreateDialog({
                 </Field>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <Field label="Response minutes">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={form.response ?? ''}
-                      onChange={(e) => set('response')(e.target.value)}
-                    />
+                    <NumberInput value={form.response ?? ''} onValueChange={set('response')} />
                   </Field>
                   <Field label="Resolution minutes">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={form.resolution ?? ''}
-                      onChange={(e) => set('resolution')(e.target.value)}
-                    />
+                    <NumberInput value={form.resolution ?? ''} onValueChange={set('resolution')} />
                   </Field>
                   <Field label="Escalation minutes">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={form.escalation ?? ''}
-                      onChange={(e) => set('escalation')(e.target.value)}
-                    />
+                    <NumberInput value={form.escalation ?? ''} onValueChange={set('escalation')} />
                   </Field>
                 </div>
                 <Field label="Emergency routing">
@@ -230,20 +219,11 @@ export function MaintenanceCreateDialog({
                     />
                   </Field>
                   <Field label="Frequency days">
-                    <Input
-                      type="number"
-                      min={1}
-                      value={form.frequency ?? ''}
-                      onChange={(e) => set('frequency')(e.target.value)}
-                    />
+                    <NumberInput value={form.frequency ?? ''} onValueChange={set('frequency')} />
                   </Field>
                 </div>
                 <Field label="Next service date">
-                  <Input
-                    type="date"
-                    value={form.nextDueAt ?? ''}
-                    onChange={(e) => set('nextDueAt')(e.target.value)}
-                  />
+                  <DatePicker value={form.nextDueAt ?? ''} onChange={set('nextDueAt')} />
                 </Field>
                 <Field label="Unit (optional)">
                   <Select
@@ -285,7 +265,7 @@ export function MaintenanceCreateDialog({
               </>
             )}
             {options.isError && (
-              <p className="text-sm text-destructive">Configuration options could not be loaded.</p>
+              <Alert variant="danger">Configuration options could not be loaded.</Alert>
             )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
@@ -293,24 +273,16 @@ export function MaintenanceCreateDialog({
               </Button>
               <Button
                 onClick={() => mutation.mutate()}
-                disabled={options.isLoading || options.isError || mutation.isPending}
+                disabled={options.isLoading || options.isError}
+                isLoading={mutation.isPending}
+                loadingText="Creating…"
               >
-                {mutation.isPending ? 'Creating…' : 'Create'}
+                Create
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
     </>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium">{label}</span>
-      {children}
-    </label>
   );
 }

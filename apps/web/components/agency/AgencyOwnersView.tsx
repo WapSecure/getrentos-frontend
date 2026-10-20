@@ -7,13 +7,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   UserRound,
   Building2,
-  AlertTriangle,
-  Loader2,
   ArrowRight,
   Mail,
   UserPlus,
 } from 'lucide-react';
-import { Badge, Button, type BadgeVariant, useToast } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ListSkeleton,
+  type BadgeVariant,
+  useToast,
+} from '@getrentos/ui';
 import { useCustody } from './CustodyProvider';
 import { InviteOwnerModal } from './InviteOwnerModal';
 import { unwrap } from '@/lib/apiHelpers';
@@ -82,8 +89,7 @@ export function AgencyOwnersView() {
       setInviteOpen(false);
       toast.success('Invitation sent.');
     },
-    onError: (e: Error) =>
-      toast.error(e.message || 'Could not send the invite.'),
+    onError: (e: Error) => toast.error(e.message || 'Could not send the invite.'),
   });
 
   const revokeMutation = useMutation({
@@ -92,8 +98,7 @@ export function AgencyOwnersView() {
       queryClient.invalidateQueries({ queryKey: ['agency', 'ownerInvites'] });
       toast.success('Invitation withdrawn.');
     },
-    onError: (e: Error) =>
-      toast.error(e.message || 'Could not withdraw.'),
+    onError: (e: Error) => toast.error(e.message || 'Could not withdraw.'),
   });
 
   const groups = useMemo<OwnerGroup[]>(() => {
@@ -125,25 +130,23 @@ export function AgencyOwnersView() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 p-8 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-        Loading your clients…
+      <div className="p-6">
+        <ListSkeleton rows={4} variant="cards" label="Loading your clients" />
       </div>
     );
   }
 
-  if (error) {
+  if (error && mandates.length === 0) {
     return (
-      <div className="m-6 flex items-center gap-2 rounded-xl border border-border bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
-        We could not load your clients ({error}).
+      <div className="p-6">
+        <Alert variant="warning">We could not load your clients ({error}).</Alert>
       </div>
     );
   }
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-start justify-between gap-3">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Clients</h1>
           <p className="mt-1 text-muted-foreground">
@@ -152,24 +155,21 @@ export function AgencyOwnersView() {
               : `${groups.length} owner${groups.length === 1 ? '' : 's'} across ${mandates.length} propert${mandates.length === 1 ? 'y' : 'ies'}.`}
           </p>
         </div>
-        <Button onClick={() => setInviteOpen(true)}>
-          <UserPlus className="h-4 w-4" />
+        <Button onClick={() => setInviteOpen(true)} icon={<UserPlus className="h-4 w-4" />}>
           Invite owner
         </Button>
       </div>
 
       {groups.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12 text-center">
-          <UserRound className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="text-muted-foreground">No client engagements yet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Invite an owner to bring their property under your management.
-          </p>
-        </div>
+        <EmptyState
+          icon={UserRound}
+          title="No client engagements yet."
+          description="Invite an owner to bring their property under your management."
+        />
       ) : (
         <div className="grid gap-5 lg:grid-cols-2">
           {groups.map((group) => (
-            <div key={group.ownerId} className="rounded-2xl border border-border bg-card p-5">
+            <Card key={group.ownerId} className="rounded-2xl p-5">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <Link
                   href={`/agency/owners/${group.ownerId}`}
@@ -208,7 +208,7 @@ export function AgencyOwnersView() {
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
@@ -217,7 +217,7 @@ export function AgencyOwnersView() {
       {outstandingInvites.length > 0 && (
         <div className="mt-8">
           <h2 className="mb-2 text-sm font-semibold text-foreground">Invited owners</h2>
-          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <tbody className="divide-y divide-border/60">
                 {outstandingInvites.map((invite) => {
@@ -251,6 +251,9 @@ export function AgencyOwnersView() {
                           size="sm"
                           onClick={() => revokeMutation.mutate(invite.id)}
                           disabled={revokeMutation.isPending}
+                          isLoading={
+                            revokeMutation.isPending && revokeMutation.variables === invite.id
+                          }
                         >
                           Withdraw
                         </Button>

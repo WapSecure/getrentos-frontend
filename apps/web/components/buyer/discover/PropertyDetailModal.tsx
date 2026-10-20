@@ -15,7 +15,7 @@ import {
   MessageSquare,
   PlayCircle,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';
 
@@ -46,6 +46,9 @@ export const PropertyDetailModal = ({
       {listing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={listing.title}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -64,20 +67,25 @@ export const PropertyDetailModal = ({
                   <span className="text-5xl">🏠</span>
                 </div>
               )}
-              <button
+              <IconButton
+                label="Close"
+                size="sm"
+                icon={<X />}
                 onClick={onClose}
-                className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <button
+                className="absolute top-3 right-3 bg-card/90 text-foreground backdrop-blur-sm hover:bg-card"
+              />
+              <IconButton
+                label={isSaved ? 'Remove from saved' : 'Save property'}
+                aria-pressed={isSaved}
+                size="sm"
+                icon={
+                  <Heart
+                    className={isSaved ? 'text-destructive fill-destructive' : 'text-foreground'}
+                  />
+                }
                 onClick={onToggleSave}
-                className="absolute top-3 right-14 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70"
-              >
-                <Heart
-                  className={`w-4 h-4 ${isSaved ? 'text-red-500 fill-red-500' : 'text-foreground'}`}
-                />
-              </button>
+                className="absolute top-3 right-14 bg-card/90 backdrop-blur-sm hover:bg-card"
+              />
               <div className="absolute bottom-3 left-4 bg-primary text-primary-foreground px-3 py-1.5 rounded-lg text-lg font-bold">
                 {formatCurrency(listing.askingPrice)}
               </div>
@@ -97,7 +105,7 @@ export const PropertyDetailModal = ({
                 )}
               </div>
 
-              <div className="flex items-center gap-5 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
                 {listing.bedrooms !== undefined && (
                   <span className="flex items-center gap-1.5">
                     <BedDouble className="w-4 h-4 text-muted-foreground" />
@@ -141,7 +149,7 @@ export const PropertyDetailModal = ({
                     </button>
                   )}
                   {listing.videoTourFilmedOnSite && (
-                    <p className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400">
+                    <p className="flex items-center gap-1 text-xs font-medium text-success">
                       <MapPin className="w-3 h-3" aria-hidden />
                       Filmed on site in the GetRentos app
                     </p>
@@ -171,27 +179,40 @@ export const PropertyDetailModal = ({
                   <p className="text-sm font-medium text-foreground">{listing.ownerName}</p>
                 </div>
                 {listing.ownerVerified && (
-                  <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-                    <ShieldCheck className="w-3 h-3" />
+                  <Badge variant="success" icon={<ShieldCheck className="w-3 h-3" />}>
                     Verified
-                  </span>
+                  </Badge>
                 )}
               </div>
 
-              <p className="text-xs text-muted-foreground">Listed {formatDate(listing.listedDate)}</p>
+              <p className="text-xs text-muted-foreground">
+                Listed {formatDate(listing.listedDate)}
+              </p>
             </div>
 
             <div className="p-4 border-t border-border grid grid-cols-3 gap-2 shrink-0">
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={onMessageOwner}>
-                <MessageSquare className="w-3.5 h-3.5" />
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<MessageSquare className="w-3.5 h-3.5" />}
+                onClick={onMessageOwner}
+              >
                 Message
               </Button>
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={onRequestViewing}>
-                <CalendarClock className="w-3.5 h-3.5" />
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<CalendarClock className="w-3.5 h-3.5" />}
+                onClick={onRequestViewing}
+              >
                 View
               </Button>
-              <Button variant="primary" size="sm" className="gap-1.5" onClick={onMakeOffer}>
-                <Handshake className="w-3.5 h-3.5" />
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Handshake className="w-3.5 h-3.5" />}
+                onClick={onMakeOffer}
+              >
                 Offer
               </Button>
             </div>

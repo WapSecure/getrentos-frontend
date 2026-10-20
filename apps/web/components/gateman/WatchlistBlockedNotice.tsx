@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, Field, Input } from '@getrentos/ui';
 import type { WatchlistMatch, WatchlistMatchedOn } from '@/types/estate';
 
 /** Matches the API's floor. Kept in step so the guard is not told off by the server for something the form allowed. */
@@ -114,37 +114,33 @@ export const WatchlistBlockedNotice = ({
             </div>
           ) : (
             <div className="space-y-2 pt-1">
-              <label
+              {/* The hint says what the reason is for. Without it a guard types
+                  "ok", the form refuses it, and a control that exists to prevent
+                  a wrong refusal ends up looking broken. */}
+              <Field
+                label="Why are you admitting them?"
                 htmlFor="watchlist-override-reason"
-                className="block text-sm font-medium text-foreground"
+                hint={`Recorded against your name and sent to the estate office. At least ${OVERRIDE_REASON_MIN_LENGTH} characters.`}
+                error={error ?? undefined}
               >
-                Why are you admitting them?
-              </label>
-              <LegacyInput
-                type="text"
-                id="watchlist-override-reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="e.g. Plate differs by one letter, driver is a different man"
-              />
-              {/* Says what the reason is for. Without this a guard types "ok",
-                  the form refuses it, and a control that exists to prevent a
-                  wrong refusal ends up looking broken. */}
-              <p className="text-xs text-muted-foreground">
-                Recorded against your name and sent to the estate office. At least{' '}
-                {OVERRIDE_REASON_MIN_LENGTH} characters.
-              </p>
-
-              {error && <p className="text-sm text-destructive">{error}</p>}
+                <Input
+                  type="text"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="e.g. Plate differs by one letter, driver is a different man"
+                />
+              </Field>
 
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant="primary"
                   size="sm"
-                  disabled={!canOverride || isOverriding}
+                  disabled={!canOverride}
+                  isLoading={isOverriding}
+                  loadingText="Admitting…"
                   onClick={() => onOverride(reason.trim())}
                 >
-                  {isOverriding ? 'Admitting…' : 'Admit anyway'}
+                  Admit anyway
                 </Button>
                 <Button
                   variant="ghost"

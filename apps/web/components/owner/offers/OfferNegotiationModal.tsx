@@ -1,11 +1,18 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, Check, XCircle, RefreshCcw } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import { Check, XCircle, RefreshCcw } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  CurrencyInput,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Input,
+} from '@getrentos/ui';
 import { formatCurrency, getInitials } from '@/lib/format';
 import type { SaleOffer, OfferMessage } from '@/types/owner';
 
@@ -78,167 +85,143 @@ export const OfferNegotiationModal = ({
   };
 
   return (
-    <AnimatePresence>
+    <Dialog open={Boolean(offer)} onOpenChange={(open) => !open && handleClose()}>
       {offer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="offer-negotiation-title"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
-                  {getInitials(offer.buyerName)}
-                </div>
-                <div>
-                  <h3 id="offer-negotiation-title" className="font-semibold text-foreground">
-                    {offer.buyerName}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">{offer.propertyName}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label="Close offer"
-                className="p-1 rounded-lg hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
+        <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0">
+          <div className="flex shrink-0 items-center gap-3 border-b border-border p-4 pr-12">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+              {getInitials(offer.buyerName)}
             </div>
-
-            <div className="p-3 bg-gray-50 dark:bg-white/5 border-b border-border flex items-center justify-between text-sm shrink-0">
-              <span className="text-muted-foreground">
-                Asking {formatCurrency(offer.askingPrice, { compact: true })}
-              </span>
-              <span className="font-semibold text-primary">
-                Current offer {formatCurrency(offer.offerAmount, { compact: true })}
-              </span>
+            <div className="min-w-0">
+              <DialogTitle className="truncate font-semibold text-foreground">
+                {offer.buyerName}
+              </DialogTitle>
+              <DialogDescription className="truncate text-xs text-muted-foreground">
+                {offer.propertyName}
+              </DialogDescription>
             </div>
+          </div>
 
-            <div className="p-4 space-y-3 overflow-y-auto flex-1">
-              {messages.map((msg) => {
-                const isOwner = msg.senderId === 'owner';
-                const isSystem = msg.type !== 'message';
-                if (isSystem) {
-                  return (
-                    <div key={msg.id} className="flex justify-center">
-                      <span className="text-xs px-3 py-1.5 rounded-full bg-secondary text-muted-foreground">
-                        {msg.text}
-                        {msg.amount !== undefined && (
-                          <strong className="text-foreground">
-                            {' '}
-                            {formatCurrency(msg.amount, { compact: true })}
-                          </strong>
-                        )}
-                      </span>
-                    </div>
-                  );
-                }
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-secondary/60 p-3 text-sm">
+            <span className="text-muted-foreground">
+              Asking {formatCurrency(offer.askingPrice, { compact: true })}
+            </span>
+            <span className="font-semibold text-primary">
+              Current offer {formatCurrency(offer.offerAmount, { compact: true })}
+            </span>
+          </div>
+
+          <div className="flex-1 space-y-3 overflow-y-auto p-4">
+            {messages.map((msg) => {
+              const isOwner = msg.senderId === 'owner';
+              const isSystem = msg.type !== 'message';
+              if (isSystem) {
                 return (
-                  <div key={msg.id} className={`flex ${isOwner ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                      className={`max-w-[75%] rounded-2xl p-3 ${
-                        isOwner
-                          ? 'bg-primary text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-foreground'
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>
-                    </div>
+                  <div key={msg.id} className="flex justify-center">
+                    <span className="rounded-full bg-secondary px-3 py-1.5 text-xs text-muted-foreground">
+                      {msg.text}
+                      {msg.amount !== undefined && (
+                        <strong className="text-foreground">
+                          {' '}
+                          {formatCurrency(msg.amount, { compact: true })}
+                        </strong>
+                      )}
+                    </span>
                   </div>
                 );
-              })}
-            </div>
+              }
+              return (
+                <div key={msg.id} className={`flex ${isOwner ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`max-w-[75%] rounded-2xl p-3 ${
+                      isOwner
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-foreground'
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap break-words text-sm">{msg.text}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-            {isCountering ? (
-              <div className="p-4 border-t border-border space-y-3 shrink-0">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Counter Amount (₦)
-                  </label>
-                  <CurrencyInput
-                    prefix="₦"
-                    min={0}
-                    value={counterAmount}
-                    onValueChange={(v) => setCounterAmount(v === 0 ? '' : String(v))}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Note (optional)
-                  </label>
-                  <LegacyInput
-                    type="text"
-                    value={counterNote}
-                    onChange={(e) => setCounterNote(e.target.value)}
-                    placeholder="e.g. Firm on closing within 30 days"
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="ghost" className="flex-1" onClick={() => setIsCountering(false)}>
-                    Cancel
+          {isCountering ? (
+            <div className="shrink-0 space-y-3 border-t border-border p-4">
+              <Field label="Counter Amount (₦)" required>
+                <CurrencyInput
+                  prefix="₦"
+                  min={0}
+                  value={counterAmount}
+                  onValueChange={(v) => setCounterAmount(v === 0 ? '' : String(v))}
+                />
+              </Field>
+              <Field label="Note (optional)">
+                <Input
+                  type="text"
+                  value={counterNote}
+                  onChange={(e) => setCounterNote(e.target.value)}
+                  placeholder="e.g. Firm on closing within 30 days"
+                />
+              </Field>
+              <div className="flex gap-3">
+                <Button variant="ghost" className="flex-1" onClick={() => setIsCountering(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  onClick={() => void handleSubmitCounter()}
+                  disabled={!counterAmount}
+                  isLoading={isSubmitting}
+                  loadingText="Sending…"
+                >
+                  Send Counter
+                </Button>
+              </div>
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+            </div>
+          ) : (
+            <div className="shrink-0 space-y-3 border-t border-border p-4">
+              {!isDecided && (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setErrorMessage(null);
+                      setIsCountering(true);
+                    }}
+                    disabled={isSubmitting}
+                    icon={<RefreshCcw className="h-3.5 w-3.5" />}
+                  >
+                    Counter
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="flex-1 text-destructive"
+                    onClick={() => void runAction('reject')}
+                    disabled={isSubmitting}
+                    icon={<XCircle className="h-3.5 w-3.5" />}
+                  >
+                    Reject
                   </Button>
                   <Button
                     variant="primary"
                     className="flex-1"
-                    onClick={() => void handleSubmitCounter()}
-                    disabled={!counterAmount || isSubmitting}
+                    onClick={() => void runAction('accept')}
+                    disabled={isSubmitting}
+                    icon={<Check className="h-3.5 w-3.5" />}
                   >
-                    {isSubmitting ? 'Sending…' : 'Send Counter'}
+                    Accept
                   </Button>
                 </div>
-                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
-              </div>
-            ) : (
-              <div className="p-4 border-t border-border shrink-0 space-y-3">
-                {!isDecided && (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1 gap-1.5"
-                      onClick={() => {
-                        setErrorMessage(null);
-                        setIsCountering(true);
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      <RefreshCcw className="w-3.5 h-3.5" />
-                      Counter
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
-                      onClick={() => void runAction('reject')}
-                      disabled={isSubmitting}
-                    >
-                      <XCircle className="w-3.5 h-3.5" />
-                      Reject
-                    </Button>
-                    <Button
-                      variant="primary"
-                      className="flex-1 gap-1.5"
-                      onClick={() => void runAction('accept')}
-                      disabled={isSubmitting}
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      Accept
-                    </Button>
-                  </div>
-                )}
-                {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
-              </div>
-            )}
-          </motion.div>
-        </div>
+              )}
+              {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+            </div>
+          )}
+        </DialogContent>
       )}
-    </AnimatePresence>
+    </Dialog>
   );
 };

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ShieldCheck, Siren } from 'lucide-react';
-import { Button, EmptyState } from '@getrentos/ui';
+import { Alert, Button, Card, CardSkeleton, EmptyState, Field, Textarea } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -60,7 +60,7 @@ export default function ResidentEmergencyPage() {
   });
 
   if (isLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton lines={4} />;
   }
 
   if (!data) {
@@ -105,7 +105,7 @@ export default function ResidentEmergencyPage() {
       </div>
 
       {/* The one action this page exists for. */}
-      <div className="bg-card rounded-2xl border border-border p-5">
+      <Card className="p-5">
         <h2 className="font-semibold text-foreground">
           {answered ? 'Is this still right?' : 'Where is your household?'}
         </h2>
@@ -147,7 +147,7 @@ export default function ResidentEmergencyPage() {
                     {option.label}
                   </span>
                   {isCurrent && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
+                    <span className="inline-flex items-center gap-1 text-xs text-success">
                       <Check className="w-3.5 h-3.5" />
                       Your answer
                     </span>
@@ -163,40 +163,42 @@ export default function ResidentEmergencyPage() {
 
         {selected && (
           <div className="mt-4">
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Anything to add? <span className="text-muted-foreground">(optional)</span>
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-              maxLength={300}
-              placeholder={notePlaceholder(selected)}
-              className="w-full rounded-lg border border-border bg-transparent p-3 text-sm"
-            />
+            <Field label="Anything to add?" optionalLabel="(optional)">
+              <Textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                maxLength={300}
+                showCount
+                placeholder={notePlaceholder(selected)}
+              />
+            </Field>
             {answer.error && (
-              <p className="text-sm text-destructive mt-2">{(answer.error as Error).message}</p>
+              <Alert variant="danger" className="mt-2">
+                {(answer.error as Error).message}
+              </Alert>
             )}
-            <div className="flex justify-end gap-2 mt-3">
+            <div className="flex flex-wrap justify-end gap-2 mt-3">
               <Button variant="ghost" onClick={() => setSelected(null)}>
                 Cancel
               </Button>
               <Button
                 variant="primary"
-                disabled={answer.isPending}
+                isLoading={answer.isPending}
+                loadingText="Sending…"
                 onClick={() =>
                   answer.mutate({ state: selected, stateNote: note.trim() || undefined })
                 }
               >
-                {answer.isPending ? 'Sending…' : 'Send to the estate office'}
+                Send to the estate office
               </Button>
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Your own lines, and the estate's numbers. Never the estate's roll. */}
-      <div className="bg-card rounded-2xl border border-border p-5">
+      <Card className="p-5">
         <h2 className="font-semibold text-foreground">Your household</h2>
         {myEntries.length === 0 ? (
           <p className="text-sm text-muted-foreground mt-2">
@@ -249,7 +251,7 @@ export default function ResidentEmergencyPage() {
             </div>
           </div>
         )}
-      </div>
+      </Card>
 
       <div>
         <h2 className="font-semibold text-foreground mb-3">How the estate is doing</h2>

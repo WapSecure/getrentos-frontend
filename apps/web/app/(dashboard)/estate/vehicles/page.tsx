@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, Plus, Settings2 } from 'lucide-react';
 import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -54,6 +54,7 @@ export default function EstateVehiclesPage() {
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   // The API only supports an "open" boolean filter: "exited" is applied client-side on this page.
   const logs = (data?.items ?? []).filter((log) =>
@@ -99,7 +100,7 @@ export default function EstateVehiclesPage() {
             {total} log{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
             <Settings2 className="w-4 h-4" />
             Manage Gates
@@ -117,6 +118,7 @@ export default function EstateVehiclesPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => {
               setStatusFilter(filter.value);
               setPage(1);

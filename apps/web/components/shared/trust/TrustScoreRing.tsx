@@ -68,12 +68,12 @@ export const TrustScoreRing = ({ score, size = 160, strokeWidth = 12 }: TrustSco
           <span
             className={`text-xs font-medium mt-1 ${
               score >= 90
-                ? 'text-green-600'
+                ? 'text-success'
                 : score >= 70
-                  ? 'text-blue-600'
+                  ? 'text-info'
                   : score >= 50
-                    ? 'text-yellow-600'
-                    : 'text-red-600'
+                    ? 'text-warning'
+                    : 'text-destructive'
             }`}
           >
             {getScoreLabel()}

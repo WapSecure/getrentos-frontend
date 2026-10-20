@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Bath, BedDouble, Building2, CalendarClock, Home, MapPin } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, Skeleton } from '@getrentos/ui';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -159,6 +159,7 @@ export const EstateAvailableListings = ({
         })
       ),
     staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
   });
 
   const listings = data?.items ?? [];
@@ -198,6 +199,7 @@ export const EstateAvailableListings = ({
               <button
                 key={t.key}
                 type="button"
+                aria-pressed={active}
                 onClick={() => setTab(t.key)}
                 className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors ${
                   active
@@ -218,7 +220,7 @@ export const EstateAvailableListings = ({
       {isLoading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-72 rounded-2xl bg-secondary animate-pulse" />
+            <Skeleton key={i} className="h-72 w-full rounded-2xl" />
           ))}
         </div>
       ) : listings.length === 0 ? (

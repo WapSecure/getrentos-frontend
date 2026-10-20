@@ -36,7 +36,7 @@ export function CapabilityChip({ on, label }: { on: boolean; label: string }) {
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
         on
-          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          ? 'bg-success-subtle text-success'
           : 'bg-muted text-muted-foreground line-through'
       }`}
     >

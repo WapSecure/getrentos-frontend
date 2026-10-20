@@ -1,7 +1,7 @@
 'use client';
 
 import { Shield, TrendingUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { trustBand } from '@/lib/trustScore';
 
 interface TrustScoreHeaderProps {
@@ -10,27 +10,31 @@ interface TrustScoreHeaderProps {
 
 export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
   const scoreInfo = trustBand(trustScore);
+  const bandVariant: BadgeVariant =
+    trustScore >= 90
+      ? 'success'
+      : trustScore >= 70
+        ? 'info'
+        : trustScore >= 50
+          ? 'warning'
+          : 'danger';
 
   return (
     <div className="mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold text-foreground">Trust Score</h1>
-            <span
-              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${scoreInfo.color} bg-${scoreInfo.color.includes('green') ? 'green' : scoreInfo.color.includes('blue') ? 'blue' : scoreInfo.color.includes('yellow') ? 'yellow' : 'red'}-50 dark:bg-${scoreInfo.color.includes('green') ? 'green' : scoreInfo.color.includes('blue') ? 'blue' : scoreInfo.color.includes('yellow') ? 'yellow' : 'red'}-900/20`}
-            >
-              <Shield className="w-4 h-4" />
+            <Badge variant={bandVariant} icon={<Shield className="w-4 h-4" aria-hidden="true" />}>
               {scoreInfo.label}
-            </span>
+            </Badge>
           </div>
           <p className="text-muted-foreground mt-1">
             Your trust score determines your credibility on the platform
           </p>
         </div>
 
-        <Button variant="primary" className="gap-2" size="sm">
-          <TrendingUp className="w-4 h-4" />
+        <Button variant="primary" size="sm" icon={<TrendingUp className="w-4 h-4" />}>
           Improve Score
         </Button>
       </div>

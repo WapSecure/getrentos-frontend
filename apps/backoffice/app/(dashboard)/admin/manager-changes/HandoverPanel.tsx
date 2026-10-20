@@ -73,7 +73,11 @@ export function HandoverPanel({
 
   if (q.isLoading)
     return (
-      <div role="status" aria-label="Loading handover" className="mt-3 space-y-2 border-t border-border pt-3">
+      <div
+        role="status"
+        aria-label="Loading handover"
+        className="mt-3 space-y-2 border-t border-border pt-3"
+      >
         <Skeleton className="h-3 w-2/3" />
         <Skeleton className="h-3 w-1/2" />
         <Skeleton className="h-3 w-1/3" />

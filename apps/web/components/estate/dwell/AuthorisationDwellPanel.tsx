@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CalendarRange, Repeat } from 'lucide-react';
-import { EmptyState } from '@getrentos/ui';
+import { Badge, type BadgeVariant, Card, EmptyState, ListSkeleton, Switch } from '@getrentos/ui';
 import type { AuthorisationDwellReport } from '@/types/estate';
 
 interface AuthorisationDwellPanelProps {
@@ -10,10 +10,10 @@ interface AuthorisationDwellPanelProps {
   isLoading: boolean;
 }
 
-const statusTone: Record<string, string> = {
-  ACTIVE: 'text-emerald-600',
-  REVOKED: 'text-destructive',
-  EXPIRED: 'text-muted-foreground',
+const statusTone: Record<string, BadgeVariant> = {
+  ACTIVE: 'success',
+  REVOKED: 'danger',
+  EXPIRED: 'neutral',
 };
 
 /**
@@ -37,13 +37,7 @@ export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwel
   const [showOnlyUsed, setShowOnlyUsed] = useState(false);
 
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[0, 1, 2].map((key) => (
-          <div key={key} className="h-24 animate-pulse rounded-2xl bg-secondary" />
-        ))}
-      </div>
-    );
+    return <ListSkeleton variant="cards" rows={3} />;
   }
 
   const authorisations = report?.authorisations ?? [];
@@ -67,40 +61,29 @@ export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwel
           <CalendarRange className="w-4 h-4" />
           {new Date(report.from).toLocaleDateString()} to {new Date(report.to).toLocaleDateString()}
         </p>
-        <button
-          type="button"
-          aria-pressed={showOnlyUsed}
-          onClick={() => setShowOnlyUsed((current) => !current)}
-          className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap border self-start ${
-            showOnlyUsed
-              ? 'border-primary bg-primary/10 text-foreground'
-              : 'border-border text-muted-foreground'
-          }`}
-        >
-          Only authorisations that were used
-        </button>
+        <Switch
+          checked={showOnlyUsed}
+          onCheckedChange={setShowOnlyUsed}
+          label="Only authorisations that were used"
+          className="self-start"
+        />
       </div>
 
       {visible.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-5">
-          <p className="text-sm text-muted-foreground">
-            Nobody has been admitted on an authorisation in this period.
-          </p>
-        </div>
+        <EmptyState
+          icon={Repeat}
+          title="Nobody has been admitted on an authorisation in this period."
+          size="compact"
+        />
       ) : (
         <div className="space-y-3">
           {visible.map((row) => (
-            <div
-              key={row.contractorPassId}
-              className="bg-card rounded-2xl border border-border p-4"
-            >
+            <Card key={row.contractorPassId} className="p-4">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-medium text-foreground">{row.name}</p>
-                    <span className={`text-xs font-medium ${statusTone[row.status] ?? ''}`}>
-                      {row.statusLabel}
-                    </span>
+                    <Badge variant={statusTone[row.status] ?? 'neutral'}>{row.statusLabel}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {[row.company, row.trade].filter(Boolean).join(' · ') || 'No firm recorded'}
@@ -146,13 +129,13 @@ export const AuthorisationDwellPanel = ({ report, isLoading }: AuthorisationDwel
               {/* Named separately from the average, because an average over
                   completed visits cannot see either of these. */}
               {row.openVisits > 0 && (
-                <p className="text-xs text-amber-600 mt-1">
+                <p className="text-xs text-warning mt-1">
                   {row.openVisits === 1
                     ? 'One visit was never logged out, so it has no finished duration to average.'
                     : `${row.openVisits} visits were never logged out, so they have no finished duration to average.`}
                 </p>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       )}

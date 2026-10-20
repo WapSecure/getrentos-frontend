@@ -43,74 +43,76 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
-      <div className="relative">
-        {/* Status Bar */}
-        <div className={`h-1 ${getStatusColor()}`} />
+        <div className="relative">
+          {/* Status Bar */}
+          <div className={`h-1 ${getStatusColor()}`} />
 
-        <div className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent">
-                <Building2 className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">{lease.propertyName}</h3>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-                  <MapPin className="w-3 h-3" />
-                  <span className="text-xs">{lease.address}</span>
+          <div className="p-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-accent">
+                  <Building2 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground">{lease.propertyName}</h3>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
+                    <MapPin className="w-3 h-3" />
+                    <span className="text-xs">{lease.address}</span>
+                  </div>
                 </div>
               </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-primary">
+                  {formatCurrency(lease.rentAmount)}
+                  {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {getDaysRemaining()} days left
+                </p>
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-bold text-primary">
-                {formatCurrency(lease.rentAmount)}
-                {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">{getDaysRemaining()} days left</p>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border">
-            <div>
-              <p className="text-xs text-muted-foreground">Lease Start</p>
-              <p className="text-sm font-medium text-foreground">
-                {new Date(lease.startDate).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </p>
+            <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border">
+              <div>
+                <p className="text-xs text-muted-foreground">Lease Start</p>
+                <p className="text-sm font-medium text-foreground">
+                  {new Date(lease.startDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Lease End</p>
+                <p className="text-sm font-medium text-foreground">
+                  {new Date(lease.endDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Security Deposit</p>
+                <p className="text-sm font-medium text-foreground">
+                  {formatCurrency(lease.securityDeposit)}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Lease End</p>
-              <p className="text-sm font-medium text-foreground">
-                {new Date(lease.endDate).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">Security Deposit</p>
-              <p className="text-sm font-medium text-foreground">
-                {formatCurrency(lease.securityDeposit)}
-              </p>
-            </div>
-          </div>
 
-          {/* Landlord Info Mini */}
-          <div className="mt-3 pt-3 border-t border-border flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-              {lease.landlord.name.charAt(0)}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">{lease.landlord.name}</p>
-              <p className="text-xs text-muted-foreground">{lease.landlord.email}</p>
+            {/* Landlord Info Mini */}
+            <div className="mt-3 pt-3 border-t border-border flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                {lease.landlord.name.charAt(0)}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">{lease.landlord.name}</p>
+                <p className="text-xs text-muted-foreground">{lease.landlord.email}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </Card>
     </motion.div>
   );

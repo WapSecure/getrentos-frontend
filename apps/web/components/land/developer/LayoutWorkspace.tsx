@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Card,
   Dialog,
   DialogContent,
   DialogTitle,
   PageErrorState,
+  Skeleton,
   Tabs,
   TabsContent,
   TabsList,
@@ -100,20 +102,24 @@ const LayoutSetup = ({
         </div>
       </div>
       {blocker ? (
-        <div className="mt-5 rounded-xl border border-warning/30 bg-warning/5 p-4 text-sm text-foreground">
-          <p>{blocker}</p>
-          <Button
-            href={LAND_DEVELOPER_ROUTES.portfolio(propertyId)}
-            variant="outline"
-            size="sm"
-            rounded="lg"
-            className="mt-3"
-            iconPosition="right"
-            icon={<ArrowRight className="h-4 w-4" />}
-          >
-            Open parcel record
-          </Button>
-        </div>
+        <Alert
+          variant="warning"
+          className="mt-5"
+          action={
+            <Button
+              href={LAND_DEVELOPER_ROUTES.portfolio(propertyId)}
+              variant="outline"
+              size="sm"
+              rounded="lg"
+              iconPosition="right"
+              icon={<ArrowRight className="h-4 w-4" />}
+            >
+              Open parcel record
+            </Button>
+          }
+        >
+          {blocker}
+        </Alert>
       ) : (
         <div className="mt-6">
           <LayoutForm
@@ -162,7 +168,7 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
 
   let body: React.ReactNode;
   if (isLoading) {
-    body = <div className="h-96 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    body = <Skeleton className="h-96 rounded-2xl" />;
   } else if (isError) {
     body = (
       <PageErrorState
@@ -221,9 +227,5 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
     );
   }
 
-  return (
-    <>
-      {body}
-    </>
-  );
+  return <>{body}</>;
 };

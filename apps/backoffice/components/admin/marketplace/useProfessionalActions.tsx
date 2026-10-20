@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ConfirmDialog, Toast } from '@getrentos/ui';
+import { ConfirmDialog, useToast } from '@getrentos/ui';
 
 /** Triggers a browser download for an authenticated CSV blob. */
 export function downloadBlob(blob: Blob, filename: string) {
@@ -32,42 +32,35 @@ export function useProfessionalActions(invalidateKey: 'realtors' | 'agents') {
   const client = useQueryClient();
   const [action, setAction] = useState<ProfessionalAction | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
   const mutation = useMutation({
     mutationFn: async () => action?.run(reason.trim()),
     onSuccess: async () => {
       setAction(null);
       setReason('');
-      setToast({ message: 'Action completed and audited.', variant: 'success' });
+      toast.success('Action completed and audited.');
       await client.invalidateQueries({ queryKey: ['admin', invalidateKey] });
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   return {
     request: setAction,
     feedback: (
-      <>
-        <ConfirmDialog
-          open={Boolean(action)}
-          onOpenChange={(open) => !open && setAction(null)}
-          title={action?.title ?? 'Confirm action'}
-          description={action?.description ?? ''}
-          confirmLabel={action?.label}
-          isLoading={mutation.isPending}
-          promptLabel="Administrative reason"
-          promptValue={reason}
-          onPromptChange={setReason}
-          promptRequired
-          promptMinLength={10}
-          onConfirm={() => mutation.mutate()}
-        />
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
-      </>
+      <ConfirmDialog
+        open={Boolean(action)}
+        onOpenChange={(open) => !open && setAction(null)}
+        title={action?.title ?? 'Confirm action'}
+        description={action?.description ?? ''}
+        confirmLabel={action?.label}
+        isLoading={mutation.isPending}
+        promptLabel="Administrative reason"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+        onConfirm={() => mutation.mutate()}
+      />
     ),
   };
 }

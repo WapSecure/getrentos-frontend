@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt } from 'lucide-react';
 import {
   Button,
@@ -11,12 +11,13 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   Field,
+  ListSkeleton,
   DatePicker,
   Pagination,
   Select,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import { rentSuffix } from '@/lib/leaseTerm';
@@ -61,14 +62,15 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
   const [dueDate, setDueDate] = useState('');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('MONTHLY');
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const planGate = usePlanGateModal();
 
-  const { data: unitsData } = useQuery({
+  const { data: unitsData, isPending: isLoadingUnits } = useQuery({
     queryKey: [
       ...landlordKeys.units(propertyId || undefined),
       { page, pageSize: PAGE_SIZE, bulkCharge: true },
     ],
+    placeholderData: keepPreviousData,
     queryFn: () =>
       unwrap(
         landlordService.listUnits({
@@ -125,12 +127,13 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
         result.skipped.length > 0
           ? `Charged ${result.created} unit${result.created === 1 ? '' : 's'}, skipped ${result.skipped.length} without a signed lease.`
           : `Charged ${result.created} unit${result.created === 1 ? '' : 's'}.`;
-      setToast({ message: summary, variant: result.created > 0 ? 'success' : 'error' });
+      if (result.created > 0) toast.success(summary);
+      else toast.error(summary);
       if (result.created > 0) handleClose();
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
-      setToast({ message: error.message || 'Unable to create these charges.', variant: 'error' });
+      toast.error(error.message || 'Unable to create these charges.');
     },
   });
 
@@ -204,9 +207,8 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
                   options={billingCycleOptions}
                 />
               </Field>
-              <Field label="Amount (₦)" htmlFor="bulk-charge-amount" required>
+              <Field label="Amount (₦)" required>
                 <CurrencyInput
-                  id="bulk-charge-amount"
                   prefix="₦"
                   min={1}
                   value={amount}
@@ -220,31 +222,28 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
             </div>
 
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <p className="text-sm font-medium text-foreground">
                   Units ({selectedUnitIds.length} selected across {totalUnits})
                 </p>
                 {eligibleUnits.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={toggleAll}
-                    className="text-xs font-medium text-primary hover:underline"
-                  >
+                  <Button variant="ghost" size="xs" className="text-primary" onClick={toggleAll}>
                     {eligibleUnits.every((unit) => selectedUnitIds.includes(unit.id))
                       ? 'Deselect page'
                       : 'Select page'}
-                  </button>
+                  </Button>
                 )}
               </div>
 
-              {eligibleUnits.length === 0 ? (
-                <div className="rounded-xl border border-border p-6 text-center">
-                  <Receipt className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    No occupied units on this page{propertyId ? ' for this property' : ''}. Only
-                    units with a tenant can be charged.
-                  </p>
-                </div>
+              {isLoadingUnits ? (
+                <ListSkeleton rows={3} />
+              ) : eligibleUnits.length === 0 ? (
+                <EmptyState
+                  icon={Receipt}
+                  title="No occupied units"
+                  description={`No occupied units on this page${propertyId ? ' for this property' : ''}. Only units with a tenant can be charged.`}
+                  size="compact"
+                />
               ) : (
                 <div className="max-h-56 overflow-y-auto rounded-xl border border-border divide-y divide-border">
                   {eligibleUnits.map((unit) => (
@@ -305,10 +304,6 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <UpgradeToProModal
         isOpen={planGate.isOpen}
         onClose={planGate.close}

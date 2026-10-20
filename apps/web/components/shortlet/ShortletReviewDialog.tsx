@@ -8,9 +8,9 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { Star } from 'lucide-react';
 import { cn } from '@getrentos/shared';
@@ -32,7 +32,7 @@ export function ShortletReviewDialog({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [hover, setHover] = useState(0);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const submit = useMutation({
     mutationFn: () =>
@@ -43,10 +43,10 @@ export function ShortletReviewDialog({
         })
       ),
     onSuccess: () => onSubmitted(),
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
-  const canSubmit = rating >= 1 && !submit.isPending;
+  const canSubmit = rating >= 1;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -67,13 +67,14 @@ export function ShortletReviewDialog({
                   onMouseEnter={() => setHover(n)}
                   onMouseLeave={() => setHover(0)}
                   aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                  aria-pressed={rating === n}
                   className="text-3xl transition"
                 >
                   <Star
                     className={cn(
                       'h-8 w-8',
                       (hover || rating) >= n
-                        ? 'fill-amber-400 text-amber-400'
+                        ? 'fill-warning text-warning'
                         : 'text-muted-foreground/40'
                     )}
                   />
@@ -81,26 +82,29 @@ export function ShortletReviewDialog({
               ))}
             </div>
           </div>
-          <div>
-            <p className="mb-2 text-sm font-medium">Comment (optional)</p>
+          <Field label="Comment" optionalLabel="(optional)">
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="What made your stay special?"
               rows={3}
               maxLength={1000}
+              showCount
             />
-          </div>
-          <Button className="w-full" disabled={!canSubmit} onClick={() => submit.mutate()}>
-            {submit.isPending ? 'Submitting…' : 'Submit review'}
+          </Field>
+          <Button
+            className="w-full"
+            disabled={!canSubmit}
+            isLoading={submit.isPending}
+            loadingText="Submitting…"
+            onClick={() => submit.mutate()}
+          >
+            Submit review
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             Your review helps other guests choose with confidence.
           </p>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

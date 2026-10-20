@@ -5,11 +5,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { Building2, CheckCircle2, Circle, Sparkles } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
+  Checkbox,
   EmptyState,
+  Input,
+  ListSkeleton,
   PageErrorState,
+  SearchInput,
   Select,
   Tabs,
   TabsList,
@@ -87,11 +92,10 @@ const ManagedMandateCard = ({
     <Card className="p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            className="mt-1.5 h-4 w-4 shrink-0 accent-primary"
+          <Checkbox
+            className="mt-1"
             checked={selected}
-            onChange={() => onToggleSelected(mandate.id)}
+            onCheckedChange={() => onToggleSelected(mandate.id)}
             aria-label={`Select ${mandate.propertyTitle ?? 'property'} for bulk activation`}
           />
           <div className="shrink-0 rounded-xl bg-muted p-2.5">
@@ -154,7 +158,8 @@ const ManagedMandateCard = ({
                 ariaLabel={`Portfolio manager for ${mandate.propertyTitle ?? 'property'}`}
                 value={managerUserId}
                 onValueChange={setManagerUserId}
-                options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+                placeholder="Choose a staff member…"
+                options={staffOptions}
               />
             </div>
           </label>
@@ -178,7 +183,11 @@ const ManagedMandateCard = ({
           Assign &amp; activate
         </Button>
       </div>
-      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+      {error && (
+        <Alert variant="danger" className="mt-2">
+          {error}
+        </Alert>
+      )}
     </Card>
   );
 };
@@ -294,7 +303,7 @@ const ActiveEngagements = ({
   const actionPending =
     reassign.isPending || suspend.isPending || resume.isPending || requestEnd.isPending;
 
-  if (active.isError) {
+  if (active.isError && !active.data) {
     return (
       <PageErrorState
         title="Could not load engagements"
@@ -305,7 +314,7 @@ const ActiveEngagements = ({
       />
     );
   }
-  if (active.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (active.isLoading) return <ListSkeleton variant="cards" />;
   if (all.length === 0) {
     return (
       <EmptyState
@@ -319,37 +328,35 @@ const ActiveEngagements = ({
   return (
     <>
       <div className="mb-4 flex justify-end">
-        <input
-          type="search"
+        <SearchInput
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onValueChange={setSearch}
           placeholder="Search property, owner or manager…"
-          aria-label="Search active engagements"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-72"
+          label="Search active engagements"
+          className="w-full sm:w-72"
         />
       </div>
 
       <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <label className="flex items-center gap-2 text-sm text-foreground">
-            <input
-              type="checkbox"
-              className="h-4 w-4 accent-primary"
-              checked={allVisibleSelected}
-              onChange={toggleAll}
-              aria-label="Select all visible"
-            />
-            {selectedVisible.length > 0
-              ? `${selectedVisible.length} selected`
-              : `Select all (${filtered.length})`}
-          </label>
+          <Checkbox
+            checked={allVisibleSelected}
+            indeterminate={selectedVisible.length > 0}
+            onCheckedChange={toggleAll}
+            label={
+              selectedVisible.length > 0
+                ? `${selectedVisible.length} selected`
+                : `Select all (${filtered.length})`
+            }
+          />
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="w-full sm:w-72">
               <Select
                 ariaLabel="New portfolio manager for the selected engagements"
                 value={newManager}
                 onValueChange={setNewManager}
-                options={[{ value: '', label: 'Reassign to…' }, ...staffOptions]}
+                placeholder="Reassign to…"
+                options={staffOptions}
               />
             </div>
             <Button
@@ -364,13 +371,12 @@ const ActiveEngagements = ({
         {/* Pause / resume the selection — pausing needs a reason, kept on each. */}
         {selectedVisible.length > 0 && (
           <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
-            <input
-              type="text"
+            <Input
               value={pauseReason}
               onChange={(event) => setPauseReason(event.target.value)}
               placeholder="Reason for pausing (min 10 characters)"
               aria-label="Reason for pausing the selected engagements"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-80"
+              className="w-full sm:w-80"
             />
             <Button
               variant="outline"
@@ -394,13 +400,12 @@ const ActiveEngagements = ({
             approves it under "Termination requests"; nothing ends here. */}
         {selectedVisible.length > 0 && (
           <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
-            <input
-              type="text"
+            <Input
               value={endReason}
               onChange={(event) => setEndReason(event.target.value)}
               placeholder="Reason to request ending (min 10 characters)"
               aria-label="Reason to request ending the selected engagements"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-80"
+              className="w-full sm:w-80"
             />
             <Button
               variant="danger"
@@ -413,7 +418,11 @@ const ActiveEngagements = ({
           </div>
         )}
       </div>
-      {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+      {error && (
+        <Alert variant="danger" className="mb-3">
+          {error}
+        </Alert>
+      )}
       {result && <p className="mb-3 text-sm text-muted-foreground">{result}</p>}
 
       {filtered.length === 0 ? (
@@ -438,11 +447,10 @@ const ActiveEngagements = ({
               <Card key={mandate.id} className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      className="mt-1.5 h-4 w-4 shrink-0 accent-primary"
+                    <Checkbox
+                      className="mt-1"
                       checked={selected.includes(mandate.id)}
-                      onChange={() => toggle(mandate.id)}
+                      onCheckedChange={() => toggle(mandate.id)}
                       aria-label={`Select ${mandate.propertyTitle ?? 'property'} to reassign`}
                     />
                     <div className="shrink-0 rounded-xl bg-muted p-2.5">
@@ -536,7 +544,7 @@ const TerminationRequests = () => {
     },
   });
 
-  if (requests.isError) {
+  if (requests.isError && !requests.data) {
     return (
       <PageErrorState
         title="Could not load requests"
@@ -547,7 +555,7 @@ const TerminationRequests = () => {
       />
     );
   }
-  if (requests.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (requests.isLoading) return <ListSkeleton variant="cards" />;
   if (all.length === 0) {
     return (
       <EmptyState
@@ -566,37 +574,33 @@ const TerminationRequests = () => {
       </p>
 
       <div className="mb-4 flex justify-end">
-        <input
-          type="search"
+        <SearchInput
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onValueChange={setSearch}
           placeholder="Search property, owner or requester…"
-          aria-label="Search termination requests"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-72"
+          label="Search termination requests"
+          className="w-full sm:w-72"
         />
       </div>
 
       <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-primary"
-            checked={allVisibleSelected}
-            onChange={toggleAll}
-            aria-label="Select all visible"
-          />
-          {selectedVisible.length > 0
-            ? `${selectedVisible.length} selected`
-            : `Select all (${filtered.length})`}
-        </label>
+        <Checkbox
+          checked={allVisibleSelected}
+          indeterminate={selectedVisible.length > 0}
+          onCheckedChange={toggleAll}
+          label={
+            selectedVisible.length > 0
+              ? `${selectedVisible.length} selected`
+              : `Select all (${filtered.length})`
+          }
+        />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <input
-            type="text"
+          <Input
             value={note}
             onChange={(event) => setNote(event.target.value)}
             placeholder="Approval note (min 10 characters)"
             aria-label="Approval note for the selected requests"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-80"
+            className="w-full sm:w-80"
           />
           <Button
             variant="danger"
@@ -608,7 +612,11 @@ const TerminationRequests = () => {
           </Button>
         </div>
       </div>
-      {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+      {error && (
+        <Alert variant="danger" className="mb-3">
+          {error}
+        </Alert>
+      )}
       {result && <p className="mb-3 text-sm text-muted-foreground">{result}</p>}
 
       {filtered.length === 0 ? (
@@ -623,11 +631,10 @@ const TerminationRequests = () => {
             <Card key={request.id} className="p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    className="mt-1.5 h-4 w-4 shrink-0 accent-primary"
+                  <Checkbox
+                    className="mt-1"
                     checked={selected.includes(request.mandateId)}
-                    onChange={() => toggle(request.mandateId)}
+                    onCheckedChange={() => toggle(request.mandateId)}
                     aria-label={`Select the request for ${request.propertyTitle ?? 'property'}`}
                   />
                   <div className="shrink-0 rounded-xl bg-muted p-2.5">
@@ -825,7 +832,9 @@ export default function AdminManagedMandatesPage() {
         <TerminationRequests />
       ) : mode === 'active' ? (
         <ActiveEngagements staffOptions={staffOptions} />
-      ) : pending.isError ? (
+      ) : pending.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : pending.isError && !pending.data ? (
         <PageErrorState
           title="Could not load the queue"
           description={(pending.error as Error).message}
@@ -833,8 +842,6 @@ export default function AdminManagedMandatesPage() {
             void pending.refetch();
           }}
         />
-      ) : pending.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : all.length === 0 ? (
         <EmptyState
           icon={Sparkles}
@@ -854,13 +861,12 @@ export default function AdminManagedMandatesPage() {
               </TabsList>
             </Tabs>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <input
-                type="search"
+              <SearchInput
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onValueChange={setSearch}
                 placeholder="Search property or owner…"
-                aria-label="Search by property or owner"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-60"
+                label="Search by property or owner"
+                className="w-full sm:w-60"
               />
               <div className="w-full sm:w-56">
                 <Select
@@ -881,25 +887,24 @@ export default function AdminManagedMandatesPage() {
           {/* Bulk action bar */}
           <div className="mb-3 flex flex-col gap-3 rounded-xl border border-border bg-card p-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <label className="flex items-center gap-2 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-primary"
-                  checked={allVisibleSelected}
-                  onChange={toggleSelectAll}
-                  aria-label="Select all visible"
-                />
-                {selectedVisible.length > 0
-                  ? `${selectedVisible.length} selected`
-                  : `Select all (${filtered.length})`}
-              </label>
+              <Checkbox
+                checked={allVisibleSelected}
+                indeterminate={selectedVisible.length > 0}
+                onCheckedChange={toggleSelectAll}
+                label={
+                  selectedVisible.length > 0
+                    ? `${selectedVisible.length} selected`
+                    : `Select all (${filtered.length})`
+                }
+              />
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <div className="w-full sm:w-60">
                   <Select
                     ariaLabel="Portfolio manager for the selected engagements"
                     value={bulkManager}
                     onValueChange={setBulkManager}
-                    options={[{ value: '', label: 'Choose a staff member…' }, ...staffOptions]}
+                    placeholder="Choose a staff member…"
+                    options={staffOptions}
                   />
                 </div>
                 <div className="w-full sm:w-56">
@@ -922,13 +927,12 @@ export default function AdminManagedMandatesPage() {
             {/* Refuse the selection — a reason is required and kept on each. */}
             {selectedVisible.length > 0 && (
               <div className="flex flex-col gap-2 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-end">
-                <input
-                  type="text"
+                <Input
                   value={bulkReason}
                   onChange={(event) => setBulkReason(event.target.value)}
                   placeholder="Reason for refusing (min 10 characters)"
                   aria-label="Reason for refusing the selected engagements"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 sm:w-96"
+                  className="w-full sm:w-96"
                 />
                 <Button
                   variant="outline"
@@ -941,7 +945,11 @@ export default function AdminManagedMandatesPage() {
               </div>
             )}
           </div>
-          {bulkError && <p className="mb-3 text-sm text-destructive">{bulkError}</p>}
+          {bulkError && (
+            <Alert variant="danger" className="mb-3">
+              {bulkError}
+            </Alert>
+          )}
           {bulkResult && <p className="mb-3 text-sm text-muted-foreground">{bulkResult}</p>}
 
           {filtered.length === 0 ? (

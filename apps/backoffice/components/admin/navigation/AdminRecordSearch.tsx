@@ -2,9 +2,9 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
-import { Input } from '@getrentos/ui';
+import { Input, Skeleton } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminSearchService, type AdminSearchType } from '@/services/adminSearchService';
 
@@ -46,6 +46,7 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
     queryKey: ['admin', 'global-search', debounced, type],
     queryFn: () => unwrap(adminSearchService.search(debounced, type === 'all' ? undefined : type)),
     enabled: focused && debounced.length >= 2,
+    placeholderData: keepPreviousData,
     staleTime: 20_000,
   });
   const results = search.data?.results ?? [];
@@ -139,9 +140,11 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
               </p>
             </div>
           ) : search.isPending ? (
-            <p className="p-4 text-sm text-muted-foreground" role="status">
-              Searching records…
-            </p>
+            <div className="space-y-2 p-3" role="status" aria-label="Searching records">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
           ) : search.isError ? (
             <div className="p-4 text-sm text-destructive" role="alert">
               Search is unavailable.{' '}

@@ -10,7 +10,7 @@ import {
   CheckCircle,
   ArrowRight,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Card, EmptyState, IconButton } from '@getrentos/ui';
 
 interface Verification {
   id: string;
@@ -55,7 +55,7 @@ export const ImprovementSuggestions = ({ verifications }: ImprovementSuggestions
     }));
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BadgeCheck className="w-4 h-4 text-primary" />
@@ -67,10 +67,12 @@ export const ImprovementSuggestions = ({ verifications }: ImprovementSuggestions
       </div>
 
       {suggestions.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground">
-          <CheckCircle className="w-6 h-6 mx-auto mb-2 text-green-500" />
-          <p className="text-sm">You&apos;re all set! All verifications are complete.</p>
-        </div>
+        <EmptyState
+          icon={CheckCircle}
+          title="You're all set! All verifications are complete."
+          size="compact"
+          bare
+        />
       ) : (
         <div className="divide-y divide-border">
           {suggestions.map((suggestion) => {
@@ -80,41 +82,35 @@ export const ImprovementSuggestions = ({ verifications }: ImprovementSuggestions
                 <div className="flex items-start gap-3">
                   <div
                     className={`p-2 rounded-lg ${
-                      suggestion.priority === 'high'
-                        ? 'bg-red-50 dark:bg-red-900/20'
-                        : 'bg-yellow-50 dark:bg-yellow-900/20'
+                      suggestion.priority === 'high' ? 'bg-destructive-subtle' : 'bg-warning-subtle'
                     }`}
                   >
                     <Icon
+                      aria-hidden="true"
                       className={`w-4 h-4 ${
-                        suggestion.priority === 'high' ? 'text-red-600' : 'text-yellow-600'
+                        suggestion.priority === 'high' ? 'text-destructive' : 'text-warning'
                       }`}
                     />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h4 className="text-sm font-medium text-foreground">{suggestion.title}</h4>
-                      <span
-                        className={`text-xs px-1.5 py-0.5 rounded-full ${
-                          suggestion.priority === 'high'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-                        }`}
+                      <Badge
+                        variant={suggestion.priority === 'high' ? 'danger' : 'warning'}
+                        className="capitalize"
                       >
                         {suggestion.priority}
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{suggestion.description}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="gap-0">
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
+                  <IconButton size="sm" label={suggestion.title} icon={<ArrowRight />} />
                 </div>
               </div>
             );
           })}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

@@ -1,13 +1,9 @@
 'use client';
 
-import { LegacyInput, NumberInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { ImagePlus, Loader2, Play, Star, Video, X } from 'lucide-react';
+import { Alert, Button, Field, Input, NumberInput, Select } from '@getrentos/ui';
+import { ImagePlus, Play, Star, Video, X } from 'lucide-react';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
@@ -221,40 +217,21 @@ const EditPropertyForm = ({
       </div>
 
       <div className="p-4 space-y-3">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Property Name</label>
-          <LegacyInput
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <Field label="Property Name" required>
+          <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Property Type</label>
-          <LegacySelect
+        <Field label="Property Type">
+          <Select
             value={type}
-            onChange={(e) => setType(e.target.value as PropertyType)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            {propertyTypes.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </LegacySelect>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Address</label>
-          <LegacyInput
-            type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            onValueChange={(value) => setType(value as PropertyType)}
+            options={propertyTypes.map((t) => ({ value: t.value, label: t.label }))}
           />
-        </div>
+        </Field>
+
+        <Field label="Address" required>
+          <Input type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+        </Field>
 
         <LocationFields
           country={country}
@@ -279,15 +256,9 @@ const EditPropertyForm = ({
           }}
         />
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Number of Units</label>
-          <NumberInput
-            min={1}
-            value={totalUnits}
-            onValueChange={setTotalUnits}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <Field label="Number of Units">
+          <NumberInput min={1} value={totalUnits} onValueChange={setTotalUnits} />
+        </Field>
 
         <div className="pt-3 mt-1 border-t border-border space-y-3">
           <div>
@@ -312,7 +283,7 @@ const EditPropertyForm = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {photos.map((photo) => (
               <div
                 key={photo.id}
@@ -351,12 +322,12 @@ const EditPropertyForm = ({
             ))}
 
             {photos.length < 12 && (
-              <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary">
-                <LegacyInput
+              <label className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring">
+                <input
                   type="file"
                   multiple
                   accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
+                  className="sr-only"
                   onChange={(event) => {
                     addPhotos(event.target.files);
                     event.target.value = '';
@@ -390,12 +361,12 @@ const EditPropertyForm = ({
               </span>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <label className="cursor-pointer text-xs font-medium text-primary">
+              <label className="cursor-pointer rounded text-xs font-medium text-primary focus-within:ring-2 focus-within:ring-ring">
                 {videoFile || (videoKey && !videoCleared) ? 'Replace' : 'Add video tour'}
-                <LegacyInput
+                <input
                   type="file"
                   accept="video/mp4,video/webm,video/quicktime"
-                  className="hidden"
+                  className="sr-only"
                   onChange={(event) => {
                     void selectVideo(event.target.files?.[0]);
                     event.target.value = '';
@@ -403,14 +374,15 @@ const EditPropertyForm = ({
                 />
               </label>
               {(videoFile || (videoKey && !videoCleared)) && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="text-destructive"
                   aria-label="Remove video tour"
                   onClick={clearVideo}
-                  className="text-xs font-medium text-destructive hover:underline"
                 >
                   Remove
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -424,26 +396,18 @@ const EditPropertyForm = ({
             />
           )}
 
-          {mediaError && (
-            <p role="alert" className="text-xs text-destructive">
-              {mediaError}
-            </p>
-          )}
+          {mediaError && <Alert variant="danger">{mediaError}</Alert>}
         </div>
 
         <Button
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={saving || !name.trim() || !address.trim()}
+          disabled={!name.trim() || !address.trim()}
+          isLoading={saving}
+          loadingText="Saving…"
         >
-          {saving ? (
-            <span className="inline-flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" /> Saving…
-            </span>
-          ) : (
-            'Save Changes'
-          )}
+          Save Changes
         </Button>
       </div>
     </>

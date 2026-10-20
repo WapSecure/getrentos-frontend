@@ -1,15 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Handshake } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Handshake } from 'lucide-react';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
-import { Button, Pagination } from '@getrentos/ui';
+import { Button, Pagination, QueryState, SearchInput, Skeleton } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -29,7 +27,7 @@ function BuyerOffersPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
 
-  const { data: offersData } = useQuery({
+  const offersQuery = useQuery({
     queryKey: [
       ...buyerKeys.offers,
       { search: searchQuery, status: filter, page, pageSize: PAGE_SIZE },
@@ -43,7 +41,9 @@ function BuyerOffersPageContent() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
+  const offersData = offersQuery.data;
   const offers = offersData?.items ?? [];
   const total = offersData?.total ?? 0;
 
@@ -168,8 +168,12 @@ function BuyerOffersPageContent() {
             {total} offer{total === 1 ? '' : 's'} you&apos;ve made
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsMakeOfferOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          className="w-fit"
+          onClick={() => setIsMakeOfferOpen(true)}
+        >
           Make an Offer
         </Button>
       </div>
@@ -186,23 +190,22 @@ function BuyerOffersPageContent() {
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by property..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search by property..."
+          label="Search offers"
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
           {filterOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={filter === option.value}
               onClick={() => {
                 setFilter(option.value);
                 setPage(1);
@@ -220,21 +223,29 @@ function BuyerOffersPageContent() {
         </div>
       </div>
 
-      {offers.length === 0 ? (
-        <div className="bg-card border border-border rounded-lg p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Handshake className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {total === 0 ? 'No offers match your filters' : 'No offers on this page'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {total === 0
+      <QueryState
+        isLoading={offersQuery.isLoading}
+        isError={offersQuery.isError && !offersData}
+        onRetry={() => void offersQuery.refetch()}
+        isRetrying={offersQuery.isFetching}
+        isEmpty={offers.length === 0}
+        empty={{
+          icon: Handshake,
+          title: total === 0 ? 'No offers match your filters' : 'No offers on this page',
+          description:
+            total === 0
               ? 'Try adjusting your search or filter.'
-              : 'Choose another page to view more offers.'}
-          </p>
-        </div>
-      ) : (
+              : 'Choose another page to view more offers.',
+        }}
+        scope="page"
+        loading={
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-48 rounded-2xl" />
+            ))}
+          </div>
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {offers.map((offer, index) => (
             <BuyerOfferCard
@@ -245,7 +256,7 @@ function BuyerOffersPageContent() {
             />
           ))}
         </div>
-      )}
+      </QueryState>
 
       {total > 0 && (
         <Pagination

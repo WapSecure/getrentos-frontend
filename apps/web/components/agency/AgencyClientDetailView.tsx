@@ -5,7 +5,19 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Building2, Mail, Phone, ShieldCheck, UserRound } from 'lucide-react';
-import { Badge, Button, Select, Textarea, PageLoadingState, PageErrorState, type BadgeVariant, useToast } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  Select,
+  Textarea,
+  PageLoadingState,
+  PageErrorState,
+  type BadgeVariant,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
 import {
   agencyClientService,
   AGENCY_CLIENT_STAGES,
@@ -37,21 +49,23 @@ export function AgencyClientDetailView() {
   const {
     data: client,
     isLoading,
-    isError,
     refetch,
   } = useQuery({
     queryKey,
     queryFn: () => unwrap(agencyClientService.get(ownerId)),
   });
 
-  const stageMutation = useMutation({
+  const stageMutation = useOptimisticMutation({
     mutationFn: (stage: AgencyClientStage) => unwrap(agencyClientService.setStage(ownerId, stage)),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(queryKey, updated);
-      toast.success('Stage updated.');
-    },
-    onError: (e: Error) =>
-      toast.error(e.message || 'Could not update stage.'),
+    patches: () => [
+      {
+        queryKey,
+        update: (old, stage) => (old ? { ...(old as object), stage } : old),
+      },
+    ],
+    errorMessage: 'Could not update stage.',
+    successMessage: 'Stage updated.',
+    onSuccess: (updated) => queryClient.setQueryData(queryKey, updated),
   });
 
   const noteMutation = useMutation({
@@ -60,12 +74,11 @@ export function AgencyClientDetailView() {
       queryClient.setQueryData(queryKey, updated);
       setNote('');
     },
-    onError: (e: Error) =>
-      toast.error(e.message || 'Could not add note.'),
+    onError: (e: Error) => toast.error(e.message || 'Could not add note.'),
   });
 
   if (isLoading) return <PageLoadingState />;
-  if (isError || !client)
+  if (!client)
     return <PageErrorState title="Couldn’t load this client" onRetry={() => refetch()} />;
 
   return (
@@ -79,8 +92,8 @@ export function AgencyClientDetailView() {
       </Link>
 
       {/* Contact card */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <div className="flex items-start justify-between gap-3">
+      <Card className="rounded-2xl p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-center gap-2">
             <UserRound className="h-6 w-6 text-primary" />
             <div>
@@ -90,8 +103,7 @@ export function AgencyClientDetailView() {
               )}
             </div>
           </div>
-          <div className="w-44">
-            <label className="text-xs text-muted-foreground">Relationship stage</label>
+          <Field label="Relationship stage" className="w-44">
             <Select
               value={client.stage}
               onValueChange={(v) => stageMutation.mutate(v as AgencyClientStage)}
@@ -100,7 +112,7 @@ export function AgencyClientDetailView() {
                 label: AGENCY_CLIENT_STAGE_LABELS[s],
               }))}
             />
-          </div>
+          </Field>
         </div>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
           {client.email && (
@@ -127,14 +139,14 @@ export function AgencyClientDetailView() {
             {client.trustScore != null ? ` · trust ${client.trustScore}` : ''}
           </span>
         </div>
-      </div>
+      </Card>
 
       {/* Managed properties */}
       <div className="mt-6">
         <h2 className="mb-2 text-sm font-semibold text-foreground">
           Properties you manage ({client.properties.length})
         </h2>
-        <div className="rounded-2xl border border-border bg-card divide-y divide-border/60">
+        <Card className="divide-y divide-border/60 rounded-2xl">
           {client.properties.map((p) => (
             <div key={p.propertyId} className="flex items-center justify-between gap-3 p-3">
               <span className="flex min-w-0 items-center gap-2">
@@ -146,7 +158,7 @@ export function AgencyClientDetailView() {
               </Badge>
             </div>
           ))}
-        </div>
+        </Card>
       </div>
 
       {/* Client money held by the firm */}
@@ -155,18 +167,20 @@ export function AgencyClientDetailView() {
       {/* Notes */}
       <div className="mt-6">
         <h2 className="mb-2 text-sm font-semibold text-foreground">Notes</h2>
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <Card className="rounded-2xl p-4">
           <div className="flex gap-2">
             <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Add a note about this client…"
+              aria-label="Note about this client"
               rows={2}
             />
             <Button
               variant="secondary"
               onClick={() => noteMutation.mutate(note.trim())}
-              disabled={!note.trim() || noteMutation.isPending}
+              disabled={!note.trim()}
+              isLoading={noteMutation.isPending}
             >
               Add
             </Button>
@@ -185,7 +199,7 @@ export function AgencyClientDetailView() {
               ))
             )}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

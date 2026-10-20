@@ -223,7 +223,11 @@ const LogDeliveryForm = ({
               <p className="block text-sm font-medium text-foreground mb-1">Household</p>
               <div className="overflow-hidden rounded-lg border border-border">
                 {isHouseholdsLoading ? (
-                  <ListSkeleton rows={3} label="Loading households" className="rounded-none border-0" />
+                  <ListSkeleton
+                    rows={3}
+                    label="Loading households"
+                    className="rounded-none border-0"
+                  />
                 ) : activeHouseholds.length === 0 ? (
                   <p className="px-3 py-4 text-sm text-muted-foreground">
                     No active households found.

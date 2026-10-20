@@ -1,20 +1,22 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Users } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Users } from 'lucide-react';
 import { ClientCard } from '@/components/realtor/clients/ClientCard';
 import { AddClientModal } from '@/components/realtor/clients/AddClientModal';
 import {
   Button,
+  EmptyState,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
   Pagination,
-  Toast,
-  type ToastVariant,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import type { ClientRole } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
@@ -34,7 +36,7 @@ export default function RealtorClientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<RoleFilter>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const queryClient = useQueryClient();
   const planGate = usePlanGateModal();
   const clientRole =
@@ -55,6 +57,7 @@ export default function RealtorClientsPage() {
       );
       return { ...result, items: result.items.map(mapRealtorClient) };
     },
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = clientsQuery;
   const clients = data?.items ?? [];
@@ -66,17 +69,14 @@ export default function RealtorClientsPage() {
       queryClient.invalidateQueries({ queryKey: realtorKeys.clients });
       setPage(1);
       setIsAddModalOpen(false);
-      setToast({ message: 'Client invitation sent.', variant: 'success' });
+      toast.success('Client invitation sent.');
     },
     onError: (error) => {
       if (planGate.handleError(error)) {
         setIsAddModalOpen(false);
         return;
       }
-      setToast({
-        message: error.message || 'Unable to add this client. Please try again.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to add this client. Please try again.');
     },
   });
 
@@ -99,51 +99,46 @@ export default function RealtorClientsPage() {
             {total} client{total === 1 ? '' : 's'} you represent
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setIsAddModalOpen(true)}
+        >
           Add Client
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search clients..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
-          {filterOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search clients..."
+          label="Search clients"
+          className="flex-1 max-w-sm"
+        />
+        <Tabs
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value as RoleFilter);
+            setPage(1);
+          }}
+        >
+          <TabsList className="max-w-full">
+            {filterOptions.map((option) => (
+              <TabsTrigger key={option.value} value={option.value}>
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : clientsQuery.isError ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading clients" />
+      ) : clientsQuery.isError && !data ? (
         <PageErrorState
           title="Clients are unavailable"
           description="We could not load the people you represent. Please try again."
@@ -151,36 +146,33 @@ export default function RealtorClientsPage() {
           isRetrying={clientsQuery.isFetching}
         />
       ) : clients.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <Users className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No clients match your filters' : 'No clients yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={Users}
+          title={hasActiveFilters ? 'No clients match your filters' : 'No clients yet'}
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to all clients.'
-              : 'Add an owner or landlord client to start representing their properties.'}
-          </p>
-          {!hasActiveFilters ? (
-            <Button variant="primary" className="mt-6" onClick={() => setIsAddModalOpen(true)}>
-              Add your first client
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => {
-                setSearchQuery('');
-                setFilter('all');
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
+              : 'Add an owner or landlord client to start representing their properties.'
+          }
+          action={
+            !hasActiveFilters ? (
+              <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
+                Add your first client
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilter('all');
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            )
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {clients.map((client) => (
@@ -212,9 +204,6 @@ export default function RealtorClientsPage() {
         error={inviteClient.isError ? inviteClient.error.message : null}
       />
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <UpgradeToProModal
         isOpen={planGate.isOpen}
         onClose={planGate.close}

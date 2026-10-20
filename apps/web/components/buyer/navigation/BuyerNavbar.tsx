@@ -1,15 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Menu, X } from 'lucide-react';
+import { Bell, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import { Button, IconButton, SearchInput, ThemeToggle, useOptimisticMutation } from '@getrentos/ui';
 import { BuyerProfileDropdown } from './BuyerProfileDropdown';
 import { navGroups } from '../dashboard/BuyerSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -40,19 +38,41 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const notificationsKey = [...buyerKeys.notifications, { page: 1, pageSize: 20 }];
   const { data: notificationsData } = useQuery({
-    queryKey: [...buyerKeys.notifications, { page: 1, pageSize: 20 }],
+    queryKey: notificationsKey,
     queryFn: () => unwrap(buyerService.getNotifications({ page: 1, pageSize: 20 })),
   });
   const notifications = notificationsData?.items ?? [];
 
-  const markRead = useMutation({
+  const markRead = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(buyerService.markNotificationRead(id)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.notifications }),
+    patches: () => [
+      {
+        queryKey: notificationsKey,
+        update: (old, id) => {
+          const page = old as { items: { id: string; read: boolean }[] };
+          return {
+            ...page,
+            items: page.items.map((n) => (n.id === id ? { ...n, read: true } : n)),
+          };
+        },
+      },
+    ],
+    invalidate: [buyerKeys.notifications],
   });
-  const markAllRead = useMutation({
+  const markAllRead = useOptimisticMutation({
     mutationFn: () => unwrap(buyerService.markAllNotificationsRead()),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.notifications }),
+    patches: () => [
+      {
+        queryKey: notificationsKey,
+        update: (old) => {
+          const page = old as { items: { read: boolean }[] };
+          return { ...page, items: page.items.map((n) => ({ ...n, read: true })) };
+        },
+      },
+    ],
+    invalidate: [buyerKeys.notifications],
   });
 
   // Real-time: refresh the bell when the backend pushes a new notification.
@@ -90,7 +110,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
   };
 
   const handleMarkAllAsRead = () => {
-    markAllRead.mutate();
+    markAllRead.mutate(undefined);
   };
 
   return (
@@ -122,32 +142,32 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
             </div>
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <LegacyInput
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearchSubmit}
-                  placeholder="Search properties, locations..."
-                  className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
+              <SearchInput
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+                onKeyDown={handleSearchSubmit}
+                placeholder="Search properties, locations..."
+                label="Search properties"
+                className="w-full"
+              />
             </div>
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
 
               <div className="relative">
-                <button
+                <IconButton
+                  label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+                  icon={<Bell />}
+                  aria-expanded={showNotifications}
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-                >
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                  )}
-                </button>
+                />
+                {unreadCount > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full"
+                  />
+                )}
 
                 <AnimatePresence>
                   {showNotifications && (
@@ -155,28 +175,28 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
                     >
                       <div className="p-3 border-b border-border flex justify-between items-center">
                         <h3 className="font-semibold text-foreground">Notifications</h3>
                         {unreadCount > 0 && (
-                          <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-primary hover:text-primary-hover"
-                          >
+                          <Button variant="ghost" size="xs" onClick={handleMarkAllAsRead}>
                             Mark all as read
-                          </button>
+                          </Button>
                         )}
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-muted-foreground">No notifications</div>
+                          <div className="p-4 text-center text-muted-foreground">
+                            No notifications
+                          </div>
                         ) : (
                           notifications.map((notification) => (
-                            <div
+                            <button
+                              type="button"
                               key={notification.id}
-                              className={`p-3 border-b border-border hover:bg-secondary cursor-pointer transition-colors ${
-                                !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                              className={`block w-full text-left p-3 border-b border-border hover:bg-secondary cursor-pointer transition-colors ${
+                                !notification.read ? 'bg-info-subtle/50' : ''
                               }`}
                               onClick={() => handleOpenNotification(notification)}
                             >
@@ -189,7 +209,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                                 </span>
                               </div>
                               <p className="text-xs text-muted-foreground">{notification.body}</p>
-                            </div>
+                            </button>
                           ))
                         )}
                       </div>
@@ -209,27 +229,24 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
               <BuyerProfileDropdown user={user} />
 
-              <button
+              <IconButton
+                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                icon={isMobileMenuOpen ? <X /> : <Menu />}
+                aria-expanded={isMobileMenuOpen}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-secondary"
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                className="lg:hidden"
+              />
             </div>
           </div>
 
           <div className="md:hidden py-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <LegacyInput
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchSubmit}
-                placeholder="Search properties, locations..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-100 dark:bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Search properties, locations..."
+              label="Search properties"
+            />
           </div>
         </div>
       </nav>

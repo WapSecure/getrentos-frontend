@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, ShieldAlert } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -51,6 +51,7 @@ export default function EstateWatchlistPage() {
     queryFn: () =>
       unwrap(estateService.listWatchlist(estate!.id, { status, page, pageSize: PAGE_SIZE })),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const entries = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -113,8 +114,8 @@ export default function EstateWatchlistPage() {
       {/* Says what the list does, because a manager who assumes it is only a note
           would never rely on it: and one who assumes a WATCH entry stops
           somebody would find out at the barrier instead. */}
-      <div className="bg-card rounded-2xl border border-border p-4 mb-6">
-        <p className="text-sm text-muted-foreground">
+      <Alert variant="neutral" className="mb-6">
+        <p>
           Everybody on this list is checked against at every way into the estate: a visitor pass
           being used, a pass being issued, a walk-in at the barrier, and a vehicle being logged: as
           well as by a guard searching the list. Names, phone numbers and plates are matched
@@ -122,13 +123,13 @@ export default function EstateWatchlistPage() {
           <span className="font-mono text-xs">lag 123 xy</span> matches{' '}
           <span className="font-mono text-xs">LAG-123-XY</span>.
         </p>
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="mt-2">
           <span className="font-medium text-foreground">Do not admit</span> refuses entry. A guard
           who can see the person may still admit them, but only by giving a reason, and you are told
           either way. <span className="font-medium text-foreground">Watch only</span> lets them in
           and tells you.
         </p>
-      </div>
+      </Alert>
 
       <div className="flex flex-wrap gap-2 mb-6">
         {statusFilters.map((filter) => (
@@ -136,6 +137,7 @@ export default function EstateWatchlistPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => {
               setStatusFilter(filter.value);
               setPage(1);

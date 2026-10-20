@@ -129,7 +129,11 @@ export default function AgentSyncPage() {
                   </p>
                 </div>
                 {synced ? (
-                  <Badge variant="success" icon={<Cloud className="w-3 h-3" />} className="shrink-0">
+                  <Badge
+                    variant="success"
+                    icon={<Cloud className="w-3 h-3" />}
+                    className="shrink-0"
+                  >
                     Synced
                   </Badge>
                 ) : (

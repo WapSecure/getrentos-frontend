@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button, CurrencyInput, Input, Select } from '@getrentos/ui';
-import { Camera, Loader2, Trash2, Video } from 'lucide-react';
+import { Alert, Button, CurrencyInput, Field, Input, Select } from '@getrentos/ui';
+import { Camera, Trash2, Video } from 'lucide-react';
 import type { OwnerProperty } from '@/types/owner';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import { LocationPicker } from '@/components/maps/LocationPicker';
@@ -177,25 +177,22 @@ const EditOwnerPropertyForm = ({
       </div>
 
       <div className="p-4 space-y-3">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Property Name</label>
+        <Field label="Property Name" required>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Property Type</label>
+        <Field label="Property Type">
           <Select
             value={propertyType}
             onValueChange={setPropertyType}
             options={PROPERTY_TYPE_OPTIONS.map(({ label }) => ({ value: label, label }))}
             ariaLabel="Property type"
           />
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Address</label>
+        <Field label="Address" required>
           <Input value={address} onChange={(e) => setAddress(e.target.value)} />
-        </div>
+        </Field>
 
         <LocationFields
           country={country}
@@ -220,21 +217,17 @@ const EditOwnerPropertyForm = ({
           }}
         />
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Estimated Value (₦)
-          </label>
+        <Field label="Estimated Value (₦)">
           <CurrencyInput
             prefix="₦"
             min={0}
             value={estimatedValue}
             onValueChange={(v) => setEstimatedValue(v === 0 ? '' : String(v))}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Property Photo</label>
+          <p className="mb-1 text-sm font-medium text-foreground">Property Photo</p>
           <div className="flex items-center gap-3">
             <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
               {previewUrl ? (
@@ -251,10 +244,10 @@ const EditOwnerPropertyForm = ({
                 variant="outline"
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
+                isLoading={isUploading}
+                loadingText="Uploading…"
               >
-                {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {isUploading ? 'Uploading…' : previewUrl ? 'Change photo' : 'Upload photo'}
+                {previewUrl ? 'Change photo' : 'Upload photo'}
               </Button>
               <p className="mt-1 text-xs text-muted-foreground">
                 Shown on your listings and any estate page featuring this property.
@@ -273,11 +266,15 @@ const EditOwnerPropertyForm = ({
               if (file) void handlePhotoSelected(file);
             }}
           />
-          {photoError && <p className="mt-1 text-sm text-destructive">{photoError}</p>}
+          {photoError && (
+            <Alert variant="danger" className="mt-2">
+              {photoError}
+            </Alert>
+          )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Video Tour</label>
+          <p className="mb-1 text-sm font-medium text-foreground">Video Tour</p>
           {videoKey && videoPreview ? (
             <video
               src={videoPreview}
@@ -292,14 +289,11 @@ const EditOwnerPropertyForm = ({
               variant="outline"
               size="sm"
               onClick={() => videoInputRef.current?.click()}
-              disabled={isUploadingVideo}
+              isLoading={isUploadingVideo}
+              loadingText="Uploading…"
+              icon={<Video className="h-4 w-4" />}
             >
-              {isUploadingVideo ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Video className="h-4 w-4" />
-              )}
-              {isUploadingVideo ? 'Uploading…' : videoKey ? 'Replace video' : 'Add video tour'}
+              {videoKey ? 'Replace video' : 'Add video tour'}
             </Button>
             {videoKey && !isUploadingVideo ? (
               <Button
@@ -309,8 +303,8 @@ const EditOwnerPropertyForm = ({
                   setVideoKey(null);
                   setVideoPreview(undefined);
                 }}
+                icon={<Trash2 className="h-4 w-4" />}
               >
-                <Trash2 className="h-4 w-4" />
                 Remove
               </Button>
             ) : null}
@@ -329,20 +323,25 @@ const EditOwnerPropertyForm = ({
               if (file) void handleVideoSelected(file);
             }}
           />
-          {videoError && <p className="mt-1 text-sm text-destructive">{videoError}</p>}
+          {videoError && (
+            <Alert variant="danger" className="mt-2">
+              {videoError}
+            </Alert>
+          )}
         </div>
 
         <Button
           variant="primary"
           fullWidth
           onClick={handleSave}
-          disabled={!name.trim() || !address.trim() || isSaving || isUploading || isUploadingVideo}
+          disabled={!name.trim() || !address.trim() || isUploading || isUploadingVideo}
           isLoading={isSaving}
+          loadingText="Saving…"
         >
-          {isSaving ? 'Saving…' : 'Save Changes'}
+          Save Changes
         </Button>
 
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <Alert variant="danger">{error}</Alert>}
       </div>
     </>
   );

@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
 import {
+  Alert,
   Button,
   Checkbox,
   CurrencyInput,
   Dialog,
   Field,
-  Input,
+  NumberInput,
   Select,
   Textarea,
   DialogContent,
@@ -138,25 +138,14 @@ export const ManagedIntakeDialog = ({
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Units" htmlFor="intake-units">
-              <Input
-                id="intake-units"
-                inputMode="numeric"
-                value={unitCount}
-                onChange={(e) => setUnitCount(e.target.value.replace(/\D/g, ''))}
-              />
+            <Field label="Units">
+              <NumberInput value={unitCount} onValueChange={setUnitCount} />
             </Field>
             <Field
               label="Occupied now"
-              htmlFor="intake-occupied"
               error={occupiedUnits > units ? 'Can’t be more than units.' : undefined}
             >
-              <Input
-                id="intake-occupied"
-                inputMode="numeric"
-                value={occupied}
-                onChange={(e) => setOccupied(e.target.value.replace(/\D/g, ''))}
-              />
+              <NumberInput value={occupied} onValueChange={setOccupied} />
             </Field>
           </div>
 
@@ -170,21 +159,18 @@ export const ManagedIntakeDialog = ({
           <Field label="What do you need help with?">
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {SERVICE_NEEDS.map((need) => (
-                <label key={need} className="flex items-center gap-2 text-sm text-foreground">
-                  <Checkbox
-                    checked={needs.includes(need)}
-                    onCheckedChange={() => toggleNeed(need)}
-                    aria-label={need}
-                  />
-                  {need}
-                </label>
+                <Checkbox
+                  key={need}
+                  checked={needs.includes(need)}
+                  onCheckedChange={() => toggleNeed(need)}
+                  label={need}
+                />
               ))}
             </div>
           </Field>
 
-          <Field label="Anything we should know?" hint="Optional." htmlFor="intake-notes">
+          <Field label="Anything we should know?" hint="Optional.">
             <Textarea
-              id="intake-notes"
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -205,19 +191,14 @@ export const ManagedIntakeDialog = ({
             </div>
           )}
 
-          {error && (
-            <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {error}
-            </p>
-          )}
+          {error && <Alert variant="danger">{error}</Alert>}
         </div>
 
         <div className="flex justify-end gap-2 border-t border-border p-4">
           <Button variant="ghost" onClick={onClose} disabled={submit.isPending}>
             Cancel
           </Button>
-          <Button onClick={() => submit.mutate()} disabled={invalid || submit.isPending}>
-            {submit.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden />}
+          <Button onClick={() => submit.mutate()} disabled={invalid} isLoading={submit.isPending}>
             Send request
           </Button>
         </div>

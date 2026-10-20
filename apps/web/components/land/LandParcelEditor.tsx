@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import {
+  Alert,
   Button,
   DocumentUploadDialog,
   Field,
@@ -140,10 +141,9 @@ export const LandParcelEditor = ({
         </div>
 
         {diligence?.findings && diligence.status !== 'VERIFIED' && (
-          <div className="mt-4 rounded-xl border border-warning/30 bg-warning/5 px-3.5 py-3 text-sm text-foreground">
-            <p className="font-medium">Compliance note</p>
-            <p className="mt-1 text-muted-foreground">{diligence.findings}</p>
-          </div>
+          <Alert variant="warning" title="Compliance note" className="mt-4">
+            {diligence.findings}
+          </Alert>
         )}
 
         <div className="mt-4 flex flex-wrap gap-2">

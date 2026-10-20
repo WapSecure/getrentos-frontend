@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Card } from '@getrentos/ui';
+import { Badge, Card, Skeleton } from '@getrentos/ui';
 import { ShieldAlert } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -29,14 +29,13 @@ export const RiskBreakdownCard = ({
   /** A one-line summary for the portfolio view. */
   compact?: boolean;
 }) => {
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: landDeveloperKeys.risk(propertyId),
     queryFn: () => unwrap(landDeveloperService.getRisk(propertyId)),
   });
 
-  if (isLoading)
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
-  if (isError || !data) {
+  if (isLoading) return <Skeleton className="h-32 rounded-2xl" />;
+  if (!data) {
     return (
       <Card static className="p-5 text-sm text-muted-foreground">
         {errorMessage(error, 'The risk assessment could not be loaded.')}

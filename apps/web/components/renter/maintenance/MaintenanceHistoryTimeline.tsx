@@ -73,7 +73,9 @@ export const MaintenanceHistoryTimeline = ({ events }: MaintenanceHistoryTimelin
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h4 className="text-sm font-medium text-foreground">{event.title}</h4>
-                      <span className="text-xs text-muted-foreground">{formatDate(event.date)}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(event.date)}
+                      </span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-0.5">{event.description}</p>
                     <p className="text-xs text-muted-foreground mt-1">by {event.user}</p>

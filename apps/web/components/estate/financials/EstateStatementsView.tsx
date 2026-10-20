@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, FileBarChart, Landmark, Plus, RotateCcw, Send } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileBarChart, Landmark, Plus, RotateCcw, Send } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
+  Card,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -13,10 +15,12 @@ import {
   DatePicker,
   EmptyState,
   Field,
+  Input,
+  ListSkeleton,
+  NumberInput,
   Pagination,
-  SaveButton,
-  Toast,
-  type ToastVariant,
+  Select,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -56,11 +60,12 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<GenerateForm>(initialForm);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: [...estateKeys.statements(estateId), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(estateService.listStatements(estateId, { page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const statements = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -81,13 +86,10 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       invalidate();
       setForm(initialForm);
       setIsGenerateOpen(false);
-      setToast({ message: 'Statement generated as a draft.', variant: 'success' });
+      toast.success('Statement generated as a draft.');
     },
     onError: (error: Error) => {
-      setToast({
-        message: error.message || 'Unable to generate this statement.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to generate this statement.');
     },
   });
 
@@ -96,23 +98,18 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: estateKeys.statement(estateId, id) });
-      setToast(
-        result.payoutStatus === 'AWAITING_APPROVAL'
-          ? {
-              message:
-                'Statement issued. The payout is held while a second GetRentos officer approves it. The estate\u2019s money is unaffected.',
-              variant: 'success',
-            }
-          : result.payoutStatus === 'FAILED'
-            ? {
-                message: 'Statement issued, but the payout failed: retry it below.',
-                variant: 'error',
-              }
-            : { message: 'Statement issued.', variant: 'success' }
-      );
+      if (result.payoutStatus === 'AWAITING_APPROVAL') {
+        toast.success(
+          'Statement issued. The payout is held while a second GetRentos officer approves it. The estate\u2019s money is unaffected.'
+        );
+      } else if (result.payoutStatus === 'FAILED') {
+        toast.error('Statement issued, but the payout failed: retry it below.');
+      } else {
+        toast.success('Statement issued.');
+      }
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to issue this statement.', variant: 'error' });
+      toast.error(error.message || 'Unable to issue this statement.');
     },
   });
 
@@ -121,23 +118,18 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: estateKeys.statement(estateId, id) });
-      setToast(
-        result.payoutStatus === 'PAID'
-          ? { message: 'Payout succeeded.', variant: 'success' }
-          : result.payoutStatus === 'AWAITING_APPROVAL'
-            ? {
-                message:
-                  'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.',
-                variant: 'success',
-              }
-            : {
-                message: 'The payout failed again. Check the payout account and try again.',
-                variant: 'error',
-              }
-      );
+      if (result.payoutStatus === 'PAID') {
+        toast.success('Payout succeeded.');
+      } else if (result.payoutStatus === 'AWAITING_APPROVAL') {
+        toast.success(
+          'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.'
+        );
+      } else {
+        toast.error('The payout failed again. Check the payout account and try again.');
+      }
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to retry this payout.', variant: 'error' });
+      toast.error(error.message || 'Unable to retry this payout.');
     },
   });
 
@@ -155,16 +147,14 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         queryKey: estateKeys.statement(estateId, dispute.statementId),
       });
       invalidate();
-      setToast({
-        message:
-          dispute.moneyEffect === 'HELD'
-            ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
-            : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.',
-        variant: 'success',
-      });
+      toast.success(
+        dispute.moneyEffect === 'HELD'
+          ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
+          : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.'
+      );
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to raise that query.', variant: 'error' });
+      toast.error(error.message || 'Unable to raise that query.');
     },
   });
 
@@ -176,10 +166,10 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         queryKey: estateKeys.statement(estateId, dispute.statementId),
       });
       invalidate();
-      setToast({ message: 'Query withdrawn.', variant: 'success' });
+      toast.success('Query withdrawn.');
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to withdraw that query.', variant: 'error' });
+      toast.error(error.message || 'Unable to withdraw that query.');
     },
   });
 
@@ -207,7 +197,9 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         </Button>
       </div>
 
-      {statements.length === 0 ? (
+      {isLoading ? (
+        <ListSkeleton rows={3} />
+      ) : statements.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState
             icon={FileBarChart}
@@ -220,8 +212,9 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
           {statements.map((statement: EstateStatement) => (
             <button
               key={statement.id}
+              type="button"
               onClick={() => setDetailId(statement.id)}
-              className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors"
+              className="w-full flex flex-wrap items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
             >
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
@@ -356,12 +349,11 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
               {detail.status === 'DRAFT' && (
                 <div className="mt-6 flex justify-end border-t border-border pt-5">
                   <Button
-                    className="gap-2"
                     rounded="md"
+                    icon={<Send className="w-4 h-4" />}
                     isLoading={issueStatement.isPending}
                     onClick={() => issueStatement.mutate(detail.id)}
                   >
-                    <Send className="w-4 h-4" />
                     Issue statement
                   </Button>
                 </div>
@@ -369,20 +361,19 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
 
               {detail.status === 'ISSUED' &&
                 (detail.payoutStatus === 'FAILED' || detail.payoutStatus === 'REJECTED') && (
-                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
                     <p className="text-xs text-muted-foreground">
                       {detail.payoutStatus === 'REJECTED'
                         ? 'Held back by a second reviewer. Sending it again puts it back in front of them.'
-                        : 'The transfer to the estate&apos;s payout account didn&apos;t go through.'}
+                        : 'The transfer to the estate\u2019s payout account didn\u2019t go through.'}
                     </p>
                     <Button
-                      className="gap-2"
                       variant="outline"
                       rounded="md"
+                      icon={<RotateCcw className="w-4 h-4" />}
                       isLoading={retryPayout.isPending}
                       onClick={() => retryPayout.mutate(detail.id)}
                     >
-                      <RotateCcw className="w-4 h-4" />
                       {detail.payoutStatus === 'REJECTED'
                         ? 'Send for approval again'
                         : 'Retry payout'}
@@ -393,10 +384,6 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
           )}
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }
@@ -404,6 +391,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
 /** Where estate dues are paid out to once a statement is issued. */
 export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [registrationNumber, setRegistrationNumber] = useState('');
@@ -434,6 +422,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
       setRegistrationNumber('');
       setBusinessType('');
       setSubmitError(null);
+      toast.success('Payout account saved.');
     },
     onError: (error: Error) => {
       setSubmitError(error.message || "Unable to update the estate's payout account.");
@@ -441,7 +430,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   });
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-6 mb-6">
+    <Card className="p-6 mb-6">
       <h3 className="text-base font-semibold text-foreground mb-1">Payout Account</h3>
       <p className="text-sm text-muted-foreground mb-4">
         Where estate dues are sent when you issue a statement.
@@ -453,12 +442,9 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
             {account.bankName} · {account.accountNumber} · {account.accountName}
           </p>
           {account.verified ? (
-            <div className="flex items-center gap-2 mt-2">
-              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-              <p className="text-xs text-green-700 dark:text-green-400">
-                Bank account verified and active for payouts
-              </p>
-            </div>
+            <Badge variant="success" className="mt-2">
+              Bank account verified and active for payouts
+            </Badge>
           ) : (
             <p className="text-xs text-muted-foreground mt-2">
               Not yet verified: save it again to resolve it against the bank.
@@ -468,76 +454,62 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Bank Code</label>
-          <div className="relative">
-            <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              value={bankCode}
-              onChange={(e) => setBankCode(e.target.value)}
-              placeholder="e.g. 058 for GTBank"
-              maxLength={6}
-              className="w-full pl-10 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Account Number</label>
-          <input
-            type="text"
+        <Field label="Bank Code">
+          <NumberInput
+            leadingIcon={<Landmark className="w-4 h-4" />}
+            value={bankCode}
+            onValueChange={setBankCode}
+            placeholder="e.g. 058 for GTBank"
+            maxLength={6}
+          />
+        </Field>
+        <Field label="Account Number">
+          <NumberInput
             value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+            onValueChange={setAccountNumber}
             placeholder="0123456789"
             maxLength={10}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            CAC number <span className="text-muted-foreground font-normal">(optional)</span>
-          </label>
-          <input
+        </Field>
+        <Field
+          label="CAC number"
+          optionalLabel="(optional)"
+          hint="Lets us verify the account belongs to the registered estate."
+        >
+          <Input
             type="text"
             value={registrationNumber}
             onChange={(e) => setRegistrationNumber(e.target.value)}
             placeholder="e.g. RC1234567"
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Lets us verify the account belongs to the registered estate.
-          </p>
-        </div>
+        </Field>
         {registrationNumber.trim() && (
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Registration type
-            </label>
-            <select
+          <Field label="Registration type">
+            <Select
               value={businessType}
-              onChange={(e) => setBusinessType(e.target.value as AgencyBusinessType | '')}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Select a type…</option>
-              {(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => (
-                <option key={t} value={t}>
-                  {BUSINESS_TYPE_LABELS[t]}
-                </option>
-              ))}
-            </select>
-          </div>
+              onValueChange={(value) => setBusinessType(value as AgencyBusinessType | '')}
+              placeholder="Select a type…"
+              options={(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => ({
+                value: t,
+                label: BUSINESS_TYPE_LABELS[t],
+              }))}
+            />
+          </Field>
         )}
       </div>
 
       <div className="mt-4 space-y-2">
-        {submitError && <p className="text-sm text-destructive">{submitError}</p>}
-        <SaveButton
-          label="Update Payout Account"
-          onClick={() => {
-            if (canSave) save.mutate();
-          }}
-        />
+        {submitError && <Alert variant="danger">{submitError}</Alert>}
+        <Button
+          variant="primary"
+          disabled={!canSave}
+          isLoading={save.isPending}
+          loadingText="Saving…"
+          onClick={() => save.mutate()}
+        >
+          Update Payout Account
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }

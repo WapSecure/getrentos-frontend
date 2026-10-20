@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, Field, IconButton, Textarea } from '@getrentos/ui';
 import type { MusterTally } from '@/types/estate';
 
 /** The API's floor on a closing note, kept in step so the form cannot under-run it. */
@@ -64,9 +64,7 @@ export const CloseMusterDialog = ({
           >
             <div className="flex items-start justify-between gap-4">
               <h2 className="text-lg font-semibold text-foreground">Stand the roll down?</h2>
-              <button onClick={handleClose} aria-label="Close" className="text-muted-foreground">
-                <X className="w-5 h-5" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <p className="text-sm text-muted-foreground mt-1">
@@ -76,20 +74,26 @@ export const CloseMusterDialog = ({
             </p>
 
             {needsNote && (
-              <p className="text-sm text-amber-600 mt-3">
+              <Alert variant="warning" className="mt-3">
                 {tally.unaccounted === 1
                   ? 'One person on the roll has not been answered for.'
                   : `${tally.unaccounted} people on the roll have not been answered for.`}{' '}
                 The estate can stand down anyway, but it has to say what happens next.
-              </p>
+              </Alert>
             )}
 
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-foreground mb-1">
-                {needsNote ? 'What happens next for the names left?' : 'Anything to record?'}{' '}
-                {!needsNote && <span className="text-muted-foreground">(optional)</span>}
-              </label>
-              <textarea
+            <Field
+              className="mt-4"
+              label={needsNote ? 'What happens next for the names left?' : 'Anything to record?'}
+              required={needsNote}
+              optionalLabel="(optional)"
+              hint={
+                needsNote
+                  ? `At least ${NOTE_MIN_LENGTH} characters. This is the only place that says the estate looked and did not find them.`
+                  : undefined
+              }
+            >
+              <Textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={3}
@@ -99,17 +103,15 @@ export const CloseMusterDialog = ({
                     ? 'e.g. Blocks A-C were searched twice; the fire service has the list of unreached visitors.'
                     : 'e.g. All clear given by the fire service at 14:40.'
                 }
-                className="w-full rounded-lg border border-border bg-transparent p-3 text-sm"
+                showCount
               />
-              {needsNote && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  At least {NOTE_MIN_LENGTH} characters. This is the only place that says the estate
-                  looked and did not find them.
-                </p>
-              )}
-            </div>
+            </Field>
 
-            {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+            {error && (
+              <Alert variant="danger" className="mt-3">
+                {error}
+              </Alert>
+            )}
 
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="ghost" onClick={handleClose}>
@@ -117,10 +119,12 @@ export const CloseMusterDialog = ({
               </Button>
               <Button
                 variant="primary"
-                disabled={isSubmitting || (needsNote && tooShort)}
+                disabled={needsNote && tooShort}
+                isLoading={isSubmitting}
+                loadingText="Standing down…"
                 onClick={() => onConfirm(note.trim() || undefined)}
               >
-                {isSubmitting ? 'Standing down…' : 'Stand the roll down'}
+                Stand the roll down
               </Button>
             </div>
           </motion.div>

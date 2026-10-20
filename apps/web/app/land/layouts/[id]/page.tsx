@@ -1,3 +1,4 @@
+import { Skeleton } from '@getrentos/ui';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
@@ -25,7 +26,7 @@ export default async function LandLayoutPage({ params }: Props) {
       <Navigation />
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* useSearchParams (the ?plot= deep link) needs a Suspense boundary. */}
-        <Suspense fallback={<div className="h-80 animate-pulse rounded-2xl bg-secondary" />}>
+        <Suspense fallback={<Skeleton className="h-80 rounded-2xl" />}>
           <LayoutDetailView layoutId={id} />
         </Suspense>
       </div>

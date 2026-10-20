@@ -23,7 +23,11 @@ function AgentInspectionsPageContent() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
-  const { data: inspectionsData, error, isLoading } = useQuery({
+  const {
+    data: inspectionsData,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: [...agentKeys.inspections, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(agentService.listInspections({ page, pageSize: PAGE_SIZE })),
     placeholderData: keepPreviousData,

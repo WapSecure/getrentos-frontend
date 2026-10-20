@@ -13,6 +13,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import {
+  Badge,
+  type BadgeVariant,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -24,27 +26,27 @@ import type { OwnerProperty, OwnershipVerificationStatus } from '@/types/owner';
 
 const verificationConfig: Record<
   OwnershipVerificationStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   verified: {
     label: 'Verified',
     icon: ShieldCheck,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+    variant: 'success',
   },
   pending_review: {
     label: 'Pending Review',
     icon: ShieldAlert,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
+    variant: 'warning',
   },
   needs_clarification: {
     label: 'Needs Clarification',
     icon: HelpCircle,
-    className: 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20',
+    variant: 'warning',
   },
   rejected: {
     label: 'Rejected',
     icon: ShieldX,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
+    variant: 'danger',
   },
 };
 
@@ -74,19 +76,27 @@ export const OwnerPropertyCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="group relative overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-ring"
     >
+      {onClick && (
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={`Open ${property.name}`}
+          className="absolute inset-0 rounded-2xl focus:outline-none"
+        />
+      )}
       <div className="relative h-40 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          <Building2 className="w-12 h-12 text-muted-foreground/60" />
         </div>
-        <div
-          className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${verification.className}`}
+        <Badge
+          variant={verification.variant}
+          icon={<VerificationIcon className="w-3 h-3" />}
+          className="absolute top-3 left-3"
         >
-          <VerificationIcon className="w-3 h-3" />
           {verification.label}
-        </div>
+        </Badge>
         {property.hasActiveSaleListing && (
           <div className="absolute top-3 right-10 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-primary bg-accent">
             Listed
@@ -99,7 +109,7 @@ export const OwnerPropertyCard = ({
               aria-label={`More actions for ${property.name}`}
               title="More actions"
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
+              className="absolute top-3 right-3 z-10 rounded-lg bg-card/90 p-1.5 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <MoreVertical className="w-4 h-4 text-foreground" />
             </button>
@@ -118,7 +128,7 @@ export const OwnerPropertyCard = ({
       </div>
 
       <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-start justify-between gap-2">
           <h3 className="font-semibold text-foreground truncate">{property.name}</h3>
           <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground whitespace-nowrap">
             {property.propertyType}
@@ -129,20 +139,20 @@ export const OwnerPropertyCard = ({
           {property.city}, {property.state}
         </p>
         {property.referenceCode && (
-          <div className="mt-2">
+          <div className="relative z-10 mt-2 w-fit">
             <ReferenceCodeChip code={property.referenceCode} />
           </div>
         )}
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div>
-            <p className="text-xs text-gray-400">Estimated value</p>
+            <p className="text-xs text-muted-foreground">Estimated value</p>
             <p className="text-sm font-semibold text-foreground">
               {formatCurrency(property.estimatedValue, { compact: true })}
             </p>
           </div>
           <p
-            className={`text-sm font-semibold ${appreciation >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+            className={`text-sm font-semibold ${appreciation >= 0 ? 'text-success' : 'text-destructive'}`}
           >
             {appreciation >= 0 ? '+' : ''}
             {appreciation.toFixed(1)}%

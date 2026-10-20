@@ -174,20 +174,20 @@ export const EmailSignIn = ({
       {pendingChallenge ? (
         /* Two-factor authentication step */
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <div className="p-4 rounded-lg bg-info-subtle border border-info/20">
             <div className="flex items-center gap-3 mb-2">
-              <ShieldCheck className="w-5 h-5 text-blue-600" />
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              <ShieldCheck className="w-5 h-5 text-info" />
+              <p className="text-sm font-medium text-foreground">
                 Two-factor authentication
               </p>
             </div>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-muted-foreground">
               Enter the 6-digit code from your authenticator app to finish signing in.
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-foreground mb-1.5">
               Authentication code
             </label>
             <Input
@@ -221,7 +221,7 @@ export const EmailSignIn = ({
           <button
             type="button"
             onClick={cancelTwoFactor}
-            className="w-full text-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Back to sign in
           </button>
@@ -229,7 +229,7 @@ export const EmailSignIn = ({
       ) : (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-foreground mb-1.5">
               Email Address
             </label>
             <div className="relative">
@@ -238,28 +238,28 @@ export const EmailSignIn = ({
                 {...register('identifier')}
                 className={
                   errors.identifier
-                    ? 'border-red-500'
+                    ? 'border-destructive'
                     : touchedFields.identifier
-                      ? 'border-green-500'
+                      ? 'border-success'
                       : undefined
                 }
                 inputClassName="py-3"
                 placeholder="you@example.com"
               />
               {touchedFields.identifier && !errors.identifier && (
-                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
               )}
               {errors.identifier && (
-                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-destructive" />
               )}
             </div>
             {errors.identifier && (
-              <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.identifier.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-foreground mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -272,7 +272,8 @@ export const EmailSignIn = ({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -285,9 +286,9 @@ export const EmailSignIn = ({
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+              <span className="text-sm text-muted-foreground">Remember me</span>
             </label>
             <a
               href={ROUTES.FORGOT_PASSWORD}

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CalendarClock, Clock, CheckCircle2, XCircle, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { ViewingRequest, ViewingRequestStatus } from '@/types/buyer';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
@@ -10,27 +10,27 @@ import { buyerService } from '@/services/buyerService';
 
 const statusConfig: Record<
   ViewingRequestStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   pending: {
     label: 'Pending',
     icon: Clock,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
+    variant: 'warning',
   },
   confirmed: {
     label: 'Confirmed',
     icon: CalendarClock,
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
+    variant: 'info',
   },
   completed: {
     label: 'Completed',
     icon: CheckCircle2,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+    variant: 'success',
   },
   cancelled: {
     label: 'Cancelled',
     icon: XCircle,
-    className: 'text-muted-foreground bg-secondary',
+    variant: 'neutral',
   },
 };
 
@@ -67,12 +67,9 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
             <p className="text-xs font-medium text-primary mt-0.5">Live video viewing</p>
           )}
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
-        >
-          <StatusIcon className="w-3 h-3" />
+        <Badge variant={status.variant} icon={<StatusIcon className="w-3 h-3" />}>
           {status.label}
-        </span>
+        </Badge>
       </div>
 
       {request.notes && <p className="text-xs text-muted-foreground mt-3">{request.notes}</p>}
@@ -86,10 +83,10 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1.5 text-red-600 dark:text-red-400"
+            className="text-destructive"
+            icon={<X className="w-3.5 h-3.5" />}
             onClick={onCancel}
           >
-            <X className="w-3.5 h-3.5" />
             Cancel Request
           </Button>
         </div>

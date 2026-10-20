@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   Input,
+  NumberInput,
 } from '@getrentos/ui';
 import { authFetch } from '@/lib/apiHelpers';
 

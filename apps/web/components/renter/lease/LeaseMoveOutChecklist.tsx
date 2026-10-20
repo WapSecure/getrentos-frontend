@@ -64,68 +64,70 @@ export const LeaseMoveOutChecklist = () => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
-      <button
-        type="button"
-        onClick={() => setIsExpanded(!isExpanded)}
-        aria-expanded={isExpanded}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <FileText className="w-5 h-5 text-primary" />
-          <div className="text-left">
-            <h3 className="font-semibold text-foreground">Move-Out Checklist</h3>
-            <p className="text-xs text-muted-foreground">
-              {completedCount}/{totalCount} items completed
-            </p>
-          </div>
-        </div>
-        <span className="text-xs text-muted-foreground">{isExpanded ? 'Hide' : 'Show'}</span>
-      </button>
-
-      {isExpanded && (
-        <div className="p-4 pt-0 space-y-3">
-          <div className="mb-3">
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-300"
-                style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
-              />
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
+          className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <FileText className="w-5 h-5 text-primary" />
+            <div className="text-left">
+              <h3 className="font-semibold text-foreground">Move-Out Checklist</h3>
+              <p className="text-xs text-muted-foreground">
+                {completedCount}/{totalCount} items completed
+              </p>
             </div>
           </div>
+          <span className="text-xs text-muted-foreground">{isExpanded ? 'Hide' : 'Show'}</span>
+        </button>
 
-          {items.map((item, index) => (
-            <motion.div
-              key={item.key}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="p-2 rounded-lg hover:bg-secondary"
+        {isExpanded && (
+          <div className="p-4 pt-0 space-y-3">
+            <div className="mb-3">
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+
+            {items.map((item, index) => (
+              <motion.div
+                key={item.key}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="p-2 rounded-lg hover:bg-secondary"
+              >
+                <Checkbox
+                  checked={item.completed}
+                  onCheckedChange={() => toggleItem(item.key)}
+                  label={
+                    <span
+                      className={item.completed ? 'text-muted-foreground line-through' : undefined}
+                    >
+                      {item.title}
+                    </span>
+                  }
+                  description={item.description}
+                />
+              </motion.div>
+            ))}
+
+            <Button
+              variant="outline"
+              fullWidth
+              size="sm"
+              className="mt-2 gap-2"
+              onClick={handleDocumentCondition}
             >
-              <Checkbox
-                checked={item.completed}
-                onCheckedChange={() => toggleItem(item.key)}
-                label={
-                  <span className={item.completed ? 'text-muted-foreground line-through' : undefined}>
-                    {item.title}
-                  </span>
-                }
-                description={item.description}
-              />
-            </motion.div>
-          ))}
-
-          <Button
-            variant="outline"
-            fullWidth
-            size="sm"
-            className="mt-2 gap-2"
-            onClick={handleDocumentCondition}
-          >
-            <Camera className="w-4 h-4" />
-            Document Condition
-          </Button>
-        </div>
-      )}
+              <Camera className="w-4 h-4" />
+              Document Condition
+            </Button>
+          </div>
+        )}
       </Card>
     </motion.div>
   );

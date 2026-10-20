@@ -8,9 +8,9 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { Star } from 'lucide-react';
 import { cn } from '@getrentos/shared';
@@ -33,7 +33,7 @@ export function ShortletGuestReviewDialog({
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [hover, setHover] = useState(0);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const submit = useMutation({
     mutationFn: () =>
@@ -44,10 +44,10 @@ export function ShortletGuestReviewDialog({
         })
       ),
     onSuccess: () => onSubmitted(),
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
-  const canSubmit = rating >= 1 && !submit.isPending;
+  const canSubmit = rating >= 1;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -70,13 +70,14 @@ export function ShortletGuestReviewDialog({
                   onMouseEnter={() => setHover(n)}
                   onMouseLeave={() => setHover(0)}
                   aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                  aria-pressed={rating === n}
                   className="text-3xl transition"
                 >
                   <Star
                     className={cn(
                       'h-7 w-7 transition-colors',
                       n <= (hover || rating)
-                        ? 'fill-amber-400 text-amber-400'
+                        ? 'fill-warning text-warning'
                         : 'text-muted-foreground/30'
                     )}
                   />
@@ -84,28 +85,30 @@ export function ShortletGuestReviewDialog({
               ))}
             </div>
           </div>
-          <div>
-            <p className="mb-2 text-sm font-medium">Comment (optional)</p>
+          <Field label="Comment" optionalLabel="(optional)">
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="How did the guest treat the place? Would you host them again?"
               rows={4}
               maxLength={1000}
+              showCount
             />
-          </div>
+          </Field>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={() => submit.mutate()} disabled={!canSubmit}>
-              {submit.isPending ? 'Submitting…' : 'Submit review'}
+            <Button
+              onClick={() => submit.mutate()}
+              isLoading={submit.isPending}
+              loadingText="Submitting…"
+              disabled={!canSubmit}
+            >
+              Submit review
             </Button>
           </div>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

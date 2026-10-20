@@ -8,9 +8,12 @@ import {
   Button,
   Card,
   EmptyState,
+  Field,
+  Input,
+  ListSkeleton,
   PageErrorState,
-  Toast,
-  type ToastVariant,
+  Skeleton,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -46,7 +49,7 @@ export default function PayoutRunsPage() {
   const canAct = hasAdminPermission(user?.roles, 'rentfinance.approve');
   const [period, setPeriod] = useState(lastEndedMonth());
   const [openRun, setOpenRun] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const runs = useQuery({
     queryKey: ['admin', 'payout-runs'],
@@ -62,20 +65,18 @@ export default function PayoutRunsPage() {
     queryClient.setQueryData(['admin', 'payout-runs', r.id], r);
     queryClient.invalidateQueries({ queryKey: ['admin', 'payout-runs'], exact: true });
   };
-  const fail = (e: Error) =>
-    setToast({ message: e.message || 'That did not work.', variant: 'error' });
+  const fail = (e: Error) => toast.error(e.message || 'That did not work.');
 
   const draft = useMutation({
     mutationFn: () => unwrap(adminPayoutRunsService.draft(period)),
     onSuccess: (r) => {
       refresh(r);
       setOpenRun(r.id);
-      setToast({
-        message: r.items.length
+      toast.success(
+        r.items.length
           ? `${r.items.length} owner statement${r.items.length === 1 ? '' : 's'} drafted for ${r.period}.`
-          : `No owner has released rent left to pay for ${r.period}.`,
-        variant: 'success',
-      });
+          : `No owner has released rent left to pay for ${r.period}.`
+      );
     },
     onError: fail,
   });
@@ -84,10 +85,8 @@ export default function PayoutRunsPage() {
     onSuccess: (r) => {
       refresh(r);
       const failed = r.items.filter((i) => i.status === 'FAILED').length;
-      setToast({
-        message: failed ? `Issued; ${failed} owner${failed === 1 ? '' : 's'} failed.` : 'Issued.',
-        variant: failed ? 'error' : 'success',
-      });
+      if (failed) toast.error(`Issued; ${failed} owner${failed === 1 ? '' : 's'} failed.`);
+      else toast.success('Issued.');
     },
     onError: fail,
   });
@@ -116,37 +115,36 @@ export default function PayoutRunsPage() {
 
       {canAct && (
         <Card className="mb-6 flex flex-wrap items-end gap-3 p-5">
-          <div>
-            <label htmlFor="payout-month" className="block text-sm font-medium text-foreground">
-              Month
-            </label>
-            <input
-              id="payout-month"
+          <Field label="Month">
+            <Input
               value={period}
               onChange={(e) => setPeriod(e.target.value.trim())}
               placeholder="YYYY-MM"
               pattern="\d{4}-\d{2}"
-              className="mt-1 h-10 w-32 rounded-lg border border-border bg-background px-3 text-sm"
+              inputMode="numeric"
+              className="w-32"
             />
-          </div>
+          </Field>
           <Button
             variant="primary"
-            disabled={draft.isPending || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            disabled={!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+            isLoading={draft.isPending}
+            loadingText="Drafting…"
             onClick={() => draft.mutate()}
           >
-            {draft.isPending ? 'Drafting…' : 'Draft payout run'}
+            Draft payout run
           </Button>
         </Card>
       )}
 
-      {runs.isError ? (
+      {runs.isLoading ? (
+        <ListSkeleton variant="cards" />
+      ) : runs.isError && !runs.data ? (
         <PageErrorState
           title="Could not load payout runs"
           description={(runs.error as Error).message}
           onRetry={() => runs.refetch()}
         />
-      ) : runs.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
       ) : !runs.data?.length ? (
         <EmptyState
           icon={Landmark}
@@ -169,7 +167,7 @@ export default function PayoutRunsPage() {
                     {s.failed ? ` · ${s.failed} failed` : ''}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={s.status === 'ISSUED' ? 'success' : 'warning'}>
                     {s.status === 'ISSUED' ? 'Issued' : 'Waiting to be issued'}
                   </Badge>
@@ -183,6 +181,17 @@ export default function PayoutRunsPage() {
                 </div>
               </div>
 
+              {openRun === s.id && !r && run.isLoading && (
+                <div
+                  className="mt-4 space-y-2 border-t border-border pt-4"
+                  role="status"
+                  aria-label="Loading run"
+                >
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              )}
               {openRun === s.id && r && (
                 <div className="mt-4 border-t border-border pt-4">
                   <div className="overflow-x-auto">
@@ -224,6 +233,7 @@ export default function PayoutRunsPage() {
                                   size="sm"
                                   variant="ghost"
                                   disabled={retry.isPending}
+                                  isLoading={retry.isPending && retry.variables?.itemId === i.id}
                                   onClick={() => retry.mutate({ id: r.id, itemId: i.id })}
                                 >
                                   Retry
@@ -239,10 +249,11 @@ export default function PayoutRunsPage() {
                     <div className="mt-4 flex flex-wrap items-center gap-3">
                       <Button
                         variant="primary"
-                        disabled={issue.isPending}
+                        isLoading={issue.isPending}
+                        loadingText="Issuing…"
                         onClick={() => issue.mutate(r.id)}
                       >
-                        {issue.isPending ? 'Issuing…' : 'Issue run'}
+                        Issue run
                       </Button>
                       <p className="text-xs text-muted-foreground">
                         Must be issued by someone other than the person who drafted it.
@@ -254,10 +265,6 @@ export default function PayoutRunsPage() {
             </Card>
           ))}
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

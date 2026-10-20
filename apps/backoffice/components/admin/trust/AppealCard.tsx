@@ -5,14 +5,16 @@ import { Badge, Button, Card, type BadgeVariant } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import type { TrustAppeal, TrustAppealStatus, TrustAppealTargetType } from '@/types/trust';
 
-export const APPEAL_STATUS_META: Record<TrustAppealStatus, { label: string; variant: BadgeVariant }> =
-  {
-    OPEN: { label: 'Open', variant: 'info' },
-    UNDER_REVIEW: { label: 'Under review', variant: 'warning' },
-    UPHELD: { label: 'Upheld', variant: 'danger' },
-    OVERTURNED: { label: 'Overturned', variant: 'success' },
-    CLOSED: { label: 'Closed', variant: 'neutral' },
-  };
+export const APPEAL_STATUS_META: Record<
+  TrustAppealStatus,
+  { label: string; variant: BadgeVariant }
+> = {
+  OPEN: { label: 'Open', variant: 'info' },
+  UNDER_REVIEW: { label: 'Under review', variant: 'warning' },
+  UPHELD: { label: 'Upheld', variant: 'danger' },
+  OVERTURNED: { label: 'Overturned', variant: 'success' },
+  CLOSED: { label: 'Closed', variant: 'neutral' },
+};
 
 export const APPEAL_TARGET_META: Record<
   TrustAppealTargetType,

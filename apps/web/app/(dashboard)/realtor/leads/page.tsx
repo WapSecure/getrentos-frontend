@@ -1,11 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, UserPlus, User, Mail, Phone } from 'lucide-react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, UserPlus, User, Mail, Phone } from 'lucide-react';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
 import type { LeadStage } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
@@ -15,12 +13,16 @@ import {
   DialogContent,
   DialogTitle,
   Field,
+  EmptyState,
   Input,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
   Pagination,
-  Toast,
-  type ToastVariant,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -58,7 +60,7 @@ export default function RealtorLeadsPage() {
     email?: string;
     phone?: string;
   }>({});
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const leadStatus = filter === 'all' ? undefined : LEAD_STAGE_TO_API_STATUS[filter];
   const leadsQuery = useQuery({
     queryKey: [
@@ -76,6 +78,7 @@ export default function RealtorLeadsPage() {
       );
       return { ...result, items: result.items.map(mapRealtorLead) };
     },
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = leadsQuery;
   const leads = data?.items ?? [];
@@ -87,10 +90,7 @@ export default function RealtorLeadsPage() {
       unwrap(realtorService.updateLeadStatus(id, status)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: realtorKeys.leads }),
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to update this lead. Please try again.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to update this lead. Please try again.'),
   });
   const { data: listingsResult, isLoading: isListingsLoading } = useQuery({
     queryKey: [
@@ -111,6 +111,7 @@ export default function RealtorLeadsPage() {
       );
     },
     enabled: isCreateOpen,
+    placeholderData: keepPreviousData,
   });
   const listings = listingsResult?.items ?? [];
   const selectedListing =
@@ -126,13 +127,10 @@ export default function RealtorLeadsPage() {
       setNewLead({ fullName: '', email: '', phone: '', listingId: '' });
       setFormErrors({});
       setIsCreateOpen(false);
-      setToast({ message: 'Lead created.', variant: 'success' });
+      toast.success('Lead created.');
     },
     onError: (error) => {
-      setToast({
-        message: error.message || 'Unable to create this lead. Please try again.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to create this lead. Please try again.');
     },
   });
 
@@ -168,58 +166,49 @@ export default function RealtorLeadsPage() {
 
   return (
     <>
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Leads</h1>
           <p className="text-muted-foreground mt-1">
             {total} lead{total === 1 ? '' : 's'} across your listings
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setIsCreateOpen(true)}>
-          <Plus className="h-4 w-4" />
+        <Button icon={<Plus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
           Add lead
         </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by lead or listing..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
-          {filterOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          placeholder="Search by lead or listing..."
+          label="Search leads"
+          className="flex-1 max-w-sm"
+        />
+        <Tabs
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value as StageFilter);
+            setPage(1);
+          }}
+        >
+          <TabsList className="max-w-full">
+            {filterOptions.map((option) => (
+              <TabsTrigger key={option.value} value={option.value}>
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : leadsQuery.isError ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading leads" />
+      ) : leadsQuery.isError && !data ? (
         <PageErrorState
           title="Leads are unavailable"
           description="We could not load your buyer and renter enquiries. Please try again."
@@ -227,32 +216,29 @@ export default function RealtorLeadsPage() {
           isRetrying={leadsQuery.isFetching}
         />
       ) : leads.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <UserPlus className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No leads match your filters' : 'No leads yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={UserPlus}
+          title={hasActiveFilters ? 'No leads match your filters' : 'No leads yet'}
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to your full pipeline.'
-              : 'Inquiries from buyers and renters on your published listings will appear here.'}
-          </p>
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => {
-                setSearchQuery('');
-                setFilter('all');
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
+              : 'Inquiries from buyers and renters on your published listings will appear here.'
+          }
+          action={
+            hasActiveFilters ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilter('all');
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {leads.map((lead) => (
@@ -363,7 +349,7 @@ export default function RealtorLeadsPage() {
             <Button
               fullWidth
               isLoading={createLead.isPending}
-              disabled={!newLead.fullName.trim() || createLead.isPending}
+              disabled={!newLead.fullName.trim()}
               onClick={handleCreateLead}
             >
               Create lead
@@ -371,10 +357,6 @@ export default function RealtorLeadsPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

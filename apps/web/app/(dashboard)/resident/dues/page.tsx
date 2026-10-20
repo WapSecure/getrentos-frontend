@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt, Repeat } from 'lucide-react';
-import { Badge, Button, EmptyState } from '@getrentos/ui';
+import { Badge, Button, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -74,15 +74,13 @@ export default function ResidentDuesPage() {
       </div>
 
       {isLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : dues.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={Receipt}
-            title="No dues yet"
-            description="Your estate manager hasn't charged any dues to your household."
-          />
-        </div>
+        <EmptyState
+          icon={Receipt}
+          title="No dues yet"
+          description="Your estate manager hasn't charged any dues to your household."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {dues.map((due) => {
@@ -93,13 +91,16 @@ export default function ResidentDuesPage() {
               due.status === 'pending' || due.status === 'overdue' || due.status === 'processing';
             return (
               <div key={due.id} className="p-4">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
                       {categoryLabels[due.category]}
                       {due.isRecurring && (
                         <span title="Repeats automatically">
-                          <Repeat className="w-3 h-3 text-muted-foreground shrink-0" />
+                          <Repeat
+                            className="w-3 h-3 text-muted-foreground shrink-0"
+                            aria-label="Repeats automatically"
+                          />
                         </span>
                       )}
                     </p>
@@ -119,18 +120,14 @@ export default function ResidentDuesPage() {
                       <Button
                         variant="primary"
                         size="sm"
-                        disabled={isPaying}
                         isLoading={isPaying}
+                        loadingText="Processing…"
                         onClick={() => {
                           setPayError(null);
                           payMutation.mutate(due.id);
                         }}
                       >
-                        {isPaying
-                          ? 'Processing…'
-                          : due.status === 'processing'
-                            ? 'Finish paying'
-                            : 'Pay Now'}
+                        {due.status === 'processing' ? 'Finish paying' : 'Pay Now'}
                       </Button>
                     )}
                   </div>

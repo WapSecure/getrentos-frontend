@@ -12,7 +12,7 @@ export function PayoutHoldNotice({ holdUntil }: { holdUntil?: string | null }) {
   // The API only sends a hold while it is still running.
   if (!holdUntil) return null;
   return (
-    <p className="mt-2 flex items-start gap-1.5 text-xs text-amber-700 dark:text-amber-400">
+    <p className="mt-2 flex items-start gap-1.5 text-xs text-warning">
       <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
       <span>
         This account was changed recently. To protect you, payouts to it start{' '}

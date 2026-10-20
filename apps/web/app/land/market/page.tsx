@@ -1,3 +1,4 @@
+import { Skeleton } from '@getrentos/ui';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -39,7 +40,7 @@ export default function LandMarketInsightsPage() {
             </Link>
           </p>
         </div>
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-secondary" />}>
+        <Suspense fallback={<Skeleton className="h-64 rounded-2xl" />}>
           <MarketInsightsView />
         </Suspense>
       </div>

@@ -178,20 +178,20 @@ export const PhoneSignIn = ({
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {pendingChallenge ? (
         <div className="space-y-4">
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+          <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
             <div className="mb-2 flex items-center gap-3">
-              <ShieldCheck className="h-5 w-5 text-blue-600" />
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+              <ShieldCheck className="h-5 w-5 text-info" />
+              <p className="text-sm font-medium text-foreground">
                 Two-factor authentication
               </p>
             </div>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-muted-foreground">
               Enter the 6-digit code from your authenticator app to finish signing in.
             </p>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="mb-1.5 block text-sm font-medium text-foreground">
               Authentication code
             </label>
             <Input
@@ -226,7 +226,7 @@ export const PhoneSignIn = ({
           <button
             type="button"
             onClick={cancelTwoFactor}
-            className="w-full text-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Back to sign in
           </button>
@@ -234,7 +234,7 @@ export const PhoneSignIn = ({
       ) : (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-foreground mb-1.5">
               Phone Number
             </label>
             <div className="relative">
@@ -243,28 +243,28 @@ export const PhoneSignIn = ({
                 {...register('identifier')}
                 className={
                   errors.identifier
-                    ? 'border-red-500'
+                    ? 'border-destructive'
                     : touchedFields.identifier
-                      ? 'border-green-500'
+                      ? 'border-success'
                       : undefined
                 }
                 inputClassName="py-3"
                 placeholder="+1 234 567 8900"
               />
               {touchedFields.identifier && !errors.identifier && (
-                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
+                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
               )}
               {errors.identifier && (
-                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-500" />
+                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-destructive" />
               )}
             </div>
             {errors.identifier && (
-              <p className="mt-1 text-sm text-red-500">{errors.identifier.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.identifier.message}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <label className="block text-sm font-medium text-foreground mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -277,7 +277,8 @@ export const PhoneSignIn = ({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -290,9 +291,9 @@ export const PhoneSignIn = ({
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+              <span className="text-sm text-muted-foreground">Remember me</span>
             </label>
             <a
               href={ROUTES.FORGOT_PASSWORD}

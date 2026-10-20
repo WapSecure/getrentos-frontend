@@ -2,8 +2,17 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Briefcase, Landmark, Loader2, Wallet } from 'lucide-react';
-import { Badge, Button, Input, NumberInput, Toast, type ToastVariant } from '@getrentos/ui';
+import { Briefcase, Landmark, Wallet } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  NumberInput,
+  Skeleton,
+  useToast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -35,9 +44,9 @@ export function AgencyAgentSelfPayout({
   const [editingAccount, setEditingAccount] = useState(false);
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const notify =
-    onToast ?? ((message: string, variant: ToastVariant) => setToast({ message, variant }));
+    onToast ?? ((message: string, variant: ToastVariant) => toast.show(message, variant));
 
   const myAccountQuery = useQuery({
     queryKey: ['agency', 'myAgentAccount'],
@@ -77,7 +86,7 @@ export function AgencyAgentSelfPayout({
 
   const cards = (
     <div className={cn('grid gap-4 lg:grid-cols-2', !standalone && className)}>
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <Card className="rounded-2xl p-5">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Wallet className="h-4 w-4 text-muted-foreground" />
           Your commission payouts
@@ -97,11 +106,20 @@ export function AgencyAgentSelfPayout({
               <p className="text-xs text-muted-foreground">Pending</p>
             </div>
           </div>
+        ) : mySummaryQuery.isLoading ? (
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+            ))}
+          </div>
         ) : (
           <p className="mt-3 text-sm text-muted-foreground">—</p>
         )}
         {summary && !summary.canReceive && (
-          <p className="mt-3 text-xs text-amber-700 dark:text-amber-400">
+          <p className="mt-3 text-xs text-warning">
             Verify your identity to trust tier {summary.withdrawTierRequired} to receive payouts.
           </p>
         )}
@@ -132,17 +150,18 @@ export function AgencyAgentSelfPayout({
             ))}
           </ul>
         )}
-      </div>
+      </Card>
 
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <Card className="rounded-2xl p-5">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Landmark className="h-4 w-4 text-muted-foreground" />
           Your payout account
         </h3>
         {myAccountQuery.isLoading ? (
-          <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-          </p>
+          <div role="status" aria-label="Loading" className="mt-3 space-y-2">
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-3 w-32" />
+          </div>
         ) : !editingAccount && account?.verified ? (
           <div className="mt-3">
             <p className="text-sm text-foreground">
@@ -159,28 +178,25 @@ export function AgencyAgentSelfPayout({
           </div>
         ) : (
           <div className="mt-3 space-y-3">
-            <label className="block">
-              <span className="text-xs text-muted-foreground">Bank code</span>
-              <Input
+            <Field label="Bank code">
+              <NumberInput
                 value={bankCode}
-                onChange={(e) => setBankCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onValueChange={(v) => setBankCode(v.slice(0, 6))}
                 placeholder="e.g. 058 for GTBank"
-                className="mt-1"
               />
-            </label>
-            <label className="block">
-              <span className="text-xs text-muted-foreground">Account number</span>
+            </Field>
+            <Field label="Account number">
               <NumberInput
                 value={accountNumber}
                 onValueChange={(v) => setAccountNumber(v.slice(0, 10))}
                 placeholder="10-digit NUBAN"
-                className="mt-1"
               />
-            </label>
+            </Field>
             <div className="flex gap-2">
               <Button
                 onClick={() => saveAccount.mutate()}
-                disabled={!canSave || saveAccount.isPending}
+                disabled={!canSave}
+                isLoading={saveAccount.isPending}
               >
                 Save account
               </Button>
@@ -196,7 +212,7 @@ export function AgencyAgentSelfPayout({
             </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 
@@ -214,9 +230,6 @@ export function AgencyAgentSelfPayout({
           : 'Your share of agency commissions, paid by the firm to your own account.'}
       </p>
       {cards}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </section>
   );
 }

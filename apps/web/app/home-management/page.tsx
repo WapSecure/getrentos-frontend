@@ -389,9 +389,9 @@ function Metric({
 }) {
   const styles = {
     blue: 'bg-primary/10 text-primary',
-    green: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
-    amber: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-    violet: 'bg-violet-500/10 text-violet-700 dark:text-violet-400',
+    green: 'bg-success-subtle text-success',
+    amber: 'bg-warning-subtle text-warning',
+    violet: 'bg-info-subtle text-info',
   } as const;
 
   return (

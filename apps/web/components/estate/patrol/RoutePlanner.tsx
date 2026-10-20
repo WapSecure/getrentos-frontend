@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, Plus, Route as RouteIcon, X } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -13,9 +14,10 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  IconButton,
   Input,
+  ListSkeleton,
   Select,
-  Skeleton,
   TimePicker,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -143,7 +145,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
   };
 
   if (routesQuery.isLoading) {
-    return <Skeleton className="h-40 w-full rounded-2xl" />;
+    return <ListSkeleton variant="cards" rows={2} />;
   }
 
   const routes = routesQuery.data ?? [];
@@ -157,8 +159,11 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
             What time a patrol starts, how long it may take, and which checkpoints it must reach.
           </p>
         </div>
-        <Button onClick={openCreate} className="gap-2" disabled={active.length === 0}>
-          <Plus className="h-4 w-4" />
+        <Button
+          onClick={openCreate}
+          icon={<Plus className="h-4 w-4" />}
+          disabled={active.length === 0}
+        >
           Add a round
         </Button>
       </div>
@@ -193,6 +198,9 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                     size="sm"
                     onClick={() => toggleMutation.mutate(route)}
                     disabled={toggleMutation.isPending}
+                    isLoading={
+                      toggleMutation.isPending && toggleMutation.variables?.id === route.id
+                    }
                   >
                     {route.active ? 'Pause' : 'Resume'}
                   </Button>
@@ -331,37 +339,32 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                       <span className="min-w-0 flex-1 truncate text-sm text-foreground">
                         {nameOf(id)}
                       </span>
-                      <button
-                        type="button"
-                        aria-label={`Move ${nameOf(id)} earlier`}
+                      <IconButton
+                        label={`Move ${nameOf(id)} earlier`}
+                        icon={<ArrowUp />}
+                        size="sm"
                         onClick={() => move(index, -1)}
                         disabled={index === 0}
-                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-40 disabled:hover:bg-transparent"
-                      >
-                        <ArrowUp className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Move ${nameOf(id)} later`}
+                      />
+                      <IconButton
+                        label={`Move ${nameOf(id)} later`}
+                        icon={<ArrowDown />}
+                        size="sm"
                         onClick={() => move(index, 1)}
                         disabled={index === draft.checkpointIds.length - 1}
-                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary disabled:opacity-40 disabled:hover:bg-transparent"
-                      >
-                        <ArrowDown className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Remove ${nameOf(id)}`}
+                      />
+                      <IconButton
+                        label={`Remove ${nameOf(id)}`}
+                        icon={<X />}
+                        size="sm"
+                        variant="danger"
                         onClick={() =>
                           setDraft({
                             ...draft,
                             checkpointIds: draft.checkpointIds.filter((value) => value !== id),
                           })
                         }
-                        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
+                      />
                     </li>
                   ))}
                 </ol>
@@ -395,9 +398,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
             )}
 
             {saveMutation.error && (
-              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
-                {(saveMutation.error as Error).message}
-              </p>
+              <Alert variant="danger">{(saveMutation.error as Error).message}</Alert>
             )}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

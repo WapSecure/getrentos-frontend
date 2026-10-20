@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
+import { Button, NumberInput } from '@getrentos/ui';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { apiFetch } from '@/lib/apiClient';
@@ -110,14 +111,14 @@ function OAuthCallbackContent() {
               Enter the 6-digit code from your authenticator app to finish signing in.
             </p>
           </div>
-          <input
+          <NumberInput
             aria-label="Authentication code"
-            inputMode="numeric"
             autoComplete="one-time-code"
             autoFocus
+            maxLength={6}
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-center font-mono text-lg tracking-[0.5em] text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            onValueChange={(value) => setCode(value.slice(0, 6))}
+            inputClassName="text-center font-mono text-lg tracking-[0.5em]"
             placeholder="••••••"
           />
           {error && (
@@ -125,13 +126,17 @@ function OAuthCallbackContent() {
               {error}
             </p>
           )}
-          <button
+          <Button
             type="submit"
-            disabled={code.length !== 6 || verifying}
-            className="w-full h-11 rounded-xl bg-primary text-primary-foreground text-sm font-semibold disabled:opacity-50"
+            disabled={code.length !== 6}
+            isLoading={verifying}
+            loadingText="Verifying…"
+            fullWidth
+            size="lg"
+            rounded="lg"
           >
-            {verifying ? 'Verifying…' : 'Verify & sign in'}
-          </button>
+            Verify & sign in
+          </Button>
           <a
             href={ROUTES.LOGIN}
             className="block text-center text-sm text-muted-foreground hover:text-foreground"

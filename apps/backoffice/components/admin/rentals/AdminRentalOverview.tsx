@@ -83,7 +83,7 @@ export const AdminRentalsOverview = () => {
 
   if (isLoading) return <PageLoadingState />;
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title="Could not load rental oversight"

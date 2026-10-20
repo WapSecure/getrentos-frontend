@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Button, PageErrorState, Select } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Button, PageErrorState, Select, Skeleton } from '@getrentos/ui';
 import { AlertTriangle, BarChart3 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
@@ -69,6 +69,7 @@ export const MarketInsightsView = () => {
   const insights = useQuery({
     queryKey: landMarketKeys.insights(params),
     queryFn: () => unwrap(landMarketService.insights(params)),
+    placeholderData: keepPreviousData,
   });
   const estates = useQuery({
     queryKey: ['estate-storefronts', 'directory', 'land-insights'],
@@ -134,10 +135,10 @@ export const MarketInsightsView = () => {
       {insights.isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy="true">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl bg-secondary" />
+            <Skeleton key={i} className="h-24 rounded-2xl" />
           ))}
         </div>
-      ) : insights.isError || !data ? (
+      ) : !data ? (
         <PageErrorState
           description={insights.error instanceof Error ? insights.error.message : undefined}
           onRetry={() => insights.refetch()}

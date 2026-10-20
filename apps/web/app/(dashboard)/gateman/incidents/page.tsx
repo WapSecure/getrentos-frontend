@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Siren, TriangleAlert } from 'lucide-react';
-import { Button, CardSkeleton, DocumentUpload, Select } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CardSkeleton,
+  DocumentUpload,
+  Field,
+  ListSkeleton,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -36,7 +46,7 @@ export default function GatemanIncidentsPage() {
 
   const { estate, isLoading: isEstateLoading } = useGatemanPost();
 
-  const { data: openIncidents } = useQuery({
+  const { data: openIncidents, isLoading: isOpenLoading } = useQuery({
     queryKey: estateKeys.incidents(estate?.id ?? '', 'open'),
     queryFn: () => unwrap(estateService.listIncidents(estate!.id, 'open')),
     enabled: !!estate,
@@ -99,52 +109,47 @@ export default function GatemanIncidentsPage() {
       </div>
 
       <button
+        type="button"
         onClick={() => panicAlert.mutate()}
         disabled={panicAlert.isPending}
-        className="w-full rounded-2xl bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:opacity-60 text-white py-6 flex flex-col items-center gap-2 shadow-lg shadow-red-600/20 transition-colors"
+        aria-busy={panicAlert.isPending || undefined}
+        className="w-full rounded-2xl bg-destructive hover:brightness-95 active:brightness-90 disabled:opacity-60 text-destructive-foreground py-6 flex flex-col items-center gap-2 shadow-lg shadow-destructive/20 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring"
       >
         <TriangleAlert className="w-8 h-8" />
         <span className="text-lg font-bold tracking-wide">
           {panicAlert.isPending ? 'Sending…' : 'PANIC ALERT'}
         </span>
-        <span className="text-xs text-red-100">Tap to immediately notify the estate manager</span>
+        <span className="text-xs text-destructive-foreground/80">
+          Tap to immediately notify the estate manager
+        </span>
       </button>
 
       {panicSent && (
-        <p className="text-center text-sm font-medium text-red-600">
-          Alert sent: the estate manager has been notified.
-        </p>
+        <Alert variant="success">Alert sent: the estate manager has been notified.</Alert>
       )}
 
-      <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+      <Card className="p-6 space-y-4">
         <h2 className="text-sm font-semibold text-foreground">Report an incident</h2>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Category</label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Category">
             <Select value={category} onValueChange={setCategory} options={categoryOptions} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
+          </Field>
+          <Field label="Priority">
             <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
-          </div>
+          </Field>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Description</label>
-          <textarea
+        <Field label="Description">
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             placeholder="What happened, where, and who's involved…"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
-        </div>
+        </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Photo <span className="text-gray-400 font-normal">(optional)</span>
-          </label>
+        <Field label="Photo" optionalLabel="(optional)">
           <DocumentUpload
             value={photo ? [{ id: 'photo', file: photo }] : []}
             onChange={(items) => setPhoto(items[0]?.file ?? null)}
@@ -152,12 +157,14 @@ export default function GatemanIncidentsPage() {
             multiple={false}
             label=""
           />
-        </div>
+        </Field>
 
         <Button
           variant="primary"
           fullWidth
-          disabled={!description.trim() || reportIncident.isPending}
+          disabled={!description.trim()}
+          isLoading={reportIncident.isPending}
+          loadingText="Reporting…"
           onClick={() =>
             reportIncident.mutate({
               description: description.trim(),
@@ -167,15 +174,17 @@ export default function GatemanIncidentsPage() {
             })
           }
         >
-          {reportIncident.isPending ? 'Reporting…' : 'Report Incident'}
+          Report Incident
         </Button>
-      </div>
+      </Card>
 
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">
           Open Incidents ({open.length})
         </h2>
-        {open.length === 0 ? (
+        {isOpenLoading ? (
+          <ListSkeleton rows={2} />
+        ) : open.length === 0 ? (
           <p className="text-sm text-muted-foreground">No open incidents right now.</p>
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">

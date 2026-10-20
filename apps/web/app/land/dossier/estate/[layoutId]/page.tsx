@@ -1,5 +1,6 @@
 'use client';
 
+import { Skeleton } from '@getrentos/ui';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Footer } from '@/components/layout/Footer';
@@ -25,7 +26,7 @@ export default function LandEstateDossierPage() {
       </div>
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-24 print:pt-0">
         {query.isLoading ? (
-          <div className="h-64 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+          <Skeleton className="h-64 rounded-2xl" />
         ) : query.data ? (
           <LandDossierView dossier={query.data} />
         ) : (

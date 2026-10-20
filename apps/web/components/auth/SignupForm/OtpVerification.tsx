@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { Button } from '@getrentos/ui';
 import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
 import { AUTH_CONSTANTS } from '@/lib/constants/auth';
 import { OtpInput } from '@/components/auth/OtpInput';
@@ -75,7 +75,7 @@ export const OtpVerification = ({
         <h3 className="text-lg font-semibold text-foreground mb-1">
           Verify your {method === 'whatsapp' ? 'WhatsApp' : method}
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           We sent a verification code to your{' '}
           <span className="font-medium text-foreground">
             {method === 'whatsapp' ? 'WhatsApp' : method}
@@ -90,7 +90,7 @@ export const OtpVerification = ({
       {/* Timer & Resend */}
       <div className="text-center">
         {!canResend ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Resend code in {formatTime(timeLeft)}
           </p>
         ) : (
@@ -106,22 +106,18 @@ export const OtpVerification = ({
       </div>
 
       {/* Submit Button */}
-      <motion.button
+      <Button
         onClick={handleSubmit}
-        disabled={otp.join('').length !== AUTH_CONSTANTS.OTP_LENGTH || isLoading}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={otp.join('').length !== AUTH_CONSTANTS.OTP_LENGTH}
+        isLoading={isLoading}
+        fullWidth
+        size="lg"
+        rounded="lg"
+        icon={<ArrowRight className="w-4 h-4" />}
+        iconPosition="right"
       >
-        {isLoading ? (
-          <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <>
-            Verify & Continue
-            <ArrowRight className="w-4 h-4" />
-          </>
-        )}
-      </motion.button>
+        Verify & Continue
+      </Button>
     </div>
   );
 };

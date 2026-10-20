@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, PageErrorState } from '@getrentos/ui';
+import { Card, PageErrorState, Skeleton } from '@getrentos/ui';
 import { ArrowLeft, Info } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -33,7 +33,7 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   });
   const propertyId = resale.data?.propertyId ?? propertyHint;
 
-  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: key,
     queryFn: () => unwrap(landDeveloperService.listTransactionMilestones(txId)),
   });
@@ -121,8 +121,8 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
 
       <div className="mt-6">
         {isLoading ? (
-          <div className="h-80 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-        ) : isError || !data ? (
+          <Skeleton className="h-80 rounded-2xl" />
+        ) : !data ? (
           <PageErrorState
             title="The conveyance steps could not be loaded"
             description={errorMessage(error)}

@@ -1,6 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
+import { Input } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
@@ -100,13 +100,13 @@ export const MessageThread = ({
 
       <div className="p-3 border-t border-border flex items-center gap-2">
         {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
-        <LegacyInput
-          type="text"
+        <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
           placeholder="Type a message..."
-          className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-secondary text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="Message"
+          className="min-w-0 flex-1"
         />
         <button
           type="button"

@@ -105,7 +105,9 @@ export const MaintenanceChecklist = () => {
                 checked={item.completed}
                 onCheckedChange={() => toggleItem(item.id)}
                 label={
-                  <span className={item.completed ? 'text-muted-foreground line-through' : undefined}>
+                  <span
+                    className={item.completed ? 'text-muted-foreground line-through' : undefined}
+                  >
                     {item.title}
                   </span>
                 }

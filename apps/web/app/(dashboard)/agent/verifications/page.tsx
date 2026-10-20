@@ -33,7 +33,11 @@ function AgentVerificationsPageContent() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
-  const { data: visitsData, error, isLoading } = useQuery({
+  const {
+    data: visitsData,
+    error,
+    isLoading,
+  } = useQuery({
     queryKey: [...agentKeys.verifications, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(agentService.listVerifications({ page, pageSize: PAGE_SIZE })),
     placeholderData: keepPreviousData,

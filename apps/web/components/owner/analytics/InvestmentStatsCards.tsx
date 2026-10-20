@@ -40,13 +40,13 @@ export const InvestmentStatsCards = ({
   ];
 
   const colorClasses = {
-    blue: { bg: 'bg-blue-50 dark:bg-blue-950/20', icon: 'text-blue-600 dark:text-blue-400' },
+    blue: { bg: 'bg-info-subtle', icon: 'text-info' },
     emerald: {
-      bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-      icon: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-success-subtle',
+      icon: 'text-success',
     },
     gold: { bg: 'bg-accent', icon: 'text-primary' },
-    green: { bg: 'bg-green-50 dark:bg-green-950/20', icon: 'text-green-600 dark:text-green-400' },
+    green: { bg: 'bg-success-subtle', icon: 'text-success' },
   } as const;
 
   return (

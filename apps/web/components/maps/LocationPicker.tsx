@@ -2,7 +2,7 @@
 
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
-import { Loader2, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { geocodeService, LAGOS_POINT, type MapPoint } from '@/services/geocodeService';
 import { addBaseTiles } from '@/lib/mapTiles';
@@ -133,9 +133,10 @@ export const LocationPicker = ({
         <MapPin className="h-4 w-4 text-primary" />
         <span className="flex-1 text-sm font-medium text-foreground">Pin on the map</span>
         {value && (
-          <button
+          <Button
             type="button"
-            className="text-xs text-muted-foreground hover:text-foreground"
+            variant="ghost"
+            size="xs"
             onClick={() => {
               // The map's element goes with the pin, so the map must too.
               mapRef.current?.remove();
@@ -147,7 +148,7 @@ export const LocationPicker = ({
             }}
           >
             Remove pin
-          </button>
+          </Button>
         )}
       </div>
       <p className="text-xs text-muted-foreground">
@@ -172,9 +173,9 @@ export const LocationPicker = ({
         variant="outline"
         size="sm"
         disabled={!canSearch || finding}
+        isLoading={finding}
         onClick={() => void find()}
       >
-        {finding ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {value ? 'Find the address again' : 'Find on map'}
       </Button>
     </div>

@@ -1,9 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { Alert, Button, EmptyState, Input } from '@getrentos/ui';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
 
@@ -48,20 +47,24 @@ export const MessageThread = ({
   return (
     <div className="flex-1 bg-card rounded-2xl border border-border flex flex-col overflow-hidden">
       <div className="p-4 border-b border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">
+        <div className="w-9 h-9 shrink-0 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">
           {getInitials(contactName)}
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-foreground">{contactName}</p>
-          <p className="text-xs text-gray-400">{contactRole}</p>
+          <p className="text-xs text-muted-foreground">{contactRole}</p>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center">
-            <MessageCircle className="w-8 h-8 text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-gray-400">No messages yet: say hello</p>
+          <div className="h-full flex flex-col items-center justify-center">
+            <EmptyState
+              icon={MessageCircle}
+              title="No messages yet: say hello"
+              size="compact"
+              bare
+            />
           </div>
         ) : (
           messages.map((message) => {
@@ -83,7 +86,7 @@ export const MessageThread = ({
                     className={`flex items-center gap-1 mt-1 ${isLandlord ? 'justify-end' : 'justify-start'}`}
                   >
                     <span
-                      className={`text-[10px] ${isLandlord ? 'text-primary-foreground/60' : 'text-gray-400'}`}
+                      className={`text-[10px] ${isLandlord ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}
                     >
                       {format(new Date(message.timestamp), 'h:mm a')}
                     </span>
@@ -102,25 +105,30 @@ export const MessageThread = ({
       </div>
 
       <div className="border-t border-border p-3">
-        {errorMessage && <p className="mb-2 text-xs text-destructive">{errorMessage}</p>}
+        {errorMessage && (
+          <Alert variant="danger" className="mb-2">
+            {errorMessage}
+          </Alert>
+        )}
         <div className="flex items-center gap-2">
-          <LegacyInput
+          <Input
             type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && void handleSend()}
             placeholder="Type a message..."
-            className="flex-1 px-3 py-2 text-sm rounded-lg border border-border bg-gray-50 dark:bg-white/5 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Message"
+            className="flex-1 min-w-0"
           />
-          <button
-            type="button"
+          <Button
+            className="shrink-0 px-3"
             onClick={() => void handleSend()}
-            disabled={!draft.trim() || isSending}
+            disabled={!draft.trim()}
+            isLoading={isSending}
             aria-label={isSending ? 'Sending message' : 'Send message'}
-            className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
           >
             <Send className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

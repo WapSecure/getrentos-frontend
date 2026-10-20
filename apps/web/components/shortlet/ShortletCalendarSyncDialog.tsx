@@ -3,17 +3,19 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
   Button,
+  CardSkeleton,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   Field,
+  IconButton,
   Input,
   Select,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { AlertTriangle, Copy, RefreshCw, Trash2 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -53,7 +55,7 @@ export function ShortletCalendarSyncDialog({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [source, setSource] = useState('Airbnb');
   const [customName, setCustomName] = useState('');
   const [url, setUrl] = useState('');
@@ -70,7 +72,7 @@ export function ShortletCalendarSyncDialog({
     queryClient.invalidateQueries({ queryKey: shortletKeys.hostBlockedDates(listing.id) });
     queryClient.invalidateQueries({ queryKey: shortletKeys.public });
   };
-  const fail = (e: Error) => setToast({ message: e.message, variant: 'error' });
+  const fail = (e: Error) => toast.error(e.message);
 
   const addFeed = useMutation({
     mutationFn: () =>
@@ -84,10 +86,9 @@ export function ShortletCalendarSyncDialog({
       setUrl('');
       setCustomName('');
       refresh();
-      setToast({
-        message: `${feed.name} connected: ${feed.eventCount} upcoming stay${feed.eventCount === 1 ? '' : 's'} blocked.`,
-        variant: 'success',
-      });
+      toast.success(
+        `${feed.name} connected: ${feed.eventCount} upcoming stay${feed.eventCount === 1 ? '' : 's'} blocked.`
+      );
     },
     onError: fail,
   });
@@ -96,11 +97,8 @@ export function ShortletCalendarSyncDialog({
     mutationFn: (id: string) => unwrap(shortletService.syncCalendarFeed(id)),
     onSuccess: (feed) => {
       refresh();
-      setToast(
-        feed.lastError
-          ? { message: feed.lastError, variant: 'error' }
-          : { message: `${feed.name} synced.`, variant: 'success' }
-      );
+      if (feed.lastError) toast.error(feed.lastError);
+      else toast.success(`${feed.name} synced.`);
     },
     onError: fail,
   });
@@ -109,7 +107,7 @@ export function ShortletCalendarSyncDialog({
     mutationFn: (id: string) => unwrap(shortletService.removeCalendarFeed(id)),
     onSuccess: () => {
       refresh();
-      setToast({ message: 'Calendar disconnected and its dates freed.', variant: 'success' });
+      toast.success('Calendar disconnected and its dates freed.');
     },
     onError: fail,
   });
@@ -119,10 +117,7 @@ export function ShortletCalendarSyncDialog({
     onSuccess: () => {
       setConfirmReset(false);
       refresh();
-      setToast({
-        message: 'New link created. Paste it into the other sites again.',
-        variant: 'success',
-      });
+      toast.success('New link created. Paste it into the other sites again.');
     },
     onError: fail,
   });
@@ -131,23 +126,17 @@ export function ShortletCalendarSyncDialog({
     if (!data) return;
     try {
       await navigator.clipboard.writeText(data.exportUrl);
-      setToast({ message: 'Link copied.', variant: 'success' });
+      toast.success('Link copied.');
     } catch {
-      setToast({
-        message: 'Could not copy. Select the link and copy it by hand.',
-        variant: 'error',
-      });
+      toast.error('Could not copy. Select the link and copy it by hand.');
     }
   };
 
   const submit = () => {
     if (source === 'Other' && !customName.trim()) {
-      return setToast({
-        message: 'Name the calendar, e.g. the site it comes from.',
-        variant: 'error',
-      });
+      return toast.error('Name the calendar, e.g. the site it comes from.');
     }
-    if (!url.trim()) return setToast({ message: 'Paste the calendar link.', variant: 'error' });
+    if (!url.trim()) return toast.error('Paste the calendar link.');
     addFeed.mutate();
   };
 
@@ -166,9 +155,9 @@ export function ShortletCalendarSyncDialog({
 
         <div className="max-h-[70vh] space-y-6 overflow-y-auto border-t border-border p-5">
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
-          ) : error ? (
-            <p className="text-sm text-destructive">{(error as Error).message}</p>
+            <CardSkeleton lines={4} />
+          ) : error && !data ? (
+            <Alert variant="danger">{(error as Error).message}</Alert>
           ) : (
             <>
               <section className="space-y-2">
@@ -186,9 +175,12 @@ export function ShortletCalendarSyncDialog({
                     className="font-mono text-xs"
                     aria-label="GetRentos calendar link"
                   />
-                  <Button variant="outline" onClick={copyLink} aria-label="Copy link">
-                    <Copy className="h-4 w-4" />
-                  </Button>
+                  <IconButton
+                    variant="outline"
+                    label="Copy link"
+                    icon={<Copy />}
+                    onClick={copyLink}
+                  />
                 </div>
                 {confirmReset ? (
                   <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border p-3 text-xs">
@@ -207,9 +199,10 @@ export function ShortletCalendarSyncDialog({
                     <Button
                       size="sm"
                       onClick={() => resetExport.mutate()}
-                      disabled={resetExport.isPending}
+                      isLoading={resetExport.isPending}
+                      loadingText="Resetting…"
                     >
-                      {resetExport.isPending ? 'Resetting…' : 'Reset link'}
+                      Reset link
                     </Button>
                   </div>
                 ) : (
@@ -259,26 +252,22 @@ export function ShortletCalendarSyncDialog({
                             </p>
                           </div>
                           <div className="flex shrink-0 gap-1">
-                            <Button
-                              variant="ghost"
+                            <IconButton
                               size="sm"
-                              aria-label={`Sync ${feed.name} now`}
+                              label={`Sync ${feed.name} now`}
+                              icon={<RefreshCw />}
                               onClick={() => syncFeed.mutate(feed.id)}
+                              isLoading={syncFeed.isPending && syncFeed.variables === feed.id}
                               disabled={syncFeed.isPending}
-                            >
-                              <RefreshCw
-                                className={`h-4 w-4 ${syncFeed.isPending && syncFeed.variables === feed.id ? 'animate-spin' : ''}`}
-                              />
-                            </Button>
-                            <Button
-                              variant="ghost"
+                            />
+                            <IconButton
                               size="sm"
-                              aria-label={`Disconnect ${feed.name}`}
+                              label={`Disconnect ${feed.name}`}
+                              icon={<Trash2 />}
                               onClick={() => removeFeed.mutate(feed.id)}
+                              isLoading={removeFeed.isPending && removeFeed.variables === feed.id}
                               disabled={removeFeed.isPending}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            />
                           </div>
                         </div>
                         {feed.lastError && (
@@ -328,18 +317,19 @@ export function ShortletCalendarSyncDialog({
                       inputMode="url"
                     />
                   </Field>
-                  <Button className="w-full" onClick={submit} disabled={addFeed.isPending}>
-                    {addFeed.isPending ? 'Checking the calendar…' : 'Connect calendar'}
+                  <Button
+                    className="w-full"
+                    onClick={submit}
+                    isLoading={addFeed.isPending}
+                    loadingText="Checking the calendar…"
+                  >
+                    Connect calendar
                   </Button>
                 </div>
               </section>
             </>
           )}
         </div>
-
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

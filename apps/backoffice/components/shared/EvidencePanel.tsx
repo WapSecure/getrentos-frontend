@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { ExternalLink, FileText, ImageIcon, Paperclip, Trash2, Upload } from 'lucide-react';
-import { Button, DocumentPreviewButton, LegacyInput } from '@getrentos/ui';
+import { Badge, Button, DocumentPreviewButton, IconButton, Input } from '@getrentos/ui';
 import { cn, formatDate } from '@getrentos/shared';
 import type { EvidenceItem } from '@/types/admin';
 
@@ -172,14 +172,14 @@ export const EvidencePanel = ({
               </span>
             )}
           </div>
-          <LegacyInput
+          <Input
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Why you are adding this (optional, shown on the record)"
-            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Note for the record"
           />
-          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+          {error && <p className="text-xs text-destructive">{error}</p>}
           <p className="text-[11px] text-muted-foreground">
             Stored on our side and opened through a short-lived link, so access can be revoked.
             Images, PDFs, video and office documents up to 25 MB.
@@ -221,15 +221,13 @@ export const EvidencePanel = ({
                 key={item.id}
                 className={cn(
                   'rounded-lg border p-2.5 flex items-start gap-2.5',
-                  isStored
-                    ? 'border-border bg-card'
-                    : 'border-amber-300/60 bg-amber-50/60 dark:border-amber-900/50 dark:bg-amber-900/10'
+                  isStored ? 'border-border bg-card' : 'border-warning/30 bg-warning-subtle'
                 )}
               >
                 <span
                   className={cn(
                     'mt-0.5 shrink-0',
-                    isStored ? 'text-muted-foreground' : 'text-amber-600 dark:text-amber-400'
+                    isStored ? 'text-muted-foreground' : 'text-warning'
                   )}
                 >
                   {isImageEvidence(item) ? (
@@ -244,16 +242,9 @@ export const EvidencePanel = ({
                     <span className="text-sm font-medium text-foreground break-all">
                       {item.name}
                     </span>
-                    <span
-                      className={cn(
-                        'rounded-full px-2 py-0.5 text-[10px] font-medium',
-                        item.source === 'ADMIN'
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
-                          : 'bg-accent text-muted-foreground'
-                      )}
-                    >
+                    <Badge variant={item.source === 'ADMIN' ? 'info' : 'neutral'}>
                       {item.source === 'ADMIN' ? 'Added by staff' : 'Submitted by a party'}
-                    </span>
+                    </Badge>
                   </div>
                   {meta.length > 0 && (
                     <p className="mt-0.5 text-[11px] text-muted-foreground break-all">
@@ -261,7 +252,7 @@ export const EvidencePanel = ({
                     </p>
                   )}
                   {!isStored && (
-                    <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-300">
+                    <p className="mt-0.5 text-[11px] text-warning">
                       External link recorded before uploads were supported: we did not receive this
                       file.
                     </p>
@@ -289,25 +280,21 @@ export const EvidencePanel = ({
                       href={item.url}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100/70 dark:text-amber-300 dark:hover:bg-amber-900/30"
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-warning hover:bg-warning/10"
                     >
                       Open
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
                   {onRemove && (
-                    <Button
-                      variant="ghost"
+                    <IconButton
+                      variant="danger"
                       size="sm"
-                      className="gap-1.5 text-red-600 dark:text-red-400"
-                      title={removeTitle}
-                      aria-label={removeTitle}
+                      icon={<Trash2 />}
+                      label={removeTitle}
                       onClick={() => onRemove(item.id)}
                       isLoading={removingId === item.id}
-                      disabled={removingId === item.id}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
+                    />
                   )}
                 </div>
               </li>

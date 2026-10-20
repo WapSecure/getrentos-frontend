@@ -1,10 +1,8 @@
 'use client';
 
-import { NumberInput } from '@getrentos/ui';
-
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Field, NumberInput, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -23,7 +21,7 @@ export const BusinessPreferencesSettings = () => {
   const [defaultCommissionRate, setDefaultCommissionRate] = useState('5');
   const [serviceAreas, setServiceAreas] = useState<string[]>([]);
   const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: prefs } = useQuery({
     queryKey: realtorKeys.settingsPreferences,
@@ -64,13 +62,9 @@ export const BusinessPreferencesSettings = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.settingsPreferences });
-      setToast({ message: 'Business preferences saved.', variant: 'success' });
+      toast.success('Business preferences saved.');
     },
-    onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to save your business preferences.',
-        variant: 'error',
-      }),
+    onError: (error) => toast.error(error.message || 'Unable to save your business preferences.'),
   });
 
   return (
@@ -81,26 +75,29 @@ export const BusinessPreferencesSettings = () => {
       </p>
 
       <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Default Commission Rate (%)
-          </label>
+        <Field label="Default Commission Rate (%)">
           <NumberInput
             min={1}
             max={100}
             value={defaultCommissionRate}
             onValueChange={setDefaultCommissionRate}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Service Areas</label>
-          <div className="flex flex-wrap gap-2">
+          <p id="business-service-areas" className="block text-sm font-medium text-foreground mb-2">
+            Service Areas
+          </p>
+          <div
+            role="group"
+            aria-labelledby="business-service-areas"
+            className="flex flex-wrap gap-2"
+          >
             {serviceAreaOptions.map((area) => (
               <button
                 key={area}
                 type="button"
+                aria-pressed={serviceAreas.includes(area)}
                 onClick={() => toggleArea(area)}
                 className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                   serviceAreas.includes(area)
@@ -115,12 +112,22 @@ export const BusinessPreferencesSettings = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Property Types</label>
-          <div className="flex flex-wrap gap-2">
+          <p
+            id="business-property-types"
+            className="block text-sm font-medium text-foreground mb-2"
+          >
+            Property Types
+          </p>
+          <div
+            role="group"
+            aria-labelledby="business-property-types"
+            className="flex flex-wrap gap-2"
+          >
             {propertyTypeOptions.map((type) => (
               <button
                 key={type.value}
                 type="button"
+                aria-pressed={propertyTypes.includes(type.value)}
                 onClick={() => toggleType(type.value)}
                 className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                   propertyTypes.includes(type.value)
@@ -137,17 +144,12 @@ export const BusinessPreferencesSettings = () => {
 
       <Button
         variant="primary"
-        className="mt-6 gap-1.5"
+        className="mt-6"
         isLoading={save.isPending}
-        disabled={save.isPending}
         onClick={() => save.mutate()}
       >
         Save Preferences
       </Button>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

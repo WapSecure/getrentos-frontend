@@ -278,7 +278,9 @@ export function HomeManagementWorkOrderInvoices({
       setPage(1);
       setForm(newInvoiceForm());
       setIsCreateOpen(false);
-      toast.success('Invoice draft created. Submit it when the completion record is ready for review.');
+      toast.success(
+        'Invoice draft created. Submit it when the completion record is ready for review.'
+      );
     },
     onError: (error) => {
       toast.error(error.message || 'Unable to create this invoice draft.');
@@ -304,7 +306,9 @@ export function HomeManagementWorkOrderInvoices({
       await invalidateInvoiceViews();
       setPage(1);
       setActionDialog(null);
-      toast.success('Invoice approved and ready for finance review. No vendor payment has been initiated.');
+      toast.success(
+        'Invoice approved and ready for finance review. No vendor payment has been initiated.'
+      );
     },
     onError: (error) => {
       toast.error(error.message || 'Unable to approve this invoice.');

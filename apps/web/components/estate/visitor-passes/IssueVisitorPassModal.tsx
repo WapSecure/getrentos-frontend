@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, DatePicker, LegacyInput, Pagination } from '@getrentos/ui';
+import {
+  Button,
+  DatePicker,
+  Field,
+  IconButton,
+  Input,
+  ListSkeleton,
+  Pagination,
+} from '@getrentos/ui';
 import type { Household } from '@/types/estate';
 
 interface IssueVisitorPassModalProps {
@@ -70,17 +78,19 @@ export const IssueVisitorPassModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
               <h3 className="font-semibold text-foreground">Issue Visitor Pass</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Household</label>
+                <p className="block text-sm font-medium text-foreground mb-1">Household</p>
                 <div className="overflow-hidden rounded-lg border border-border">
                   {isHouseholdsLoading ? (
-                    <p className="px-3 py-4 text-sm text-muted-foreground">Loading households…</p>
+                    <ListSkeleton
+                      rows={3}
+                      label="Loading households"
+                      className="rounded-none border-0"
+                    />
                   ) : activeHouseholds.length === 0 ? (
                     <p className="px-3 py-4 text-sm text-muted-foreground">
                       No active households found.
@@ -133,51 +143,36 @@ export const IssueVisitorPassModal = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Visitor Name
-                </label>
-                <LegacyInput
+              <Field label="Visitor Name">
+                <Input
                   type="text"
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   placeholder="e.g. Tunde Adekunle"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Phone <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
-                  type="text"
+              <Field label="Phone" optionalLabel="(optional)">
+                <Input
+                  type="tel"
                   value={visitorPhone}
                   onChange={(e) => setVisitorPhone(e.target.value)}
                   placeholder="e.g. 08012345678"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Purpose <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <LegacyInput
+              <Field label="Purpose" optionalLabel="(optional)">
+                <Input
                   type="text"
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
                   placeholder="e.g. Family visit"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Expires{' '}
-                  <span className="text-gray-400 font-normal">
-                    (optional: defaults to 24 hours)
-                  </span>
-                </label>
-                <DatePicker value={expiresAt} onChange={setExpiresAt} />
-              </div>
+              <Field label="Expires" optionalLabel="(optional: defaults to 24 hours)">
+                <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3 shrink-0">
@@ -187,7 +182,9 @@ export const IssueVisitorPassModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Issuing…"
                 onClick={() =>
                   onSubmit({
                     householdId,
@@ -198,7 +195,7 @@ export const IssueVisitorPassModal = ({
                   })
                 }
               >
-                {isSubmitting ? 'Issuing…' : 'Issue Pass'}
+                Issue Pass
               </Button>
             </div>
           </motion.div>

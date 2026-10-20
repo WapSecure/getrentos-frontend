@@ -1,10 +1,19 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState, useMemo } from 'react';
-import { X, Zap } from 'lucide-react';
-import { Button, CurrencyInput, DatePicker, Select } from '@getrentos/ui';
+import { DoorOpen, X, Zap } from 'lucide-react';
+import {
+  Button,
+  Checkbox,
+  CurrencyInput,
+  DatePicker,
+  EmptyState,
+  Field,
+  IconButton,
+  Input,
+  RadioGroup,
+  Select,
+} from '@getrentos/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
@@ -114,8 +123,8 @@ export const CreateListingModal = ({
           aria-labelledby="create-listing-title"
           className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl"
         >
-          <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-            <div>
+          <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
+            <div className="min-w-0">
               <h3 id="create-listing-title" className="font-semibold text-foreground">
                 Publish listing
               </h3>
@@ -123,28 +132,27 @@ export const CreateListingModal = ({
                 Make a vacant unit available for rent
               </p>
             </div>
-            <button
-              type="button"
+            <IconButton
+              label="Close publish listing form"
+              size="sm"
+              icon={<X />}
               onClick={handleClose}
               disabled={isSubmitting}
-              aria-label="Close publish listing form"
-              className="flex min-h-9 min-w-9 items-center justify-center rounded-lg hover:bg-secondary disabled:opacity-50"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            />
           </div>
 
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
             {vacantUnits.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No vacant units available to list. Add a property or mark a unit vacant first.
-              </p>
+              <EmptyState
+                icon={DoorOpen}
+                title="No vacant units available to list"
+                description="Add a property or mark a unit vacant first."
+                size="compact"
+                bare
+              />
             ) : (
               <>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Unit <span className="text-destructive">*</span>
-                  </label>
+                <Field label="Unit" required>
                   <Select
                     value={unitId}
                     onValueChange={handleUnitChange}
@@ -154,110 +162,83 @@ export const CreateListingModal = ({
                       label: `${unit.propertyName}: ${unit.unitName}`,
                     }))}
                   />
-                </div>
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Listing Title <span className="text-destructive">*</span>
-                  </label>
-                  <LegacyInput
+                <Field label="Listing Title" required>
+                  <Input
                     type="text"
                     value={listingTitle}
                     onChange={(e) => setListingTitle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </div>
+                </Field>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">
-                    Rent Period <span className="text-destructive">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    {(['year', 'month'] as RentPeriod[]).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setRentPeriod(p)}
-                        className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                          rentPeriod === p
-                            ? 'bg-accent border-primary text-primary'
-                            : 'border-border text-muted-foreground hover:border-muted-foreground/40'
-                        }`}
-                      >
-                        {p === 'year' ? 'Yearly (recommended)' : 'Monthly'}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Most Nigerian landlords let tenants a full year upfront. Choose monthly only for
-                    short-let or month-to-month arrangements.
-                  </p>
-                </div>
+                <Field
+                  label="Rent Period"
+                  required
+                  hint="Most Nigerian landlords let tenants a full year upfront. Choose monthly only for short-let or month-to-month arrangements."
+                >
+                  <RadioGroup
+                    variant="card"
+                    orientation="horizontal"
+                    columns={2}
+                    value={rentPeriod}
+                    onValueChange={(p) => setRentPeriod(p as RentPeriod)}
+                    options={[
+                      { value: 'year', label: 'Yearly (recommended)' },
+                      { value: 'month', label: 'Monthly' },
+                    ]}
+                  />
+                </Field>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      {rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}{' '}
-                      <span className="text-destructive">*</span>
-                    </label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Field
+                    label={rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}
+                    required
+                  >
                     <CurrencyInput
                       prefix="₦"
                       value={askingRent}
                       onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Security Deposit (₦)
-                    </label>
+                  </Field>
+                  <Field label="Security Deposit (₦)">
                     <CurrencyInput
                       prefix="₦"
                       value={securityDeposit}
                       onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
                       placeholder="Optional"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                  </div>
+                  </Field>
                 </div>
 
                 {rentPeriod === 'year' && (
-                  <label className="flex items-start gap-2 text-sm text-foreground p-3 rounded-lg bg-accent border border-primary/20">
-                    <LegacyInput
-                      type="checkbox"
+                  <div className="p-3 rounded-lg bg-accent border border-primary/20">
+                    <Checkbox
                       checked={allowsMonthlyPayment}
-                      onChange={(e) => setAllowsMonthlyPayment(e.target.checked)}
-                      className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
+                      onCheckedChange={setAllowsMonthlyPayment}
+                      label={
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <Zap className="w-3.5 h-3.5 text-primary" />
+                          Allow monthly installments via GetRentos Flex
+                        </span>
+                      }
+                      description="GetRentos pays you the full year upfront; the tenant repays us monthly. Leave unchecked to require the full year from the tenant directly."
                     />
-                    <span>
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <Zap className="w-3.5 h-3.5 text-primary" />
-                        Allow monthly installments via GetRentos Flex
-                      </span>
-                      <span className="block text-xs text-muted-foreground mt-0.5">
-                        GetRentos pays you the full year upfront; the tenant repays us monthly.
-                        Leave unchecked to require the full year from the tenant directly.
-                      </span>
-                    </span>
-                  </label>
+                  </div>
                 )}
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Availability Date <span className="text-destructive">*</span>
-                  </label>
+                <Field label="Availability Date" required>
                   <DatePicker value={availabilityDate} onChange={setAvailabilityDate} />
-                </div>
+                </Field>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">
-                    Amenities
-                  </label>
+                  <p className="block text-sm font-medium text-foreground mb-1.5">Amenities</p>
                   <div className="flex flex-wrap gap-2">
                     {amenityOptions.map((amenity) => (
                       <button
                         key={amenity}
                         type="button"
+                        aria-pressed={amenities.includes(amenity)}
                         onClick={() => toggleAmenity(amenity)}
                         className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                           amenities.includes(amenity)
@@ -272,33 +253,13 @@ export const CreateListingModal = ({
                 </div>
 
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={allowPets}
-                      onChange={(e) => setAllowPets(e.target.checked)}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                    />
-                    Allow pets
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={furnished}
-                      onChange={(e) => setFurnished(e.target.checked)}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                    />
-                    Furnished
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={shortLetEnabled}
-                      onChange={(e) => setShortLetEnabled(e.target.checked)}
-                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                    />
-                    Short-let enabled
-                  </label>
+                  <Checkbox checked={allowPets} onCheckedChange={setAllowPets} label="Allow pets" />
+                  <Checkbox checked={furnished} onCheckedChange={setFurnished} label="Furnished" />
+                  <Checkbox
+                    checked={shortLetEnabled}
+                    onCheckedChange={setShortLetEnabled}
+                    label="Short-let enabled"
+                  />
                 </div>
               </>
             )}
@@ -316,9 +277,11 @@ export const CreateListingModal = ({
                   variant="primary"
                   fullWidth
                   onClick={handlePublish}
-                  disabled={!isValid || isSubmitting}
+                  disabled={!isValid}
+                  isLoading={isSubmitting}
+                  loadingText="Publishing…"
                 >
-                  {isSubmitting ? 'Publishing…' : 'Publish listing'}
+                  Publish listing
                 </Button>
                 <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
                   Cancel

@@ -40,6 +40,10 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
   return (
     <div ref={dropdownRef} className="relative">
       <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label={`Account menu for ${fullName}`}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
       >
@@ -61,7 +65,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-64 bg-card rounded-xl shadow-lg border border-border z-50"
+            className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
           >
             <div className="p-3 border-b border-border">
               <p className="text-sm font-semibold text-foreground">{fullName}</p>
@@ -115,8 +119,9 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
 
             <div className="border-t border-border py-2">
               <button
+                type="button"
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive-subtle transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 Sign out

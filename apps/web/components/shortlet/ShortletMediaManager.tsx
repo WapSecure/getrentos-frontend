@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useMutation } from '@tanstack/react-query';
-import { Badge, Button, Field, Input, Toast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, Field, IconButton, Input, useToast } from '@getrentos/ui';
 import { ImagePlus, Link2, Map as MapIcon, Star, Trash2, Video } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
@@ -38,7 +38,7 @@ export function ShortletMediaManager({
   /** Property gallery the host can import as a starting point: {key, url}. */
   suggestions?: { key: string; url: string }[];
 }) {
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [previews, setPreviews] = useState<Record<string, string>>(() => {
     const seed: Record<string, string> = {};
     value.imageKeys.forEach((key, i) => {
@@ -64,7 +64,7 @@ export function ShortletMediaManager({
       setPreviews((prev) => ({ ...prev, [res.key]: objectUrl }));
       onChange({ ...value, imageKeys: [...value.imageKeys, res.key] });
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const uploadVideo = useMutation({
@@ -75,7 +75,7 @@ export function ShortletMediaManager({
       setVideoPreview(URL.createObjectURL(file));
       onChange({ ...value, videoKey: res.key, videoUrl: '' });
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const removeImage = (key: string) => {
@@ -160,27 +160,21 @@ export function ShortletMediaManager({
                 )}
                 <div className="absolute inset-0 flex items-end justify-between gap-1 bg-black/45 p-1.5 opacity-0 transition group-hover:opacity-100">
                   {key !== cover && (
-                    <Button
-                      type="button"
-                      variant="ghost"
+                    <IconButton
                       size="sm"
-                      className="h-7 w-7 bg-white/80 p-0 text-foreground hover:bg-white"
+                      label="Set as cover"
+                      icon={<Star />}
+                      className="h-7 w-7 bg-card/80 text-foreground hover:bg-card"
                       onClick={() => setCover(key)}
-                      aria-label="Set as cover"
-                    >
-                      <Star className="h-3.5 w-3.5" />
-                    </Button>
+                    />
                   )}
-                  <Button
-                    type="button"
-                    variant="ghost"
+                  <IconButton
                     size="sm"
-                    className="ml-auto h-7 w-7 bg-white/80 p-0 text-destructive hover:bg-white"
+                    label="Remove photo"
+                    icon={<Trash2 />}
+                    className="ml-auto h-7 w-7 bg-card/80 text-destructive hover:bg-card"
                     onClick={() => removeImage(key)}
-                    aria-label="Remove photo"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  />
                 </div>
               </div>
             ))}
@@ -210,6 +204,7 @@ export function ShortletMediaManager({
                     type="button"
                     onClick={() => importSuggestion(s)}
                     disabled={added}
+                    aria-label={added ? 'Photo added' : 'Add this photo'}
                     className={`relative h-16 w-20 overflow-hidden rounded-lg border-2 transition ${
                       added
                         ? 'cursor-default border-primary opacity-60'
@@ -237,7 +232,7 @@ export function ShortletMediaManager({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <p className="mb-2 text-sm font-medium">Video</p>
           <input
@@ -265,8 +260,9 @@ export function ShortletMediaManager({
                   size="sm"
                   onClick={() => videoInputRef.current?.click()}
                   disabled={uploadVideo.isPending}
+                  icon={<Video className="h-3.5 w-3.5" />}
                 >
-                  <Video className="mr-1 h-3.5 w-3.5" /> Replace
+                  Replace
                 </Button>
                 <Button type="button" variant="ghost" size="sm" onClick={clearVideo}>
                   Remove
@@ -279,10 +275,11 @@ export function ShortletMediaManager({
               variant="outline"
               className="w-full"
               onClick={() => videoInputRef.current?.click()}
-              disabled={uploadVideo.isPending}
+              isLoading={uploadVideo.isPending}
+              loadingText="Uploading…"
+              icon={<Video className="h-4 w-4" />}
             >
-              <Video className="mr-1.5 h-4 w-4" />
-              {uploadVideo.isPending ? 'Uploading…' : 'Upload video'}
+              Upload video
             </Button>
           )}
           <Field label="Or paste a video link" hint="YouTube, Vimeo…" className="mt-2">
@@ -308,16 +305,12 @@ export function ShortletMediaManager({
             />
           </Field>
           {value.tourUrl && (
-            <Badge variant="info" className="mt-2">
-              <Link2 className="mr-1 h-3 w-3" /> Tour embed enabled
+            <Badge variant="info" className="mt-2" icon={<Link2 className="h-3 w-3" />}>
+              Tour embed enabled
             </Badge>
           )}
         </div>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

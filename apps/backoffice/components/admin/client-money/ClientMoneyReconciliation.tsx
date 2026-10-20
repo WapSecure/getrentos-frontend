@@ -7,14 +7,18 @@ import {
   Badge,
   Button,
   Card,
+  CardSkeleton,
   CurrencyInput,
+  DatePicker,
   Dialog,
   DialogContent,
   DialogTitle,
   EmptyState,
   Field,
+  Input,
   PageErrorState,
-  Toast,
+  Select,
+  useToast,
   type ToastVariant,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
@@ -53,8 +57,8 @@ export function ClientMoneyReconciliation() {
   const canRelease = hasAdminPermission(user?.roles ?? [], 'escrow.approve');
 
   const [tab, setTab] = useState<'pools' | 'releases' | 'disputes'>('pools');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const notify = (message: string, variant: ToastVariant) => setToast({ message, variant });
+  const toast = useToast();
+  const notify = (message: string, variant: ToastVariant) => toast.show(message, variant);
 
   const [attestOpen, setAttestOpen] = useState(false);
   const [balance, setBalance] = useState(0);
@@ -122,7 +126,7 @@ export function ClientMoneyReconciliation() {
     onError: (err: Error) => notify(err.message, 'error'),
   });
 
-  if (error) {
+  if (error && !data) {
     return <PageErrorState description={(error as Error).message} onRetry={() => void refetch()} />;
   }
 
@@ -154,10 +158,10 @@ export function ClientMoneyReconciliation() {
               <Button
                 variant="outline"
                 disabled={isFetching}
+                icon={<RefreshCw className="h-3.5 w-3.5" aria-hidden />}
                 onClick={() => void refetch()}
                 aria-label="Reload the reconciliations"
               >
-                <RefreshCw className="mr-1.5 h-3.5 w-3.5" aria-hidden />
                 Reload
               </Button>
               <Button
@@ -189,7 +193,7 @@ export function ClientMoneyReconciliation() {
         <div
           role="tablist"
           aria-label="Client money sections"
-          className="flex gap-1 border-b border-border"
+          className="flex gap-1 overflow-x-auto border-b border-border"
         >
           <TabButton selected={tab === 'pools'} onClick={() => setTab('pools')}>
             The pooled accounts
@@ -197,24 +201,20 @@ export function ClientMoneyReconciliation() {
           <TabButton selected={tab === 'releases'} onClick={() => setTab('releases')}>
             Payouts to release
             {waitingCount > 0 && (
-              <span className="ml-2 rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+              <Badge variant="danger" className="ml-2">
                 {waitingCount}
-              </span>
+              </Badge>
             )}
           </TabButton>
           <TabButton selected={tab === 'disputes'} onClick={() => setTab('disputes')}>
             Queries on statements
             {openDisputeCount > 0 && (
-              <span className="ml-2 rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+              <Badge variant="danger" className="ml-2">
                 {openDisputeCount}
-              </span>
+              </Badge>
             )}
           </TabButton>
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
 
       {tab === 'releases' && canRelease ? (
@@ -254,7 +254,7 @@ export function ClientMoneyReconciliation() {
           {isLoading ? (
             <div className="space-y-3">
               {[0, 1, 2].map((row) => (
-                <div key={row} className="h-28 animate-pulse rounded-2xl bg-muted" />
+                <CardSkeleton key={row} />
               ))}
             </div>
           ) : rows.length === 0 ? (
@@ -285,49 +285,35 @@ export function ClientMoneyReconciliation() {
                 every pool the reconciliation knows about is already in it, and
                 a second source of truth for "which pools exist" is how the two
                 come to disagree. */}
-                <Field label="Which pool" htmlFor="holder" required>
-                  <select
-                    id="holder"
+                <Field label="Which pool" required>
+                  <Select
                     value={holder}
-                    onChange={(event) => setHolder(event.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  >
-                    <option value="platform">GetRentos itself (the platform pool)</option>
-                    {holders.map((option) => (
-                      <option key={option.id ?? 'platform'} value={option.id ?? 'platform'}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Business date" htmlFor="asOfDate" required>
-                  <input
-                    id="asOfDate"
-                    type="date"
-                    value={asOfDate}
-                    onChange={(event) => setAsOfDate(event.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                    onValueChange={setHolder}
+                    options={[
+                      { value: 'platform', label: 'GetRentos itself (the platform pool)' },
+                      ...holders.map((option) => ({
+                        value: option.id ?? 'platform',
+                        label: option.name,
+                      })),
+                    ]}
+                    className="w-full"
                   />
                 </Field>
-                <Field label="Balance in the pool" htmlFor="balance" required>
+                <Field label="Business date" required>
+                  <DatePicker value={asOfDate} onChange={setAsOfDate} className="w-full" />
+                </Field>
+                <Field label="Balance in the pool" required>
                   <CurrencyInput
-                    id="balance"
                     prefix="₦"
                     value={balance}
                     onValueChange={setBalance}
                     placeholder="0"
                   />
                 </Field>
-                <Field
-                  label="Where the figure came from"
-                  htmlFor="note"
-                  hint="Optional. e.g. GTB *4821 closing"
-                >
-                  <input
-                    id="note"
+                <Field label="Where the figure came from" hint="Optional. e.g. GTB *4821 closing">
+                  <Input
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                     placeholder="GTB *4821 closing"
                   />
                 </Field>
@@ -443,7 +429,7 @@ function PoolCard({ row }: { row: ReconciliationRow }) {
       </dl>
 
       {row.integrityFindings.length > 0 && (
-        <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+        <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive-subtle p-3">
           <p className="text-xs font-medium text-destructive">
             Accounts whose entries do not explain their balance
           </p>

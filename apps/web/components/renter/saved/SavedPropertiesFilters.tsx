@@ -1,8 +1,7 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
-
 import { LayoutGrid, List } from 'lucide-react';
+import { Select } from '@getrentos/ui';
 
 interface SavedPropertiesFiltersProps {
   viewMode: 'grid' | 'list';
@@ -43,11 +42,13 @@ export const SavedPropertiesFilters = ({
         {statusOptions.map((option) => (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={filterStatus === option.value}
             onClick={() => setFilterStatus(option.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
               filterStatus === option.value
-                ? 'bg-primary text-white'
-                : 'bg-secondary text-muted-foreground hover:bg-gray-200 dark:hover:bg-white/20'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-secondary text-muted-foreground hover:bg-secondary/70 hover:text-foreground'
             }`}
           >
             {option.label}
@@ -56,37 +57,40 @@ export const SavedPropertiesFilters = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <LegacySelect
+        <Select
+          ariaLabel="Sort saved properties"
           value={sortBy}
-          onChange={(e) =>
-            setSortBy(e.target.value as 'recent' | 'price-low' | 'price-high' | 'trust-score')
+          onValueChange={(value) =>
+            setSortBy(value as 'recent' | 'price-low' | 'price-high' | 'trust-score')
           }
-          className="px-4 py-1.5 text-sm cursor-pointer"
-        >
-          {sortOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </LegacySelect>
+          options={sortOptions}
+          controlSize="sm"
+          className="min-w-0 sm:w-52"
+        />
 
         {/* View Toggle */}
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg">
+        <div className="flex gap-1 p-1 bg-secondary rounded-lg" role="group" aria-label="Layout">
           <button
+            type="button"
+            aria-label="Grid view"
+            aria-pressed={viewMode === 'grid'}
             onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'
+            className={`p-1.5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
+              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
             }`}
           >
-            <LayoutGrid className="w-4 h-4" />
+            <LayoutGrid className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
+            type="button"
+            aria-label="List view"
+            aria-pressed={viewMode === 'list'}
             onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'
+            className={`p-1.5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
+              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
             }`}
           >
-            <List className="w-4 h-4" />
+            <List className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>

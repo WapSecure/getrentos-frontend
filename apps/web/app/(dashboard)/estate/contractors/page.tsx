@@ -239,10 +239,7 @@ export default function EstateContractorPassesPage() {
       ) : (
         <div className="space-y-3">
           {passes.map((pass) => (
-            <Card
-              key={pass.id}
-              className="p-4 flex flex-col sm:flex-row sm:items-center gap-4"
-            >
+            <Card key={pass.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium text-foreground">{pass.name}</p>

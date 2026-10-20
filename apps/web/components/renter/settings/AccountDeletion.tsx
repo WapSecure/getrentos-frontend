@@ -1,12 +1,10 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
-import { AlertTriangle, Trash2, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Trash2, Check } from 'lucide-react';
+import { Alert, Button, Field, Input } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
@@ -40,8 +38,8 @@ export const AccountDeletion = () => {
   if (step === 'complete') {
     return (
       <div className="text-center py-8">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-          <Check className="w-8 h-8 text-red-600" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive-subtle flex items-center justify-center">
+          <Check className="w-8 h-8 text-destructive" aria-hidden="true" />
         </div>
         <h3 className="text-xl font-semibold text-foreground">Account Deleted</h3>
         <p className="text-sm text-muted-foreground mt-2">
@@ -53,62 +51,52 @@ export const AccountDeletion = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-4">Delete Account</h2>
+      <h2 className="text-xl font-semibold text-destructive mb-4">Delete Account</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Permanently delete your account and all associated data
       </p>
 
-      <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-red-800 dark:text-red-300">Warning</p>
-            <p className="text-xs text-red-700 dark:text-red-400 mt-1">
-              This action is permanent and cannot be undone. All your data, including applications,
-              payments, messages, and lease agreements will be permanently deleted.
-            </p>
-          </div>
-        </div>
-      </div>
+      <Alert variant="danger" title="Warning">
+        This action is permanent and cannot be undone. All your data, including applications,
+        payments, messages, and lease agreements will be permanently deleted.
+      </Alert>
 
-      <div className="mt-6">
-        <label className="block text-sm font-medium text-foreground mb-2">
-          To confirm, type <span className="font-bold">delete my account</span> below
-        </label>
-        <LegacyInput
+      <Field
+        className="mt-6"
+        label={
+          <>
+            To confirm, type <span className="font-bold">delete my account</span> below
+          </>
+        }
+      >
+        <Input
           type="text"
           value={confirmText}
           onChange={(e) => setConfirmText(e.target.value)}
           placeholder="Type 'delete my account' to confirm"
-          className="w-full px-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
         />
-      </div>
+      </Field>
 
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Enter your password to confirm
-        </label>
-        <LegacyInput
+      <Field className="mt-4" label="Enter your password to confirm" error={error}>
+        <Input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full px-4 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
         />
-      </div>
-
-      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+      </Field>
 
       <Button
         variant="danger"
         fullWidth
-        className="mt-6 gap-2"
+        className="mt-6"
         onClick={handleDelete}
-        disabled={confirmText !== 'delete my account' || !password || deleteMutation.isPending}
+        disabled={confirmText !== 'delete my account' || !password}
         isLoading={deleteMutation.isPending}
+        loadingText="Deleting..."
+        icon={<Trash2 className="w-4 h-4" />}
       >
-        <Trash2 className="w-4 h-4" />
-        {deleteMutation.isPending ? 'Deleting...' : 'Delete Account'}
+        Delete Account
       </Button>
     </div>
   );

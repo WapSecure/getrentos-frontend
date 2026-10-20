@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
   CheckCircle2,
   Clock,
   Home,
   ImagePlus,
-  Loader2,
   Pencil,
   Plus,
   Search,
@@ -17,16 +16,22 @@ import {
   Unlink,
 } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
+  CurrencyInput,
   DatePicker,
   EmptyState,
+  Field,
+  IconButton,
   Input,
+  ListSkeleton,
   NumberInput,
   Select,
-  Toast,
-  type ToastVariant,
+  StatCard,
+  StatGridSkeleton,
+  useToast,
 } from '@getrentos/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ListingMediaPanel } from '@/components/estate/marketplace/ListingMediaPanel';
@@ -65,14 +70,6 @@ const listingStatusBadge = (status: EstateListing['status']) => {
 const formatNaira = (amount: number) =>
   `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 
-const StatTile = ({ label, value, hint }: { label: string; value: number; hint?: string }) => (
-  <div className="rounded-2xl border border-border bg-card p-4">
-    <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-    <p className="text-2xl font-bold text-foreground mt-1">{value}</p>
-    {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
-  </div>
-);
-
 /**
  * Add a property to the estate.
  *
@@ -83,12 +80,13 @@ const StatTile = ({ label, value, hint }: { label: string; value: number; hint?:
 const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () => void }) => {
   const [search, setSearch] = useState('');
   const [note, setNote] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const candidates = useQuery({
     queryKey: ['estate', estateId, 'marketplace', 'candidates', search],
     queryFn: () => unwrap(estateMarketplaceService.listPropertyCandidates(estateId, search)),
     enabled: search.trim().length >= 3,
+    placeholderData: keepPreviousData,
   });
 
   const request = useMutation({
@@ -100,45 +98,37 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
         })
       ),
     onSuccess: (agreement) => {
-      setToast({
-        message:
-          agreement.status === 'ACTIVE'
-            ? 'Added: this estate owns the property, so it can market it straight away.'
-            : 'Added, and the owner has been asked for marketing rights.',
-        variant: 'success',
-      });
+      toast.success(
+        agreement.status === 'ACTIVE'
+          ? 'Added: this estate owns the property, so it can market it straight away.'
+          : 'Added, and the owner has been asked for marketing rights.'
+      );
       setSearch('');
       setNote('');
       onDone();
     },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'That property could not be added.', variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message || 'That property could not be added.'),
   });
 
   return (
     <div className="border-t border-border pt-4 space-y-4">
-      <div>
-        <label className="text-sm font-medium text-foreground" htmlFor="estate-property-search">
-          Find the property
-        </label>
+      <Field
+        label="Find the property"
+        htmlFor="estate-property-search"
+        hint="Type at least three characters. Properties already in another estate are not shown."
+      >
         <Input
-          id="estate-property-search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search by street, area or title: e.g. Alexander Avenue"
           leadingIcon={<Search className="w-4 h-4" />}
         />
-        <p className="text-xs text-muted-foreground mt-1.5">
-          Type at least three characters. Properties already in another estate are not shown.
-        </p>
-      </div>
+      </Field>
 
       {search.trim().length >= 3 && (
         <div className="space-y-2">
           {candidates.isLoading ? (
-            <p className="text-sm text-muted-foreground flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" /> Searching…
-            </p>
+            <ListSkeleton rows={2} label="Searching" />
           ) : (candidates.data ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No matching property. The owner needs to register it on GetRentos first.
@@ -147,7 +137,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
             candidates.data!.map((candidate) => (
               <div
                 key={candidate.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{candidate.title}</p>
@@ -164,6 +154,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
                     variant="outline"
                     onClick={() => request.mutate(candidate.id)}
                     disabled={request.isPending}
+                    isLoading={request.isPending && request.variables === candidate.id}
                   >
                     {candidate.inThisEstate ? 'Ask to market' : 'Add & ask'}
                   </Button>
@@ -178,11 +169,8 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
         value={note}
         onChange={(event) => setNote(event.target.value)}
         placeholder="Optional note for the owner, e.g. why you are asking"
+        aria-label="Note for the owner"
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };
@@ -205,7 +193,7 @@ const NewListingPanel = ({
   const [maxGuests, setMaxGuests] = useState<number | string>(2);
   const [minNights, setMinNights] = useState<number | string>(1);
   const [cleaningFee, setCleaningFee] = useState<number | string>('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const marketable = agreements.filter((a) => a.effective);
   const needsAgreement = marketable.length === 0;
@@ -242,18 +230,15 @@ const NewListingPanel = ({
         })
       ),
     onSuccess: (listing) => {
-      setToast({
-        message:
-          listing.status === 'PUBLISHED'
-            ? 'Published: it is live in the market and on the estate page.'
-            : 'Saved as a draft. Publish it when you are ready.',
-        variant: 'success',
-      });
+      toast.success(
+        listing.status === 'PUBLISHED'
+          ? 'Published: it is live in the market and on the estate page.'
+          : 'Saved as a draft. Publish it when you are ready.'
+      );
       setPrice('');
       onDone();
     },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'That listing could not be created.', variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message || 'That listing could not be created.'),
   });
 
   if (needsAgreement) {
@@ -269,12 +254,8 @@ const NewListingPanel = ({
 
   return (
     <div className="border-t border-border pt-4 space-y-4">
-      <div>
-        <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-property">
-          Property
-        </label>
+      <Field label="Property" htmlFor="estate-listing-property">
         <Select
-          ariaLabel="Property"
           value={propertyId}
           onValueChange={(value) => setPropertyId(value)}
           options={[
@@ -285,15 +266,11 @@ const NewListingPanel = ({
             })),
           ]}
         />
-      </div>
+      </Field>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-type">
-            Market
-          </label>
+        <Field label="Market" htmlFor="estate-listing-type">
           <Select
-            ariaLabel="Market"
             value={listingType}
             onValueChange={(value) => setListingType(value as EstateListingType)}
             options={[
@@ -302,84 +279,57 @@ const NewListingPanel = ({
               { value: 'SHORTLET', label: 'Short let' },
             ]}
           />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-price">
-            {listingType === 'SHORTLET' ? 'Nightly rate' : 'Asking price'}
-          </label>
-          <NumberInput
-            id="estate-listing-price"
-            value={price}
-            onValueChange={(value) => setPrice(value)}
-          />
-        </div>
+        </Field>
+        <Field
+          label={listingType === 'SHORTLET' ? 'Nightly rate' : 'Asking price'}
+          htmlFor="estate-listing-price"
+        >
+          <CurrencyInput prefix="₦" value={price} onValueChange={(value) => setPrice(value)} />
+        </Field>
       </div>
 
       {shortlet ? (
         <div className="grid sm:grid-cols-3 gap-4">
-          <div>
-            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-guests">
-              Guests, at most
-            </label>
-            <NumberInput
-              id="estate-listing-guests"
-              value={maxGuests}
-              onValueChange={(value) => setMaxGuests(value)}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-nights">
-              Minimum nights
-            </label>
-            <NumberInput
-              id="estate-listing-nights"
-              value={minNights}
-              onValueChange={(value) => setMinNights(value)}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-foreground" htmlFor="estate-listing-cleaning">
-              Cleaning fee (optional)
-            </label>
-            <NumberInput
-              id="estate-listing-cleaning"
+          <Field label="Guests, at most" htmlFor="estate-listing-guests">
+            <NumberInput value={maxGuests} onValueChange={(value) => setMaxGuests(value)} />
+          </Field>
+          <Field label="Minimum nights" htmlFor="estate-listing-nights">
+            <NumberInput value={minNights} onValueChange={(value) => setMinNights(value)} />
+          </Field>
+          <Field label="Cleaning fee" optionalLabel="(optional)" htmlFor="estate-listing-cleaning">
+            <CurrencyInput
+              prefix="₦"
+              allowZero
               value={cleaningFee}
               onValueChange={(value) => setCleaningFee(value)}
             />
-          </div>
+          </Field>
         </div>
       ) : null}
 
-      <div className="max-w-56">
-        <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
+      <Field label="Available from" className="max-w-56">
         <DatePicker value={availableFrom} onChange={setAvailableFrom} />
-      </div>
+      </Field>
 
       <div className="flex flex-wrap gap-3">
         <Button
           variant="outline"
           disabled={!propertyId || !priceIsValid || create.isPending}
+          isLoading={create.isPending && create.variables === false}
           onClick={() => create.mutate(false)}
         >
           Save as draft
         </Button>
         <Button
           variant="primary"
+          icon={<Send className="w-4 h-4" />}
           disabled={!propertyId || !priceIsValid || create.isPending}
+          isLoading={create.isPending && create.variables === true}
           onClick={() => create.mutate(true)}
         >
-          {create.isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
           Publish
         </Button>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };
@@ -398,7 +348,9 @@ const EditListingPanel = ({
   const [title, setTitle] = useState(listing.listingTitle ?? '');
   const [price, setPrice] = useState<number | string>(listing.price);
   const [availableFrom, setAvailableFrom] = useState(
-    listing.availableFrom ? listing.availableFrom.slice(0, 10) : new Date().toISOString().slice(0, 10)
+    listing.availableFrom
+      ? listing.availableFrom.slice(0, 10)
+      : new Date().toISOString().slice(0, 10)
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -422,44 +374,31 @@ const EditListingPanel = ({
 
   return (
     <div className="rounded-xl border border-border p-3 space-y-3">
-      <div>
-        <label className="text-sm font-medium text-foreground" htmlFor={`edit-title-${listing.id}`}>
-          Headline
-        </label>
-        <Input
-          id={`edit-title-${listing.id}`}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          maxLength={200}
-        />
-      </div>
+      <Field label="Headline" htmlFor={`edit-title-${listing.id}`}>
+        <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} />
+      </Field>
       <div className="grid sm:grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-medium text-foreground" htmlFor={`edit-price-${listing.id}`}>
-            {listing.listingType === 'SHORTLET' ? 'Nightly rate' : 'Asking price'}
-          </label>
-          <NumberInput
-            id={`edit-price-${listing.id}`}
-            value={price}
-            onValueChange={(value) => setPrice(value)}
-          />
-        </div>
-        <div>
-          <span className="mb-1 block text-sm font-medium text-foreground">Available from</span>
+        <Field
+          label={listing.listingType === 'SHORTLET' ? 'Nightly rate' : 'Asking price'}
+          htmlFor={`edit-price-${listing.id}`}
+        >
+          <CurrencyInput prefix="₦" value={price} onValueChange={(value) => setPrice(value)} />
+        </Field>
+        <Field label="Available from">
           <DatePicker value={availableFrom} onChange={setAvailableFrom} />
-        </div>
+        </Field>
       </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
       <div className="flex gap-2">
         <Button
           variant="primary"
-          disabled={Number(price) <= 0 || save.isPending}
+          disabled={Number(price) <= 0}
+          isLoading={save.isPending}
           onClick={() => {
             setError(null);
             save.mutate();
           }}
         >
-          {save.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Save changes
         </Button>
         <Button variant="ghost" onClick={onDone}>
@@ -478,7 +417,7 @@ export default function EstateMarketplacePage() {
 
   const [showAdd, setShowAdd] = useState(false);
   const [showNewListing, setShowNewListing] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   /** Which listing's photo panel is open. One at a time: the list is long. */
   const [mediaListingId, setMediaListingId] = useState<string | null>(null);
   const [editListingId, setEditListingId] = useState<string | null>(null);
@@ -511,41 +450,39 @@ export default function EstateMarketplacePage() {
     mutationFn: ({ id, status }: { id: string; status: 'PUBLISHED' | 'PAUSED' | 'CLOSED' }) =>
       unwrap(estateMarketplaceService.setListingStatus(estateId, id, status)),
     onSuccess: (listing) => {
-      setToast({
-        message:
-          listing.status === 'PUBLISHED'
-            ? 'Published to the market and the estate page.'
-            : `Listing ${listing.status.toLowerCase()}.`,
-        variant: 'success',
-      });
+      toast.success(
+        listing.status === 'PUBLISHED'
+          ? 'Published to the market and the estate page.'
+          : `Listing ${listing.status.toLowerCase()}.`
+      );
       refresh();
     },
-    onError: (err: Error) => setToast({ message: err.message, variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const detach = useMutation({
     mutationFn: (propertyId: string) =>
       unwrap(estateMarketplaceService.detachProperty(estateId, propertyId)),
     onSuccess: () => {
-      setToast({ message: 'Property removed from the estate.', variant: 'success' });
+      toast.success('Property removed from the estate.');
       refresh();
     },
-    onError: (err: Error) => setToast({ message: err.message, variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const bulkPublish = useMutation({
     mutationFn: (ids: string[]) => unwrap(estateMarketplaceService.bulkPublish(estateId, ids)),
     onSuccess: (result) => {
-      setToast({
-        message:
-          result.skipped.length === 0
-            ? `${result.published} listings published.`
-            : `${result.published} published, ${result.skipped.length} skipped: ${result.skipped[0]?.reason ?? ''}`,
-        variant: result.skipped.length === 0 ? 'success' : 'warning',
-      });
+      if (result.skipped.length === 0) {
+        toast.success(`${result.published} listings published.`);
+      } else {
+        toast.warning(
+          `${result.published} published, ${result.skipped.length} skipped: ${result.skipped[0]?.reason ?? ''}`
+        );
+      }
       refresh();
     },
-    onError: (err: Error) => setToast({ message: err.message, variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   if (!estateId) {
@@ -577,16 +514,32 @@ export default function EstateMarketplacePage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatTile label="Properties" value={summary?.properties ?? 0} />
-        <StatTile
-          label="Awaiting owner"
-          value={summary?.agreementsPending ?? 0}
-          hint={summary?.agreementsPending ? 'These block new listings' : undefined}
-        />
-        <StatTile label="Cleared to market" value={summary?.agreementsActive ?? 0} />
-        <StatTile label="Live listings" value={summary?.listingsPublished ?? 0} />
-      </div>
+      {inventory.isLoading ? (
+        <StatGridSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard icon={Building2} label="Properties" value={summary?.properties ?? 0} />
+          <StatCard
+            icon={Clock}
+            accent="orange"
+            label="Awaiting owner"
+            value={summary?.agreementsPending ?? 0}
+            subtitle={summary?.agreementsPending ? 'These block new listings' : undefined}
+          />
+          <StatCard
+            icon={ShieldCheck}
+            accent="emerald"
+            label="Cleared to market"
+            value={summary?.agreementsActive ?? 0}
+          />
+          <StatCard
+            icon={Home}
+            accent="primary"
+            label="Live listings"
+            value={summary?.listingsPublished ?? 0}
+          />
+        </div>
+      )}
 
       <Card static>
         <div className="p-6">
@@ -600,8 +553,12 @@ export default function EstateMarketplacePage() {
                 An owner must agree before this estate can publish a listing for their property.
               </p>
             </div>
-            <Button variant="outline" onClick={() => setShowAdd((open) => !open)}>
-              <Plus className="w-4 h-4" />
+            <Button
+              variant="outline"
+              icon={<Plus className="w-4 h-4" />}
+              aria-expanded={showAdd}
+              onClick={() => setShowAdd((open) => !open)}
+            >
               {showAdd ? 'Close' : 'Add a property'}
             </Button>
           </div>
@@ -610,9 +567,7 @@ export default function EstateMarketplacePage() {
 
           <div className="mt-5 space-y-2">
             {agreements.isLoading ? (
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading…
-              </p>
+              <ListSkeleton rows={3} />
             ) : agreementRows.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No properties yet. Add one to start advertising inside this estate.
@@ -621,7 +576,7 @@ export default function EstateMarketplacePage() {
               agreementRows.map((agreement) => (
                 <div
                   key={agreement.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-border p-3"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">
@@ -642,14 +597,14 @@ export default function EstateMarketplacePage() {
                     ) : (
                       statusBadge(agreement.status)
                     )}
-                    <Button
-                      variant="ghost"
+                    <IconButton
+                      label={`Remove ${agreement.propertyTitle} from this estate`}
+                      title="Remove from this estate"
+                      icon={<Unlink />}
                       onClick={() => detach.mutate(agreement.propertyId)}
                       disabled={detach.isPending}
-                      title="Remove from this estate"
-                    >
-                      <Unlink className="w-4 h-4" />
-                    </Button>
+                      isLoading={detach.isPending && detach.variables === agreement.propertyId}
+                    />
                   </div>
                 </div>
               ))
@@ -670,28 +625,28 @@ export default function EstateMarketplacePage() {
                 Everything this estate is advertising, and everything still in draft.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {drafts.length > 1 && (
                 <Button
                   variant="outline"
+                  icon={<CheckCircle2 className="w-4 h-4" />}
                   onClick={() => bulkPublish.mutate(drafts.map((d) => d.id))}
-                  disabled={bulkPublish.isPending}
+                  isLoading={bulkPublish.isPending}
                   title={
                     isEnterprise
                       ? 'Publish every draft at once (Enterprise)'
                       : 'Bulk publishing is an Enterprise feature'
                   }
                 >
-                  {bulkPublish.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4" />
-                  )}
                   Publish all drafts
                 </Button>
               )}
-              <Button variant="primary" onClick={() => setShowNewListing((open) => !open)}>
-                <Plus className="w-4 h-4" />
+              <Button
+                variant="primary"
+                icon={<Plus className="w-4 h-4" />}
+                aria-expanded={showNewListing}
+                onClick={() => setShowNewListing((open) => !open)}
+              >
                 {showNewListing ? 'Close' : 'New listing'}
               </Button>
             </div>
@@ -703,9 +658,7 @@ export default function EstateMarketplacePage() {
 
           <div className="mt-5 space-y-2">
             {listings.isLoading ? (
-              <p className="text-sm text-muted-foreground flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading…
-              </p>
+              <ListSkeleton rows={3} />
             ) : listingRows.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Nothing advertised yet. Create a listing once a property is cleared to market.
@@ -713,7 +666,7 @@ export default function EstateMarketplacePage() {
             ) : (
               listingRows.map((listing) => (
                 <div key={listing.id} className="space-y-2">
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-3">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">
                         {listing.listingTitle || listing.propertyTitle}
@@ -727,7 +680,7 @@ export default function EstateMarketplacePage() {
                         · {formatNaira(listing.price)} · owner {listing.ownerName}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       {listingStatusBadge(listing.status)}
                       <Button
                         variant="ghost"
@@ -744,7 +697,9 @@ export default function EstateMarketplacePage() {
                         <Button
                           variant="ghost"
                           onClick={() =>
-                            setEditListingId((current) => (current === listing.id ? null : listing.id))
+                            setEditListingId((current) =>
+                              current === listing.id ? null : listing.id
+                            )
                           }
                         >
                           <Pencil className="w-4 h-4" />
@@ -754,6 +709,8 @@ export default function EstateMarketplacePage() {
                       {listing.status === 'PUBLISHED' ? (
                         <Button
                           variant="ghost"
+                          disabled={setStatus.isPending}
+                          isLoading={setStatus.isPending && setStatus.variables?.id === listing.id}
                           onClick={() => setStatus.mutate({ id: listing.id, status: 'PAUSED' })}
                         >
                           <Clock className="w-4 h-4" />
@@ -764,6 +721,7 @@ export default function EstateMarketplacePage() {
                           variant="outline"
                           onClick={() => setStatus.mutate({ id: listing.id, status: 'PUBLISHED' })}
                           disabled={setStatus.isPending}
+                          isLoading={setStatus.isPending && setStatus.variables?.id === listing.id}
                         >
                           Publish
                         </Button>
@@ -786,10 +744,6 @@ export default function EstateMarketplacePage() {
           </div>
         </div>
       </Card>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

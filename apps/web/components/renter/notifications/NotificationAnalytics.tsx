@@ -1,6 +1,7 @@
 'use client';
 
-import { TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { TrendingUp, Clock, CheckCircle } from 'lucide-react';
+import { Alert, Card } from '@getrentos/ui';
 
 interface Notification {
   read: boolean;
@@ -18,7 +19,7 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
   const readRate = total > 0 ? Math.round((readCount / total) * 100) : 0;
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
@@ -63,17 +64,11 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
         </div>
 
         {unreadCount > 0 && (
-          <div className="p-2 rounded-lg bg-warning-subtle border border-warning/20">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-warning mt-0.5" />
-              <p className="text-xs text-warning">
-                You have {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}. Stay
-                informed!
-              </p>
-            </div>
-          </div>
+          <Alert variant="warning">
+            You have {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}. Stay informed!
+          </Alert>
         )}
       </div>
-    </div>
+    </Card>
   );
 };

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt, Plus, Settings } from 'lucide-react';
 import {
   Button,
@@ -10,8 +10,7 @@ import {
   EmptyState,
   ListSkeleton,
   Pagination,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -42,7 +41,7 @@ export default function EstateDuesPage() {
   const [statusFilter, setStatusFilter] = useState<DueStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const [householdPage, setHouseholdPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
 
@@ -65,6 +64,7 @@ export default function EstateDuesPage() {
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const households = householdsData?.items ?? [];
   const householdsTotal = householdsData?.total ?? 0;
@@ -83,6 +83,7 @@ export default function EstateDuesPage() {
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const dues = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -117,10 +118,10 @@ export default function EstateDuesPage() {
       queryClient.invalidateQueries({ queryKey: estateKeys.myEstates });
       queryClient.invalidateQueries({ queryKey: estateKeys.myEstate });
       setIsSettingsOpen(false);
-      setToast({ message: 'Due settings saved.', variant: 'success' });
+      toast.success('Due settings saved.');
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to save these settings.', variant: 'error' });
+      toast.error(error.message || 'Unable to save these settings.');
     },
   });
 
@@ -142,7 +143,7 @@ export default function EstateDuesPage() {
             {total} due{total === 1 ? '' : 's'} in {estate.name}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
             <Settings className="w-4 h-4" />
             Due Settings
@@ -167,6 +168,7 @@ export default function EstateDuesPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => {
               setStatusFilter(filter.value);
               setPage(1);
@@ -231,10 +233,6 @@ export default function EstateDuesPage() {
         onSubmit={(data) => updateDueSettings.mutate(data)}
         isSubmitting={updateDueSettings.isPending}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

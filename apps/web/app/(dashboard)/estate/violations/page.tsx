@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TriangleAlert, Plus } from 'lucide-react';
 import { Button, CardSkeleton, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -52,6 +52,7 @@ export default function EstateViolationsPage() {
         estateService.listViolations(estate!.id, statusFilter === 'all' ? undefined : statusFilter)
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
 
   const invalidate = () => {
@@ -126,6 +127,7 @@ export default function EstateViolationsPage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => setStatusFilter(filter.value)}
           >
             {filter.label}

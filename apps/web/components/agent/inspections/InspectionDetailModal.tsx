@@ -68,9 +68,7 @@ export const InspectionDetailModal = ({
                 </div>
                 {room.notes && <p className="text-xs text-muted-foreground mt-1">{room.notes}</p>}
                 {(() => {
-                  const roomPhotos = (inspection.photos ?? []).filter(
-                    (p) => p.room === room.room
-                  );
+                  const roomPhotos = (inspection.photos ?? []).filter((p) => p.room === room.room);
                   if (roomPhotos.length > 0) {
                     return (
                       <div className="mt-2 flex flex-wrap gap-2">

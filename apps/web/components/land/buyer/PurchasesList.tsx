@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
-import { Button, EmptyState, PageErrorState, Pagination, Select } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Button, EmptyState, PageErrorState, Pagination, Select, Skeleton } from '@getrentos/ui';
 import { AlertTriangle, ChevronRight, Landmark } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -37,6 +37,7 @@ export const PurchasesList = () => {
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: buyerLandKeys.purchaseList(params),
     queryFn: () => unwrap(landBuyerService.listPurchases(params)),
+    placeholderData: keepPreviousData,
   });
   const purchases = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -58,10 +59,10 @@ export const PurchasesList = () => {
       {isLoading ? (
         <div className="space-y-3" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl bg-secondary" />
+            <Skeleton key={i} className="h-24 rounded-2xl" />
           ))}
         </div>
-      ) : isError ? (
+      ) : isError && !data ? (
         <PageErrorState
           description={error instanceof Error ? error.message : undefined}
           onRetry={() => refetch()}

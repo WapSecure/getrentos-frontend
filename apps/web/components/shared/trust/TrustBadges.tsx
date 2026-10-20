@@ -58,12 +58,12 @@ export const TrustBadges = ({ badges }: TrustBadgesProps) => {
               key={badge.id}
               className={`p-3 rounded-lg text-center transition-all ${
                 badge.earned
-                  ? 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800'
-                  : 'bg-gray-50 dark:bg-white/5 border border-border opacity-50'
+                  ? 'bg-warning-subtle border border-warning/20'
+                  : 'bg-secondary border border-border opacity-50'
               }`}
             >
               <div
-                className={`flex justify-center mb-2 ${badge.earned ? 'text-amber-600' : 'text-gray-400'}`}
+                className={`flex justify-center mb-2 ${badge.earned ? 'text-warning' : 'text-muted-foreground'}`}
               >
                 <Icon className="w-6 h-6" />
               </div>
@@ -74,7 +74,7 @@ export const TrustBadges = ({ badges }: TrustBadgesProps) => {
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">{badge.description}</p>
               {badge.earned && (
-                <span className="inline-block mt-1 text-xs text-amber-600">✓ Earned</span>
+                <span className="inline-block mt-1 text-xs text-warning">✓ Earned</span>
               )}
             </div>
           );

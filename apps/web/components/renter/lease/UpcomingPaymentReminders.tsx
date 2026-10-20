@@ -60,70 +60,72 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Payment Reminders</h3>
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Bell className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">Payment Reminders</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">Upcoming rent payments</p>
         </div>
-        <p className="text-xs text-muted-foreground mt-0.5">Upcoming rent payments</p>
-      </div>
 
-      <div className="divide-y divide-border">
-        {reminders.map((reminder, index) => {
-          const statusConfig = getStatusConfig(reminder.status, reminder.daysRemaining);
-          const StatusIcon = statusConfig.icon;
+        <div className="divide-y divide-border">
+          {reminders.map((reminder, index) => {
+            const statusConfig = getStatusConfig(reminder.status, reminder.daysRemaining);
+            const StatusIcon = statusConfig.icon;
 
-          return (
-            <motion.div
-              key={reminder.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="p-3 hover:bg-secondary transition-colors"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">{reminder.propertyName}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Calendar className="w-3 h-3" />
-                      <span>{formatDate(reminder.dueDate)}</span>
+            return (
+              <motion.div
+                key={reminder.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="p-3 hover:bg-secondary transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{reminder.propertyName}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(reminder.dueDate)}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <span className="text-xs font-semibold text-primary">
+                        {formatCurrency(reminder.amount)}
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">•</span>
-                    <span className="text-xs font-semibold text-primary">
-                      {formatCurrency(reminder.amount)}
-                    </span>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant={statusConfig.variant} icon={<StatusIcon className="w-3 h-3" />}>
+                      {statusConfig.label}
+                    </Badge>
+                    {reminder.status !== 'overdue' && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {reminder.daysRemaining} days left
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge variant={statusConfig.variant} icon={<StatusIcon className="w-3 h-3" />}>
-                    {statusConfig.label}
-                  </Badge>
-                  {reminder.status !== 'overdue' && (
-                    <p className="text-xs text-muted-foreground mt-1">{reminder.daysRemaining} days left</p>
-                  )}
-                </div>
-              </div>
-              {reminder.status === 'overdue' && (
-                <Button variant="danger" size="sm" className="mt-2 w-full">
-                  Pay Now
-                </Button>
-              )}
-              {reminder.status !== 'overdue' && reminder.daysRemaining <= 5 && (
-                <Button variant="primary" size="sm" className="mt-2 w-full">
-                  Pay Now
-                </Button>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
+                {reminder.status === 'overdue' && (
+                  <Button variant="danger" size="sm" className="mt-2 w-full">
+                    Pay Now
+                  </Button>
+                )}
+                {reminder.status !== 'overdue' && reminder.daysRemaining <= 5 && (
+                  <Button variant="primary" size="sm" className="mt-2 w-full">
+                    Pay Now
+                  </Button>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
 
-      <div className="p-3 border-t border-border">
-        <Button variant="ghost" size="sm" fullWidth className="gap-1">
-          View All Payments
-        </Button>
-      </div>
+        <div className="p-3 border-t border-border">
+          <Button variant="ghost" size="sm" fullWidth className="gap-1">
+            View All Payments
+          </Button>
+        </div>
       </Card>
     </motion.div>
   );

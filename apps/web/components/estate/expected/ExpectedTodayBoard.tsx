@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Briefcase, Package, UserCheck } from 'lucide-react';
-import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
+import { Badge, Card, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -28,7 +28,7 @@ export const ExpectedTodayBoard = ({ estateId }: { estateId: string }) => {
   });
 
   if (boardQuery.isLoading) {
-    return <Skeleton className="h-40 w-full rounded-2xl" />;
+    return <ListSkeleton variant="cards" rows={3} />;
   }
 
   const board = boardQuery.data;

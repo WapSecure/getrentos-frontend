@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Download, FileText, FileSpreadsheet, AlertCircle, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Download, FileText, FileSpreadsheet, Check } from 'lucide-react';
+import { Alert, Button, RadioGroup } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
@@ -79,65 +79,44 @@ export const DataExport = () => {
       <div className="space-y-4">
         <div className="p-4 rounded-lg border border-border">
           <h3 className="font-medium text-foreground mb-2">Export Format</h3>
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => setExportType('print')}
-              className={`flex-1 p-3 rounded-lg border transition-colors ${
-                exportType === 'print'
-                  ? 'border-primary bg-accent'
-                  : 'border-border hover:border-gray-300'
-              }`}
-            >
-              <FileText className="w-5 h-5 mx-auto mb-1 text-gray-500" />
-              <p className="text-xs text-muted-foreground">Print or save as PDF</p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setExportType('csv')}
-              className={`flex-1 p-3 rounded-lg border transition-colors ${
-                exportType === 'csv'
-                  ? 'border-primary bg-accent'
-                  : 'border-border hover:border-gray-300'
-              }`}
-            >
-              <FileSpreadsheet className="w-5 h-5 mx-auto mb-1 text-gray-500" />
-              <p className="text-xs text-muted-foreground">CSV</p>
-            </button>
-          </div>
+          <RadioGroup
+            value={exportType}
+            onValueChange={setExportType}
+            variant="card"
+            columns={2}
+            options={[
+              {
+                value: 'print',
+                label: 'Print or save as PDF',
+                icon: <FileText className="w-5 h-5" />,
+              },
+              { value: 'csv', label: 'CSV', icon: <FileSpreadsheet className="w-5 h-5" /> },
+            ]}
+          />
         </div>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
-        <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-xs font-medium text-yellow-800 dark:text-yellow-300">
-                What&apos;s included
-              </p>
-              <ul className="text-xs text-yellow-700 dark:text-yellow-400 mt-1 space-y-0.5 list-disc list-inside">
-                <li>Profile information</li>
-                <li>Application history</li>
-                <li>Payment history</li>
-                <li>Maintenance requests</li>
-                <li>Messages</li>
-                <li>Lease agreements</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <Alert variant="warning" title="What's included">
+          <ul className="text-xs mt-1 space-y-0.5 list-disc list-inside">
+            <li>Profile information</li>
+            <li>Application history</li>
+            <li>Payment history</li>
+            <li>Maintenance requests</li>
+            <li>Messages</li>
+            <li>Lease agreements</li>
+          </ul>
+        </Alert>
 
         <Button
           variant="primary"
           fullWidth
           onClick={handleExport}
-          disabled={exportMutation.isPending}
           isLoading={exportMutation.isPending}
-          className="gap-2"
+          loadingText="Exporting..."
+          icon={completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
         >
-          {completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
-          {completed ? 'Exported!' : exportMutation.isPending ? 'Exporting...' : 'Export Data'}
+          {completed ? 'Exported!' : 'Export Data'}
         </Button>
       </div>
     </div>

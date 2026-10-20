@@ -89,11 +89,7 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
                   <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                vertical={false}
-                stroke="currentColor"
-                className="text-border"
-              />
+              <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
               <XAxis
                 dataKey="month"
                 axisLine={false}

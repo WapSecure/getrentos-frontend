@@ -1,6 +1,6 @@
 'use client';
 
-import { NumberInput } from '@getrentos/ui';
+import { CurrencyInput, Field } from '@getrentos/ui';
 
 interface PropertyValueFieldsProps {
   estimatedValue: string;
@@ -8,9 +8,6 @@ interface PropertyValueFieldsProps {
   onEstimatedValueChange: (value: string) => void;
   onPurchasePriceChange: (value: string) => void;
 }
-
-const inputClass =
-  'w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary';
 
 /** What the property is worth and what it cost: the two numbers Portfolio needs for cap rate and yield. */
 export const PropertyValueFields = ({
@@ -20,28 +17,22 @@ export const PropertyValueFields = ({
   onPurchasePriceChange,
 }: PropertyValueFieldsProps) => (
   <div className="grid gap-3 sm:grid-cols-2">
-    <div>
-      <label className="block text-sm font-medium text-foreground mb-1">Current value (₦)</label>
-      <NumberInput
-        min={0}
+    <Field label="Current value (₦)" hint="What you would sell it for today.">
+      <CurrencyInput
+        prefix="₦"
         value={estimatedValue}
-        onValueChange={onEstimatedValueChange}
+        onValueChange={(v) => onEstimatedValueChange(v === 0 ? '' : String(v))}
         placeholder="e.g. 120000000"
-        className={inputClass}
       />
-      <p className="text-xs text-muted-foreground mt-1">What you would sell it for today.</p>
-    </div>
-    <div>
-      <label className="block text-sm font-medium text-foreground mb-1">Purchase price (₦)</label>
-      <NumberInput
-        min={0}
+    </Field>
+    <Field label="Purchase price (₦)" hint="What you paid for it.">
+      <CurrencyInput
+        prefix="₦"
         value={purchasePrice}
-        onValueChange={onPurchasePriceChange}
+        onValueChange={(v) => onPurchasePriceChange(v === 0 ? '' : String(v))}
         placeholder="e.g. 85000000"
-        className={inputClass}
       />
-      <p className="text-xs text-muted-foreground mt-1">What you paid for it.</p>
-    </div>
+    </Field>
   </div>
 );
 

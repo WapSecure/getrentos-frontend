@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import {
+  Alert,
   Button,
   Dialog,
   DialogContent,
@@ -62,7 +63,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
           <DialogDescription>Your shortlet earnings across all listings.</DialogDescription>
         </div>
         <div className="max-h-[75vh] space-y-5 overflow-y-auto border-t border-border p-5">
-          {isLoading || !data ? (
+          {isLoading ? (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -71,6 +72,8 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
               </div>
               <Skeleton className="h-40 w-full rounded-lg" />
             </div>
+          ) : !data ? (
+            <Alert variant="danger">We couldn&apos;t load your earnings. Try again later.</Alert>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -196,7 +199,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                             title={`${d.date}: ${d.views} view${d.views === 1 ? '' : 's'}`}
                           >
                             <div
-                              className="w-full rounded-t bg-emerald-500/70"
+                              className="w-full rounded-t bg-success/70"
                               style={{ height: `${Math.max(4, (d.views / maxDailyViews) * 100)}%` }}
                             />
                           </div>
@@ -220,7 +223,7 @@ export function HostEarningsAnalyticsDialog({ onClose }: { onClose: () => void }
                             </p>
                             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                               <div
-                                className="h-full rounded-full bg-emerald-500/70"
+                                className="h-full rounded-full bg-success/70"
                                 style={{ width: `${(l.views / maxListingViews) * 100}%` }}
                               />
                             </div>

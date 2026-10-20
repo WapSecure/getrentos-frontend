@@ -6,13 +6,16 @@ import { AlertTriangle, Coins, Landmark, Receipt, Wallet } from 'lucide-react';
 import {
   Badge,
   Button,
+  Alert,
   ConfirmDialog,
+  DatePicker,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
   Input,
-  Toast,
+  useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { ApiError, unwrap } from '@getrentos/shared';
@@ -160,9 +163,7 @@ export function PaymentsQueue() {
   } | null>(null);
   const [processingKey, setProcessingKey] = useState<string | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const executeAction = async () => {
     if (!pendingAction || processingKey) return;
@@ -184,16 +185,14 @@ export function PaymentsQueue() {
       }[type];
       setPendingAction(null);
       setReason('');
-      setToast({ message: successMessage, variant: 'success' });
+      toast.success(successMessage);
       await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
     } catch (error) {
-      setToast({
-        message:
-          error instanceof ApiError
-            ? error.message
-            : 'The finance action could not be completed. Please try again.',
-        variant: 'error',
-      });
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'The finance action could not be completed. Please try again.'
+      );
     } finally {
       setProcessingKey(null);
     }
@@ -347,9 +346,6 @@ export function PaymentsQueue() {
         promptRequired={promptRequired}
         promptMinLength={10}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }
@@ -420,9 +416,7 @@ export function StatementsQueue() {
   } | null>(null);
   const [processingKey, setProcessingKey] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const executeAction = async () => {
     if (!pendingAction || processingKey) return;
@@ -436,22 +430,18 @@ export function StatementsQueue() {
         await unwrap(adminRentFinanceService.retryStatementPayout(statement.id));
       }
       setPendingAction(null);
-      setToast({
-        message:
-          type === 'issue'
-            ? `Statement for ${statement.ownerName} was issued.`
-            : `Payout retry submitted for ${statement.ownerName}.`,
-        variant: 'success',
-      });
+      toast.success(
+        type === 'issue'
+          ? `Statement for ${statement.ownerName} was issued.`
+          : `Payout retry submitted for ${statement.ownerName}.`
+      );
       await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
     } catch (error) {
-      setToast({
-        message:
-          error instanceof ApiError
-            ? error.message
-            : 'The finance action could not be completed. Please try again.',
-        variant: 'error',
-      });
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'The finance action could not be completed. Please try again.'
+      );
     } finally {
       setProcessingKey(null);
     }
@@ -574,11 +564,8 @@ export function StatementsQueue() {
       {generating && (
         <GenerateStatementDialog
           onClose={() => setGenerating(false)}
-          onGenerated={(message) => setToast({ message, variant: 'success' })}
+          onGenerated={(message) => toast.success(message)}
         />
-      )}
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );
@@ -624,25 +611,26 @@ function GenerateStatementDialog({
           Find the owner&apos;s user ID from their case-360 URL or the users register.
         </DialogDescription>
         <div className="mt-5 space-y-4">
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium">Owner user ID</span>
+          <Field label="Owner user ID">
             <Input value={ownerId} onChange={(e) => setOwnerId(e.target.value)} />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium">Period start</span>
-              <Input
-                type="date"
+          </Field>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Period start">
+              <DatePicker
                 value={periodStart}
-                onChange={(e) => setPeriodStart(e.target.value)}
+                onChange={setPeriodStart}
+                max={periodEnd || undefined}
               />
-            </label>
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium">Period end</span>
-              <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
-            </label>
+            </Field>
+            <Field label="Period end">
+              <DatePicker
+                value={periodEnd}
+                onChange={setPeriodEnd}
+                min={periodStart || undefined}
+              />
+            </Field>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <Alert variant="danger">{error}</Alert>}
         </div>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
@@ -665,9 +653,7 @@ export function PayoutAccountsQueue() {
   } | null>(null);
   const [processingKey, setProcessingKey] = useState<string | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const executeAction = async () => {
     if (!pendingAction || processingKey) return;
@@ -682,22 +668,18 @@ export function PayoutAccountsQueue() {
       }
       setPendingAction(null);
       setReason('');
-      setToast({
-        message:
-          type === 'block'
-            ? `${account.landlordName}'s payout account was blocked.`
-            : `${account.landlordName}'s payout account was restored.`,
-        variant: 'success',
-      });
+      toast.success(
+        type === 'block'
+          ? `${account.landlordName}'s payout account was blocked.`
+          : `${account.landlordName}'s payout account was restored.`
+      );
       await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
     } catch (error) {
-      setToast({
-        message:
-          error instanceof ApiError
-            ? error.message
-            : 'The finance action could not be completed. Please try again.',
-        variant: 'error',
-      });
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'The finance action could not be completed. Please try again.'
+      );
     } finally {
       setProcessingKey(null);
     }
@@ -815,9 +797,6 @@ export function PayoutAccountsQueue() {
         promptRequired
         promptMinLength={10}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }
@@ -827,9 +806,7 @@ export function ExpensesQueue() {
   const [pendingExpense, setPendingExpense] = useState<AdminExpense | null>(null);
   const [processingKey, setProcessingKey] = useState<string | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const executeRemove = async () => {
     if (!pendingExpense || processingKey) return;
@@ -838,19 +815,14 @@ export function ExpensesQueue() {
     setProcessingKey(expense.id);
     try {
       await unwrap(adminRentFinanceService.removeExpense(expense.id, reason.trim()));
-      setToast({
-        message: `Expense for ${expense.propertyTitle} was removed.`,
-        variant: 'success',
-      });
+      toast.success(`Expense for ${expense.propertyTitle} was removed.`);
       await queryClient.invalidateQueries({ queryKey: ['admin', 'rentFinance'] });
     } catch (error) {
-      setToast({
-        message:
-          error instanceof ApiError
-            ? error.message
-            : 'The expense could not be removed. Please try again.',
-        variant: 'error',
-      });
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'The expense could not be removed. Please try again.'
+      );
     } finally {
       setProcessingKey(null);
     }
@@ -935,9 +907,6 @@ export function ExpensesQueue() {
         promptRequired
         promptMinLength={10}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Chrome } from 'lucide-react';
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -32,14 +33,18 @@ function ConsentScreen() {
           <p>This local-only screen creates a test account so the OAuth flow can be verified.</p>
         </div>
         <div className="space-y-3">
-          <button
+          <Button
+            variant="outline"
+            size="lg"
+            rounded="lg"
+            fullWidth
             onClick={handleConsent}
-            disabled={submitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-card border border-border px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary transition-colors disabled:opacity-60"
+            isLoading={submitting}
+            loadingText="Continuing…"
+            icon={<Chrome className="w-4 h-4 text-primary" />}
           >
-            <Chrome className="w-4 h-4 text-primary" />
-            {submitting ? 'Continuing…' : 'Continue as test user'}
-          </button>
+            Continue as test user
+          </Button>
           <a
             href={ROUTES.LOGIN}
             className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors"

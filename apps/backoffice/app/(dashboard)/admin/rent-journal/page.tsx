@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpenCheck, CheckCircle2, TriangleAlert } from 'lucide-react';
-import { Badge, Button, Card, PageErrorState, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  PageErrorState,
+  Skeleton,
+  TableSkeleton,
+  Textarea,
+  useToast,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -92,7 +101,7 @@ export default function RentJournalPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
   const canRun = hasAdminPermission(user?.roles, 'rentfinance.approve');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [openLease, setOpenLease] = useState<string | null>(null);
   const [overrideFor, setOverrideFor] = useState<string | null>(null);
   const [override, setOverride] = useState('');
@@ -108,10 +117,9 @@ export default function RentJournalPage() {
       setOverrideFor(null);
       setOverride('');
       queryClient.invalidateQueries({ queryKey: ['admin', 'journal'] });
-      setToast({ message: `${period} is closed.`, variant: 'success' });
+      toast.success(`${period} is closed.`);
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'The month did not close.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'The month did not close.'),
   });
 
   const trial = useQuery({
@@ -132,15 +140,16 @@ export default function RentJournalPage() {
     mutationFn: () => unwrap(adminJournalService.runCheck()),
     onSuccess: (r: JournalCheck) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'journal'] });
-      setToast({
-        message: r.mismatches.length
-          ? `${r.mismatches.length} mismatch${r.mismatches.length === 1 ? '' : 'es'} found.`
-          : `Books agree. ${r.entriesPosted} new entr${r.entriesPosted === 1 ? 'y' : 'ies'} posted.`,
-        variant: r.mismatches.length ? 'error' : 'success',
-      });
+      if (r.mismatches.length)
+        toast.error(
+          `${r.mismatches.length} mismatch${r.mismatches.length === 1 ? '' : 'es'} found.`
+        );
+      else
+        toast.success(
+          `Books agree. ${r.entriesPosted} new entr${r.entriesPosted === 1 ? 'y' : 'ies'} posted.`
+        );
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'The check failed.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'The check failed.'),
   });
 
   const c = check.data;
@@ -161,13 +170,18 @@ export default function RentJournalPage() {
           </p>
         </div>
         {canRun && (
-          <Button variant="primary" disabled={run.isPending} onClick={() => run.mutate()}>
-            {run.isPending ? 'Checking…' : 'Run check now'}
+          <Button
+            variant="primary"
+            isLoading={run.isPending}
+            loadingText="Checking…"
+            onClick={() => run.mutate()}
+          >
+            Run check now
           </Button>
         )}
       </div>
 
-      {check.isError ? (
+      {check.isError && !c ? (
         <PageErrorState
           title="Could not load the agreement check"
           description={(check.error as Error).message}
@@ -176,9 +190,11 @@ export default function RentJournalPage() {
       ) : (
         <Card className="mb-6 p-5">
           {!c ? (
-            <p className="text-sm text-muted-foreground">
-              {check.isLoading ? 'Loading…' : 'No check has run yet.'}
-            </p>
+            check.isLoading ? (
+              <Skeleton className="h-5 w-2/3" />
+            ) : (
+              <p className="text-sm text-muted-foreground">No check has run yet.</p>
+            )
           ) : c.mismatches.length === 0 && c.balanced ? (
             <p className="flex items-center gap-2 text-sm text-foreground">
               <CheckCircle2 className="h-5 w-5 text-success" aria-hidden />
@@ -234,7 +250,7 @@ export default function RentJournalPage() {
         </Card>
       )}
 
-      {trial.isError ? (
+      {trial.isError && !t ? (
         <PageErrorState
           title="Could not load the trial balance"
           description={(trial.error as Error).message}
@@ -251,7 +267,7 @@ export default function RentJournalPage() {
             )}
           </div>
           {!t ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <TableSkeleton rows={5} columns={4} />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -306,7 +322,15 @@ export default function RentJournalPage() {
           month is final; anything that turns up later is booked in the next open month.
         </p>
         {months.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <TableSkeleton rows={4} columns={5} />
+        ) : months.isError && !months.data ? (
+          <PageErrorState
+            title="Could not load months"
+            description={(months.error as Error).message}
+            onRetry={() => months.refetch()}
+            headingLevel="h2"
+            className="min-h-0 py-10"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -344,11 +368,16 @@ export default function RentJournalPage() {
                     <td className="py-2 text-right">
                       {canRun && m.status === 'OPEN' && (
                         <div className="flex flex-col items-end gap-2">
-                          <div className="flex gap-2">
+                          <div className="flex flex-wrap justify-end gap-2">
                             <Button
                               size="sm"
                               variant="outline"
                               disabled={close.isPending}
+                              isLoading={
+                                close.isPending &&
+                                close.variables?.period === m.period &&
+                                !close.variables?.reason
+                              }
                               onClick={() => close.mutate({ period: m.period })}
                             >
                               Close month
@@ -364,18 +393,19 @@ export default function RentJournalPage() {
                             </Button>
                           </div>
                           {overrideFor === m.period && (
-                            <div className="flex w-72 flex-col gap-2">
-                              <textarea
+                            <div className="flex w-full max-w-72 flex-col gap-2 sm:w-72">
+                              <Textarea
                                 rows={2}
                                 value={override}
                                 onChange={(e) => setOverride(e.target.value)}
                                 placeholder="Why it closes without a clean reconciliation (at least 10 characters)"
-                                className="rounded-lg border border-border bg-background p-2 text-xs"
+                                aria-label={`Reason for closing ${m.period}`}
                               />
                               <Button
                                 size="sm"
                                 variant="primary"
                                 disabled={override.trim().length < 10 || close.isPending}
+                                isLoading={close.isPending && !!close.variables?.reason}
                                 onClick={() =>
                                   close.mutate({ period: m.period, reason: override.trim() })
                                 }
@@ -406,7 +436,11 @@ export default function RentJournalPage() {
             </Button>
           </div>
           {entries.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <div className="space-y-2" role="status" aria-label="Loading">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-2/3" />
+            </div>
           ) : (
             <ul className="space-y-3 text-sm">
               {(entries.data ?? []).map((e) => (
@@ -432,10 +466,6 @@ export default function RentJournalPage() {
             </ul>
           )}
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

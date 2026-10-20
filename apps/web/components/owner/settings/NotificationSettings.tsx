@@ -5,7 +5,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Handshake, ShieldCheck, FileText, MessageCircle, Star, Bell } from 'lucide-react';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, ListSkeleton, Switch, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { ownerService, type OwnerNotificationPreference } from '@/services/ownerService';
@@ -22,9 +22,9 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> 
 export const NotificationSettings = () => {
   const queryClient = useQueryClient();
   const [preferences, setPreferences] = useState<OwnerNotificationPreference[]>([]);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data: serverPrefs = [] } = useQuery({
+  const { data: serverPrefs = [], isLoading } = useQuery({
     queryKey: ownerKeys.notificationPrefs,
     queryFn: () => unwrap(ownerService.getNotificationPreferences()),
   });
@@ -43,13 +43,10 @@ export const NotificationSettings = () => {
     mutationFn: () => unwrap(ownerService.updateNotificationPreferences(preferences)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ownerKeys.notificationPrefs });
-      setToast({ message: 'Notification preferences saved.', variant: 'success' });
+      toast.success('Notification preferences saved.');
     },
     onError: (error) =>
-      setToast({
-        message: error.message || 'Failed to save notification preferences.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Failed to save notification preferences.'),
   });
 
   return (
@@ -62,31 +59,40 @@ export const NotificationSettings = () => {
 
       <div className="space-y-3">
         <div className="flex items-center justify-end gap-8 pr-2 text-xs font-medium text-muted-foreground">
-          <span className="w-11 text-center">Email</span>
-          <span className="w-11 text-center">Push</span>
+          <span className="w-12 text-center">Email</span>
+          <span className="w-12 text-center">Push</span>
         </div>
+        {isLoading && <ListSkeleton rows={5} label="Loading notification preferences" />}
         {preferences.map((pref) => {
           const meta = CATEGORY_META[pref.id] ?? { label: pref.id, icon: Bell };
           const Icon = meta.icon;
           return (
             <div
               key={pref.id}
-              className="flex items-center justify-between p-3 rounded-lg border border-border"
+              className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
             >
-              <div className="flex items-center gap-3">
-                <Icon className="w-4 h-4 text-gray-400" />
+              <div className="flex min-w-0 items-center gap-3">
+                <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <span className="text-sm text-foreground">{meta.label}</span>
               </div>
               <div className="flex items-center gap-8">
-                <div className="w-10 flex justify-center">
+                <div className="flex w-12 justify-center">
                   {categorySendsEmail(pref.id) ? (
-                    <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                    <Switch
+                      checked={pref.email}
+                      onCheckedChange={() => toggle(pref.id, 'email')}
+                      aria-label={`${meta.label} by email`}
+                    />
                   ) : (
                     <NoEmail />
                   )}
                 </div>
-                <div className="w-10 flex justify-center">
-                  <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                <div className="flex w-12 justify-center">
+                  <Switch
+                    checked={pref.push}
+                    onCheckedChange={() => toggle(pref.id, 'push')}
+                    aria-label={`${meta.label} by push`}
+                  />
                 </div>
               </div>
             </div>
@@ -98,31 +104,14 @@ export const NotificationSettings = () => {
         variant="primary"
         className="mt-6 gap-1.5"
         isLoading={save.isPending}
-        disabled={preferences.length === 0 || save.isPending}
+        disabled={preferences.length === 0}
         onClick={() => save.mutate()}
       >
         Save Preferences
       </Button>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };
-
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);
 
 /** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (

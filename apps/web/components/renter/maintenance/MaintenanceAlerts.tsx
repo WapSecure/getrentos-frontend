@@ -98,7 +98,9 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground">{alert.title}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">{alert.message}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{formatDate(alert.date)}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDate(alert.date)}
+                          </p>
                         </div>
                         {!alert.read && (
                           <span className="w-2 h-2 bg-info rounded-full mt-2 shrink-0" />

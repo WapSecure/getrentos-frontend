@@ -139,7 +139,9 @@ export const MessageReminders = ({
                 }`}
               >
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm ${reminder.active ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <p
+                    className={`text-sm ${reminder.active ? 'text-foreground' : 'text-muted-foreground'}`}
+                  >
                     {reminder.message}
                   </p>
                   <p className="text-xs text-muted-foreground">

@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, RefreshCw, Siren, ShieldCheck } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, Pagination } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -86,6 +86,7 @@ export default function EstateEmergencyPage() {
     queryKey: [...estateKeys.emergencyMusters(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(estateService.listMusters(estate!.id, { page, pageSize: PAGE_SIZE })),
     enabled: !!estate && !active,
+    placeholderData: keepPreviousData,
   });
   const history = historyQuery.data?.items ?? [];
   const historyTotal = historyQuery.data?.total ?? 0;
@@ -184,33 +185,31 @@ export default function EstateEmergencyPage() {
         /* The ordinary state, said plainly rather than as an empty table: this
            screen is only ever opened on purpose, so it should confirm that
            nothing is being called before it shows a history. */
-        <div className="bg-card rounded-2xl border border-border p-5 mb-6">
-          <div className="flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-emerald-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-foreground">No roll call is in progress</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Raising the alarm tells every household immediately and takes the roll as it stands
-                : everybody the estate believes is inside, plus every visitor the gate has admitted
-                and not logged out. You can refresh that list while the emergency is open, because
-                people keep arriving.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert
+          variant="success"
+          icon={ShieldCheck}
+          title="No roll call is in progress"
+          className="mb-6"
+        >
+          Raising the alarm tells every household immediately and takes the roll as it stands :
+          everybody the estate believes is inside, plus every visitor the gate has admitted and not
+          logged out. You can refresh that list while the emergency is open, because people keep
+          arriving.
+        </Alert>
       )}
 
       {/* The live console, or a closed roll being reviewed. */}
       {muster && (
         <div className="space-y-4 mb-8">
           {!active && selectedMusterId && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<ArrowLeft className="w-4 h-4" />}
               onClick={() => setSelectedMusterId(null)}
-              className="text-sm text-muted-foreground inline-flex items-center gap-1.5"
             >
-              <ArrowLeft className="w-4 h-4" />
               Back to the history
-            </button>
+            </Button>
           )}
 
           <div
@@ -241,15 +240,15 @@ export default function EstateEmergencyPage() {
               </div>
 
               {isLive && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="secondary"
-                    className="gap-2"
-                    disabled={addArrivals.isPending}
+                    icon={<RefreshCw className="w-4 h-4" />}
+                    isLoading={addArrivals.isPending}
+                    loadingText="Checking…"
                     onClick={() => addArrivals.mutate()}
                   >
-                    <RefreshCw className="w-4 h-4" />
-                    {addArrivals.isPending ? 'Checking…' : 'Check the gate again'}
+                    Check the gate again
                   </Button>
                   <Button
                     variant="primary"
@@ -287,6 +286,8 @@ export default function EstateEmergencyPage() {
             {rollFilters.map((filter) => (
               <button
                 key={filter.value}
+                type="button"
+                aria-pressed={rollFilter === filter.value}
                 onClick={() => setRollFilter(filter.value)}
                 className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap border ${
                   rollFilter === filter.value
@@ -300,15 +301,17 @@ export default function EstateEmergencyPage() {
           </div>
 
           {visibleRoll.length === 0 ? (
-            <div className="bg-card rounded-2xl border border-border p-5">
-              <p className="text-sm text-muted-foreground">
-                {roll.length === 0
+            <EmptyState
+              icon={ShieldCheck}
+              size="compact"
+              title={
+                roll.length === 0
                   ? 'Nobody was on this roll.'
                   : rollFilter === 'outstanding'
                     ? 'Every name has an answer.'
-                    : 'Nobody on this roll needs help.'}
-              </p>
-            </div>
+                    : 'Nobody on this roll needs help.'
+              }
+            />
           ) : (
             <div className="space-y-3">
               {visibleRoll.map((entry) => (
@@ -331,7 +334,7 @@ export default function EstateEmergencyPage() {
           )}
 
           {answerEntry.error && (
-            <p className="text-sm text-destructive">{(answerEntry.error as Error).message}</p>
+            <Alert variant="danger">{(answerEntry.error as Error).message}</Alert>
           )}
         </div>
       )}
@@ -342,11 +345,7 @@ export default function EstateEmergencyPage() {
         <>
           <h2 className="text-lg font-semibold text-foreground mb-3">Past roll calls</h2>
           {historyQuery.isLoading ? (
-            <div className="space-y-3">
-              {[0, 1, 2].map((key) => (
-                <div key={key} className="h-20 animate-pulse rounded-2xl bg-secondary" />
-              ))}
-            </div>
+            <ListSkeleton variant="cards" rows={3} />
           ) : history.length === 0 ? (
             <EmptyState
               icon={Siren}
@@ -420,8 +419,9 @@ export default function EstateEmergencyPage() {
  */
 const HistoryRow = ({ summary, onOpen }: { summary: MusterSummary; onOpen: () => void }) => (
   <button
+    type="button"
     onClick={onOpen}
-    className="w-full text-left bg-card rounded-2xl border border-border p-4 hover:border-primary/40"
+    className="w-full text-left bg-card rounded-2xl border border-border p-4 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
   >
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">

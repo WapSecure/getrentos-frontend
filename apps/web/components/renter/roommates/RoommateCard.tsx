@@ -1,7 +1,5 @@
 'use client';
 
-import { NumberInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import {
   Mail,
@@ -17,7 +15,16 @@ import {
   X,
   Check,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Badge,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  IconButton,
+  NumberInput,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { format } from 'date-fns';
 
 interface Roommate {
@@ -38,22 +45,13 @@ interface RoommateCardProps {
   onUpdateShare: (id: string, percentage: number) => void;
 }
 
-const statusConfig = {
-  active: {
-    label: 'Active',
-    color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-    icon: CheckCircle,
-  },
-  pending: {
-    label: 'Pending',
-    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-    icon: Clock,
-  },
-  inactive: {
-    label: 'Inactive',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-    icon: XCircle,
-  },
+const statusConfig: Record<
+  Roommate['status'],
+  { label: string; variant: BadgeVariant; icon: typeof CheckCircle }
+> = {
+  active: { label: 'Active', variant: 'success', icon: CheckCircle },
+  pending: { label: 'Pending', variant: 'warning', icon: Clock },
+  inactive: { label: 'Inactive', variant: 'danger', icon: XCircle },
 };
 
 const formatDate = (dateString: string) => {
@@ -64,7 +62,6 @@ const formatDate = (dateString: string) => {
 export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCardProps) => {
   const [isEditingShare, setIsEditingShare] = useState(false);
   const [sharePercentage, setSharePercentage] = useState(roommate.sharePercentage);
-  const [showMenu, setShowMenu] = useState(false);
 
   const StatusIcon = statusConfig[roommate.status].icon;
 
@@ -83,9 +80,9 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
   };
 
   return (
-    <div className="p-4 hover:bg-secondary transition-colors">
+    <div className="group p-4 hover:bg-secondary transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex min-w-0 items-center gap-3 flex-1">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
             {getInitials(roommate.name)}
           </div>
@@ -93,21 +90,21 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-semibold text-foreground">{roommate.name}</h4>
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[roommate.status].color}`}
+              <Badge
+                variant={statusConfig[roommate.status].variant}
+                icon={<StatusIcon className="w-3 h-3" aria-hidden="true" />}
               >
-                <StatusIcon className="w-3 h-3" />
                 {statusConfig[roommate.status].label}
-              </span>
+              </Badge>
               {roommate.rating && (
-                <span className="inline-flex items-center gap-0.5 text-xs text-amber-600">
-                  <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                <span className="inline-flex items-center gap-0.5 text-xs text-warning">
+                  <Star className="w-3 h-3 fill-warning text-warning" aria-hidden="true" />
                   {roommate.rating}
                 </span>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-gray-500">
+            <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Mail className="w-3 h-3" />
                 <span>{roommate.email}</span>
@@ -131,12 +128,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
             {roommate.responsibilities.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {roommate.responsibilities.map((task) => (
-                  <span
-                    key={task}
-                    className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full"
-                  >
-                    {task}
-                  </span>
+                  <Badge key={task}>{task}</Badge>
                 ))}
               </div>
             )}
@@ -149,73 +141,58 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
               <div className="flex items-center gap-1">
                 <NumberInput
                   integer={false}
+                  aria-label={`Rent share for ${roommate.name}`}
                   value={sharePercentage}
                   onValueChange={(v) => setSharePercentage(Number(v) || 0)}
-                  className="w-16 px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-20"
                   min="0"
                   max="100"
                 />
-                <span className="text-sm text-gray-500">%</span>
-                <Button
+                <span className="text-sm text-muted-foreground">%</span>
+                <IconButton
                   size="sm"
-                  variant="ghost"
+                  label="Save share"
                   onClick={handleUpdateShare}
-                  className="p-1 h-auto"
-                >
-                  <Check className="w-3 h-3 text-green-500" />
-                </Button>
-                <Button
+                  icon={<Check className="text-success" />}
+                />
+                <IconButton
                   size="sm"
-                  variant="ghost"
+                  label="Cancel editing share"
                   onClick={() => setIsEditingShare(false)}
-                  className="p-1 h-auto"
-                >
-                  <X className="w-3 h-3 text-red-500" />
-                </Button>
+                  icon={<X className="text-destructive" />}
+                />
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-primary">
                   {roommate.sharePercentage}%
                 </span>
-                <Button
+                <IconButton
                   size="sm"
-                  variant="ghost"
+                  label={`Edit rent share for ${roommate.name}`}
                   onClick={() => setIsEditingShare(true)}
-                  className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Edit2 className="w-3 h-3 text-gray-400" />
-                </Button>
+                  className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                  icon={<Edit2 />}
+                />
               </div>
             )}
           </div>
 
-          <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-1 h-auto"
-            >
-              <MoreVertical className="w-4 h-4 text-gray-500" />
-            </Button>
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-card rounded-lg shadow-lg border border-border z-10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    onRemove(roommate.id);
-                    setShowMenu(false);
-                  }}
-                  className="w-full justify-start px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <Trash2 className="w-3 h-3 mr-2" />
-                  Remove Roommate
-                </Button>
-              </div>
-            )}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton
+                size="sm"
+                label={`Actions for ${roommate.name}`}
+                icon={<MoreVertical />}
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onSelect={() => onRemove(roommate.id)} className="text-destructive">
+                <Trash2 className="w-3 h-3" aria-hidden="true" />
+                Remove Roommate
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

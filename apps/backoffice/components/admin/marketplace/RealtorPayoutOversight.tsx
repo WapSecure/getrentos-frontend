@@ -1,17 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Banknote, RotateCw } from 'lucide-react';
 import {
   Badge,
   Button,
   ConfirmDialog,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
   Pagination,
   Select,
-  Toast,
+  useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
@@ -56,9 +57,7 @@ export const RealtorPayoutOversight = () => {
   const [status, setStatus] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
   const [confirming, setConfirming] = useState<AdminRealtorCommissionPayout | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: ['admin', 'realtor-payouts', { status, page }],
@@ -70,16 +69,17 @@ export const RealtorPayoutOversight = () => {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const retry = useMutation({
     mutationFn: (id: string) => unwrap(adminMarketplaceService.retryRealtorPayout(id)),
     onSuccess: async () => {
       setConfirming(null);
-      setToast({ message: 'Payout sent again and audited.', variant: 'success' });
+      toast.success('Payout sent again and audited.');
       await client.invalidateQueries({ queryKey: ['admin', 'realtor-payouts'] });
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const items = data?.items ?? [];
@@ -101,7 +101,8 @@ export const RealtorPayoutOversight = () => {
             setStatus(value as StatusFilter);
             setPage(1);
           }}
-          className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+          searchable={false}
+          className="w-full sm:w-52"
           options={[
             { value: 'all', label: 'All payouts' },
             ...FILTER_ORDER.map((value) => ({ value, label: FILTER_LABEL[value] })),
@@ -110,7 +111,9 @@ export const RealtorPayoutOversight = () => {
       </div>
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
-        {isError ? (
+        {isLoading ? (
+          <ListSkeleton rows={5} className="rounded-none border-0" />
+        ) : isError && !data ? (
           <PageErrorState
             title="Could not load payouts"
             description="Realtor payouts are temporarily unavailable."
@@ -118,12 +121,6 @@ export const RealtorPayoutOversight = () => {
             isRetrying={isFetching}
             className="min-h-[220px] rounded-none border-0"
           />
-        ) : isLoading ? (
-          <div className="space-y-2 p-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-secondary" />
-            ))}
-          </div>
         ) : items.length === 0 ? (
           <EmptyState
             icon={Banknote}
@@ -145,21 +142,18 @@ export const RealtorPayoutOversight = () => {
                   </p>
                   {/* A failure is the bank sending money back: say why. */}
                   {p.status === 'failed' && p.failureReason && (
-                    <p className="mt-0.5 text-sm text-red-600 dark:text-red-400">
-                      {p.failureReason}
-                    </p>
+                    <p className="mt-0.5 text-sm text-destructive">{p.failureReason}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-4">
                   <p className="font-semibold">{formatCurrency(p.amount)}</p>
                   {p.status === 'failed' && (
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1.5"
+                      icon={<RotateCw className="h-3.5 w-3.5" />}
                       onClick={() => setConfirming(p)}
                     >
-                      <RotateCw className="h-3.5 w-3.5" />
                       Retry
                     </Button>
                   )}
@@ -192,10 +186,6 @@ export const RealtorPayoutOversight = () => {
         isLoading={retry.isPending}
         onConfirm={() => confirming && retry.mutate(confirming.id)}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

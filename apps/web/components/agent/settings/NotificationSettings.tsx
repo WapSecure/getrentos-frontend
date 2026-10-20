@@ -5,7 +5,7 @@ import { TextMessageConsentCard } from '@/components/shared/settings/TextMessage
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, ShieldCheck } from 'lucide-react';
-import { Button, Toast, type ToastVariant } from '@getrentos/ui';
+import { Button, Switch, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -28,7 +28,7 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> 
 export const NotificationSettings = () => {
   const queryClient = useQueryClient();
   const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: serverPrefs = [] } = useQuery({
     queryKey: agentKeys.settingsNotifications,
@@ -62,13 +62,10 @@ export const NotificationSettings = () => {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentKeys.settingsNotifications });
-      setToast({ message: 'Notification preferences saved.', variant: 'success' });
+      toast.success('Notification preferences saved.');
     },
     onError: (error) =>
-      setToast({
-        message: error.message || 'Unable to save your notification preferences.',
-        variant: 'error',
-      }),
+      toast.error(error.message || 'Unable to save your notification preferences.'),
   });
 
   return (
@@ -89,22 +86,32 @@ export const NotificationSettings = () => {
           return (
             <div
               key={pref.id}
-              className="flex items-center justify-between p-3 rounded-lg border border-border"
+              className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border"
             >
-              <div className="flex items-center gap-3">
-                <Icon className="w-4 h-4 text-gray-400" />
+              <div className="flex min-w-0 items-center gap-3">
+                <Icon className="w-4 h-4 shrink-0 text-muted-foreground" />
                 <span className="text-sm text-foreground">{pref.label}</span>
               </div>
               <div className="flex items-center gap-8">
                 <div className="w-10 flex justify-center">
                   {categorySendsEmail(pref.id) ? (
-                    <Toggle checked={pref.email} onChange={() => toggle(pref.id, 'email')} />
+                    <Switch
+                      size="sm"
+                      checked={pref.email}
+                      onCheckedChange={() => toggle(pref.id, 'email')}
+                      aria-label={`${pref.label} by email`}
+                    />
                   ) : (
                     <NoEmail />
                   )}
                 </div>
                 <div className="w-10 flex justify-center">
-                  <Toggle checked={pref.push} onChange={() => toggle(pref.id, 'push')} />
+                  <Switch
+                    size="sm"
+                    checked={pref.push}
+                    onCheckedChange={() => toggle(pref.id, 'push')}
+                    aria-label={`${pref.label} by push`}
+                  />
                 </div>
               </div>
             </div>
@@ -114,33 +121,16 @@ export const NotificationSettings = () => {
 
       <Button
         variant="primary"
-        className="mt-6 gap-1.5"
+        className="mt-6"
         isLoading={save.isPending}
-        disabled={preferences.length === 0 || save.isPending}
+        disabled={preferences.length === 0}
         onClick={() => save.mutate()}
       >
         Save Preferences
       </Button>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };
-
-const Toggle = ({ checked, onChange }: { checked: boolean; onChange: () => void }) => (
-  <button
-    onClick={onChange}
-    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-      checked ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-    }`}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'}`}
-    />
-  </button>
-);
 
 /** Shown where a category has no email: these updates are in-app and push only. */
 const NoEmail = () => (

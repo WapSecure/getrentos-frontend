@@ -10,10 +10,9 @@ import {
   DialogDescription,
   DialogTitle,
   Field,
-  Input,
-  Toast,
+  NumberInput,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import { Banknote, Wallet } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
@@ -47,7 +46,7 @@ export function ShortletPayoutsDialog({
   const queryClient = useQueryClient();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: summary } = useQuery({
     queryKey: ['shortlets', 'host', 'payout-summary'],
@@ -75,21 +74,18 @@ export function ShortletPayoutsDialog({
       invalidate();
       setBankCode('');
       setAccountNumber('');
-      setToast({ message: 'Payout account saved.', variant: 'success' });
+      toast.success('Payout account saved.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const withdraw = useMutation({
     mutationFn: () => unwrap(shortletService.requestPayout()),
     onSuccess: (p) => {
       invalidate();
-      setToast({
-        message: `Withdrawal of ${formatCurrency(p.amount)} is on its way.`,
-        variant: 'success',
-      });
+      toast.success(`Withdrawal of ${formatCurrency(p.amount)} is on its way.`);
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -140,19 +136,18 @@ export function ShortletPayoutsDialog({
             <Button
               onClick={() => withdraw.mutate()}
               disabled={
-                !summary?.accountSet ||
-                !summary.available ||
-                summary?.canWithdraw === false ||
-                withdraw.isPending
+                !summary?.accountSet || !summary.available || summary?.canWithdraw === false
               }
               title={
                 summary?.canWithdraw === false
                   ? `Withdrawing needs Trust Tier ${summary.withdrawTierRequired}.`
                   : undefined
               }
+              icon={<Banknote className="h-4 w-4" />}
+              isLoading={withdraw.isPending}
+              loadingText="Withdrawing…"
             >
-              <Banknote className="mr-1.5 h-4 w-4" />
-              {withdraw.isPending ? 'Withdrawing…' : 'Withdraw'}
+              Withdraw
             </Button>
           </div>
 
@@ -236,19 +231,19 @@ export function ShortletPayoutsDialog({
               <p className="mb-3 mt-1 text-xs text-muted-foreground">
                 Your earnings are paid to this NUBAN bank account.
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Bank code" hint="e.g. 058 for GTBank">
-                  <Input
+                  <NumberInput
                     value={bankCode}
-                    onChange={(e) => setBankCode(e.target.value)}
+                    onValueChange={setBankCode}
                     placeholder="058"
                     maxLength={6}
                   />
                 </Field>
                 <Field label="Account number">
-                  <Input
+                  <NumberInput
                     value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+                    onValueChange={setAccountNumber}
                     placeholder="0123456789"
                     maxLength={10}
                   />
@@ -258,11 +253,11 @@ export function ShortletPayoutsDialog({
                 className="mt-3 w-full"
                 variant="outline"
                 onClick={() => saveAccount.mutate()}
-                disabled={
-                  bankCode.length < 3 || accountNumber.length !== 10 || saveAccount.isPending
-                }
+                isLoading={saveAccount.isPending}
+                loadingText="Saving…"
+                disabled={bankCode.length < 3 || accountNumber.length !== 10}
               >
-                {saveAccount.isPending ? 'Saving…' : 'Save account'}
+                Save account
               </Button>
             </div>
           )}
@@ -298,9 +293,6 @@ export function ShortletPayoutsDialog({
             <NairaSign className="h-3.5 w-3.5" /> Payouts transfer to your bank via Paystack.
           </p>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -23,8 +23,12 @@ export const RealtorDashboardHeader = ({ greeting, firstName }: RealtorDashboard
           Here&apos;s how your clients and listings are performing.
         </p>
       </div>
-      <Button href={ROUTES.REALTOR_LISTINGS} variant="primary" className="shrink-0 gap-2 shadow-sm">
-        <Plus className="h-4 w-4" />
+      <Button
+        href={ROUTES.REALTOR_LISTINGS}
+        variant="primary"
+        icon={<Plus className="h-4 w-4" />}
+        className="shrink-0 shadow-sm"
+      >
         Add Listing
       </Button>
     </div>

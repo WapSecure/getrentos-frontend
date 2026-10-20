@@ -62,7 +62,7 @@ export const TrustScoreBreakdownCard = ({ breakdown }: TrustScoreBreakdownCardPr
       </ul>
 
       {breakdown.penalty > 0 && (
-        <p className="mt-4 text-sm text-amber-700 dark:text-amber-400">
+        <p className="mt-4 text-sm text-warning">
           A penalty of −{breakdown.penalty} point{breakdown.penalty === 1 ? '' : 's'} is applied for
           unresolved issues on this account.
         </p>

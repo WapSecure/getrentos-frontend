@@ -2,6 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
+import {
+  Card,
+  CardSkeleton,
+  PageErrorState,
+  Skeleton,
+  StatGridSkeleton,
+} from '@getrentos/ui';
 import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
 import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
 import { VerificationList } from '@/components/shared/trust/VerificationList';
@@ -23,13 +30,23 @@ interface TrustProfileViewProps {
  * (score, headline stats, verifications and badges): no fabricated values.
  */
 export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustProfileViewProps) => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey,
     queryFn: () => unwrap(queryFn()),
   });
 
   if (isLoading) {
-    return <div className="p-10 text-center text-muted-foreground">Loading trust profile…</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-1/3" />
+        <StatGridSkeleton />
+        <CardSkeleton lines={4} />
+      </div>
+    );
+  }
+
+  if (isError && !data) {
+    return <PageErrorState onRetry={() => void refetch()} isRetrying={isFetching} />;
   }
 
   const trustScore = data?.trustScore ?? 0;
@@ -45,21 +62,21 @@ export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustPr
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-card rounded-2xl border border-border p-6 flex items-center justify-center">
+        <Card className="p-6 flex items-center justify-center">
           <TrustScoreRing score={trustScore} />
-        </div>
+        </Card>
 
         <div className="lg:col-span-2 grid grid-cols-2 gap-4">
           {stats.slice(0, 4).map((stat, index) => {
             const Icon = statIcons[index % statIcons.length];
             return (
-              <div key={stat.label} className="bg-card rounded-2xl border border-border p-4">
+              <Card key={stat.label} className="p-4">
                 <div className="inline-flex p-2.5 rounded-xl bg-accent mb-3">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
                 <p className="text-xl font-bold text-foreground tracking-tight">{stat.value}</p>
-              </div>
+              </Card>
             );
           })}
         </div>

@@ -22,9 +22,17 @@ import {
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
-import { Badge, PageErrorState, type BadgeVariant } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Card } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  ListSkeleton,
+  PageErrorState,
+  Skeleton,
+  StatGridSkeleton,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -164,18 +172,14 @@ export function HomeOverviewView() {
   if (isLoading) {
     return (
       <div className="space-y-6" aria-busy="true" aria-label="Loading home information">
-        <div className="h-44 animate-pulse rounded-3xl bg-secondary" />
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {[0, 1, 2, 3].map((item) => (
-            <div key={item} className="h-32 animate-pulse rounded-2xl bg-secondary" />
-          ))}
-        </div>
-        <div className="h-72 animate-pulse rounded-2xl bg-secondary" />
+        <Skeleton className="h-44 w-full rounded-2xl" />
+        <StatGridSkeleton className="gap-4 xl:grid-cols-4" />
+        <ListSkeleton rows={4} />
       </div>
     );
   }
 
-  if (leaseQuery.isError) {
+  if (leaseQuery.isError && leaseQuery.data === undefined) {
     return (
       <PageErrorState
         title="Home details are unavailable"
@@ -255,27 +259,26 @@ export function HomeOverviewView() {
       <HomeTeamCard />
 
       {hasDataError && (
-        <div
-          role="alert"
-          className="flex flex-wrap items-start gap-3 rounded-2xl border border-warning/30 bg-warning-subtle px-4 py-3 text-sm text-foreground"
+        <Alert
+          variant="warning"
+          icon={CircleAlert}
+          action={
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (maintenanceQuery.isError) void maintenanceQuery.refetch();
+                if (documentsQuery.isError) void documentsQuery.refetch();
+                if (remindersQuery.isError) void remindersQuery.refetch();
+              }}
+            >
+              Retry missing data
+            </Button>
+          }
         >
-          <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-          <p className="min-w-0 flex-1">
-            Some home information could not be refreshed. Your available records are still shown.
-          </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              if (maintenanceQuery.isError) void maintenanceQuery.refetch();
-              if (documentsQuery.isError) void documentsQuery.refetch();
-              if (remindersQuery.isError) void remindersQuery.refetch();
-            }}
-          >
-            Retry missing data
-          </Button>
-        </div>
+          Some home information could not be refreshed. Your available records are still shown.
+        </Alert>
       )}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -371,7 +374,7 @@ export function HomeOverviewView() {
                     <span
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                         request.isEmergency
-                          ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+                          ? 'bg-destructive-subtle text-destructive'
                           : 'bg-warning-subtle text-warning'
                       }`}
                     >
@@ -397,7 +400,7 @@ export function HomeOverviewView() {
                           className={`mt-1 block text-xs font-medium ${
                             request.acknowledgedAt
                               ? 'text-success'
-                              : 'text-red-700 dark:text-red-300'
+                              : 'text-destructive'
                           }`}
                         >
                           {request.acknowledgedAt ? 'Acknowledged' : 'Awaiting acknowledgement'}

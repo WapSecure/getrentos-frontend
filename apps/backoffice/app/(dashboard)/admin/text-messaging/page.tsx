@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare } from 'lucide-react';
-import { Badge, Card, EmptyState } from '@getrentos/ui';
+import { Badge, Card, EmptyState, PageErrorState, StatGridSkeleton } from '@getrentos/ui';
 import { authFetch, safeCall, unwrap } from '@getrentos/shared';
 
 interface TextSummary {
@@ -62,7 +62,16 @@ export default function TextMessagingPage() {
         </p>
       </div>
       {!s ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        summary.isError ? (
+          <PageErrorState
+            title="Could not load text messaging"
+            onRetry={() => void summary.refetch()}
+            isRetrying={summary.isFetching}
+            headingLevel="h2"
+          />
+        ) : (
+          <StatGridSkeleton />
+        )
       ) : (
         <>
           {!s.providerConfigured && (

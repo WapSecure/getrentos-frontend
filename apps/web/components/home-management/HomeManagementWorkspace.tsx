@@ -5,16 +5,32 @@ import { useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
-import { HomeManagementEscalationQueue } from '@/components/home-management/HomeManagementEscalationQueue';
-import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
-import { HomeManagementOperationsCommandCenter } from '@/components/home-management/HomeManagementOperationsCommandCenter';
-import { HomeManagementPortfolioAnalytics } from '@/components/home-management/HomeManagementPortfolioAnalytics';
-import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
+import {
+  HomeManagementEscalationQueue,
+} from '@/components/home-management/HomeManagementEscalationQueue';
+import {
+  HomeManagementInspectionFeed,
+} from '@/components/home-management/HomeManagementInspectionFeed';
+import {
+  HomeManagementOperationsCommandCenter,
+} from '@/components/home-management/HomeManagementOperationsCommandCenter';
+import {
+  HomeManagementPortfolioAnalytics,
+} from '@/components/home-management/HomeManagementPortfolioAnalytics';
+import {
+  HomeManagementRecordsPanel,
+} from '@/components/home-management/HomeManagementRecordsPanel';
 import { HomeManagementSlaPolicies } from '@/components/home-management/HomeManagementSlaPolicies';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
-import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
-import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
-import { PreventiveMaintenancePlans } from '@/components/home-management/PreventiveMaintenancePlans';
+import {
+  HomeManagementVendorPerformance,
+} from '@/components/home-management/HomeManagementVendorPerformance';
+import {
+  HomeManagementWorkOrderQueue,
+} from '@/components/home-management/HomeManagementWorkOrderQueue';
+import {
+  PreventiveMaintenancePlans,
+} from '@/components/home-management/PreventiveMaintenancePlans';
 import { EmptyState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';

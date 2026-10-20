@@ -28,7 +28,12 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
 
       <div className="divide-y divide-border">
         {tasks.length === 0 ? (
-          <EmptyState icon={ClipboardCheck} title="No tasks scheduled for today" size="compact" bare />
+          <EmptyState
+            icon={ClipboardCheck}
+            title="No tasks scheduled for today"
+            size="compact"
+            bare
+          />
         ) : (
           tasks.map((task) => {
             const config = typeConfig[task.type];

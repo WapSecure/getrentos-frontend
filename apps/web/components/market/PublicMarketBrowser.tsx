@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import {
   BadgeCheck,
@@ -14,17 +14,18 @@ import {
   LockKeyhole,
   MapPin,
   Ruler,
-  Search,
   ShieldCheck,
   SlidersHorizontal,
 } from 'lucide-react';
 import {
+  Alert,
   Badge,
+  Button,
   Checkbox,
   CurrencyInput,
   EmptyState,
-  Input,
   Pagination,
+  SearchInput,
   Select,
   Skeleton,
 } from '@getrentos/ui';
@@ -179,16 +180,17 @@ const ListingCard = ({
             <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          rounded="lg"
+          className="mt-4"
           disabled={compareDisabled}
           aria-pressed={compared}
+          icon={<Columns3 className="h-4 w-4" aria-hidden="true" />}
           onClick={() => onCompare(listing)}
-          className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 text-sm font-semibold text-foreground transition hover:border-primary/40 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-45"
         >
-          <Columns3 className="h-4 w-4" aria-hidden="true" />
           {compared ? 'Remove from compare' : 'Add to compare'}
-        </button>
+        </Button>
       </div>
     </article>
   );
@@ -255,12 +257,7 @@ const FilterToggle = ({
   label: string;
   checked: boolean;
   onChange: (value: boolean) => void;
-}) => (
-  <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-    <Checkbox checked={checked} onCheckedChange={onChange} aria-label={label} />
-    {label}
-  </label>
-);
+}) => <Checkbox checked={checked} onCheckedChange={onChange} label={label} />;
 
 /** Waits for typing to pause before a value is used in a request. */
 function useDebouncedValue<T>(value: T, delayMs: number): T {
@@ -347,6 +344,7 @@ export const PublicMarketBrowser = ({
     // query with page 1 of everything would show the wrong listings while loading.
     initialData: isDefaultView ? initialData : undefined,
     enabled: !priceRangeInvalid,
+    placeholderData: keepPreviousData,
   });
 
   const listings = data?.items ?? [];
@@ -411,16 +409,15 @@ export const PublicMarketBrowser = ({
 
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="sm:max-w-md sm:flex-1">
-          <Input
+          <SearchInput
             id="public-market-search"
             value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
+            onValueChange={(value) => {
+              setSearch(value);
               setPage(1);
             }}
             placeholder="Search by area, city, street, estate or title"
-            aria-label="Search listings"
-            leadingIcon={<Search className="h-4 w-4" />}
+            label="Search listings"
           />
         </div>
         <div className="sm:w-56">
@@ -434,21 +431,22 @@ export const PublicMarketBrowser = ({
             options={SORTS[market]}
           />
         </div>
-        <button
-          type="button"
+        <Button
+          variant="outline"
+          size="lg"
+          rounded="lg"
           onClick={() => setShowFilters((v) => !v)}
           aria-expanded={showFilters}
           aria-controls="public-market-filters"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 text-sm font-medium text-foreground hover:border-primary/60"
+          icon={<SlidersHorizontal className="h-4 w-4" />}
         >
-          <SlidersHorizontal className="h-4 w-4" />
           Filters
           {activeCount > 0 && (
-            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+            <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
               {activeCount}
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {showFilters && (
@@ -535,28 +533,26 @@ export const PublicMarketBrowser = ({
               </>
             )}
             {activeCount > 0 && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto"
                 onClick={() => {
                   setRefine(NO_REFINEMENTS);
                   setPage(1);
                 }}
-                className="ml-auto text-sm font-medium text-primary hover:underline"
               >
                 Clear filters
-              </button>
+              </Button>
             )}
           </div>
         </div>
       )}
 
       {priceRangeInvalid ? (
-        <div
-          role="status"
-          className="mt-8 rounded-2xl border border-destructive/25 bg-destructive/5 px-5 py-4 text-sm text-foreground"
-        >
+        <Alert variant="danger" className="mt-8">
           Adjust the price range to continue. The minimum price cannot exceed the maximum.
-        </div>
+        </Alert>
       ) : isLoading ? (
         <div className="mt-8" aria-label="Loading listings" aria-busy="true">
           <Skeleton className="mb-5 h-5 w-40 rounded-full" />
@@ -566,7 +562,7 @@ export const PublicMarketBrowser = ({
             ))}
           </div>
         </div>
-      ) : isError ? (
+      ) : isError && !data ? (
         <div className="mt-10">
           <EmptyState
             icon={Home}
@@ -626,21 +622,17 @@ export const PublicMarketBrowser = ({
               {compared.map((item) => item.title).join(' · ')}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setCompared([])}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
+          <Button variant="ghost" size="sm" onClick={() => setCompared([])}>
             Clear
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            size="lg"
+            rounded="lg"
             disabled={compared.length < 2}
             onClick={() => setComparisonOpen(true)}
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
           >
             Compare
-          </button>
+          </Button>
         </div>
       )}
       <ListingComparisonDialog

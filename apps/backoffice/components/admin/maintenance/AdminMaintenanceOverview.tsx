@@ -23,8 +23,7 @@ import {
   PageErrorState,
   PageLoadingState,
   StatCard,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -93,27 +92,24 @@ export const AdminMaintenanceOverview = () => {
   const canScan = hasAdminPermission(user?.roles, 'maintenance.moderate');
   const queryClient = useQueryClient();
   const [showScanConfirm, setShowScanConfirm] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const scan = useMutation({
     mutationFn: () => unwrap(adminMaintenanceService.runSlaScan()),
     onSuccess: (result) => {
-      setToast({
-        message:
-          result.notified > 0
-            ? `Scan complete: ${result.notified} work order(s) notified of SLA breaches.`
-            : 'Scan complete: no new SLA breaches to notify.',
-        variant: 'success',
-      });
+      toast.success(
+        result.notified > 0
+          ? `Scan complete: ${result.notified} work order(s) notified of SLA breaches.`
+          : 'Scan complete: no new SLA breaches to notify.'
+      );
       queryClient.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Scan failed. Please try again.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Scan failed. Please try again.'),
   });
 
   if (isLoading) return <PageLoadingState />;
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title="Could not load maintenance oversight"
@@ -146,10 +142,11 @@ export const AdminMaintenanceOverview = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowScanConfirm(true)}
-              disabled={scan.isPending}
+              isLoading={scan.isPending}
+              loadingText="Scanning…"
+              icon={<RefreshCw className="h-4 w-4" />}
             >
-              <RefreshCw className={`mr-1.5 h-4 w-4 ${scan.isPending ? 'animate-spin' : ''}`} />
-              {scan.isPending ? 'Scanning…' : 'Run SLA scan'}
+              Run SLA scan
             </Button>
           </div>
         )}
@@ -247,9 +244,6 @@ export const AdminMaintenanceOverview = () => {
         confirmLabel="Run SLA scan"
         onConfirm={() => scan.mutate()}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Briefcase,
-  Search,
   Star,
   UserRound,
   MapPin,
@@ -18,10 +17,12 @@ import { NairaSign } from '@getrentos/ui/NairaSign';
 import {
   Badge,
   Button,
+  CardSkeleton,
   EmptyState,
+  ListSkeleton,
   PageErrorState,
   Pagination,
-  LegacyInput,
+  SearchInput,
   Select,
   type BadgeVariant,
 } from '@getrentos/ui';
@@ -70,6 +71,7 @@ export const RealtorRegister = () => {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const items = data?.items ?? [];
 
@@ -95,25 +97,28 @@ export const RealtorRegister = () => {
             Professional register: licenses, business settings, payout readiness, deals and reviews.
           </p>
         </div>
-        <Button variant="outline" onClick={handleExport} disabled={exporting}>
-          {exporting ? 'Exporting…' : 'Export CSV'}
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          isLoading={exporting}
+          loadingText="Exporting…"
+        >
+          Export CSV
         </Button>
       </div>
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-          <div className="relative flex-1 min-w-[220px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <LegacyInput
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search name or email..."
-              className="w-full pl-9"
-            />
-          </div>
+          <SearchInput
+            value={search}
+            onValueChange={(value) => {
+              setSearch(value);
+              setPage(1);
+            }}
+            label="Search realtors"
+            placeholder="Search name or email..."
+            className="flex-1 min-w-[220px] max-w-sm"
+          />
           <Select
             value={license}
             ariaLabel="Filter by license status"
@@ -121,7 +126,8 @@ export const RealtorRegister = () => {
               setLicense(value as LicenseFilter);
               setPage(1);
             }}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            searchable={false}
+            className="w-full sm:w-48"
             options={[
               { value: 'all', label: 'All licenses' },
               { value: 'APPROVED', label: 'Licensed' },
@@ -132,7 +138,9 @@ export const RealtorRegister = () => {
           />
         </div>
 
-        {isError ? (
+        {isLoading ? (
+          <ListSkeleton rows={5} className="rounded-none border-0" />
+        ) : isError && !data ? (
           <PageErrorState
             title="Could not load realtors"
             description="The realtor register is temporarily unavailable."
@@ -140,12 +148,6 @@ export const RealtorRegister = () => {
             isRetrying={isFetching}
             className="min-h-[220px] rounded-none border-0"
           />
-        ) : isLoading ? (
-          <div className="space-y-2 p-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-secondary" />
-            ))}
-          </div>
         ) : items.length === 0 ? (
           <EmptyState
             icon={Briefcase}
@@ -187,7 +189,7 @@ export const RealtorRegister = () => {
                   </div>
                   <div className="text-right text-sm">
                     <p className="flex items-center justify-end gap-1 font-semibold">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                       {r.averageRating || '—'}
                     </p>
                     <p className="text-xs text-muted-foreground">{r.reviewCount} reviews</p>
@@ -242,7 +244,10 @@ function RealtorDetailDialog({
         onClick={(e) => e.stopPropagation()}
       >
         {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading realtor…</div>
+          <div className="space-y-4 p-5">
+            <CardSkeleton lines={2} />
+            <CardSkeleton lines={4} />
+          </div>
         ) : isError || !data ? (
           <div className="p-8 text-center">
             <p className="text-destructive">Could not load the realtor case.</p>
@@ -346,7 +351,7 @@ function RealtorCase360({
         </div>
       </div>
       {detail.suspended && detail.suspendedReason && (
-        <p className="border-b border-border bg-destructive/5 px-5 py-2 text-sm text-destructive">
+        <p className="border-b border-border bg-destructive-subtle px-5 py-2 text-sm text-destructive">
           Suspended{detail.suspendedAt ? ` ${formatDate(detail.suspendedAt)}` : ''}:{' '}
           {detail.suspendedReason}
         </p>
@@ -523,14 +528,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-secondary/40 p-2.5">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p
-        className={cn(
-          'mt-0.5 font-semibold',
-          label === 'Paid' && 'text-green-600 dark:text-green-400'
-        )}
-      >
-        {value}
-      </p>
+      <p className={cn('mt-0.5 font-semibold', label === 'Paid' && 'text-success')}>{value}</p>
     </div>
   );
 }

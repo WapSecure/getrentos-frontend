@@ -31,10 +31,7 @@ export const SavedRecommendations = () => {
 
       <div className="divide-y divide-border">
         {recommendations.slice(0, 3).map((rec) => (
-          <div
-            key={rec.id}
-            className="p-3 hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
-          >
+          <div key={rec.id} className="p-3 hover:bg-secondary transition-colors">
             <Link href={buildRoute.renterPropertyDetail(rec.id)} className="block">
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0">
@@ -45,7 +42,7 @@ export const SavedRecommendations = () => {
                     <MapPin className="w-3 h-3" />
                     {rec.location}
                   </p>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mt-1">
                     <span className="font-semibold text-primary">
                       {formatPrice(rec.price, rec.period)}
                     </span>

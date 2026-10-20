@@ -146,6 +146,7 @@ export const MaintenanceRequestCard = ({
               size="sm"
               className="px-2.5"
               title={request.scheduledFor ? 'Move visit' : 'Book visit'}
+              aria-label={request.scheduledFor ? 'Move visit' : 'Book visit'}
               onClick={() => onScheduleVisit(request)}
               disabled={isBusy}
             >
@@ -157,6 +158,7 @@ export const MaintenanceRequestCard = ({
             size="sm"
             className="px-2.5 text-warning hover:text-warning/80"
             title="Escalate"
+            aria-label="Escalate"
             onClick={() => onEscalate(request.id)}
             isLoading={isEscalating}
             disabled={isBusy}
@@ -168,6 +170,7 @@ export const MaintenanceRequestCard = ({
             size="sm"
             className="px-2.5"
             title="Mark Resolved"
+            aria-label="Mark Resolved"
             onClick={() => onMarkResolved(request.id)}
             isLoading={isMarkingResolved}
             disabled={isBusy}

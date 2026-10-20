@@ -2,12 +2,10 @@
 
 import { TextMessageConsentCard } from '@/components/shared/settings/TextMessageConsentCard';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Bell, MessageCircle, FileText, CreditCard, Wrench, Home } from 'lucide-react';
-import { SaveButton } from '@getrentos/ui';
+import { Checkbox, SaveButton, Switch, useToast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -75,6 +73,12 @@ export const NotificationSettings = () => {
 
 const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference[] }) => {
   const [preferences, setPreferences] = useState<NotificationPreference[]>(initial);
+  const toast = useToast();
+
+  const patchPreference = (
+    prefId: string,
+    patch: (p: NotificationPreference) => NotificationPreference
+  ) => setPreferences((prev) => prev.map((p) => (p.id === prefId ? patch(p) : p)));
 
   const togglePreferenceMutation = useMutation({
     mutationFn: ({ category, enabled }: { prefId: string; category: string; enabled: boolean }) =>
@@ -85,6 +89,19 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
           inApp: enabled,
         })
       ),
+    onMutate: ({ prefId, enabled }) => {
+      const previous = preferences.find((p) => p.id === prefId);
+      patchPreference(prefId, (p) => ({
+        ...p,
+        enabled,
+        channels: { email: enabled, push: enabled, inApp: enabled },
+      }));
+      return { previous };
+    },
+    onError: (_error, { prefId }, context) => {
+      if (context?.previous) patchPreference(prefId, () => context.previous!);
+      toast.error('That notification setting did not save. Please try again.');
+    },
     onSuccess: (updated, { prefId }) => {
       setPreferences((prev) =>
         prev.map((p) =>
@@ -121,6 +138,15 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
       channel: 'email' | 'push' | 'inApp';
       value: boolean;
     }) => unwrap(renterService.updateNotificationPreference(category, { [channel]: value })),
+    onMutate: ({ prefId, channel, value }) => {
+      const previous = preferences.find((p) => p.id === prefId);
+      patchPreference(prefId, (p) => ({ ...p, channels: { ...p.channels, [channel]: value } }));
+      return { previous };
+    },
+    onError: (_error, { prefId }, context) => {
+      if (context?.previous) patchPreference(prefId, () => context.previous!);
+      toast.error('That notification setting did not save. Please try again.');
+    },
     onSuccess: (updated, { prefId }) => {
       setPreferences((prev) =>
         prev.map((p) =>
@@ -155,60 +181,39 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
           const Icon = pref.icon;
           return (
             <div key={pref.id} className="p-4 rounded-lg border border-border">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="p-2 rounded-lg bg-secondary">
-                    <Icon className="w-4 h-4 text-gray-500" />
+                    <Icon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground">{pref.label}</h4>
-                  </div>
+                  <h4 className="text-sm font-medium text-foreground">{pref.label}</h4>
                 </div>
-                <button
-                  onClick={() => togglePreference(pref.id)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    pref.enabled ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      pref.enabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
+                <Switch
+                  checked={pref.enabled}
+                  onCheckedChange={() => togglePreference(pref.id)}
+                  aria-label={`${pref.label} notifications`}
+                />
               </div>
 
               {pref.enabled && (
-                <div className="mt-3 pt-3 border-t border-border flex gap-4">
+                <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-4">
                   {categorySendsEmail(pref.category) && (
-                    <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={pref.channels.email}
-                        onChange={() => toggleChannel(pref.id, 'email')}
-                        className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                      />
-                      Email
-                    </label>
+                    <Checkbox
+                      checked={pref.channels.email}
+                      onCheckedChange={() => toggleChannel(pref.id, 'email')}
+                      label="Email"
+                    />
                   )}
-                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={pref.channels.push}
-                      onChange={() => toggleChannel(pref.id, 'push')}
-                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                    />
-                    Push
-                  </label>
-                  <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <LegacyInput
-                      type="checkbox"
-                      checked={pref.channels.inApp}
-                      onChange={() => toggleChannel(pref.id, 'inApp')}
-                      className="w-3 h-3 rounded border-border text-primary focus:ring-primary"
-                    />
-                    In-App
-                  </label>
+                  <Checkbox
+                    checked={pref.channels.push}
+                    onCheckedChange={() => toggleChannel(pref.id, 'push')}
+                    label="Push"
+                  />
+                  <Checkbox
+                    checked={pref.channels.inApp}
+                    onCheckedChange={() => toggleChannel(pref.id, 'inApp')}
+                    label="In-App"
+                  />
                 </div>
               )}
             </div>

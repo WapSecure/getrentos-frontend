@@ -26,7 +26,7 @@ export const SavedPropertiesHeader = ({
         actions={
           <>
             <div className="flex min-h-10 items-center gap-2 rounded-xl border border-border bg-background/70 px-3">
-              <Heart className="w-4 h-4 text-pink-500" />
+              <Heart className="w-4 h-4 text-destructive" aria-hidden="true" />
               <span className="text-sm font-medium text-foreground">{savedCount}</span>
               <span className="text-xs text-muted-foreground">Saved</span>
             </div>
@@ -38,8 +38,12 @@ export const SavedPropertiesHeader = ({
             </div>
 
             {onExport && savedCount > 0 && (
-              <Button size="sm" variant="outline" onClick={onExport} className="gap-2">
-                <Download className="w-4 h-4" />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onExport}
+                icon={<Download className="w-4 h-4" />}
+              >
                 Export
               </Button>
             )}
@@ -53,7 +57,7 @@ export const SavedPropertiesHeader = ({
             transition={{ delay: 0.2 }}
             className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3.5"
           >
-            <BadgeCheck className="w-4 h-4 text-purple-600 shrink-0" />
+            <BadgeCheck className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
             <p className="text-sm text-foreground">
               <span className="font-semibold">Insight:</span> You have {savedCount} saved
               properties.

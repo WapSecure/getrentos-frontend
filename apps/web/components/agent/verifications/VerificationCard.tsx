@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { UserCheck, CheckCircle2, XCircle, CloudOff, Cloud } from 'lucide-react';
+import { Badge, Card } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { VerificationVisit } from '@/types/agent';
 
@@ -16,14 +16,9 @@ const subjectLabels: Record<VerificationVisit['subjectType'], string> = {
   property: 'Property',
 };
 
-export const VerificationCard = ({ visit, delay = 0 }: VerificationCardProps) => {
+export const VerificationCard = ({ visit }: VerificationCardProps) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4 hover:shadow-lg transition-all duration-300"
-    >
+    <Card className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="p-2.5 rounded-xl bg-accent shrink-0">
@@ -36,26 +31,25 @@ export const VerificationCard = ({ visit, delay = 0 }: VerificationCardProps) =>
             </p>
           </div>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${
-            visit.syncStatus === 'synced'
-              ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-              : 'text-orange-700 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20'
-          }`}
+        <Badge
+          variant={visit.syncStatus === 'synced' ? 'success' : 'warning'}
+          icon={
+            visit.syncStatus === 'synced' ? (
+              <Cloud className="w-3 h-3" />
+            ) : (
+              <CloudOff className="w-3 h-3" />
+            )
+          }
+          className="shrink-0 whitespace-nowrap"
         >
-          {visit.syncStatus === 'synced' ? (
-            <Cloud className="w-3 h-3" />
-          ) : (
-            <CloudOff className="w-3 h-3" />
-          )}
           {visit.syncStatus === 'synced' ? 'Synced' : 'Pending Sync'}
-        </span>
+        </Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div className="flex items-center gap-1.5">
           {visit.idVerified ? (
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <CheckCircle2 className="w-4 h-4 text-success" />
           ) : (
             <XCircle className="w-4 h-4 text-muted-foreground/50" />
           )}
@@ -63,7 +57,7 @@ export const VerificationCard = ({ visit, delay = 0 }: VerificationCardProps) =>
         </div>
         <div className="flex items-center gap-1.5">
           {visit.addressConfirmed ? (
-            <CheckCircle2 className="w-4 h-4 text-green-500" />
+            <CheckCircle2 className="w-4 h-4 text-success" />
           ) : (
             <XCircle className="w-4 h-4 text-muted-foreground/50" />
           )}
@@ -71,9 +65,9 @@ export const VerificationCard = ({ visit, delay = 0 }: VerificationCardProps) =>
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
+      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
         {formatDate(visit.scheduledDate)}
       </p>
-    </motion.div>
+    </Card>
   );
 };

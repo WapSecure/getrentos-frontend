@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hammer } from 'lucide-react';
 import { Button, CardSkeleton, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -46,6 +46,7 @@ export default function EstateMaintenancePage() {
         )
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
 
   const invalidate = () => {
@@ -105,6 +106,7 @@ export default function EstateMaintenancePage() {
             key={filter.value}
             variant={statusFilter === filter.value ? 'primary' : 'ghost'}
             size="sm"
+            aria-pressed={statusFilter === filter.value}
             onClick={() => setStatusFilter(filter.value)}
           >
             {filter.label}

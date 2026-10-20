@@ -1,9 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Input,
+} from '@getrentos/ui';
 
 interface InviteOwnerModalProps {
   isOpen: boolean;
@@ -35,82 +42,63 @@ export function InviteOwnerModal({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="w-full max-w-sm overflow-hidden rounded-xl bg-card"
-          >
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <h3 className="font-semibold text-foreground">Invite an owner</h3>
-              <button onClick={handleClose} className="rounded-lg p-1 hover:bg-secondary">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3 p-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Owner email
-                </label>
-                <LegacyInput
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="owner@example.com"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  They’ll get an email to join GetRentos (or sign in) and accept.
-                </p>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Name <span className="text-muted-foreground">(optional)</span>
-                </label>
-                <LegacyInput
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Jane Doe"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Note <span className="text-muted-foreground">(optional)</span>
-                </label>
-                <LegacyInput
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="A short message"
-                />
-              </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
-            </div>
-
-            <div className="flex gap-3 border-t border-border p-4">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!email.trim() || isSubmitting}
-                onClick={() =>
-                  onSubmit({
-                    email: email.trim(),
-                    name: name.trim() || undefined,
-                    note: note.trim() || undefined,
-                  })
-                }
-              >
-                {isSubmitting ? 'Sending…' : 'Send invite'}
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="max-w-sm p-0">
+        <div className="border-b border-border p-4 pr-12">
+          <DialogTitle className="font-semibold text-foreground">Invite an owner</DialogTitle>
+          <DialogDescription className="sr-only">
+            Invite an owner to bring their property under your management.
+          </DialogDescription>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="space-y-3 p-4">
+          <Field
+            label="Owner email"
+            hint="They’ll get an email to join GetRentos (or sign in) and accept."
+            required
+          >
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="owner@example.com"
+            />
+          </Field>
+          <Field label="Name" optionalLabel="(optional)">
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
+          </Field>
+          <Field label="Note" optionalLabel="(optional)">
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="A short message"
+            />
+          </Field>
+          {error && <Alert variant="danger">{error}</Alert>}
+        </div>
+
+        <div className="flex gap-3 border-t border-border p-4">
+          <Button variant="ghost" fullWidth onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            fullWidth
+            disabled={!email.trim()}
+            isLoading={isSubmitting}
+            loadingText="Sending…"
+            onClick={() =>
+              onSubmit({
+                email: email.trim(),
+                name: name.trim() || undefined,
+                note: note.trim() || undefined,
+              })
+            }
+          >
+            Send invite
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -85,7 +85,7 @@ export const AdminRentFinanceOverview = () => {
 
   if (isLoading) return <PageLoadingState />;
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title="Could not load rent finance"

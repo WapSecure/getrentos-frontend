@@ -1,14 +1,19 @@
 'use client';
 
-import { LegacyInput, Pagination } from '@getrentos/ui';
-
+import {
+  Pagination,
+  Button,
+  EmptyState,
+  Alert,
+  SearchInput,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, HardHat, Search } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, HardHat } from 'lucide-react';
 import { VendorCard } from '@/components/landlord/vendors/VendorCard';
 import { VendorFormModal } from '@/components/landlord/vendors/VendorFormModal';
 import { VendorDetailModal } from '@/components/landlord/vendors/VendorDetailModal';
-import { Button } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -27,9 +32,11 @@ export default function LandlordVendorsPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   // The vendors endpoint does not accept a search param, so search stays client-side.
+  const vendorsKey = [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }];
   const { data, isPending, isError, refetch } = useQuery({
-    queryKey: [...landlordKeys.vendors, { page, pageSize: PAGE_SIZE }],
+    queryKey: vendorsKey,
     queryFn: () => unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const vendors = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? 0;
@@ -59,6 +66,27 @@ export default function LandlordVendorsPage() {
     onError: failed,
   });
 
+  const toggleActiveMutation = useOptimisticMutation({
+    mutationFn: (vendor: Vendor) =>
+      unwrap(landlordService.updateVendor(vendor.id, { isActive: !vendor.isActive })),
+    patches: () => [
+      {
+        queryKey: vendorsKey,
+        update: (old, vendor) => {
+          const page = old as NonNullable<typeof data>;
+          return {
+            ...page,
+            items: page.items.map((v) =>
+              v.id === vendor.id ? { ...v, isActive: !vendor.isActive } : v
+            ),
+          };
+        },
+      },
+    ],
+    invalidate: [landlordKeys.vendors],
+    errorMessage: 'We could not update this vendor. Please try again.',
+  });
+
   const removeVendorMutation = useMutation({
     mutationFn: (id: string) => unwrap(landlordService.removeVendor(id)),
     onSuccess: invalidateVendors,
@@ -83,7 +111,7 @@ export default function LandlordVendorsPage() {
 
   const handleToggleActive = (vendor: Vendor) => {
     setNotice(null);
-    updateVendorMutation.mutate({ id: vendor.id, updates: { isActive: !vendor.isActive } });
+    toggleActiveMutation.mutate(vendor);
   };
 
   const handleRemoveVendor = (id: string) => {
@@ -110,49 +138,29 @@ export default function LandlordVendorsPage() {
             {total} vendor{total === 1 ? '' : 's'} in your directory
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={openAddForm}>
-          <Plus className="w-4 h-4" />
+        <Button variant="primary" onClick={openAddForm} icon={<Plus className="w-4 h-4" />}>
           Add Vendor
         </Button>
       </div>
 
       {notice && (
-        <div
-          role="alert"
-          className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
-        >
-          <span>{notice}</span>
-          <button
-            type="button"
-            onClick={() => setNotice(null)}
-            className="font-medium hover:underline"
-          >
-            Dismiss
-          </button>
-        </div>
+        <Alert variant="warning" className="mb-4" onDismiss={() => setNotice(null)}>
+          {notice}
+        </Alert>
       )}
 
-      <div className="relative max-w-sm mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <LegacyInput
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search vendors..."
-          className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        />
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+        placeholder="Search vendors..."
+        className="max-w-sm mb-6"
+      />
 
       <ListState
         items={filteredVendors}
         query={{ isPending, isError, refetch }}
         errorTitle="We couldn't load your vendors"
-        empty={
-          <div className="bg-card rounded-2xl border border-border p-12 text-center">
-            <HardHat className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">No vendors found</p>
-          </div>
-        }
+        empty={<EmptyState icon={HardHat} title="No vendors found" />}
       >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredVendors.map((vendor, index) => (

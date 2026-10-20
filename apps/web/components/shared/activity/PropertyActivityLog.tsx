@@ -1,9 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { Bot, Building2, History, ShieldCheck, UserRound, Wrench } from 'lucide-react';
-import { Badge, Button, Select, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Select,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -54,6 +64,7 @@ export const PropertyActivityLog = () => {
       unwrap(ownerActivity({ propertyId: propertyId || undefined, who, before: pageParam })),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextBefore,
+    placeholderData: keepPreviousData,
   });
 
   const items = feed.data?.pages.flatMap((p) => p.items) ?? [];
@@ -98,19 +109,22 @@ export const PropertyActivityLog = () => {
       </div>
 
       {feed.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading activity…</p>
-      ) : feed.isError ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {(feed.error as Error).message || 'Could not load the activity log.'}
-        </p>
+        <ListSkeleton rows={5} />
+      ) : feed.isError && !feed.data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="Could not load the activity log"
+          description={(feed.error as Error).message || undefined}
+          onRetry={() => void feed.refetch()}
+          isRetrying={feed.isFetching}
+          className="min-h-0 py-10"
+        />
       ) : items.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-8 text-center">
-          <Building2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground" aria-hidden />
-          <p className="font-medium text-foreground">Nothing yet</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            When someone acts on your properties, it shows up here.
-          </p>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="Nothing yet"
+          description="When someone acts on your properties, it shows up here."
+        />
       ) : (
         <div className="space-y-6">
           {[...days.entries()].map(([day, list]) => (

@@ -60,15 +60,15 @@ export default function AgentReviewsPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
-        <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">
+        <Card className="p-6 flex flex-col items-center justify-center text-center">
           <p className="text-4xl font-bold text-foreground">{overallRating.toFixed(1)}</p>
           <StarRow rating={Math.round(overallRating)} />
           <p className="text-xs text-muted-foreground mt-2">
             Based on {reviewCount} review{reviewCount === 1 ? '' : 's'}
           </p>
-        </div>
+        </Card>
 
-        <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 space-y-4">
+        <Card className="lg:col-span-2 p-6 space-y-4">
           {distribution.map(({ star, count }) => (
             <div key={star} className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground w-16 shrink-0 flex items-center gap-1">
@@ -84,7 +84,7 @@ export default function AgentReviewsPage() {
               <span className="text-sm font-medium text-foreground w-8 text-right">{count}</span>
             </div>
           ))}
-        </div>
+        </Card>
       </div>
 
       <div className="space-y-4">

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, X, Star } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { HardHat, Loader2, X, Star } from 'lucide-react';
+import { Alert, EmptyState, IconButton, ListSkeleton, Pagination } from '@getrentos/ui';
 import { visitToIso, VisitTimeField } from '@/components/landlord/maintenance/VisitTimeField';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -32,7 +32,7 @@ export const AssignVendorModal = ({
 }: AssignVendorModalProps) => {
   const [page, setPage] = useState(1);
   const [visit, setVisit] = useState('');
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: [
       ...landlordKeys.vendors,
       { page, pageSize: PAGE_SIZE, assignment: true, activeOnly: true },
@@ -40,6 +40,7 @@ export const AssignVendorModal = ({
     queryFn: () =>
       unwrap(landlordService.listVendors({ page, pageSize: PAGE_SIZE, activeOnly: true })),
     enabled: !!request,
+    placeholderData: keepPreviousData,
   });
   const vendors = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -54,14 +55,12 @@ export const AssignVendorModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[80vh] flex flex-col"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Assign Vendor</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{request.issueTitle}</p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-2 overflow-y-auto flex-1">
@@ -70,31 +69,37 @@ export const AssignVendorModal = ({
                 onChange={setVisit}
                 label="Visit date & time (optional)"
               />
-              {error && (
-                <p role="alert" className="text-xs text-red-600 dark:text-red-400">
-                  {error}
-                </p>
-              )}
-              {vendors.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No active vendors in your directory. Add or reactivate one from the Vendors page.
-                </p>
+              {error && <Alert variant="danger">{error}</Alert>}
+              {isPending ? (
+                <ListSkeleton rows={3} />
+              ) : vendors.length === 0 ? (
+                <EmptyState
+                  icon={HardHat}
+                  title="No active vendors"
+                  description="No active vendors in your directory. Add or reactivate one from the Vendors page."
+                  size="compact"
+                />
               ) : (
                 vendors.map((vendor) => {
                   const isAssigning = assigningVendorId === vendor.id;
                   return (
                     <button
                       key={vendor.id}
+                      type="button"
+                      aria-busy={isAssigning || undefined}
                       onClick={() => onAssign(request.id, vendor.id, visitToIso(visit))}
                       disabled={assigningVendorId !== null}
-                      className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground">{vendor.name}</p>
                         <p className="text-xs text-muted-foreground">{vendor.serviceType}</p>
                       </div>
                       {isAssigning ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                        <Loader2
+                          aria-label="Assigning"
+                          className="w-3.5 h-3.5 animate-spin text-primary motion-reduce:animate-none"
+                        />
                       ) : (
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           {vendor.ratingCount > 0 ? (

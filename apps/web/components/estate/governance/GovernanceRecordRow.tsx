@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, Trash2, FileText, History, FilePlus2 } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
+import { Badge, IconButton } from '@getrentos/ui';
 import type { GovernanceRecord } from '@/types/estate';
 
 const typeVariant: Record<GovernanceRecord['type'], 'info' | 'neutral'> = {
@@ -48,7 +48,11 @@ export const GovernanceRecordRow = ({
             <Badge variant={typeVariant[record.type]}>{typeLabels[record.type]}</Badge>
             {record.version > 1 && <Badge variant="neutral">v{record.version}</Badge>}
             {record.requiresSignatures && record.signatureProgress && (
-              <button onClick={onViewSignatures} className="cursor-pointer">
+              <button
+                type="button"
+                onClick={onViewSignatures}
+                className="cursor-pointer rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 <Badge variant={record.status === 'approved' ? 'success' : 'warning'}>
                   {record.status === 'approved'
                     ? 'Fully signed'
@@ -65,37 +69,38 @@ export const GovernanceRecordRow = ({
       </div>
       <div className="flex items-center gap-1 shrink-0">
         {record.version > 1 && onViewHistory && (
-          <button
+          <IconButton
+            label="View version history"
+            icon={<History />}
+            size="sm"
             onClick={onViewHistory}
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-            aria-label="View version history"
-          >
-            <History className="w-4 h-4" />
-          </button>
+          />
         )}
         {onUploadNewVersion && (
-          <button
+          <IconButton
+            label="Upload new version"
+            icon={<FilePlus2 />}
+            size="sm"
             onClick={onUploadNewVersion}
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-            aria-label="Upload new version"
-          >
-            <FilePlus2 className="w-4 h-4" />
-          </button>
+          />
         )}
         <a
           href={record.url}
           target="_blank"
           rel="noreferrer"
+          aria-label={`Download ${record.title}`}
+          title="Download"
           className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
         >
           <Download className="w-4 h-4" />
         </a>
-        <button
+        <IconButton
+          label={`Delete ${record.title}`}
+          icon={<Trash2 />}
+          variant="danger"
+          size="sm"
           onClick={onRemove}
-          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        />
       </div>
     </div>
   );

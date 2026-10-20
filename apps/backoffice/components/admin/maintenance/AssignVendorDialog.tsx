@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
+  Field,
   Button,
   Dialog,
   DialogContent,
@@ -10,7 +12,7 @@ import {
   DialogTitle,
   Input,
   Select,
-  Toast,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
@@ -26,7 +28,7 @@ export function AssignVendorDialog({
   const client = useQueryClient();
   const [vendorId, setVendorId] = useState(order?.assignedVendorId ?? '');
   const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const vendors = useQuery({
     queryKey: ['admin', 'maintenance', 'vendors', 'assignment'],
     queryFn: () => unwrap(adminMaintenanceService.listVendors({ page: 1, pageSize: 100 })),
@@ -41,7 +43,7 @@ export function AssignVendorDialog({
       await client.invalidateQueries({ queryKey: ['admin', 'maintenance'] });
       onClose();
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
   const options = (vendors.data?.items ?? [])
     .filter((vendor) => vendor.isActive)
@@ -71,30 +73,31 @@ export function AssignVendorDialog({
               disabled={vendors.isLoading || vendors.isError}
             />
             {vendors.isError && (
-              <p className="text-sm text-destructive">
-                Vendors could not be loaded. Close and try again.
-              </p>
+              <Alert variant="danger">Vendors could not be loaded. Close and try again.</Alert>
             )}
-            <label className="block space-y-1.5">
-              <span className="text-sm font-medium">Assignment note (optional)</span>
+            <Field label="Assignment note (optional)">
               <Input
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
                 placeholder="Why this vendor is suitable"
               />
-            </label>
+            </Field>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>
                 Cancel
               </Button>
-              <Button onClick={() => mutation.mutate()} disabled={!vendorId || mutation.isPending}>
-                {mutation.isPending ? 'Assigning…' : 'Assign vendor'}
+              <Button
+                onClick={() => mutation.mutate()}
+                disabled={!vendorId}
+                isLoading={mutation.isPending}
+                loadingText="Assigning…"
+              >
+                Assign vendor
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      {error && <Toast message={error} variant="error" onClose={() => setError(null)} />}
     </>
   );
 }

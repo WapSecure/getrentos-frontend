@@ -1,19 +1,15 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
+import { Button, EmptyState, Pagination, SearchInput, Select, useToast } from '@getrentos/ui';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Receipt, Search, Tag, DoorClosed } from 'lucide-react';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus, Receipt, Tag, DoorClosed } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
 import { ChargeUnitModal, type ChargeUnitInput } from '@/components/landlord/units/ChargeUnitModal';
 import { BulkPricingModal } from '@/components/landlord/units/BulkPricingModal';
-import { Button, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';
@@ -44,7 +40,7 @@ function LandlordUnitsPageContent() {
   const [isBulkPricingOpen, setIsBulkPricingOpen] = useState(false);
   const [chargingUnit, setChargingUnit] = useState<Unit | null>(null);
   const [chargeError, setChargeError] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   // Debounce the search input; reset to page 1 inside the timer callback.
   useEffect(() => {
@@ -96,6 +92,7 @@ function LandlordUnitsPageContent() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const units = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -106,9 +103,9 @@ function LandlordUnitsPageContent() {
     mutationFn: (unitId: string) => unwrap(landlordService.markUnitVacant(unitId)),
     onSuccess: () => {
       invalidateUnits();
-      setToast({ message: 'Tenant removed and unit marked vacant.', variant: 'success' });
+      toast.success('Tenant removed and unit marked vacant.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const assignTenantMutation = useMutation({
@@ -116,9 +113,9 @@ function LandlordUnitsPageContent() {
       unwrap(landlordService.assignUnitTenant(unitId, tenantName)),
     onSuccess: () => {
       invalidateUnits();
-      setToast({ message: 'Tenant assigned to the unit.', variant: 'success' });
+      toast.success('Tenant assigned to the unit.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const addUnitMutation = useMutation({
@@ -137,9 +134,9 @@ function LandlordUnitsPageContent() {
     },
     onSuccess: () => {
       invalidateUnits();
-      setToast({ message: 'Unit added.', variant: 'success' });
+      toast.success('Unit added.');
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   const handleMarkVacant = (unitId: string) =>
@@ -166,7 +163,7 @@ function LandlordUnitsPageContent() {
       invalidateUnits();
       setChargingUnit(null);
       setChargeError(null);
-      setToast({ message: 'Charge raised and the tenant notified.', variant: 'success' });
+      toast.success('Charge raised and the tenant notified.');
     },
     onError: (error: Error) => setChargeError(error.message),
   });
@@ -181,63 +178,56 @@ function LandlordUnitsPageContent() {
             {totalProperties === 1 ? 'y' : 'ies'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
-            className="gap-2"
             onClick={() => setIsBulkPricingOpen(true)}
             disabled={totalUnits === 0}
+            icon={<Tag className="w-4 h-4" />}
           >
-            <Tag className="w-4 h-4" />
             Bulk pricing
           </Button>
           <Button
             variant="outline"
-            className="gap-2"
             onClick={() => setIsBulkChargeOpen(true)}
             disabled={totalUnits === 0}
+            icon={<Receipt className="w-4 h-4" />}
           >
-            <Receipt className="w-4 h-4" />
             Bulk charge
           </Button>
           <Button
             variant="primary"
-            className="gap-2"
             onClick={() => setIsAddModalOpen(true)}
             disabled={properties.length === 0}
+            icon={<Plus className="w-4 h-4" />}
           >
-            <Plus className="w-4 h-4" />
             Add Unit
           </Button>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search units or tenants..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <LegacySelect
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search units or tenants..."
+          label="Search units"
+          className="flex-1 max-w-sm"
+        />
+        <Select
           value={propertyFilter}
-          onChange={(e) => {
-            setPropertyFilter(e.target.value);
+          onValueChange={(value) => {
+            setPropertyFilter(value);
             setPage(1);
           }}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="all">All Properties</option>
-          {properties.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </LegacySelect>
+          options={[
+            { value: 'all', label: 'All Properties' },
+            ...properties.map((p) => ({ value: p.id, label: p.name })),
+          ]}
+          searchable={properties.length > 8}
+          ariaLabel="Filter by property"
+          className="sm:w-56"
+        />
       </div>
 
       <ListState
@@ -247,10 +237,7 @@ function LandlordUnitsPageContent() {
         skeletonClassName="h-16"
         skeletonRows={4}
         empty={
-          <div className="bg-card rounded-2xl border border-border p-12 text-center">
-            <DoorClosed className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">No units found</p>
-          </div>
+          <EmptyState icon={DoorClosed} title="No units found" />
         }
       >
         <UnitsTable
@@ -308,9 +295,6 @@ function LandlordUnitsPageContent() {
         onClose={() => setIsBulkPricingOpen(false)}
         properties={properties}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

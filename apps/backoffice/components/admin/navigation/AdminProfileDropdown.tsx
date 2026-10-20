@@ -82,7 +82,7 @@ export const AdminProfileDropdown = ({ user }: AdminProfileDropdownProps) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={handleSignOut}
-          className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:bg-red-50 dark:focus:bg-red-900/20"
+          className="text-destructive hover:bg-destructive-subtle focus:bg-destructive-subtle"
         >
           <LogOut className="w-4 h-4" />
           Sign out

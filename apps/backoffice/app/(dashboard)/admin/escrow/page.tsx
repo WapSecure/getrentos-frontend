@@ -1,15 +1,20 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Search, Landmark, Flag, Send, Undo2 } from 'lucide-react';
-import { DataTable, type Column } from '@getrentos/ui';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Landmark, Flag, Send, Undo2 } from 'lucide-react';
+import {
+  DataTable,
+  IconButton,
+  SearchInput,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  type Column,
+} from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
@@ -75,6 +80,7 @@ export default function AdminEscrowPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const transactions = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -148,8 +154,9 @@ export default function AdminEscrowPage() {
           <div className="flex items-center justify-end gap-1">
             {canSettle && settling && (
               <>
-                <button
-                  type="button"
+                <IconButton
+                  size="sm"
+                  icon={<Send />}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (busy) return;
@@ -163,14 +170,14 @@ export default function AdminEscrowPage() {
                     });
                   }}
                   disabled={busy}
-                  aria-label={`Release escrow funds for ${t.propertyTitle}`}
-                  className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-emerald-600 hover:bg-secondary dark:hover:text-emerald-400 disabled:opacity-50"
+                  isLoading={actions.processingKey === `release:${t.id}`}
+                  label={`Release escrow funds for ${t.propertyTitle}`}
+                  className="hover:text-success"
                   title={`Release ${amount} to the seller`}
-                >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
+                />
+                <IconButton
+                  size="sm"
+                  icon={<Undo2 />}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (busy) return;
@@ -184,16 +191,17 @@ export default function AdminEscrowPage() {
                     });
                   }}
                   disabled={busy}
-                  aria-label={`Refund escrow funds for ${t.propertyTitle}`}
-                  className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-amber-600 hover:bg-secondary dark:hover:text-amber-400 disabled:opacity-50"
+                  isLoading={actions.processingKey === `refund:${t.id}`}
+                  label={`Refund escrow funds for ${t.propertyTitle}`}
+                  className="hover:text-warning"
                   title={`Refund ${amount} to the buyer`}
-                >
-                  <Undo2 className="w-3.5 h-3.5" />
-                </button>
+                />
               </>
             )}
-            <button
-              type="button"
+            <IconButton
+              size="sm"
+              icon={<Flag />}
+              variant={t.flagged ? 'danger' : 'ghost'}
               onClick={(e) => {
                 e.stopPropagation();
                 if (busy) return;
@@ -211,20 +219,11 @@ export default function AdminEscrowPage() {
                 });
               }}
               disabled={busy}
-              aria-label={
-                t.flagged ? 'Remove transaction review flag' : 'Flag transaction for review'
-              }
-              className={cn(
-                'p-1.5 rounded-lg transition-colors',
-                t.flagged
-                  ? 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30'
-                  : 'text-muted-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-secondary',
-                busy && 'opacity-50'
-              )}
+              isLoading={actions.processingKey === `flag:${t.id}`}
+              label={t.flagged ? 'Remove transaction review flag' : 'Flag transaction for review'}
+              className={t.flagged ? 'bg-destructive-subtle' : 'hover:text-destructive'}
               title={t.flagged ? 'Unflag transaction' : 'Flag for review'}
-            >
-              <Flag className="w-3.5 h-3.5" />
-            </button>
+            />
           </div>
         );
       },
@@ -243,42 +242,36 @@ export default function AdminEscrowPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by property, buyer, or seller..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
+            setPage(1);
+          }}
+          label="Search escrow transactions"
+          placeholder="Search by property, buyer, or seller..."
+          className="flex-1 max-w-sm"
+        />
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
-        {statusOptions.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => {
-              setStatusFilter(option.value);
-              setPage(1);
-            }}
-            className={cn(
-              'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-              statusFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(value) => {
+          setStatusFilter(value as StatusFilter);
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList className="max-w-full">
+          {statusOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
-      {isError ? (
+      {isError && !data ? (
         <PageErrorState
           title="Could not load escrow transactions"
           description="Escrow records are temporarily unavailable. Your search and status filter have been preserved."
@@ -291,7 +284,7 @@ export default function AdminEscrowPage() {
           data={transactions}
           isLoading={isLoading}
           getRowKey={(t) => t.id}
-          getRowClassName={(t) => (t.flagged ? 'bg-red-50/50 dark:bg-red-900/10' : undefined)}
+          getRowClassName={(t) => (t.flagged ? 'bg-destructive-subtle/50' : undefined)}
           emptyState={<EmptyState icon={Landmark} title="No transactions match your filters" />}
           footer={
             total > 0 && (

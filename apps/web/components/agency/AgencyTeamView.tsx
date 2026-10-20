@@ -3,7 +3,19 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Mail, UserPlus, Users } from 'lucide-react';
-import { Badge, Button, Card, DatePicker, EmptyState, Input, PageErrorState, Select, useToast } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  DatePicker,
+  EmptyState,
+  Field,
+  Input,
+  PageErrorState,
+  Select,
+  TableSkeleton,
+  useToast,
+} from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser } from '@/lib/authStorage';
 import {
@@ -103,7 +115,7 @@ export function AgencyTeamView() {
     onError: fail,
   });
 
-  if (members.isError) {
+  if (members.isError && !members.data) {
     return (
       <div className="p-6">
         <PageErrorState
@@ -133,32 +145,31 @@ export function AgencyTeamView() {
             <UserPlus className="h-4 w-4 text-muted-foreground" /> Invite someone
           </h2>
           <div className="mt-3 grid gap-3 md:grid-cols-[1fr_220px_180px_auto] md:items-end">
-            <label className="block space-y-1.5">
-              <span className="text-xs text-muted-foreground">Email</span>
+            <Field label="Email">
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@yourfirm.ng"
               />
-            </label>
-            <label className="block space-y-1.5">
-              <span className="text-xs text-muted-foreground">Role</span>
+            </Field>
+            <Field label="Role">
               <Select
                 value={role}
                 onValueChange={(v) => setRole(v as AssignableAgencyRole)}
                 options={ASSIGNABLE_ROLE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
               />
-            </label>
-            <label className="block space-y-1.5">
-              <span className="text-xs text-muted-foreground">Until (optional)</span>
-              <DatePicker value={endDay} onChange={setEndDay} />
-            </label>
+            </Field>
+            <Field label="Until (optional)">
+              <DatePicker value={endDay} onChange={setEndDay} clearable />
+            </Field>
             <Button
               onClick={() => invite.mutate()}
-              disabled={!email.includes('@') || invite.isPending}
+              disabled={!email.includes('@')}
+              isLoading={invite.isPending}
+              loadingText="Sending…"
             >
-              {invite.isPending ? 'Sending…' : 'Send invite'}
+              Send invite
             </Button>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
@@ -190,6 +201,7 @@ export function AgencyTeamView() {
                         variant="ghost"
                         onClick={() => revoke.mutate(i.id)}
                         disabled={revoke.isPending}
+                        isLoading={revoke.isPending && revoke.variables === i.id}
                       >
                         Withdraw
                       </Button>
@@ -203,7 +215,7 @@ export function AgencyTeamView() {
       )}
 
       {members.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <TableSkeleton rows={4} columns={4} />
       ) : (members.data ?? []).length === 0 ? (
         <EmptyState
           icon={Users}
@@ -211,7 +223,7 @@ export function AgencyTeamView() {
           description="Invite people to work with you."
         />
       ) : (
-        <Card className="overflow-hidden p-0">
+        <Card className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
@@ -242,7 +254,7 @@ export function AgencyTeamView() {
                             value: o.value,
                             label: o.label,
                           }))}
-                          aria-label={`Role for ${m.name}`}
+                          ariaLabel={`Role for ${m.name}`}
                         />
                       ) : (
                         m.roleLabel
@@ -255,6 +267,7 @@ export function AgencyTeamView() {
                           onChange={(day) =>
                             update.mutate({ userId: m.userId, expiresAt: endOfDay(day) })
                           }
+                          ariaLabel={`Access end date for ${m.name}`}
                         />
                       ) : m.expiresAt ? (
                         formatDate(m.expiresAt)

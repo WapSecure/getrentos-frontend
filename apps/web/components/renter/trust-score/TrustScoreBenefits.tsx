@@ -10,6 +10,7 @@ import {
   CheckCircle,
   BadgeCheck,
 } from 'lucide-react';
+import { Badge, Card } from '@getrentos/ui';
 
 const benefits = [
   {
@@ -52,7 +53,7 @@ const benefits = [
 
 export const TrustScoreBenefits = () => {
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BadgeCheck className="w-4 h-4 text-primary" />
@@ -74,12 +75,10 @@ export const TrustScoreBenefits = () => {
               <div className="p-2 rounded-lg bg-accent">
                 <Icon className="w-4 h-4 text-primary" />
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-medium text-foreground">{benefit.title}</p>
-                  <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 rounded-full">
-                    {benefit.level}
-                  </span>
+                  <Badge variant="info">{benefit.level}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{benefit.description}</p>
               </div>
@@ -88,6 +87,6 @@ export const TrustScoreBenefits = () => {
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 };

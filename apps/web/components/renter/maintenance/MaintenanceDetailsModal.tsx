@@ -181,9 +181,7 @@ export const MaintenanceDetailsModal = ({
                 <div className="p-3 rounded-lg bg-purple-subtle border border-purple/20">
                   <div className="flex items-center gap-2 mb-2">
                     <User className="w-4 h-4 text-purple" />
-                    <span className="text-sm font-medium text-purple">
-                      Assigned Vendor
-                    </span>
+                    <span className="text-sm font-medium text-purple">Assigned Vendor</span>
                   </div>
                   <p className="text-sm font-medium text-foreground">
                     {request.assignedVendorName}

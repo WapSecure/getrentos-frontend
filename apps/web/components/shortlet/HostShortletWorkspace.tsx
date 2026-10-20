@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from 'react';
 import { HostFeeNote } from './HostFeeNote';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Badge,
   Button,
+  Card,
   CurrencyInput,
   DatePicker,
   Dialog,
@@ -20,10 +21,12 @@ import {
   Select,
   Skeleton,
   Switch,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   TimePicker,
-  Toast,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import {
   BarChart3,
@@ -123,11 +126,12 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
   const [claimTarget, setClaimTarget] = useState<ShortletBooking | null>(null);
   const [guestReviewTarget, setGuestReviewTarget] = useState<ShortletBooking | null>(null);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: listingsData, isLoading: listingsLoading } = useQuery({
     queryKey: [...shortletKeys.hostListings, { page: listingsPage, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(shortletService.myListings({ page: listingsPage, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const listings = listingsData?.items ?? [];
 
@@ -135,6 +139,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
     queryKey: [...shortletKeys.hostBookings, { page: bookingsPage, pageSize: PAGE_SIZE }],
     queryFn: () =>
       unwrap(shortletService.hostBookings({ page: bookingsPage, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const bookings = bookingsData?.items ?? [];
 
@@ -149,9 +154,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
       unwrap(shortletService.setListingStatus(id, status)),
     onSuccess: () => {
       invalidateAll();
-      setToast({ message: 'Listing updated.', variant: 'success' });
+      toast.success('Listing updated.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const decide = useMutation({
@@ -163,12 +168,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
       ),
     onSuccess: (_, { action }) => {
       queryClient.invalidateQueries({ queryKey: shortletKeys.hostBookings });
-      setToast({
-        message: action === 'approve' ? 'Booking approved.' : 'Booking declined.',
-        variant: 'success',
-      });
+      toast.success(action === 'approve' ? 'Booking approved.' : 'Booking declined.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -181,44 +183,57 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           </p>
           <HostFeeNote />
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setMessagesOpen(true)}>
-            <MessageSquare className="mr-1.5 h-4 w-4" /> Messages
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setMessagesOpen(true)}
+            icon={<MessageSquare className="h-4 w-4" />}
+          >
+            Messages
           </Button>
-          <Button variant="outline" onClick={() => setDisputesOpen(true)}>
-            <Gavel className="mr-1.5 h-4 w-4" /> Disputes
+          <Button
+            variant="outline"
+            onClick={() => setDisputesOpen(true)}
+            icon={<Gavel className="h-4 w-4" />}
+          >
+            Disputes
           </Button>
-          <Button variant="outline" onClick={() => setClaimsOpen(true)}>
-            <ShieldAlert className="mr-1.5 h-4 w-4" /> Deposit claims
+          <Button
+            variant="outline"
+            onClick={() => setClaimsOpen(true)}
+            icon={<ShieldAlert className="h-4 w-4" />}
+          >
+            Deposit claims
           </Button>
-          <Button variant="outline" onClick={() => setAnalyticsOpen(true)}>
-            <BarChart3 className="mr-1.5 h-4 w-4" /> Analytics
+          <Button
+            variant="outline"
+            onClick={() => setAnalyticsOpen(true)}
+            icon={<BarChart3 className="h-4 w-4" />}
+          >
+            Analytics
           </Button>
-          <Button variant="outline" onClick={() => setPayoutsOpen(true)}>
-            <Banknote className="mr-1.5 h-4 w-4" /> Payouts
+          <Button
+            variant="outline"
+            onClick={() => setPayoutsOpen(true)}
+            icon={<Banknote className="h-4 w-4" />}
+          >
+            Payouts
           </Button>
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-1.5 h-4 w-4" /> New listing
+          <Button onClick={() => setCreateOpen(true)} icon={<Plus className="h-4 w-4" />}>
+            New listing
           </Button>
         </div>
       </div>
 
-      <div className="mb-6 inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['listings', 'bookings'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            className={`rounded-md px-4 py-1.5 font-medium transition-colors ${
-              tab === t
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-secondary'
-            }`}
-          >
-            {t === 'listings' ? 'My Listings' : `Booking Requests (${bookingsData?.total ?? 0})`}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="mb-6">
+        <TabsList className="max-w-full">
+          {(['listings', 'bookings'] as Tab[]).map((t) => (
+            <TabsTrigger key={t} value={t} className="px-4 text-sm">
+              {t === 'listings' ? 'My Listings' : `Booking Requests (${bookingsData?.total ?? 0})`}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {tab === 'listings' ? (
         listingsLoading ? (
@@ -236,10 +251,10 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         ) : (
           <div className="space-y-3">
             {listings.map((l) => (
-              <div key={l.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+              <Card key={l.id} className="p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-medium">{l.title}</h3>
                       {l.status !== 'PUBLISHED' && (
                         <Badge
@@ -255,9 +270,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                         </Badge>
                       )}
                       {l.instantBooking && (
-                        <Badge>
-                          <Zap className="mr-1 h-3 w-3" /> Instant
-                        </Badge>
+                        <Badge icon={<Zap className="h-3 w-3" />}>Instant</Badge>
                       )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -286,6 +299,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                             status: l.status === 'PUBLISHED' ? 'PAUSED' : 'PUBLISHED',
                           })
                         }
+                        isLoading={
+                          setStatus.isPending &&
+                          setStatus.variables?.id === l.id &&
+                          setStatus.variables.status !== 'CLOSED'
+                        }
                         disabled={setStatus.isPending}
                       >
                         {l.status === 'PUBLISHED' ? 'Pause' : 'Resume'}
@@ -296,6 +314,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setStatus.mutate({ id: l.id, status: 'CLOSED' })}
+                        isLoading={
+                          setStatus.isPending &&
+                          setStatus.variables?.id === l.id &&
+                          setStatus.variables.status === 'CLOSED'
+                        }
                         disabled={setStatus.isPending}
                       >
                         Close
@@ -304,21 +327,41 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     <Button variant="outline" size="sm" onClick={() => setEditTarget(l)}>
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setPricingTarget(l)}>
-                      <Tags className="mr-1.5 h-4 w-4" /> Pricing &amp; seasons
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPricingTarget(l)}
+                      icon={<Tags className="h-4 w-4" />}
+                    >
+                      Pricing &amp; seasons
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setBlockTarget(l)}>
-                      <CalendarOff className="mr-1.5 h-4 w-4" /> Block dates
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBlockTarget(l)}
+                      icon={<CalendarOff className="h-4 w-4" />}
+                    >
+                      Block dates
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setEssentialsTarget(l)}>
-                      <ClipboardList className="mr-1.5 h-4 w-4" /> Rules &amp; essentials
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEssentialsTarget(l)}
+                      icon={<ClipboardList className="h-4 w-4" />}
+                    >
+                      Rules &amp; essentials
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setSyncTarget(l)}>
-                      <CalendarSync className="mr-1.5 h-4 w-4" /> Calendar sync
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSyncTarget(l)}
+                      icon={<CalendarSync className="h-4 w-4" />}
+                    >
+                      Calendar sync
                     </Button>
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
             <Pagination
               page={listingsPage}
@@ -343,7 +386,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
       ) : (
         <div className="space-y-3">
           {bookings.map((b) => (
-            <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <Card key={b.id} className="p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <h3 className="font-medium">{b.propertyTitle}</h3>
@@ -357,7 +400,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   ) : (
                     b.guestRatingAverage != null && (
                       <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <Star className="h-3.5 w-3.5 fill-warning text-warning" />
                         {b.guestRatingAverage.toFixed(1)} guest rating
                         {b.guestRatingCount != null ? ` (${b.guestRatingCount})` : ''}
                       </p>
@@ -375,7 +418,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     </p>
                   )}
                   {b.deposit != null && b.depositStatus === 'HELD' && (
-                    <p className="mt-0.5 text-xs text-amber-600 dark:text-amber-400">
+                    <p className="mt-0.5 text-xs text-warning">
                       {formatCurrency(b.deposit)} deposit held
                       {b.depositClaimStatus === 'PENDING' && b.depositClaimAmount != null
                         ? ` · claim pending ${formatCurrency(b.depositClaimAmount)}`
@@ -410,8 +453,13 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                 b.checkOut <= TODAY &&
                 b.depositClaimStatus !== 'PENDING' && (
                   <div className="mt-3 flex justify-end gap-2 border-t border-border pt-3">
-                    <Button variant="outline" size="sm" onClick={() => setClaimTarget(b)}>
-                      <ShieldAlert className="mr-1.5 h-4 w-4" /> Claim deposit
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setClaimTarget(b)}
+                      icon={<ShieldAlert className="h-4 w-4" />}
+                    >
+                      Claim deposit
                     </Button>
                   </div>
                 )}
@@ -421,6 +469,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                     variant="outline"
                     size="sm"
                     onClick={() => decide.mutate({ id: b.id, action: 'decline' })}
+                    isLoading={
+                      decide.isPending &&
+                      decide.variables?.id === b.id &&
+                      decide.variables.action === 'decline'
+                    }
                     disabled={decide.isPending}
                   >
                     Decline
@@ -428,6 +481,11 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   <Button
                     size="sm"
                     onClick={() => decide.mutate({ id: b.id, action: 'approve' })}
+                    isLoading={
+                      decide.isPending &&
+                      decide.variables?.id === b.id &&
+                      decide.variables.action === 'approve'
+                    }
                     disabled={decide.isPending}
                   >
                     Approve
@@ -437,17 +495,27 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
               {(b.status === 'CONFIRMED' || b.status === 'COMPLETED') && (
                 <div className="mt-3 flex flex-wrap justify-end gap-2 border-t border-border pt-3">
                   {b.status === 'COMPLETED' && !b.guestReviewed && (
-                    <Button variant="outline" size="sm" onClick={() => setGuestReviewTarget(b)}>
-                      <Star className="mr-1.5 h-4 w-4" /> Review guest
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setGuestReviewTarget(b)}
+                      icon={<Star className="h-4 w-4" />}
+                    >
+                      Review guest
                     </Button>
                   )}
                   {b.status === 'COMPLETED' && b.guestReviewed && (
-                    <Badge variant="success" className="mt-0.5">
-                      <Star className="mr-1 h-3 w-3" /> Reviewed
+                    <Badge variant="success" icon={<Star className="h-3 w-3" />} className="mt-0.5">
+                      Reviewed
                     </Badge>
                   )}
-                  <Button variant="outline" size="sm" onClick={() => setDisputeTarget(b)}>
-                    <Gavel className="mr-1.5 h-4 w-4" /> Open dispute
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDisputeTarget(b)}
+                    icon={<Gavel className="h-4 w-4" />}
+                  >
+                    Open dispute
                   </Button>
                   {b.status === 'CONFIRMED' && b.checkIn > TODAY && (
                     <Button variant="ghost" size="sm" onClick={() => setCancelTarget(b)}>
@@ -466,7 +534,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   {b.cancellationReason ? `: “${b.cancellationReason}”` : '.'}
                 </p>
               )}
-            </div>
+            </Card>
           ))}
           <Pagination
             page={bookingsPage}
@@ -484,7 +552,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           onCreated={() => {
             setCreateOpen(false);
             invalidateAll();
-            setToast({ message: 'Shortlet listing published.', variant: 'success' });
+            toast.success('Shortlet listing published.');
           }}
         />
       )}
@@ -496,7 +564,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           onSaved={() => {
             setEditTarget(null);
             invalidateAll();
-            setToast({ message: 'Listing updated.', variant: 'success' });
+            toast.success('Listing updated.');
           }}
         />
       )}
@@ -506,7 +574,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           onClose={() => setCancelTarget(null)}
           onDone={(message) => {
             setCancelTarget(null);
-            setToast({ message, variant: 'success' });
+            toast.success(message);
           }}
         />
       )}
@@ -557,7 +625,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           onSubmitted={() => {
             setGuestReviewTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.hostBookings });
-            setToast({ message: 'Guest review submitted. Thanks!', variant: 'success' });
+            toast.success('Guest review submitted. Thanks!');
           }}
         />
       )}
@@ -568,10 +636,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
           onOpened={() => {
             setDisputeTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.disputes });
-            setToast({
-              message: 'Dispute opened: the other party has been notified.',
-              variant: 'success',
-            });
+            toast.success('Dispute opened: the other party has been notified.');
           }}
         />
       )}
@@ -583,16 +648,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
             setClaimTarget(null);
             queryClient.invalidateQueries({ queryKey: shortletKeys.hostBookings });
             queryClient.invalidateQueries({ queryKey: shortletKeys.depositClaims });
-            setToast({
-              message: 'Deposit claim filed: an admin will review it.',
-              variant: 'success',
-            });
+            toast.success('Deposit claim filed: an admin will review it.');
           }}
         />
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );
@@ -632,7 +690,7 @@ function CreateListingDialog({
     videoUrl: '',
     tourUrl: '',
   });
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: properties, isLoading } = useQuery({
     queryKey: [role, 'properties', 'for-shortlet'],
@@ -682,17 +740,17 @@ function CreateListingDialog({
       // Tier 2 account) surfaces as an inline verification notice by the
       // publish button, not a toast — so the host sees exactly what to do.
       if (reason instanceof VerificationRequiredError) return;
-      setToast({ message: reason.message, variant: 'error' });
+      toast.error(reason.message);
     },
   });
 
   const submit = () => {
     if (!propertyId) {
-      setToast({ message: 'Choose a property to host on.', variant: 'error' });
+      toast.error('Choose a property to host on.');
       return;
     }
     if (!nightlyRate || Number(nightlyRate) <= 0) {
-      setToast({ message: 'Enter a nightly/flat rate.', variant: 'error' });
+      toast.error('Enter a nightly/flat rate.');
       return;
     }
     create.mutate({
@@ -816,24 +874,20 @@ function CreateListingDialog({
               <TimePicker value={checkOutTime} onChange={setCheckOutTime} />
             </Field>
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <div>
-              <p className="text-sm font-medium">Instant booking</p>
-              <p className="text-xs text-muted-foreground">
-                Guests book immediately without your approval.
-              </p>
-            </div>
-            <Switch checked={instantBooking} onCheckedChange={setInstantBooking} />
-          </div>
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <div>
-              <p className="text-sm font-medium">Furnished</p>
-              <p className="text-xs text-muted-foreground">
-                This shortlet is furnished and ready to stay.
-              </p>
-            </div>
-            <Switch checked={furnished} onCheckedChange={setFurnished} />
-          </div>
+          <Switch
+            checked={instantBooking}
+            onCheckedChange={setInstantBooking}
+            label="Instant booking"
+            description="Guests book immediately without your approval."
+            className="rounded-lg border border-border p-3"
+          />
+          <Switch
+            checked={furnished}
+            onCheckedChange={setFurnished}
+            label="Furnished"
+            description="This shortlet is furnished and ready to stay."
+            className="rounded-lg border border-border p-3"
+          />
           <Field label="Amenities">
             <div className="flex flex-wrap gap-2">
               {SHORTLET_AMENITIES.map((amenity) => {
@@ -842,6 +896,7 @@ function CreateListingDialog({
                   <button
                     key={amenity}
                     type="button"
+                    aria-pressed={selected}
                     onClick={() =>
                       setAmenities((prev) =>
                         selected ? prev.filter((a) => a !== amenity) : [...prev, amenity]
@@ -850,7 +905,7 @@ function CreateListingDialog({
                     className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
                       selected
                         ? 'bg-accent border-primary text-primary'
-                        : 'border-border text-muted-foreground hover:border-gray-300'
+                        : 'border-border text-muted-foreground hover:border-foreground/20'
                     }`}
                   >
                     {amenity}
@@ -876,13 +931,15 @@ function CreateListingDialog({
               scoreHref={role === 'owner' ? ROUTES.OWNER_TRUST_PROFILE : undefined}
             />
           ) : null}
-          <Button className="w-full" onClick={submit} disabled={create.isPending}>
-            {create.isPending ? 'Publishing…' : 'Publish listing'}
+          <Button
+            className="w-full"
+            onClick={submit}
+            isLoading={create.isPending}
+            loadingText="Publishing…"
+          >
+            Publish listing
           </Button>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -922,7 +979,7 @@ function EditListingDialog({
     videoUrl: listing.videoKey ? '' : (listing.videoUrl ?? ''),
     tourUrl: listing.tourUrl ?? '',
   });
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   // Photos already on the underlying property, offered as one-click suggestions.
   const { data: properties } = useQuery({
@@ -980,7 +1037,7 @@ function EditListingDialog({
         })
       ),
     onSuccess: () => onSaved(),
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   return (
@@ -1064,15 +1121,13 @@ function EditListingDialog({
               <TimePicker value={checkOutTime} onChange={setCheckOutTime} />
             </Field>
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-border p-3">
-            <div>
-              <p className="text-sm font-medium">Instant booking</p>
-              <p className="text-xs text-muted-foreground">
-                Guests book immediately without your approval.
-              </p>
-            </div>
-            <Switch checked={instantBooking} onCheckedChange={setInstantBooking} />
-          </div>
+          <Switch
+            checked={instantBooking}
+            onCheckedChange={setInstantBooking}
+            label="Instant booking"
+            description="Guests book immediately without your approval."
+            className="rounded-lg border border-border p-3"
+          />
           <div className="rounded-lg border border-border p-3">
             <ShortletMediaManager
               value={media}
@@ -1082,13 +1137,15 @@ function EditListingDialog({
               suggestions={mediaSuggestions}
             />
           </div>
-          <Button className="w-full" onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? 'Saving…' : 'Save changes'}
+          <Button
+            className="w-full"
+            onClick={() => save.mutate()}
+            isLoading={save.isPending}
+            loadingText="Saving…"
+          >
+            Save changes
           </Button>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );
@@ -1116,7 +1173,7 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: blocked } = useQuery({
     queryKey: shortletKeys.hostBlockedDates(listing.id),
@@ -1138,23 +1195,23 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
       setReason('');
       queryClient.invalidateQueries({ queryKey: shortletKeys.hostBlockedDates(listing.id) });
       queryClient.invalidateQueries({ queryKey: shortletKeys.public });
-      setToast({ message: 'Dates blocked.', variant: 'success' });
+      toast.success('Dates blocked.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const removeBlock = useMutation({
     mutationFn: (id: string) => unwrap(shortletService.unblockDates(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shortletKeys.hostBlockedDates(listing.id) });
-      setToast({ message: 'Blocked range removed.', variant: 'success' });
+      toast.success('Blocked range removed.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const submit = () => {
     if (!startDate || !endDate) {
-      setToast({ message: 'Pick both dates.', variant: 'error' });
+      toast.error('Pick both dates.');
       return;
     }
     addBlock.mutate();
@@ -1193,8 +1250,13 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
               placeholder="e.g. Maintenance"
             />
           </Field>
-          <Button className="w-full" onClick={submit} disabled={addBlock.isPending}>
-            {addBlock.isPending ? 'Blocking…' : 'Block dates'}
+          <Button
+            className="w-full"
+            onClick={submit}
+            isLoading={addBlock.isPending}
+            loadingText="Blocking…"
+          >
+            Block dates
           </Button>
 
           {(blocked?.length ?? 0) > 0 && (
@@ -1203,9 +1265,9 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
               {(blocked ?? []).map((b: BlockedDateRange) => (
                 <div
                   key={b.id}
-                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
                 >
-                  <span>
+                  <span className="min-w-0">
                     {formatDate(b.startDate, 'short')} → {formatDate(b.endDate, 'short')}
                     {b.reason && !b.importedFrom && !b.lockedByCancellation ? ` · ${b.reason}` : ''}
                   </span>
@@ -1218,6 +1280,7 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
                       variant="ghost"
                       size="sm"
                       onClick={() => removeBlock.mutate(b.id)}
+                      isLoading={removeBlock.isPending && removeBlock.variables === b.id}
                       disabled={removeBlock.isPending}
                     >
                       Remove
@@ -1228,9 +1291,6 @@ function BlockDatesDialog({ listing, onClose }: { listing: ShortletListing; onCl
             </div>
           )}
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

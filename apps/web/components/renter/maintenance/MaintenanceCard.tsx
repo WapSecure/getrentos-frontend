@@ -214,9 +214,7 @@ export const MaintenanceCard = ({
             {request.isEmergency && (
               <div
                 className={`flex items-center gap-1 font-medium ${
-                  request.acknowledgedAt
-                    ? 'text-success'
-                    : 'text-destructive'
+                  request.acknowledgedAt ? 'text-success' : 'text-destructive'
                 }`}
               >
                 {request.acknowledgedAt ? (

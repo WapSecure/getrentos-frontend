@@ -116,12 +116,10 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
                   : 'hover:bg-secondary border-transparent disabled:cursor-not-allowed disabled:opacity-60'
               } border`}
             >
-              <div
-                className={`p-2 rounded-lg ${
-                  isSelected ? 'bg-success/10' : 'bg-secondary'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-success' : 'text-muted-foreground'}`} />
+              <div className={`p-2 rounded-lg ${isSelected ? 'bg-success/10' : 'bg-secondary'}`}>
+                <Icon
+                  className={`w-4 h-4 ${isSelected ? 'text-success' : 'text-muted-foreground'}`}
+                />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium text-foreground">{option.label}</p>

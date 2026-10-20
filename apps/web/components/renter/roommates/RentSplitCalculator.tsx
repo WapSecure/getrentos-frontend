@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import { Button, Card, CurrencyInput, Field, NumberInput } from '@getrentos/ui';
 
 interface Roommate {
   id: string;
@@ -71,7 +71,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Calculator className="w-4 h-4 text-primary" />
@@ -81,23 +81,18 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
       </div>
 
       <div className="p-4 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Total rent (₦)
-          </label>
-          <CurrencyInput
-            prefix="₦"
-            value={totalRent}
-            onValueChange={setTotalRent}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <Field label="Total rent (₦)">
+          <CurrencyInput prefix="₦" value={totalRent} onValueChange={setTotalRent} />
+        </Field>
 
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Split Method</label>
-          <div className="flex gap-2">
+          <p className="block text-sm font-medium text-foreground mb-1" id="split-method-label">
+            Split Method
+          </p>
+          <div className="flex gap-2" role="group" aria-labelledby="split-method-label">
             <Button
               variant={splitMethod === 'equal' ? 'primary' : 'secondary'}
+              aria-pressed={splitMethod === 'equal'}
               size="sm"
               onClick={() => handleSplitMethodChange('equal')}
               className="flex-1"
@@ -106,6 +101,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
             </Button>
             <Button
               variant={splitMethod === 'percentage' ? 'primary' : 'secondary'}
+              aria-pressed={splitMethod === 'percentage'}
               size="sm"
               onClick={() => handleSplitMethodChange('percentage')}
               className="flex-1"
@@ -114,6 +110,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
             </Button>
             <Button
               variant={splitMethod === 'custom' ? 'primary' : 'secondary'}
+              aria-pressed={splitMethod === 'custom'}
               size="sm"
               onClick={() => handleSplitMethodChange('custom')}
               className="flex-1"
@@ -127,12 +124,12 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
           <div className="space-y-2">
             {roommates.map((r) => (
               <div key={r.id} className="flex items-center gap-2">
-                <span className="text-sm text-foreground flex-1">{r.name}</span>
-                <div className="w-20">
-                  <CurrencyInput
-                    value={customShares[r.id] || 0}
-                    onValueChange={(v) => handleCustomShareChange(r.id, v)}
-                    className="w-full px-2 py-1 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                <span className="min-w-0 text-sm text-foreground flex-1">{r.name}</span>
+                <div className="w-24">
+                  <NumberInput
+                    aria-label={`Share for ${r.name}`}
+                    value={customShares[r.id] || ''}
+                    onValueChange={(v) => handleCustomShareChange(r.id, Number(v) || 0)}
                   />
                 </div>
               </div>
@@ -156,6 +153,6 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

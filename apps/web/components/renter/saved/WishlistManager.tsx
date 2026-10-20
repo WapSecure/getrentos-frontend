@@ -1,15 +1,13 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, FolderPlus, Trash2, MoreHorizontal, Check, Bookmark } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Plus, X, FolderPlus, Trash2, Pencil, Check, Bookmark } from 'lucide-react';
+import { Button, Card, IconButton, Input, useOptimisticMutation, useToast } from '@getrentos/ui';
 import { renterService, type Wishlist } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { Toast, ToastVariant } from '@getrentos/ui';
 
 interface WishlistManagerProps {
   wishlists: Wishlist[];
@@ -27,7 +25,7 @@ export const WishlistManager = ({
   const [newWishlistName, setNewWishlistName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: renterKeys.wishlists });
 
@@ -37,22 +35,21 @@ export const WishlistManager = ({
       invalidate();
       setNewWishlistName('');
       setIsCreating(false);
-      setToast({ message: 'Wishlist created', variant: 'success' });
+      toast.success('Wishlist created');
     },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'Failed to create wishlist', variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to create wishlist'),
   });
 
-  const renameMutation = useMutation({
+  const renameMutation = useOptimisticMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) =>
       unwrap(renterService.renameWishlist(id, name)),
-    onSuccess: () => {
-      invalidate();
-      setEditingId(null);
-      setEditName('');
-    },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'Failed to rename wishlist', variant: 'error' }),
+    patches: ({ id, name }) => [
+      {
+        queryKey: renterKeys.wishlists,
+        update: (old) => (old as Wishlist[]).map((w) => (w.id === id ? { ...w, name } : w)),
+      },
+    ],
+    errorMessage: 'Failed to rename wishlist',
   });
 
   const deleteMutation = useMutation({
@@ -61,8 +58,7 @@ export const WishlistManager = ({
       invalidate();
       if (selectedWishlist !== 'all') setSelectedWishlist('all');
     },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'Failed to delete wishlist', variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to delete wishlist'),
   });
 
   const handleCreateWishlist = () => {
@@ -85,144 +81,144 @@ export const WishlistManager = ({
   const handleSaveEdit = () => {
     if (!editName.trim() || !editingId) return;
     renameMutation.mutate({ id: editingId, name: editName.trim() });
+    setEditingId(null);
+    setEditName('');
   };
 
   const totalProperties = wishlists.reduce((sum, w) => sum + w.count, 0);
 
   return (
-    <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
-        <div className="p-4 border-b border-border">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="font-semibold text-foreground">Wishlists</h3>
-              <p className="text-xs text-gray-500">Organize your saved properties</p>
-            </div>
-            <button
-              onClick={() => setIsCreating(true)}
-              className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
-            >
-              <Plus className="w-4 h-4 text-gray-500" />
-            </button>
+    <Card>
+      <div className="p-4 border-b border-border">
+        <div className="flex justify-between items-center gap-2">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-foreground">Wishlists</h3>
+            <p className="text-xs text-muted-foreground">Organize your saved properties</p>
           </div>
+          <IconButton
+            size="sm"
+            label="Create wishlist"
+            onClick={() => setIsCreating(true)}
+            icon={<Plus />}
+          />
         </div>
+      </div>
 
-        <div className="p-2">
-          <div
-            onClick={() => setSelectedWishlist('all')}
-            className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
-              selectedWishlist === 'all' ? 'bg-accent text-primary' : 'hover:bg-secondary'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <FolderPlus className="w-4 h-4" />
-              <span className="text-sm font-medium">All Properties</span>
-            </div>
-            <span className="text-xs text-gray-500">{totalProperties}</span>
-          </div>
+      <div className="p-2">
+        <button
+          type="button"
+          aria-pressed={selectedWishlist === 'all'}
+          onClick={() => setSelectedWishlist('all')}
+          className={`w-full flex min-w-0 items-center justify-between gap-2 p-3 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
+            selectedWishlist === 'all' ? 'bg-accent text-primary' : 'hover:bg-secondary'
+          }`}
+        >
+          <span className="flex items-center gap-2">
+            <FolderPlus className="w-4 h-4" aria-hidden="true" />
+            <span className="text-sm font-medium">All Properties</span>
+          </span>
+          <span className="text-xs text-muted-foreground">{totalProperties}</span>
+        </button>
 
-          {wishlists.map((wishlist) => (
-            <div key={wishlist.id} className="relative">
-              {editingId === wishlist.id ? (
-                <div className="p-2 flex gap-2">
-                  <LegacyInput
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="flex-1 px-2 py-1 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveEdit}
-                    className="p-1 rounded-lg bg-green-500 text-white"
-                  >
-                    <Check className="w-3 h-3" />
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="p-1 rounded-lg bg-gray-500 text-white"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : (
-                <div
+        {wishlists.map((wishlist) => (
+          <div key={wishlist.id} className="relative">
+            {editingId === wishlist.id ? (
+              <div className="p-2 flex items-center gap-2">
+                <Input
+                  type="text"
+                  aria-label="Wishlist name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  controlSize="sm"
+                  className="min-w-0 flex-1"
+                  autoFocus
+                />
+                <IconButton
+                  size="sm"
+                  variant="secondary"
+                  label="Save wishlist name"
+                  onClick={handleSaveEdit}
+                  icon={<Check className="text-success" />}
+                />
+                <IconButton
+                  size="sm"
+                  label="Cancel renaming"
+                  onClick={() => setEditingId(null)}
+                  icon={<X />}
+                />
+              </div>
+            ) : (
+              <div className="group flex items-center gap-1">
+                <button
+                  type="button"
+                  aria-pressed={selectedWishlist === wishlist.id}
                   onClick={() => setSelectedWishlist(wishlist.id)}
-                  className={`w-full flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer group ${
+                  className={`flex min-w-0 flex-1 items-center justify-between gap-2 p-3 rounded-lg text-left transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
                     selectedWishlist === wishlist.id
                       ? 'bg-accent text-primary'
                       : 'hover:bg-secondary'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Bookmark className="w-4 h-4" />
-                    <span className="text-sm">{wishlist.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">{wishlist.count}</span>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEditWishlist(wishlist.id);
-                        }}
-                        className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded cursor-pointer"
-                      >
-                        <MoreHorizontal className="w-3 h-3" />
-                      </span>
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteWishlist(wishlist.id);
-                        }}
-                        className="p-0.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded cursor-pointer"
-                      >
-                        <Trash2 className="w-3 h-3 text-red-500" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-
-          <AnimatePresence>
-            {isCreating && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-2 p-2 border-t border-border"
-              >
-                <LegacyInput
-                  type="text"
-                  value={newWishlistName}
-                  onChange={(e) => setNewWishlistName(e.target.value)}
-                  placeholder="Wishlist name"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary mb-2"
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <Button
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Bookmark className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <span className="truncate text-sm">{wishlist.name}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground">{wishlist.count}</span>
+                </button>
+                <div className="flex gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 transition-opacity">
+                  <IconButton
                     size="sm"
-                    onClick={handleCreateWishlist}
-                    disabled={!newWishlistName.trim() || createMutation.isPending}
-                    isLoading={createMutation.isPending}
-                  >
-                    Create
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setIsCreating(false)}>
-                    Cancel
-                  </Button>
+                    label={`Rename ${wishlist.name}`}
+                    onClick={() => handleEditWishlist(wishlist.id)}
+                    icon={<Pencil />}
+                  />
+                  <IconButton
+                    size="sm"
+                    variant="danger"
+                    label={`Delete ${wishlist.name}`}
+                    onClick={() => handleDeleteWishlist(wishlist.id)}
+                    isLoading={deleteMutation.isPending && deleteMutation.variables === wishlist.id}
+                    icon={<Trash2 />}
+                  />
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-        </div>
+          </div>
+        ))}
+
+        <AnimatePresence>
+          {isCreating && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 p-2 border-t border-border space-y-2"
+            >
+              <Input
+                type="text"
+                aria-label="Wishlist name"
+                value={newWishlistName}
+                onChange={(e) => setNewWishlistName(e.target.value)}
+                placeholder="Wishlist name"
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleCreateWishlist}
+                  disabled={!newWishlistName.trim()}
+                  isLoading={createMutation.isPending}
+                >
+                  Create
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsCreating(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </>
+    </Card>
   );
 };

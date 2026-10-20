@@ -2,11 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { ExpensesPanel } from '@/components/landlord/financials/ExpensesPanel';
-import { Button } from '@getrentos/ui';
+import { Button, Skeleton, StatGridSkeleton, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
 import {
   landlordService,
   type FinancialStats as FinancialStatsData,
@@ -21,7 +21,7 @@ const FinancialChart = dynamic(
   () => import('@/components/landlord/financials/FinancialChart').then((m) => m.FinancialChart),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-xl bg-secondary/50" />,
+    loading: () => <Skeleton className="h-64 w-full rounded-xl" />,
   }
 );
 
@@ -45,10 +45,11 @@ export function FinancialsOverviewView() {
   const [exported, setExported] = useState(false);
   const { isPro } = usePlanTier();
 
-  const { data: stats = EMPTY_STATS } = useQuery({
+  const { data: stats = EMPTY_STATS, isLoading: statsLoading } = useQuery({
     queryKey: landlordKeys.financialStats(period),
     queryFn: () => unwrap(landlordService.getFinancialStats(period)),
     enabled: isPro,
+    placeholderData: keepPreviousData,
   });
 
   const { data: chartData = [] } = useQuery({
@@ -89,7 +90,6 @@ export function FinancialsOverviewView() {
               size="sm"
               className="gap-1.5"
               onClick={handleExport}
-              disabled={exportMutation.isPending}
               isLoading={exportMutation.isPending}
             >
               {exported ? (
@@ -107,28 +107,30 @@ export function FinancialsOverviewView() {
         title="Financial analytics is a Pro feature"
         description="Upgrade to Pro to see income, expenses, profitability trends, and export your data as CSV."
       >
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6">
-          {periodOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setPeriod(option.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                period === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={period}
+          onValueChange={(value) => setPeriod(value as ReportPeriod)}
+          className="mb-6"
+        >
+          <TabsList>
+            {periodOptions.map((option) => (
+              <TabsTrigger key={option.value} value={option.value}>
+                {option.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
 
-        <FinancialStats
-          rentalIncome={rentalIncome}
-          outstandingRent={outstandingRent}
-          maintenanceCosts={maintenanceCosts}
-          netProfit={netProfit}
-        />
+        {statsLoading ? (
+          <StatGridSkeleton className="mb-6 grid-cols-2" />
+        ) : (
+          <FinancialStats
+            rentalIncome={rentalIncome}
+            outstandingRent={outstandingRent}
+            maintenanceCosts={maintenanceCosts}
+            netProfit={netProfit}
+          />
+        )}
 
         <FinancialChart data={chartData} />
       </ProFeatureGate>

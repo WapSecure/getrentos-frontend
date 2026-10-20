@@ -1,16 +1,17 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
   Button,
+  type Column,
   ConfirmDialog,
   DataTable,
   EmptyState,
   Input,
   Pagination,
-  type Column,
 } from '@getrentos/ui';
 import { EyeOff, Grid3x3, Pencil, Plus, RotateCcw, Search, Upload } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -56,6 +57,7 @@ export const PlotInventory = ({ propertyId, layoutStatus, notify }: PlotInventor
   const { data, isLoading, isError, error } = useQuery({
     queryKey: landDeveloperKeys.plots(propertyId, { status }),
     queryFn: () => unwrap(landDeveloperService.listPlots(propertyId, { status })),
+    placeholderData: keepPreviousData,
   });
 
   const refresh = () =>
@@ -283,10 +285,8 @@ export const PlotInventory = ({ propertyId, layoutStatus, notify }: PlotInventor
         </p>
       )}
 
-      {isError ? (
-        <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          {errorMessage(error, 'The plots could not be loaded.')}
-        </p>
+      {isError && !data ? (
+        <Alert variant="danger">{errorMessage(error, 'The plots could not be loaded.')}</Alert>
       ) : (
         <DataTable
           columns={columns}

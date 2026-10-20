@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, ClipboardCheck } from 'lucide-react';
 import {
   Button,
+  CardSkeleton,
+  EmptyState,
   Pagination,
   PageErrorState,
-  PageLoadingState,
-  Toast,
-  type ToastVariant,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import { InspectionCard } from '@/components/landlord/inspections/InspectionCard';
 import { CreateInspectionModal } from '@/components/landlord/inspections/CreateInspectionModal';
@@ -44,13 +47,14 @@ export function InspectionsView() {
   const [filter, setFilter] = useState<'all' | InspectionStatus>('all');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [openInspectionId, setOpenInspectionId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const status = filter === 'all' ? undefined : filter;
 
   const inspectionsQuery = useQuery({
     queryKey: [...landlordKeys.inspections({ status }), { page }],
     queryFn: () => unwrap(inspectionService.list({ status, page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const { data, isLoading } = inspectionsQuery;
   const inspections = data?.items ?? [];
@@ -70,8 +74,7 @@ export function InspectionsView() {
       setIsCreateOpen(false);
       setOpenInspectionId(created.id);
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Could not create the inspection.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Could not create the inspection.'),
   });
 
   return (
@@ -89,30 +92,30 @@ export function InspectionsView() {
         </Button>
       </div>
 
-      <div className="mb-6 flex w-fit gap-1 overflow-x-auto rounded-lg bg-secondary p-1">
-        {statusFilters.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={filter === option.value}
-            onClick={() => {
-              setFilter(option.value);
-              setPage(1);
-            }}
-            className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              filter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={filter}
+        onValueChange={(value) => {
+          setFilter(value as 'all' | InspectionStatus);
+          setPage(1);
+        }}
+        className="mb-6 max-w-full"
+      >
+        <TabsList className="max-w-full">
+          {statusFilters.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
-        <PageLoadingState />
-      ) : inspectionsQuery.isError ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <CardSkeleton key={i} lines={2} />
+          ))}
+        </div>
+      ) : !data ? (
         <PageErrorState
           title="Inspections are unavailable"
           description="We could not load condition reports. No inspection has been changed."
@@ -120,17 +123,17 @@ export function InspectionsView() {
           isRetrying={inspectionsQuery.isFetching}
         />
       ) : inspections.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <ClipboardCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="font-medium text-foreground">
-            {filter === 'all' ? 'No inspections yet' : `No ${filter.toLowerCase()} inspections`}
-          </p>
-          {filter !== 'all' && (
-            <Button variant="outline" className="mt-5" onClick={() => setFilter('all')}>
-              View all inspections
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          icon={ClipboardCheck}
+          title={filter === 'all' ? 'No inspections yet' : `No ${filter.toLowerCase()} inspections`}
+          action={
+            filter !== 'all' ? (
+              <Button variant="outline" onClick={() => setFilter('all')}>
+                View all inspections
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {inspections.map((inspection) => (
@@ -168,10 +171,6 @@ export function InspectionsView() {
           /* list is invalidated by the modal's mutations */
         }}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

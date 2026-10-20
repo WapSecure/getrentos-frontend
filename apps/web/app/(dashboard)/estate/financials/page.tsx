@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { Button, CardSkeleton } from '@getrentos/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
@@ -46,6 +46,7 @@ export default function EstateFinancialsPage() {
     queryKey: estateKeys.financialStats(estate?.id ?? '', period),
     queryFn: () => unwrap(estateService.getFinancialStats(estate!.id, period)),
     enabled: !!estate && isPro,
+    placeholderData: keepPreviousData,
   });
 
   const exportMutation = useMutation({
@@ -80,7 +81,6 @@ export default function EstateFinancialsPage() {
             size="sm"
             className="gap-1.5"
             onClick={() => exportMutation.mutate()}
-            disabled={exportMutation.isPending}
             isLoading={exportMutation.isPending}
           >
             {exported ? (
@@ -102,11 +102,13 @@ export default function EstateFinancialsPage() {
           {periodOptions.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={period === option.value}
               onClick={() => setPeriod(option.value)}
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                 period === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}

@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { X, ShieldCheck } from 'lucide-react';
+import { Alert, IconButton } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { RentPayment, EscrowStatus } from '@/types/landlord';
 import { InvoiceLines } from '@/components/shared/InvoiceLines';
@@ -35,16 +36,14 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-md w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Payment Details</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {payment.tenantName}: {payment.unitName}
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-5">
@@ -72,18 +71,10 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
               />
 
               {payment.escrowStatus === 'frozen' ? (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                      Funds Frozen: Dispute Raised
-                    </p>
-                    <p className="text-xs text-red-700 dark:text-red-400 mt-1">
-                      {payment.disputeReason ||
-                        'A dispute has been raised on this payment. Funds are frozen until the dispute is resolved by GetRentos support.'}
-                    </p>
-                  </div>
-                </div>
+                <Alert variant="danger" title="Funds Frozen: Dispute Raised">
+                  {payment.disputeReason ||
+                    'A dispute has been raised on this payment. Funds are frozen until the dispute is resolved by GetRentos support.'}
+                </Alert>
               ) : (
                 <div>
                   <div className="flex items-center justify-between">
@@ -94,15 +85,13 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                           {index > 0 && (
                             <div
                               className={`absolute right-1/2 top-2.5 w-full h-0.5 ${
-                                index <= currentIndex
-                                  ? 'bg-primary'
-                                  : 'bg-gray-200 dark:bg-white/10'
+                                index <= currentIndex ? 'bg-primary' : 'bg-border'
                               }`}
                             />
                           )}
                           <div
                             className={`relative z-10 w-5 h-5 rounded-full flex items-center justify-center ${
-                              isComplete ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'
+                              isComplete ? 'bg-primary' : 'bg-border'
                             }`}
                           >
                             {isComplete && (
@@ -110,7 +99,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                             )}
                           </div>
                           <p
-                            className={`text-xs mt-2 text-center ${isComplete ? 'text-foreground font-medium' : 'text-gray-400'}`}
+                            className={`text-xs mt-2 text-center ${isComplete ? 'text-foreground font-medium' : 'text-muted-foreground'}`}
                           >
                             {step.label}
                           </p>
@@ -121,16 +110,13 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
                 </div>
               )}
 
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                <p className="text-xs text-muted-foreground">
-                  GetRentos holds the tenant’s payment and pays it to you automatically once the
-                  lease conditions are verified. Landlords cannot pay it out early or skip this
-                  step.
-                </p>
-              </div>
+              <Alert variant="neutral">
+                GetRentos holds the tenant’s payment and pays it to you automatically once the lease
+                conditions are verified. Landlords cannot pay it out early or skip this step.
+              </Alert>
 
               {payment.releaseDate && (
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs text-muted-foreground text-center">
                   Released to your account on {formatDate(payment.releaseDate)}
                 </p>
               )}

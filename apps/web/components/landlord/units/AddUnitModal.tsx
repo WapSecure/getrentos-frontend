@@ -1,13 +1,17 @@
 'use client';
 
-import { LegacyInput, NumberInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import {
+  Button,
+  CurrencyInput,
+  Field,
+  IconButton,
+  Input,
+  NumberInput,
+  Select,
+} from '@getrentos/ui';
 import type { Property, Unit } from '@/types/landlord';
 
 interface AddUnitModalProps {
@@ -78,74 +82,47 @@ export const AddUnitModal = ({
             exit={{ opacity: 0, scale: 0.9 }}
             className="bg-card rounded-xl max-w-md w-full overflow-hidden"
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
+            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
+              <div className="min-w-0">
                 <h3 className="font-semibold text-foreground">Add Unit</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Define a new unit within a property
                 </p>
               </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Property <span className="text-destructive">*</span>
-                </label>
-                <LegacySelect
+              <Field label="Property" required>
+                <Select
                   value={propertyId}
-                  onChange={(e) => setSelectedPropertyId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {properties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </LegacySelect>
-              </div>
+                  onValueChange={setSelectedPropertyId}
+                  options={properties.map((p) => ({ value: p.id, label: p.name }))}
+                />
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Unit Name <span className="text-destructive">*</span>
-                </label>
-                <LegacyInput
+              <Field label="Unit Name" required>
+                <Input
                   type="text"
                   value={unitName}
                   onChange={(e) => setUnitName(e.target.value)}
                   placeholder="e.g. Unit 3B"
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-              </div>
+              </Field>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
-                  <NumberInput
-                    min={0}
-                    value={bedrooms}
-                    onValueChange={setBedrooms}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Bathrooms
-                  </label>
-                  <NumberInput
-                    min={0}
-                    value={bathrooms}
-                    onValueChange={setBathrooms}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+                <Field label="Bedrooms">
+                  <NumberInput min={0} value={bedrooms} onValueChange={setBedrooms} />
+                </Field>
+                <Field label="Bathrooms">
+                  <NumberInput min={0} value={bathrooms} onValueChange={setBathrooms} />
+                </Field>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Rent (₦)</label>
+              <Field
+                label="Rent (₦)"
+                hint="Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what the advert will ask for."
+              >
                 <div className="flex gap-2">
                   <CurrencyInput
                     prefix="₦"
@@ -153,23 +130,23 @@ export const AddUnitModal = ({
                     value={askingRent}
                     onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
                     placeholder={askingRentPeriod === 'year' ? '2500000' : '250000'}
-                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="min-w-0 flex-1"
                   />
-                  <select
-                    value={askingRentPeriod}
-                    onChange={(e) => setAskingRentPeriod(e.target.value as 'year' | 'month')}
-                    className="px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    aria-label="Rent period"
-                  >
-                    <option value="year">per year</option>
-                    <option value="month">per month</option>
-                  </select>
+                  <div className="w-32 shrink-0">
+                    <Select
+                      id="unit-rent-period"
+                      value={askingRentPeriod}
+                      onValueChange={(value) => setAskingRentPeriod(value as 'year' | 'month')}
+                      ariaLabel="Rent period"
+                      searchable={false}
+                      options={[
+                        { value: 'year', label: 'per year' },
+                        { value: 'month', label: 'per month' },
+                      ]}
+                    />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what the
-                  advert will ask for.
-                </p>
-              </div>
+              </Field>
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -177,7 +154,7 @@ export const AddUnitModal = ({
                 variant="primary"
                 fullWidth
                 onClick={() => void handleSubmit()}
-                disabled={!isValid || isSubmitting}
+                disabled={!isValid}
                 isLoading={isSubmitting}
               >
                 Add Unit

@@ -2,7 +2,7 @@
 
 import { TrendingUp, BadgeCheck } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Button } from '@getrentos/ui';
+import { Button, Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -14,7 +14,7 @@ interface MarketPriceInsightsProps {
 }
 
 export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceInsightsProps) => {
-  const { data: insights } = useQuery({
+  const { data: insights, isLoading } = useQuery({
     queryKey: ownerKeys.marketInsights(city),
     queryFn: () => unwrap(ownerService.getMarketInsights(city)),
     enabled: !!city.trim(),
@@ -22,6 +22,20 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
 
   const comparables = insights?.comparables ?? [];
   const { lowEstimate = 0, highEstimate = 0, suggested = 0 } = insights ?? {};
+
+  if (city.trim() && isLoading) {
+    return (
+      <div
+        role="status"
+        aria-label="Loading market insight"
+        className="space-y-2 rounded-lg border border-border p-3"
+      >
+        <Skeleton className="h-3 w-32" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-2/3" />
+      </div>
+    );
+  }
 
   if (!city.trim() || comparables.length === 0) {
     return (
@@ -62,7 +76,7 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-primary/20">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-primary/20">
         <p className="text-xs text-muted-foreground">
           Suggested range{' '}
           <span className="font-semibold text-foreground">
@@ -73,10 +87,9 @@ export const MarketPriceInsights = ({ city, onUseSuggestedPrice }: MarketPriceIn
         <Button
           variant="outline"
           size="xs"
-          className="gap-1"
           onClick={() => onUseSuggestedPrice(suggested)}
+          icon={<BadgeCheck className="w-3 h-3" />}
         >
-          <BadgeCheck className="w-3 h-3" />
           Use {formatCurrency(suggested, { compact: true })}
         </Button>
       </div>

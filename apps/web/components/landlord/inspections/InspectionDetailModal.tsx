@@ -7,11 +7,13 @@ import {
   DialogContent,
   Button,
   Badge,
+  CardSkeleton,
+  Field,
+  PageErrorState,
   Select,
   Input,
   Textarea,
   CurrencyInput,
-  PageLoadingState,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { Plus, Camera, Share2, CheckCircle2 } from 'lucide-react';
@@ -64,7 +66,12 @@ export const InspectionDetailModal = ({
   const [notes, setNotes] = useState('');
   const [cost, setCost] = useState<number>(0);
 
-  const { data: inspection, isLoading } = useQuery({
+  const {
+    data: inspection,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: inspectionId ? landlordKeys.inspection(inspectionId) : ['inspection', 'none'],
     queryFn: () => unwrap(inspectionService.get(inspectionId!)),
     enabled: Boolean(inspectionId),
@@ -132,16 +139,24 @@ export const InspectionDetailModal = ({
     <Dialog open={Boolean(inspectionId)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-full max-w-2xl">
         <div className="max-h-[85vh] overflow-y-auto p-6">
-          {isLoading || !inspection ? (
-            <PageLoadingState />
+          {isLoading ? (
+            <CardSkeleton lines={5} />
+          ) : !inspection ? (
+            <PageErrorState
+              headingLevel="h2"
+              className="min-h-0 py-10"
+              title="This inspection did not load"
+              onRetry={() => void refetch()}
+              isRetrying={isRefetching}
+            />
           ) : (
             <div className="space-y-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
                   <h2 className="text-lg font-semibold text-foreground">
                     {inspection.propertyTitle ?? 'Property'}
                   </h2>
-                  <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                  <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <Badge variant="neutral">{INSPECTION_TYPE_LABELS[inspection.type]}</Badge>
                     <Badge variant={STATUS_VARIANT[inspection.status]}>
                       {INSPECTION_STATUS_LABELS[inspection.status]}
@@ -204,12 +219,13 @@ export const InspectionDetailModal = ({
                           size="sm"
                           className="mt-2 gap-1.5"
                           onClick={() => pickPhotoFor(item.id)}
-                          disabled={addPhotoMutation.isPending}
+                          disabled={addPhotoMutation.isPending && uploadingItemId !== item.id}
+                          isLoading={uploadingItemId === item.id && addPhotoMutation.isPending}
+                          loadingText="Uploading…"
+                          aria-label={`Add photo of ${item.area}`}
                         >
                           <Camera className="h-4 w-4" />
-                          {uploadingItemId === item.id && addPhotoMutation.isPending
-                            ? 'Uploading…'
-                            : 'Add photo'}
+                          Add photo
                         </Button>
                       )}
                     </div>
@@ -222,39 +238,38 @@ export const InspectionDetailModal = ({
                 <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
                   <p className="text-sm font-medium text-foreground">Add an area</p>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Input
-                      placeholder="Area, e.g. Kitchen"
-                      value={area}
-                      onChange={(e) => setArea(e.target.value)}
-                    />
-                    <Select
-                      value={condition}
-                      onValueChange={(v) => setCondition(v as InspectionCondition)}
-                      options={INSPECTION_CONDITIONS.map((c) => ({
-                        value: c,
-                        label: INSPECTION_CONDITION_LABELS[c],
-                      }))}
-                    />
-                  </div>
-                  <Textarea
-                    placeholder="Notes (optional)"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={2}
-                  />
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <CurrencyInput
-                        value={cost}
-                        onValueChange={setCost}
-                        placeholder="Estimated remedial cost (optional)"
+                    <Field label="Area" required>
+                      <Input
+                        placeholder="e.g. Kitchen"
+                        value={area}
+                        onChange={(e) => setArea(e.target.value)}
                       />
-                    </div>
+                    </Field>
+                    <Field label="Condition">
+                      <Select
+                        value={condition}
+                        onValueChange={(v) => setCondition(v as InspectionCondition)}
+                        searchable={false}
+                        options={INSPECTION_CONDITIONS.map((c) => ({
+                          value: c,
+                          label: INSPECTION_CONDITION_LABELS[c],
+                        }))}
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Notes (optional)">
+                    <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+                  </Field>
+                  <div className="flex flex-wrap items-end gap-3">
+                    <Field label="Estimated remedial cost (optional)" className="min-w-0 flex-1">
+                      <CurrencyInput value={cost} onValueChange={setCost} placeholder="0" />
+                    </Field>
                     <Button
                       variant="secondary"
                       className="gap-1.5"
                       onClick={() => addItemMutation.mutate()}
-                      disabled={!area.trim() || addItemMutation.isPending}
+                      disabled={!area.trim()}
+                      isLoading={addItemMutation.isPending}
                     >
                       <Plus className="h-4 w-4" />
                       Add
@@ -273,10 +288,12 @@ export const InspectionDetailModal = ({
                     variant="primary"
                     className="gap-1.5"
                     onClick={() => completeMutation.mutate()}
-                    disabled={inspection.items.length === 0 || completeMutation.isPending}
+                    disabled={inspection.items.length === 0}
+                    isLoading={completeMutation.isPending}
+                    loadingText="Completing…"
                   >
                     <CheckCircle2 className="h-4 w-4" />
-                    {completeMutation.isPending ? 'Completing…' : 'Complete'}
+                    Complete
                   </Button>
                 )}
                 {isCompleted && (
@@ -284,10 +301,11 @@ export const InspectionDetailModal = ({
                     variant="primary"
                     className="gap-1.5"
                     onClick={() => shareMutation.mutate()}
-                    disabled={shareMutation.isPending}
+                    isLoading={shareMutation.isPending}
+                    loadingText="Sharing…"
                   >
                     <Share2 className="h-4 w-4" />
-                    {shareMutation.isPending ? 'Sharing…' : 'Share with owner'}
+                    Share with owner
                   </Button>
                 )}
               </div>

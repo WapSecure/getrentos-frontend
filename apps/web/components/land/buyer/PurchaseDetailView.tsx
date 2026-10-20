@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PageErrorState, Tabs, TabsContent, TabsList, TabsTrigger, Toast } from '@getrentos/ui';
+import {
+  Alert,
+  PageErrorState,
+  Skeleton,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  useToast,
+} from '@getrentos/ui';
 import { ArrowLeft, Info } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -27,8 +36,6 @@ import { ConditionsPanel } from '../closing/ConditionsPanel';
 import { PerfectionPanel } from '../closing/PerfectionPanel';
 import { CoApprovalCard } from '../representatives/CoApprovalCard';
 import { landRepresentativeKeys } from '@/services/landRepresentativeService';
-
-type ToastState = { message: string; variant: 'success' | 'error' | 'info' } | null;
 
 const Line = ({ label, value, strong }: { label: string; value: string; strong?: boolean }) => (
   <div className={`flex justify-between gap-3 py-1.5 ${strong ? 'font-semibold' : ''}`}>
@@ -64,15 +71,14 @@ const refundSentence = (purchase: {
 
 export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<ToastState>(null);
+  const toast = useToast();
   const [reporting, setReporting] = useState(false);
   const notify = (message: string, variant: 'success' | 'error' | 'info') =>
-    setToast({ message, variant });
+    toast.show(message, variant);
 
   const {
     data: purchase,
     isLoading,
-    isError,
     error,
     refetch,
     isRefetching,
@@ -161,12 +167,12 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   if (isLoading) {
     return (
       <div className="space-y-4" aria-busy="true">
-        <div className="h-10 w-1/2 animate-pulse rounded-xl bg-secondary" />
-        <div className="h-64 animate-pulse rounded-2xl bg-secondary" />
+        <Skeleton className="h-10 w-1/2 rounded-xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
     );
   }
-  if (isError || !purchase) {
+  if (!purchase) {
     return (
       <PageErrorState
         title="Could not load this purchase"
@@ -232,24 +238,18 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
       )}
 
       {purchase.status === 'DEFAULTED' && (
-        <p
-          role="alert"
-          className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive"
-        >
+        <Alert variant="danger">
           This purchase is in default because a payment is more than{' '}
           {purchase.terms.defaultAfterDays} days late. Pay what is overdue now; the developer may
           otherwise revoke the contract, refunding what you paid less{' '}
           {bpsToPercent(purchase.terms.revocationChargeBps)}.
-        </p>
+        </Alert>
       )}
       {purchase.canCancelInFull && (
-        <p
-          role="alert"
-          className="rounded-xl border border-warning/40 bg-warning/5 p-4 text-sm text-foreground"
-        >
+        <Alert variant="warning">
           A condition of this purchase was not met. You may cancel and receive everything you have
           paid, with no cancellation charge, or keep the purchase. See the Conditions tab.
-        </p>
+        </Alert>
       )}
       {ended && (
         <p className="rounded-xl border border-border bg-secondary/40 p-4 text-sm text-foreground">
@@ -335,15 +335,14 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
               <CoApprovalCard
                 deal={{ purchaseId: purchase.id }}
                 labelFor={(key) => purchase.milestones.find((m) => m.key === key)?.label ?? key}
-                onChanged={(message, variant) => setToast({ message, variant })}
+                onChanged={(message, variant) => toast.show(message, variant)}
               />
-              <p className="flex gap-2 rounded-xl bg-info/5 p-3 text-sm text-muted-foreground">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" aria-hidden />
+              <Alert variant="info" icon={Info}>
                 GetRentos holds your payments. Each step you confirm releases its share to the
                 developer, never more than you have paid. Confirm in order, and only once you hold
                 the document or have been shown the plot. Allocation, the deed and the survey in
                 your name come after full payment.
-              </p>
+              </Alert>
               <MilestoneTimeline
                 milestones={purchase.milestones}
                 contractOpen={contractOpen}
@@ -374,10 +373,6 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
           />
         </aside>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

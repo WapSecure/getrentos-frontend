@@ -13,8 +13,7 @@ import {
   NumberInput,
   Select,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { Lock } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -55,7 +54,7 @@ export function ShortletEssentialsDialog({
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const [houseRules, setHouseRules] = useState(listing.houseRules ?? '');
   const [pets, setPets] = useState<TriState>(toTri(listing.petsAllowed));
@@ -90,9 +89,9 @@ export function ShortletEssentialsDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shortletKeys.hostListings });
       queryClient.invalidateQueries({ queryKey: shortletKeys.public });
-      setToast({ message: 'Saved.', variant: 'success' });
+      toast.success('Saved.');
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -137,6 +136,7 @@ export function ShortletEssentialsDialog({
                 onChange={(e) => setHouseRules(e.target.value)}
                 rows={3}
                 maxLength={2000}
+                showCount
                 placeholder="Quiet hours from 10pm. Visitors must be registered at the gate."
               />
             </Field>
@@ -146,14 +146,12 @@ export function ShortletEssentialsDialog({
             <h3 className="text-sm font-semibold">Power</h3>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               {Object.entries(POWER_SOURCE_LABEL).map(([value, label]) => (
-                <label key={value} className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={powerSources.includes(value)}
-                    onCheckedChange={(on) => togglePower(value, on)}
-                    aria-label={label}
-                  />
-                  {label}
-                </label>
+                <Checkbox
+                  key={value}
+                  checked={powerSources.includes(value)}
+                  onCheckedChange={(on) => togglePower(value, on)}
+                  label={label}
+                />
               ))}
             </div>
             <Field
@@ -199,19 +197,21 @@ export function ShortletEssentialsDialog({
               onChange={(e) => setInstructions(e.target.value)}
               rows={4}
               maxLength={2000}
+              showCount
               placeholder="Tell the gateman you're staying at Flat 3B. Key box code 4471. Wi-Fi: LekkiLoft / sunshine123"
               aria-label="Check-in instructions"
             />
           </section>
 
-          <Button className="w-full" onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? 'Saving…' : 'Save'}
+          <Button
+            className="w-full"
+            onClick={() => save.mutate()}
+            isLoading={save.isPending}
+            loadingText="Saving…"
+          >
+            Save
           </Button>
         </div>
-
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

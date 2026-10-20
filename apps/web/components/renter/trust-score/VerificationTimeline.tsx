@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, CheckCircle, Circle, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Check, Clock, CheckCircle, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 import { VerificationItem } from '@/types/trust-score';
 
 interface VerificationTimelineProps {
@@ -29,45 +29,45 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
+    <Card>
+      <button
+        type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        className="w-full p-4 flex items-center justify-between gap-3 hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/20"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <Clock className="w-4 h-4 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Verification Timeline</h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {timelineItems.filter((t) => t.status === 'completed').length} of{' '}
               {timelineItems.length} complete
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="p-1 h-auto">
+        <span className="rounded-md p-1 text-muted-foreground" aria-hidden="true">
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </div>
+        </span>
+      </button>
 
       {isExpanded && (
         <div className="p-4 pt-0">
           <div className="relative">
-            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
 
             <div className="space-y-4">
               {timelineItems.map((item) => (
                 <div key={item.id} className="relative pl-10">
                   <div
                     className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                      item.status === 'completed'
-                        ? 'bg-green-100 dark:bg-green-900/20'
-                        : 'bg-gray-100 dark:bg-gray-800'
+                      item.status === 'completed' ? 'bg-success-subtle' : 'bg-secondary'
                     }`}
                   >
                     {item.status === 'completed' ? (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <CheckCircle className="w-4 h-4 text-success" />
                     ) : (
-                      <Circle className="w-4 h-4 text-gray-400" />
+                      <Circle className="w-4 h-4 text-muted-foreground" />
                     )}
                   </div>
 
@@ -81,10 +81,10 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
                         {item.event}
                       </h4>
                       {item.status === 'completed' && (
-                        <span className="text-xs text-green-600">✓</span>
+                        <Check className="w-3 h-3 text-success" aria-label="Complete" />
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{formatDate(item.date)}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.date)}</p>
                   </div>
                 </div>
               ))}
@@ -92,6 +92,6 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

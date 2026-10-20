@@ -16,7 +16,7 @@ import {
   Cog,
   Wallet,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, IconButton } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type {
   BuyerEscrowTransaction,
@@ -30,6 +30,8 @@ interface BuyerEscrowTransactionDetailModalProps {
   transaction: BuyerEscrowTransaction | null;
   onClose: () => void;
   onMakePayment: (transactionId: string, stage: 'deposit' | 'final') => void;
+  /** A deposit or final payment is on its way to the server. */
+  isPaying?: boolean;
 }
 
 const actorConfig: Record<
@@ -74,6 +76,7 @@ export const BuyerEscrowTransactionDetailModal = ({
   transaction,
   onClose,
   onMakePayment,
+  isPaying = false,
 }: BuyerEscrowTransactionDetailModalProps) => {
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
@@ -91,6 +94,9 @@ export const BuyerEscrowTransactionDetailModal = ({
       {transaction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={transaction.propertyTitle}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -103,9 +109,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                   Owner: {transaction.ownerName}
                 </p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-5 overflow-y-auto flex-1">
@@ -117,28 +121,14 @@ export const BuyerEscrowTransactionDetailModal = ({
               </div>
 
               {isFrozen ? (
-                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-red-700 dark:text-red-400">
-                      Payment on hold: dispute open
-                    </p>
-                    <p className="text-xs text-red-600 dark:text-red-300 mt-0.5">
-                      {transaction.disputeReason ||
-                        'A dispute has been raised on this transaction. Funds are held until resolution.'}
-                    </p>
-                  </div>
-                </div>
+                <Alert variant="danger" icon={ShieldAlert} title="Payment on hold: dispute open">
+                  {transaction.disputeReason ||
+                    'A dispute has been raised on this transaction. Funds are held until resolution.'}
+                </Alert>
               ) : isRefunded ? (
-                <div className="p-3 rounded-lg bg-secondary border border-border flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-xs font-medium text-foreground">Payment refunded</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      This transaction was refunded and cannot accept further payments.
-                    </p>
-                  </div>
-                </div>
+                <Alert variant="neutral" icon={ShieldAlert} title="Payment refunded">
+                  This transaction was refunded and cannot accept further payments.
+                </Alert>
               ) : (
                 <div>
                   <h4 className="text-sm font-medium text-foreground mb-3">Payment progress</h4>
@@ -154,7 +144,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                             <div
                               className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                                 isDone
-                                  ? 'bg-primary text-white'
+                                  ? 'bg-primary text-primary-foreground'
                                   : isActive
                                     ? 'bg-primary/20 text-primary ring-2 ring-primary'
                                     : 'bg-secondary text-muted-foreground'
@@ -180,15 +170,18 @@ export const BuyerEscrowTransactionDetailModal = ({
                             >
                               {step.label}
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {step.description}
+                            </p>
                             {isActive && step.key === 'deposit_pending' && canDeposit && (
                               <Button
                                 variant="primary"
                                 size="sm"
-                                className="gap-1.5 mt-2"
+                                className="mt-2"
+                                icon={<Wallet className="w-3.5 h-3.5" />}
+                                isLoading={isPaying}
                                 onClick={() => onMakePayment(transaction.id, 'deposit')}
                               >
-                                <Wallet className="w-3.5 h-3.5" />
                                 Make Deposit Payment
                               </Button>
                             )}
@@ -196,10 +189,11 @@ export const BuyerEscrowTransactionDetailModal = ({
                               <Button
                                 variant="primary"
                                 size="sm"
-                                className="gap-1.5 mt-2"
+                                className="mt-2"
+                                icon={<Wallet className="w-3.5 h-3.5" />}
+                                isLoading={isPaying}
                                 onClick={() => onMakePayment(transaction.id, 'final')}
                               >
-                                <Wallet className="w-3.5 h-3.5" />
                                 Pay Final Balance
                               </Button>
                             )}
@@ -214,13 +208,10 @@ export const BuyerEscrowTransactionDetailModal = ({
               {/* Land sales only: renders nothing for any other property. */}
               <LandConveyanceEntry transaction={transaction} />
 
-              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
-                <Lock className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-blue-700 dark:text-blue-300">
-                  The money you pay is held safely by GetRentos and only paid to the owner once all
-                  verification conditions are met: protecting both you and the seller.
-                </p>
-              </div>
+              <Alert variant="info" icon={Lock}>
+                The money you pay is held safely by GetRentos and only paid to the owner once all
+                verification conditions are met: protecting both you and the seller.
+              </Alert>
 
               {transaction.releasedAt && (
                 <p className="text-xs text-muted-foreground text-center">
@@ -230,6 +221,8 @@ export const BuyerEscrowTransactionDetailModal = ({
 
               <div className="border border-border rounded-lg overflow-hidden">
                 <button
+                  type="button"
+                  aria-expanded={showActivityLog}
                   onClick={() => setShowActivityLog((v) => !v)}
                   className="w-full flex items-center justify-between p-3 text-left hover:bg-secondary transition-colors"
                 >
@@ -275,10 +268,10 @@ export const BuyerEscrowTransactionDetailModal = ({
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 gap-1.5"
+                className="flex-1"
+                icon={<LifeBuoy className="w-4 h-4" />}
                 onClick={() => router.push(ROUTES.BUYER_MESSAGES)}
               >
-                <LifeBuoy className="w-4 h-4" />
                 Contact Support
               </Button>
             </div>

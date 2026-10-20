@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Pagination, EmptyState } from '@getrentos/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { landlordService } from '@/services/landlordService';
@@ -41,6 +41,7 @@ export default function LandlordApplicationsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const applications = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -80,6 +81,7 @@ export default function LandlordApplicationsPage() {
         {statusFilters.map((option) => (
           <button
             key={option.value}
+            type="button"
             onClick={() => {
               setFilter(option.value);
               setPage(1);
@@ -87,7 +89,7 @@ export default function LandlordApplicationsPage() {
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               filter === option.value
                 ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {option.label}
@@ -100,12 +102,7 @@ export default function LandlordApplicationsPage() {
         query={{ isPending, isError, refetch }}
         errorTitle="We couldn't load your applications"
         skeletonClassName="h-32"
-        empty={
-          <div className="bg-card rounded-2xl border border-border p-12 text-center">
-            <FileText className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">No applications found</p>
-          </div>
-        }
+        empty={<EmptyState icon={FileText} title="No applications found" />}
       >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {applications.map((application, index) => (

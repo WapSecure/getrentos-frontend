@@ -1,13 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, CalendarClock } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
-import { TimePicker } from '@getrentos/ui';
-import { Textarea } from '@getrentos/ui';
+import {
+  Button,
+  DatePicker,
+  Field,
+  IconButton,
+  RadioGroup,
+  Textarea,
+  TimePicker,
+} from '@getrentos/ui';
 import type { BuyerPropertyListing } from '@/types/buyer';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -70,6 +75,7 @@ export const RequestViewingModal = ({
         })
       ),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
   });
   const { data: defaultListing } = useQuery({
     queryKey: [...buyerKeys.listings, 'detail', defaultPropertyId],
@@ -112,29 +118,27 @@ export const RequestViewingModal = ({
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Request Viewing"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
+            className="bg-card rounded-xl max-w-sm w-full overflow-hidden max-h-[90vh] overflow-y-auto"
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">Request Viewing</h3>
-              <button
-                type="button"
+              <IconButton
+                label="Close viewing request"
+                size="sm"
+                icon={<X />}
                 onClick={handleClose}
                 disabled={isSubmitting}
-                aria-label="Close viewing request"
-                className="p-1 rounded-lg hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Property <span className="text-red-500">*</span>
-                </label>
+              <Field label="Property" required>
                 <PaginatedSelect
                   value={propertyId}
                   onValueChange={(value) => {
@@ -163,68 +167,49 @@ export const RequestViewingModal = ({
                   isLoading={isListingsLoading}
                   ariaLabel="property"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Date</label>
+              <Field label="Date">
                 <DatePicker value={date} onChange={setDate} />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Time</label>
+              <Field label="Time">
                 <TimePicker value={time} onChange={setTime} />
-              </div>
+              </Field>
 
               {canVideo && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    How would you like to view it?
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(
-                      [
-                        ['IN_PERSON', 'Visit in person'],
-                        ['VIDEO', 'Live video call'],
-                      ] as const
-                    ).map(([value, label]) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setMode(value)}
-                        aria-pressed={mode === value}
-                        className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
-                          mode === value
-                            ? 'border-primary bg-accent text-primary'
-                            : 'border-border text-muted-foreground hover:border-primary'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  {mode === 'VIDEO' && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      The owner walks you through it on a video call once they confirm. Join it from
-                      your viewing requests.
-                    </p>
-                  )}
-                </div>
+                <Field
+                  label="How would you like to view it?"
+                  hint={
+                    mode === 'VIDEO'
+                      ? 'The owner walks you through it on a video call once they confirm. Join it from your viewing requests.'
+                      : undefined
+                  }
+                >
+                  <RadioGroup
+                    value={mode}
+                    onValueChange={setMode}
+                    variant="card"
+                    columns={2}
+                    options={[
+                      { value: 'IN_PERSON', label: 'Visit in person' },
+                      { value: 'VIDEO', label: 'Live video call' },
+                    ]}
+                  />
+                </Field>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Notes <span className="text-muted-foreground font-normal">(optional)</span>
-                </label>
+              <Field label="Notes" optionalLabel="(optional)">
                 <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   placeholder="Anything the owner should know"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div className="p-4 border-t border-border flex gap-3">
+            <div className="p-4 border-t border-border flex flex-wrap gap-3">
               {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
               <Button
                 variant="ghost"
@@ -236,12 +221,12 @@ export const RequestViewingModal = ({
               </Button>
               <Button
                 variant="primary"
-                className="flex-1 gap-1.5"
+                className="flex-1"
+                icon={<CalendarClock className="w-4 h-4" />}
                 onClick={() => void handleSubmit()}
                 disabled={!selectedListing || !date || !time || isSubmitting}
                 isLoading={isSubmitting}
               >
-                <CalendarClock className="w-4 h-4" />
                 Request
               </Button>
             </div>

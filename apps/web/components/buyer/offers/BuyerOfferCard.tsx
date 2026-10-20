@@ -11,47 +11,48 @@ import {
   XCircle,
   Archive,
 } from 'lucide-react';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferStatus, FinancingType } from '@/types/buyer';
 
 const statusConfig: Record<
   BuyerOfferStatus,
-  { label: string; icon: React.ElementType; className: string }
+  { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   submitted: {
     label: 'Submitted',
     icon: Clock,
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
+    variant: 'warning',
   },
   countered: {
     label: 'Countered',
     icon: RefreshCcw,
-    className: 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20',
+    variant: 'info',
   },
   accepted: {
     label: 'Accepted',
     icon: CheckCircle2,
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
+    variant: 'success',
   },
   rejected: {
     label: 'Rejected',
     icon: XCircle,
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
+    variant: 'danger',
   },
   withdrawn: {
     label: 'Withdrawn',
     icon: XCircle,
-    className: 'text-muted-foreground bg-secondary',
+    variant: 'neutral',
   },
   expired: {
     label: 'Expired',
     icon: Archive,
-    className: 'text-muted-foreground bg-secondary',
+    variant: 'neutral',
   },
   closed: {
     label: 'Closed',
     icon: Archive,
-    className: 'text-muted-foreground bg-secondary',
+    variant: 'neutral',
   },
 };
 
@@ -85,19 +86,24 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="bg-card rounded-2xl border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="bg-card rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 border border-border p-4 cursor-pointer hover:shadow-lg transition-all duration-300"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-semibold text-foreground truncate">{offer.propertyTitle}</h3>
           <p className="text-xs text-muted-foreground truncate">Owner: {offer.ownerName}</p>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${status.className}`}
-        >
-          <StatusIcon className="w-3 h-3" />
+        <Badge variant={status.variant} icon={<StatusIcon className="w-3 h-3" />}>
           {status.label}
-        </span>
+        </Badge>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-4">
@@ -106,9 +112,7 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
           <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
-          <p
-            className={`text-xs ${diffPct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
-          >
+          <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>
             {diffPct >= 0 ? '+' : ''}
             {diffPct.toFixed(1)}% vs asking
           </p>

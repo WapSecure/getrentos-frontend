@@ -12,8 +12,7 @@ import {
   Input,
   Select,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { Scale } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -40,7 +39,7 @@ export function ShortletOpenDisputeDialog({
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<ShortletDisputeCategory>('SERVICE_QUALITY');
   const [description, setDescription] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const open = useMutation({
     mutationFn: () =>
@@ -52,10 +51,10 @@ export function ShortletOpenDisputeDialog({
         })
       ),
     onSuccess: () => onOpened(),
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
-  const canSubmit = title.trim().length >= 3 && description.trim().length >= 10 && !open.isPending;
+  const canSubmit = title.trim().length >= 3 && description.trim().length >= 10;
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
@@ -93,21 +92,24 @@ export function ShortletOpenDisputeDialog({
               placeholder="Describe what happened…"
               rows={5}
               maxLength={2000}
+              showCount
             />
           </Field>
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button onClick={() => open.mutate()} disabled={!canSubmit}>
-              <Scale className="mr-1.5 h-4 w-4" />
-              {open.isPending ? 'Opening…' : 'Open dispute'}
+            <Button
+              onClick={() => open.mutate()}
+              isLoading={open.isPending}
+              loadingText="Opening…"
+              disabled={!canSubmit}
+              icon={<Scale className="h-4 w-4" />}
+            >
+              Open dispute
             </Button>
           </div>
         </div>
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
       </DialogContent>
     </Dialog>
   );

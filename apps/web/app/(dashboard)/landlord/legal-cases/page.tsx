@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Scale } from 'lucide-react';
-import { Button, DataTable, type Column } from '@getrentos/ui';
-
+import { Button, DataTable, EmptyState, useToast, type Column } from '@getrentos/ui';
 import { LegalCaseDetail } from '@/components/landlord/legal-cases/LegalCaseDetail';
 import { LegalCaseStage } from '@/components/landlord/legal-cases/LegalCaseStage';
 import { OpenLegalCaseModal } from '@/components/landlord/legal-cases/OpenLegalCaseModal';
@@ -55,7 +54,7 @@ export default function LandlordLegalCasesPage() {
   const [limit, setLimit] = useState(50);
   const [opening, setOpening] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const toast = useToast();
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: [...landlordKeys.legalCases, { stage, limit }],
@@ -66,6 +65,7 @@ export default function LandlordLegalCasesPage() {
           limit,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const { data: leases, isLoading: isLoadingLeases } = useQuery({
@@ -80,14 +80,14 @@ export default function LandlordLegalCasesPage() {
   });
 
   const onError = (error: unknown) =>
-    setToast(error instanceof Error ? error.message : 'Something went wrong.');
+    toast.error(error instanceof Error ? error.message : 'Something went wrong.');
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: landlordKeys.legalCases });
     if (selectedId) queryClient.invalidateQueries({ queryKey: landlordKeys.legalCase(selectedId) });
   };
   const done = (message: string) => () => {
-    setToast(message);
+    toast.success(message);
     refresh();
   };
 
@@ -293,17 +293,18 @@ export default function LandlordLegalCasesPage() {
               : `${cases.length} case${cases.length === 1 ? '' : 's'}, none needing attention`}
           </p>
         </div>
-        <Button onClick={() => setOpening(true)}>
-          <Plus className="mr-1.5 h-4 w-4" aria-hidden />
+        <Button onClick={() => setOpening(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>
           Open a case
         </Button>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex w-fit gap-1 overflow-x-auto rounded-lg bg-secondary p-1">
+        <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-lg bg-secondary p-1">
           {STAGES.map((option) => (
             <button
               key={option.value}
+              type="button"
+              aria-pressed={stage === option.value}
               onClick={() => setStage(option.value)}
               className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 stage === option.value
@@ -321,6 +322,8 @@ export default function LandlordLegalCasesPage() {
 
         <div className="flex w-fit gap-1 rounded-lg bg-secondary p-1">
           <button
+            type="button"
+            aria-pressed={focus === 'attention'}
             onClick={() => setFocus('attention')}
             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               focus === 'attention'
@@ -334,6 +337,8 @@ export default function LandlordLegalCasesPage() {
             )}
           </button>
           <button
+            type="button"
+            aria-pressed={focus === 'all'}
             onClick={() => setFocus('all')}
             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               focus === 'all'
@@ -352,14 +357,14 @@ export default function LandlordLegalCasesPage() {
         errorTitle="We couldn't load your cases"
         skeletonClassName="h-16"
         empty={
-          <div className="rounded-2xl border border-border bg-card p-12 text-center">
-            <Scale className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-            <p className="text-muted-foreground">
-              {focus === 'attention'
+          <EmptyState
+            icon={Scale}
+            title={
+              focus === 'attention'
                 ? 'Nothing needs attention. Every case has a next step.'
-                : 'No cases here yet.'}
-            </p>
-          </div>
+                : 'No cases here yet.'
+            }
+          />
         }
       >
         <DataTable
@@ -411,14 +416,6 @@ export default function LandlordLegalCasesPage() {
         />
       )}
 
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-foreground px-4 py-2 text-sm text-background shadow-lg"
-        >
-          {toast}
-        </div>
-      )}
     </>
   );
 }

@@ -1,14 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
 import { CreateLeaseModal } from '@/components/landlord/leases/CreateLeaseModal';
 import { RenewalOfferModal } from '@/components/landlord/leases/RenewalOfferModal';
 import { RentScheduleModal } from '@/components/landlord/leases/RentScheduleModal';
 import { SignLeaseModal } from '@/components/landlord/leases/SignLeaseModal';
-import { Button, Pagination, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Pagination,
+  useToast,
+} from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -32,9 +39,14 @@ export default function LandlordLeasesPage() {
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [billingLease, setBillingLease] = useState<Lease | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
-  const { data, isLoading: isLoadingLeases } = useQuery({
+  const {
+    data,
+    isLoading: isLoadingLeases,
+    isError: leasesFailed,
+    refetch: refetchLeases,
+  } = useQuery({
     queryKey: [
       ...landlordKeys.leases(),
       { page, pageSize: PAGE_SIZE, status: filter === 'all' ? undefined : filter },
@@ -47,6 +59,7 @@ export default function LandlordLeasesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const leases = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -125,16 +138,14 @@ export default function LandlordLeasesPage() {
       );
       queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       setSigningLease(null);
-      setToast({
-        message:
-          updated.status === 'signed'
-            ? 'Lease fully executed: both parties have signed.'
-            : 'Your signature was recorded. Waiting on the tenant.',
-        variant: 'success',
-      });
+      toast.success(
+        updated.status === 'signed'
+          ? 'Lease fully executed: both parties have signed.'
+          : 'Your signature was recorded. Waiting on the tenant.'
+      );
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to sign this lease.', variant: 'error' });
+      toast.error(error.message || 'Unable to sign this lease.');
     },
   });
 
@@ -193,16 +204,21 @@ export default function LandlordLeasesPage() {
               : `${activeLeaseCount} active lease${activeLeaseCount === 1 ? '' : 's'}`}
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          onClick={() => setIsCreateModalOpen(true)}
+          icon={<Plus className="w-4 h-4" />}
+        >
           Create Lease
         </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6 overflow-x-auto">
+      <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit mb-6 overflow-x-auto">
         {statusFilters.map((option) => (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={filter === option.value}
             onClick={() => {
               setFilter(option.value);
               setPage(1);
@@ -210,7 +226,7 @@ export default function LandlordLeasesPage() {
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               filter === option.value
                 ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {option.label}
@@ -219,12 +235,15 @@ export default function LandlordLeasesPage() {
       </div>
 
       {isLoadingLeases ? (
-        <PageLoadingState />
+        <ListSkeleton rows={6} variant="cards" label="Loading leases" />
+      ) : leasesFailed && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your leases"
+          onRetry={() => void refetchLeases()}
+        />
       ) : leases.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <FileCheck className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-muted-foreground">No leases found</p>
-        </div>
+        <EmptyState icon={FileCheck} title="No leases found" />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {leases.map((lease, index) => (
@@ -279,9 +298,6 @@ export default function LandlordLeasesPage() {
         isPending={signLeaseMutation.isPending}
       />
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </>
   );
 }

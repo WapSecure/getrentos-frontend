@@ -9,7 +9,6 @@ import {
   ChevronDown,
   Gauge,
   Coins,
-  Loader2,
   Lock,
   ShieldCheck,
   UserCheck,
@@ -18,6 +17,7 @@ import {
   Wrench,
   MessageSquareText,
 } from 'lucide-react';
+import { Badge, Button, Skeleton } from '@getrentos/ui';
 import { useCustody } from './CustodyProvider';
 import {
   grantsNothing,
@@ -74,17 +74,25 @@ export function CustodyBar() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-4 py-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-        Working out which clients you manage…
+      <div
+        role="status"
+        aria-label="Working out which clients you manage"
+        className="flex flex-wrap items-center gap-3 border-b border-border bg-muted/40 px-4 py-2"
+      >
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="ml-auto h-7 w-32" />
       </div>
     );
   }
 
-  if (error) {
+  if (error && mandates.length === 0) {
     return (
-      <div className="flex items-center gap-2 border-b border-border bg-amber-50 px-4 py-2 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-        <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+      <div
+        role="alert"
+        className="flex items-center gap-2 border-b border-warning/25 bg-warning-subtle px-4 py-2 text-sm text-foreground"
+      >
+        <AlertTriangle className="h-4 w-4 shrink-0 text-warning" aria-hidden />
         We could not load your clients ({error}). Do not act on a property until this list is back.
         you cannot tell whose it is.
       </div>
@@ -136,20 +144,17 @@ export function CustodyBar() {
           <span className="text-muted-foreground">{noticeSummary(selected)}</span>
 
           {!isLive(selected) && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-              {MANDATE_STATUS_LABELS[selected.status]}
-            </span>
+            <Badge variant="warning">{MANDATE_STATUS_LABELS[selected.status]}</Badge>
           )}
           {grantsNothing(selected) && (
-            <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              <Lock className="h-3 w-3" aria-hidden />
+            <Badge variant="neutral" icon={<Lock className="h-3 w-3" aria-hidden />}>
               This mandate grants no access yet
-            </span>
+            </Badge>
           )}
         </>
       ) : (
         <>
-          <span className="flex items-center gap-1.5 font-medium text-amber-800 dark:text-amber-300">
+          <span className="flex items-center gap-1.5 font-medium text-warning">
             <AlertTriangle className="h-4 w-4" aria-hidden />
             No client selected
           </span>
@@ -159,83 +164,105 @@ export function CustodyBar() {
         </>
       )}
 
-      <Link
+      <Button
         href="/agency/home-management"
-        className="ml-auto flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm" className="ml-auto"
+        icon={<Wrench className="h-4 w-4" aria-hidden />}
       >
-        <Wrench className="h-4 w-4" aria-hidden />
         Home management
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/queries"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<MessageSquareText className="h-4 w-4" aria-hidden />}
       >
-        <MessageSquareText className="h-4 w-4" aria-hidden />
         Owner questions
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/commissions"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<Coins className="h-4 w-4" aria-hidden />}
       >
-        <Coins className="h-4 w-4" aria-hidden />
         Commissions
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/protection"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
       >
-        <ShieldCheck className="h-4 w-4" aria-hidden />
         Protection
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/realtors"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<UserCheck className="h-4 w-4" aria-hidden />}
       >
-        <UserCheck className="h-4 w-4" aria-hidden />
         Realtor access
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/team"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<Users className="h-4 w-4" aria-hidden />}
       >
-        <Users className="h-4 w-4" aria-hidden />
         Team
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/overview"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<Gauge className="h-4 w-4" aria-hidden />}
       >
-        <Gauge className="h-4 w-4" aria-hidden />
         Overview
-      </Link>
+      </Button>
 
-      <Link
+      <Button
         href="/agency/owners"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        variant="outline"
+        size="xs"
+        rounded="sm"
+        icon={<Users className="h-4 w-4" aria-hidden />}
       >
-        <Users className="h-4 w-4" aria-hidden />
         All clients
-      </Link>
+      </Button>
 
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="xs"
+        rounded="sm"
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-expanded={open}
         aria-haspopup="listbox"
-        className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 font-medium hover:bg-accent"
+        iconPosition="right"
+        icon={
+          <ChevronDown
+            className={
+              open ? 'h-4 w-4 rotate-180 transition-transform' : 'h-4 w-4 transition-transform'
+            }
+            aria-hidden
+          />
+        }
       >
         Switch client
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}
-          aria-hidden
-        />
-      </button>
+      </Button>
 
       {open && (
         <ul
@@ -308,7 +335,7 @@ function MandateOption({
             {mandate.ownerName ?? 'the owner'} · {noticeSummary(mandate)}
           </span>
           {!live && (
-            <span className="mt-0.5 block text-xs text-amber-700 dark:text-amber-400">
+            <span className="mt-0.5 block text-xs text-warning">
               {MANDATE_STATUS_LABELS[mandate.status]}
               {mandate.status !== 'ACTIVE' && ' — you cannot act under this one yet'}
             </span>

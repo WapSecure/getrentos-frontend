@@ -1,9 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Star, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Pagination, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ownerService, type OwnerReview } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -14,7 +14,7 @@ const StarRow = ({ rating }: { rating: number }) => (
     {Array.from({ length: 5 }).map((_, i) => (
       <Star
         key={i}
-        className={`w-3.5 h-3.5 ${i < rating ? 'fill-primary text-primary' : 'text-gray-200 dark:text-gray-700'}`}
+        className={`w-3.5 h-3.5 ${i < rating ? 'fill-primary text-primary' : 'text-border'}`}
       />
     ))}
   </div>
@@ -30,9 +30,10 @@ const PAGE_SIZE = 10;
 
 export default function OwnerReviewsPage() {
   const [page, setPage] = useState(1);
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: [...ownerKeys.reviews, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(ownerService.listReviews({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const reviews = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -76,7 +77,7 @@ export default function OwnerReviewsPage() {
               const Icon = category.icon;
               return (
                 <div key={category.label} className="flex items-center gap-3">
-                  <Icon className="w-4 h-4 text-gray-400 shrink-0" />
+                  <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span className="text-sm text-muted-foreground w-36 shrink-0">
                     {category.label}
                   </span>
@@ -96,28 +97,40 @@ export default function OwnerReviewsPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
-        {reviews.map((review: OwnerReview) => (
-          <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
-                  {getInitials(review.author)}
+      {isLoading ? (
+        <ListSkeleton rows={3} variant="cards" label="Loading reviews" />
+      ) : isError && !data ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your reviews"
+          onRetry={() => void refetch()}
+        />
+      ) : reviews.length === 0 ? (
+        <EmptyState icon={Star} title="No reviews yet" />
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((review: OwnerReview) => (
+            <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
+                    {getInitials(review.author)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{review.author}</p>
+                    <p className="text-xs text-muted-foreground">{review.category}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{review.author}</p>
-                  <p className="text-xs text-muted-foreground">{review.category}</p>
+                <div className="text-right shrink-0">
+                  <StarRow rating={review.rating} />
+                  <p className="text-xs text-muted-foreground mt-1">{formatDate(review.date)}</p>
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <StarRow rating={review.rating} />
-                <p className="text-xs text-gray-400 mt-1">{formatDate(review.date)}</p>
-              </div>
+              <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>
             </div>
-            <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {total > 0 && (
         <Pagination

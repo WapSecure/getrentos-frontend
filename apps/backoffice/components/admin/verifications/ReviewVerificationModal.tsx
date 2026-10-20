@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Check, XCircle, HelpCircle, FileText, Download } from 'lucide-react';
-import { Textarea } from '@getrentos/ui';
+import { Alert, Field, Skeleton, Textarea } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
@@ -110,28 +110,31 @@ export const ReviewVerificationModal = ({
                     Submitted Documents ({documents.length || request.documentCount})
                   </p>
                   {detailError ? (
-                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-center">
-                      <p className="text-xs text-destructive">
-                        The submitted documents could not be loaded. Do not decide this request
-                        without reviewing them.
-                      </p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        onClick={() => void refetchDetail()}
-                        isLoading={detailFetching}
-                      >
-                        Try again
-                      </Button>
-                    </div>
+                    <Alert
+                      variant="danger"
+                      action={
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void refetchDetail()}
+                          isLoading={detailFetching}
+                        >
+                          Try again
+                        </Button>
+                      }
+                    >
+                      The submitted documents could not be loaded. Do not decide this request
+                      without reviewing them.
+                    </Alert>
                   ) : detailLoading ? (
                     <div
-                      className="rounded-lg border border-border p-3 text-xs text-muted-foreground"
+                      className="space-y-2"
                       role="status"
+                      aria-label="Loading submitted documents"
                     >
-                      Loading submitted documents…
+                      <Skeleton className="h-10 w-full rounded-lg" />
+                      <Skeleton className="h-10 w-full rounded-lg" />
                     </div>
                   ) : documents.length === 0 ? (
                     <div className="rounded-lg border border-border p-3 text-xs text-muted-foreground">
@@ -154,6 +157,7 @@ export const ReviewVerificationModal = ({
                             target="_blank"
                             rel="noreferrer"
                             title="Download"
+                            aria-label={`Download ${doc.name}`}
                             className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-primary hover:bg-secondary"
                           >
                             <Download className="w-4 h-4" />
@@ -169,14 +173,19 @@ export const ReviewVerificationModal = ({
                       Property Media ({media.length})
                     </p>
                     {detailLoading ? (
-                      <p className="rounded-lg border border-border p-3 text-xs text-muted-foreground">
-                        Loading property media…
-                      </p>
+                      <div
+                        className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+                        role="status"
+                        aria-label="Loading property media"
+                      >
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                      </div>
                     ) : media.length === 0 ? (
-                      <p className="rounded-lg border border-warning/30 bg-warning/5 p-3 text-xs text-foreground">
+                      <Alert variant="warning">
                         No property media is available. Confirm whether media is required before
                         approval.
-                      </p>
+                      </Alert>
                     ) : (
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         {media.map((file) => (
@@ -195,15 +204,11 @@ export const ReviewVerificationModal = ({
                 )}
               </>
             ) : (
-              <div>
-                <label
-                  htmlFor="verification-decision-reason"
-                  className="block text-sm font-medium text-foreground mb-1"
-                >
-                  {mode === 'reject' ? 'Reason for rejection' : 'What clarification is needed?'}
-                </label>
+              <Field
+                label={mode === 'reject' ? 'Reason for rejection' : 'What clarification is needed?'}
+                hint="Required · At least 10 characters for the review record."
+              >
                 <Textarea
-                  id="verification-decision-reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
@@ -214,12 +219,8 @@ export const ReviewVerificationModal = ({
                       ? 'e.g. Document is illegible or expired'
                       : 'e.g. Please resubmit a clearer scan'
                   }
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Required · At least 10 characters for the review record.
-                </p>
-              </div>
+              </Field>
             )}
           </div>
 
@@ -237,7 +238,7 @@ export const ReviewVerificationModal = ({
                 </Button>
                 <Button
                   variant="outline"
-                  className="flex-1 gap-1.5 text-red-600 dark:text-red-400"
+                  className="flex-1 gap-1.5 text-destructive"
                   onClick={() => setMode('reject')}
                   disabled={isSubmitting || detailUnavailable}
                 >

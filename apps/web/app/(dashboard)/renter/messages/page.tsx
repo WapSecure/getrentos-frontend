@@ -253,10 +253,7 @@ export default function MessagesPage() {
     return <PageLoadingState />;
   }
 
-  if (
-    (conversationsQuery.isError && !data) ||
-    (remindersQuery.isError && !remindersQuery.data)
-  ) {
+  if ((conversationsQuery.isError && !data) || (remindersQuery.isError && !remindersQuery.data)) {
     return (
       <PageErrorState
         title="Messages are unavailable"

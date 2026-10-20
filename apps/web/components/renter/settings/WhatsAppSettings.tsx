@@ -1,10 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageCircle, Smartphone, CheckCircle2 } from 'lucide-react';
-import { Button, Toast, ToastVariant } from '@getrentos/ui';
+import { Button, Field, Input, Switch, useToast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -38,7 +37,7 @@ export const WhatsAppSettings = () => {
     phone: '',
     preferences: { ...DEFAULT_PREFERENCES },
   });
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data } = useQuery({
     queryKey: renterKeys.settingsPreferences,
@@ -63,10 +62,9 @@ export const WhatsAppSettings = () => {
       unwrap(renterService.updateSettingsPreferences({ whatsapp: next })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.settingsPreferences });
-      setToast({ message: 'WhatsApp settings saved', variant: 'success' });
+      toast.success('WhatsApp settings saved');
     },
-    onError: (err: Error) =>
-      setToast({ message: err.message || 'Failed to save WhatsApp settings', variant: 'error' }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to save WhatsApp settings'),
   });
 
   const togglePreference = (id: string) =>
@@ -86,9 +84,6 @@ export const WhatsAppSettings = () => {
 
   return (
     <div>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <h2 className="text-xl font-semibold text-foreground mb-4">WhatsApp Notifications</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Get rent reminders, maintenance updates, and messages on WhatsApp instead of relying on
@@ -98,8 +93,8 @@ export const WhatsAppSettings = () => {
       {!state.connected ? (
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 rounded-lg bg-secondary">
-            <div className="w-9 h-9 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <div className="w-9 h-9 rounded-lg bg-success-subtle flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-4 h-4 text-success" aria-hidden="true" />
             </div>
             <p className="text-xs text-muted-foreground">
               Add your WhatsApp number to receive notifications there. Actual message delivery is
@@ -107,26 +102,20 @@ export const WhatsAppSettings = () => {
             </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              WhatsApp Number
-            </label>
-            <div className="relative">
-              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <LegacyInput
-                type="tel"
-                value={state.phone}
-                onChange={(e) => setState((prev) => ({ ...prev, phone: e.target.value }))}
-                placeholder="+234 803 000 0000"
-                className="w-full pl-10 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
+          <Field label="WhatsApp Number">
+            <Input
+              leadingIcon={<Smartphone className="w-4 h-4" />}
+              type="tel"
+              value={state.phone}
+              onChange={(e) => setState((prev) => ({ ...prev, phone: e.target.value }))}
+              placeholder="+234 803 000 0000"
+            />
+          </Field>
 
           <Button
             variant="primary"
             onClick={handleConnect}
-            disabled={!state.phone.trim() || saveMutation.isPending}
+            disabled={!state.phone.trim()}
             isLoading={saveMutation.isPending}
           >
             Connect WhatsApp
@@ -134,40 +123,36 @@ export const WhatsAppSettings = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-              <div>
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-lg bg-success-subtle border border-success/20">
+            <div className="flex min-w-0 items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 shrink-0 text-success" aria-hidden="true" />
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">Connected to {state.phone}</p>
                 <p className="text-xs text-muted-foreground">
                   You&apos;ll receive selected notifications on WhatsApp.
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="text-red-500" onClick={handleDisconnect}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-destructive"
+              onClick={handleDisconnect}
+              isLoading={saveMutation.isPending && saveMutation.variables?.connected === false}
+            >
               Disconnect
             </Button>
           </div>
 
           <div className="space-y-2">
             {PREFERENCE_LABELS.map((pref) => (
-              <div
-                key={pref.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border"
-              >
-                <span className="text-sm text-foreground">{pref.label}</span>
-                <button
-                  onClick={() => togglePreference(pref.id)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    state.preferences[pref.id] ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      state.preferences[pref.id] ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
+              <div key={pref.id} className="p-3 rounded-lg border border-border">
+                <Switch
+                  className="w-full"
+                  checked={!!state.preferences[pref.id]}
+                  onCheckedChange={() => togglePreference(pref.id)}
+                  label={pref.label}
+                />
               </div>
             ))}
           </div>
@@ -177,7 +162,6 @@ export const WhatsAppSettings = () => {
             className="w-full"
             onClick={() => saveMutation.mutate(state)}
             isLoading={saveMutation.isPending}
-            disabled={saveMutation.isPending}
           >
             Save WhatsApp Settings
           </Button>

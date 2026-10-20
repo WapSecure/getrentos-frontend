@@ -125,7 +125,8 @@ export default function BuyerTransactionsPage() {
         isEmpty={transactions.length === 0}
         empty={{
           icon: ShieldCheck,
-          title: total === 0 ? 'No transactions match your filters' : 'No transactions on this page',
+          title:
+            total === 0 ? 'No transactions match your filters' : 'No transactions on this page',
           description:
             total === 0
               ? 'Once an owner accepts your offer, the purchase and its protected payment will appear here.'
@@ -166,6 +167,7 @@ export default function BuyerTransactionsPage() {
         transaction={activeTransaction}
         onClose={() => setActiveTransactionId(null)}
         onMakePayment={handleMakePayment}
+        isPaying={depositMutation.isPending || releaseMutation.isPending}
       />
     </>
   );

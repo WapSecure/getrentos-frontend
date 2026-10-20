@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react';
-import { Button, CardSkeleton } from '@getrentos/ui';
+import { Button, CardSkeleton, ListSkeleton } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -45,11 +45,12 @@ export default function GatemanDeliveriesPage() {
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   const households = householdsData?.items ?? [];
   const householdsTotal = householdsData?.total ?? 0;
 
-  const { data: awaitingData } = useQuery({
+  const { data: awaitingData, isLoading: isAwaitingLoading } = useQuery({
     queryKey: estateKeys.deliveries(estate?.id ?? '', 'received'),
     queryFn: () =>
       unwrap(
@@ -117,7 +118,9 @@ export default function GatemanDeliveriesPage() {
         <h2 className="text-sm font-semibold text-foreground mb-3">
           Awaiting Pickup ({awaiting.length})
         </h2>
-        {awaiting.length === 0 ? (
+        {isAwaitingLoading ? (
+          <ListSkeleton rows={2} />
+        ) : awaiting.length === 0 ? (
           <p className="text-sm text-muted-foreground">No deliveries awaiting pickup.</p>
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">

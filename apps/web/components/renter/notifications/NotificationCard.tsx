@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Button } from '@getrentos/ui';
+import { Button, IconButton } from '@getrentos/ui';
 import { notificationHref } from '@/lib/notificationHref';
 
 interface NotificationMetadata {
@@ -131,9 +131,7 @@ export const NotificationCard = ({
   return (
     <div
       className={`group p-4 rounded-xl transition-all cursor-pointer ${
-        notification.read
-          ? 'hover:bg-secondary'
-          : 'bg-info-subtle/50 hover:bg-info-subtle'
+        notification.read ? 'hover:bg-secondary' : 'bg-info-subtle/50 hover:bg-info-subtle'
       } ${isHovered ? 'shadow-sm' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -155,9 +153,7 @@ export const NotificationCard = ({
                 >
                   {notification.title}
                 </h4>
-                {!notification.read && (
-                  <span className="w-2 h-2 bg-info rounded-full shrink-0" />
-                )}
+                {!notification.read && <span className="w-2 h-2 bg-info rounded-full shrink-0" />}
               </div>
               <p
                 className={`text-sm ${
@@ -185,25 +181,22 @@ export const NotificationCard = ({
                 </Button>
               )}
               {!notification.read && (
-                <Button
-                  variant="ghost"
+                <IconButton
+                  label="Mark as read"
+                  icon={<CheckCircle />}
                   size="sm"
-                  className="p-1 h-auto text-info hover:text-info"
+                  className="text-info hover:text-info"
                   onClick={handleMarkAsReadClick}
-                  title="Mark as read"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                </Button>
+                />
               )}
-              <Button
-                variant="ghost"
+              <IconButton
+                label="Delete notification"
+                icon={<Trash2 />}
                 size="sm"
-                className="p-1 h-auto text-destructive hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                variant="danger"
+                className="sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
                 onClick={handleDeleteClick}
-                title="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              />
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, Field, IconButton, Input } from '@getrentos/ui';
 
 interface InviteGatemanModalProps {
   isOpen: boolean;
@@ -39,27 +39,22 @@ export const InviteGatemanModal = ({
           >
             <div className="p-4 border-b border-border flex justify-between items-center">
               <h3 className="font-semibold text-foreground">Add Gateman</h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Platform account email
-                </label>
-                <LegacyInput
+              <Field
+                label="Platform account email"
+                hint="They must already have a GetRentos account with this email."
+              >
+                <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="gateman@example.com"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  They must already have a GetRentos account with this email.
-                </p>
-              </div>
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              </Field>
+              {error && <p className="text-xs text-destructive">{error}</p>}
             </div>
 
             <div className="p-4 border-t border-border flex gap-3">
@@ -69,10 +64,12 @@ export const InviteGatemanModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!email.trim() || isSubmitting}
+                disabled={!email.trim()}
+                isLoading={isSubmitting}
+                loadingText="Adding…"
                 onClick={() => onSubmit(email.trim())}
               >
-                {isSubmitting ? 'Adding…' : 'Add Gateman'}
+                Add Gateman
               </Button>
             </div>
           </motion.div>

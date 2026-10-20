@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { UserPlus, CalendarClock, Handshake, Wallet, Inbox } from 'lucide-react';
+import { Card, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -18,22 +19,10 @@ interface ActivityItem {
 }
 
 const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
-  lead: {
-    icon: UserPlus,
-    bg: 'bg-purple-50 dark:bg-purple-950/20',
-    color: 'text-purple-600 dark:text-purple-400',
-  },
-  viewing: {
-    icon: CalendarClock,
-    bg: 'bg-orange-50 dark:bg-orange-950/20',
-    color: 'text-orange-600 dark:text-orange-400',
-  },
+  lead: { icon: UserPlus, bg: 'bg-info-subtle', color: 'text-info' },
+  viewing: { icon: CalendarClock, bg: 'bg-warning-subtle', color: 'text-warning' },
   offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
-  commission: {
-    icon: Wallet,
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    color: 'text-emerald-600 dark:text-emerald-400',
-  },
+  commission: { icon: Wallet, bg: 'bg-success-subtle', color: 'text-success' },
 };
 
 export const RealtorActivityFeed = () => {
@@ -60,7 +49,7 @@ export const RealtorActivityFeed = () => {
   });
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Recent Activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -70,12 +59,9 @@ export const RealtorActivityFeed = () => {
 
       <div className="divide-y divide-border">
         {isLoading ? (
-          <p className="p-6 text-center text-sm text-muted-foreground">Loading activity…</p>
+          <ListSkeleton rows={3} label="Loading activity" className="rounded-none border-0" />
         ) : items.length === 0 ? (
-          <div className="p-8 text-center">
-            <Inbox className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">No activity yet</p>
-          </div>
+          <EmptyState icon={Inbox} title="No activity yet" size="compact" bare />
         ) : (
           items.map((item) => {
             const config = typeConfig[item.type];
@@ -100,6 +86,6 @@ export const RealtorActivityFeed = () => {
           })
         )}
       </div>
-    </div>
+    </Card>
   );
 };

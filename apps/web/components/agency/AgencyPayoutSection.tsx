@@ -2,12 +2,16 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Banknote, Landmark, Loader2, Wallet } from 'lucide-react';
+import { Banknote, Landmark, Wallet } from 'lucide-react';
 import {
   Badge,
   Button,
-  Input,
+  Card,
+  EmptyState,
+  Field,
   NumberInput,
+  Skeleton,
+  TableSkeleton,
   type BadgeVariant,
   type ToastVariant,
 } from '@getrentos/ui';
@@ -85,8 +89,7 @@ export function AgencyPayoutSection({
   const account = accountQuery.data;
   const summary = summaryQuery.data;
   const canSave = bankCode.trim().length >= 3 && accountNumber.trim().length === 10;
-  const canWithdraw =
-    Boolean(summary?.accountSet) && (summary?.available ?? 0) > 0 && !withdraw.isPending;
+  const canWithdraw = Boolean(summary?.accountSet) && (summary?.available ?? 0) > 0;
 
   return (
     <div className="mt-8">
@@ -97,15 +100,16 @@ export function AgencyPayoutSection({
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Payout account */}
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <Card className="rounded-2xl p-5">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Landmark className="h-4 w-4 text-muted-foreground" />
             Payout account
           </h3>
           {accountQuery.isLoading ? (
-            <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-            </p>
+            <div role="status" aria-label="Loading" className="mt-3 space-y-2">
+              <Skeleton className="h-4 w-48" />
+              <Skeleton className="h-3 w-32" />
+            </div>
           ) : !editingAccount && account?.verified ? (
             <div className="mt-3">
               <p className="text-sm text-foreground">
@@ -122,28 +126,25 @@ export function AgencyPayoutSection({
             </div>
           ) : (
             <div className="mt-3 space-y-3">
-              <label className="block">
-                <span className="text-xs text-muted-foreground">Bank code</span>
-                <Input
+              <Field label="Bank code">
+                <NumberInput
                   value={bankCode}
-                  onChange={(e) => setBankCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onValueChange={(v) => setBankCode(v.slice(0, 6))}
                   placeholder="e.g. 058 for GTBank"
-                  className="mt-1"
                 />
-              </label>
-              <label className="block">
-                <span className="text-xs text-muted-foreground">Account number</span>
+              </Field>
+              <Field label="Account number">
                 <NumberInput
                   value={accountNumber}
                   onValueChange={(v) => setAccountNumber(v.slice(0, 10))}
                   placeholder="10-digit NUBAN"
-                  className="mt-1"
                 />
-              </label>
+              </Field>
               <div className="flex gap-2">
                 <Button
                   onClick={() => saveAccount.mutate()}
-                  disabled={!canSave || saveAccount.isPending}
+                  disabled={!canSave}
+                  isLoading={saveAccount.isPending}
                 >
                   Save account
                 </Button>
@@ -159,40 +160,46 @@ export function AgencyPayoutSection({
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Available to withdraw */}
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <Card className="rounded-2xl p-5">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <Banknote className="h-4 w-4 text-muted-foreground" />
             Available to withdraw
           </h3>
-          <p className="mt-3 text-2xl font-bold text-foreground">
-            {summary ? formatCurrency(summary.available) : '—'}
-          </p>
+          {summaryQuery.isLoading ? (
+            <Skeleton className="mt-3 h-8 w-32" />
+          ) : (
+            <p className="mt-3 text-2xl font-bold text-foreground">
+              {summary ? formatCurrency(summary.available) : '—'}
+            </p>
+          )}
           <p className="mt-1 text-xs text-muted-foreground">Earned commissions not yet paid out.</p>
-          <Button className="mt-3" onClick={() => withdraw.mutate()} disabled={!canWithdraw}>
-            {withdraw.isPending ? 'Requesting…' : 'Withdraw'}
+          <Button
+            className="mt-3"
+            onClick={() => withdraw.mutate()}
+            disabled={!canWithdraw}
+            isLoading={withdraw.isPending}
+            loadingText="Requesting…"
+          >
+            Withdraw
           </Button>
           {!summary?.accountSet && (
             <p className="mt-2 text-xs text-muted-foreground">Add a payout account to withdraw.</p>
           )}
-        </div>
+        </Card>
       </div>
 
       {/* Payout history */}
       <div className="mt-4">
         <h3 className="mb-2 text-sm font-semibold text-foreground">Payout history</h3>
         {payoutsQuery.isLoading ? (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-          </p>
+          <TableSkeleton rows={3} columns={4} />
         ) : !payoutsQuery.data || payoutsQuery.data.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-            No payouts yet.
-          </div>
+          <EmptyState icon={Banknote} title="No payouts yet." size="compact" />
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted-foreground">

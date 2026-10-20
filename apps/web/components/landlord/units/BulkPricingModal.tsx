@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Tag } from 'lucide-react';
 import {
   Button,
@@ -13,10 +13,10 @@ import {
   DialogTitle,
   EmptyState,
   Field,
+  ListSkeleton,
   Pagination,
   Select,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import { rentSuffix } from '@/lib/leaseTerm';
@@ -42,14 +42,15 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
   const [askingRent, setAskingRent] = useState('');
   const [askingRentPeriod, setAskingRentPeriod] = useState<'year' | 'month'>('year');
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const planGate = usePlanGateModal();
 
-  const { data: unitsData } = useQuery({
+  const { data: unitsData, isPending: isLoadingUnits } = useQuery({
     queryKey: [
       ...landlordKeys.units(propertyId || undefined),
       { page, pageSize: PAGE_SIZE, bulkPricing: true },
     ],
+    placeholderData: keepPreviousData,
     queryFn: () =>
       unwrap(
         landlordService.listUnits({
@@ -99,15 +100,14 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
         result.listingsUpdated > 0
           ? ` and ${result.listingsUpdated} live advert${result.listingsUpdated === 1 ? '' : 's'}`
           : '';
-      setToast({
-        message: `Updated pricing for ${result.updated} unit${result.updated === 1 ? '' : 's'}${listings}.`,
-        variant: 'success',
-      });
+      toast.success(
+        `Updated pricing for ${result.updated} unit${result.updated === 1 ? '' : 's'}${listings}.`
+      );
       handleClose();
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
-      setToast({ message: error.message || 'Unable to update pricing.', variant: 'error' });
+      toast.error(error.message || 'Unable to update pricing.');
     },
   });
 
@@ -167,63 +167,59 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
               </Field>
               <Field
                 label="New rent (₦)"
-                htmlFor="bulk-price-amount"
                 required
                 className="sm:col-span-2"
+                hint="Applied to the selected units and to any live advert for them, so the price the market sees does not drift from the one you set."
               >
                 <div className="flex gap-2">
                   <CurrencyInput
-                    id="bulk-price-amount"
                     prefix="₦"
                     min="1"
                     value={askingRent}
                     onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
                     placeholder={askingRentPeriod === 'year' ? 'e.g. 2500000' : 'e.g. 250000'}
-                    className="flex-1"
+                    className="min-w-0 flex-1"
                   />
-                  <select
-                    value={askingRentPeriod}
-                    onChange={(e) => setAskingRentPeriod(e.target.value as 'year' | 'month')}
-                    className="px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    aria-label="Rent period"
-                  >
-                    <option value="year">per year</option>
-                    <option value="month">per month</option>
-                  </select>
+                  <div className="w-32 shrink-0">
+                    <Select
+                      id="bulk-price-period"
+                      value={askingRentPeriod}
+                      onValueChange={(value) => setAskingRentPeriod(value as 'year' | 'month')}
+                      ariaLabel="Rent period"
+                      searchable={false}
+                      options={[
+                        { value: 'year', label: 'per year' },
+                        { value: 'month', label: 'per month' },
+                      ]}
+                    />
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Applied to the selected units and to any live advert for them, so the price the
-                  market sees does not drift from the one you set.
-                </p>
               </Field>
             </div>
 
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <p className="text-sm font-medium text-foreground">
                   Units ({selectedUnitIds.length} selected across {totalUnits})
                 </p>
                 {eligibleUnits.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={toggleAll}
-                    className="text-xs font-medium text-primary hover:underline"
-                  >
+                  <Button variant="ghost" size="xs" className="text-primary" onClick={toggleAll}>
                     {eligibleUnits.every((unit) => selectedUnitIds.includes(unit.id))
                       ? 'Deselect page'
                       : 'Select page'}
-                  </button>
+                  </Button>
                 )}
               </div>
 
-              {eligibleUnits.length === 0 ? (
-                <div className="rounded-xl border border-border p-6 text-center">
-                  <EmptyState
-                    icon={Tag}
-                    title="No units"
-                    description="No units match this property."
-                  />
-                </div>
+              {isLoadingUnits ? (
+                <ListSkeleton rows={3} />
+              ) : eligibleUnits.length === 0 ? (
+                <EmptyState
+                  icon={Tag}
+                  title="No units"
+                  description="No units match this property."
+                  size="compact"
+                />
               ) : (
                 <div className="max-h-56 overflow-y-auto rounded-xl border border-border divide-y divide-border">
                   {eligibleUnits.map((unit) => (
@@ -279,10 +275,6 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <UpgradeToProModal
         isOpen={planGate.isOpen}
         onClose={planGate.close}

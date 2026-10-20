@@ -3,19 +3,30 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, CircleAlert, ClipboardList, MapPin, Navigation, Send } from 'lucide-react';
 import {
+  ArrowLeft,
+  Camera,
+  CircleAlert,
+  ClipboardList,
+  MapPin,
+  Navigation,
+  Send,
+} from 'lucide-react';
+import {
+  Alert,
   Badge,
   Button,
   Card,
+  DocumentUpload,
   EmptyState,
   Field,
-  Textarea,
-  Toast,
-  type ToastVariant,
-  DocumentUpload,
-  type PendingUpload,
   NumberInput,
+  type PendingUpload,
+  RadioGroup,
+  Skeleton,
+  Textarea,
+  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import {
   LAND_BOUNDARY_LABELS,
@@ -52,14 +63,11 @@ export const InspectorDesk = () => {
   const params = useSearchParams();
   const router = useRouter();
   const id = params.get('id');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const notify = (message: string, variant: ToastVariant = 'success') =>
-    setToast({ message, variant });
+    toast.show(message, variant);
   return (
     <div className="space-y-6">
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       {id ? (
         <JobDetail id={id} onBack={() => router.push('/land/inspections')} notify={notify} />
       ) : (
@@ -84,8 +92,8 @@ const JobList = ({ onOpen }: { onOpen: (id: string) => void }) => {
         </p>
       </div>
       {jobs.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : jobs.isError ? (
+        <Skeleton className="h-40 rounded-2xl" />
+      ) : jobs.isError && !jobs.data ? (
         <EmptyState
           icon={CircleAlert}
           title="Your inspections could not be loaded"
@@ -150,9 +158,8 @@ const JobDetail = ({
     void queryClient.invalidateQueries({ queryKey: landKeys.inspectorJobs });
   };
 
-  if (job.isLoading)
-    return <div className="h-96 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
-  if (job.isError || !job.data) {
+  if (job.isLoading) return <Skeleton className="h-96 rounded-2xl" />;
+  if (!job.data) {
     return (
       <EmptyState
         icon={CircleAlert}
@@ -167,13 +174,15 @@ const JobDetail = ({
   return (
     <>
       <div>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<ArrowLeft className="h-4 w-4" />}
           onClick={onBack}
-          className="text-sm text-muted-foreground hover:text-foreground"
+          className="-ml-2"
         >
-          ← Land inspections
-        </button>
+          Land inspections
+        </Button>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-foreground">{j.land.label}</h1>
@@ -185,11 +194,7 @@ const JobDetail = ({
           <Badge variant={open ? 'info' : 'neutral'}>{STATUS_WORDS[j.status] ?? j.status}</Badge>
         </div>
       </div>
-      {j.staffNote && (
-        <p className="rounded-xl bg-warning/10 p-3 text-sm text-foreground">
-          GetRentos asks: {j.staffNote}
-        </p>
-      )}
+      {j.staffNote && <Alert variant="warning">GetRentos asks: {j.staffNote}</Alert>}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card static className="space-y-3 p-5">
           <h2 className="font-semibold text-foreground">The visit</h2>
@@ -387,22 +392,15 @@ const ReportForm = ({
     <Card static className="space-y-4 p-5">
       <h2 className="font-semibold text-foreground">Report</h2>
       <Field label="The boundary" required>
-        <div role="radiogroup" aria-label="The boundary" className="grid grid-cols-2 gap-2">
-          {CONDITIONS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              role="radio"
-              aria-checked={condition === c}
-              onClick={() => setCondition(c)}
-              className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${condition === c ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:border-foreground/20'}`}
-            >
-              {LAND_BOUNDARY_LABELS[c]}
-            </button>
-          ))}
-        </div>
+        <RadioGroup
+          value={condition}
+          onValueChange={setCondition}
+          variant="card"
+          columns={2}
+          options={CONDITIONS.map((c) => ({ value: c, label: LAND_BOUNDARY_LABELS[c] }))}
+        />
       </Field>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Beacons on the survey">
           <NumberInput integer value={expected} onValueChange={setExpected} />
         </Field>
@@ -420,6 +418,7 @@ const ReportForm = ({
           onChange={(e) => setSummary(e.target.value)}
           rows={6}
           maxLength={8000}
+          showCount
         />
       </Field>
       <Button
