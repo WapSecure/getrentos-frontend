@@ -17,6 +17,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
+    "test:e2e:visual": "playwright test --config=playwright.visual.config.ts",
+    "test:e2e:visual:update": "E2E_VISUAL_COMPARE=1 playwright test --config=playwright.visual.config.ts --update-snapshots",
+    "test:e2e:visual:compare": "E2E_VISUAL_COMPARE=1 playwright test --config=playwright.visual.config.ts",
     "preflight:feature": "node scripts/repo-preflight.mjs feature",
     "validate:dev-sync": "node scripts/repo-preflight.mjs dev-sync",
     "audit:ui-controls": "node scripts/ui-control-audit.mjs",
@@ -25,6 +28,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.63.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",

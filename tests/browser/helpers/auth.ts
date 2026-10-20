@@ -3,7 +3,18 @@ import { expect, type Page } from '@playwright/test';
 export type TestAccount = { email: string; password: string };
 
 export function accountFromEnv(
-  prefix: 'RENTER' | 'LANDLORD' | 'OWNER' | 'REALTOR' | 'ADMIN'
+  prefix:
+    | 'RENTER'
+    | 'LANDLORD'
+    | 'OWNER'
+    | 'REALTOR'
+    | 'BUYER'
+    | 'AGENT'
+    | 'PROPERTY_MANAGER'
+    | 'ESTATE'
+    | 'RESIDENT'
+    | 'GATEMAN'
+    | 'ADMIN'
 ): TestAccount | null {
   const email = process.env[`E2E_${prefix}_EMAIL`];
   const password = process.env[`E2E_${prefix}_PASSWORD`] ?? process.env.E2E_PASSWORD;

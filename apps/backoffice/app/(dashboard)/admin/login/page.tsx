@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Not an administrator?{' '}
-          <a href={`${WEB_APP_URL}/login`} className="text-primary hover:underline">
+          <a href={`${WEB_APP_URL}/login`} className="text-primary underline underline-offset-2">
             Use the user sign-in
           </a>
         </p>
