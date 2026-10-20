@@ -6,7 +6,12 @@
 
 export type LandWatchTier = 'ESSENTIAL' | 'PROTECTED' | 'MANAGED';
 export type LandWatchStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
-export type LandInspectionKind = 'ROUTINE' | 'INCIDENT' | 'REINSPECTION' | 'PRE_PURCHASE';
+export type LandInspectionKind =
+  | 'ROUTINE'
+  | 'INCIDENT'
+  | 'REINSPECTION'
+  | 'PRE_PURCHASE'
+  | 'JOB_CHECK';
 export type LandInspectionStatus =
   | 'REQUESTED'
   | 'ASSIGNED'
@@ -227,6 +232,7 @@ export const LAND_INSPECTION_KIND_LABELS: Record<LandInspectionKind, string> = {
   INCIDENT: 'Incident inspection',
   REINSPECTION: 'Reinspection',
   PRE_PURCHASE: 'Pre-purchase inspection',
+  JOB_CHECK: 'Check of vendor work',
 };
 
 export const LAND_BOUNDARY_LABELS: Record<LandBoundaryCondition, string> = {
@@ -288,3 +294,97 @@ export const formatDistance = (metres: number): string => {
 /** Where a capture was taken, relative to the land. */
 export const describeDistance = (metres: number | null): string =>
   metres == null ? 'no location' : metres === 0 ? 'on the land' : `${formatDistance(metres)} away`;
+
+// ─── Vendor coordination (Managed tier) ─────────────────────────────────────
+
+export type LandWatchJobKind =
+  | 'FENCING'
+  | 'CLEARING'
+  | 'SECURITY'
+  | 'BEACON_REPLACEMENT'
+  | 'SURVEY'
+  | 'OTHER';
+export type LandWatchJobStatus =
+  | 'REQUESTED'
+  | 'QUOTED'
+  | 'APPROVED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED';
+export type LandWatchJobQuoteStatus = 'OFFERED' | 'ACCEPTED' | 'DECLINED' | 'WITHDRAWN';
+
+export interface LandWatchJobQuote {
+  id: string;
+  vendorName: string;
+  /** The owner sees it only on the quote they accepted. */
+  vendorPhone: string | null;
+  amountNaira: number;
+  scope: string;
+  validUntil: string | null;
+  status: LandWatchJobQuoteStatus;
+  createdAt: string;
+}
+
+export interface LandWatchJobProof {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  note: string | null;
+  createdAt: string;
+  /** Short-lived signed link. */
+  url: string;
+}
+
+/** A job as the owner sees it (GET /land/watch/:id/jobs). */
+export interface LandWatchJob {
+  id: string;
+  reference: string;
+  watchId: string;
+  kind: LandWatchJobKind;
+  description: string;
+  status: LandWatchJobStatus;
+  createdAt: string;
+  acceptedAt: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  completionNote: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  /** The independent inspection of the finished work, once booked. */
+  checkInspectionId: string | null;
+  quotes: LandWatchJobQuote[];
+  proof: LandWatchJobProof[];
+}
+
+/** A job as staff see it (GET /admin/land/watch/jobs). */
+export interface StaffLandWatchJob extends LandWatchJob {
+  tier: LandWatchTier;
+  land: { label: string; city: string; state: string; propertyId: string };
+  subscriberId: string;
+}
+
+export const LAND_WATCH_JOB_KIND_LABELS: Record<LandWatchJobKind, string> = {
+  FENCING: 'Fencing',
+  CLEARING: 'Clearing',
+  SECURITY: 'Security',
+  BEACON_REPLACEMENT: 'Beacon replacement',
+  SURVEY: 'Survey',
+  OTHER: 'Other work',
+};
+
+/** What each status means to the owner. */
+export const LAND_WATCH_JOB_STATUS_LABELS: Record<
+  LandWatchJobStatus,
+  { label: string; tone: 'neutral' | 'info' | 'warning' | 'success' | 'danger' }
+> = {
+  REQUESTED: { label: 'Finding vendors', tone: 'neutral' },
+  QUOTED: { label: 'Quotes ready', tone: 'warning' },
+  APPROVED: { label: 'Vendor chosen', tone: 'info' },
+  IN_PROGRESS: { label: 'Work under way', tone: 'info' },
+  COMPLETED: { label: 'Done', tone: 'success' },
+  CANCELLED: { label: 'Cancelled', tone: 'neutral' },
+};
+
+/** Said wherever an owner accepts a quote: GetRentos arranges, the owner pays. */
+export const LAND_WATCH_JOB_PAYMENT_NOTE =
+  'You pay the vendor directly. GetRentos arranges the work and records proof of it, but does not hold or pass on this money.';
