@@ -36,6 +36,7 @@ import { ReportLandProblemDialog } from '../disputes/ReportLandProblemDialog';
 import { ConditionsPanel } from '../closing/ConditionsPanel';
 import { PerfectionPanel } from '../closing/PerfectionPanel';
 import { CoApprovalCard } from '../representatives/CoApprovalCard';
+import { BuyerEstateInfrastructure } from '../estate-infrastructure/BuyerEstateInfrastructure';
 import { landRepresentativeKeys } from '@/services/landRepresentativeService';
 
 const Line = ({ label, value, strong }: { label: string; value: string; strong?: boolean }) => (
@@ -311,6 +312,7 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
                 <TabsTrigger value="conditions">Conditions</TabsTrigger>
               )}
               <TabsTrigger value="conveyance">Conveyance</TabsTrigger>
+              <TabsTrigger value="infrastructure">Infrastructure</TabsTrigger>
               {purchase.perfection && <TabsTrigger value="title">Title</TabsTrigger>}
               <TabsTrigger value="statement">Statement</TabsTrigger>
             </TabsList>
@@ -351,6 +353,12 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
                 pendingKey={milestoneKey}
                 onConfirm={(key) => confirmStep.mutateAsync(key)}
                 onDispute={(key, reason) => disputeStep.mutateAsync({ key, reason })}
+              />
+            </TabsContent>
+            <TabsContent value="infrastructure" className="mt-4">
+              <BuyerEstateInfrastructure
+                purchaseId={purchase.id}
+                notify={(message, variant) => toast.show(message, variant)}
               />
             </TabsContent>
             {purchase.perfection && (

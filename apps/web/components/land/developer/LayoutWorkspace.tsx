@@ -30,6 +30,7 @@ import { LayoutForm } from './LayoutForm';
 import { LayoutStatusPanel } from './LayoutStatusPanel';
 import { PaymentPlans } from './PaymentPlans';
 import { PlotInventory } from './PlotInventory';
+import { DeveloperEstateInfrastructure } from '../estate-infrastructure/DeveloperEstateInfrastructure';
 
 const Detail = ({ label, value }: { label: string; value: string }) => (
   <div>
@@ -194,6 +195,7 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="plots">Plots</TabsTrigger>
             <TabsTrigger value="plans">Payment plans</TabsTrigger>
+            <TabsTrigger value="infrastructure">Infrastructure</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="mt-5 space-y-6">
             <InventoryDashboard propertyId={propertyId} />
@@ -204,6 +206,9 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
           </TabsContent>
           <TabsContent value="plans" className="mt-5">
             <PaymentPlans layout={layout} notify={notify} />
+          </TabsContent>
+          <TabsContent value="infrastructure" className="mt-5">
+            <DeveloperEstateInfrastructure propertyId={propertyId} notify={notify} />
           </TabsContent>
         </Tabs>
 
