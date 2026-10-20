@@ -3,7 +3,10 @@ import type {
   LandBoundaryCondition,
   LandWatchDetail,
   LandWatchIncidentKind,
+  LandWatchOption,
   LandWatchSummary,
+  LandWatchTerms,
+  LandWatchTier,
 } from '@getrentos/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
@@ -20,6 +23,14 @@ export interface CaptureFields {
 /** Land Watch for owners and buyers, and the inspector's field desk. */
 export const landWatchApi = {
   mine: () => apiFetch<LandWatchSummary[]>('/land/watch'),
+  terms: () => apiFetch<LandWatchTerms>('/land/watch/terms'),
+  options: () => apiFetch<LandWatchOption[]>('/land/watch/options'),
+  /** The owner has read the disclaimer on screen before this is called. */
+  subscribe: (body: { propertyId?: string; landPlotId?: string; tier: LandWatchTier }) =>
+    apiFetch<LandWatchDetail>('/land/watch', {
+      method: 'POST',
+      body: { ...body, acceptDisclaimer: true },
+    }),
   get: (id: string) => apiFetch<LandWatchDetail>(`/land/watch/${encodeURIComponent(id)}`),
   reportIncident: (
     id: string,

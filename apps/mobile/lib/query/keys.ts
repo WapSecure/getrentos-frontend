@@ -19,6 +19,8 @@ export const qk = {
   estateAgreements: ['estate-agreements', 'mine'] as const,
   landConsents: ['land', 'consent-requests'] as const,
   landWatches: ['land', 'watch'] as const,
+  landWatchOptions: ['land', 'watch-options'] as const,
+  landWatchTerms: ['land', 'watch-terms'] as const,
   landWatch: (id: string) => ['land', 'watch', id] as const,
   landInspections: ['land', 'inspections'] as const,
   landInspection: (id: string) => ['land', 'inspections', id] as const,

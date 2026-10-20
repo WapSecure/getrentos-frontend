@@ -47,15 +47,12 @@ import {
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landKeys } from '@/lib/queryKeys';
-import { landBuyerService } from '@/services/landBuyerService';
-import { landService } from '@/services/landService';
 import { landWatchService } from '@/services/landWatchService';
 import { errorMessage } from '../developer/feedback';
 import { InspectionReportCard } from './InspectionReportCard';
 
 type Notify = (message: string, variant?: ToastVariant) => void;
 const TIERS: LandWatchTier[] = ['ESSENTIAL', 'PROTECTED', 'MANAGED'];
-const OWNING = new Set(['ACTIVE', 'PAID_IN_FULL', 'COMPLETED']);
 
 /**
  * Land Watch for the person who owns the land: watched parcels and plots, the
@@ -207,33 +204,22 @@ const SubscribeCard = ({
   onDone: (id: string) => void;
   notify: Notify;
 }) => {
+  const queryClient = useQueryClient();
   const terms = useQuery({
     queryKey: landKeys.watchTerms,
     queryFn: () => unwrap(landWatchService.terms()),
   });
-  // Either list may be refused for this account's roles; whichever answers is offered.
-  const parcels = useQuery({
-    queryKey: [...landKeys.owner, 'watch-options'],
-    queryFn: () => unwrap(landService.listOwnerLand({ pageSize: 100 })),
-    retry: false,
+  const landOptions = useQuery({
+    queryKey: landKeys.watchOptions,
+    queryFn: () => unwrap(landWatchService.options()),
   });
-  const plots = useQuery({
-    queryKey: ['land', 'buyer', 'purchases', 'watch-options'],
-    queryFn: () => unwrap(landBuyerService.listPurchases({ pageSize: 100 })),
-    retry: false,
-  });
-  const options = [
-    ...(parcels.data?.items ?? []).map((r) => ({
-      value: `parcel:${r.property.id}`,
-      label: `${r.property.title} (my land)`,
-    })),
-    ...(plots.data?.items ?? [])
-      .filter((p) => OWNING.has(p.status))
-      .map((p) => ({
-        value: `plot:${p.plotId}`,
-        label: `Plot ${p.block ? `${p.block}/` : ''}${p.plotNumber}, ${p.layoutName} (bought)`,
-      })),
-  ];
+  // Land already watched is left out: it has its own watch to open instead.
+  const options = (landOptions.data ?? [])
+    .filter((o) => !o.watchId)
+    .map((o) => ({
+      value: o.kind === 'PLOT' ? `plot:${o.landPlotId}` : `parcel:${o.propertyId}`,
+      label: o.kind === 'PLOT' ? `${o.label} (bought)` : `${o.label} (my land)`,
+    }));
   const [target, setTarget] = useState('');
   const [tier, setTier] = useState<LandWatchTier>('PROTECTED');
   const [accepted, setAccepted] = useState(false);
@@ -246,10 +232,14 @@ const SubscribeCard = ({
         )
       );
     },
-    onSuccess: (detail) => onDone(detail.id),
+    onSuccess: (detail) => {
+      // The list and the picker both live under the watches key.
+      void queryClient.invalidateQueries({ queryKey: landKeys.watches });
+      onDone(detail.id);
+    },
     onError: (error) => notify(errorMessage(error, 'Could not start Land Watch.'), 'error'),
   });
-  const loading = parcels.isLoading || plots.isLoading;
+  const loading = landOptions.isLoading;
 
   return (
     <Card static className="space-y-4 p-5">

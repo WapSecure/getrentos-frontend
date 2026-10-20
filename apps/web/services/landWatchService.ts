@@ -4,6 +4,7 @@ import type {
   LandBoundaryCondition,
   LandWatchDetail,
   LandWatchIncidentKind,
+  LandWatchOption,
   LandWatchReminderKind,
   LandWatchSummary,
   LandWatchTerms,
@@ -29,6 +30,7 @@ export interface CaptureMeta {
 /** Land Watch for owners and buyers, and the inspector's desk. */
 export const landWatchService = {
   terms: () => safeCall(() => authFetch<LandWatchTerms>('/land/watch/terms')),
+  options: () => safeCall(() => authFetch<LandWatchOption[]>('/land/watch/options')),
   mine: () => safeCall(() => authFetch<LandWatchSummary[]>('/land/watch')),
   get: (id: string) => safeCall(() => authFetch<LandWatchDetail>(watchPath(id))),
   subscribe: (input: { propertyId?: string; landPlotId?: string; tier: LandWatchTier }) =>

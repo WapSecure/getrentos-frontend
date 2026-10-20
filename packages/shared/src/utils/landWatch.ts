@@ -124,6 +124,19 @@ export interface LandWatchTerms {
   routineIntervalDays: Record<LandWatchTier, number | null>;
 }
 
+/** Land an account can put under watch (GET /land/watch/options). */
+export interface LandWatchOption {
+  kind: 'PARCEL' | 'PLOT';
+  /** Set for a land property the account owns. */
+  propertyId: string | null;
+  /** Set for a plot the account bought. */
+  landPlotId: string | null;
+  label: string;
+  place: string;
+  /** The watch already on this land, if any. */
+  watchId: string | null;
+}
+
 /** An inspection on the inspector's desk. */
 export interface InspectorJob {
   id: string;
