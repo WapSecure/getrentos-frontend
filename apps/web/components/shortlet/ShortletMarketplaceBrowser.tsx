@@ -13,11 +13,14 @@ import {
   CurrencyInput,
   DatePicker,
   EmptyState,
+  IconButton,
   NumberInput,
+  PageErrorState,
   Pagination,
   SearchInput,
   Select,
   Skeleton,
+  ToggleChip,
 } from '@getrentos/ui';
 import {
   BedDouble,
@@ -25,7 +28,6 @@ import {
   ClipboardCheck,
   Heart,
   MapPin,
-  Search,
   Star,
   Zap,
 } from 'lucide-react';
@@ -121,7 +123,7 @@ export const ShortletMarketplaceBrowser = ({
     ]
   );
 
-  const { data, isLoading, isPending, isError } = useQuery({
+  const { data, isLoading, isPending, isError, isFetching, refetch } = useQuery({
     queryKey: [...shortletKeys.public, queryParams],
     queryFn: () => unwrap(shortletService.listPublic(queryParams)),
     placeholderData: keepPreviousData,
@@ -284,24 +286,19 @@ export const ShortletMarketplaceBrowser = ({
         {SHORTLET_AMENITIES.filter((a) => a !== '24/7 Power').map((amenity) => {
           const on = amenities.includes(amenity);
           return (
-            <button
+            <ToggleChip
               key={amenity}
-              type="button"
-              aria-pressed={on}
-              onClick={() => {
+              size="sm"
+              pressed={on}
+              onPressedChange={() => {
                 setAmenities((current) =>
                   on ? current.filter((a) => a !== amenity) : [...current, amenity]
                 );
                 setPage(1);
               }}
-              className={`cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
-                on
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-muted-foreground hover:bg-secondary'
-              }`}
             >
               {amenity}
-            </button>
+            </ToggleChip>
           );
         })}
       </div>
@@ -334,10 +331,12 @@ export const ShortletMarketplaceBrowser = ({
           ))}
         </div>
       ) : isError && !data ? (
-        <EmptyState
-          icon={Search}
+        <PageErrorState
+          headingLevel="h2"
           title="Could not load shortlets"
           description="Please try again."
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
         />
       ) : listings.length === 0 ? (
         <EmptyState
@@ -395,19 +394,25 @@ export const ShortletMarketplaceBrowser = ({
                   )}
                 </div>
                 {wishlist.canUseWishlist && (
-                  <button
-                    type="button"
-                    aria-label={wishlist.isSaved(listing.id) ? 'Remove from saved' : 'Save listing'}
+                  <IconButton
+                    label={wishlist.isSaved(listing.id) ? 'Remove from saved' : 'Save listing'}
+                    aria-pressed={wishlist.isSaved(listing.id)}
+                    size="sm"
+                    icon={
+                      <Heart
+                        className={
+                          wishlist.isSaved(listing.id)
+                            ? 'fill-destructive text-destructive'
+                            : 'text-muted-foreground'
+                        }
+                      />
+                    }
                     onClick={(e) => {
                       e.stopPropagation();
                       wishlist.toggle.mutate(listing.id);
                     }}
-                    className="absolute right-3 top-3 rounded-full bg-background/80 p-2 shadow-sm backdrop-blur transition-colors hover:bg-background"
-                  >
-                    <Heart
-                      className={`h-4 w-4 ${wishlist.isSaved(listing.id) ? 'fill-destructive text-destructive' : 'text-muted-foreground'}`}
-                    />
-                  </button>
+                    className="absolute right-3 top-3 rounded-full bg-background/80 shadow-sm backdrop-blur hover:bg-background"
+                  />
                 )}
               </div>
               <div className="p-4">

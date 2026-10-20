@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, Clock, Route as RouteIcon } from 'lucide-react';
-import { Alert, Badge, Card, EmptyState, ListSkeleton, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Card,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  SegmentedControl,
+  StatGridSkeleton,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -62,6 +71,16 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
   }
 
   const report = reportQuery.data;
+  if (!report && reportQuery.isError) {
+    return (
+      <PageErrorState
+        headingLevel="h2"
+        title="The patrol report did not load"
+        onRetry={() => void reportQuery.refetch()}
+        isRetrying={reportQuery.isFetching}
+      />
+    );
+  }
   const rounds = report?.rounds ?? [];
   const missed = rounds.filter((round) => round.status === 'MISSED');
 
@@ -74,23 +93,13 @@ export const RoundReport = ({ estateId }: { estateId: string }) => {
             Every night a round was due, whether it was walked, and where it was not.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {RANGES.map((range) => (
-            <button
-              key={range.value}
-              type="button"
-              aria-pressed={rangeDays === range.value}
-              onClick={() => selectRange(range.value)}
-              className={`min-h-9 rounded-xl border px-3 text-sm transition-colors ${
-                rangeDays === range.value
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border bg-card text-foreground hover:border-foreground/20'
-              }`}
-            >
-              {range.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          aria-label="Period"
+          size="sm"
+          value={rangeDays}
+          onValueChange={selectRange}
+          segments={RANGES}
+        />
       </div>
 
       {report && (

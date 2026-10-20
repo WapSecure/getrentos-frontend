@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { Button, Card, CurrencyInput, Field, NumberInput } from '@getrentos/ui';
+import { Card, CurrencyInput, Field, NumberInput, SegmentedControl } from '@getrentos/ui';
 
 interface Roommate {
   id: string;
@@ -89,35 +89,17 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
           <p className="block text-sm font-medium text-foreground mb-1" id="split-method-label">
             Split Method
           </p>
-          <div className="flex gap-2" role="group" aria-labelledby="split-method-label">
-            <Button
-              variant={splitMethod === 'equal' ? 'primary' : 'secondary'}
-              aria-pressed={splitMethod === 'equal'}
-              size="sm"
-              onClick={() => handleSplitMethodChange('equal')}
-              className="flex-1"
-            >
-              Equal
-            </Button>
-            <Button
-              variant={splitMethod === 'percentage' ? 'primary' : 'secondary'}
-              aria-pressed={splitMethod === 'percentage'}
-              size="sm"
-              onClick={() => handleSplitMethodChange('percentage')}
-              className="flex-1"
-            >
-              By Share %
-            </Button>
-            <Button
-              variant={splitMethod === 'custom' ? 'primary' : 'secondary'}
-              aria-pressed={splitMethod === 'custom'}
-              size="sm"
-              onClick={() => handleSplitMethodChange('custom')}
-              className="flex-1"
-            >
-              Custom
-            </Button>
-          </div>
+          <SegmentedControl
+            aria-label="Split Method"
+            value={splitMethod}
+            onValueChange={handleSplitMethodChange}
+            size="sm"
+            segments={[
+              { value: 'equal', label: 'Equal' },
+              { value: 'percentage', label: 'By Share %' },
+              { value: 'custom', label: 'Custom' },
+            ]}
+          />
         </div>
 
         {splitMethod === 'custom' && (

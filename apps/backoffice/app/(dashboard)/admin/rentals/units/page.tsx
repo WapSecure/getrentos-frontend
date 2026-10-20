@@ -10,12 +10,17 @@ import {
   ConfirmDialog,
   CurrencyInput,
   DatePicker,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   EmptyState,
   Input,
   ListSkeleton,
   PageErrorState,
   Pagination,
   SearchInput,
+  SegmentedControl,
   Select,
   Skeleton,
   useToast,
@@ -204,16 +209,13 @@ function OperationDialog({ editor, selectedCount, pending, onChange, onClose, on
   });
   const title = editor.kind === 'assign' ? 'Assign tenant' : editor.kind === 'pricing' ? 'Update unit pricing' : 'Create lease charges';
   const invalidAssignment = editor.kind === 'assign' && (editor.mode === 'registered' ? !editor.candidate : editor.value.trim().length < 2);
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => { if (!pending) onClose(); }}>
-    <div role="dialog" aria-modal="true" aria-labelledby="unit-operation-title" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border bg-card p-5 shadow-xl" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === 'Escape' && !pending) onClose(); }}>
-      <h2 id="unit-operation-title" className="text-lg font-semibold">{title}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{editor.kind === 'assign' ? `Assign a tenant to ${editor.unit.unitName}. Registered renters are linked to their account; manual names are occupancy records only.` : `This affects ${selectedCount} selected unit(s) and will be recorded in the audit trail.`}</p>
+  return <Dialog open onOpenChange={(next) => { if (!next && !pending) onClose(); }}>
+    <DialogContent size="md">
+      <DialogTitle className="text-lg font-semibold text-foreground">{title}</DialogTitle>
+      <DialogDescription className="mt-1 text-sm text-muted-foreground">{editor.kind === 'assign' ? `Assign a tenant to ${editor.unit.unitName}. Registered renters are linked to their account; manual names are occupancy records only.` : `This affects ${selectedCount} selected unit(s) and will be recorded in the audit trail.`}</DialogDescription>
       <div className="mt-4 space-y-3">
         {editor.kind === 'assign' && <>
-          <div className="flex gap-2" role="group" aria-label="Tenant assignment type">
-            <Button type="button" size="sm" variant={editor.mode === 'registered' ? 'primary' : 'outline'} aria-pressed={editor.mode === 'registered'} disabled={pending} onClick={() => onChange({ ...editor, mode: 'registered' })}>Registered renter</Button>
-            <Button type="button" size="sm" variant={editor.mode === 'manual' ? 'primary' : 'outline'} aria-pressed={editor.mode === 'manual'} disabled={pending} onClick={() => onChange({ ...editor, mode: 'manual' })}>Manual name</Button>
-          </div>
+          <SegmentedControl aria-label="Tenant assignment type" size="sm" value={editor.mode} onValueChange={(mode) => onChange({ ...editor, mode })} segments={[{ value: 'registered', label: 'Registered renter', disabled: pending }, { value: 'manual', label: 'Manual name', disabled: pending }]} />
           {editor.mode === 'registered' ? <>
             <SearchInput autoFocus label="Search registered renters" placeholder="Search name, email or phone (2+ characters)" value={editor.search} disabled={pending} onValueChange={(value) => onChange({ ...editor, search: value, candidate: null })} />
             {editor.candidate && <p className="rounded-md border border-primary/30 bg-accent p-3 text-sm" aria-live="polite">Selected: <strong>{editor.candidate.legalName}</strong> · {editor.candidate.email}</p>}
@@ -230,7 +232,7 @@ function OperationDialog({ editor, selectedCount, pending, onChange, onClose, on
           <p className="text-xs text-muted-foreground">Charges are created only for units with signed leases. The result will identify how many selections were skipped.</p>
         </>}
       </div>
-      <div className="mt-5 flex justify-end gap-2"><Button variant="outline" disabled={pending} onClick={onClose}>Cancel</Button><Button disabled={invalidAssignment} isLoading={pending} loadingText="Processing…" onClick={onConfirm}>Confirm</Button></div>
-    </div>
-  </div>;
+      <div className="mt-6 flex flex-wrap justify-end gap-2"><Button variant="outline" disabled={pending} onClick={onClose}>Cancel</Button><Button disabled={invalidAssignment} isLoading={pending} loadingText="Processing…" onClick={onConfirm}>Confirm</Button></div>
+    </DialogContent>
+  </Dialog>;
 }

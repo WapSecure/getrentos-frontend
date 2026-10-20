@@ -2,7 +2,7 @@
 
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import { Button, Card } from '@getrentos/ui';
+import { Card, ToggleChip } from '@getrentos/ui';
 
 interface NotificationFiltersProps {
   filterType: string;
@@ -65,15 +65,14 @@ export const NotificationFilters = ({
             </p>
             <div className="flex flex-wrap gap-2">
               {typeOptions.map((option) => (
-                <Button
+                <ToggleChip
                   key={option.value}
-                  variant={filterType === option.value ? 'primary' : 'secondary'}
-                  aria-pressed={filterType === option.value}
                   size="sm"
-                  onClick={() => setFilterType(option.value)}
+                  pressed={filterType === option.value}
+                  onPressedChange={() => setFilterType(option.value)}
                 >
                   {option.label}
-                </Button>
+                </ToggleChip>
               ))}
             </div>
           </div>
@@ -84,15 +83,14 @@ export const NotificationFilters = ({
             </p>
             <div className="flex flex-wrap gap-2">
               {readOptions.map((option) => (
-                <Button
+                <ToggleChip
                   key={option.value}
-                  variant={filterRead === option.value ? 'primary' : 'secondary'}
-                  aria-pressed={filterRead === option.value}
                   size="sm"
-                  onClick={() => setFilterRead(option.value)}
+                  pressed={filterRead === option.value}
+                  onPressedChange={() => setFilterRead(option.value)}
                 >
                   {option.label}
-                </Button>
+                </ToggleChip>
               ))}
             </div>
           </div>

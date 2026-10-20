@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { Wrench, Plus, Clock } from 'lucide-react';
 import { Button } from '@getrentos/ui';
@@ -7,9 +8,11 @@ import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface MaintenanceHeaderProps {
   onReport: () => void;
+  /** Sits beside the report button, e.g. the alerts bell. */
+  extraAction?: ReactNode;
 }
 
-export const MaintenanceHeader = ({ onReport }: MaintenanceHeaderProps) => {
+export const MaintenanceHeader = ({ onReport, extraAction }: MaintenanceHeaderProps) => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <RenterPageHeader
@@ -18,10 +21,12 @@ export const MaintenanceHeader = ({ onReport }: MaintenanceHeaderProps) => {
         title="Maintenance"
         description="Report an issue, follow its progress, and keep a reliable service history for your home."
         actions={
-          <Button variant="primary" className="gap-2" size="sm" onClick={onReport}>
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            Report issue
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" icon={<Plus className="h-4 w-4" />} onClick={onReport}>
+              Report issue
+            </Button>
+            {extraAction}
+          </div>
         }
       >
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">

@@ -182,18 +182,22 @@ export default function MaintenancePage() {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <MaintenanceHeader onReport={() => setShowReportModal(true)} />
-        <MaintenanceAlerts
-          alerts={alerts}
-          onMarkAsRead={(id) => {
-            setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)));
-            renterService.markNotificationAsRead(id);
-          }}
-          onClearAll={() => {
-            setAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
-            renterService.markAllNotificationsAsRead();
-          }}
+      <div className="mb-6">
+        <MaintenanceHeader
+          onReport={() => setShowReportModal(true)}
+          extraAction={
+            <MaintenanceAlerts
+              alerts={alerts}
+              onMarkAsRead={(id) => {
+                setAlerts((prev) => prev.map((a) => (a.id === id ? { ...a, read: true } : a)));
+                renterService.markNotificationAsRead(id);
+              }}
+              onClearAll={() => {
+                setAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+                renterService.markAllNotificationsAsRead();
+              }}
+            />
+          }
         />
       </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Loader2, Upload, Image as ImageIcon, Video } from 'lucide-react';
 import {
   Alert,
@@ -129,6 +129,7 @@ export const CreateSaleListingModal = ({
         })
       ),
     enabled: isOpen,
+    placeholderData: keepPreviousData,
   });
   const verifiedProperties = propertiesPage?.items ?? [];
   const propertyTotal = propertiesPage?.total ?? 0;
@@ -264,7 +265,7 @@ export const CreateSaleListingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0">
+      <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg">
         <div className="shrink-0 border-b border-border p-4 pr-12">
           <DialogTitle className="font-semibold text-foreground">Create Sale Listing</DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">

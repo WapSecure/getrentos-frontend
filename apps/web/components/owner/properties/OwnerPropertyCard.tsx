@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  IconButton,
 } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
@@ -104,15 +105,14 @@ export const OwnerPropertyCard = ({
         )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label={`More actions for ${property.name}`}
+            <IconButton
+              label={`More actions for ${property.name}`}
               title="More actions"
+              size="sm"
+              icon={<MoreVertical />}
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-3 right-3 z-10 rounded-lg bg-card/90 p-1.5 backdrop-blur-sm transition-colors hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <MoreVertical className="w-4 h-4 text-foreground" />
-            </button>
+              className="absolute top-3 right-3 z-10 bg-card/90 text-foreground backdrop-blur-sm hover:bg-card"
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onSelect={() => onEdit?.()}>

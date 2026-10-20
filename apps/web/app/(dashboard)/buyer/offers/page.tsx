@@ -7,11 +7,17 @@ import { Plus, Handshake } from 'lucide-react';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
 import { MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
-import { Button, Pagination, QueryState, SearchInput, Skeleton } from '@getrentos/ui';
+import {
+  Button,
+  Pagination,
+  QueryState,
+  SearchInput,
+  SegmentedControl,
+  Skeleton,
+} from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
-import { cn } from '@/lib/cn';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
 import type { BuyerOffer, BuyerOfferStatus, BuyerOfferMessage } from '@/types/buyer';
@@ -200,27 +206,17 @@ function BuyerOffersPageContent() {
           label="Search offers"
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
-          {filterOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          size="sm"
+          aria-label="Filter by status"
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value);
+            setPage(1);
+          }}
+          segments={filterOptions}
+          className="max-w-full overflow-x-auto"
+        />
       </div>
 
       <QueryState

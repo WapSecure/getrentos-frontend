@@ -225,13 +225,13 @@ export const HomeTeamCard = () => {
             (without your name). If you already paid, also report it to your bank now.
           </p>
         ) : !reporting ? (
-          <button
-            type="button"
+          <Button
+            variant="link"
             onClick={() => setReporting(true)}
-            className="text-sm font-medium text-destructive hover:underline"
+            className="whitespace-normal text-left font-medium text-destructive"
           >
             Report someone posing as your landlord, manager or GetRentos
-          </button>
+          </Button>
         ) : (
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Report an impostor</h3>

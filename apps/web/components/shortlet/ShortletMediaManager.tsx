@@ -158,7 +158,7 @@ export function ShortletMediaManager({
                     Cover
                   </Badge>
                 )}
-                <div className="absolute inset-0 flex items-end justify-between gap-1 bg-black/45 p-1.5 opacity-0 transition group-hover:opacity-100">
+                <div className="absolute inset-0 flex items-end justify-between gap-1 bg-black/45 p-1.5 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
                   {key !== cover && (
                     <IconButton
                       size="sm"

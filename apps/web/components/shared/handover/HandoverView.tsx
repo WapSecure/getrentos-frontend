@@ -362,40 +362,39 @@ export function HandoverView({ transferId }: { transferId: string }) {
         <Card className="space-y-4 p-5">
           <h2 className="font-semibold text-foreground">Sign as the outgoing manager</h2>
           {outside.map((d) => (
-            <div key={d.id}>
-              <p className="text-sm text-foreground">
-                Deposit of {formatCurrency(d.amount)} ({d.tenant}, {d.unit}) you held outside
-                GetRentos
-              </p>
-              <Select
-                ariaLabel={`What happened to the ${formatCurrency(d.amount)} deposit`}
-                value={deposits[d.id]?.treatment ?? ''}
-                onValueChange={(value) =>
-                  setDeposits((s) => ({
-                    ...s,
-                    [d.id]: {
-                      note: s[d.id]?.note ?? '',
-                      treatment: value as DepositTreatment,
-                    },
-                  }))
-                }
-                placeholder="What happened to it…"
-                searchable={false}
-                options={(Object.keys(TREATMENT) as DepositTreatment[]).map((t) => ({
-                  value: t,
-                  label: TREATMENT[t],
-                }))}
-                className="mt-1"
-              />
-              <Input
-                aria-label="Reference or note"
-                value={deposits[d.id]?.note ?? ''}
-                onChange={(e) =>
-                  setDeposits((s) => ({ ...s, [d.id]: { ...s[d.id], note: e.target.value } }))
-                }
-                placeholder="Transfer reference or note (optional)"
-                className="mt-2"
-              />
+            <div key={d.id} className="space-y-2">
+              <Field
+                label={`Deposit of ${formatCurrency(d.amount)} (${d.tenant}, ${d.unit}) you held outside GetRentos`}
+              >
+                <Select
+                  ariaLabel={`What happened to the ${formatCurrency(d.amount)} deposit`}
+                  value={deposits[d.id]?.treatment ?? ''}
+                  onValueChange={(value) =>
+                    setDeposits((s) => ({
+                      ...s,
+                      [d.id]: {
+                        note: s[d.id]?.note ?? '',
+                        treatment: value as DepositTreatment,
+                      },
+                    }))
+                  }
+                  placeholder="What happened to it…"
+                  searchable={false}
+                  options={(Object.keys(TREATMENT) as DepositTreatment[]).map((t) => ({
+                    value: t,
+                    label: TREATMENT[t],
+                  }))}
+                />
+              </Field>
+              <Field label="Reference or note" optionalLabel="Optional">
+                <Input
+                  value={deposits[d.id]?.note ?? ''}
+                  onChange={(e) =>
+                    setDeposits((s) => ({ ...s, [d.id]: { ...s[d.id], note: e.target.value } }))
+                  }
+                  placeholder="Transfer reference or note"
+                />
+              </Field>
             </div>
           ))}
           <Field label="Keys, codes and access handed over" htmlFor="ho-keys">
@@ -461,13 +460,13 @@ export function HandoverView({ transferId }: { transferId: string }) {
               </div>
             </Card>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="link"
               onClick={() => setShowDispute(true)}
-              className="cursor-pointer text-sm text-muted-foreground underline"
+              className="whitespace-normal text-left font-normal text-muted-foreground underline"
             >
               Something isn&apos;t right? Dispute the handover instead of signing.
-            </button>
+            </Button>
           )}
         </div>
       )}

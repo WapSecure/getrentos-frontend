@@ -59,14 +59,14 @@ export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalcul
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+        className="gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
       >
         <Navigation className="w-3 h-3" />
         Calculate commute
-      </button>
+      </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="p-0">

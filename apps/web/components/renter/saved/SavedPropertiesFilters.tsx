@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutGrid, List } from 'lucide-react';
-import { Select } from '@getrentos/ui';
+import { SegmentedControl, Select, ToggleChip } from '@getrentos/ui';
 
 interface SavedPropertiesFiltersProps {
   viewMode: 'grid' | 'list';
@@ -38,21 +38,15 @@ export const SavedPropertiesFilters = ({
 }: SavedPropertiesFiltersProps) => {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by status">
         {statusOptions.map((option) => (
-          <button
+          <ToggleChip
             key={option.value}
-            type="button"
-            aria-pressed={filterStatus === option.value}
-            onClick={() => setFilterStatus(option.value)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
-              filterStatus === option.value
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-muted-foreground hover:bg-secondary/70 hover:text-foreground'
-            }`}
+            pressed={filterStatus === option.value}
+            onPressedChange={() => setFilterStatus(option.value)}
           >
             {option.label}
-          </button>
+          </ToggleChip>
         ))}
       </div>
 
@@ -68,31 +62,17 @@ export const SavedPropertiesFilters = ({
           className="min-w-0 sm:w-52"
         />
 
-        {/* View Toggle */}
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg" role="group" aria-label="Layout">
-          <button
-            type="button"
-            aria-label="Grid view"
-            aria-pressed={viewMode === 'grid'}
-            onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
-              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
-            }`}
-          >
-            <LayoutGrid className="w-4 h-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            aria-label="List view"
-            aria-pressed={viewMode === 'list'}
-            onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 ${
-              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
-            }`}
-          >
-            <List className="w-4 h-4" aria-hidden="true" />
-          </button>
-        </div>
+        <SegmentedControl
+          aria-label="Layout"
+          value={viewMode}
+          onValueChange={setViewMode}
+          iconOnly
+          size="sm"
+          segments={[
+            { value: 'grid', label: 'Grid view', icon: <LayoutGrid className="w-4 h-4" /> },
+            { value: 'list', label: 'List view', icon: <List className="w-4 h-4" /> },
+          ]}
+        />
       </div>
     </div>
   );

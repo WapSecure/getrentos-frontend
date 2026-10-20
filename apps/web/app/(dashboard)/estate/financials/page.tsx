@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
-import { Button, CardSkeleton } from '@getrentos/ui';
+import { Button, CardSkeleton, SegmentedControl } from '@getrentos/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
 import { EstateFinancialsChart } from '@/components/estate/financials/EstateFinancialsChart';
 import {
@@ -79,15 +79,16 @@ export default function EstateFinancialsPage() {
           <Button
             variant="primary"
             size="sm"
-            className="gap-1.5"
+            icon={
+              exported ? (
+                <Check className="w-3.5 h-3.5" />
+              ) : (
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+              )
+            }
             onClick={() => exportMutation.mutate()}
             isLoading={exportMutation.isPending}
           >
-            {exported ? (
-              <Check className="w-3.5 h-3.5" />
-            ) : (
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-            )}
             {exported ? 'Exported' : 'Export CSV'}
           </Button>
         )}
@@ -98,23 +99,14 @@ export default function EstateFinancialsPage() {
         title="Financial reporting is a Pro feature"
         description="Upgrade to Pro to see dues collected, outstanding balances, and late fees by period, plus export your data as CSV."
       >
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6">
-          {periodOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={period === option.value}
-              onClick={() => setPeriod(option.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                period === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          aria-label="Report period"
+          size="sm"
+          className="mb-6"
+          value={period}
+          onValueChange={setPeriod}
+          segments={periodOptions}
+        />
 
         <EstateFinancialStats
           duesCollected={stats.duesCollected}

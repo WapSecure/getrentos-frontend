@@ -1,9 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button, DocumentUpload, Field, IconButton, Input, Select } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DocumentUpload,
+  Field,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import type { Gate } from '@/types/estate';
 
 const purposeOptions = [
@@ -57,102 +64,89 @@ export const LogVehicleModal = ({
   const canSubmit = plateNumber.trim().length > 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">Log Vehicle</h3>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="md">
+        <DialogTitle className="text-lg font-semibold text-foreground">Log Vehicle</DialogTitle>
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <Field label="Plate number">
-                <Input
-                  type="text"
-                  value={plateNumber}
-                  onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-                  placeholder="ABC123XY"
-                  inputClassName="uppercase"
-                />
-              </Field>
+        <div className="mt-5 space-y-4">
+          <Field label="Plate number" required>
+            <Input
+              type="text"
+              value={plateNumber}
+              onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+              placeholder="ABC123XY"
+              inputClassName="uppercase"
+            />
+          </Field>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Description" optionalLabel="(optional)">
-                  <Input
-                    type="text"
-                    value={vehicleDescription}
-                    onChange={(e) => setVehicleDescription(e.target.value)}
-                    placeholder="e.g. Black Camry"
-                  />
-                </Field>
-                <Field label="Driver" optionalLabel="(optional)">
-                  <Input
-                    type="text"
-                    value={driverName}
-                    onChange={(e) => setDriverName(e.target.value)}
-                    placeholder="e.g. Tunde"
-                  />
-                </Field>
-              </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Description" optionalLabel="(optional)">
+              <Input
+                type="text"
+                value={vehicleDescription}
+                onChange={(e) => setVehicleDescription(e.target.value)}
+                placeholder="e.g. Black Camry"
+              />
+            </Field>
+            <Field label="Driver" optionalLabel="(optional)">
+              <Input
+                type="text"
+                value={driverName}
+                onChange={(e) => setDriverName(e.target.value)}
+                placeholder="e.g. Tunde"
+              />
+            </Field>
+          </div>
 
-              <Field label="Purpose">
-                <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
-              </Field>
+          <Field label="Purpose">
+            <Select value={purpose} onValueChange={setPurpose} options={purposeOptions} />
+          </Field>
 
-              {gateOptions.length > 0 && (
-                <Field label="Gate">
-                  <Select
-                    value={gateId}
-                    onValueChange={setGateId}
-                    options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
-                  />
-                </Field>
-              )}
+          {gateOptions.length > 0 && (
+            <Field label="Gate">
+              <Select
+                value={gateId}
+                onValueChange={setGateId}
+                options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+              />
+            </Field>
+          )}
 
-              <Field label="Photo" optionalLabel="(optional)">
-                <DocumentUpload
-                  value={photo ? [{ id: 'photo', file: photo }] : []}
-                  onChange={(items) => setPhoto(items[0]?.file ?? null)}
-                  accept="image/*"
-                  multiple={false}
-                  label=""
-                />
-              </Field>
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canSubmit}
-                isLoading={isSubmitting}
-                loadingText="Logging…"
-                onClick={() =>
-                  onSubmit({
-                    plateNumber: plateNumber.trim(),
-                    vehicleDescription: vehicleDescription.trim() || undefined,
-                    driverName: driverName.trim() || undefined,
-                    purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
-                    gateId: gateId || undefined,
-                    photo: photo ?? undefined,
-                  })
-                }
-              >
-                Log Vehicle
-              </Button>
-            </div>
-          </motion.div>
+          <Field label="Photo" optionalLabel="(optional)">
+            <DocumentUpload
+              value={photo ? [{ id: 'photo', file: photo }] : []}
+              onChange={(items) => setPhoto(items[0]?.file ?? null)}
+              accept="image/*"
+              multiple={false}
+              label=""
+            />
+          </Field>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <Button variant="ghost" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!canSubmit}
+            isLoading={isSubmitting}
+            loadingText="Logging…"
+            onClick={() =>
+              onSubmit({
+                plateNumber: plateNumber.trim(),
+                vehicleDescription: vehicleDescription.trim() || undefined,
+                driverName: driverName.trim() || undefined,
+                purpose: purpose as 'VISITOR' | 'RESIDENT' | 'DELIVERY' | 'STAFF' | 'OTHER',
+                gateId: gateId || undefined,
+                photo: photo ?? undefined,
+              })
+            }
+          >
+            Log Vehicle
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -7,6 +7,7 @@ import { isAuthenticated, getStoredUser } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { agencyOwnerInviteService } from '@/services/agencyOwnerInviteService';
 import { Logo } from '@/components/ui/Logo';
+import { Button, Skeleton } from '@getrentos/ui';
 
 type Phase = 'loading' | 'needs-auth' | 'claiming' | 'done' | 'error';
 
@@ -84,16 +85,21 @@ function ClaimContent() {
         <Logo size="lg" />
       </div>
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 text-center shadow-[0_16px_40px_rgba(0,0,0,0.08)]">
-        {phase === 'loading' || phase === 'claiming' ? (
-          <>
-            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" />
-            <h1 className="text-lg font-semibold text-foreground">
-              {phase === 'claiming' ? 'Accepting…' : 'Loading your invitation…'}
-            </h1>
-          </>
+        {phase === 'loading' ? (
+          <div role="status" aria-live="polite" aria-label="Loading your invitation">
+            <Skeleton className="mx-auto mb-3 h-8 w-8 rounded-full" />
+            <Skeleton className="mx-auto h-5 w-2/3" />
+            <Skeleton className="mx-auto mt-3 h-3.5 w-full" />
+            <Skeleton className="mx-auto mt-2 h-3.5 w-4/5" />
+          </div>
+        ) : phase === 'claiming' ? (
+          <div role="status" aria-live="polite">
+            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-primary motion-reduce:animate-none" />
+            <h1 className="text-lg font-semibold text-foreground">Accepting…</h1>
+          </div>
         ) : phase === 'done' ? (
           <>
-            <CheckCircle2 className="mx-auto mb-3 h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+            <CheckCircle2 className="mx-auto mb-3 h-8 w-8 text-success" />
             <h1 className="text-lg font-semibold text-foreground">You’re all set</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               You’ve accepted {firm || 'the firm'}’s invitation. They can now set up management for
@@ -117,12 +123,9 @@ function ClaimContent() {
               invitation link again.
             </p>
             <div className="mt-5 flex flex-col gap-2">
-              <a
-                href={`${ROUTES.SIGNUP}?email=${encodeURIComponent(email)}`}
-                className="inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
-              >
+              <Button href={`${ROUTES.SIGNUP}?email=${encodeURIComponent(email)}`} rounded="full" fullWidth>
                 Create an account
-              </a>
+              </Button>
               <a
                 href={ROUTES.LOGIN}
                 className="inline-block text-sm font-medium text-primary hover:text-primary-hover"

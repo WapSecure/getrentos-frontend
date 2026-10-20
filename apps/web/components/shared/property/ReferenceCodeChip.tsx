@@ -37,7 +37,7 @@ export const ReferenceCodeChip = ({
       onClick={copy}
       title="Copy property code"
       aria-label={copied ? `Property code ${code} copied` : `Copy property code ${code}`}
-      className={`inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 font-mono text-xs text-foreground transition-colors hover:bg-accent ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-2 py-1 font-mono text-xs text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${className}`}
     >
       {code}
       {copied ? (

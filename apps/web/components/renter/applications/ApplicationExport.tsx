@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Download, FileText, FileSpreadsheet, X, Check } from 'lucide-react';
-import { IconButton } from '@getrentos/ui';
+import { Download, FileText, FileSpreadsheet, Check } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
@@ -79,77 +78,65 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Export Applications</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {applications.length} applications to export
-                </p>
-              </div>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={onClose} />
-            </div>
-
-            <div className="p-4 space-y-3">
-              <button
-                type="button"
-                onClick={exportToCSV}
-                disabled={exporting !== null}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-success-subtle">
-                    <FileSpreadsheet className="w-5 h-5 text-success" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-foreground">Export as CSV</p>
-                    <p className="text-xs text-muted-foreground">Download as spreadsheet</p>
-                  </div>
-                </div>
-                {exporting === 'csv' ? (
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                ) : exporting === null && completed ? (
-                  <Check className="w-5 h-5 text-success" />
-                ) : (
-                  <Download className="w-5 h-5 text-muted-foreground" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={exportToPDF}
-                disabled={exporting !== null}
-                className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-destructive-subtle">
-                    <FileText className="w-5 h-5 text-destructive" />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-medium text-foreground">Export as PDF</p>
-                    <p className="text-xs text-muted-foreground">Download as document</p>
-                  </div>
-                </div>
-                {exporting === 'pdf' ? (
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                ) : exporting === null && completed ? (
-                  <Check className="w-5 h-5 text-success" />
-                ) : (
-                  <Download className="w-5 h-5 text-muted-foreground" />
-                )}
-              </button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent padded={false}>
+        <div className="p-4 pr-12 border-b border-border">
+          <DialogTitle className="font-semibold text-foreground">Export Applications</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            {applications.length} applications to export
+          </DialogDescription>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-3">
+          <button
+            type="button"
+            onClick={exportToCSV}
+            disabled={exporting !== null}
+            className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-success-subtle">
+                <FileSpreadsheet className="w-5 h-5 text-success" />
+              </div>
+              <div className="text-left">
+                <p className="font-medium text-foreground">Export as CSV</p>
+                <p className="text-xs text-muted-foreground">Download as spreadsheet</p>
+              </div>
+            </div>
+            {exporting === 'csv' ? (
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : exporting === null && completed ? (
+              <Check className="w-5 h-5 text-success" />
+            ) : (
+              <Download className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={exportToPDF}
+            disabled={exporting !== null}
+            className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-destructive-subtle">
+                <FileText className="w-5 h-5 text-destructive" />
+              </div>
+              <div className="text-left">
+                <p className="font-medium text-foreground">Export as PDF</p>
+                <p className="text-xs text-muted-foreground">Download as document</p>
+              </div>
+            </div>
+            {exporting === 'pdf' ? (
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : exporting === null && completed ? (
+              <Check className="w-5 h-5 text-success" />
+            ) : (
+              <Download className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -14,6 +14,8 @@ import {
   ListSkeleton,
   PageErrorState,
   Pagination,
+  Skeleton,
+  ToggleChip,
   useToast,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
@@ -199,9 +201,11 @@ export default function LandlordLeasesPage() {
           {/* A count of zero is a claim about the portfolio, so do not make it
               until the portfolio has actually been read. */}
           <p className="text-muted-foreground mt-1">
-            {isLoadingActive
-              ? 'Counting your active leases…'
-              : `${activeLeaseCount} active lease${activeLeaseCount === 1 ? '' : 's'}`}
+            {isLoadingActive ? (
+              <Skeleton className="inline-block h-4 w-40 max-w-full align-middle" />
+            ) : (
+              `${activeLeaseCount} active lease${activeLeaseCount === 1 ? '' : 's'}`
+            )}
           </p>
         </div>
         <Button
@@ -213,24 +217,19 @@ export default function LandlordLeasesPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit mb-6 overflow-x-auto">
+      <div className="mb-6 flex gap-2 overflow-x-auto" role="group" aria-label="Filter leases by status">
         {statusFilters.map((option) => (
-          <button
+          <ToggleChip
             key={option.value}
-            type="button"
-            aria-pressed={filter === option.value}
-            onClick={() => {
+            size="sm"
+            pressed={filter === option.value}
+            onPressedChange={() => {
               setFilter(option.value);
               setPage(1);
             }}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-              filter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
           >
             {option.label}
-          </button>
+          </ToggleChip>
         ))}
       </div>
 
@@ -297,7 +296,6 @@ export default function LandlordLeasesPage() {
         onSign={handleSignLease}
         isPending={signLeaseMutation.isPending}
       />
-
     </>
   );
 }

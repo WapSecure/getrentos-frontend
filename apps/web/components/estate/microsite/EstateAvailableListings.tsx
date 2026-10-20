@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Bath, BedDouble, Building2, CalendarClock, Home, MapPin } from 'lucide-react';
-import { Badge, EmptyState, Skeleton } from '@getrentos/ui';
+import { Badge, EmptyState, Skeleton, ToggleChip } from '@getrentos/ui';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -192,28 +192,21 @@ export const EstateAvailableListings = ({
       </div>
 
       {visibleTabs.length > 2 && (
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
-          {visibleTabs.map((t) => {
-            const active = tab === t.key;
-            return (
-              <button
-                key={t.key}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setTab(t.key)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  active
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-card text-muted-foreground border-border hover:border-primary/40'
-                }`}
-              >
-                {t.label}
-                {counts[t.key] !== undefined && counts[t.key]! > 0 ? (
-                  <span className={active ? ' opacity-80' : ' opacity-60'}> · {counts[t.key]}</span>
-                ) : null}
-              </button>
-            );
-          })}
+        <div
+          role="group"
+          aria-label="Listing type"
+          className="flex gap-2 mt-4 overflow-x-auto pb-1"
+        >
+          {visibleTabs.map((t) => (
+            <ToggleChip
+              key={t.key}
+              pressed={tab === t.key}
+              onPressedChange={() => setTab(t.key)}
+              count={counts[t.key] || undefined}
+            >
+              {t.label}
+            </ToggleChip>
+          ))}
         </div>
       )}
 

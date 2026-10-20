@@ -17,6 +17,7 @@ import {
   Pagination,
   QueryState,
   SearchInput,
+  SegmentedControl,
   Skeleton,
   useOptimisticMutation,
 } from '@getrentos/ui';
@@ -168,26 +169,17 @@ export default function BuyerDiscoverPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto mb-6">
-        {typeFilters.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={typeFilter === option.value}
-            onClick={() => {
-              setTypeFilter(option.value);
-              setPage(1);
-            }}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-              typeFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        size="sm"
+        aria-label="Filter by property type"
+        value={typeFilter}
+        onValueChange={(value) => {
+          setTypeFilter(value);
+          setPage(1);
+        }}
+        segments={typeFilters}
+        className="max-w-full overflow-x-auto mb-6"
+      />
 
       <QueryState
         isLoading={listingsQuery.isLoading || savedQuery.isLoading}

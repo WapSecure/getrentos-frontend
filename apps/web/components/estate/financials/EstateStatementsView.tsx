@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Card,
+  CardSkeleton,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -191,8 +192,11 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
             estate&apos;s account
           </p>
         </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsGenerateOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setIsGenerateOpen(true)}
+        >
           Generate statement
         </Button>
       </div>
@@ -200,13 +204,11 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       {isLoading ? (
         <ListSkeleton rows={3} />
       ) : statements.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12">
-          <EmptyState
-            icon={FileBarChart}
-            title="No statements yet"
-            description="Generate your first statement to see a real dues-collected breakdown for a period."
-          />
-        </div>
+        <EmptyState
+          icon={FileBarChart}
+          title="No statements yet"
+          description="Generate your first statement to see a real dues-collected breakdown for a period."
+        />
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {statements.map((statement: EstateStatement) => (
@@ -253,8 +255,8 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       )}
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
-        <DialogContent className="max-w-lg p-0">
-          <form onSubmit={submit} className="p-6">
+        <DialogContent size="md">
+          <form onSubmit={submit}>
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Generate statement
             </DialogTitle>
@@ -277,7 +279,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
               </Field>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3 border-t border-border pt-5">
+            <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-border pt-5">
               <Button
                 type="button"
                 variant="outline"
@@ -300,10 +302,15 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       </Dialog>
 
       <Dialog open={!!detailId} onOpenChange={(open) => !open && setDetailId(null)}>
-        <DialogContent className="max-w-lg p-0">
-          {detail && (
-            <div className="p-6">
-              <div className="flex items-center justify-between gap-3">
+        <DialogContent size="lg">
+          {!detail ? (
+            <>
+              <DialogTitle className="sr-only">Statement</DialogTitle>
+              <CardSkeleton lines={5} />
+            </>
+          ) : (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 pr-8">
                 <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
                   {formatDate(detail.periodStart)}: {formatDate(detail.periodEnd)}
                 </DialogTitle>

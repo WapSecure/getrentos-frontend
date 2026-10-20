@@ -12,11 +12,16 @@ import {
   Button,
   Card,
   CardSkeleton,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   EmptyState,
   Field,
   ListSkeleton,
   Pagination,
   Textarea,
+  ToggleChip,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -207,24 +212,18 @@ export default function EstateContractorPassesPage() {
         </Card>
       )}
 
-      <div className="flex gap-2 mb-4 overflow-x-auto">
+      <div className="flex gap-2 mb-4 overflow-x-auto" role="group" aria-label="Filter contractors by status">
         {statusFilters.map((filter) => (
-          <button
+          <ToggleChip
             key={filter.value}
-            type="button"
-            aria-pressed={statusFilter === filter.value}
-            onClick={() => {
+            pressed={statusFilter === filter.value}
+            onPressedChange={() => {
               setStatusFilter(filter.value);
               setPage(1);
             }}
-            className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap border ${
-              statusFilter === filter.value
-                ? 'border-primary bg-primary/10 text-foreground'
-                : 'border-border text-muted-foreground'
-            }`}
           >
             {filter.label}
-          </button>
+          </ToggleChip>
         ))}
       </div>
 
@@ -297,51 +296,55 @@ export default function EstateContractorPassesPage() {
       />
 
       {/* Withdrawing, inline: one field, and the reason is the point of it. */}
-      {revoking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-card rounded-xl max-w-md w-full p-5">
-            <h2 className="text-lg font-semibold text-foreground">
-              Withdraw {revoking.name}&rsquo;s authorisation?
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              They will be refused at the barrier from now on. The record stays, along with every
-              arrival they were admitted for.
-            </p>
-            <Field
-              label="Reason"
-              required
-              className="mt-4"
-              hint={`At least ${REASON_MIN_LENGTH} characters. A withdrawal without a stated reason is one nobody can review later.`}
-            >
-              <Textarea
-                value={revokeReason}
-                onChange={(e) => setRevokeReason(e.target.value)}
-                rows={3}
-                placeholder="Why is it being withdrawn?"
-              />
-            </Field>
-            {revokePass.error && (
-              <p className="text-sm text-destructive mt-2">{(revokePass.error as Error).message}</p>
-            )}
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="ghost" onClick={() => setRevoking(null)}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                disabled={revokeReason.trim().length < REASON_MIN_LENGTH}
-                isLoading={revokePass.isPending}
-                loadingText="Withdrawing…"
-                onClick={() =>
-                  revokePass.mutate({ passId: revoking.id, reason: revokeReason.trim() })
-                }
+      <Dialog open={!!revoking} onOpenChange={(open) => !open && setRevoking(null)}>
+        <DialogContent size="md">
+          {revoking && (
+            <>
+              <DialogTitle className="text-lg font-semibold text-foreground">
+                Withdraw {revoking.name}&rsquo;s authorisation?
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                They will be refused at the barrier from now on. The record stays, along with every
+                arrival they were admitted for.
+              </DialogDescription>
+              <Field
+                label="Reason"
+                required
+                className="mt-4"
+                hint={`At least ${REASON_MIN_LENGTH} characters. A withdrawal without a stated reason is one nobody can review later.`}
               >
-                Withdraw
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+                <Textarea
+                  value={revokeReason}
+                  onChange={(e) => setRevokeReason(e.target.value)}
+                  rows={3}
+                  placeholder="Why is it being withdrawn?"
+                />
+              </Field>
+              {revokePass.error && (
+                <Alert variant="danger" className="mt-3">
+                  {(revokePass.error as Error).message}
+                </Alert>
+              )}
+              <div className="mt-6 flex flex-wrap justify-end gap-2">
+                <Button variant="ghost" onClick={() => setRevoking(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled={revokeReason.trim().length < REASON_MIN_LENGTH}
+                  isLoading={revokePass.isPending}
+                  loadingText="Withdrawing…"
+                  onClick={() =>
+                    revokePass.mutate({ passId: revoking.id, reason: revokeReason.trim() })
+                  }
+                >
+                  Withdraw
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

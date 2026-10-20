@@ -2,11 +2,23 @@
 
 import { useState } from 'react';
 import { Check, BadgeCheck } from 'lucide-react';
-import { Badge, Button, Card, CardSkeleton } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  SegmentedControl,
+  type Segment,
+} from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import type { BillingCycle, PlanPricing } from '@/services/subscriptionService';
 
 const naira = (kobo: number) => formatCurrency(kobo / 100);
+
+const CYCLE_SEGMENTS: Segment<BillingCycle>[] = [
+  { value: 'MONTHLY', label: 'Monthly' },
+  { value: 'ANNUAL', label: 'Annual' },
+];
 
 /**
  * The Pro offer card: price (monthly/annual), trial and CTA. Reads its numbers
@@ -80,23 +92,13 @@ export function ProPriceCard({
           : ' · VAT added at checkout'}
       </p>
 
-      <div className="mt-4 inline-flex rounded-lg border border-border bg-card p-1 text-sm">
-        {(['MONTHLY', 'ANNUAL'] as const).map((c) => (
-          <button
-            key={c}
-            type="button"
-            aria-pressed={cycle === c}
-            onClick={() => setCycle(c)}
-            className={
-              cycle === c
-                ? 'rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground'
-                : 'rounded-md px-3 py-1.5 text-muted-foreground hover:bg-secondary'
-            }
-          >
-            {c === 'MONTHLY' ? 'Monthly' : 'Annual'}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        aria-label="Billing cycle"
+        value={cycle}
+        onValueChange={setCycle}
+        segments={CYCLE_SEGMENTS}
+        className="mt-4"
+      />
 
       {!isPro && (
         <div className="mt-5">

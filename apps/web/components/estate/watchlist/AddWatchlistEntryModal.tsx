@@ -1,15 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
 import {
   Alert,
   Button,
   DatePicker,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   DocumentUpload,
   Field,
-  IconButton,
   Input,
   Select,
 } from '@getrentos/ui';
@@ -112,182 +112,169 @@ export const AddWatchlistEntryModal = ({
     label.trim().length > 0 && reason.trim().length >= REASON_MIN_LENGTH && !cannotMatch;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="md">
+        <DialogTitle className="text-lg font-semibold text-foreground">Add to watch list</DialogTitle>
+
+        <div className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="Subject">
+              <Select
+                value={subjectType}
+                onValueChange={(value) => {
+                  const next = value as WatchlistSubjectType;
+                  if (next === subjectType) return;
+                  // Everything identity-bearing is cleared on a change of
+                  // subject. Carrying it over is not neutral: a description
+                  // typed for a vehicle ("Black Hilux") is two words, so it
+                  // would be accepted as a person's name and the estate would
+                  // have filed a rule about somebody who does not exist.
+                  setLabel('');
+                  setPhone('');
+                  setPlateNumber('');
+                  setSubjectType(next);
+                }}
+                options={SUBJECT_OPTIONS}
+              />
+            </Field>
+            <Field label="What happens">
+              <Select
+                value={severity}
+                onValueChange={(value) => setSeverity(value as WatchlistSeverity)}
+                options={SEVERITY_OPTIONS}
+              />
+            </Field>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            {severity === 'BLOCK'
+              ? 'The gate is refused, and they can only be admitted if a guard gives a reason: which you are told about.'
+              : 'The gate is not refused. The estate office is told when they arrive.'}
+          </p>
+
+          <Field
+            label={isVehicle ? 'Vehicle' : 'Full name'}
+            required
+            hint={
+              isVehicle
+                ? undefined
+                : 'A full name, not one name. A single name word would flag everybody who shares it.'
+            }
           >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">Add to watch list</h3>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
+            <Input
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder={
+                isVehicle ? 'e.g. Black Hilux, no plate visible' : 'e.g. Tunde Fagbenle'
+              }
+            />
+          </Field>
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Subject">
-                  <Select
-                    value={subjectType}
-                    onValueChange={(value) => {
-                      const next = value as WatchlistSubjectType;
-                      if (next === subjectType) return;
-                      // Everything identity-bearing is cleared on a change of
-                      // subject. Carrying it over is not neutral: a description
-                      // typed for a vehicle ("Black Hilux") is two words, so it
-                      // would be accepted as a person's name and the estate would
-                      // have filed a rule about somebody who does not exist.
-                      setLabel('');
-                      setPhone('');
-                      setPlateNumber('');
-                      setSubjectType(next);
-                    }}
-                    options={SUBJECT_OPTIONS}
-                  />
-                </Field>
-                <Field label="What happens">
-                  <Select
-                    value={severity}
-                    onValueChange={(value) => setSeverity(value as WatchlistSeverity)}
-                    options={SEVERITY_OPTIONS}
-                  />
-                </Field>
-              </div>
+          {isVehicle ? (
+            <Field
+              label="Plate number"
+              hint={
+                <>
+                  Spacing and case are ignored, so <span className="font-mono">lag 123 xy</span>{' '}
+                  matches this too.
+                </>
+              }
+            >
+              <Input
+                type="text"
+                value={plateNumber}
+                onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
+                placeholder="LAG-123-XY"
+                inputClassName="uppercase"
+              />
+            </Field>
+          ) : (
+            <Field
+              label="Phone"
+              optionalLabel="(optional)"
+              hint="A number is a much stronger match than a name. Worth adding if the estate has one."
+            >
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 08031234567"
+              />
+            </Field>
+          )}
 
-              <p className="text-xs text-muted-foreground">
-                {severity === 'BLOCK'
-                  ? 'The gate is refused, and they can only be admitted if a guard gives a reason: which you are told about.'
-                  : 'The gate is not refused. The estate office is told when they arrive.'}
-              </p>
+          <Field
+            label="Why are they on this list?"
+            required
+            hint={`A guard is shown this word for word, so they can explain the refusal to the person at the gate. At least ${REASON_MIN_LENGTH} characters.`}
+          >
+            <Input
+              type="text"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g. Harassed residents in Block A"
+            />
+          </Field>
 
-              <Field
-                label={isVehicle ? 'Vehicle' : 'Full name'}
-                required
-                hint={
-                  isVehicle
-                    ? undefined
-                    : 'A full name, not one name. A single name word would flag everybody who shares it.'
-                }
-              >
-                <Input
-                  type="text"
-                  value={label}
-                  onChange={(e) => setLabel(e.target.value)}
-                  placeholder={
-                    isVehicle ? 'e.g. Black Hilux, no plate visible' : 'e.g. Tunde Fagbenle'
-                  }
-                />
-              </Field>
+          <Field
+            label="Permanent?"
+            optionalLabel="Leave blank for an entry that stands until somebody lifts it"
+          >
+            <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
+          </Field>
 
-              {isVehicle ? (
-                <Field
-                  label="Plate number"
-                  hint={
-                    <>
-                      Spacing and case are ignored, so <span className="font-mono">lag 123 xy</span>{' '}
-                      matches this too.
-                    </>
-                  }
-                >
-                  <Input
-                    type="text"
-                    value={plateNumber}
-                    onChange={(e) => setPlateNumber(e.target.value.toUpperCase())}
-                    placeholder="LAG-123-XY"
-                    inputClassName="uppercase"
-                  />
-                </Field>
-              ) : (
-                <Field
-                  label="Phone"
-                  optionalLabel="(optional)"
-                  hint="A number is a much stronger match than a name. Worth adding if the estate has one."
-                >
-                  <Input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. 08031234567"
-                  />
-                </Field>
-              )}
+          <Field label="Photo" optionalLabel="(optional)">
+            <DocumentUpload
+              value={photo ? [{ id: 'photo', file: photo }] : []}
+              onChange={(items) => setPhoto(items[0]?.file ?? null)}
+              accept="image/*"
+              multiple={false}
+              label=""
+            />
+          </Field>
 
-              <Field
-                label="Why are they on this list?"
-                required
-                hint={`A guard is shown this word for word, so they can explain the refusal to the person at the gate. At least ${REASON_MIN_LENGTH} characters.`}
-              >
-                <Input
-                  type="text"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="e.g. Harassed residents in Block A"
-                />
-              </Field>
+          {cannotMatch && label.trim().length > 0 && (
+            <Alert variant="warning">
+              {isVehicle
+                ? 'A vehicle needs a plate number. Without one there is nothing a guard can compare, so the rule would never fire.'
+                : 'This cannot be matched against anybody yet. Give a full name, or add a phone number: otherwise the list would look like it was covering somebody it never would.'}
+            </Alert>
+          )}
 
-              <Field
-                label="Permanent?"
-                optionalLabel="Leave blank for an entry that stands until somebody lifts it"
-              >
-                <DatePicker value={expiresAt} onChange={setExpiresAt} clearable />
-              </Field>
-
-              <Field label="Photo" optionalLabel="(optional)">
-                <DocumentUpload
-                  value={photo ? [{ id: 'photo', file: photo }] : []}
-                  onChange={(items) => setPhoto(items[0]?.file ?? null)}
-                  accept="image/*"
-                  multiple={false}
-                  label=""
-                />
-              </Field>
-
-              {cannotMatch && label.trim().length > 0 && (
-                <Alert variant="warning">
-                  {isVehicle
-                    ? 'A vehicle needs a plate number. Without one there is nothing a guard can compare, so the rule would never fire.'
-                    : 'This cannot be matched against anybody yet. Give a full name, or add a phone number: otherwise the list would look like it was covering somebody it never would.'}
-                </Alert>
-              )}
-
-              {error && <p className="text-xs text-destructive">{error}</p>}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canSubmit}
-                isLoading={isSubmitting}
-                loadingText="Adding…"
-                onClick={() =>
-                  onSubmit({
-                    label: label.trim(),
-                    reason: reason.trim(),
-                    subjectType,
-                    severity,
-                    phone: isVehicle ? undefined : phone.trim() || undefined,
-                    plateNumber: isVehicle ? plateNumber.trim() || undefined : undefined,
-                    // A date input is a calendar day; the API wants an instant. End
-                    // of that day, so an entry does not lapse the morning it is set.
-                    expiresAt: expiresAt
-                      ? new Date(`${expiresAt}T23:59:59`).toISOString()
-                      : undefined,
-                    photo: photo ?? undefined,
-                  })
-                }
-              >
-                Add to list
-              </Button>
-            </div>
-          </motion.div>
+          {error && <Alert variant="danger">{error}</Alert>}
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <Button variant="ghost" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!canSubmit}
+            isLoading={isSubmitting}
+            loadingText="Adding…"
+            onClick={() =>
+              onSubmit({
+                label: label.trim(),
+                reason: reason.trim(),
+                subjectType,
+                severity,
+                phone: isVehicle ? undefined : phone.trim() || undefined,
+                plateNumber: isVehicle ? plateNumber.trim() || undefined : undefined,
+                // A date input is a calendar day; the API wants an instant. End
+                // of that day, so an entry does not lapse the morning it is set.
+                expiresAt: expiresAt
+                  ? new Date(`${expiresAt}T23:59:59`).toISOString()
+                  : undefined,
+                photo: photo ?? undefined,
+              })
+            }
+          >
+            Add to list
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

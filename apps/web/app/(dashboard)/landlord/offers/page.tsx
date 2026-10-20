@@ -7,6 +7,7 @@ import {
   Pagination,
   SearchInput,
   Skeleton,
+  ToggleChip,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -176,24 +177,19 @@ export default function LandlordOffersPage() {
           label="Search offers"
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter offers by status">
           {filterOptions.map((option) => (
-            <button
+            <ToggleChip
               key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
                 setFilter(option.value);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
             >
               {option.label}
-            </button>
+            </ToggleChip>
           ))}
         </div>
       </div>

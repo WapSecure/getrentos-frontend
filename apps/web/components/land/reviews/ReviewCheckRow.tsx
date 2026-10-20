@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, Textarea } from '@getrentos/ui';
 import { FileCheck2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheckStatus } from '@/types/land';
@@ -122,15 +122,12 @@ export const ReviewCheckRow = ({
               ))}
             </div>
           </fieldset>
-          <div className="space-y-1">
-            <label htmlFor={`${name}-note`} className="text-xs font-medium text-muted-foreground">
-              Your note
-              {status === 'FLAGGED' || (status === 'NOT_APPLICABLE' && check.required)
-                ? ' (required)'
-                : ' (optional)'}
-            </label>
+          <Field
+            label="Your note"
+            required={status === 'FLAGGED' || (status === 'NOT_APPLICABLE' && check.required)}
+            optionalLabel="(optional)"
+          >
             <Textarea
-              id={`${name}-note`}
               rows={2}
               maxLength={2000}
               showCount
@@ -138,7 +135,7 @@ export const ReviewCheckRow = ({
               onChange={(e) => setNote(e.target.value)}
               placeholder="What you checked and what you found"
             />
-          </div>
+          </Field>
           {problem && (
             <p className="text-xs text-destructive" role="status">
               {problem}

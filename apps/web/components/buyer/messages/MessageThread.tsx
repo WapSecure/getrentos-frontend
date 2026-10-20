@@ -1,6 +1,6 @@
 'use client';
 
-import { Input } from '@getrentos/ui';
+import { IconButton, Input } from '@getrentos/ui';
 
 import { useState } from 'react';
 import { Send, MessageCircle, Check, CheckCheck } from 'lucide-react';
@@ -108,15 +108,14 @@ export const MessageThread = ({
           aria-label="Message"
           className="min-w-0 flex-1"
         />
-        <button
-          type="button"
+        <IconButton
+          label="Send message"
+          variant="primary"
+          icon={<Send />}
           onClick={() => void handleSend()}
-          disabled={!draft.trim() || isSending}
-          aria-label={isSending ? 'Sending message' : 'Send message'}
-          className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </button>
+          disabled={!draft.trim()}
+          isLoading={isSending}
+        />
       </div>
     </div>
   );

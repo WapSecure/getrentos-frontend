@@ -8,6 +8,7 @@ import {
   Pagination,
   SearchInput,
   Skeleton,
+  ToggleChip,
   useToast,
 } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
@@ -204,9 +205,11 @@ export default function LandlordPropertiesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Properties</h1>
           <p className="text-muted-foreground mt-1">
-            {isLoadingProperties || (propertiesFailed && !data)
-              ? 'Loading your portfolio…'
-              : `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`}
+            {isLoadingProperties || (propertiesFailed && !data) ? (
+              <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
+            ) : (
+              `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`
+            )}
           </p>
         </div>
         <Button
@@ -226,24 +229,19 @@ export default function LandlordPropertiesPage() {
           label="Search properties"
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter properties">
           {filterOptions.map((option) => (
-            <button
+            <ToggleChip
               key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
                 setFilter(option.value);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
             >
               {option.label}
-            </button>
+            </ToggleChip>
           ))}
         </div>
       </div>

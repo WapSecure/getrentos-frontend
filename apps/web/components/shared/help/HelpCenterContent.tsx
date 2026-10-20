@@ -11,7 +11,7 @@ import {
   Clock,
   ArrowRight,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Card } from '@getrentos/ui';
 
 interface FAQItem {
   question: string;
@@ -68,15 +68,12 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div
-                key={faq.question}
-                className="bg-card border border-border rounded-xl overflow-hidden"
-              >
+              <Card key={faq.question}>
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between gap-3 p-4 text-left"
+                  className="w-full flex items-center justify-between gap-3 p-4 text-left focus-visible:outline-none focus-visible:bg-secondary/60"
                 >
                   <span className="text-sm font-medium text-foreground">{faq.question}</span>
                   <ChevronDown
@@ -90,13 +87,13 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
                     {faq.answer}
                   </p>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
 
         <div className="space-y-4">
-          <div className="bg-card border border-border rounded-xl p-4">
+          <Card className="p-4">
             <h3 className="text-sm font-semibold text-foreground mb-3">Contact Support</h3>
             <div className="space-y-3">
               <a
@@ -138,7 +135,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
               Message Support
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
-          </div>
+          </Card>
         </div>
       </div>
     </>

@@ -13,6 +13,8 @@ import {
   DialogContent,
   DialogTitle,
   EmptyState,
+  PageErrorState,
+  SegmentedControl,
   Skeleton,
   useToast,
   type Column,
@@ -81,7 +83,12 @@ export default function LandlordNoticesPage() {
     queryFn: () => unwrap(landlordService.listNotices({ state: 'SERVED', limit: 200 })),
   });
 
-  const { data: periods, isPending: isPeriodsPending } = useQuery({
+  const {
+    data: periods,
+    isPending: isPeriodsPending,
+    refetch: refetchPeriods,
+    isFetching: isPeriodsFetching,
+  } = useQuery({
     queryKey: landlordKeys.noticePeriods,
     queryFn: () => unwrap(landlordService.getNoticePeriods()),
   });
@@ -241,39 +248,23 @@ export default function LandlordNoticesPage() {
         </p>
       </div>
 
-      <div className="mb-4 flex w-fit gap-1 rounded-lg bg-secondary p-1">
-        <button
-          type="button"
-          aria-pressed={tab === 'running'}
-          onClick={() => setTab('running')}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            tab === 'running'
-              ? 'bg-card text-primary shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <BellRing className="h-3.5 w-3.5" aria-hidden />
-          Running
-        </button>
-        <button
-          type="button"
-          aria-pressed={tab === 'periods'}
-          onClick={() => setTab('periods')}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-            tab === 'periods'
-              ? 'bg-card text-primary shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Settings2 className="h-3.5 w-3.5" aria-hidden />
-          Periods
-          {unconfigured > 0 && (
-            <span className="ml-1 rounded-full bg-warning-subtle px-1.5 text-[10px] font-semibold text-warning">
-              {unconfigured}
-            </span>
-          )}
-        </button>
-      </div>
+      <SegmentedControl
+        aria-label="Notices view"
+        size="sm"
+        className="mb-4"
+        value={tab}
+        onValueChange={setTab}
+        segments={[
+          { value: 'running', label: 'Running', icon: <BellRing /> },
+          {
+            value: 'periods',
+            label: 'Periods',
+            icon: <Settings2 />,
+            count: unconfigured > 0 ? unconfigured : undefined,
+            countTone: 'warning',
+          },
+        ]}
+      />
 
       {/*
         The register only surfaces on the daily view when it is actually standing
@@ -316,12 +307,20 @@ export default function LandlordNoticesPage() {
             onRowClick={(notice) => setOpenLadder(notice.leaseId)}
           />
         </ListState>
-      ) : isPeriodsPending || !periods ? (
+      ) : isPeriodsPending ? (
         <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
           {[0, 1, 2].map((row) => (
             <Skeleton key={row} className="h-32 rounded-2xl" />
           ))}
         </div>
+      ) : !periods ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your notice periods"
+          description="This was a connection problem: nothing was changed. Try again."
+          onRetry={() => void refetchPeriods()}
+          isRetrying={isPeriodsFetching}
+        />
       ) : (
         <NoticePeriodRegister
           settings={periods}
@@ -334,7 +333,7 @@ export default function LandlordNoticesPage() {
       {/* The tenancy behind a row, or behind ?leaseId from a legal case. */}
       {ladder && (
         <Dialog open onOpenChange={(open) => !open && closeLadder()}>
-          <DialogContent className="max-h-[85vh] max-w-2xl p-0">
+          <DialogContent size="lg" padded={false}>
             {/*
               The header carries the tenancy so the body does not have to, and
               stays put while the ladder scrolls — the one action in here should
@@ -404,7 +403,6 @@ export default function LandlordNoticesPage() {
           onSubmit={(input) => serveNotice.mutate({ id: serving.id, input })}
         />
       )}
-
     </>
   );
 }

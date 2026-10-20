@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Scale } from 'lucide-react';
-import { Button, DataTable, EmptyState, useToast, type Column } from '@getrentos/ui';
+import { Button, DataTable, EmptyState, ToggleChip, useToast, type Column } from '@getrentos/ui';
 import { LegalCaseDetail } from '@/components/landlord/legal-cases/LegalCaseDetail';
 import { LegalCaseStage } from '@/components/landlord/legal-cases/LegalCaseStage';
 import { OpenLegalCaseModal } from '@/components/landlord/legal-cases/OpenLegalCaseModal';
@@ -299,55 +299,32 @@ export default function LandlordLegalCasesPage() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-lg bg-secondary p-1">
+        <div className="flex max-w-full gap-2 overflow-x-auto" role="group" aria-label="Filter cases by stage">
           {STAGES.map((option) => (
-            <button
+            <ToggleChip
               key={option.value}
-              type="button"
-              aria-pressed={stage === option.value}
-              onClick={() => setStage(option.value)}
-              className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                stage === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
+              size="sm"
+              pressed={stage === option.value}
+              onPressedChange={() => setStage(option.value)}
+              count={counts[option.value] > 0 ? counts[option.value] : undefined}
             >
               {option.label}
-              {counts[option.value] > 0 && (
-                <span className="ml-1.5 text-muted-foreground/80">{counts[option.value]}</span>
-              )}
-            </button>
+            </ToggleChip>
           ))}
         </div>
 
-        <div className="flex w-fit gap-1 rounded-lg bg-secondary p-1">
-          <button
-            type="button"
-            aria-pressed={focus === 'attention'}
-            onClick={() => setFocus('attention')}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              focus === 'attention'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
+        <div className="flex gap-2" role="group" aria-label="Show cases">
+          <ToggleChip
+            size="sm"
+            pressed={focus === 'attention'}
+            onPressedChange={() => setFocus('attention')}
+            count={attentionCount > 0 ? attentionCount : undefined}
           >
             Needs attention
-            {attentionCount > 0 && (
-              <span className="ml-1.5 text-muted-foreground/80">{attentionCount}</span>
-            )}
-          </button>
-          <button
-            type="button"
-            aria-pressed={focus === 'all'}
-            onClick={() => setFocus('all')}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              focus === 'all'
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
+          </ToggleChip>
+          <ToggleChip size="sm" pressed={focus === 'all'} onPressedChange={() => setFocus('all')}>
             All
-          </button>
+          </ToggleChip>
         </div>
       </div>
 

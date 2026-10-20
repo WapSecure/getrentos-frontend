@@ -68,14 +68,14 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={handleOpen}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+        className="gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
       >
         <Calculator className="w-3 h-3" />
         Rent vs Buy
-      </button>
+      </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="p-0 sm:max-w-lg">

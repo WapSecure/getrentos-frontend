@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
-import { Pagination, EmptyState } from '@getrentos/ui';
+import { Button, Pagination, EmptyState } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -152,13 +152,15 @@ export default function OwnerMessagesPage() {
         <div className={cn(activeId ? 'flex' : 'hidden sm:flex', 'flex-1 flex-col')}>
           {activeConversation ? (
             <>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ArrowLeft className="w-4 h-4" />}
                 onClick={() => setActiveId(null)}
-                className="sm:hidden flex items-center gap-1.5 text-sm text-muted-foreground mb-2"
+                className="sm:hidden self-start mb-2"
               >
-                <ArrowLeft className="w-4 h-4" />
                 Back to conversations
-              </button>
+              </Button>
               <MessageThread
                 contactName={activeConversation.participantName}
                 contactRole={activeConversation.participantRole}

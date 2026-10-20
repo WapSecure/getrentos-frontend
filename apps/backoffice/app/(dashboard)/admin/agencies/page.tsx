@@ -194,13 +194,13 @@ export default function AdminAgenciesPage() {
                     <Row label="Contact" value={`${p.contactEmail} · ${p.contactPhone}`} />
                     <div className="sm:col-span-2">
                       {p.certificateFileName ? (
-                        <button
-                          type="button"
+                        <Button
+                          variant="link"
                           onClick={() => openCertificate(a.organizationId)}
-                          className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+                          className="gap-1.5 font-normal"
                         >
                           <FileText className="h-4 w-4" /> {p.certificateFileName}
-                        </button>
+                        </Button>
                       ) : (
                         <span className="text-sm text-muted-foreground">
                           No certificate uploaded

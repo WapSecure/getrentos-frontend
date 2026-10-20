@@ -50,11 +50,12 @@ export const PropertyGallery = ({
 
         {videoTourUrl && (
           <button
+            type="button"
             onClick={onOpenTour}
             aria-label={
               filmedOnSite ? 'Watch the video tour, filmed on site' : 'Watch the video tour'
             }
-            className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/70 backdrop-blur-sm text-white text-xs rounded-full hover:bg-black/80 transition-colors"
+            className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 bg-black/70 backdrop-blur-sm text-white text-xs rounded-full hover:bg-black/80 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Camera className="w-3 h-3" />
             <span>Video tour</span>
@@ -80,10 +81,11 @@ export const PropertyGallery = ({
           {photos.map((url, index) => (
             <button
               key={`${url.slice(-24)}-${index}`}
+              type="button"
               onClick={() => setActiveIndex(index)}
               aria-label={`Show photo ${index + 1}`}
               aria-current={index === activeIndex}
-              className={`relative shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-colors ${
+              className={`relative shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 index === activeIndex
                   ? 'border-primary'
                   : 'border-transparent opacity-70 hover:opacity-100'

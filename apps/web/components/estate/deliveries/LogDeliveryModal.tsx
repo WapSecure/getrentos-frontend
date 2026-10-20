@@ -1,19 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useMutation } from '@tanstack/react-query';
-import { X } from 'lucide-react';
 import {
   Alert,
   Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   DocumentUpload,
   Field,
-  IconButton,
   Input,
   ListSkeleton,
   NumberInput,
   Pagination,
+  RadioGroup,
   Select,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -63,7 +64,9 @@ interface LogDeliveryModalProps {
  * "clear the fields on close" was never going to cover that case.
  */
 export const LogDeliveryModal = ({ isOpen, ...props }: LogDeliveryModalProps) => (
-  <AnimatePresence>{isOpen && <LogDeliveryForm {...props} />}</AnimatePresence>
+  <Dialog open={isOpen} onOpenChange={(next) => !next && props.onClose()}>
+    <LogDeliveryForm {...props} />
+  </Dialog>
 );
 
 type FormProps = Omit<LogDeliveryModalProps, 'isOpen'>;
@@ -133,208 +136,174 @@ const LogDeliveryForm = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
-      >
-        <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-          <h3 className="font-semibold text-foreground">Log Delivery</h3>
-          <IconButton label="Close" icon={<X />} size="sm" onClick={onClose} />
-        </div>
+    <DialogContent size="md">
+      <DialogTitle className="text-lg font-semibold text-foreground">Log Delivery</DialogTitle>
 
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
-          <div className="rounded-lg border border-border p-3">
-            <Field label="Courier's code" htmlFor="delivery-code">
-              <div className="flex gap-2">
-                <NumberInput
-                  className="min-w-0 flex-1"
-                  value={code}
-                  onValueChange={(value) => {
-                    setCode(value);
-                    // Any edit invalidates the last answer. Showing a stale "this is
-                    // for Block C" beside a code the guard has since changed is worse
-                    // than showing nothing.
-                    if (screen || checkError) {
-                      setScreen(null);
-                      setCheckError(null);
-                    }
-                  }}
-                  placeholder="e.g. 472913"
-                />
-                <Button
-                  variant="secondary"
-                  className="shrink-0"
-                  disabled={code.trim().length < 6}
-                  isLoading={checkCode.isPending}
-                  loadingText="Checking…"
-                  onClick={() => checkCode.mutate()}
-                >
-                  Check
-                </Button>
-              </div>
-            </Field>
-
-            {matched && (
-              <Alert variant="success" title={screen?.unitLabel} className="mt-3">
-                <p className="text-xs">{screen?.message}</p>
-                <p className="mt-1 text-xs">{screen?.instruction}</p>
-                <button
-                  type="button"
-                  onClick={clearCode}
-                  className="mt-2 text-xs text-muted-foreground underline hover:text-foreground"
-                >
-                  Use a different code
-                </button>
-              </Alert>
-            )}
-
-            {screen && !screen.matched && (
-              // Worded by the server and shown as-is. The refusal says the same
-              // thing whether the code was wrong, expired or already used, so this
-              // screen cannot be used to work out whether a household exists here.
-              <Alert variant="warning" className="mt-3">
-                <p className="text-xs">
-                  {screen.message} {screen.instruction}
-                </p>
-              </Alert>
-            )}
-
-            {checkError && (
-              <p role="alert" className="mt-3 text-xs text-destructive">
-                {checkError}
-              </p>
-            )}
-
-            <p className="mt-2 text-xs text-muted-foreground">
-              Checking a code does not use it up. Only taking the parcel in does.
-            </p>
-          </div>
-
-          {matched ? (
-            <p className="text-xs text-muted-foreground">
-              This parcel will be recorded against {screen?.unitLabel}, because that is the
-              household the code belongs to.
-            </p>
-          ) : (
-            <div>
-              <p className="block text-sm font-medium text-foreground mb-1">Household</p>
-              <div className="overflow-hidden rounded-lg border border-border">
-                {isHouseholdsLoading ? (
-                  <ListSkeleton
-                    rows={3}
-                    label="Loading households"
-                    className="rounded-none border-0"
-                  />
-                ) : activeHouseholds.length === 0 ? (
-                  <p className="px-3 py-4 text-sm text-muted-foreground">
-                    No active households found.
-                  </p>
-                ) : (
-                  <div className="divide-y divide-border" role="radiogroup" aria-label="Household">
-                    {activeHouseholds.map((household) => {
-                      const isSelected = household.id === householdId;
-                      return (
-                        <button
-                          key={household.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={isSelected}
-                          onClick={() => setHouseholdId(household.id)}
-                          className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition-colors ${
-                            isSelected
-                              ? 'bg-primary/10 text-primary'
-                              : 'text-foreground hover:bg-secondary'
-                          }`}
-                        >
-                          <span>
-                            {household.unitLabel}: {household.residentName}
-                          </span>
-                          <span
-                            aria-hidden="true"
-                            className={`h-3 w-3 shrink-0 rounded-full border ${
-                              isSelected
-                                ? 'border-primary bg-primary'
-                                : 'border-muted-foreground/50'
-                            }`}
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {householdTotal > 0 && (
-                  <Pagination
-                    page={householdPage}
-                    pageSize={householdPageSize}
-                    total={householdTotal}
-                    onPageChange={onHouseholdPageChange}
-                  />
-                )}
-              </div>
-            </div>
-          )}
-
-          <Field label="Courier" optionalLabel="(optional)">
-            <Input
-              type="text"
-              value={courier}
-              onChange={(e) => setCourier(e.target.value)}
-              placeholder="e.g. DHL"
-            />
-          </Field>
-
-          <Field label="Recipient" optionalLabel="(optional)">
-            <Input
-              type="text"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-              placeholder="e.g. Ada Okafor"
-            />
-          </Field>
-
-          {gateOptions.length > 0 && (
-            <Field label="Gate">
-              <Select
-                value={gateId}
-                onValueChange={setGateId}
-                options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+      <div className="mt-4 space-y-4">
+        <div className="rounded-lg border border-border p-3">
+          <Field label="Courier's code" htmlFor="delivery-code">
+            <div className="flex gap-2">
+              <NumberInput
+                className="min-w-0 flex-1"
+                value={code}
+                onValueChange={(value) => {
+                  setCode(value);
+                  // Any edit invalidates the last answer. Showing a stale "this is
+                  // for Block C" beside a code the guard has since changed is worse
+                  // than showing nothing.
+                  if (screen || checkError) {
+                    setScreen(null);
+                    setCheckError(null);
+                  }
+                }}
+                placeholder="e.g. 472913"
               />
-            </Field>
+              <Button
+                variant="secondary"
+                className="shrink-0"
+                disabled={code.trim().length < 6}
+                isLoading={checkCode.isPending}
+                loadingText="Checking…"
+                onClick={() => checkCode.mutate()}
+              >
+                Check
+              </Button>
+            </div>
+          </Field>
+
+          {matched && (
+            <Alert variant="success" title={screen?.unitLabel} className="mt-3">
+              <p className="text-xs">{screen?.message}</p>
+              <p className="mt-1 text-xs">{screen?.instruction}</p>
+              <Button
+                variant="link"
+                onClick={clearCode}
+                className="mt-2 text-xs font-normal text-muted-foreground underline hover:text-foreground"
+              >
+                Use a different code
+              </Button>
+            </Alert>
           )}
 
-          <div>
-            <p className="block text-sm font-medium text-foreground mb-1">
-              Photo <span className="text-muted-foreground font-normal">(optional)</span>
+          {screen && !screen.matched && (
+            // Worded by the server and shown as-is. The refusal says the same
+            // thing whether the code was wrong, expired or already used, so this
+            // screen cannot be used to work out whether a household exists here.
+            <Alert variant="warning" className="mt-3">
+              <p className="text-xs">
+                {screen.message} {screen.instruction}
+              </p>
+            </Alert>
+          )}
+
+          {checkError && (
+            <p role="alert" className="mt-3 text-xs text-destructive">
+              {checkError}
             </p>
-            <DocumentUpload
-              value={photo ? [{ id: 'photo', file: photo }] : []}
-              onChange={(items) => setPhoto(items[0]?.file ?? null)}
-              accept="image/*"
-              multiple={false}
-              label=""
-            />
-          </div>
+          )}
+
+          <p className="mt-2 text-xs text-muted-foreground">
+            Checking a code does not use it up. Only taking the parcel in does.
+          </p>
         </div>
 
-        <div className="p-4 border-t border-border flex gap-3 shrink-0">
-          <Button variant="ghost" fullWidth onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            fullWidth
-            disabled={!canSubmit}
-            isLoading={isSubmitting}
-            loadingText="Logging…"
-            onClick={handleSubmit}
-          >
-            Log Delivery
-          </Button>
+        {matched ? (
+          <p className="text-xs text-muted-foreground">
+            This parcel will be recorded against {screen?.unitLabel}, because that is the household
+            the code belongs to.
+          </p>
+        ) : (
+          <Field label="Household" required>
+            <div className="overflow-hidden rounded-lg border border-border">
+              {isHouseholdsLoading ? (
+                <ListSkeleton
+                  rows={3}
+                  label="Loading households"
+                  className="rounded-none border-0"
+                />
+              ) : activeHouseholds.length === 0 ? (
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  No active households found.
+                </p>
+              ) : (
+                <RadioGroup
+                  value={householdId}
+                  onValueChange={setHouseholdId}
+                  options={activeHouseholds.map((household) => ({
+                    value: household.id,
+                    label: `${household.unitLabel}: ${household.residentName}`,
+                  }))}
+                  className="p-3"
+                />
+              )}
+              {householdTotal > 0 && (
+                <Pagination
+                  page={householdPage}
+                  pageSize={householdPageSize}
+                  total={householdTotal}
+                  onPageChange={onHouseholdPageChange}
+                />
+              )}
+            </div>
+          </Field>
+        )}
+
+        <Field label="Courier" optionalLabel="(optional)">
+          <Input
+            type="text"
+            value={courier}
+            onChange={(e) => setCourier(e.target.value)}
+            placeholder="e.g. DHL"
+          />
+        </Field>
+
+        <Field label="Recipient" optionalLabel="(optional)">
+          <Input
+            type="text"
+            value={recipientName}
+            onChange={(e) => setRecipientName(e.target.value)}
+            placeholder="e.g. Ada Okafor"
+          />
+        </Field>
+
+        {gateOptions.length > 0 && (
+          <Field label="Gate">
+            <Select
+              value={gateId}
+              onValueChange={setGateId}
+              options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
+            />
+          </Field>
+        )}
+
+        <div>
+          <p className="block text-sm font-medium text-foreground mb-1">
+            Photo <span className="text-muted-foreground font-normal">(optional)</span>
+          </p>
+          <DocumentUpload
+            value={photo ? [{ id: 'photo', file: photo }] : []}
+            onChange={(items) => setPhoto(items[0]?.file ?? null)}
+            accept="image/*"
+            multiple={false}
+            label=""
+          />
         </div>
-      </motion.div>
-    </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap justify-end gap-2">
+        <Button variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          disabled={!canSubmit}
+          isLoading={isSubmitting}
+          loadingText="Logging…"
+          onClick={handleSubmit}
+        >
+          Log Delivery
+        </Button>
+      </div>
+    </DialogContent>
   );
 };

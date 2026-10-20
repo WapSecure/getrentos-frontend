@@ -12,6 +12,7 @@ import {
   DatePicker,
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogTitle,
   EmptyState,
   Field,
@@ -274,12 +275,14 @@ export function ClientMoneyReconciliation() {
           )}
 
           <Dialog open={attestOpen} onOpenChange={setAttestOpen}>
-            <DialogContent className="p-6">
-              <DialogTitle>Record what the bank holds</DialogTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
+            <DialogContent>
+              <DialogTitle className="text-lg font-semibold text-foreground">
+                Record what the bank holds
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
                 The whole control depends on this figure coming from outside the ledger. Record what
                 the account actually holds, not what we think it should.
-              </p>
+              </DialogDescription>
               <div className="mt-4 space-y-3">
                 {/* Drawn from the report rather than a separate holders endpoint:
                 every pool the reconciliation knows about is already in it, and
@@ -318,7 +321,7 @@ export function ClientMoneyReconciliation() {
                   />
                 </Field>
               </div>
-              <div className="mt-5 flex justify-end gap-2">
+              <div className="mt-6 flex flex-wrap justify-end gap-2">
                 <Button variant="outline" onClick={() => setAttestOpen(false)}>
                   Cancel
                 </Button>

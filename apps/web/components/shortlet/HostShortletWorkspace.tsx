@@ -25,6 +25,7 @@ import {
   TabsList,
   TabsTrigger,
   TimePicker,
+  ToggleChip,
   useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
@@ -889,27 +890,22 @@ function CreateListingDialog({
             className="rounded-lg border border-border p-3"
           />
           <Field label="Amenities">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Amenities">
               {SHORTLET_AMENITIES.map((amenity) => {
                 const selected = amenities.includes(amenity);
                 return (
-                  <button
+                  <ToggleChip
                     key={amenity}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() =>
+                    size="sm"
+                    pressed={selected}
+                    onPressedChange={() =>
                       setAmenities((prev) =>
                         selected ? prev.filter((a) => a !== amenity) : [...prev, amenity]
                       )
                     }
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                      selected
-                        ? 'bg-accent border-primary text-primary'
-                        : 'border-border text-muted-foreground hover:border-foreground/20'
-                    }`}
                   >
                     {amenity}
-                  </button>
+                  </ToggleChip>
                 );
               })}
             </div>

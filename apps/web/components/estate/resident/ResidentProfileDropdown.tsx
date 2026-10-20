@@ -1,87 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, LogOut } from 'lucide-react';
-import { ROUTES } from '@/lib/constants/auth';
-import { logoutSession } from '@/lib/apiClient';
-import { getInitials } from '@/lib/format';
-import { RoleSwitcher } from '@/components/shared/navigation/RoleSwitcher';
+import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 
 interface ResidentProfileDropdownProps {
   user: { fullName: string; email: string } | null;
 }
 
 export const ResidentProfileDropdown = ({ user }: ResidentProfileDropdownProps) => {
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSignOut = async () => {
-    await logoutSession();
-    router.push(ROUTES.LOGIN);
-  };
-
-  const fullName = user?.fullName || 'Resident';
-  const initials = getInitials(fullName);
-
-  return (
-    <div ref={dropdownRef} className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-secondary transition-colors"
-      >
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
-          {initials}
-        </div>
-        <div className="hidden sm:block text-left">
-          <p className="text-sm font-medium text-foreground">{fullName}</p>
-          <p className="text-xs text-muted-foreground">Resident</p>
-        </div>
-        <ChevronDown
-          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-        />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-64 bg-card rounded-xl shadow-lg border border-border z-50"
-          >
-            <div className="p-3 border-b border-border">
-              <p className="text-sm font-semibold text-foreground">{fullName}</p>
-              <p className="text-xs text-muted-foreground">{user?.email || ''}</p>
-            </div>
-
-            <RoleSwitcher currentRoleId="resident" />
-
-            <div className="border-t border-border py-2">
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive-subtle transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign out
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+  return <AccountMenu user={user} roleId="resident" roleLabel="Resident" />;
 };

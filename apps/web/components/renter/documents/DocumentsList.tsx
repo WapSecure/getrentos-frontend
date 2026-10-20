@@ -2,7 +2,7 @@
 
 import { LayoutGrid, List, FileText } from 'lucide-react';
 import { DocumentCard } from './DocumentCard';
-import { Card, Checkbox, EmptyState, IconButton, Select } from '@getrentos/ui';
+import { Card, Checkbox, EmptyState, SegmentedControl, Select } from '@getrentos/ui';
 
 interface Document {
   id: string;
@@ -118,24 +118,17 @@ export const DocumentsList = ({
             ]}
           />
 
-          <div className="flex gap-1 p-1 bg-secondary rounded-lg">
-            <IconButton
-              label="Grid view"
-              size="sm"
-              icon={<LayoutGrid />}
-              aria-pressed={viewMode === 'grid'}
-              onClick={handleViewModeGrid}
-              className={viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : undefined}
-            />
-            <IconButton
-              label="List view"
-              size="sm"
-              icon={<List />}
-              aria-pressed={viewMode === 'list'}
-              onClick={handleViewModeList}
-              className={viewMode === 'list' ? 'bg-card text-primary shadow-sm' : undefined}
-            />
-          </div>
+          <SegmentedControl
+            aria-label="Layout"
+            value={viewMode}
+            onValueChange={(mode) => (mode === 'grid' ? handleViewModeGrid() : handleViewModeList())}
+            iconOnly
+            size="sm"
+            segments={[
+              { value: 'grid', label: 'Grid view', icon: <LayoutGrid /> },
+              { value: 'list', label: 'List view', icon: <List /> },
+            ]}
+          />
         </div>
       </div>
 

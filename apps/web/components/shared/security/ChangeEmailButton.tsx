@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
   Input,
   NumberInput,
 } from '@getrentos/ui';
@@ -75,13 +76,13 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={() => setOpen(true)}
-        className="mt-1 text-sm font-medium text-primary hover:underline"
+        className="mt-1 font-medium"
       >
         Change email
-      </button>
+      </Button>
       <Dialog
         open={open}
         onOpenChange={(next) => {
@@ -89,8 +90,8 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
           if (!next) reset();
         }}
       >
-        <DialogContent className="max-w-md p-6">
-          <DialogTitle className="text-lg font-semibold">Change your sign-in email</DialogTitle>
+        <DialogContent size="md">
+          <DialogTitle className="text-lg font-semibold text-foreground">Change your sign-in email</DialogTitle>
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {reference
               ? `Enter the 6-digit code we sent to ${sentTo}.`
@@ -104,27 +105,29 @@ export function ChangeEmailButton({ onChanged }: { onChanged?: (email: string) =
             }}
           >
             {reference ? (
-              <NumberInput
-                autoFocus
-                autoComplete="one-time-code"
-                maxLength={6}
-                aria-label="Code"
-                value={code}
-                onValueChange={setCode}
-              />
+              <Field label="Verification code">
+                <NumberInput
+                  autoFocus
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={code}
+                  onValueChange={setCode}
+                />
+              </Field>
             ) : (
-              <Input
-                autoFocus
-                type="email"
-                autoComplete="email"
-                aria-label="New email"
-                placeholder="you@example.com"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-              />
+              <Field label="New email address">
+                <Input
+                  autoFocus
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+              </Field>
             )}
             {error ? <Alert variant="danger">{error}</Alert> : null}
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-wrap justify-end gap-2 pt-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                 Cancel
               </Button>

@@ -1,11 +1,21 @@
 'use client';
 
-import { Alert, Field, IconButton, Input, NumberInput, Select, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  IconButton,
+  Input,
+  NumberInput,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  X,
   Check,
   Upload,
   FileText,
@@ -165,282 +175,262 @@ export const AddPropertyModal = ({
     form.titleDeed || form.certificateOfOccupancy || form.managementAuthorization;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
-              <div className="min-w-0">
-                <h3 className="font-semibold text-foreground">Add Property</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Step {step + 1} of {steps.length}: {steps[step]}
-                </p>
-              </div>
-              <IconButton
-                label="Close add property"
-                size="sm"
-                icon={<X />}
-                onClick={handleClose}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="px-4 pt-3 shrink-0">
-              <div className="flex gap-1.5">
-                {steps.map((label, index) => (
-                  <div
-                    key={label}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      index <= step ? 'bg-primary' : 'bg-border'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {step === 0 && (
-                <>
-                  <Field label="Property Name" required>
-                    <Input
-                      type="text"
-                      value={form.name}
-                      onChange={(e) => update('name', e.target.value)}
-                      placeholder="e.g. Sunrise Apartments"
-                    />
-                  </Field>
-
-                  <Field label="Property Type">
-                    <Select
-                      value={form.type}
-                      onValueChange={(value) => update('type', value as PropertyType)}
-                      options={propertyTypes.map((t) => ({ value: t.value, label: t.label }))}
-                    />
-                  </Field>
-
-                  <Field label="Address" required>
-                    <Input
-                      type="text"
-                      value={form.address}
-                      onChange={(e) => update('address', e.target.value)}
-                      placeholder="Street address"
-                    />
-                  </Field>
-
-                  <LocationFields
-                    country={form.country}
-                    state={form.state}
-                    city={form.city}
-                    onCountryChange={(c) => update('country', c)}
-                    onStateChange={(s) => update('state', s)}
-                    onCityChange={(c) => update('city', c)}
-                    required
-                  />
-
-                  <LocationPicker
-                    address={form.address}
-                    city={form.city}
-                    state={form.state}
-                    country={form.country}
-                    value={form.pin}
-                    onChange={(pin) => update('pin', pin)}
-                  />
-
-                  <Field label="Number of Units">
-                    <NumberInput
-                      min={1}
-                      value={form.totalUnits}
-                      onValueChange={(v) => update('totalUnits', v)}
-                    />
-                  </Field>
-
-                  <Field label="Description">
-                    <Textarea
-                      value={form.description}
-                      onChange={(e) => update('description', e.target.value)}
-                      rows={2}
-                      placeholder="Optional description"
-                    />
-                  </Field>
-                </>
-              )}
-
-              {step === 1 && (
-                <>
-                  <UploadField
-                    label="Cover Image"
-                    required
-                    icon={ImageIcon}
-                    file={form.coverImage}
-                    accept="image/jpeg,image/png,image/webp"
-                    onSelect={(file) => update('coverImage', file)}
-                  />
-                  <div>
-                    <p className="block text-sm font-medium text-foreground mb-1">
-                      Gallery Images{' '}
-                      <span className="text-muted-foreground/60 font-normal">(optional)</span>
-                    </p>
-                    <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring transition-colors">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/jpeg,image/png,image/webp"
-                        className="sr-only"
-                        onChange={(event) =>
-                          update(
-                            'galleryImages',
-                            [...form.galleryImages, ...Array.from(event.target.files ?? [])].slice(
-                              0,
-                              12
-                            )
-                          )
-                        }
-                      />
-                      <Upload className="w-4 h-4" />
-                      {form.galleryImages.length > 0
-                        ? `${form.galleryImages.length} image(s) selected: add more`
-                        : 'Add gallery images'}
-                    </label>
-                    {form.galleryImages.length > 0 && (
-                      <FileList
-                        files={form.galleryImages}
-                        onRemove={(index) =>
-                          update(
-                            'galleryImages',
-                            form.galleryImages.filter((_, itemIndex) => itemIndex !== index)
-                          )
-                        }
-                      />
-                    )}
-                  </div>
-                  <UploadField
-                    label="Video Tour"
-                    icon={Video}
-                    file={form.videoTour}
-                    accept="video/mp4,video/webm,video/quicktime"
-                    onSelect={async (file) => {
-                      const problem = file ? await videoFileProblem(file) : null;
-                      setSubmitError(problem);
-                      update('videoTour', problem ? null : file);
-                    }}
-                  />
-                </>
-              )}
-
-              {step === 2 && (
-                <>
-                  <Alert variant="info" icon={ShieldCheck}>
-                    Verification documents are optional at this stage, but properties without at
-                    least one document will show as unverified to renters and buyers until
-                    submitted.
-                  </Alert>
-                  <UploadField
-                    label="Title Deed"
-                    icon={FileText}
-                    file={form.titleDeed}
-                    accept=".pdf,image/jpeg,image/png,image/webp"
-                    onSelect={(file) => update('titleDeed', file)}
-                  />
-                  <UploadField
-                    label="Certificate of Occupancy"
-                    icon={FileText}
-                    file={form.certificateOfOccupancy}
-                    accept=".pdf,image/jpeg,image/png,image/webp"
-                    onSelect={(file) => update('certificateOfOccupancy', file)}
-                  />
-                  <UploadField
-                    label="Management Authorization"
-                    icon={FileText}
-                    file={form.managementAuthorization}
-                    accept=".pdf,image/jpeg,image/png,image/webp"
-                    onSelect={(file) => update('managementAuthorization', file)}
-                  />
-                </>
-              )}
-
-              {step === 3 && (
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
-                    <SummaryRow label="Name" value={form.name || '—'} />
-                    <SummaryRow
-                      label="Type"
-                      value={propertyTypes.find((t) => t.value === form.type)?.label || '—'}
-                    />
-                    <SummaryRow
-                      label="Address"
-                      value={`${form.address}, ${form.city}, ${form.state}`}
-                    />
-                    <SummaryRow label="Units" value={form.totalUnits} />
-                    <SummaryRow
-                      label="Cover Image"
-                      value={form.coverImage?.name || 'Not selected'}
-                    />
-                    <SummaryRow label="Gallery" value={`${form.galleryImages.length} image(s)`} />
-                    <SummaryRow label="Video Tour" value={form.videoTour?.name || 'Not selected'} />
-                    <SummaryRow
-                      label="Verification Docs"
-                      value={hasAnyVerificationDoc ? 'Submitted' : 'None uploaded'}
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    This creates the property in your portfolio. Public listing remains locked until
-                    identity and ownership verification are approved.
-                  </p>
-                  {submitError && <Alert variant="danger">{submitError}</Alert>}
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              {step > 0 && (
-                <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
-                  Back
-                </Button>
-              )}
-              <div className="flex-1" />
-              {step < steps.length - 1 && (
-                <Button
-                  variant="primary"
-                  onClick={() => setStep((s) => s + 1)}
-                  disabled={
-                    (step === 0 && !canProceedFromStep1) || (step === 1 && !canProceedFromStep2)
-                  }
-                >
-                  Continue
-                </Button>
-              )}
-              {step === steps.length - 1 && (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePublish(false)}
-                    disabled={isSubmitting}
-                  >
-                    Save Draft
-                  </Button>
-                  <Button
-                    variant="primary"
-                    className="gap-2"
-                    onClick={() => handlePublish(true)}
-                    disabled={!hasAnyVerificationDoc}
-                    isLoading={isSubmitting}
-                    loadingText="Uploading…"
-                  >
-                    <Check className="w-4 h-4" />
-                    Submit for publishing
-                  </Button>
-                </>
-              )}
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && !isSubmitting && handleClose()}>
+      <DialogContent padded={false} className="flex flex-col sm:max-w-lg">
+        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
+          <div className="min-w-0">
+            <DialogTitle className="font-semibold text-foreground">Add Property</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              Step {step + 1} of {steps.length}: {steps[step]}
+            </DialogDescription>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="px-4 pt-3 shrink-0">
+          <div className="flex gap-1.5">
+            {steps.map((label, index) => (
+              <div
+                key={label}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  index <= step ? 'bg-primary' : 'bg-border'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+          {step === 0 && (
+            <>
+              <Field label="Property Name" required>
+                <Input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => update('name', e.target.value)}
+                  placeholder="e.g. Sunrise Apartments"
+                />
+              </Field>
+
+              <Field label="Property Type">
+                <Select
+                  value={form.type}
+                  onValueChange={(value) => update('type', value as PropertyType)}
+                  options={propertyTypes.map((t) => ({ value: t.value, label: t.label }))}
+                />
+              </Field>
+
+              <Field label="Address" required>
+                <Input
+                  type="text"
+                  value={form.address}
+                  onChange={(e) => update('address', e.target.value)}
+                  placeholder="Street address"
+                />
+              </Field>
+
+              <LocationFields
+                country={form.country}
+                state={form.state}
+                city={form.city}
+                onCountryChange={(c) => update('country', c)}
+                onStateChange={(s) => update('state', s)}
+                onCityChange={(c) => update('city', c)}
+                required
+              />
+
+              <LocationPicker
+                address={form.address}
+                city={form.city}
+                state={form.state}
+                country={form.country}
+                value={form.pin}
+                onChange={(pin) => update('pin', pin)}
+              />
+
+              <Field label="Number of Units">
+                <NumberInput
+                  min={1}
+                  value={form.totalUnits}
+                  onValueChange={(v) => update('totalUnits', v)}
+                />
+              </Field>
+
+              <Field label="Description">
+                <Textarea
+                  value={form.description}
+                  onChange={(e) => update('description', e.target.value)}
+                  rows={2}
+                  placeholder="Optional description"
+                />
+              </Field>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <UploadField
+                label="Cover Image"
+                required
+                icon={ImageIcon}
+                file={form.coverImage}
+                accept="image/jpeg,image/png,image/webp"
+                onSelect={(file) => update('coverImage', file)}
+              />
+              <div>
+                <p className="block text-sm font-medium text-foreground mb-1">
+                  Gallery Images{' '}
+                  <span className="text-muted-foreground/60 font-normal">(optional)</span>
+                </p>
+                <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring transition-colors">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    onChange={(event) =>
+                      update(
+                        'galleryImages',
+                        [...form.galleryImages, ...Array.from(event.target.files ?? [])].slice(
+                          0,
+                          12
+                        )
+                      )
+                    }
+                  />
+                  <Upload className="w-4 h-4" />
+                  {form.galleryImages.length > 0
+                    ? `${form.galleryImages.length} image(s) selected: add more`
+                    : 'Add gallery images'}
+                </label>
+                {form.galleryImages.length > 0 && (
+                  <FileList
+                    files={form.galleryImages}
+                    onRemove={(index) =>
+                      update(
+                        'galleryImages',
+                        form.galleryImages.filter((_, itemIndex) => itemIndex !== index)
+                      )
+                    }
+                  />
+                )}
+              </div>
+              <UploadField
+                label="Video Tour"
+                icon={Video}
+                file={form.videoTour}
+                accept="video/mp4,video/webm,video/quicktime"
+                onSelect={async (file) => {
+                  const problem = file ? await videoFileProblem(file) : null;
+                  setSubmitError(problem);
+                  update('videoTour', problem ? null : file);
+                }}
+              />
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <Alert variant="info" icon={ShieldCheck}>
+                Verification documents are optional at this stage, but properties without at least
+                one document will show as unverified to renters and buyers until submitted.
+              </Alert>
+              <UploadField
+                label="Title Deed"
+                icon={FileText}
+                file={form.titleDeed}
+                accept=".pdf,image/jpeg,image/png,image/webp"
+                onSelect={(file) => update('titleDeed', file)}
+              />
+              <UploadField
+                label="Certificate of Occupancy"
+                icon={FileText}
+                file={form.certificateOfOccupancy}
+                accept=".pdf,image/jpeg,image/png,image/webp"
+                onSelect={(file) => update('certificateOfOccupancy', file)}
+              />
+              <UploadField
+                label="Management Authorization"
+                icon={FileText}
+                file={form.managementAuthorization}
+                accept=".pdf,image/jpeg,image/png,image/webp"
+                onSelect={(file) => update('managementAuthorization', file)}
+              />
+            </>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-border divide-y divide-border overflow-hidden">
+                <SummaryRow label="Name" value={form.name || '—'} />
+                <SummaryRow
+                  label="Type"
+                  value={propertyTypes.find((t) => t.value === form.type)?.label || '—'}
+                />
+                <SummaryRow
+                  label="Address"
+                  value={`${form.address}, ${form.city}, ${form.state}`}
+                />
+                <SummaryRow label="Units" value={form.totalUnits} />
+                <SummaryRow label="Cover Image" value={form.coverImage?.name || 'Not selected'} />
+                <SummaryRow label="Gallery" value={`${form.galleryImages.length} image(s)`} />
+                <SummaryRow label="Video Tour" value={form.videoTour?.name || 'Not selected'} />
+                <SummaryRow
+                  label="Verification Docs"
+                  value={hasAnyVerificationDoc ? 'Submitted' : 'None uploaded'}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                This creates the property in your portfolio. Public listing remains locked until
+                identity and ownership verification are approved.
+              </p>
+              {submitError && <Alert variant="danger">{submitError}</Alert>}
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-border flex gap-3 shrink-0">
+          {step > 0 && (
+            <Button variant="ghost" onClick={() => setStep((s) => s - 1)}>
+              Back
+            </Button>
+          )}
+          <div className="flex-1" />
+          {step < steps.length - 1 && (
+            <Button
+              variant="primary"
+              onClick={() => setStep((s) => s + 1)}
+              disabled={
+                (step === 0 && !canProceedFromStep1) || (step === 1 && !canProceedFromStep2)
+              }
+            >
+              Continue
+            </Button>
+          )}
+          {step === steps.length - 1 && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => handlePublish(false)}
+                disabled={isSubmitting}
+              >
+                Save Draft
+              </Button>
+              <Button
+                variant="primary"
+                className="gap-2"
+                onClick={() => handlePublish(true)}
+                disabled={!hasAnyVerificationDoc}
+                isLoading={isSubmitting}
+                loadingText="Uploading…"
+              >
+                <Check className="w-4 h-4" />
+                Submit for publishing
+              </Button>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

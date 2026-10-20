@@ -4,17 +4,17 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, BadgeCheck } from 'lucide-react';
-import { TableSkeleton } from '@getrentos/ui';
+import { Button, SegmentedControl, TableSkeleton, type Segment } from '@getrentos/ui';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { PlanComparisonTable } from '@/components/shared/subscription/PlanComparisonTable';
 import { ProPriceCard } from '@/components/shared/subscription/ProPriceCard';
 import type { PlanPersona } from '@/services/subscriptionService';
 
-const PERSONAS: { key: PlanPersona; label: string }[] = [
-  { key: 'landlord', label: 'Landlords' },
-  { key: 'estate', label: 'Estate managers' },
-  { key: 'owner', label: 'Property owners' },
-  { key: 'realtor', label: 'Realtors' },
+const PERSONAS: Segment<PlanPersona>[] = [
+  { value: 'landlord', label: 'Landlords' },
+  { value: 'estate', label: 'Estate managers' },
+  { value: 'owner', label: 'Property owners' },
+  { value: 'realtor', label: 'Realtors' },
 ];
 
 /**
@@ -57,23 +57,13 @@ export default function PricingPage() {
         <div className="mt-12">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-foreground">Compare Free and Pro</h2>
-            <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1 text-sm">
-              {PERSONAS.map((p) => (
-                <button
-                  key={p.key}
-                  type="button"
-                  aria-pressed={persona === p.key}
-                  onClick={() => setPersona(p.key)}
-                  className={
-                    persona === p.key
-                      ? 'rounded-md bg-primary px-3 py-1.5 font-medium text-primary-foreground'
-                      : 'rounded-md px-3 py-1.5 text-muted-foreground hover:bg-secondary'
-                  }
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              aria-label="Plan audience"
+              value={persona}
+              onValueChange={setPersona}
+              segments={PERSONAS}
+              className="flex flex-wrap"
+            />
           </div>
 
           {isLoading ? (
@@ -103,12 +93,9 @@ export default function PricingPage() {
         </div>
 
         <div className="mt-10 text-center">
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-medium text-primary-foreground"
-          >
+          <Button href="/signup" size="lg">
             Get started free
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

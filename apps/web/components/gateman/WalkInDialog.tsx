@@ -1,10 +1,19 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, X } from 'lucide-react';
-import { Alert, Button, Field, IconButton, Input, ListSkeleton } from '@getrentos/ui';
+import { Search } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  Input,
+  ListSkeleton,
+  RadioGroup,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
@@ -175,156 +184,135 @@ export const WalkInDialog = ({
   });
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="md">
+        <DialogTitle className="text-lg font-semibold text-foreground">Visitor with no pass</DialogTitle>
+
+        <div className="mt-4 space-y-4">
+          <Field label="Who have they come to see?">
+            <Input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search unit or resident"
+              leadingIcon={<Search className="w-4 h-4" aria-hidden="true" />}
+            />
+          </Field>
+
+          {isLoading ? (
+            <ListSkeleton rows={3} variant="cards" label="Loading households" />
+          ) : matches.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No household matches that.</p>
+          ) : (
+            <div className="max-h-56 overflow-y-auto p-0.5">
+              <RadioGroup
+                variant="card"
+                aria-label="Household"
+                value={household?.id ?? ''}
+                onValueChange={(id) => setHousehold(matches.find((h) => h.id === id) ?? null)}
+                options={matches.map((h) => ({
+                  value: h.id,
+                  label: h.unitLabel,
+                  description: h.residentLinked
+                    ? h.residentName
+                    : `${h.residentName} · nobody here uses the app, so they cannot approve: ask the estate office`,
+                  disabled: !h.residentLinked,
+                }))}
+              />
+            </div>
+          )}
+
+          <Field
+            label="Visitor name"
+            required
+            hint="The household decides based on this, so use their real name."
           >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">Visitor with no pass</h3>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
+            <Input
+              type="text"
+              value={visitorName}
+              onChange={(e) => setVisitorName(e.target.value)}
+              placeholder="e.g. Tola Ade"
+            />
+          </Field>
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <Field label="Who have they come to see?">
-                <Input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search unit or resident"
-                  leadingIcon={<Search className="w-4 h-4" />}
-                />
-              </Field>
+          <Field label="Phone" optionalLabel="(optional)">
+            <Input
+              type="tel"
+              value={visitorPhone}
+              onChange={(e) => setVisitorPhone(e.target.value)}
+              placeholder="e.g. 08012345678"
+            />
+          </Field>
 
-              {isLoading ? (
-                <ListSkeleton rows={3} variant="cards" label="Loading households" />
-              ) : matches.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No household matches that.</p>
-              ) : (
-                <div className="space-y-2 max-h-56 overflow-y-auto">
-                  {matches.map((h) => {
-                    const selected = household?.id === h.id;
-                    const reachable = h.residentLinked;
-                    return (
-                      <button
-                        key={h.id}
-                        type="button"
-                        aria-pressed={selected}
-                        disabled={!reachable}
-                        onClick={() => setHousehold(h)}
-                        className={`w-full text-left rounded-lg border p-3 transition-colors ${
-                          selected ? 'border-primary bg-primary/5' : 'border-border'
-                        } ${reachable ? 'hover:bg-secondary' : 'opacity-50 cursor-not-allowed'}`}
-                      >
-                        <p className="text-sm font-medium text-foreground">{h.unitLabel}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {h.residentName}
-                          {reachable
-                            ? ''
-                            : ' · nobody here uses the app, so they cannot approve: ask the estate office'}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+          <Field label="Reason" optionalLabel="(optional)">
+            <Input
+              type="text"
+              value={purpose}
+              onChange={(e) => setPurpose(e.target.value)}
+              placeholder="e.g. Plumbing repair"
+            />
+          </Field>
 
-              <Field
-                label="Visitor name"
-                hint="The household decides based on this, so use their real name."
-              >
-                <Input
-                  type="text"
-                  value={visitorName}
-                  onChange={(e) => setVisitorName(e.target.value)}
-                  placeholder="e.g. Tola Ade"
-                />
-              </Field>
+          {refusal && (
+            <WatchlistBlockedNotice
+              message={refusal.message}
+              matches={refusal.matches}
+              onOverride={(reason) => request.mutate({ overrideReason: reason })}
+              isOverriding={request.isPending}
+              error={overrideError}
+            />
+          )}
 
-              <Field label="Phone" optionalLabel="(optional)">
-                <Input
-                  type="tel"
-                  value={visitorPhone}
-                  onChange={(e) => setVisitorPhone(e.target.value)}
-                  placeholder="e.g. 08012345678"
-                />
-              </Field>
+          {/* Last thing before the footer, because it is the last thing worth
+              knowing before a household is asked. */}
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              fullWidth
+              disabled={!canCheck}
+              isLoading={check.isPending}
+              loadingText="Checking…"
+              onClick={() => {
+                setScreening(null);
+                check.mutate();
+              }}
+            >
+              Check the watch list
+            </Button>
+            {screening && <WatchlistCheckResult screening={screening} />}
+          </div>
 
-              <Field label="Reason" optionalLabel="(optional)">
-                <Input
-                  type="text"
-                  value={purpose}
-                  onChange={(e) => setPurpose(e.target.value)}
-                  placeholder="e.g. Plumbing repair"
-                />
-              </Field>
-
-              {refusal && (
-                <WatchlistBlockedNotice
-                  message={refusal.message}
-                  matches={refusal.matches}
-                  onOverride={(reason) => request.mutate({ overrideReason: reason })}
-                  isOverriding={request.isPending}
-                  error={overrideError}
-                />
-              )}
-
-              {/* Last thing before the footer, because it is the last thing worth
-                  knowing before a household is asked. */}
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  fullWidth
-                  disabled={!canCheck}
-                  isLoading={check.isPending}
-                  loadingText="Checking…"
-                  onClick={() => {
-                    setScreening(null);
-                    check.mutate();
-                  }}
-                >
-                  Check the watch list
-                </Button>
-                {screening && <WatchlistCheckResult screening={screening} />}
-              </div>
-
-              {error && <Alert variant="danger">{error}</Alert>}
-            </div>
-
-            <div className="p-4 border-t border-border shrink-0 space-y-2">
-              {/* Once the estate has refused, the primary action is gone on
-                  purpose. Leaving "Ask for approval" here would invite a retry
-                  that returns the same refusal while the visitor waits: the
-                  only route forward is the stated override inside the notice. */}
-              {refusal ? (
-                <Button variant="outline" fullWidth onClick={handleClose}>
-                  Close
-                </Button>
-              ) : (
-                <>
-                  <Button
-                    variant="primary"
-                    fullWidth
-                    disabled={!canSubmit}
-                    isLoading={request.isPending}
-                    loadingText="Asking…"
-                    onClick={() => request.mutate({})}
-                  >
-                    Ask for approval
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    The gate stays closed until the household answers. They have 10 minutes.
-                  </p>
-                </>
-              )}
-            </div>
-          </motion.div>
+          {error && <Alert variant="danger">{error}</Alert>}
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 space-y-2 border-t border-border pt-4">
+          {/* Once the estate has refused, the primary action is gone on
+              purpose. Leaving "Ask for approval" here would invite a retry
+              that returns the same refusal while the visitor waits: the
+              only route forward is the stated override inside the notice. */}
+          {refusal ? (
+            <Button variant="outline" fullWidth onClick={handleClose}>
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="primary"
+                fullWidth
+                disabled={!canSubmit}
+                isLoading={request.isPending}
+                loadingText="Asking…"
+                onClick={() => request.mutate({})}
+              >
+                Ask for approval
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                The gate stays closed until the household answers. They have 10 minutes.
+              </p>
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

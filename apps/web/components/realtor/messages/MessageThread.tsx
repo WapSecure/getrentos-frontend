@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { Send, Paperclip, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { Send, Paperclip, MessageCircle, Check, CheckCheck, X } from 'lucide-react';
 import { Button, Card, EmptyState, IconButton, Input } from '@getrentos/ui';
 import { getInitials } from '@/lib/format';
 import { format } from 'date-fns';
@@ -101,15 +101,17 @@ export const MessageThread = ({
         {files.length > 0 && (
           <div className="mb-2 flex flex-wrap gap-1">
             {files.map((file) => (
-              <button
+              <Button
                 key={`${file.name}-${file.lastModified}`}
-                type="button"
+                variant="secondary"
+                size="xs"
                 aria-label={`Remove ${file.name}`}
+                icon={<X className="h-3 w-3" aria-hidden />}
+                iconPosition="right"
                 onClick={() => setFiles((current) => current.filter((item) => item !== file))}
-                className="rounded bg-secondary px-2 py-1 text-xs"
               >
-                {file.name} ×
-              </button>
+                {file.name}
+              </Button>
             ))}
           </div>
         )}

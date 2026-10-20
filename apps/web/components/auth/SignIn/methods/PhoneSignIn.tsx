@@ -1,15 +1,12 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff, LogIn, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
+import { Alert, Button, Checkbox, Field, IconButton, Input, NumberInput } from '@getrentos/ui';
 import {
   resolvePrimaryRoleId,
   ROUTES,
@@ -177,38 +174,22 @@ export const PhoneSignIn = ({
   return (
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {pendingChallenge ? (
+        /* Two-factor authentication step */
         <div className="space-y-4">
-          <div className="rounded-lg border border-info/20 bg-info-subtle p-4">
-            <div className="mb-2 flex items-center gap-3">
-              <ShieldCheck className="h-5 w-5 text-info" />
-              <p className="text-sm font-medium text-foreground">
-                Two-factor authentication
-              </p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Enter the 6-digit code from your authenticator app to finish signing in.
-            </p>
-          </div>
+          <Alert variant="info" icon={ShieldCheck} title="Two-factor authentication">
+            Enter the 6-digit code from your authenticator app to finish signing in.
+          </Alert>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">
-              Authentication code
-            </label>
-            <Input
-              type="text"
-              inputMode="numeric"
+          <Field label="Authentication code">
+            <NumberInput
               autoComplete="one-time-code"
+              maxLength={6}
               value={twoFactorCode}
-              onChange={(event) =>
-                setTwoFactorCode(
-                  event.target.value.replace(VALIDATION_PATTERNS.NON_DIGITS, '').slice(0, 6)
-                )
-              }
-              inputClassName="py-3 text-center font-mono tracking-[0.5em]"
+              onValueChange={setTwoFactorCode}
+              inputClassName="py-3 text-center tracking-[0.5em] font-mono"
               placeholder="••••••"
-              aria-label="Authentication code"
             />
-          </div>
+          </Field>
 
           <Button
             type="button"
@@ -219,89 +200,68 @@ export const PhoneSignIn = ({
             isLoading={isVerifying2fa}
             onClick={completeTwoFactorLogin}
           >
-            <ShieldCheck className="h-4 w-4" />
+            <ShieldCheck className="w-4 h-4" />
             Verify &amp; Sign In
           </Button>
 
-          <button
-            type="button"
-            onClick={cancelTwoFactor}
-            className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
+          <Button type="button" variant="ghost" fullWidth onClick={cancelTwoFactor}>
             Back to sign in
-          </button>
+          </Button>
         </div>
       ) : (
         <>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
-              Phone Number
-            </label>
-            <div className="relative">
-              <Input
-                type="tel"
-                {...register('identifier')}
-                className={
-                  errors.identifier
-                    ? 'border-destructive'
-                    : touchedFields.identifier
-                      ? 'border-success'
-                      : undefined
-                }
-                inputClassName="py-3"
-                placeholder="+1 234 567 8900"
-              />
-              {touchedFields.identifier && !errors.identifier && (
-                <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-success" />
-              )}
-              {errors.identifier && (
-                <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-destructive" />
-              )}
-            </div>
-            {errors.identifier && (
-              <p className="mt-1 text-sm text-destructive">{errors.identifier.message}</p>
-            )}
-          </div>
+          <Field label="Phone number" error={errors.identifier?.message}>
+            <Input
+              type="tel"
+              autoComplete="tel"
+              {...register('identifier')}
+              className={touchedFields.identifier && !errors.identifier ? 'border-success' : undefined}
+              inputClassName="py-3"
+              placeholder="+1 234 567 8900"
+              trailingIcon={
+                touchedFields.identifier && !errors.identifier ? (
+                  <CheckCircle className="w-5 h-5 text-success" aria-hidden="true" />
+                ) : errors.identifier ? (
+                  <XCircle className="w-5 h-5 text-destructive" aria-hidden="true" />
+                ) : undefined
+              }
+            />
+          </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">
-              Password
-            </label>
-            <div className="relative">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                inputClassName="py-3 pr-8"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          <Field
+            label="Password"
+            labelAside={
+              <a
+                href={ROUTES.FORGOT_PASSWORD}
+                className="font-medium text-primary hover:text-primary-hover transition-colors"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+                Forgot password?
+              </a>
+            }
+          >
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              {...register('password')}
+              inputClassName="py-3"
+              placeholder="Enter your password"
+              trailingIcon={
+                <IconButton
+                  size="sm"
+                  className="-mr-2"
+                  label={showPassword ? 'Hide password' : 'Show password'}
+                  icon={showPassword ? <EyeOff /> : <Eye />}
+                  onClick={() => setShowPassword(!showPassword)}
+                />
+              }
+            />
+          </Field>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2">
-              <LegacyInput
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-              />
-              <span className="text-sm text-muted-foreground">Remember me</span>
-            </label>
-            <a
-              href={ROUTES.FORGOT_PASSWORD}
-              className="text-sm text-primary hover:text-primary-hover transition-colors"
-            >
-              Forgot password?
-            </a>
-          </div>
+          <Checkbox
+            label="Remember me"
+            checked={rememberMe}
+            onCheckedChange={setRememberMe}
+          />
 
           <Button
             type="submit"

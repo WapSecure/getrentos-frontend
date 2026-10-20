@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
+  Button,
   PageErrorState,
   Skeleton,
   Tabs,
@@ -217,13 +218,13 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
             </Link>
           )}
           {purchase.propertyId && (
-            <button
-              type="button"
+            <Button
+              variant="link"
               onClick={() => setReporting(true)}
-              className="text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
             >
               Report a problem
-            </button>
+            </Button>
           )}
         </div>
       </header>

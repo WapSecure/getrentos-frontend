@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Copy, Check, Gift, Users, Wallet, Mail, MessageCircle } from 'lucide-react';
-import { Alert, Button, CardSkeleton } from '@getrentos/ui';
+import { Alert, Button, Card, CardSkeleton } from '@getrentos/ui';
 import { referralService } from '@/services/referralService';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { ReferralSummary } from '@/types/referral';
@@ -47,20 +47,20 @@ export const ReferralSummaryCard = () => {
     {
       name: 'WhatsApp',
       icon: MessageCircle,
-      color: 'bg-green-500',
+      color: 'bg-success-subtle text-success',
       action: () =>
         window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank'),
     },
     {
       name: 'SMS',
       icon: MessageCircle,
-      color: 'bg-blue-500',
+      color: 'bg-info-subtle text-info',
       action: () => window.open(`sms:?body=${encodeURIComponent(shareMessage)}`, '_blank'),
     },
     {
       name: 'Email',
       icon: Mail,
-      color: 'bg-gray-600',
+      color: 'bg-secondary text-foreground',
       action: () =>
         (window.location.href = `mailto:?subject=${encodeURIComponent('Join me on GetRentos')}&body=${encodeURIComponent(shareMessage)}`),
     },
@@ -82,7 +82,7 @@ export const ReferralSummaryCard = () => {
         </div>
       )}
 
-      <div className="bg-card rounded-2xl border border-border p-6">
+      <Card className="rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Gift className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Your referral code</h2>
@@ -104,21 +104,21 @@ export const ReferralSummaryCard = () => {
               key={option.name}
               type="button"
               onClick={option.action}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <div
                 className={`w-9 h-9 rounded-full ${option.color} flex items-center justify-center`}
               >
-                <option.icon className="w-4 h-4 text-white" />
+                <option.icon className="w-4 h-4" aria-hidden="true" />
               </div>
               <span className="text-xs text-muted-foreground">{option.name}</span>
             </button>
           ))}
         </div>
-      </div>
+      </Card>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
+        <Card className="rounded-2xl p-5 flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center shrink-0">
             <Users className="w-5 h-5 text-primary" />
           </div>
@@ -126,8 +126,8 @@ export const ReferralSummaryCard = () => {
             <p className="text-xs text-muted-foreground">People referred</p>
             <p className="text-xl font-bold text-foreground">{summary.totalReferred}</p>
           </div>
-        </div>
-        <div className="bg-card rounded-2xl border border-border p-5 flex items-center gap-4">
+        </Card>
+        <Card className="rounded-2xl p-5 flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center shrink-0">
             <Wallet className="w-5 h-5 text-primary" />
           </div>
@@ -137,10 +137,10 @@ export const ReferralSummaryCard = () => {
               {formatCurrency(summary.totalEarned)}
             </p>
           </div>
-        </div>
+        </Card>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border p-6">
+      <Card className="rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-foreground mb-4">Recent referrals</h3>
         {summary.referrals.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -164,7 +164,7 @@ export const ReferralSummaryCard = () => {
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

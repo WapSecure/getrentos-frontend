@@ -12,6 +12,8 @@ import {
   DocumentPreviewButton,
   EmptyState,
   SearchInput,
+  Skeleton,
+  ToggleChip,
 } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -112,9 +114,11 @@ export default function LandlordDocumentsPage() {
           {/* Zero is a claim about the portfolio, so wait until it has been read
               before making it. */}
           <p className="text-muted-foreground mt-1">
-            {isPending
-              ? 'Counting your documents…'
-              : `${total} document${total === 1 ? '' : 's'} across your portfolio`}
+            {isPending ? (
+              <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
+            ) : (
+              `${total} document${total === 1 ? '' : 's'} across your portfolio`
+            )}
           </p>
         </div>
         <Button
@@ -133,23 +137,19 @@ export default function LandlordDocumentsPage() {
           placeholder="Search documents..."
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter documents by category">
           {categoryFilters.map((option) => (
-            <button
+            <ToggleChip
               key={option.value}
-              type="button"
-              onClick={() => {
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
                 setFilter(option.value);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
             >
               {option.label}
-            </button>
+            </ToggleChip>
           ))}
         </div>
       </div>

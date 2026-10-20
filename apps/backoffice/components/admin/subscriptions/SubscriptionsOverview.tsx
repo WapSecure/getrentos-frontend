@@ -5,6 +5,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { CreditCard, Receipt, TriangleAlert, TrendingUp } from 'lucide-react';
 import {
   Badge,
+  Button,
   Card,
   EmptyState,
   PageErrorState,
@@ -296,15 +297,15 @@ function SubscriptionRow({
               </span>
             )}
             {row.tier === 'PRO' && (
-              <button
-                type="button"
+              <Button
+                variant="link"
                 onClick={onToggleInvoices}
                 aria-expanded={invoicesOpen}
-                className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                className="mt-1 gap-1 text-xs font-medium"
               >
                 <Receipt className="h-3 w-3" />
                 {invoicesOpen ? 'Hide payments' : 'Payment history'}
-              </button>
+              </Button>
             )}
           </div>
         </td>

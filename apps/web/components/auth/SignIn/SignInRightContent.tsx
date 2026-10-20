@@ -11,7 +11,7 @@ import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
 import { useToast, type ToastVariant } from '@getrentos/ui';
-import { SessionExpiredNotice } from '@getrentos/ui';
+import { Button, SessionExpiredNotice } from '@getrentos/ui';
 import { AuthMethodTabs } from '../AuthMethodTabs';
 
 interface SignInRightContentProps {
@@ -110,14 +110,16 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
     <section className="relative z-10 flex w-full items-center justify-center px-4 py-20 sm:px-8 lg:w-1/2 lg:px-12 lg:py-16">
       <div className="w-full max-w-[30rem] rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl sm:p-9 dark:shadow-[0_24px_80px_-32px_rgba(0,0,0,0.7)]">
         {/* Back Button */}
-        <button
+        <Button
+          variant="outline"
+          rounded="lg"
           onClick={handleBack}
-          className="fixed left-4 top-4 z-30 flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card/90 px-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 sm:left-6 sm:top-6 lg:static lg:mb-8"
           aria-label="Go back"
+          icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
+          className="fixed left-4 top-4 z-30 min-h-11 bg-card/90 px-3 font-medium text-muted-foreground backdrop-blur sm:left-6 sm:top-6 lg:static lg:mb-8"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          <span>Back</span>
-        </button>
+          Back
+        </Button>
 
         <div className="mb-8">
           <div className="mb-6 flex justify-center lg:hidden">

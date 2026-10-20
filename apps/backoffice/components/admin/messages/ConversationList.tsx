@@ -1,6 +1,7 @@
 'use client';
 
-import { SearchInput, Skeleton } from '@getrentos/ui';
+import { MessageSquare } from 'lucide-react';
+import { EmptyState, ListSkeleton, SearchInput } from '@getrentos/ui';
 import { getInitials, formatRelativeTime } from '@getrentos/shared';
 
 export interface Conversation {
@@ -42,13 +43,9 @@ export const ConversationList = ({
 
       <div className="flex-1 overflow-y-auto divide-y divide-border">
         {isLoading ? (
-          <div className="space-y-2 p-3" role="status" aria-label="Loading conversations">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-16 w-full rounded-lg" />
-            ))}
-          </div>
+          <ListSkeleton rows={6} bare label="Loading conversations" />
         ) : conversations.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">No conversations found</p>
+          <EmptyState icon={MessageSquare} title="No conversations found" size="compact" bare />
         ) : (
           conversations.map((conversation) => (
             <button

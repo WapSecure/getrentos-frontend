@@ -1,13 +1,14 @@
 'use client';
 
 import {
-  Pagination,
   Button,
   ConfirmDialog,
-  SearchInput,
   EmptyState,
   ListSkeleton,
   PageErrorState,
+  Pagination,
+  SearchInput,
+  SegmentedControl,
   Skeleton,
   useToast,
 } from '@getrentos/ui';
@@ -197,26 +198,17 @@ export default function OwnerPropertiesPage() {
           placeholder="Search by name or city..."
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
-          {filterOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          size="sm"
+          aria-label="Filter by verification"
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value);
+            setPage(1);
+          }}
+          segments={filterOptions}
+          className="max-w-full overflow-x-auto"
+        />
       </div>
 
       {isLoading ? (

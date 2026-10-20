@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Sun, Moon } from 'lucide-react';
+import { IconButton } from '@getrentos/ui';
 
 const className =
-  'relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-gray-200 backdrop-blur-sm transition-colors duration-200 hover:bg-gray-300 dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20';
+  'h-10 w-10 rounded-full border border-border bg-secondary text-foreground backdrop-blur-sm hover:bg-foreground/[0.08] hover:text-foreground';
 
 /**
  * The light/dark switch for the public pages. The shared ThemeToggle animates with
@@ -22,21 +23,15 @@ export const ThemeSwitch = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return <span className={className} aria-hidden="true" />;
+  if (!mounted) return <span className={`block shrink-0 ${className}`} aria-hidden="true" />;
 
   const isDark = (resolvedTheme || theme) === 'dark';
   return (
-    <button
-      type="button"
+    <IconButton
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      aria-label="Toggle theme"
+      label="Toggle theme"
       className={className}
-    >
-      {isDark ? (
-        <Moon className="h-4 w-4 text-foreground" />
-      ) : (
-        <Sun className="h-4 w-4 text-foreground" />
-      )}
-    </button>
+      icon={isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+    />
   );
 };

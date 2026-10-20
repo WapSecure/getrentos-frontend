@@ -1,9 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, Send } from 'lucide-react';
-import { Alert, Button, IconButton, Textarea } from '@getrentos/ui';
+import { Send } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Textarea,
+} from '@getrentos/ui';
 import type { LandlordLead } from '@/types/landlord';
 
 const defaultMessage = (lead: LandlordLead) =>
@@ -28,55 +35,49 @@ export const NudgeModal = ({ lead, onClose, onSend, isSubmitting, isError }: Nud
   };
 
   return (
-    <AnimatePresence>
-      {lead && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center gap-3">
-              <div className="min-w-0">
-                <h3 className="font-semibold text-foreground">Nudge {lead.leadName}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{lead.propertyName}</p>
-              </div>
-              <IconButton label="Close" size="sm" icon={<X />} onClick={handleClose} />
-            </div>
-
-            <div className="p-4 space-y-3">
-              <Textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={4}
-                placeholder="Write a follow-up message..."
-                aria-label="Follow-up message"
-              />
-              {isError && (
-                <Alert variant="danger">Couldn&apos;t send the nudge. Please try again.</Alert>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" onClick={handleClose} className="flex-1">
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1 gap-2"
-                onClick={() => onSend(message)}
-                disabled={!message.trim()}
-                isLoading={isSubmitting}
-                loadingText="Sending…"
-              >
-                <Send className="w-4 h-4" />
-                Send
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={!!lead} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="sm" padded={false}>
+        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
+          <div className="min-w-0">
+            <DialogTitle className="font-semibold text-foreground">
+              Nudge {lead.leadName}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              {lead.propertyName}
+            </DialogDescription>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-3">
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+            placeholder="Write a follow-up message..."
+            aria-label="Follow-up message"
+          />
+          {isError && (
+            <Alert variant="danger">Couldn&apos;t send the nudge. Please try again.</Alert>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-border flex gap-3">
+          <Button variant="ghost" onClick={handleClose} className="flex-1">
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1 gap-2"
+            onClick={() => onSend(message)}
+            disabled={!message.trim()}
+            isLoading={isSubmitting}
+            loadingText="Sending…"
+          >
+            <Send className="w-4 h-4" />
+            Send
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

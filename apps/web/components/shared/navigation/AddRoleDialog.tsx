@@ -33,7 +33,7 @@ export const AddRoleDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="max-w-md p-0">
+      <DialogContent size="md" padded={false}>
         <div className="border-b border-border p-4">
           <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
             Add a role
@@ -53,10 +53,10 @@ export const AddRoleDialog = ({
                 disabled={addRole.isPending}
                 aria-busy={(addRole.isPending && addRole.variables?.role === id) || undefined}
                 onClick={() => addRole.mutate({ role: id as AddableRoleId })}
-                className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary disabled:opacity-60"
+                className="flex w-full items-start gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:border-primary/40 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
               >
                 {addRole.isPending && addRole.variables?.role === id ? (
-                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary" />
+                  <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-primary motion-reduce:animate-none" />
                 ) : (
                   <Plus className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 )}

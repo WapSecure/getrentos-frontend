@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, Trash2, FileText, History, FilePlus2 } from 'lucide-react';
-import { Badge, IconButton } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@getrentos/ui';
 import type { GovernanceRecord } from '@/types/estate';
 
 const typeVariant: Record<GovernanceRecord['type'], 'info' | 'neutral'> = {
@@ -84,16 +84,18 @@ export const GovernanceRecordRow = ({
             onClick={onUploadNewVersion}
           />
         )}
-        <a
+        <Button
           href={record.url}
           target="_blank"
           rel="noreferrer"
+          variant="ghost"
+          size="xs"
+          className="h-8 w-8 px-0"
           aria-label={`Download ${record.title}`}
           title="Download"
-          className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
         >
-          <Download className="w-4 h-4" />
-        </a>
+          <Download className="w-4 h-4" aria-hidden="true" />
+        </Button>
         <IconButton
           label={`Delete ${record.title}`}
           icon={<Trash2 />}

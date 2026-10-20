@@ -17,8 +17,10 @@ import {
   IconButton,
   Input,
   ListSkeleton,
+  PageErrorState,
   Select,
   TimePicker,
+  ToggleChip,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -108,6 +110,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
     },
   });
 
+  // Pausing a round changes what guards are asked to walk: wait for the server.
   const toggleMutation = useMutation({
     mutationFn: (route: PatrolRoute) =>
       unwrap(estateService.updatePatrolRoute(estateId, route.id, { active: !route.active })),
@@ -148,6 +151,17 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
     return <ListSkeleton variant="cards" rows={2} />;
   }
 
+  if (!routesQuery.data && routesQuery.isError) {
+    return (
+      <PageErrorState
+        headingLevel="h2"
+        title="The rounds did not load"
+        onRetry={() => void routesQuery.refetch()}
+        isRetrying={routesQuery.isFetching}
+      />
+    );
+  }
+
   const routes = routesQuery.data ?? [];
 
   return (
@@ -169,9 +183,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
       </div>
 
       {active.length === 0 && !checkpointsQuery.isLoading && (
-        <p className="text-sm text-muted-foreground">
-          Add a checkpoint first: a round is a list of places to reach.
-        </p>
+        <Alert variant="info">Add a checkpoint first: a round is a list of places to reach.</Alert>
       )}
 
       {routes.length === 0 ? (
@@ -197,10 +209,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleMutation.mutate(route)}
-                    disabled={toggleMutation.isPending}
-                    isLoading={
-                      toggleMutation.isPending && toggleMutation.variables?.id === route.id
-                    }
+                    isLoading={toggleMutation.isPending && toggleMutation.variables?.id === route.id}
                   >
                     {route.active ? 'Pause' : 'Resume'}
                   </Button>
@@ -244,7 +253,7 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
           recorded on the checkpoint dialog: `Dialog` unmounts its children when
           `open` goes false, but this component's draft state would survive it. */}
       <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : close())}>
-        <DialogContent className="max-w-2xl p-6">
+        <DialogContent size="lg">
           <DialogTitle className="pr-8 text-xl font-semibold tracking-[-0.02em] text-foreground">
             {editingId ? 'Edit round' : 'Add a round'}
           </DialogTitle>
@@ -260,9 +269,8 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
               saveMutation.mutate();
             }}
           >
-            <Field label="Name" required htmlFor="route-name">
+            <Field label="Name" required>
               <Input
-                id="route-name"
                 value={draft.name}
                 onChange={(event) => setDraft({ ...draft, name: event.target.value })}
                 placeholder="Night perimeter round"
@@ -288,15 +296,14 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
             </div>
 
             <Field label="Which days" hint="Leave all off for every day.">
-              <div className="flex flex-wrap gap-2">
+              <div role="group" aria-label="Which days" className="flex flex-wrap gap-2">
                 {DAYS.map((day) => {
                   const on = draft.daysOfWeek.includes(day.value);
                   return (
-                    <button
+                    <ToggleChip
                       key={day.value}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() =>
+                      pressed={on}
+                      onPressedChange={() =>
                         setDraft({
                           ...draft,
                           daysOfWeek: on
@@ -304,14 +311,9 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                             : [...draft.daysOfWeek, day.value].sort((a, b) => a - b),
                         })
                       }
-                      className={`rounded-lg border px-3 py-1.5 text-sm ${
-                        on
-                          ? 'border-primary bg-primary/10 text-foreground'
-                          : 'border-border text-muted-foreground'
-                      }`}
                     >
                       {day.label}
-                    </button>
+                    </ToggleChip>
                   );
                 })}
               </div>
@@ -378,20 +380,20 @@ export const RoutePlanner = ({ estateId }: { estateId: string }) => {
                   {active
                     .filter((checkpoint) => !chosen.has(checkpoint.id))
                     .map((checkpoint) => (
-                      <button
+                      <Button
                         key={checkpoint.id}
-                        type="button"
+                        variant="outline"
+                        size="sm"
+                        icon={<Plus className="h-3.5 w-3.5" />}
                         onClick={() =>
                           setDraft({
                             ...draft,
                             checkpointIds: [...draft.checkpointIds, checkpoint.id],
                           })
                         }
-                        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
                       >
-                        <Plus className="h-3.5 w-3.5" />
                         {checkpoint.name}
-                      </button>
+                      </Button>
                     ))}
                 </div>
               </div>

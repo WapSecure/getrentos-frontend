@@ -4,10 +4,16 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Star, Star as StarOutline, MapPin } from 'lucide-react';
-import { Textarea } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { useToast } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Textarea,
+  useToast,
+} from '@getrentos/ui';
 import { renterService, type PendingReview } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -183,76 +189,75 @@ export const RenterReviews = () => {
       </motion.div>
 
       {/* Review Modal */}
-      {showReviewModal && selectedReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
-          >
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-foreground mb-2">Write a Review</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {selectedReview.type === 'property'
-                  ? `How was your experience at ${selectedReview.property}?`
-                  : `How was your experience with ${selectedReview.landlord}?`}
-              </p>
+      <Dialog
+        open={showReviewModal && selectedReview !== null}
+        onOpenChange={(next) => !next && !submitMutation.isPending && setShowReviewModal(false)}
+      >
+        {selectedReview && (
+          <DialogContent showClose={!submitMutation.isPending}>
+            <DialogTitle className="pr-8 text-xl font-semibold text-foreground mb-2">
+              Write a Review
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mb-4">
+              {selectedReview.type === 'property'
+                ? `How was your experience at ${selectedReview.property}?`
+                : `How was your experience with ${selectedReview.landlord}?`}
+            </DialogDescription>
 
-              {/* Star Rating */}
-              <div className="flex justify-center gap-2 mb-4" role="group" aria-label="Rating">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    type="button"
-                    key={star}
-                    aria-label={`${star} star${star === 1 ? '' : 's'}`}
-                    aria-pressed={rating === star}
-                    className="rounded-md focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    onClick={() => setRating(star)}
-                  >
-                    {(hoverRating || rating) >= star ? (
-                      <Star className="w-8 h-8 fill-primary text-primary" />
-                    ) : (
-                      <StarOutline className="w-8 h-8 text-muted-foreground/50" />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Review Text */}
-              <Field label="Your review" className="mb-4">
-                <Textarea
-                  placeholder="Share your experience..."
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  rows={4}
-                />
-              </Field>
-
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  fullWidth
-                  onClick={() => setShowReviewModal(false)}
-                  disabled={submitMutation.isPending}
+            {/* Star Rating */}
+            <div className="flex justify-center gap-2 mb-4" role="group" aria-label="Rating">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  type="button"
+                  key={star}
+                  aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                  aria-pressed={rating === star}
+                  className="rounded-md focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  onClick={() => setRating(star)}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={handleSubmitReview}
-                  disabled={rating === 0 || submitMutation.isPending}
-                  isLoading={submitMutation.isPending}
-                >
-                  Submit Review
-                </Button>
-              </div>
+                  {(hoverRating || rating) >= star ? (
+                    <Star className="w-8 h-8 fill-primary text-primary" />
+                  ) : (
+                    <StarOutline className="w-8 h-8 text-muted-foreground/50" />
+                  )}
+                </button>
+              ))}
             </div>
-          </motion.div>
-        </div>
-      )}
+
+            {/* Review Text */}
+            <Field label="Your review" className="mb-4">
+              <Textarea
+                placeholder="Share your experience..."
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                rows={4}
+              />
+            </Field>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                fullWidth
+                onClick={() => setShowReviewModal(false)}
+                disabled={submitMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={handleSubmitReview}
+                disabled={rating === 0 || submitMutation.isPending}
+                isLoading={submitMutation.isPending}
+              >
+                Submit Review
+              </Button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
     </>
   );
 };

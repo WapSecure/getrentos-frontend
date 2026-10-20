@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Loader2, AlertCircle, ShieldCheck } from 'lucide-react';
-import { Button, NumberInput } from '@getrentos/ui';
+import { Button, Field, NumberInput } from '@getrentos/ui';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { apiFetch } from '@/lib/apiClient';
@@ -111,21 +111,17 @@ function OAuthCallbackContent() {
               Enter the 6-digit code from your authenticator app to finish signing in.
             </p>
           </div>
-          <NumberInput
-            aria-label="Authentication code"
-            autoComplete="one-time-code"
-            autoFocus
-            maxLength={6}
-            value={code}
-            onValueChange={(value) => setCode(value.slice(0, 6))}
-            inputClassName="text-center font-mono text-lg tracking-[0.5em]"
-            placeholder="••••••"
-          />
-          {error && (
-            <p role="alert" className="text-sm text-destructive text-center">
-              {error}
-            </p>
-          )}
+          <Field label="Authentication code" error={error || undefined}>
+            <NumberInput
+              autoComplete="one-time-code"
+              autoFocus
+              maxLength={6}
+              value={code}
+              onValueChange={(value) => setCode(value.slice(0, 6))}
+              inputClassName="text-center font-mono text-lg tracking-[0.5em]"
+              placeholder="••••••"
+            />
+          </Field>
           <Button
             type="submit"
             disabled={code.length !== 6}
@@ -164,13 +160,13 @@ function OAuthCallbackContent() {
             </a>
           </>
         ) : (
-          <>
-            <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-3" />
+          <div role="status" aria-live="polite">
+            <Loader2 className="w-8 h-8 text-primary animate-spin motion-reduce:animate-none mx-auto mb-3" />
             <h1 className="text-lg font-semibold text-foreground">Completing sign-in…</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Securely signing you into GetRentos.
             </p>
-          </>
+          </div>
         )}
       </div>
     </div>

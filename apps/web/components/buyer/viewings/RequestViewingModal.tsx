@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, CalendarClock } from 'lucide-react';
+import { CalendarClock } from 'lucide-react';
 import {
   Button,
   DatePicker,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Field,
-  IconButton,
   RadioGroup,
   Textarea,
   TimePicker,
@@ -114,125 +115,110 @@ export const RequestViewingModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Request Viewing"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden max-h-[90vh] overflow-y-auto"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <h3 className="font-semibold text-foreground">Request Viewing</h3>
-              <IconButton
-                label="Close viewing request"
-                size="sm"
-                icon={<X />}
-                onClick={handleClose}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="p-4 space-y-4">
-              <Field label="Property" required>
-                <PaginatedSelect
-                  value={propertyId}
-                  onValueChange={(value) => {
-                    setPropertyId(value);
-                    setSelectedListingState(
-                      listings.find((listing) => listing.id === value) ??
-                        (defaultListing?.id === value ? defaultListing : null)
-                    );
-                  }}
-                  items={listings}
-                  selectedItem={selectedListing}
-                  getItemValue={(listing) => listing.id}
-                  getItemLabel={(listing) => listing.title}
-                  search={listingSearch}
-                  onSearchChange={(value) => {
-                    setListingSearch(value);
-                    setListingPage(1);
-                  }}
-                  searchPlaceholder="Search available properties"
-                  page={listingPage}
-                  pageSize={LISTING_PAGE_SIZE}
-                  total={listingsPage?.total ?? 0}
-                  onPageChange={setListingPage}
-                  placeholder="Select a property"
-                  emptyMessage="No available properties match this search."
-                  isLoading={isListingsLoading}
-                  ariaLabel="property"
-                />
-              </Field>
-
-              <Field label="Date">
-                <DatePicker value={date} onChange={setDate} />
-              </Field>
-
-              <Field label="Time">
-                <TimePicker value={time} onChange={setTime} />
-              </Field>
-
-              {canVideo && (
-                <Field
-                  label="How would you like to view it?"
-                  hint={
-                    mode === 'VIDEO'
-                      ? 'The owner walks you through it on a video call once they confirm. Join it from your viewing requests.'
-                      : undefined
-                  }
-                >
-                  <RadioGroup
-                    value={mode}
-                    onValueChange={setMode}
-                    variant="card"
-                    columns={2}
-                    options={[
-                      { value: 'IN_PERSON', label: 'Visit in person' },
-                      { value: 'VIDEO', label: 'Live video call' },
-                    ]}
-                  />
-                </Field>
-              )}
-
-              <Field label="Notes" optionalLabel="(optional)">
-                <Textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={2}
-                  placeholder="Anything the owner should know"
-                />
-              </Field>
-            </div>
-
-            <div className="p-4 border-t border-border flex flex-wrap gap-3">
-              {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="flex-1"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1"
-                icon={<CalendarClock className="w-4 h-4" />}
-                onClick={() => void handleSubmit()}
-                disabled={!selectedListing || !date || !time || isSubmitting}
-                isLoading={isSubmitting}
-              >
-                Request
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && !isSubmitting && handleClose()}>
+      <DialogContent size="sm" padded={false}>
+        <div className="p-4 pr-12 border-b border-border">
+          <DialogTitle className="font-semibold text-foreground">Request Viewing</DialogTitle>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4">
+          <Field label="Property" required>
+            <PaginatedSelect
+              value={propertyId}
+              onValueChange={(value) => {
+                setPropertyId(value);
+                setSelectedListingState(
+                  listings.find((listing) => listing.id === value) ??
+                    (defaultListing?.id === value ? defaultListing : null)
+                );
+              }}
+              items={listings}
+              selectedItem={selectedListing}
+              getItemValue={(listing) => listing.id}
+              getItemLabel={(listing) => listing.title}
+              search={listingSearch}
+              onSearchChange={(value) => {
+                setListingSearch(value);
+                setListingPage(1);
+              }}
+              searchPlaceholder="Search available properties"
+              page={listingPage}
+              pageSize={LISTING_PAGE_SIZE}
+              total={listingsPage?.total ?? 0}
+              onPageChange={setListingPage}
+              placeholder="Select a property"
+              emptyMessage="No available properties match this search."
+              isLoading={isListingsLoading}
+              ariaLabel="property"
+            />
+          </Field>
+
+          <Field label="Date">
+            <DatePicker value={date} onChange={setDate} />
+          </Field>
+
+          <Field label="Time">
+            <TimePicker value={time} onChange={setTime} />
+          </Field>
+
+          {canVideo && (
+            <Field
+              label="How would you like to view it?"
+              hint={
+                mode === 'VIDEO'
+                  ? 'The owner walks you through it on a video call once they confirm. Join it from your viewing requests.'
+                  : undefined
+              }
+            >
+              <RadioGroup
+                value={mode}
+                onValueChange={setMode}
+                variant="card"
+                columns={2}
+                options={[
+                  { value: 'IN_PERSON', label: 'Visit in person' },
+                  { value: 'VIDEO', label: 'Live video call' },
+                ]}
+              />
+            </Field>
+          )}
+
+          <Field label="Notes" optionalLabel="(optional)">
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              placeholder="Anything the owner should know"
+            />
+          </Field>
+        </div>
+
+        <div className="p-4 border-t border-border flex flex-wrap gap-3">
+          {submitError && (
+            <p role="alert" className="w-full text-sm text-destructive">
+              {submitError}
+            </p>
+          )}
+          <Button
+            variant="ghost"
+            onClick={handleClose}
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1"
+            icon={<CalendarClock className="w-4 h-4" />}
+            onClick={() => void handleSubmit()}
+            disabled={!selectedListing || !date || !time || isSubmitting}
+            isLoading={isSubmitting}
+          >
+            Request
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

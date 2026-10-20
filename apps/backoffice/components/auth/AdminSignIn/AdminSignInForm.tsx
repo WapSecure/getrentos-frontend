@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react';
-import { Alert, Checkbox, Field, Input, NumberInput } from '@getrentos/ui';
+import { Alert, Checkbox, Field, IconButton, Input, NumberInput } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useToast } from '@getrentos/ui';
 import { SessionExpiredNotice } from '@getrentos/ui';
@@ -216,14 +216,13 @@ export const AdminSignInForm = () => {
                 inputClassName="py-3"
                 placeholder="Enter your password"
                 trailingIcon={
-                  <button
-                    type="button"
+                  <IconButton
+                    size="sm"
+                    className="-mr-2"
+                    label={showPassword ? 'Hide password' : 'Show password'}
+                    icon={showPassword ? <EyeOff /> : <Eye />}
                     onClick={() => setShowPassword((s) => !s)}
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                  />
                 }
               />
             </Field>

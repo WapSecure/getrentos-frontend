@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import {
   Alert,
   Button,
   Checkbox,
   CurrencyInput,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   Field,
-  IconButton,
   RadioGroup,
   Textarea,
 } from '@getrentos/ui';
@@ -134,148 +135,133 @@ export const MakeOfferModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Make an Offer"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">Make an Offer</h3>
-              <IconButton
-                label="Close offer dialog"
-                size="sm"
-                icon={<X />}
-                onClick={handleClose}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <Field
-                label="Property"
-                required
-                hint={
-                  selectedListing
-                    ? `Asking price: ₦${selectedListing.askingPrice.toLocaleString()}`
-                    : undefined
-                }
-              >
-                <PaginatedSelect
-                  value={propertyId}
-                  onValueChange={(value) => {
-                    setPropertyId(value);
-                    setSelectedListingState(
-                      listings.find((listing) => listing.id === value) ??
-                        (defaultListing?.id === value ? defaultListing : null)
-                    );
-                  }}
-                  items={listings}
-                  selectedItem={selectedListing}
-                  getItemValue={(listing) => listing.id}
-                  getItemLabel={(listing) => listing.title}
-                  search={listingSearch}
-                  onSearchChange={(value) => {
-                    setListingSearch(value);
-                    setListingPage(1);
-                  }}
-                  searchPlaceholder="Search available properties"
-                  page={listingPage}
-                  pageSize={LISTING_PAGE_SIZE}
-                  total={listingsPage?.total ?? 0}
-                  onPageChange={setListingPage}
-                  placeholder="Select a property"
-                  emptyMessage="No available properties match this search."
-                  isLoading={isListingsLoading}
-                  ariaLabel="property"
-                />
-              </Field>
-
-              <Field label="Offer Amount" required>
-                <CurrencyInput
-                  prefix="₦"
-                  min={0}
-                  value={offerAmount}
-                  onValueChange={(v) => setOfferAmount(v === 0 ? '' : String(v))}
-                />
-              </Field>
-
-              <Field label="Financing Type">
-                <RadioGroup
-                  value={financingType}
-                  onValueChange={setFinancingType}
-                  options={financingOptions}
-                  orientation="horizontal"
-                />
-              </Field>
-
-              <Field label="Deposit Amount" optionalLabel="(optional)">
-                <CurrencyInput
-                  prefix="₦"
-                  min={0}
-                  value={depositAmount}
-                  onValueChange={(v) => setDepositAmount(v === 0 ? '' : String(v))}
-                />
-              </Field>
-
-              <Field label="Message to Owner" optionalLabel="(optional)">
-                <Textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={2}
-                  placeholder="e.g. Pre-approved and ready to close quickly"
-                />
-              </Field>
-            </div>
-
-            {isLand && notVerified.length > 0 && (
-              <Alert
-                variant="warning"
-                title="What was not verified on this land"
-                className="mx-4 mb-3"
-              >
-                <div className="mt-2">
-                  <TrustLabelsList notVerified={notVerified} />
-                </div>
-                <Checkbox
-                  className="mt-2"
-                  checked={acceptedRisks}
-                  onCheckedChange={setAcceptedRisks}
-                  label="I have read what was not verified and accept it before offering."
-                />
-              </Alert>
-            )}
-
-            <div className="p-4 border-t border-border flex flex-wrap gap-3 shrink-0">
-              {submitError && <p className="w-full text-sm text-destructive">{submitError}</p>}
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="flex-1"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1"
-                icon={<Send className="w-3.5 h-3.5" />}
-                onClick={() => void handleSubmit()}
-                disabled={!propertyId || !offerAmount || needsAcceptance || isSubmitting}
-                isLoading={isSubmitting}
-              >
-                Submit Offer
-              </Button>
-            </div>
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && !isSubmitting && handleClose()}>
+      <DialogContent size="sm" padded={false} className="flex flex-col overflow-hidden">
+        <div className="p-4 pr-12 border-b border-border shrink-0">
+          <DialogTitle className="font-semibold text-foreground">Make an Offer</DialogTitle>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
+          <Field
+            label="Property"
+            required
+            hint={
+              selectedListing
+                ? `Asking price: ₦${selectedListing.askingPrice.toLocaleString()}`
+                : undefined
+            }
+          >
+            <PaginatedSelect
+              value={propertyId}
+              onValueChange={(value) => {
+                setPropertyId(value);
+                setSelectedListingState(
+                  listings.find((listing) => listing.id === value) ??
+                    (defaultListing?.id === value ? defaultListing : null)
+                );
+              }}
+              items={listings}
+              selectedItem={selectedListing}
+              getItemValue={(listing) => listing.id}
+              getItemLabel={(listing) => listing.title}
+              search={listingSearch}
+              onSearchChange={(value) => {
+                setListingSearch(value);
+                setListingPage(1);
+              }}
+              searchPlaceholder="Search available properties"
+              page={listingPage}
+              pageSize={LISTING_PAGE_SIZE}
+              total={listingsPage?.total ?? 0}
+              onPageChange={setListingPage}
+              placeholder="Select a property"
+              emptyMessage="No available properties match this search."
+              isLoading={isListingsLoading}
+              ariaLabel="property"
+            />
+          </Field>
+
+          <Field label="Offer Amount" required>
+            <CurrencyInput
+              prefix="₦"
+              min={0}
+              value={offerAmount}
+              onValueChange={(v) => setOfferAmount(v === 0 ? '' : String(v))}
+            />
+          </Field>
+
+          <Field label="Financing Type">
+            <RadioGroup
+              value={financingType}
+              onValueChange={setFinancingType}
+              options={financingOptions}
+              orientation="horizontal"
+            />
+          </Field>
+
+          <Field label="Deposit Amount" optionalLabel="(optional)">
+            <CurrencyInput
+              prefix="₦"
+              min={0}
+              value={depositAmount}
+              onValueChange={(v) => setDepositAmount(v === 0 ? '' : String(v))}
+            />
+          </Field>
+
+          <Field label="Message to Owner" optionalLabel="(optional)">
+            <Textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={2}
+              placeholder="e.g. Pre-approved and ready to close quickly"
+            />
+          </Field>
+        </div>
+
+        {isLand && notVerified.length > 0 && (
+          <Alert
+            variant="warning"
+            title="What was not verified on this land"
+            className="mx-4 mb-3"
+          >
+            <div className="mt-2">
+              <TrustLabelsList notVerified={notVerified} />
+            </div>
+            <Checkbox
+              className="mt-2"
+              checked={acceptedRisks}
+              onCheckedChange={setAcceptedRisks}
+              label="I have read what was not verified and accept it before offering."
+            />
+          </Alert>
+        )}
+
+        <div className="p-4 border-t border-border flex flex-wrap gap-3 shrink-0">
+          {submitError && (
+            <p role="alert" className="w-full text-sm text-destructive">
+              {submitError}
+            </p>
+          )}
+          <Button
+            variant="ghost"
+            onClick={handleClose}
+            className="flex-1"
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            className="flex-1"
+            icon={<Send className="w-3.5 h-3.5" />}
+            onClick={() => void handleSubmit()}
+            disabled={!propertyId || !offerAmount || needsAcceptance || isSubmitting}
+            isLoading={isSubmitting}
+          >
+            Submit Offer
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

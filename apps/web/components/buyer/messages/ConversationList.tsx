@@ -1,6 +1,7 @@
 'use client';
 
-import { SearchInput } from '@getrentos/ui';
+import { MessageCircle } from 'lucide-react';
+import { EmptyState, SearchInput } from '@getrentos/ui';
 import { getInitials, formatRelativeTime } from '@/lib/format';
 
 export interface Conversation {
@@ -40,7 +41,7 @@ export const ConversationList = ({
 
       <div className="flex-1 overflow-y-auto divide-y divide-border">
         {conversations.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">No conversations found</p>
+          <EmptyState icon={MessageCircle} title="No conversations found" size="compact" bare />
         ) : (
           conversations.map((conversation) => (
             <button

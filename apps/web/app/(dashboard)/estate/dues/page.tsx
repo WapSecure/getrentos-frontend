@@ -10,6 +10,7 @@ import {
   EmptyState,
   ListSkeleton,
   Pagination,
+  ToggleChip,
   useToast,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
@@ -162,20 +163,18 @@ export default function EstateDuesPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter dues by status">
         {statusFilters.map((filter) => (
-          <Button
+          <ToggleChip
             key={filter.value}
-            variant={statusFilter === filter.value ? 'primary' : 'ghost'}
-            size="sm"
-            aria-pressed={statusFilter === filter.value}
-            onClick={() => {
+            pressed={statusFilter === filter.value}
+            onPressedChange={() => {
               setStatusFilter(filter.value);
               setPage(1);
             }}
           >
             {filter.label}
-          </Button>
+          </ToggleChip>
         ))}
       </div>
 

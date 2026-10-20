@@ -13,10 +13,10 @@ import {
   Input,
   Pagination,
   Select,
+  ToggleChip,
 } from '@getrentos/ui';
 import { Receipt, Search } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
-import { cn } from '@/lib/cn';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
@@ -241,28 +241,22 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
       <div className="mb-4 mt-8 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="-mx-1 overflow-x-auto px-1">
           <div
-            className="flex w-max gap-1 rounded-lg bg-secondary p-1"
+            className="flex w-max gap-2"
             role="group"
             aria-label="Purchase status"
           >
             {statusOptions.map((option) => (
-              <button
+              <ToggleChip
                 key={option.label}
-                type="button"
-                aria-pressed={status === option.value}
-                onClick={() => {
+                size="sm"
+                pressed={status === option.value}
+                onPressedChange={() => {
                   setStatus(option.value);
                   setPage(1);
                 }}
-                className={cn(
-                  'whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                  status === option.value
-                    ? 'bg-card text-primary shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
               >
                 {option.label}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>

@@ -94,14 +94,14 @@ export const OtpVerification = ({
             Resend code in {formatTime(timeLeft)}
           </p>
         ) : (
-          <button
+          <Button
+            variant="link"
             onClick={handleResend}
             disabled={isLoading}
-            className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors"
+            icon={<RefreshCw className="w-3 h-3" />}
           >
-            <RefreshCw className="w-3 h-3" />
             Resend code
-          </button>
+          </Button>
         )}
       </div>
 

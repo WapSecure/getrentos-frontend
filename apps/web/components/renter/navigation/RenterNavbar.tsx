@@ -1,14 +1,12 @@
 'use client';
 
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Menu, X } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatDistanceToNow } from 'date-fns';
+import { Search, Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import { IconButton, Input, ThemeToggle, useOptimisticMutation } from '@getrentos/ui';
+import { IconButton, Input, ThemeToggle } from '@getrentos/ui';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { RenterProfileDropdown } from './RenterProfileDropdown';
@@ -17,8 +15,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { notificationHref } from '@/lib/notificationHref';
+import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 
 interface RenterNavbarProps {
   user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
@@ -26,49 +23,11 @@ interface RenterNavbarProps {
 
 export const RenterNavbar = ({ user }: RenterNavbarProps) => {
   const { t } = useLanguage();
-  const queryClient = useQueryClient();
   const pathname = usePathname();
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const notificationsRef = useRef<HTMLDivElement>(null);
-
-  const bellKey = [...renterKeys.notifications, { page: 1, pageSize: 5 }];
-  const { data } = useQuery({
-    queryKey: bellKey,
-    queryFn: () => unwrap(renterService.listNotifications({ page: 1, pageSize: 5 })),
-  });
-  const notifications = data?.items ?? [];
-
-  const invalidateNotifications = () =>
-    queryClient.invalidateQueries({ queryKey: renterKeys.notifications });
-
-  // Real-time: refresh the bell when the backend pushes a new notification.
-  useRealtimeEvent('notification:new', () => {
-    invalidateNotifications();
-  });
-
-  const markRead = (old: unknown, isTarget: (id: string) => boolean) => {
-    const page = old as { items: { id: string; read: boolean }[] };
-    return {
-      ...page,
-      items: page.items.map((n) => (isTarget(n.id) ? { ...n, read: true } : n)),
-    };
-  };
-
-  const markAsReadMutation = useOptimisticMutation({
-    mutationFn: (id: string) => unwrap(renterService.markNotificationAsRead(id)),
-    patches: (id) => [{ queryKey: bellKey, update: (old) => markRead(old, (n) => n === id) }],
-    invalidate: [renterKeys.notifications],
-  });
-
-  const markAllAsReadMutation = useOptimisticMutation<unknown, void>({
-    mutationFn: () => unwrap(renterService.markAllNotificationsAsRead()),
-    patches: () => [{ queryKey: bellKey, update: (old) => markRead(old, () => true) }],
-    invalidate: [renterKeys.notifications],
-  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,51 +38,12 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
   }, []);
 
   useEffect(() => {
-    const closeOverlays = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsMobileMenuOpen(false);
-        setShowNotifications(false);
-      }
+    const closeMobileMenu = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMobileMenuOpen(false);
     };
-    const closeNotifications = (event: MouseEvent) => {
-      if (!notificationsRef.current?.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener('keydown', closeOverlays);
-    document.addEventListener('mousedown', closeNotifications);
-    return () => {
-      document.removeEventListener('keydown', closeOverlays);
-      document.removeEventListener('mousedown', closeNotifications);
-    };
+    document.addEventListener('keydown', closeMobileMenu);
+    return () => document.removeEventListener('keydown', closeMobileMenu);
   }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleMarkAsRead = (id: string) => {
-    markAsReadMutation.mutate(id);
-  };
-
-  // Mark it read, then open what it is about (if it is about something).
-  const handleOpenNotification = (notification: {
-    id: string;
-    type: string;
-    read: boolean;
-    actionUrl?: string;
-    conversationId?: string;
-    action?: { url: string };
-  }) => {
-    if (!notification.read) handleMarkAsRead(notification.id);
-    const href = notificationHref('renter', notification);
-    if (href) {
-      setShowNotifications(false);
-      router.push(href);
-    }
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllAsReadMutation.mutate();
-  };
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -207,90 +127,18 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
               </div>
               <ThemeToggle />
 
-              {/* Notifications */}
-              <div ref={notificationsRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  aria-label={
-                    unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'
-                  }
-                  aria-expanded={showNotifications}
-                  aria-controls="renter-notifications-menu"
-                  className="relative flex min-h-10 min-w-10 items-center justify-center rounded-xl transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
-                >
-                  <Bell className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
-                  {unreadCount > 0 && (
-                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-                  )}
-                </button>
-
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div
-                      id="renter-notifications-menu"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border/70 bg-card shadow-2xl"
-                    >
-                      <div className="p-3 border-b border-border flex justify-between items-center">
-                        <h3 className="font-semibold text-foreground">Notifications</h3>
-                        {unreadCount > 0 && (
-                          <button
-                            type="button"
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-primary hover:text-primary-hover"
-                          >
-                            Mark all as read
-                          </button>
-                        )}
-                      </div>
-                      <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="p-6 text-center text-sm text-muted-foreground">
-                            You&apos;re all caught up
-                          </div>
-                        ) : (
-                          notifications.map((notification) => (
-                            <button
-                              type="button"
-                              key={notification.id}
-                              className={`block w-full p-3 text-left border-b border-border hover:bg-secondary transition-colors ${
-                                !notification.read ? 'bg-info-subtle' : ''
-                              }`}
-                              onClick={() => handleOpenNotification(notification)}
-                            >
-                              <div className="flex justify-between items-start gap-2 mb-1">
-                                <h4 className="text-sm font-medium text-foreground">
-                                  {notification.title}
-                                </h4>
-                                <span className="shrink-0 text-xs text-muted-foreground">
-                                  {formatDistanceToNow(new Date(notification.createdAt), {
-                                    addSuffix: true,
-                                  })}
-                                </span>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.message}
-                              </p>
-                            </button>
-                          ))
-                        )}
-                      </div>
-                      <div className="p-2 border-t border-border">
-                        <Link
-                          href={ROUTES.RENTER_NOTIFICATIONS}
-                          onClick={() => setShowNotifications(false)}
-                          className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
-                        >
-                          View all notifications
-                        </Link>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <NotificationBell
+                portal="renter"
+                queryKey={renterKeys.notifications}
+                pageSize={5}
+                fetchNotifications={() =>
+                  unwrap(renterService.listNotifications({ page: 1, pageSize: 5 }))
+                }
+                markRead={(id) => unwrap(renterService.markNotificationAsRead(id))}
+                markAllRead={() => unwrap(renterService.markAllNotificationsAsRead())}
+                refetchAfterMarking
+                viewAllHref={ROUTES.RENTER_NOTIFICATIONS}
+              />
 
               {/* Profile Dropdown */}
               <RenterProfileDropdown user={user} />

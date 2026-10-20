@@ -9,6 +9,10 @@ export interface Segment<T extends string> {
   label: string;
   icon?: ReactNode;
   disabled?: boolean;
+  /** A number after the label ("Periods 3"); hidden when undefined. */
+  count?: number;
+  /** `warning` marks a count that needs attention (unconfigured, overdue). */
+  countTone?: 'neutral' | 'warning';
 }
 
 interface SegmentedControlProps<T extends string> {
@@ -100,6 +104,18 @@ export function SegmentedControl<T extends string>({
               </span>
             )}
             {!iconOnly && segment.label}
+            {segment.count !== undefined && (
+              <span
+                className={cn(
+                  'rounded-full px-1.5 text-xs tabular-nums',
+                  segment.countTone === 'warning'
+                    ? 'bg-warning-subtle text-warning'
+                    : 'bg-foreground/[0.06] text-muted-foreground'
+                )}
+              >
+                {segment.count}
+              </span>
+            )}
           </button>
         );
       })}

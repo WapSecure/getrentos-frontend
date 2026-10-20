@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { KeyRound, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Alert, Button } from '@getrentos/ui';
+import { Alert, Button, IconButton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
@@ -72,24 +72,21 @@ export const ResetPasswordModal = ({
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <Field
               label="New password"
-              htmlFor="reset-password"
               required
               hint="Use the generated one, or type your own."
             >
               <Input
-                id="reset-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
                 trailingIcon={
-                  <button
-                    type="button"
+                  <IconButton
+                    size="sm"
+                    className="-mr-2"
+                    label="Generate a new password"
+                    icon={<RefreshCw />}
                     onClick={() => setPassword(generatePassword())}
-                    aria-label="Generate a new password"
-                    className="text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </button>
+                  />
                 }
               />
             </Field>

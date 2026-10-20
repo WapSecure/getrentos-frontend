@@ -1,32 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Menu, X, Wifi, WifiOff } from 'lucide-react';
+import { Menu, X, Wifi, WifiOff } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import {
   Badge,
-  Button,
-  EmptyState,
   IconButton,
   SearchInput,
   ThemeToggle,
-  useOptimisticMutation,
 } from '@getrentos/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { navGroups } from '../dashboard/AgentSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
-import { formatRelativeTime } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
-import { agentService, type AgentNotification } from '@/services/agentService';
-import { notificationHref } from '@/lib/notificationHref';
-import { useRealtimeEvent } from '@/hooks/useRealtime';
+import { agentService } from '@/services/agentService';
+import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 
 interface AgentNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -45,36 +39,14 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const queryClient = useQueryClient();
-  const { data: notifications = [] } = useQuery({
-    queryKey: agentKeys.notifications,
-    queryFn: () => unwrap(agentService.getNotifications()),
-  });
-  const markRead = useOptimisticMutation({
-    mutationFn: (id: string) => unwrap(agentService.markNotificationRead(id)),
-    patches: (id) => [
-      {
-        queryKey: agentKeys.notifications,
-        update: (old) =>
-          (old as AgentNotification[]).map((n) => (n.id === id ? { ...n, read: true } : n)),
-      },
-    ],
-  });
-  const markAllRead = useOptimisticMutation({
-    mutationFn: () => unwrap(agentService.markAllNotificationsRead()),
-    patches: () => [
-      {
-        queryKey: agentKeys.notifications,
-        update: (old) => (old as AgentNotification[]).map((n) => ({ ...n, read: true })),
-      },
-    ],
-  });
-
-  // Real-time: refresh the bell when the backend pushes a new notification.
-  useRealtimeEvent('notification:new', () => {
-    queryClient.invalidateQueries({ queryKey: agentKeys.notifications });
-  });
-  const [showNotifications, setShowNotifications] = useState(false);
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -92,22 +64,6 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
       window.removeEventListener('offline', updateStatus);
     };
   }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  // Mark it read, then open what it is about (if it is about something).
-  const handleOpenNotification = (notification: AgentNotification) => {
-    if (!notification.read) markRead.mutate(notification.id);
-    const href = notificationHref('agent', notification);
-    if (href) {
-      setShowNotifications(false);
-      router.push(href);
-    }
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllRead.mutate();
-  };
 
   return (
     <>
@@ -159,77 +115,15 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
 
               <ThemeToggle />
 
-              <div className="relative">
-                <IconButton
-                  label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-                  aria-expanded={showNotifications}
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative"
-                  icon={
-                    <>
-                      <Bell />
-                      {unreadCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-                      )}
-                    </>
-                  }
-                />
-
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
-                    >
-                      <div className="p-3 border-b border-border flex justify-between items-center">
-                        <h3 className="font-semibold text-foreground">Notifications</h3>
-                        {unreadCount > 0 && (
-                          <Button variant="ghost" size="xs" onClick={handleMarkAllAsRead}>
-                            Mark all as read
-                          </Button>
-                        )}
-                      </div>
-                      <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <EmptyState icon={Bell} title="No notifications" size="compact" bare />
-                        ) : (
-                          notifications.map((notification) => (
-                            <button
-                              type="button"
-                              key={notification.id}
-                              className={`block w-full text-left p-3 border-b border-border hover:bg-secondary transition-colors ${
-                                !notification.read ? 'bg-info-subtle/50' : ''
-                              }`}
-                              onClick={() => handleOpenNotification(notification)}
-                            >
-                              <div className="flex justify-between items-start mb-1">
-                                <h4 className="text-sm font-medium text-foreground">
-                                  {notification.title}
-                                </h4>
-                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.createdAt)}
-                                </span>
-                              </div>
-                              <p className="text-xs text-muted-foreground">{notification.body}</p>
-                            </button>
-                          ))
-                        )}
-                      </div>
-                      <div className="p-2 border-t border-border">
-                        <Link
-                          href={ROUTES.AGENT_TASKS}
-                          className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
-                          onClick={() => setShowNotifications(false)}
-                        >
-                          View all tasks
-                        </Link>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <NotificationBell
+                portal="agent"
+                queryKey={agentKeys.notifications}
+                fetchNotifications={() => unwrap(agentService.getNotifications())}
+                markRead={(id) => unwrap(agentService.markNotificationRead(id))}
+                markAllRead={() => unwrap(agentService.markAllNotificationsRead())}
+                viewAllHref={ROUTES.AGENT_TASKS}
+                viewAllLabel="View all tasks"
+              />
 
               <AgentProfileDropdown user={user} />
 

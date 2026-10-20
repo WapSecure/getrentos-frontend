@@ -8,8 +8,7 @@ import {
   LayoutGrid,
   List,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { IconButton } from '@getrentos/ui';
+import { Button, IconButton, SegmentedControl } from '@getrentos/ui';
 import { format } from 'date-fns';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
@@ -99,32 +98,17 @@ export const CalendarHeader = ({
 
         <div className="flex-1" />
 
-        <div className="flex gap-1 rounded-xl bg-secondary p-1" role="group" aria-label="Calendar view">
-          <IconButton
-            label="Month view"
-            icon={<LayoutGrid />}
-            size="sm"
-            aria-pressed={viewMode === 'month'}
-            onClick={() => setViewMode('month')}
-            className={viewMode === 'month' ? 'bg-card text-primary shadow-sm' : undefined}
-          />
-          <IconButton
-            label="Week view"
-            icon={<List />}
-            size="sm"
-            aria-pressed={viewMode === 'week'}
-            onClick={() => setViewMode('week')}
-            className={viewMode === 'week' ? 'bg-card text-primary shadow-sm' : undefined}
-          />
-          <IconButton
-            label="Day view"
-            icon={<CalendarIcon />}
-            size="sm"
-            aria-pressed={viewMode === 'day'}
-            onClick={() => setViewMode('day')}
-            className={viewMode === 'day' ? 'bg-card text-primary shadow-sm' : undefined}
-          />
-        </div>
+        <SegmentedControl
+          aria-label="Calendar view"
+          iconOnly
+          value={viewMode}
+          onValueChange={setViewMode}
+          segments={[
+            { value: 'month', label: 'Month view', icon: <LayoutGrid /> },
+            { value: 'week', label: 'Week view', icon: <List /> },
+            { value: 'day', label: 'Day view', icon: <CalendarIcon /> },
+          ]}
+        />
       </div>
     </RenterPageHeader>
   );

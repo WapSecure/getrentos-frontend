@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Siren, TriangleAlert } from 'lucide-react';
+import { ShieldCheck, Siren, TriangleAlert } from 'lucide-react';
 import {
   Alert,
   Button,
   Card,
   CardSkeleton,
   DocumentUpload,
+  EmptyState,
   Field,
   ListSkeleton,
   Select,
@@ -91,11 +92,7 @@ export default function GatemanIncidentsPage() {
   }
 
   if (!estate) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">You&apos;re not assigned to an estate yet.</p>
-      </div>
-    );
+    return <EmptyState icon={Siren} title="You're not assigned to an estate yet." />;
   }
 
   return (
@@ -185,7 +182,7 @@ export default function GatemanIncidentsPage() {
         {isOpenLoading ? (
           <ListSkeleton rows={2} />
         ) : open.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No open incidents right now.</p>
+          <EmptyState icon={ShieldCheck} size="compact" title="No open incidents right now." />
         ) : (
           <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
             {open.map((incident) => (

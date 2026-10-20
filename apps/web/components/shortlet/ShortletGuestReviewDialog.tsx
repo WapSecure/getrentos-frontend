@@ -71,7 +71,7 @@ export function ShortletGuestReviewDialog({
                   onMouseLeave={() => setHover(0)}
                   aria-label={`${n} star${n > 1 ? 's' : ''}`}
                   aria-pressed={rating === n}
-                  className="text-3xl transition"
+                  className="rounded-md text-3xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <Star
                     className={cn(

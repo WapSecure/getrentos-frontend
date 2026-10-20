@@ -100,13 +100,13 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
             {error && <Alert variant="danger">{error}</Alert>}
           </div>
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="link"
             onClick={() => setOpen(true)}
-            className="mt-1 text-sm font-medium text-primary hover:underline"
+            className="mt-1 font-medium"
           >
             Dispute this
-          </button>
+          </Button>
         ))}
     </li>
   );
