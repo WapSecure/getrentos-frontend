@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Field, RadioGroup, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, RadioGroup, type RadioOption, Textarea } from '@getrentos/ui';
 import { FileCheck2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheckStatus } from '@/types/land';
@@ -9,19 +9,10 @@ import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
 import { ReviewCheckEvidence, type ReviewEvidenceActions } from './ReviewCheckEvidence';
 import { decisionProblem, hasCitedDocument } from './reviewRules';
 
-const CHOICES: { value: LandDiligenceCheckStatus; label: string }[] = [
-  {
-    value: 'PASSED',
-    label: 'Pass',
-  },
-  {
-    value: 'FLAGGED',
-    label: 'Flag',
-  },
-  {
-    value: 'NOT_APPLICABLE',
-    label: 'N/A',
-  },
+const CHOICES: RadioOption<LandDiligenceCheckStatus>[] = [
+  { value: 'PASSED', label: 'Pass', tone: 'success' },
+  { value: 'FLAGGED', label: 'Flag', tone: 'destructive' },
+  { value: 'NOT_APPLICABLE', label: 'N/A', tone: 'info' },
 ];
 
 const STATUS_BADGE: Record<

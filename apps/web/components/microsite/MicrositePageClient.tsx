@@ -118,7 +118,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
           <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
             {profile.reviewCount > 0 && (
               <span className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                <Star className="w-3.5 h-3.5 fill-warning text-warning" />
                 {profile.rating.toFixed(1)} ({profile.reviewCount})
               </span>
             )}

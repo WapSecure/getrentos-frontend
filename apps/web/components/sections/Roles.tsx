@@ -55,11 +55,11 @@ export const Roles = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {roles.map((role) => (
             <MarketingCard key={role.id} className="p-6">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-white/10 flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-4">
                 <role.icon className="w-6 h-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold text-foreground mb-2">{role.name}</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">{role.description}</p>
+              <p className="text-muted-foreground text-sm">{role.description}</p>
             </MarketingCard>
           ))}
         </div>

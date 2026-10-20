@@ -85,14 +85,14 @@ export const SignupLeftContent = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5 border border-border hover:border-primary/30 transition-all"
+                  className="flex items-start gap-3 p-3 rounded-xl bg-secondary border border-border hover:border-primary/30 transition-all"
                 >
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <feature.icon className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-foreground mb-1">{feature.title}</h3>
-                    <p className="text-xs text-gray-500 dark:text-white/60">
+                    <p className="text-xs text-muted-foreground">
                       {feature.description}
                     </p>
                   </div>
@@ -111,17 +111,17 @@ export const SignupLeftContent = () => {
                 <span className="text-sm font-medium text-foreground">Your Trust Score</span>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="w-3 h-3 text-primary" />
-                  <span className="text-xs text-gray-500 dark:text-white/60">Starts at 0</span>
+                  <span className="text-xs text-muted-foreground">Starts at 0</span>
                 </div>
               </div>
-              <div className="h-2 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
+              <div className="h-2 bg-border rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: '0%' }}
                   className="h-full bg-primary rounded-full"
                 />
               </div>
-              <p className="text-xs text-gray-500 dark:text-white/50 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Complete verifications to increase your trust score and unlock premium features
               </p>
             </motion.div>

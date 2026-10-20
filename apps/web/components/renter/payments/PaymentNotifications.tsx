@@ -6,7 +6,9 @@ import {
   EmptyState,
   IconButton,
   Popover,
+  PopoverBody,
   PopoverContent,
+  PopoverHeader,
   PopoverTrigger,
 } from '@getrentos/ui';
 
@@ -88,8 +90,8 @@ export const PaymentNotifications = ({
         )}
       </div>
 
-      <PopoverContent aria-label="Payment notifications">
-        <div className="p-3 border-b border-border flex justify-between items-center">
+      <PopoverContent aria-label="Payment notifications" layout="sections">
+        <PopoverHeader>
           <div>
             <h3 className="font-semibold text-foreground">Notifications</h3>
             <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
@@ -99,9 +101,9 @@ export const PaymentNotifications = ({
               Clear all
             </Button>
           )}
-        </div>
+        </PopoverHeader>
 
-        <div className="max-h-96 overflow-y-auto divide-y divide-border">
+        <PopoverBody className="divide-y divide-border">
           {notifications.length === 0 ? (
             <EmptyState icon={Bell} title="No notifications" size="compact" bare />
           ) : (
@@ -141,7 +143,7 @@ export const PaymentNotifications = ({
               );
             })
           )}
-        </div>
+        </PopoverBody>
       </PopoverContent>
     </Popover>
   );

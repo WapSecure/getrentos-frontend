@@ -69,14 +69,14 @@ export const HowItWorks = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {steps.map((step) => (
           <MarketingCard key={step.number} className="p-6">
-            <div className="mb-3 text-4xl font-bold text-gray-200 dark:text-white/10">
+            <div className="mb-3 text-4xl font-bold text-border">
               {step.number}
             </div>
-            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/10">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
               <step.icon className="h-5 w-5 text-primary" />
             </div>
             <h3 className="mb-2 text-lg font-semibold text-foreground">{step.title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
+            <p className="text-sm text-muted-foreground">{step.description}</p>
           </MarketingCard>
         ))}
       </div>

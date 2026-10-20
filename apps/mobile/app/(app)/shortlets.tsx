@@ -242,8 +242,19 @@ function SearchCell({
   );
 }
 
-/** Fixed night-sky colours: the banner looks the same in light and dark mode. */
-const NIGHT = { bg: '#121823', border: 'rgba(255,255,255,0.08)', amber: '#ffb454' };
+/**
+ * Detty December campaign palette: a fixed night sky with an amber accent, so the
+ * banner looks the same in light and dark mode. No theme token covers it; keep in
+ * step with the hero in app/(app)/detty-december.tsx.
+ */
+const NIGHT = {
+  bg: '#121823',
+  border: 'rgba(255,255,255,0.08)',
+  text: '#ffffff',
+  soft: 'rgba(255,255,255,0.72)',
+  amber: '#ffb454',
+  amberSoft: 'rgba(255,180,84,0.18)',
+};
 
 /** The season's front door: dark, quiet, one line of promise. */
 function DettyBanner() {
@@ -276,7 +287,7 @@ function DettyBanner() {
           borderRadius: 22,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'rgba(255,180,84,0.18)',
+          backgroundColor: NIGHT.amberSoft,
         }}
       >
         <BadgeCheck size={20} color={NIGHT.amber} />
@@ -285,14 +296,14 @@ function DettyBanner() {
         <Text variant="label" style={{ color: NIGHT.amber }}>
           DETTY DECEMBER
         </Text>
-        <Text variant="bodyStrong" style={{ color: '#ffffff' }}>
+        <Text variant="bodyStrong" style={{ color: NIGHT.text }}>
           Book a stay you can trust
         </Text>
-        <Text variant="caption" style={{ color: 'rgba(255,255,255,0.72)' }}>
+        <Text variant="caption" style={{ color: NIGHT.soft }}>
           20 Dec – 3 Jan · money held until you arrive
         </Text>
       </View>
-      <ArrowRight size={18} color="#ffffff" />
+      <ArrowRight size={18} color={NIGHT.text} />
     </Pressable>
   );
 }

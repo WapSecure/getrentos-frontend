@@ -11,7 +11,10 @@ import {
   IconButton,
   Pagination,
   Popover,
+  PopoverBody,
   PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
   PopoverTrigger,
   useOptimisticMutation,
 } from '@getrentos/ui';
@@ -169,16 +172,16 @@ export function NotificationBell(props: NotificationBellProps) {
           )}
         </div>
 
-        <PopoverContent aria-label="Notifications">
-          <div className="p-3 border-b border-border flex justify-between items-center gap-2">
+        <PopoverContent aria-label="Notifications" layout="sections">
+          <PopoverHeader>
             <h3 className="font-semibold text-foreground">Notifications</h3>
             {unreadCount > 0 && (
               <Button variant="ghost" size="xs" onClick={() => markAllRead.mutate()}>
                 Mark all as read
               </Button>
             )}
-          </div>
-          <div className="max-h-96 overflow-y-auto">
+          </PopoverHeader>
+          <PopoverBody>
             {notifications.length === 0 ? (
               <EmptyState icon={Bell} title="No notifications" size="compact" bare />
             ) : (
@@ -205,12 +208,14 @@ export function NotificationBell(props: NotificationBellProps) {
                 </button>
               ))
             )}
-          </div>
+          </PopoverBody>
           {paginate && pageSize && total > pageSize && (
-            <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
+            <PopoverFooter className="px-0 py-0">
+              <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
+            </PopoverFooter>
           )}
           {viewAllHref && (
-            <div className="p-2 border-t border-border">
+            <PopoverFooter className="p-2">
               <Link
                 href={viewAllHref}
                 onClick={() => setOpen(false)}
@@ -218,7 +223,7 @@ export function NotificationBell(props: NotificationBellProps) {
               >
                 {viewAllLabel}
               </Link>
-            </div>
+            </PopoverFooter>
           )}
         </PopoverContent>
       </Popover>

@@ -245,7 +245,7 @@ export async function PublicListingPage({
                     <p className="truncate font-semibold text-foreground">{listing.host.name}</p>
                     {listing.host.rating ? (
                       <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        <Star className="h-3 w-3 fill-warning text-warning" />
                         {listing.host.rating.toFixed(1)}
                         {listing.host.reviews ? ` · ${listing.host.reviews} reviews` : ''}
                       </p>

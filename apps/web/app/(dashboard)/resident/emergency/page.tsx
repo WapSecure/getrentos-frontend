@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ShieldCheck, Siren } from 'lucide-react';
-import { Alert, Button, Card, CardSkeleton, EmptyState, Field, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CardSkeleton,
+  EmptyState,
+  Field,
+  RadioGroup,
+  type RadioOption,
+  Textarea,
+} from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -117,49 +127,37 @@ export default function ResidentEmergencyPage() {
               : 'One answer covers everybody who lives here. Tell a marshal anything you cannot say here.'}
         </p>
 
-        <div className="space-y-2 mt-4">
-          {MUSTER_ANSWER_OPTIONS.map((option) => {
-            const isCurrent = answered && states.every((state) => state === option.state);
-            const isSelected = selected === option.state;
-            return (
-              <button
-                key={option.state}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => {
-                  setSelected(option.state);
-                  setNote('');
-                }}
-                className={`w-full text-left rounded-xl border p-4 ${
-                  isSelected
-                    ? option.urgent
-                      ? 'border-destructive bg-destructive/10'
-                      : 'border-primary bg-primary/10'
-                    : 'border-border'
-                }`}
+        <RadioGroup
+          variant="card"
+          className="mt-4"
+          aria-label="Where is your household?"
+          value={selected ?? ''}
+          onValueChange={(state) => {
+            setSelected(state);
+            setNote('');
+          }}
+          options={MUSTER_ANSWER_OPTIONS.map((option): RadioOption<MusterSelfAnswer> => ({
+            value: option.state,
+            tone: option.urgent ? 'destructive' : 'primary',
+            label: (
+              <span
+                className={
+                  option.urgent && selected === option.state ? 'text-destructive' : undefined
+                }
               >
-                <span className="flex items-center gap-2">
-                  <span
-                    className={`font-medium ${
-                      option.urgent && isSelected ? 'text-destructive' : 'text-foreground'
-                    }`}
-                  >
-                    {option.label}
-                  </span>
-                  {isCurrent && (
-                    <span className="inline-flex items-center gap-1 text-xs text-success">
-                      <Check className="w-3.5 h-3.5" />
-                      Your answer
-                    </span>
-                  )}
+                {option.label}
+              </span>
+            ),
+            description: option.description,
+            aside:
+              answered && states.every((state) => state === option.state) ? (
+                <span className="inline-flex items-center gap-1 text-xs font-normal text-success">
+                  <Check className="w-3.5 h-3.5" aria-hidden />
+                  Your answer
                 </span>
-                <span className="block text-sm text-muted-foreground mt-1">
-                  {option.description}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+              ) : undefined,
+          }))}
+        />
 
         {selected && (
           <div className="mt-4">

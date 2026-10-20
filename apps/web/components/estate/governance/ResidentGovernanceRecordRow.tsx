@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, FileText, PenLine } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button, IconLink } from '@getrentos/ui';
 import type { GovernanceRecord } from '@/types/estate';
 
 const typeVariant: Record<GovernanceRecord['type'], 'info' | 'neutral'> = {
@@ -63,14 +63,14 @@ export const ResidentGovernanceRecordRow = ({
             Sign
           </Button>
         )}
-        <a
+        <IconLink
           href={record.url}
           target="_blank"
           rel="noreferrer"
-          className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
-        >
-          <Download className="w-4 h-4" />
-        </a>
+          label={`Download ${record.title}`}
+          icon={<Download />}
+          size="sm"
+        />
       </div>
     </div>
   );

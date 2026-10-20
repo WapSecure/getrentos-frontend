@@ -468,6 +468,7 @@ function PassIssuedSheet({
               borderRadius: radius.lg,
               borderWidth: 1,
               borderColor: colors.border,
+              // Always on white: a QR code needs the contrast in dark mode too.
               backgroundColor: '#fff',
             }}
           />

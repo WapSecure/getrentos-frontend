@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
-import { Dialog, DialogContent, DialogTitle, ListSkeleton } from '@getrentos/ui';
+import { Dialog, DialogContent, DialogTitle, IconLink, ListSkeleton } from '@getrentos/ui';
 
 interface GovernanceVersionsModalProps {
   estateId: string;
@@ -50,16 +50,14 @@ export const GovernanceVersionsModal = ({
                       {version.size} · Uploaded {formatDate(version.createdAt)}
                     </p>
                   </div>
-                  <a
+                  <IconLink
                     href={version.url}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`Download version ${version.version}`}
-                    title={`Download version ${version.version}`}
-                    className="p-2 rounded-lg hover:bg-secondary text-muted-foreground shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <Download className="w-4 h-4" aria-hidden="true" />
-                  </a>
+                    label={`Download version ${version.version}`}
+                    icon={<Download />}
+                    size="sm"
+                  />
                 </div>
               ))}
             </div>

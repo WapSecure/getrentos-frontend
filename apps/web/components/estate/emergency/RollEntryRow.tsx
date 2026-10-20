@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, MessageSquarePlus } from 'lucide-react';
-import { Badge, type BadgeVariant, Button, Card, Textarea } from '@getrentos/ui';
+import { Badge, type BadgeVariant, Button, Card, RadioGroup, type RadioOption, Textarea } from '@getrentos/ui';
 import type { MusterRollEntry, MusterRollState } from '@/types/estate';
 
 /**
@@ -13,27 +13,11 @@ import type { MusterRollEntry, MusterRollState } from '@/types/estate';
  * is one a marshal stops trusting. Note the wording: this is the marshal
  * speaking about somebody else, so it reads "Accounted for", never "safe".
  */
-const STATE_ACTIONS: { state: MusterRollState; label: string; active: string }[] = [
-  {
-    state: 'ACCOUNTED',
-    label: 'Accounted for',
-    active: 'border-success bg-success-subtle text-foreground',
-  },
-  {
-    state: 'NOT_ON_SITE',
-    label: 'Not on site',
-    active: 'border-primary bg-primary/10 text-foreground',
-  },
-  {
-    state: 'NEEDS_HELP',
-    label: 'Needs help',
-    active: 'border-destructive bg-destructive/10 text-foreground',
-  },
-  {
-    state: 'UNACCOUNTED',
-    label: 'Not answered yet',
-    active: 'border-border bg-secondary text-foreground',
-  },
+const STATE_ACTIONS: RadioOption<MusterRollState>[] = [
+  { value: 'ACCOUNTED', label: 'Accounted for', tone: 'success' },
+  { value: 'NOT_ON_SITE', label: 'Not on site', tone: 'primary' },
+  { value: 'NEEDS_HELP', label: 'Needs help', tone: 'destructive' },
+  { value: 'UNACCOUNTED', label: 'Not answered yet', tone: 'neutral' },
 ];
 
 const stateTone: Record<MusterRollState, BadgeVariant> = {
@@ -97,30 +81,23 @@ export const RollEntryRow = ({ entry, rollOpen, isSaving, onAnswer }: RollEntryR
 
       {rollOpen ? (
         <div className="mt-3">
-          <div className="flex flex-wrap gap-2">
-            {STATE_ACTIONS.map((action) => {
-              const isCurrent = entry.state === action.state;
-              return (
-                <button
-                  key={action.state}
-                  type="button"
-                  aria-pressed={isCurrent}
-                  disabled={isSaving}
-                  onClick={() => {
-                    // A tap that changes nothing is not sent: the API treats it as
-                    // a decision, and the record of who answered this person would
-                    // then name a marshal who did nothing.
-                    if (isCurrent) return;
-                    onAnswer(entry.id, action.state);
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-sm border disabled:opacity-60 ${
-                    isCurrent ? action.active : 'border-border text-muted-foreground'
-                  }`}
-                >
-                  {action.label}
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <RadioGroup
+              // Each choice is saved at once: arrowing past an option must not send it.
+              activation="manual"
+              value={entry.state}
+              onValueChange={(state) => {
+                // A tap that changes nothing is not sent: the API treats it as
+                // a decision, and the record of who answered this person would
+                // then name a marshal who did nothing.
+                if (state === entry.state) return;
+                onAnswer(entry.id, state);
+              }}
+              options={STATE_ACTIONS}
+              orientation="horizontal"
+              disabled={isSaving}
+              aria-label={`Answer for ${entry.personName}`}
+            />
 
             <Button
               variant="ghost"

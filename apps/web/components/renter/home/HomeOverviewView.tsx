@@ -637,7 +637,7 @@ function SnapshotCard({
     amber: 'bg-warning-subtle text-warning',
     blue: 'bg-accent text-primary',
     green: 'bg-success-subtle text-success',
-    violet: 'bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-300',
+    violet: 'bg-purple-subtle text-purple',
   };
 
   return (

@@ -55,7 +55,7 @@ export default function DettyDecemberPage() {
       <Navigation />
       <section className="border-b border-border bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
-          <span className="inline-flex items-center rounded-full border border-amber-300/60 bg-amber-100/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-900 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+          <span className="inline-flex items-center rounded-full border border-warning/30 bg-warning-subtle px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-warning">
             Dec 20 – Jan 3
           </span>
           <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-[-0.02em] text-foreground sm:text-5xl">

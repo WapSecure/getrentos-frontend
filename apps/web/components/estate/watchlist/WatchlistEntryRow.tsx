@@ -1,7 +1,7 @@
 'use client';
 
 import { ImageIcon, ShieldAlert, ShieldCheck, Undo2 } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button, IconLink } from '@getrentos/ui';
 import type { WatchlistEntry } from '@/types/estate';
 
 const formatDate = (value: string) =>
@@ -88,16 +88,15 @@ export const WatchlistEntryRow = ({ entry, onLift }: WatchlistEntryRowProps) => 
 
       <div className="flex items-center gap-2 shrink-0">
         {entry.photoUrl && (
-          <a
+          <IconLink
             href={entry.photoUrl}
             target="_blank"
             rel="noreferrer"
-            className="p-2 rounded-lg hover:bg-secondary text-muted-foreground"
+            label={`Photo on file for ${entry.label}`}
             title="Photo on file"
-            aria-label={`Photo on file for ${entry.label}`}
-          >
-            <ImageIcon className="w-4 h-4" />
-          </a>
+            icon={<ImageIcon />}
+            size="sm"
+          />
         )}
         {inForce ? (
           <Button variant="outline" size="sm" className="gap-1.5" onClick={onLift}>

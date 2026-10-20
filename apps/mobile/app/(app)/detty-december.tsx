@@ -16,13 +16,18 @@ import { SupportContact } from '@/components/shortlet/StayUI';
 import { peakWeek, seasonRange } from '@/lib/stays';
 import { shiftDay } from '@/lib/hostDates';
 
-/** Fixed night-sky colours so the hero reads the same in light and dark mode. */
+/**
+ * Detty December campaign palette: a fixed night sky with an amber accent, so the
+ * hero reads the same in light and dark mode. No theme token covers it; keep in
+ * step with the banner in app/(app)/shortlets.tsx.
+ */
 const NIGHT = {
   bg: '#121823',
   text: '#ffffff',
   soft: 'rgba(255,255,255,0.72)',
   amber: '#ffb454',
   amberSoft: 'rgba(255,180,84,0.16)',
+  glass: 'rgba(255,255,255,0.1)',
 };
 
 const PROMISES: { icon: LucideIcon; title: string; body: string }[] = [
@@ -95,7 +100,7 @@ export default function DettyDecember() {
             borderRadius: 20,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(255,255,255,0.1)',
+            backgroundColor: NIGHT.glass,
           }}
         >
           <ChevronLeft size={22} color={NIGHT.text} />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Landmark, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
@@ -19,6 +19,10 @@ import {
   Input,
   PageErrorState,
   Select,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   useToast,
   type ToastVariant,
 } from '@getrentos/ui';
@@ -143,6 +147,118 @@ export function ClientMoneyReconciliation() {
     .filter(([id]) => id !== null)
     .map(([id, row]) => ({ id, name: row.organizationName ?? `Firm ${String(id).slice(0, 8)}…` }));
 
+  const poolsPanel = (
+    <>
+      {/* Staleness is stated rather than alerted on: an absent process is not an
+      incident, but it must not be invisible either. */}
+      <Card static className="p-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+          <span className="flex items-center gap-1.5">
+            <Landmark className="h-4 w-4 text-muted-foreground" aria-hidden />
+            {attestation?.latestAsOfDate
+              ? `Last counted ${attestation.latestAsOfDate}${
+                  attestation.daysSince === 0
+                    ? ' (today)'
+                    : ` — ${attestation.daysSince} day(s) ago`
+                }`
+              : 'No bank balance has ever been recorded.'}
+          </span>
+          {failing > 0 && (
+            <span className="flex items-center gap-1.5 text-destructive">
+              <AlertTriangle className="h-4 w-4" aria-hidden />
+              {failing} pool(s) do not add up
+            </span>
+          )}
+          {unattested > 0 && (
+            <span className="text-muted-foreground">
+              {unattested} pool(s) not checked on the days shown
+            </span>
+          )}
+        </div>
+      </Card>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[0, 1, 2].map((row) => (
+            <CardSkeleton key={row} />
+          ))}
+        </div>
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon={ShieldCheck}
+          title="Nothing has been reconciled yet"
+          description="The job runs every night at 2am. Record what the bank holds and run it now to see the first verdict."
+        />
+      ) : (
+        <ul className="space-y-3">
+          {rows.map((row) => (
+            <li key={row.id}>
+              <PoolCard row={row} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Dialog open={attestOpen} onOpenChange={setAttestOpen}>
+        <DialogContent>
+          <DialogTitle className="text-lg font-semibold text-foreground">
+            Record what the bank holds
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
+            The whole control depends on this figure coming from outside the ledger. Record what
+            the account actually holds, not what we think it should.
+          </DialogDescription>
+          <div className="mt-4 space-y-3">
+            {/* Drawn from the report rather than a separate holders endpoint:
+            every pool the reconciliation knows about is already in it, and
+            a second source of truth for "which pools exist" is how the two
+            come to disagree. */}
+            <Field label="Which pool" required>
+              <Select
+                value={holder}
+                onValueChange={setHolder}
+                options={[
+                  { value: 'platform', label: 'GetRentos itself (the platform pool)' },
+                  ...holders.map((option) => ({
+                    value: option.id ?? 'platform',
+                    label: option.name,
+                  })),
+                ]}
+                className="w-full"
+              />
+            </Field>
+            <Field label="Business date" required>
+              <DatePicker value={asOfDate} onChange={setAsOfDate} className="w-full" />
+            </Field>
+            <Field label="Balance in the pool" required>
+              <CurrencyInput
+                prefix="₦"
+                value={balance}
+                onValueChange={setBalance}
+                placeholder="0"
+              />
+            </Field>
+            <Field label="Where the figure came from" hint="Optional. e.g. GTB *4821 closing">
+              <Input
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                placeholder="GTB *4821 closing"
+              />
+            </Field>
+          </div>
+          <div className="mt-6 flex flex-wrap justify-end gap-2">
+            <Button variant="outline" onClick={() => setAttestOpen(false)}>
+              Cancel
+            </Button>
+            <Button isLoading={attest.isPending} onClick={() => attest.mutate()}>
+              Record
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
@@ -190,183 +306,45 @@ export function ClientMoneyReconciliation() {
           letting an owner's held payout out — worked by the same people at
           different moments. Tabs rather than one long page, and the count is on
           the tab because a queue nobody notices is a payout nobody releases. */}
-      {canRelease && (
-        <div
-          role="tablist"
-          aria-label="Client money sections"
-          className="flex gap-1 overflow-x-auto border-b border-border"
+      {canRelease ? (
+        <Tabs
+          value={tab}
+          onValueChange={(next) => setTab(next as typeof tab)}
+          className="space-y-6"
         >
-          <TabButton selected={tab === 'pools'} onClick={() => setTab('pools')}>
-            The pooled accounts
-          </TabButton>
-          <TabButton selected={tab === 'releases'} onClick={() => setTab('releases')}>
-            Payouts to release
-            {waitingCount > 0 && (
-              <Badge variant="danger" className="ml-2">
-                {waitingCount}
-              </Badge>
-            )}
-          </TabButton>
-          <TabButton selected={tab === 'disputes'} onClick={() => setTab('disputes')}>
-            Queries on statements
-            {openDisputeCount > 0 && (
-              <Badge variant="danger" className="ml-2">
-                {openDisputeCount}
-              </Badge>
-            )}
-          </TabButton>
-        </div>
-      )}
-
-      {tab === 'releases' && canRelease ? (
-        <ReleaseQueue notify={notify} />
-      ) : tab === 'disputes' && canRelease ? (
-        <DisputeQueue notify={notify} />
+          <TabsList variant="underline" aria-label="Client money sections">
+            <TabsTrigger value="pools">The pooled accounts</TabsTrigger>
+            <TabsTrigger value="releases">
+              Payouts to release
+              {waitingCount > 0 && (
+                <Badge variant="danger" className="ml-2">
+                  {waitingCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="disputes">
+              Queries on statements
+              {openDisputeCount > 0 && (
+                <Badge variant="danger" className="ml-2">
+                  {openDisputeCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="pools" className="space-y-6">
+            {poolsPanel}
+          </TabsContent>
+          <TabsContent value="releases">
+            <ReleaseQueue notify={notify} />
+          </TabsContent>
+          <TabsContent value="disputes">
+            <DisputeQueue notify={notify} />
+          </TabsContent>
+        </Tabs>
       ) : (
-        <>
-          {/* Staleness is stated rather than alerted on: an absent process is not an
-          incident, but it must not be invisible either. */}
-          <Card static className="p-4">
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-              <span className="flex items-center gap-1.5">
-                <Landmark className="h-4 w-4 text-muted-foreground" aria-hidden />
-                {attestation?.latestAsOfDate
-                  ? `Last counted ${attestation.latestAsOfDate}${
-                      attestation.daysSince === 0
-                        ? ' (today)'
-                        : ` — ${attestation.daysSince} day(s) ago`
-                    }`
-                  : 'No bank balance has ever been recorded.'}
-              </span>
-              {failing > 0 && (
-                <span className="flex items-center gap-1.5 text-destructive">
-                  <AlertTriangle className="h-4 w-4" aria-hidden />
-                  {failing} pool(s) do not add up
-                </span>
-              )}
-              {unattested > 0 && (
-                <span className="text-muted-foreground">
-                  {unattested} pool(s) not checked on the days shown
-                </span>
-              )}
-            </div>
-          </Card>
-
-          {isLoading ? (
-            <div className="space-y-3">
-              {[0, 1, 2].map((row) => (
-                <CardSkeleton key={row} />
-              ))}
-            </div>
-          ) : rows.length === 0 ? (
-            <EmptyState
-              icon={ShieldCheck}
-              title="Nothing has been reconciled yet"
-              description="The job runs every night at 2am. Record what the bank holds and run it now to see the first verdict."
-            />
-          ) : (
-            <ul className="space-y-3">
-              {rows.map((row) => (
-                <li key={row.id}>
-                  <PoolCard row={row} />
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <Dialog open={attestOpen} onOpenChange={setAttestOpen}>
-            <DialogContent>
-              <DialogTitle className="text-lg font-semibold text-foreground">
-                Record what the bank holds
-              </DialogTitle>
-              <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                The whole control depends on this figure coming from outside the ledger. Record what
-                the account actually holds, not what we think it should.
-              </DialogDescription>
-              <div className="mt-4 space-y-3">
-                {/* Drawn from the report rather than a separate holders endpoint:
-                every pool the reconciliation knows about is already in it, and
-                a second source of truth for "which pools exist" is how the two
-                come to disagree. */}
-                <Field label="Which pool" required>
-                  <Select
-                    value={holder}
-                    onValueChange={setHolder}
-                    options={[
-                      { value: 'platform', label: 'GetRentos itself (the platform pool)' },
-                      ...holders.map((option) => ({
-                        value: option.id ?? 'platform',
-                        label: option.name,
-                      })),
-                    ]}
-                    className="w-full"
-                  />
-                </Field>
-                <Field label="Business date" required>
-                  <DatePicker value={asOfDate} onChange={setAsOfDate} className="w-full" />
-                </Field>
-                <Field label="Balance in the pool" required>
-                  <CurrencyInput
-                    prefix="₦"
-                    value={balance}
-                    onValueChange={setBalance}
-                    placeholder="0"
-                  />
-                </Field>
-                <Field label="Where the figure came from" hint="Optional. e.g. GTB *4821 closing">
-                  <Input
-                    value={note}
-                    onChange={(event) => setNote(event.target.value)}
-                    placeholder="GTB *4821 closing"
-                  />
-                </Field>
-              </div>
-              <div className="mt-6 flex flex-wrap justify-end gap-2">
-                <Button variant="outline" onClick={() => setAttestOpen(false)}>
-                  Cancel
-                </Button>
-                <Button isLoading={attest.isPending} onClick={() => attest.mutate()}>
-                  Record
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
+        poolsPanel
       )}
     </div>
-  );
-}
-
-/**
- * A tab, as a button that says which one is showing.
- *
- * Hand-rolled rather than pulled in: two tabs do not need a library, and the
- * roles are the part that matters — a screen reader should say which panel is
- * current.
- */
-function TabButton({
-  selected,
-  onClick,
-  children,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={selected}
-      onClick={onClick}
-      className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
-        selected
-          ? 'border-primary text-foreground'
-          : 'border-transparent text-muted-foreground hover:text-foreground'
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

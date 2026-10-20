@@ -33,7 +33,7 @@ const reasons = [
 ];
 
 export const WhyGetRentos = () => (
-  <section className="bg-gray-50 px-4 py-20 dark:bg-background">
+  <section className="bg-muted/50 px-4 py-20 dark:bg-background">
     <div className="mx-auto max-w-7xl">
       <SectionHeading
         badge="WHY GETRENTOS"
