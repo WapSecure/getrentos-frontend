@@ -19,6 +19,25 @@ export const landReviewerService = {
   getSeat: (seatId: string) =>
     safeCall(() => authFetch<LandReviewCase>(`/land/reviews/${encodeURIComponent(seatId)}`)),
 
+  /** Surveyor: sign off, or return with a reason, the outline now on the parcel. */
+  signOffBoundary: (
+    seatId: string,
+    versionId: string,
+    input: { decision: 'SIGNED_OFF' | 'REJECTED'; note?: string }
+  ) =>
+    safeCall(() =>
+      authFetch<LandReviewCase>(
+        `${seatPath(seatId)}/boundary/${encodeURIComponent(versionId)}/sign-off`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            decision: input.decision,
+            ...(input.note?.trim() ? { note: input.note.trim() } : {}),
+          }),
+        }
+      )
+    ),
+
   decideCheck: (seatId: string, key: string, input: DecideLandReviewCheckInput) =>
     safeCall(() =>
       authFetch<LandReviewCase>(

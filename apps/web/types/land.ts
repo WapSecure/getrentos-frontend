@@ -1,3 +1,4 @@
+import type { CrsCode, LandBoundaryStatus } from '@getrentos/shared';
 export type LandAreaUnit = 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
 
 export type LandDiligenceStatus =
@@ -77,6 +78,8 @@ export interface LandParcelInput {
   depth?: number;
   /** GeoJSON-like boundary data. It is optional until a surveyed plan is uploaded. */
   boundaryGeometry?: unknown;
+  /** The coordinate system boundaryGeometry is in; survey plans use Minna grids. Default WGS 84. */
+  boundaryCrs?: CrsCode;
   boundaryNotes?: string;
   zoning?: string;
   permittedUse?: string;
@@ -126,6 +129,8 @@ export interface OwnerLandRecord {
   diligence: LandDiligence | null;
   /** Whether diligence can be submitted (or resubmitted) now, and if not, why. */
   submission: { canSubmit: boolean; blockers: string[] };
+  /** The outline now on the parcel and whether a surveyor signed it off. */
+  boundary: LandBoundaryStatus | null;
   /** Backend may expose this at the top level for fast collection rendering. */
   listing?: {
     id: string;
@@ -154,6 +159,7 @@ export interface OwnerLandApiRecord {
   parcel?: LandParcel | null;
   canSubmitForReview?: boolean;
   submissionBlockers?: string[];
+  boundary?: LandBoundaryStatus | null;
   createdAt: string;
   updatedAt: string;
 }

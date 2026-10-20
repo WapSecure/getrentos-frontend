@@ -1,3 +1,4 @@
+import type { LandBoundaryStatus } from '@getrentos/shared';
 import { apiFetch } from './client';
 import type { Paginated } from './properties';
 
@@ -75,6 +76,8 @@ export interface OwnerLandRecord {
   ownershipProofCount: number;
   hasActiveSaleListing: boolean;
   parcel?: LandParcel | null;
+  /** The outline now on the parcel and whether the case's surveyor signed it off. */
+  boundary?: LandBoundaryStatus | null;
 }
 
 export const ownerLandApi = {

@@ -1,11 +1,16 @@
 import { cn } from '@getrentos/shared';
 
+/**
+ * A placeholder block. A span (displayed as a block) rather than a div, so it
+ * is also valid inside a paragraph or heading, e.g. "{count} listings" while
+ * the count loads.
+ */
 export const Skeleton = ({ className }: { className?: string }) => {
   return (
-    <div
+    <span
       aria-hidden="true"
       className={cn(
-        'animate-pulse rounded-lg bg-foreground/[0.07] motion-reduce:animate-none',
+        'block animate-pulse rounded-lg bg-foreground/[0.07] motion-reduce:animate-none',
         className
       )}
     />

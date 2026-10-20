@@ -1,3 +1,4 @@
+import type { LandBoundaryVersion } from '@getrentos/shared';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   LandOwnershipProofInput,
@@ -56,6 +57,7 @@ const mapOwnerLand = (record: OwnerLandApiRecord): OwnerLandRecord => ({
     canSubmit: record.canSubmitForReview ?? false,
     blockers: record.submissionBlockers ?? [],
   },
+  boundary: record.boundary ?? null,
 });
 
 const mapPublicLand = (listing: PublicLandListingApi): PublicLandListing => ({
@@ -105,6 +107,10 @@ export const landService = {
         })
       )
     ),
+
+  /** Every outline the parcel has had, newest first, with each one's surveyor sign-off. */
+  boundaryVersions: (propertyId: string) =>
+    safeCall(() => authFetch<LandBoundaryVersion[]>(`/owner/land/${propertyId}/boundary/versions`)),
 
   /** Puts the parcel into the diligence review queue (or back into it after changes). */
   submitForReview: (propertyId: string) =>

@@ -36,6 +36,12 @@ export interface LandDossier {
     permittedUse?: string;
     encumbranceStatus: string;
     boundaryGeometry?: Record<string, unknown>;
+    /** Whether the case's surveyor checked the outline against the survey plan. */
+    boundarySignOff?: {
+      version: number;
+      status: 'UNREVIEWED' | 'SIGNED_OFF' | 'REJECTED';
+      at?: string;
+    };
   };
   assuranceTier?: string;
   riskScore?: number;

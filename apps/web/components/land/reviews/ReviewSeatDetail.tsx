@@ -18,6 +18,7 @@ import { ApiError, unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 import { landReviewKeys } from '@/lib/landSalesQueryKeys';
+import { BoundarySignOffPanel } from './BoundarySignOffPanel';
 import { landReviewerService } from '@/services/landReviewerService';
 import { ParcelBoundaryMap } from '@/components/maps/ParcelBoundaryMap';
 import {
@@ -364,13 +365,23 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
               <p className="mt-3 text-sm text-muted-foreground">{p.boundaryNotes}</p>
             )}
           </section>
-          {corners && (
-            <div className="rounded-2xl border border-border bg-card p-3">
-              <p className="mb-2 text-xs font-medium text-muted-foreground">
-                Outline as drawn by the owner
-              </p>
-              <ParcelBoundaryMap corners={corners} height={260} />
-            </div>
+          {data.boundaryVersions ? (
+            // The surveyor checks the outline against the plan and signs it off.
+            <BoundarySignOffPanel
+              seatId={seatId}
+              versions={data.boundaryVersions}
+              canDecide={active}
+              onUpdated={store}
+            />
+          ) : (
+            corners && (
+              <div className="rounded-2xl border border-border bg-card p-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  Outline as drawn by the owner
+                </p>
+                <ParcelBoundaryMap corners={corners} height={260} />
+              </div>
+            )
           )}
         </aside>
       </div>

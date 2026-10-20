@@ -1,5 +1,6 @@
 'use client';
 
+import { boundarySignOffText } from '@getrentos/shared';
 import { Printer } from 'lucide-react';
 import { Alert, Badge, Button } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -92,6 +93,21 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
             <dt className="text-xs text-muted-foreground">Encumbrances</dt>
             <dd>{words(parcel.encumbranceStatus)}</dd>
           </div>
+          {parcel.boundarySignOff && (
+            <div>
+              <dt className="text-xs text-muted-foreground">Boundary</dt>
+              <dd>
+                {boundarySignOffText(parcel.boundarySignOff)}
+                {parcel.boundarySignOff.status === 'SIGNED_OFF' && parcel.boundarySignOff.at
+                  ? ` (${new Date(parcel.boundarySignOff.at).toLocaleDateString('en-NG', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })})`
+                  : ''}
+              </dd>
+            </div>
+          )}
           {dossier.riskBand && (
             <div>
               <dt className="text-xs text-muted-foreground">Risk</dt>

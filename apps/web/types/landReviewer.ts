@@ -1,3 +1,4 @@
+import type { LandBoundaryVersion } from '@getrentos/shared';
 import type { LandDiligenceCheckStatus, LandTitleType } from '@/types/land';
 import type { LandDocumentType } from '@/types/landDocument';
 
@@ -98,6 +99,8 @@ export interface LandReviewCase extends MyLandReviewSummary {
   /** Send back as expectedVersion with a decision. */
   caseVersion: number;
   parcel: LandReviewParcel;
+  /** Surveyor seats only: every outline the parcel has had, newest first. */
+  boundaryVersions?: LandBoundaryVersion[];
   /** Only for seats verifying ownership against the registry. */
   ownerLegalName: string | null;
   documents: LandReviewDocument[];

@@ -215,9 +215,9 @@ export const OwnerLandWorkspace = () => {
       <section className="mb-6 grid gap-4 md:grid-cols-3">
         <Card static className="p-4">
           <p className="text-xs text-muted-foreground">Registered parcels</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">
+          <div className="mt-1 text-2xl font-semibold text-foreground">
             {isLoading ? <Skeleton className="h-8 w-12" /> : total}
-          </p>
+          </div>
         </Card>
         <Card static className="p-4">
           <p className="text-xs text-muted-foreground">Ready for sale on this page</p>
@@ -330,7 +330,10 @@ export const OwnerLandWorkspace = () => {
                 record={selected}
                 isSaving={saveParcel.isPending}
                 onSave={async (parcel) => {
-                  await saveParcel.mutateAsync({ propertyId: selected.property.id, parcel });
+                  // The mutation's onError already tells the owner what went wrong.
+                  await saveParcel
+                    .mutateAsync({ propertyId: selected.property.id, parcel })
+                    .catch(() => undefined);
                 }}
                 onUploadProof={async (proof) => {
                   await uploadProof.mutateAsync({ propertyId: selected.property.id, proof });
