@@ -1,44 +1,30 @@
 'use client';
 
 import { CheckCircle2, Clock, AlertCircle, ShieldCheck, Zap } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { FinancingInstallment, FinancingPlan, InstallmentStatus } from '@/types/financing';
 
 interface ActiveFinancingPlanCardProps {
   plan: FinancingPlan;
   onPayInstallment: (installmentId: string) => void;
+  isPaying?: boolean;
 }
 
 const statusConfig: Record<
   InstallmentStatus,
-  { label: string; className: string; icon: React.ElementType }
+  { label: string; variant: BadgeVariant; icon: React.ElementType }
 > = {
-  paid: {
-    label: 'Paid',
-    className: 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20',
-    icon: CheckCircle2,
-  },
-  due: {
-    label: 'Due Now',
-    className: 'text-yellow-700 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20',
-    icon: Clock,
-  },
-  overdue: {
-    label: 'Overdue',
-    className: 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20',
-    icon: AlertCircle,
-  },
-  upcoming: {
-    label: 'Upcoming',
-    className: 'text-muted-foreground bg-secondary',
-    icon: Clock,
-  },
+  paid: { label: 'Paid', variant: 'success', icon: CheckCircle2 },
+  due: { label: 'Due Now', variant: 'warning', icon: Clock },
+  overdue: { label: 'Overdue', variant: 'danger', icon: AlertCircle },
+  upcoming: { label: 'Upcoming', variant: 'neutral', icon: Clock },
 };
 
 export const ActiveFinancingPlanCard = ({
   plan,
   onPayInstallment,
+  isPaying = false,
 }: ActiveFinancingPlanCardProps) => {
   const paidCount = plan.installments.filter((i) => i.status === 'paid').length;
   const progressPct = Math.round((paidCount / plan.installments.length) * 100);
@@ -58,11 +44,10 @@ export const ActiveFinancingPlanCard = ({
               </div>
               <h1 className="text-xl font-bold text-foreground">{plan.propertyName}</h1>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">
-              <ShieldCheck className="w-3.5 h-3.5" />
+            <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
               Landlord paid in full
               {plan.landlordPaidAt ? ` on ${formatDate(plan.landlordPaidAt)}` : ''}
-            </div>
+            </Badge>
           </div>
         </div>
 
@@ -96,7 +81,7 @@ export const ActiveFinancingPlanCard = ({
           </div>
 
           {nextDue && (
-            <div className="mb-6 flex items-center justify-between rounded-2xl border border-border/70 bg-secondary/30 p-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/70 bg-secondary/30 p-4">
               <div>
                 <p className="text-xs text-muted-foreground">Next payment due</p>
                 <p className="text-lg font-bold text-foreground">
@@ -104,7 +89,11 @@ export const ActiveFinancingPlanCard = ({
                 </p>
                 <p className="text-xs text-muted-foreground">{formatDate(nextDue.dueDate)}</p>
               </div>
-              <Button variant="primary" onClick={() => onPayInstallment(nextDue.id)}>
+              <Button
+                variant="primary"
+                onClick={() => onPayInstallment(nextDue.id)}
+                isLoading={isPaying}
+              >
                 Pay Installment
               </Button>
             </div>
@@ -151,12 +140,9 @@ const InstallmentRow = ({ installment }: { installment: FinancingInstallment }) 
           </p>
         </div>
       </div>
-      <span
-        className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${status.className}`}
-      >
-        <StatusIcon className="w-3 h-3" />
+      <Badge variant={status.variant} icon={<StatusIcon className="h-3 w-3" />}>
         {status.label}
-      </span>
+      </Badge>
     </div>
   );
 };

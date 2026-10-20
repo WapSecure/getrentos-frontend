@@ -1,12 +1,8 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button, CurrencyInput } from '@getrentos/ui';
+import { Badge, Button, Checkbox, CurrencyInput, Field, Input, Select } from '@getrentos/ui';
 
 interface Filters {
   location: string;
@@ -27,6 +23,19 @@ interface DiscoverFiltersProps {
 const propertyTypes = ['Apartment', 'House', 'Studio', 'Duplex', 'Townhouse', 'Condo'];
 const bedroomOptions = ['Any', '1', '2', '3', '4', '5+'];
 const bathroomOptions = ['Any', '1', '2', '3', '4+'];
+
+const bedroomSelectOptions = bedroomOptions.map((option) => ({
+  value: option === 'Any' ? '' : option,
+  label: option !== 'Any' && option !== '5+' ? `${option} bed` : option,
+}));
+const bathroomSelectOptions = bathroomOptions.map((option) => ({
+  value: option === 'Any' ? '' : option,
+  label: option !== 'Any' && option !== '4+' ? `${option} bath` : option,
+}));
+const propertyTypeOptions = [
+  { value: '', label: 'Any' },
+  ...propertyTypes.map((type) => ({ value: type, label: type })),
+];
 
 export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -79,16 +88,12 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium text-foreground">Filters</span>
-          {hasActiveFilters && (
-            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-semibold text-foreground">
-              {activeFilterCount}
-            </span>
-          )}
+          {hasActiveFilters && <Badge>{activeFilterCount}</Badge>}
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         )}
       </button>
 
@@ -96,99 +101,72 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
         <div id="property-discovery-filters" className="border-t border-border p-4">
           <div className="mb-4 space-y-3">
             {/* Location */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Location</label>
-              <LegacyInput
+            <Field label="Location">
+              <Input
                 type="text"
                 value={filters.location}
                 onChange={(e) => handleChange('location', e.target.value)}
                 placeholder="City, area, or postal code"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
-            </div>
+            </Field>
 
             {/* Price Range: Min and Max side by side, full card width */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Price Range (₦)
-              </label>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Min price (₦)">
                 <CurrencyInput
                   prefix="₦"
                   value={filters.minPrice}
                   onValueChange={(v) => handleChange('minPrice', v === 0 ? '' : String(v))}
                   placeholder="Min"
                 />
+              </Field>
+              <Field label="Max price (₦)">
                 <CurrencyInput
                   prefix="₦"
                   value={filters.maxPrice}
                   onValueChange={(v) => handleChange('maxPrice', v === 0 ? '' : String(v))}
                   placeholder="Max"
                 />
-              </div>
+              </Field>
             </div>
 
             {/* Bedrooms + Bathrooms: compact pair */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
-                <LegacySelect
+              <Field label="Bedrooms">
+                <Select
                   value={filters.bedrooms}
-                  onChange={(e) => handleChange('bedrooms', e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {bedroomOptions.map((option) => (
-                    <option key={option} value={option === 'Any' ? '' : option}>
-                      {option} {option !== 'Any' && option !== '5+' ? 'bed' : ''}
-                    </option>
-                  ))}
-                </LegacySelect>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Bathrooms</label>
-                <LegacySelect
+                  onValueChange={(v) => handleChange('bedrooms', v)}
+                  options={bedroomSelectOptions}
+                  placeholder="Any"
+                />
+              </Field>
+              <Field label="Bathrooms">
+                <Select
                   value={filters.bathrooms}
-                  onChange={(e) => handleChange('bathrooms', e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  {bathroomOptions.map((option) => (
-                    <option key={option} value={option === 'Any' ? '' : option}>
-                      {option} {option !== 'Any' && option !== '4+' ? 'bath' : ''}
-                    </option>
-                  ))}
-                </LegacySelect>
-              </div>
+                  onValueChange={(v) => handleChange('bathrooms', v)}
+                  options={bathroomSelectOptions}
+                  placeholder="Any"
+                />
+              </Field>
             </div>
 
             {/* Property Type */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">
-                Property Type
-              </label>
-              <LegacySelect
+            <Field label="Property Type">
+              <Select
                 value={filters.propertyType}
-                onChange={(e) => handleChange('propertyType', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">Any</option>
-                {propertyTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </LegacySelect>
-            </div>
+                onValueChange={(v) => handleChange('propertyType', v)}
+                options={propertyTypeOptions}
+                placeholder="Any"
+              />
+            </Field>
 
             {/* Verified Only Toggle */}
-            <label className="flex cursor-pointer items-center gap-2 pt-1">
-              <LegacyInput
-                type="checkbox"
-                checked={filters.verifiedOnly}
-                onChange={(e) => handleChange('verifiedOnly', e.target.checked)}
-                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-              />
-              <span className="text-sm text-foreground">Verified listings only</span>
-            </label>
+            <Checkbox
+              className="pt-1"
+              checked={filters.verifiedOnly}
+              onCheckedChange={(checked) => handleChange('verifiedOnly', checked)}
+              label="Verified listings only"
+            />
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t border-border pt-4">

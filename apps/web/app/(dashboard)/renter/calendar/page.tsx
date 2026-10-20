@@ -11,7 +11,7 @@ import type { CalendarEvent, CalendarEventFormData, CalendarViewMode } from '@/t
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
-import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, useToast } from '@getrentos/ui';
 
 export default function CalendarPage() {
   const queryClient = useQueryClient();
@@ -24,7 +24,7 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const toast = useToast();
 
   const invalidateEvents = () =>
     queryClient.invalidateQueries({ queryKey: renterKeys.calendarEvents });
@@ -32,20 +32,20 @@ export default function CalendarPage() {
   const createEventMutation = useMutation({
     mutationFn: (data: CalendarEventFormData) => unwrap(renterService.createCalendarEvent(data)),
     onSuccess: invalidateEvents,
-    onError: () => setErrorMessage('The event could not be created.'),
+    onError: () => toast.error('The event could not be created.'),
   });
 
   const updateEventMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CalendarEvent> }) =>
       unwrap(renterService.updateCalendarEvent(id, updates)),
     onSuccess: invalidateEvents,
-    onError: () => setErrorMessage('The event could not be updated.'),
+    onError: () => toast.error('The event could not be updated.'),
   });
 
   const deleteEventMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.deleteCalendarEvent(id)),
     onSuccess: invalidateEvents,
-    onError: () => setErrorMessage('The event could not be deleted.'),
+    onError: () => toast.error('The event could not be deleted.'),
   });
 
   const handleUpdateEvent = async (id: string, updates: Partial<CalendarEvent>) => {
@@ -78,7 +78,7 @@ export default function CalendarPage() {
   };
 
   if (eventsQuery.isLoading) return <PageLoadingState />;
-  if (eventsQuery.isError) {
+  if (eventsQuery.isError && !eventsQuery.data) {
     return (
       <PageErrorState
         title="Calendar is unavailable"
@@ -91,9 +91,6 @@ export default function CalendarPage() {
 
   return (
     <>
-      {errorMessage && (
-        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
-      )}
       <CalendarHeader
         currentDate={currentDate}
         setCurrentDate={setCurrentDate}

@@ -109,7 +109,7 @@ export const BuyerEscrowTransactionDetailModal = ({
             </div>
 
             <div className="p-4 space-y-5 overflow-y-auto flex-1">
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 flex items-center justify-between">
+              <div className="p-3 rounded-lg bg-secondary flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Purchase Price</span>
                 <span className="text-lg font-bold text-primary">
                   {formatCurrency(transaction.purchasePrice)}
@@ -157,7 +157,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                                   ? 'bg-primary text-white'
                                   : isActive
                                     ? 'bg-primary/20 text-primary ring-2 ring-primary'
-                                    : 'bg-secondary text-gray-400'
+                                    : 'bg-secondary text-muted-foreground'
                               }`}
                             >
                               {isDone ? (
@@ -168,7 +168,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                             </div>
                             {!isLast && (
                               <div
-                                className={`w-0.5 flex-1 min-h-6 ${isDone ? 'bg-primary' : 'bg-gray-200 dark:bg-white/10'}`}
+                                className={`w-0.5 flex-1 min-h-6 ${isDone ? 'bg-primary' : 'bg-border'}`}
                               />
                             )}
                           </div>
@@ -180,7 +180,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                             >
                               {step.label}
                             </p>
-                            <p className="text-xs text-gray-400 mt-0.5">{step.description}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
                             {isActive && step.key === 'deposit_pending' && canDeposit && (
                               <Button
                                 variant="primary"
@@ -223,7 +223,7 @@ export const BuyerEscrowTransactionDetailModal = ({
               </div>
 
               {transaction.releasedAt && (
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs text-muted-foreground text-center">
                   Transaction completed on {formatDate(transaction.releasedAt)}
                 </p>
               )}
@@ -234,14 +234,14 @@ export const BuyerEscrowTransactionDetailModal = ({
                   className="w-full flex items-center justify-between p-3 text-left hover:bg-secondary transition-colors"
                 >
                   <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-                    <ScrollText className="w-4 h-4 text-gray-400" />
+                    <ScrollText className="w-4 h-4 text-muted-foreground" />
                     Activity Log
-                    <span className="text-xs font-normal text-gray-400">
+                    <span className="text-xs font-normal text-muted-foreground">
                       ({transaction.activityLog.length} events)
                     </span>
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-400 transition-transform ${showActivityLog ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 text-muted-foreground transition-transform ${showActivityLog ? 'rotate-180' : ''}`}
                   />
                 </button>
 
@@ -257,7 +257,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs text-foreground">{entry.action}</p>
-                            <p className="text-xs text-gray-400 mt-0.5">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               {actor.label} · {formatDate(entry.timestamp, 'long')}
                             </p>
                           </div>

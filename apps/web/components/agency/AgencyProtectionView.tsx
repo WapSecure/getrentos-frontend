@@ -4,20 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Plus, ShieldCheck } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Checkbox,
-  DatePicker,
-  Input,
-  NumberInput,
-  Textarea,
-  PageLoadingState,
-  PageErrorState,
-  Toast,
-  type BadgeVariant,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Badge, Button, Checkbox, DatePicker, Input, NumberInput, Textarea, PageLoadingState, PageErrorState, type BadgeVariant, useToast } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -51,7 +38,7 @@ export function AgencyProtectionView() {
   const queryKey = ['agency', 'protection'];
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey,
@@ -75,20 +62,20 @@ export function AgencyProtectionView() {
       queryClient.invalidateQueries({ queryKey });
       setAdding(false);
       setForm(emptyForm);
-      setToast({ message: 'Attestation recorded.', variant: 'success' });
+      toast.success('Attestation recorded.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not record the attestation.', variant: 'error' }),
+      toast.error(e.message || 'Could not record the attestation.'),
   });
 
   const revokeMutation = useMutation({
     mutationFn: (id: string) => unwrap(agencyProtectionService.revoke(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      setToast({ message: 'Attestation revoked.', variant: 'success' });
+      toast.success('Attestation revoked.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not revoke.', variant: 'error' }),
+      toast.error(e.message || 'Could not revoke.'),
   });
 
   if (isLoading) return <PageLoadingState />;
@@ -281,10 +268,6 @@ export function AgencyProtectionView() {
             </tbody>
           </table>
         </div>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

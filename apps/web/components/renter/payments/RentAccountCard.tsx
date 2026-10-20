@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wallet } from 'lucide-react';
-import { Button, ConfirmDialog } from '@getrentos/ui';
+import { Alert, Button, Card, ConfirmDialog } from '@getrentos/ui';
 import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { renterService } from '@/services/renterService';
@@ -45,7 +45,7 @@ export const RentAccountCard = () => {
   if (!list.length) return null;
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4">
+    <Card className="p-4">
       <h3 className="font-semibold text-foreground flex items-center gap-2">
         <Wallet className="w-4 h-4 text-primary" /> Rent account
       </h3>
@@ -65,6 +65,7 @@ export const RentAccountCard = () => {
                   variant="outline"
                   className="mt-1.5"
                   disabled={refund.isPending}
+                  isLoading={refund.isPending && refund.variables === a.leaseId}
                   onClick={() => {
                     setMessage(null);
                     setConfirming({ leaseId: a.leaseId, amount: a.creditBalance });
@@ -114,9 +115,9 @@ export const RentAccountCard = () => {
         ))}
       </div>
       {message && (
-        <p role="status" className={`mt-3 text-xs ${message.ok ? 'text-success' : 'text-warning'}`}>
+        <Alert variant={message.ok ? 'success' : 'warning'} className="mt-3">
           {message.text}
-        </p>
+        </Alert>
       )}
       <ConfirmDialog
         open={!!confirming}
@@ -131,6 +132,6 @@ export const RentAccountCard = () => {
           setConfirming(null);
         }}
       />
-    </div>
+    </Card>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BadgeCheck,
   Ban,
@@ -22,11 +22,12 @@ import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { CurrencyInput, Input, NumberInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { getStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
@@ -198,7 +199,7 @@ export function HomeManagementWorkOrderInvoices({
   const [currentUserId] = useState<string | null | undefined>(
     () => getStoredUser<{ id?: string }>()?.id ?? null
   );
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const invoicesQuery = useQuery({
     enabled: isExpanded,
@@ -213,6 +214,7 @@ export function HomeManagementWorkOrderInvoices({
           pageSize: INVOICE_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const invoices = useMemo(() => invoicesQuery.data?.items ?? [], [invoicesQuery.data]);
@@ -276,16 +278,10 @@ export function HomeManagementWorkOrderInvoices({
       setPage(1);
       setForm(newInvoiceForm());
       setIsCreateOpen(false);
-      setToast({
-        message: 'Invoice draft created. Submit it when the completion record is ready for review.',
-        variant: 'success',
-      });
+      toast.success('Invoice draft created. Submit it when the completion record is ready for review.');
     },
     onError: (error) => {
-      setToast({
-        message: error.message || 'Unable to create this invoice draft.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to create this invoice draft.');
     },
   });
 
@@ -295,13 +291,10 @@ export function HomeManagementWorkOrderInvoices({
       await invalidateInvoiceViews();
       setPage(1);
       setActionDialog(null);
-      setToast({
-        message: 'Invoice submitted for a different operator to approve.',
-        variant: 'success',
-      });
+      toast.success('Invoice submitted for a different operator to approve.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to submit this invoice.', variant: 'error' });
+      toast.error(error.message || 'Unable to submit this invoice.');
     },
   });
 
@@ -311,14 +304,10 @@ export function HomeManagementWorkOrderInvoices({
       await invalidateInvoiceViews();
       setPage(1);
       setActionDialog(null);
-      setToast({
-        message:
-          'Invoice approved and ready for finance review. No vendor payment has been initiated.',
-        variant: 'success',
-      });
+      toast.success('Invoice approved and ready for finance review. No vendor payment has been initiated.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to approve this invoice.', variant: 'error' });
+      toast.error(error.message || 'Unable to approve this invoice.');
     },
   });
 
@@ -334,10 +323,10 @@ export function HomeManagementWorkOrderInvoices({
       setPage(1);
       setActionDialog(null);
       setActionReason('');
-      setToast({ message: 'Invoice rejected and the reason was recorded.', variant: 'success' });
+      toast.success('Invoice rejected and the reason was recorded.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to reject this invoice.', variant: 'error' });
+      toast.error(error.message || 'Unable to reject this invoice.');
     },
   });
 
@@ -353,10 +342,10 @@ export function HomeManagementWorkOrderInvoices({
       setPage(1);
       setActionDialog(null);
       setActionReason('');
-      setToast({ message: 'Invoice voided and the decision was recorded.', variant: 'success' });
+      toast.success('Invoice voided and the decision was recorded.');
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to void this invoice.', variant: 'error' });
+      toast.error(error.message || 'Unable to void this invoice.');
     },
   });
 
@@ -368,24 +357,18 @@ export function HomeManagementWorkOrderInvoices({
     mutationFn: ({ invoiceId }) => unwrap(homeManagementService.payWorkOrderInvoice(invoiceId)),
     onSuccess: async (result) => {
       await invalidateInvoiceViews();
-      setToast(
-        result.payoutStatus === 'FAILED'
-          ? {
-              message:
-                'The transfer to the vendor failed. Check their payout account and try again.',
-              variant: 'error',
-            }
-          : {
-              message:
-                result.payoutStatus === 'PAID'
-                  ? 'Vendor paid.'
-                  : 'Payment sent: it shows as paid once the bank confirms.',
-              variant: 'success',
-            }
-      );
+      if (result.payoutStatus === 'FAILED') {
+        toast.error('The transfer to the vendor failed. Check their payout account and try again.');
+      } else {
+        toast.success(
+          result.payoutStatus === 'PAID'
+            ? 'Vendor paid.'
+            : 'Payment sent: it shows as paid once the bank confirms.'
+        );
+      }
     },
     onError: (error) => {
-      setToast({ message: error.message || 'Unable to pay this invoice.', variant: 'error' });
+      toast.error(error.message || 'Unable to pay this invoice.');
     },
   });
 
@@ -550,7 +533,7 @@ export function HomeManagementWorkOrderInvoices({
       {isExpanded && (
         <div className="mt-4 space-y-4">
           {creationBlocker && (
-            <p className="rounded-xl bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-800 dark:text-amber-300">
+            <p className="rounded-xl bg-warning-subtle px-3 py-2 text-xs leading-5 text-foreground">
               {creationBlocker}
             </p>
           )}
@@ -558,10 +541,10 @@ export function HomeManagementWorkOrderInvoices({
           {invoicesQuery.isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 2 }, (_, index) => (
-                <div key={index} className="h-36 animate-pulse rounded-xl bg-card" />
+                <Skeleton key={index} className="h-36 rounded-xl" />
               ))}
             </div>
-          ) : invoicesQuery.isError ? (
+          ) : invoicesQuery.isError && !invoicesQuery.data ? (
             <EmptyState
               className="border-dashed bg-card p-6"
               icon={CircleAlert}
@@ -696,12 +679,12 @@ export function HomeManagementWorkOrderInvoices({
                           </p>
                         )}
                         {invoice.status === 'APPROVED' && invoice.payoutStatus === 'PENDING' && (
-                          <p className="mt-3 rounded-xl bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-800 dark:text-emerald-300">
+                          <p className="mt-3 rounded-xl bg-success-subtle px-3 py-2 text-xs leading-5 text-foreground">
                             Approved and ready to pay. The vendor has not been paid yet.
                           </p>
                         )}
                         {invoice.payoutStatus === 'PAID' && invoice.paidOutAt && (
-                          <p className="mt-3 rounded-xl bg-emerald-500/10 px-3 py-2 text-xs leading-5 text-emerald-800 dark:text-emerald-300">
+                          <p className="mt-3 rounded-xl bg-success-subtle px-3 py-2 text-xs leading-5 text-foreground">
                             Paid on {dateLabel(invoice.paidOutAt)}.
                           </p>
                         )}
@@ -1179,8 +1162,6 @@ export function HomeManagementWorkOrderInvoices({
           )}
         </DialogContent>
       </Dialog>
-
-      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
     </div>
   );
 }

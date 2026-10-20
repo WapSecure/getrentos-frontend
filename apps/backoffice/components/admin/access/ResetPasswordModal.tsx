@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { KeyRound, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Alert, Button } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
@@ -94,7 +94,7 @@ export const ResetPasswordModal = ({
               />
             </Field>
 
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <Alert variant="danger">{error}</Alert>}
 
             <div className="flex gap-2 pt-2">
               <Button
@@ -105,8 +105,14 @@ export const ResetPasswordModal = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="danger" className="flex-1" isLoading={submitting}>
-                {submitting ? 'Resetting…' : 'Reset password'}
+              <Button
+                type="submit"
+                variant="danger"
+                className="flex-1"
+                isLoading={submitting}
+                loadingText="Resetting…"
+              >
+                Reset password
               </Button>
             </div>
           </form>

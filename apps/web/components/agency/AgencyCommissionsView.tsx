@@ -4,18 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Coins, Receipt, Percent, Settings2 } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  NumberInput,
-  Select,
-  StatCard,
-  PageLoadingState,
-  PageErrorState,
-  Toast,
-  type BadgeVariant,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Badge, Button, NumberInput, Select, StatCard, PageLoadingState, PageErrorState, type BadgeVariant, useToast } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { AgencyPayoutSection } from './AgencyPayoutSection';
@@ -49,7 +38,7 @@ export function AgencyCommissionsView() {
   const [editing, setEditing] = useState(false);
   const [lettingPct, setLettingPct] = useState('');
   const [renewalPct, setRenewalPct] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey,
@@ -62,10 +51,10 @@ export function AgencyCommissionsView() {
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
       setEditing(false);
-      setToast({ message: 'Rate card updated.', variant: 'success' });
+      toast.success('Rate card updated.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not update the rate card.', variant: 'error' }),
+      toast.error(e.message || 'Could not update the rate card.'),
   });
 
   const teamQuery = useQuery({
@@ -83,10 +72,10 @@ export function AgencyCommissionsView() {
       unwrap(agencyCommissionService.setAgentSplit(userId, splitPct)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agency', 'team'] });
-      setToast({ message: 'Split updated.', variant: 'success' });
+      toast.success('Split updated.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not update the split.', variant: 'error' }),
+      toast.error(e.message || 'Could not update the split.'),
   });
 
   const assignMutation = useMutation({
@@ -99,7 +88,7 @@ export function AgencyCommissionsView() {
     }) => unwrap(agencyCommissionService.assignAgent(commissionId, agentUserId)),
     onSuccess: () => refreshCommissionsAndTeam(),
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not credit the agent.', variant: 'error' }),
+      toast.error(e.message || 'Could not credit the agent.'),
   });
 
   const agentOptions = [
@@ -124,11 +113,11 @@ export function AgencyCommissionsView() {
     const letting = Number(lettingPct);
     const renewal = Number(renewalPct);
     if (!Number.isFinite(letting) || !Number.isFinite(renewal)) {
-      setToast({ message: 'Enter both rates as whole percentages.', variant: 'error' });
+      toast.error('Enter both rates as whole percentages.');
       return;
     }
     if (letting < 0 || letting > 100 || renewal < 0 || renewal > 100) {
-      setToast({ message: 'Rates must be between 0 and 100.', variant: 'error' });
+      toast.error('Rates must be between 0 and 100.');
       return;
     }
     configMutation.mutate({ lettingPct: letting, renewalPct: renewal });
@@ -319,13 +308,9 @@ export function AgencyCommissionsView() {
         savingUserId={splitMutation.isPending ? splitMutation.variables?.userId : null}
       />
 
-      <AgencyPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
+      <AgencyPayoutSection onToast={(message, variant) => toast.show(message, variant)} />
 
-      <AgencyAgentPayoutSection onToast={(message, variant) => setToast({ message, variant })} />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
+      <AgencyAgentPayoutSection onToast={(message, variant) => toast.show(message, variant)} />
     </div>
   );
 }

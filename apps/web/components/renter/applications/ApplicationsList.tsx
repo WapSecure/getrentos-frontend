@@ -69,17 +69,15 @@ export const ApplicationsList = ({
 
   if (sortedApplications.length === 0) {
     return (
-      <div className="rounded-2xl border border-border/70 bg-card py-8 shadow-sm">
-        <EmptyState
-          icon={FileText}
-          title="No applications found"
-          description={
-            filterStatus === 'all'
-              ? "You haven't submitted any applications yet."
-              : `There are no ${filterStatus.replace('_', ' ')} applications in this view.`
-          }
-        />
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No applications found"
+        description={
+          filterStatus === 'all'
+            ? "You haven't submitted any applications yet."
+            : `There are no ${filterStatus.replace('_', ' ')} applications in this view.`
+        }
+      />
     );
   }
 

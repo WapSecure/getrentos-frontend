@@ -1,10 +1,8 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
-
-import { LayoutGrid, List, FileText, Check, ArrowDownUp } from 'lucide-react';
+import { LayoutGrid, List, FileText } from 'lucide-react';
 import { DocumentCard } from './DocumentCard';
-import { Button } from '@getrentos/ui';
+import { Card, Checkbox, EmptyState, IconButton, Select } from '@getrentos/ui';
 
 interface Document {
   id: string;
@@ -59,8 +57,11 @@ export const DocumentsList = ({
   const pageFullySelected =
     documents.length > 0 && documents.every((document) => selectedDocuments.includes(document.id));
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onSortByChange(e.target.value as SortByType);
+  const pagePartlySelected =
+    !pageFullySelected && documents.some((document) => selectedDocuments.includes(document.id));
+
+  const handleSortChange = (value: string) => {
+    onSortByChange(value as SortByType);
   };
 
   const handleSelectAll = () => {
@@ -77,25 +78,24 @@ export const DocumentsList = ({
 
   if (documents.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-12 text-center">
-        <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-foreground">No documents found</h3>
-        <p className="text-muted-foreground mt-2">Upload your first document to get started</p>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title="No documents found"
+        description="Upload your first document to get started"
+      />
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border flex justify-between items-center flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={handleSelectAll} className="p-1 h-auto">
-            <div
-              className={`w-4 h-4 rounded border-2 ${pageFullySelected ? 'bg-primary border-primary' : 'border-border'}`}
-            >
-              {pageFullySelected && <Check className="w-3 h-3 text-white" />}
-            </div>
-          </Button>
+          <Checkbox
+            checked={pageFullySelected}
+            indeterminate={pagePartlySelected}
+            onCheckedChange={handleSelectAll}
+            aria-label="Select all documents on this page"
+          />
           <div>
             <h3 className="font-semibold text-foreground">All Documents</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -105,36 +105,36 @@ export const DocumentsList = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <LegacySelect
-              value={sortBy}
-              onChange={handleSortChange}
-              className="appearance-none px-3 py-1.5 pr-8 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="name">Sort by Name</option>
-              <option value="date">Sort by Date</option>
-              <option value="size">Sort by Size</option>
-            </LegacySelect>
-            <ArrowDownUp className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
+          <Select
+            value={sortBy}
+            onValueChange={handleSortChange}
+            ariaLabel="Sort documents"
+            controlSize="sm"
+            className="w-40"
+            options={[
+              { value: 'name', label: 'Sort by Name' },
+              { value: 'date', label: 'Sort by Date' },
+              { value: 'size', label: 'Sort by Size' },
+            ]}
+          />
 
           <div className="flex gap-1 p-1 bg-secondary rounded-lg">
-            <Button
-              variant="ghost"
+            <IconButton
+              label="Grid view"
               size="sm"
+              icon={<LayoutGrid />}
+              aria-pressed={viewMode === 'grid'}
               onClick={handleViewModeGrid}
-              className={`p-1.5 h-auto ${viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
+              className={viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : undefined}
+            />
+            <IconButton
+              label="List view"
               size="sm"
+              icon={<List />}
+              aria-pressed={viewMode === 'list'}
               onClick={handleViewModeList}
-              className={`p-1.5 h-auto ${viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-gray-500'}`}
-            >
-              <List className="w-4 h-4" />
-            </Button>
+              className={viewMode === 'list' ? 'bg-card text-primary shadow-sm' : undefined}
+            />
           </div>
         </div>
       </div>
@@ -160,6 +160,6 @@ export const DocumentsList = ({
           />
         ))}
       </div>
-    </div>
+    </Card>
   );
 };

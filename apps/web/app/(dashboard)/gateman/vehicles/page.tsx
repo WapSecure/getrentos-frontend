@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, LogOut as ExitIcon } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
+import { Button, CardSkeleton, DocumentUpload, LegacyInput, Select } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
@@ -125,7 +125,7 @@ export default function GatemanVehiclesPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {

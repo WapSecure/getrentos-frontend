@@ -1,15 +1,19 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { Textarea } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Plus, Edit2, Trash2, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  IconButton,
+  Input,
+  Select,
+  Textarea,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { renterService, type MessageTemplate } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -31,14 +35,17 @@ const categoryLabels: Record<string, string> = {
   general: 'General',
 };
 
-const categoryColors: Record<string, string> = {
-  application: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-  viewing: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-  followup: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
-  general: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+const categoryVariants: Record<string, BadgeVariant> = {
+  application: 'info',
+  viewing: 'success',
+  followup: 'warning',
+  general: 'neutral',
 };
 
-const categoryOptions: string[] = ['application', 'viewing', 'followup', 'general'];
+const categoryOptions = ['application', 'viewing', 'followup', 'general'].map((cat) => ({
+  value: cat,
+  label: categoryLabels[cat],
+}));
 
 export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) => {
   const queryClient = useQueryClient();
@@ -137,73 +144,74 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
     });
   };
 
-  const handleCategoryChange = (value: string): string => value;
-
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <div
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
-      >
-        <div className="flex items-center gap-2">
+    <Card>
+      <div className="flex items-center justify-between gap-2 p-3">
+        <button
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <FileText className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-foreground">Message Templates</span>
-          <span className="text-xs text-gray-500">({templates.length})</span>
-        </div>
-        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">({templates.length})</span>
+        </button>
+        <div className="flex items-center gap-1">
           <Button
             size="sm"
             variant="ghost"
-            className="gap-1"
-            onClick={() => setIsAdding(!isAdding)}
+            icon={<Plus className="w-3 h-3" />}
+            onClick={() => {
+              setIsAdding(!isAdding);
+              setIsExpanded(true);
+            }}
           >
-            <Plus className="w-3 h-3" />
             New
           </Button>
-          {isExpanded ? (
-            <ChevronUp className="w-4 h-4 text-gray-500" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-gray-500" />
-          )}
+          <IconButton
+            size="sm"
+            label={isExpanded ? 'Collapse templates' : 'Expand templates'}
+            aria-expanded={isExpanded}
+            icon={isExpanded ? <ChevronUp /> : <ChevronDown />}
+            onClick={() => setIsExpanded(!isExpanded)}
+          />
         </div>
       </div>
 
       {isExpanded && (
         <div className="p-3 pt-0 space-y-3 max-h-96 overflow-y-auto">
           {isAdding && (
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 border border-border space-y-3">
-              <LegacyInput
-                type="text"
-                value={newTemplate.title}
-                onChange={(e) => setNewTemplate({ ...newTemplate, title: e.target.value })}
-                placeholder="Template name"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Textarea
-                value={newTemplate.content}
-                onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
-                placeholder="Template content..."
-                rows={3}
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <LegacySelect
-                value={newTemplate.category}
-                onChange={(e) =>
-                  setNewTemplate({ ...newTemplate, category: handleCategoryChange(e.target.value) })
-                }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {categoryOptions.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {categoryLabels[cat]}
-                  </option>
-                ))}
-              </LegacySelect>
-              <div className="flex gap-2">
+            <div className="p-3 rounded-lg bg-secondary/60 border border-border space-y-3">
+              <Field label="Template name" required>
+                <Input
+                  type="text"
+                  value={newTemplate.title}
+                  onChange={(e) => setNewTemplate({ ...newTemplate, title: e.target.value })}
+                  placeholder="Template name"
+                />
+              </Field>
+              <Field label="Content" required>
+                <Textarea
+                  value={newTemplate.content}
+                  onChange={(e) => setNewTemplate({ ...newTemplate, content: e.target.value })}
+                  placeholder="Template content..."
+                  rows={3}
+                />
+              </Field>
+              <Field label="Category">
+                <Select
+                  value={newTemplate.category}
+                  onValueChange={(category) => setNewTemplate({ ...newTemplate, category })}
+                  options={categoryOptions}
+                />
+              </Field>
+              <div className="flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   onClick={handleAddTemplate}
                   disabled={!newTemplate.title || !newTemplate.content}
+                  isLoading={addMutation.isPending}
                 >
                   Add Template
                 </Button>
@@ -221,36 +229,35 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
             >
               {editingId === template.id && editTemplate ? (
                 <div className="space-y-3">
-                  <LegacyInput
-                    type="text"
-                    value={editTemplate.title}
-                    onChange={(e) => setEditTemplate({ ...editTemplate, title: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <Textarea
-                    value={editTemplate.content}
-                    onChange={(e) => setEditTemplate({ ...editTemplate, content: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <LegacySelect
-                    value={editTemplate.category ?? 'general'}
-                    onChange={(e) =>
-                      setEditTemplate({
-                        ...editTemplate,
-                        category: handleCategoryChange(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {categoryOptions.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {categoryLabels[cat]}
-                      </option>
-                    ))}
-                  </LegacySelect>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveEdit}>
+                  <Field label="Template name" required>
+                    <Input
+                      type="text"
+                      value={editTemplate.title}
+                      onChange={(e) => setEditTemplate({ ...editTemplate, title: e.target.value })}
+                    />
+                  </Field>
+                  <Field label="Content" required>
+                    <Textarea
+                      value={editTemplate.content}
+                      onChange={(e) =>
+                        setEditTemplate({ ...editTemplate, content: e.target.value })
+                      }
+                      rows={3}
+                    />
+                  </Field>
+                  <Field label="Category">
+                    <Select
+                      value={editTemplate.category ?? 'general'}
+                      onValueChange={(category) => setEditTemplate({ ...editTemplate, category })}
+                      options={categoryOptions}
+                    />
+                  </Field>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveEdit}
+                      isLoading={updateMutation.isPending}
+                    >
                       Save
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
@@ -260,56 +267,54 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                 </div>
               ) : (
                 <div>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h4 className="font-medium text-foreground">{template.title}</h4>
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[template.category ?? 'general']}`}
-                        >
+                        <Badge variant={categoryVariants[template.category ?? 'general']}>
                           {categoryLabels[template.category ?? 'general']}
-                        </span>
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {template.content}
                       </p>
-                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                         <span>Used {template.useCount} times</span>
                       </div>
                     </div>
-                    <div className="flex gap-1 ml-2">
-                      <button
-                        onClick={() => handleUseTemplate(template)}
-                        className="p-1 rounded hover:bg-secondary"
+                    <div className="flex shrink-0 gap-1">
+                      <IconButton
+                        size="sm"
+                        label="Use template"
                         title="Use template"
-                      >
-                        <Check className="w-3 h-3 text-green-500" />
-                      </button>
-                      <button
-                        onClick={() => handleCopyTemplate(template.content, template.id)}
-                        className="p-1 rounded hover:bg-secondary"
+                        icon={<Check className="text-success" />}
+                        onClick={() => handleUseTemplate(template)}
+                      />
+                      <IconButton
+                        size="sm"
+                        label="Copy template"
                         title="Copy template"
-                      >
-                        {copiedId === template.id ? (
-                          <Check className="w-3 h-3 text-green-500" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => handleEditTemplate(template.id)}
-                        className="p-1 rounded hover:bg-secondary"
+                        icon={
+                          copiedId === template.id ? <Check className="text-success" /> : <Copy />
+                        }
+                        onClick={() => handleCopyTemplate(template.content, template.id)}
+                      />
+                      <IconButton
+                        size="sm"
+                        label="Edit template"
                         title="Edit template"
-                      >
-                        <Edit2 className="w-3 h-3 text-blue-500" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTemplate(template.id)}
-                        className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20"
+                        icon={<Edit2 />}
+                        onClick={() => handleEditTemplate(template.id)}
+                      />
+                      <IconButton
+                        size="sm"
+                        variant="danger"
+                        label="Delete template"
                         title="Delete template"
-                      >
-                        <Trash2 className="w-3 h-3 text-red-500" />
-                      </button>
+                        icon={<Trash2 />}
+                        isLoading={deleteMutation.isPending && deleteMutation.variables === template.id}
+                        onClick={() => handleDeleteTemplate(template.id)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -318,6 +323,6 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
           ))}
         </div>
       )}
-    </div>
+    </Card>
   );
 };

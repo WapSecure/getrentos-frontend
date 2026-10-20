@@ -1,12 +1,20 @@
 'use client';
 
-import { Textarea } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
+import { AlertTriangle } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Card,
+  DatePicker,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Textarea,
+} from '@getrentos/ui';
 
 interface LeaseTerminationRequestProps {
   leaseId: string;
@@ -54,17 +62,13 @@ export const LeaseTerminationRequest = ({
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl border border-border overflow-hidden"
-      >
-        <div className="p-4">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
+            <div className="p-2 rounded-lg bg-destructive-subtle">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-foreground">Early Lease Termination</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Request to terminate your lease before the end date
@@ -75,88 +79,60 @@ export const LeaseTerminationRequest = ({
             </div>
           </div>
 
-          <div className="mt-3 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                Early termination may incur penalties. Review your lease agreement for details.
-              </p>
-            </div>
-          </div>
-        </div>
+          <Alert variant="warning" className="mt-3">
+            Early termination may incur penalties. Review your lease agreement for details.
+          </Alert>
+        </Card>
       </motion.div>
 
-      {/* Termination Request Modal */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Request Early Termination</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{propertyName}</p>
-              </div>
-              <button onClick={close} className="p-1 rounded-lg hover:bg-gray-100">
-                <X className="w-4 h-4" />
-              </button>
+      <Dialog open={isOpen} onOpenChange={(next) => (next ? open() : close())}>
+        <DialogContent className="p-0">
+          <div className="p-4 pr-12 border-b border-border">
+            <DialogTitle className="font-semibold text-foreground">
+              Request Early Termination
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              {propertyName}
+            </DialogDescription>
+          </div>
+
+          <div className="p-4 space-y-4">
+            <Field label="Proposed Move-Out Date" required>
+              <DatePicker
+                value={noticeDate}
+                onChange={setNoticeDate}
+                min={new Date().toISOString().slice(0, 10)}
+              />
+            </Field>
+
+            <Field label="Reason for Termination" required>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Please provide details..."
+                rows={4}
+              />
+            </Field>
+
+            {error && <Alert variant="danger">{error}</Alert>}
+
+            <div className="flex gap-3">
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={handleSubmit}
+                disabled={!noticeDate || !reason || isSubmitting}
+                isLoading={isSubmitting}
+              >
+                Submit Request
+              </Button>
+              <Button variant="ghost" fullWidth onClick={close}>
+                Cancel
+              </Button>
             </div>
-
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Proposed Move-Out Date
-                </label>
-                <DatePicker
-                  value={noticeDate}
-                  onChange={setNoticeDate}
-                  min={new Date().toISOString().slice(0, 10)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Reason for Termination
-                </label>
-                <Textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Please provide details..."
-                  rows={4}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-
-              {error && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/40 dark:bg-red-900/20"
-                >
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-                  <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={handleSubmit}
-                  disabled={!noticeDate || !reason || isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  Submit Request
-                </Button>
-                <Button variant="ghost" fullWidth onClick={close}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

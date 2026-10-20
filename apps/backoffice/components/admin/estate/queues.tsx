@@ -15,7 +15,18 @@ import {
   BadgeCheck,
   Eye,
 } from 'lucide-react';
-import { Badge, Button, ConfirmDialog, Toast, type BadgeVariant } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  CardSkeleton,
+  ConfirmDialog,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  useToast,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { EstateQueuePage, type EstateQueueConfig } from './EstateQueuePage';
@@ -91,42 +102,35 @@ export function useEstateActions() {
   const client = useQueryClient();
   const [action, setAction] = useState<EstateAction | null>(null);
   const [reason, setReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
   const mutation = useMutation({
     mutationFn: async () => action?.run(reason.trim()),
     onSuccess: async () => {
       setAction(null);
       setReason('');
-      setToast({ message: 'Estate action completed and audited.', variant: 'success' });
+      toast.success('Estate action completed and audited.');
       await client.invalidateQueries({ queryKey: ['admin', 'estates'] });
     },
-    onError: (error: Error) => setToast({ message: error.message, variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message),
   });
 
   return {
     request: setAction,
     feedback: (
-      <>
-        <ConfirmDialog
-          open={Boolean(action)}
-          onOpenChange={(open) => !open && setAction(null)}
-          title={action?.title ?? 'Confirm action'}
-          description={action?.description ?? ''}
-          confirmLabel={action?.label}
-          isLoading={mutation.isPending}
-          promptLabel="Administrative reason"
-          promptValue={reason}
-          onPromptChange={setReason}
-          promptRequired
-          promptMinLength={10}
-          onConfirm={() => mutation.mutate()}
-        />
-        {toast && (
-          <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-        )}
-      </>
+      <ConfirmDialog
+        open={Boolean(action)}
+        onOpenChange={(open) => !open && setAction(null)}
+        title={action?.title ?? 'Confirm action'}
+        description={action?.description ?? ''}
+        confirmLabel={action?.label}
+        isLoading={mutation.isPending}
+        promptLabel="Administrative reason"
+        promptValue={reason}
+        onPromptChange={setReason}
+        promptRequired
+        promptMinLength={10}
+        onConfirm={() => mutation.mutate()}
+      />
     ),
   };
 }
@@ -962,8 +966,13 @@ export function GovernanceQueue() {
         header: '',
         render: (g) => (
           <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setActive(g)}>
-              <Eye className="mr-1 h-3.5 w-3.5" /> View
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setActive(g)}
+              icon={<Eye className="h-3.5 w-3.5" />}
+            >
+              View
             </Button>
             <Button
               variant="danger"
@@ -997,34 +1006,39 @@ export function GovernanceQueue() {
 }
 
 function GovernanceDetailDialog({ recordId, onClose }: { recordId: string; onClose: () => void }) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: adminKeys.estates('governance-records', { search: recordId }),
     queryFn: () => unwrap(adminEstateService.governanceRecordDetail(recordId)),
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading governance record…</div>
-        ) : isError || !data ? (
-          <div className="p-8 text-center">
-            <p className="text-destructive">Could not load the governance record.</p>
-            <Button className="mt-3" variant="ghost" onClick={onClose}>
-              Close
-            </Button>
+      <DialogContent className="p-0 sm:max-w-2xl sm:p-0" showClose={false}>
+        {data ? (
+          <GovernanceDetail detail={data} onClose={onClose} />
+        ) : isLoading ? (
+          <div className="p-5">
+            <DialogTitle className="sr-only">Loading governance record</DialogTitle>
+            <CardSkeleton lines={5} className="border-0 p-0" />
           </div>
         ) : (
-          <GovernanceDetail detail={data} onClose={onClose} />
+          <div className="space-y-3 p-5">
+            <DialogTitle className="sr-only">Governance record</DialogTitle>
+            <Alert variant="danger">Could not load the governance record.</Alert>
+            <div className="flex justify-end">
+              <Button variant="ghost" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1039,16 +1053,16 @@ function GovernanceDetail({
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5">
         <div>
-          <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+          <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold">
             <FileText className="h-5 w-5 text-muted-foreground" />
             {detail.title}
-          </h2>
+          </DialogTitle>
           <p className="mt-1 text-sm text-muted-foreground">
             {detail.estateName} · {titleCase(detail.type)} · v{detail.version} · Created{' '}
             {date(detail.createdAt)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant={governanceTypeVariant(detail.type)}>{titleCase(detail.type)}</Badge>
           <Pill label={titleCase(detail.status)} variant={governanceStatusVariant(detail.status)} />
         </div>

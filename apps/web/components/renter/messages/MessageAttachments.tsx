@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileText, Image as ImageIcon, Link as LinkIcon, Download, Eye, X } from 'lucide-react';
-import { FilePreviewDialog } from '@getrentos/ui';
+import { FilePreviewDialog, IconButton } from '@getrentos/ui';
 
 interface Attachment {
   name: string;
@@ -47,31 +47,33 @@ export const MessageAttachments = ({
           }}
           role="button"
           tabIndex={0}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm group"
+          className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-lg text-sm group"
         >
           {renderAttachmentIcon(attachment.type)}
           <span className="truncate max-w-[120px]">{attachment.name}</span>
-          <span className="text-xs text-gray-500">({formatFileSize(attachment.size)})</span>
-          <button
+          <span className="text-xs text-muted-foreground">({formatFileSize(attachment.size)})</span>
+          <IconButton
+            size="sm"
+            label={`Download ${attachment.name}`}
+            icon={<Download />}
+            className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
             onClick={(event) => {
               event.stopPropagation();
               onDownload(attachment);
             }}
-            className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <Download className="w-3 h-3" />
-          </button>
+          />
           <Eye className="h-3 w-3 text-muted-foreground" />
           {onRemove && (
-            <button
+            <IconButton
+              size="sm"
+              label={`Remove ${attachment.name}`}
+              icon={<X />}
+              className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
               onClick={(event) => {
                 event.stopPropagation();
                 onRemove(index);
               }}
-              className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="w-3 h-3" />
-            </button>
+            />
           )}
         </div>
       ))}

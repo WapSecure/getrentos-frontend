@@ -2,6 +2,7 @@
 
 import { CreditCard, Wrench, CalendarClock, UserPlus, Receipt } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -55,13 +56,13 @@ const typeFor = (type: string): ActivityType => {
 };
 
 export const LandlordActivityFeed = () => {
-  const { data: activity = [] } = useQuery({
+  const { data: activity = [], isPending } = useQuery({
     queryKey: landlordKeys.dashboardActivity,
     queryFn: () => unwrap(landlordService.getDashboardActivity()),
   });
 
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Recent Activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -70,13 +71,20 @@ export const LandlordActivityFeed = () => {
       </div>
 
       <div className="divide-y divide-border">
-        {activity.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No activity yet</p>
+        {isPending ? (
+          <div role="status" aria-label="Loading">
+            {[0, 1, 2].map((row) => (
+              <div key={row} className="p-4 flex items-start gap-3">
+                <Skeleton className="h-8 w-8 shrink-0" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-3.5 w-2/5" />
+                  <Skeleton className="h-3 w-3/5" />
+                </div>
+              </div>
+            ))}
           </div>
+        ) : activity.length === 0 ? (
+          <EmptyState icon={CreditCard} title="No activity yet" size="compact" bare />
         ) : (
           activity.map((item) => {
             const config = typeConfig[typeFor(item.type)];
@@ -101,6 +109,6 @@ export const LandlordActivityFeed = () => {
           })
         )}
       </div>
-    </div>
+    </Card>
   );
 };

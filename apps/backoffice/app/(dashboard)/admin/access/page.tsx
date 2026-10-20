@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldCheck,
   LockKeyhole,
@@ -16,13 +16,13 @@ import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
 import { ResetPasswordModal } from '@/components/admin/access/ResetPasswordModal';
 import { StaffApprovalsPanel } from '@/components/admin/access/StaffApprovalsPanel';
 import { StaffStatusBadge } from '@/components/admin/access/StaffStatusBadge';
-import { Badge } from '@getrentos/ui';
+import { Alert, Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { EmptyState, PageErrorState } from '@getrentos/ui';
 import { TableSkeleton } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast, type ToastVariant } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
@@ -43,8 +43,8 @@ export default function AdminAccessPage() {
   const canApprove = hasAdminPermission(roles, 'staff.approve');
   const creatableRoles = useMemo(() => creatableStaffRoles(roles), [roles]);
 
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
-  const notify = (message: string, variant: ToastVariant) => setToast({ message, variant });
+  const toast = useToast();
+  const notify = (message: string, variant: ToastVariant) => toast.show(message, variant);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<AdminStaffMember | null>(null);
@@ -68,6 +68,7 @@ export default function AdminAccessPage() {
     queryKey: adminKeys.staffList({ page: staffPage, pageSize: PAGE_SIZE }),
     queryFn: () => unwrap(adminService.listStaff({ page: staffPage, pageSize: PAGE_SIZE })),
     enabled: canManage,
+    placeholderData: keepPreviousData,
   });
   const staff = staffData?.items ?? [];
   const staffTotal = staffData?.total ?? 0;
@@ -115,10 +116,6 @@ export default function AdminAccessPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
-
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-accent p-2.5 text-primary">
@@ -138,15 +135,14 @@ export default function AdminAccessPage() {
         )}
       </div>
 
-      <div className="mb-6 flex gap-3 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
-        <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
+      <Alert variant="warning" icon={LockKeyhole} className="mb-6">
         <p>
           <span className="font-semibold">Hierarchy-aware provisioning:</span> a Super Admin can
           create any role; other admins can only create roles subordinate to their own.
           Non-super-admin creations start as <span className="font-medium">pending</span> and must
           be approved by a senior admin before the member can sign in.
         </p>
-      </div>
+      </Alert>
 
       {canApprove && (
         <div className="mb-6">
@@ -166,7 +162,7 @@ export default function AdminAccessPage() {
 
           {isLoading ? (
             <TableSkeleton rows={4} columns={4} />
-          ) : isError ? (
+          ) : isError && !staffData ? (
             <PageErrorState
               title="Staff directory unavailable"
               description="Staff accounts could not be loaded. No access changes can be made until the current records are available."

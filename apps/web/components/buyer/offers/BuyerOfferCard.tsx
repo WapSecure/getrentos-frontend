@@ -41,17 +41,17 @@ const statusConfig: Record<
   withdrawn: {
     label: 'Withdrawn',
     icon: XCircle,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+    className: 'text-muted-foreground bg-secondary',
   },
   expired: {
     label: 'Expired',
     icon: Archive,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+    className: 'text-muted-foreground bg-secondary',
   },
   closed: {
     label: 'Closed',
     icon: Archive,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+    className: 'text-muted-foreground bg-secondary',
   },
 };
 
@@ -102,7 +102,7 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-gray-400">Your Offer</p>
+          <p className="text-xs text-muted-foreground">Your Offer</p>
           <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
@@ -114,15 +114,15 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
           </p>
         </div>
         <div>
-          <p className="text-xs text-gray-400">Financing</p>
+          <p className="text-xs text-muted-foreground">Financing</p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-            <FinancingIcon className="w-3.5 h-3.5 text-gray-400" />
+            <FinancingIcon className="w-3.5 h-3.5 text-muted-foreground" />
             {financingLabels[offer.financingType]}
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-gray-400 mt-3 pt-3 border-t border-border">
+      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
         Submitted {formatDate(offer.submittedAt)}
       </p>
     </motion.div>

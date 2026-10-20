@@ -1,5 +1,6 @@
 'use client';
 
+import { Card } from '@getrentos/ui';
 import { motion } from 'framer-motion';
 import { leaseRentSuffix } from '@/lib/leaseTerm';
 import { MapPin, Building2 } from 'lucide-react';
@@ -29,22 +30,19 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
   const getStatusColor = () => {
     switch (lease.status) {
       case 'active':
-        return 'bg-green-500';
+        return 'bg-success';
       case 'expiring':
-        return 'bg-yellow-500';
+        return 'bg-warning';
       case 'expired':
-        return 'bg-red-500';
+        return 'bg-destructive';
       default:
-        return 'bg-gray-500';
+        return 'bg-muted-foreground';
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card>
       <div className="relative">
         {/* Status Bar */}
         <div className={`h-1 ${getStatusColor()}`} />
@@ -68,13 +66,13 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
                 {formatCurrency(lease.rentAmount)}
                 {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">{getDaysRemaining()} days left</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{getDaysRemaining()} days left</p>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border">
             <div>
-              <p className="text-xs text-gray-500">Lease Start</p>
+              <p className="text-xs text-muted-foreground">Lease Start</p>
               <p className="text-sm font-medium text-foreground">
                 {new Date(lease.startDate).toLocaleDateString('en-US', {
                   month: 'short',
@@ -84,7 +82,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Lease End</p>
+              <p className="text-xs text-muted-foreground">Lease End</p>
               <p className="text-sm font-medium text-foreground">
                 {new Date(lease.endDate).toLocaleDateString('en-US', {
                   month: 'short',
@@ -94,7 +92,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
               </p>
             </div>
             <div>
-              <p className="text-xs text-gray-500">Security Deposit</p>
+              <p className="text-xs text-muted-foreground">Security Deposit</p>
               <p className="text-sm font-medium text-foreground">
                 {formatCurrency(lease.securityDeposit)}
               </p>
@@ -108,11 +106,12 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">{lease.landlord.name}</p>
-              <p className="text-xs text-gray-500">{lease.landlord.email}</p>
+              <p className="text-xs text-muted-foreground">{lease.landlord.email}</p>
             </div>
           </div>
         </div>
       </div>
+      </Card>
     </motion.div>
   );
 };

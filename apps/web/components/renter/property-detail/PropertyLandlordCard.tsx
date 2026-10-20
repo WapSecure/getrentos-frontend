@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Clock, Star, Shield, MessageCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, Card } from '@getrentos/ui';
 import type { Property } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -37,7 +37,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4">
+    <Card className="p-4">
       <h3 className="text-sm font-semibold text-foreground mb-3">Landlord</h3>
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
@@ -46,7 +46,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <p className="font-medium text-foreground truncate">{name}</p>
-            {property.landlordVerified && <Shield className="w-4 h-4 text-green-500 shrink-0" />}
+            {property.landlordVerified && <Shield className="w-4 h-4 text-success shrink-0" />}
           </div>
           <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
             {property.landlordReviews ? (
@@ -87,6 +87,6 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         <MessageCircle className="w-4 h-4" />
         Message Landlord
       </Button>
-    </div>
+    </Card>
   );
 };

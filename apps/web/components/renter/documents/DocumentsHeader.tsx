@@ -25,8 +25,8 @@ export const DocumentsHeader = ({ documentCount, onUpload }: DocumentsHeaderProp
     >
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40">
-            <Shield className="w-5 h-5 text-blue-600" />
+          <div className="rounded-lg bg-info-subtle p-2">
+            <Shield className="h-5 w-5 text-info" />
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">

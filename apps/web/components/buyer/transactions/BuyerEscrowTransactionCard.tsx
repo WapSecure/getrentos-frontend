@@ -58,7 +58,7 @@ export const BuyerEscrowTransactionCard = ({
             isFrozen
               ? 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
               : isRefunded
-                ? 'text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-white/10'
+                ? 'text-muted-foreground bg-secondary'
                 : transaction.escrowStatus === 'released'
                   ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
                   : 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20'
@@ -81,12 +81,12 @@ export const BuyerEscrowTransactionCard = ({
         <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              isFrozen ? 'bg-red-500' : isRefunded ? 'bg-gray-400' : 'bg-primary'
+              isFrozen ? 'bg-red-500' : isRefunded ? 'bg-muted-foreground' : 'bg-primary'
             }`}
             style={{ width: `${progressPct}%` }}
           />
         </div>
-        <p className="text-xs text-gray-400 mt-1.5">Opened {formatDate(transaction.createdAt)}</p>
+        <p className="text-xs text-muted-foreground mt-1.5">Opened {formatDate(transaction.createdAt)}</p>
       </div>
     </motion.div>
   );

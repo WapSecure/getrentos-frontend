@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -35,7 +36,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 };
 
 export const LandlordRevenueChart = () => {
-  const { data = [] } = useQuery({
+  const { data = [], isPending } = useQuery({
     queryKey: landlordKeys.revenueTrend,
     queryFn: () => unwrap(landlordService.getRevenueTrend()),
   });
@@ -48,35 +49,33 @@ export const LandlordRevenueChart = () => {
   const change = previousMonth > 0 ? ((currentMonth - previousMonth) / previousMonth) * 100 : null;
 
   return (
-    <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <div>
+    <Card className="p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <div className="min-w-0">
           <h3 className="font-semibold text-foreground">Rent Collection Trend</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Monthly income, last 6 months</p>
         </div>
         {change !== null && (
-          <div
-            className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-              change >= 0
-                ? 'text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20'
-                : 'text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-900/20'
-            }`}
+          <Badge
+            variant={change >= 0 ? 'success' : 'danger'}
+            icon={<TrendingUp className={change < 0 ? 'w-3 h-3 rotate-180' : 'w-3 h-3'} />}
           >
-            <TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />
             {change >= 0 ? '+' : ''}
             {change.toFixed(1)}%
-          </div>
+          </Badge>
         )}
       </div>
 
-      {!hasData ? (
+      {isPending ? (
+        <Skeleton className="h-56 w-full" />
+      ) : !hasData ? (
         <div className="h-56 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No rent collection data yet</p>
-          </div>
+          <EmptyState
+            icon={TrendingUp}
+            title="No rent collection data yet"
+            size="compact"
+            bare
+          />
         </div>
       ) : (
         <div className="h-56">
@@ -91,7 +90,7 @@ export const LandlordRevenueChart = () => {
               <CartesianGrid
                 vertical={false}
                 stroke="currentColor"
-                className="text-gray-100 dark:text-white/5"
+                className="text-border"
               />
               <XAxis
                 dataKey="month"
@@ -124,6 +123,6 @@ export const LandlordRevenueChart = () => {
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

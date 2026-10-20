@@ -62,10 +62,11 @@ export const CalendarDayView = ({ events, currentDate, onEventClick }: CalendarD
                 {eventsAtHour.map((event) => {
                   const position = getEventPosition(event);
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={event.id}
                       onClick={() => onEventClick(event)}
-                      className="absolute left-2 right-2 rounded-lg p-2 text-white cursor-pointer hover:opacity-80 transition-opacity"
+                      className="absolute left-2 right-2 rounded-lg p-2 text-left text-white cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/30"
                       style={{
                         top: position.top,
                         height: Math.max(position.height, 40),
@@ -79,7 +80,7 @@ export const CalendarDayView = ({ events, currentDate, onEventClick }: CalendarD
                       {event.location && (
                         <div className="text-xs opacity-75 mt-0.5">{event.location}</div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>

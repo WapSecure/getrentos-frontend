@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
   Landmark,
-  Search,
   MapPin,
   Home,
   Wallet,
@@ -18,12 +17,20 @@ import {
   FileText,
 } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
+  Card,
+  CardSkeleton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
   EmptyState,
+  Input,
+  ListSkeleton,
   PageErrorState,
   Pagination,
-  LegacyInput,
+  SearchInput,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { cn, unwrap } from '@getrentos/shared';
@@ -68,6 +75,7 @@ export const EstateRegister = () => {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const items = data?.items ?? [];
 
@@ -86,41 +94,41 @@ export const EstateRegister = () => {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card shadow-sm">
+      <Card className="shadow-sm">
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-          <div className="relative flex-1 min-w-[220px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <LegacyInput
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search estate, org or manager…"
-              className="w-full pl-9"
-            />
-          </div>
-          <LegacyInput
+          <SearchInput
+            value={search}
+            onValueChange={(value) => {
+              setSearch(value);
+              setPage(1);
+            }}
+            placeholder="Search estate, org or manager…"
+            label="Search estates"
+            className="w-full min-w-0 sm:max-w-sm sm:flex-1"
+          />
+          <Input
             value={city}
             onChange={(e) => {
               setCity(e.target.value);
               setPage(1);
             }}
             placeholder="City…"
-            className="w-32"
+            aria-label="Filter by city"
+            className="min-w-0 flex-1 sm:w-32 sm:flex-none"
           />
-          <LegacyInput
+          <Input
             value={state}
             onChange={(e) => {
               setState(e.target.value);
               setPage(1);
             }}
             placeholder="State…"
-            className="w-32"
+            aria-label="Filter by state"
+            className="min-w-0 flex-1 sm:w-32 sm:flex-none"
           />
         </div>
 
-        {isError ? (
+        {isError && !data ? (
           <PageErrorState
             title="Could not load estates"
             description="The estate register is temporarily unavailable."
@@ -129,7 +137,7 @@ export const EstateRegister = () => {
             className="min-h-[220px] rounded-none border-0"
           />
         ) : isLoading ? (
-          <div className="p-10 text-center text-muted-foreground">Loading estates…</div>
+          <ListSkeleton rows={5} label="Loading estates" className="rounded-none border-0" />
         ) : items.length === 0 ? (
           <EmptyState
             icon={Landmark}
@@ -189,7 +197,7 @@ export const EstateRegister = () => {
           total={data?.total ?? 0}
           onPageChange={setPage}
         />
-      </div>
+      </Card>
 
       {active && <EstateDetailDialog estateId={active.id} onClose={() => setActive(null)} />}
     </div>
@@ -197,34 +205,39 @@ export const EstateRegister = () => {
 };
 
 function EstateDetailDialog({ estateId, onClose }: { estateId: string; onClose: () => void }) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: adminKeys.estates('register', { search: estateId }),
     queryFn: () => unwrap(adminEstateService.estateDetail(estateId)),
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading estate…</div>
-        ) : isError || !data ? (
-          <div className="p-8 text-center">
-            <p className="text-destructive">Could not load the estate case.</p>
-            <Button className="mt-3" variant="ghost" onClick={onClose}>
-              Close
-            </Button>
+      <DialogContent className="p-0 sm:max-w-4xl sm:p-0" showClose={false}>
+        {data ? (
+          <EstateCase360 detail={data} onClose={onClose} />
+        ) : isLoading ? (
+          <div className="p-5">
+            <DialogTitle className="sr-only">Loading estate</DialogTitle>
+            <CardSkeleton lines={6} className="border-0 p-0" />
           </div>
         ) : (
-          <EstateCase360 detail={data} onClose={onClose} />
+          <div className="space-y-3 p-5">
+            <DialogTitle className="sr-only">Estate case</DialogTitle>
+            <Alert variant="danger">Could not load the estate case.</Alert>
+            <div className="flex justify-end">
+              <Button variant="ghost" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -255,12 +268,12 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5">
         <div>
-          <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+          <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold">
             <Landmark className="h-5 w-5 text-muted-foreground" />
             {detail.name}
             {detail.microsite?.enabled && <Badge variant="success">Microsite live</Badge>}
             {detail.archived && <Badge variant="danger">Suspended</Badge>}
-          </h2>
+          </DialogTitle>
           {detail.archived && detail.archivedReason && (
             <p className="mt-1 text-sm text-destructive">
               Suspended{detail.archivedAt ? ` ${formatDate(detail.archivedAt)}` : ''}:{' '}
@@ -286,7 +299,7 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
             </p>
           )}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Badge variant="neutral">Created {formatDate(detail.createdAt)}</Badge>
           {detail.archived ? (
             <Button
@@ -373,7 +386,7 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2.5 text-sm"
                 >
                   <p className="font-medium">{h.unitLabel}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>{h.residentName}</span>
                     {h.residentLinked && <Badge variant="success">Linked</Badge>}
                     <Badge variant={householdStatusVariant(h.status)}>{h.status}</Badge>
@@ -394,7 +407,7 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                   className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-2.5 text-sm"
                 >
                   <p className="font-medium">{d.unitLabel ?? '—'}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-semibold text-foreground">
                       {formatCurrency(d.amount)}
                     </span>
@@ -506,9 +519,9 @@ function MiniStat({
       <p
         className={cn(
           'mt-0.5 font-semibold',
-          tone === 'success' && 'text-green-600 dark:text-green-400',
-          tone === 'warning' && 'text-amber-600 dark:text-amber-400',
-          tone === 'danger' && 'text-red-600 dark:text-red-400'
+          tone === 'success' && 'text-success',
+          tone === 'warning' && 'text-warning',
+          tone === 'danger' && 'text-destructive'
         )}
       >
         {value}

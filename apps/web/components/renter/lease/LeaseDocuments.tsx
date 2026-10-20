@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Eye, Clock } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { FilePreviewDialog } from '@getrentos/ui';
+import { Button, Card, FilePreviewDialog, IconButton } from '@getrentos/ui';
 
 interface Document {
   name: string;
@@ -28,11 +27,8 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-primary" />
@@ -50,39 +46,35 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
             transition={{ delay: index * 0.05 }}
             className="flex items-center justify-between p-3 hover:bg-secondary transition-colors"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <div className="p-2 rounded-lg bg-secondary">
-                <FileText className="w-4 h-4 text-gray-500" />
+                <FileText className="w-4 h-4 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{doc.name}</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-xs text-gray-500">{doc.type}</span>
-                  <span className="text-xs text-gray-300">•</span>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">{doc.type}</span>
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
                     <span>{formatDate(doc.uploadedAt)}</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex gap-1">
-              <Button
+            <div className="flex shrink-0 gap-1">
+              <IconButton
                 size="sm"
-                variant="ghost"
-                className="px-2"
+                label={`Preview ${doc.name}`}
+                icon={<Eye />}
                 onClick={() => setPreviewDocument(doc)}
-              >
-                <Eye className="w-3 h-3" />
-              </Button>
-              <Button
+              />
+              <IconButton
                 size="sm"
-                variant="ghost"
-                className="px-2"
+                label={`Download ${doc.name}`}
+                icon={<Download />}
                 onClick={() => window.open(doc.url, '_blank', 'noopener,noreferrer')}
-              >
-                <Download className="w-3 h-3" />
-              </Button>
+              />
             </div>
           </motion.div>
         ))}
@@ -106,6 +98,7 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
             : null
         }
       />
+      </Card>
     </motion.div>
   );
 };

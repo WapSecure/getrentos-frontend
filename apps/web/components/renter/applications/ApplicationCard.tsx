@@ -14,8 +14,7 @@ import {
   Star,
   Trash2,
 } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@getrentos/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { pluralize } from '@/lib/format';
 import { Application } from '@/types/renter';
@@ -60,7 +59,7 @@ export const ApplicationCard = ({
       >
         <div className="flex flex-col sm:flex-row">
           <div className="relative flex h-32 w-full shrink-0 items-center justify-center bg-muted sm:w-40">
-            <Home className="w-8 h-8 text-gray-400" />
+            <Home className="w-8 h-8 text-muted-foreground" />
           </div>
 
           <div className="flex-1 p-4">
@@ -110,8 +109,8 @@ export const ApplicationCard = ({
               </div>
             </div>
 
-            <div className="flex justify-between items-center mt-3">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex flex-wrap justify-between items-center gap-2 mt-3">
+              <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                 <User className="w-3 h-3" />
                 <span className="text-foreground">{application.landlord.name}</span>
                 {(application.landlord.rating ?? 0) > 0 && (
@@ -127,15 +126,20 @@ export const ApplicationCard = ({
                     size="sm"
                     variant="ghost"
                     onClick={() => onWithdraw(application)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    icon={<Trash2 className="w-4 h-4" />}
+                    className="text-destructive hover:bg-destructive-subtle hover:text-destructive"
                   >
-                    <Trash2 className="w-4 h-4" />
                     Withdraw
                   </Button>
                 )}
-                <Button size="sm" variant="ghost" onClick={onViewDetails} className="gap-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={onViewDetails}
+                  icon={<ChevronRight className="w-3 h-3" />}
+                  iconPosition="right"
+                >
                   View Details
-                  <ChevronRight className="w-3 h-3" />
                 </Button>
               </div>
             </div>
@@ -153,7 +157,7 @@ export const ApplicationCard = ({
       className="group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
     >
       <div className="relative flex h-32 items-center justify-center bg-muted">
-        <Home className="w-10 h-10 text-gray-400" />
+        <Home className="w-10 h-10 text-muted-foreground" />
         <Badge
           variant={status.variant}
           icon={status.icon && <status.icon className="w-3 h-3" />}
@@ -192,25 +196,31 @@ export const ApplicationCard = ({
             <span className="font-bold text-primary">
               {formatPrice(application.price, application.period)}
             </span>
-            <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
               <User className="w-3 h-3" />
               <span>{application.landlord.name}</span>
             </div>
           </div>
           <div className="flex gap-1">
             {canWithdraw && onWithdraw && (
-              <Button
+              <IconButton
+                label="Withdraw application"
+                icon={<Trash2 />}
                 size="sm"
-                variant="ghost"
+                variant="danger"
                 onClick={() => onWithdraw(application)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 px-2"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              />
             )}
-            <Button size="sm" variant="ghost" onClick={onViewDetails} className="gap-1 px-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onViewDetails}
+              icon={<ChevronRight className="w-3 h-3" />}
+              iconPosition="right"
+              aria-label={`View ${application.title}`}
+              className="px-2"
+            >
               View
-              <ChevronRight className="w-3 h-3" />
             </Button>
           </div>
         </div>

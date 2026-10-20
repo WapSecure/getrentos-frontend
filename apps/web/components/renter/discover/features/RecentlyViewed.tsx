@@ -49,17 +49,19 @@ export const RecentlyViewed = () => {
             className="p-3 hover:bg-secondary transition-colors"
           >
             <Link href={buildRoute.renterPropertyDetail(property.id)} className="flex gap-3">
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center shrink-0">
-                <Eye className="w-5 h-5 text-gray-400" />
+              <div className="w-12 h-12 bg-secondary rounded-lg flex items-center justify-center shrink-0">
+                <Eye className="w-5 h-5 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-medium text-foreground truncate">{property.title}</h4>
                 <p className="text-xs text-muted-foreground truncate">{property.location}</p>
-                <div className="flex items-center justify-between mt-0.5">
+                <div className="flex items-center justify-between gap-2 mt-0.5">
                   <span className="text-xs font-semibold text-primary">
                     {formatPrice(property.price, property.period)}
                   </span>
-                  <span className="text-xs text-gray-400">{formatTimeAgo(property.viewedAt)}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {formatTimeAgo(property.viewedAt)}
+                  </span>
                 </div>
               </div>
             </Link>

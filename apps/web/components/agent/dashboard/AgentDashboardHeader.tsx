@@ -23,8 +23,12 @@ export const AgentDashboardHeader = ({ greeting, firstName }: AgentDashboardHead
           Here&apos;s what&apos;s on your schedule today.
         </p>
       </div>
-      <Button href={ROUTES.AGENT_TASKS} variant="primary" className="shrink-0 gap-2 shadow-sm">
-        <ClipboardList className="h-4 w-4" />
+      <Button
+        href={ROUTES.AGENT_TASKS}
+        variant="primary"
+        icon={<ClipboardList className="h-4 w-4" />}
+        className="shrink-0 shadow-sm"
+      >
         View Tasks
       </Button>
     </div>

@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CircleAlert, HandCoins, RefreshCw } from 'lucide-react';
-import { Button, EmptyState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, EmptyState, Skeleton, useToast } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -37,7 +36,7 @@ export default function AdminLandPurchaseDetailPage() {
   const canView = hasAdminPermission(user?.roles, 'sales.view');
   const canWaiveMilestone = hasAdminPermission(user?.roles, 'verifications.approve');
   const canWaiveLateFee = hasAdminPermission(user?.roles, 'escrow.approve');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const key = landQueryKeys.purchase(purchaseId);
   const detailQuery = useQuery({
@@ -49,15 +48,12 @@ export default function AdminLandPurchaseDetailPage() {
   const applyUpdate = (updated: LandPurchaseDetail, message: string) => {
     queryClient.setQueryData(key, updated);
     void queryClient.invalidateQueries({ queryKey: landQueryKeys.purchasesRoot });
-    setToast({ message, variant: 'success' });
+    toast.success(message);
   };
   const reportError = (error: unknown, fallback: string) => {
     const info = readLandApiError(error, fallback);
     if (info.stale) void detailQuery.refetch();
-    setToast({
-      message: info.stale ? `${info.message} The purchase has been reloaded.` : info.message,
-      variant: 'error',
-    });
+    toast.error(info.stale ? `${info.message} The purchase has been reloaded.` : info.message);
   };
 
   const retryRefund = useMutation({
@@ -142,10 +138,10 @@ export default function AdminLandPurchaseDetailPage() {
       />
     );
   }
-  if (detailQuery.isLoading) return <PageLoadingState />;
+  if (detailQuery.isLoading) return <PurchaseSkeleton />;
 
   const purchase = detailQuery.data;
-  if (detailQuery.isError || !purchase) {
+  if (!purchase) {
     return (
       <EmptyState
         icon={CircleAlert}
@@ -154,11 +150,13 @@ export default function AdminLandPurchaseDetailPage() {
           detailQuery.error instanceof Error ? detailQuery.error.message : 'Purchase not found.'
         }
         action={
-          <Link href="/admin/land/purchases">
-            <Button variant="outline" icon={<ArrowLeft className="h-4 w-4" />}>
-              Back to purchases
-            </Button>
-          </Link>
+          <Button
+            href="/admin/land/purchases"
+            variant="outline"
+            icon={<ArrowLeft className="h-4 w-4" />}
+          >
+            Back to purchases
+          </Button>
         }
       />
     );
@@ -169,9 +167,6 @@ export default function AdminLandPurchaseDetailPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <Link
         href="/admin/land/purchases"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -204,23 +199,19 @@ export default function AdminLandPurchaseDetailPage() {
 
       <div className="space-y-5">
         {terminated && (
-          <div className="flex gap-3 rounded-2xl border border-warning/40 bg-warning-subtle p-4 text-sm">
-            <HandCoins className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
-            <div>
-              <p className="font-semibold text-foreground">
-                {purchase.status === 'REVOKED' ? 'Contract revoked' : 'Contract cancelled'}
-              </p>
-              <p className="mt-0.5 text-muted-foreground">
-                {purchase.status === 'REVOKED' ? 'Revoked' : 'Cancelled'}
-                {(purchase.revokedAt ?? purchase.cancelledAt) &&
-                  ` on ${formatDate((purchase.revokedAt ?? purchase.cancelledAt) as string)}`}
-                {purchase.revocationReason && ` · ${purchase.revocationReason}`}. Paid{' '}
-                {formatCurrency(purchase.amountPaid)}, released to the developer{' '}
-                {formatCurrency(purchase.releasedToSeller)}; revocation charge{' '}
-                {bpsToPercent(purchase.terms.revocationChargeBps)}.
-              </p>
-            </div>
-          </div>
+          <Alert
+            variant="warning"
+            icon={HandCoins}
+            title={purchase.status === 'REVOKED' ? 'Contract revoked' : 'Contract cancelled'}
+          >
+            {purchase.status === 'REVOKED' ? 'Revoked' : 'Cancelled'}
+            {(purchase.revokedAt ?? purchase.cancelledAt) &&
+              ` on ${formatDate((purchase.revokedAt ?? purchase.cancelledAt) as string)}`}
+            {purchase.revocationReason && ` · ${purchase.revocationReason}`}. Paid{' '}
+            {formatCurrency(purchase.amountPaid)}, released to the developer{' '}
+            {formatCurrency(purchase.releasedToSeller)}; revocation charge{' '}
+            {bpsToPercent(purchase.terms.revocationChargeBps)}.
+          </Alert>
         )}
 
         {terminated && (purchase.refundDue ?? 0) > 0 && (
@@ -346,5 +337,23 @@ export default function AdminLandPurchaseDetailPage() {
         </div>
       </div>
     </>
+  );
+}
+
+function PurchaseSkeleton() {
+  return (
+    <div role="status" aria-label="Loading purchase" className="space-y-5">
+      <Skeleton className="h-4 w-32" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-56" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </div>
+      <CardSkeleton lines={4} />
+      <CardSkeleton lines={5} />
+      <div className="grid gap-5 xl:grid-cols-2">
+        <CardSkeleton lines={4} />
+        <CardSkeleton lines={4} />
+      </div>
+    </div>
   );
 }

@@ -3,7 +3,20 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Clock, MessageSquareText, Plus } from 'lucide-react';
-import { Badge, Button, Card, Field, Input, Select, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  EmptyState,
+  Field,
+  Input,
+  ListSkeleton,
+  PageErrorState,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
 import { mine as myMandates } from '@/services/mandateService';
@@ -69,12 +82,12 @@ const AskForm = ({ onDone }: { onDone: (id: string) => void }) => {
     onError: (err: Error) => setError(err.message || 'Could not send your question.'),
   });
 
-  if (mandates.isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (mandates.isLoading) return <CardSkeleton lines={4} />;
   if (properties.length === 0) {
     return (
-      <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+      <Alert variant="neutral">
         None of your properties has a manager right now, so there is no one to ask.
-      </p>
+      </Alert>
     );
   }
   return (
@@ -119,7 +132,7 @@ const AskForm = ({ onDone }: { onDone: (id: string) => void }) => {
       >
         Send question
       </Button>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <Alert variant="danger">{error}</Alert>}
     </Card>
   );
 };
@@ -155,7 +168,19 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
   });
 
   const q = thread.data;
-  if (!q) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (!q) {
+    if (thread.isError)
+      return (
+        <PageErrorState
+          headingLevel="h2"
+          title="This question did not load"
+          onRetry={() => void thread.refetch()}
+          isRetrying={thread.isFetching}
+          className="min-h-0 py-10"
+        />
+      );
+    return <CardSkeleton lines={5} />;
+  }
   const isOwner = q.viewerSide === 'OWNER';
   const resolved = q.status === 'RESOLVED';
   return (
@@ -167,9 +192,9 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> All questions
       </button>
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <Card className="p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <h2 className="text-lg font-semibold text-foreground">{q.subject}</h2>
             <p className="text-sm text-muted-foreground">
               {q.propertyTitle} · {CATEGORY_LABEL[q.category]} ·{' '}
@@ -244,8 +269,12 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
             </div>
           </div>
         )}
-        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
-      </div>
+        {error && (
+          <Alert variant="danger" className="mt-2">
+            {error}
+          </Alert>
+        )}
+      </Card>
     </div>
   );
 };
@@ -302,11 +331,17 @@ export const QueryThreads = ({ as }: { as: 'owner' | 'manager' }) => {
             />
           )}
           {list.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <ListSkeleton rows={4} />
+          ) : list.isError && !list.data ? (
+            <PageErrorState
+              headingLevel="h2"
+              title="Your questions did not load"
+              onRetry={() => void list.refetch()}
+              isRetrying={list.isFetching}
+              className="min-h-0 py-10"
+            />
           ) : (list.data ?? []).length === 0 ? (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              No questions yet.
-            </div>
+            <EmptyState icon={MessageSquareText} title="No questions yet." size="compact" />
           ) : (
             <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
               {(list.data ?? []).map((q) => (

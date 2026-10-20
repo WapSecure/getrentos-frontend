@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Mail, CheckCircle, XCircle, AlertCircle, Calendar, TrendingUp } from 'lucide-react';
+import { Mail, CheckCircle, XCircle, Calendar, TrendingUp } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, Card } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import type { RenewalOffer } from '@/types/lease';
 
@@ -31,7 +31,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
         ? 'declined'
         : null
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [pending, setPending] = useState<'accept' | 'decline' | null>(null);
 
   const handleContactLandlord = () => {
     router.push(ROUTES.RENTER_MESSAGES);
@@ -55,23 +55,23 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
   };
 
   const handleResponse = async (action: 'accept' | 'decline') => {
-    setIsLoading(true);
-    await onRespond(renewalOffer.id, action);
-    setResponse(action === 'accept' ? 'accepted' : 'declined');
-    setIsLoading(false);
+    setPending(action);
+    try {
+      await onRespond(renewalOffer.id, action);
+      setResponse(action === 'accept' ? 'accepted' : 'declined');
+    } finally {
+      setPending(null);
+    }
   };
 
   if (response === 'accepted') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl border border-green-200 dark:border-green-800 overflow-hidden"
-      >
-        <div className="p-4 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className="border-success/20">
+        <div className="p-4 bg-success-subtle border-b border-success/20">
           <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <h3 className="font-semibold text-green-800 dark:text-green-300">Renewal Accepted</h3>
+            <CheckCircle className="w-5 h-5 text-success" />
+            <h3 className="font-semibold text-success">Renewal Accepted</h3>
           </div>
         </div>
         <div className="p-4">
@@ -84,20 +84,18 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             Contact Landlord
           </Button>
         </div>
+        </Card>
       </motion.div>
     );
   }
 
   if (response === 'declined') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl border border-border overflow-hidden"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <Card>
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
-            <XCircle className="w-5 h-5 text-gray-500" />
+            <XCircle className="w-5 h-5 text-muted-foreground" />
             <h3 className="font-semibold text-foreground">Renewal Declined</h3>
           </div>
         </div>
@@ -106,26 +104,19 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             You&apos;ve declined the renewal offer. Your current lease will expire on{' '}
             {formatDate(lease.endDate)}.
           </p>
-          <div className="mt-3 p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5" />
-              <p className="text-xs text-yellow-700 dark:text-yellow-400">
-                You&apos;ll need to move out by {formatDate(lease.endDate)} or discuss alternative
-                arrangements.
-              </p>
-            </div>
-          </div>
+          <Alert variant="warning" className="mt-3">
+            You&apos;ll need to move out by {formatDate(lease.endDate)} or discuss alternative
+            arrangements.
+          </Alert>
         </div>
+        </Card>
       </motion.div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-primary/30 overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="border-primary/30">
       <div className="border-b border-border bg-muted/30 p-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-primary" />
@@ -138,19 +129,19 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
 
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-2 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <NairaSign className="w-3 h-3 text-primary" />
-              <span className="text-xs text-gray-500">Current Rent</span>
+              <span className="text-xs text-muted-foreground">Current Rent</span>
             </div>
             <p className="text-sm font-semibold text-foreground">
               {formatCurrency(lease.rentAmount)}
             </p>
           </div>
-          <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-2 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <TrendingUp className="w-3 h-3 text-primary" />
-              <span className="text-xs text-gray-500">New Rent</span>
+              <span className="text-xs text-muted-foreground">New Rent</span>
             </div>
             <p className="text-sm font-semibold text-foreground">
               {formatCurrency(renewalOffer.newRentAmount)}
@@ -158,14 +149,14 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
           </div>
         </div>
 
-        <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <div className="p-2 rounded-lg bg-info-subtle border border-info/20">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-blue-600" />
-            <span className="text-xs font-medium text-blue-800 dark:text-blue-300">
+            <Calendar className="w-4 h-4 text-info" />
+            <span className="text-xs font-medium text-info">
               New Term: {formatDate(renewalOffer.newEndDate)}
             </span>
           </div>
-          <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">{renewalOffer.terms}</p>
+          <p className="text-xs text-info mt-1">{renewalOffer.terms}</p>
         </div>
 
         <div className="flex gap-2">
@@ -173,7 +164,8 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             variant="primary"
             className="flex-1"
             onClick={() => handleResponse('accept')}
-            isLoading={isLoading}
+            isLoading={pending === 'accept'}
+            disabled={pending !== null}
           >
             Accept
           </Button>
@@ -181,12 +173,14 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             variant="outline"
             className="flex-1"
             onClick={() => handleResponse('decline')}
-            isLoading={isLoading}
+            isLoading={pending === 'decline'}
+            disabled={pending !== null}
           >
             Decline
           </Button>
         </div>
       </div>
+      </Card>
     </motion.div>
   );
 };

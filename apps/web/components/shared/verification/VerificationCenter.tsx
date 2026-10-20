@@ -15,7 +15,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Button, Input, Select } from '@getrentos/ui';
+import { Alert, Button, Field, Input, NumberInput, Select, Skeleton } from '@getrentos/ui';
 import { cn, unwrap } from '@/lib/apiHelpers';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
@@ -30,53 +30,53 @@ import {
 const KYC_STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
   APPROVED: {
     label: 'Verified',
-    color: 'text-green-700 dark:text-green-400',
-    bg: 'bg-green-100 dark:bg-green-900/30',
+    color: 'text-success',
+    bg: 'bg-success-subtle',
   },
   PENDING_REVIEW: {
     label: 'Pending review',
-    color: 'text-yellow-700 dark:text-yellow-400',
-    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   NEEDS_CLARIFICATION: {
     label: 'Needs clarification',
-    color: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   REJECTED: {
     label: 'Rejected',
-    color: 'text-red-700 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/30',
+    color: 'text-destructive',
+    bg: 'bg-destructive-subtle',
   },
 };
 
 const STEP_STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
   PASSED: {
     label: 'Done',
-    color: 'text-green-700 dark:text-green-400',
-    bg: 'bg-green-100 dark:bg-green-900/30',
+    color: 'text-success',
+    bg: 'bg-success-subtle',
   },
   FAILED: {
     label: 'Failed',
-    color: 'text-red-700 dark:text-red-400',
-    bg: 'bg-red-100 dark:bg-red-900/30',
+    color: 'text-destructive',
+    bg: 'bg-destructive-subtle',
   },
   REVIEW_REQUIRED: {
     label: 'Needs review',
-    color: 'text-orange-700 dark:text-orange-400',
-    bg: 'bg-orange-100 dark:bg-orange-900/30',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   NOT_STARTED: { label: 'Not started', color: 'text-muted-foreground', bg: 'bg-secondary' },
   IN_PROGRESS: {
     label: 'In progress',
-    color: 'text-blue-700 dark:text-blue-400',
-    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    color: 'text-info',
+    bg: 'bg-info-subtle',
   },
   SKIPPED: { label: 'Skipped', color: 'text-muted-foreground', bg: 'bg-secondary' },
   WAITING_FOR_USER: {
     label: 'Waiting on you',
-    color: 'text-yellow-700 dark:text-yellow-400',
-    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    color: 'text-warning',
+    bg: 'bg-warning-subtle',
   },
   WAITING_FOR_PROVIDER: {
     label: 'Waiting on provider',
@@ -455,18 +455,19 @@ export const VerificationCenter = ({
           <Button
             variant="outline"
             size="sm"
-            disabled={opts.revoking}
+            isLoading={opts.revoking}
+            loadingText="Revoking…"
             onClick={() => revokeConsentMutation.mutate(consent.id)}
           >
-            {opts.revoking ? 'Revoking…' : 'Revoke consent'}
+            Revoke consent
           </Button>
         ) : (
-          <Button size="sm" disabled={opts.granting} onClick={opts.onGrant}>
-            {opts.granting ? 'Recording…' : 'Grant consent'}
+          <Button size="sm" isLoading={opts.granting} loadingText="Recording…" onClick={opts.onGrant}>
+            Grant consent
           </Button>
         )}
         {active && consent && (
-          <p className="w-full text-xs text-green-700 dark:text-green-400">
+          <p className="w-full text-xs text-success">
             Active · granted {new Date(consent.grantedAt).toLocaleDateString()}
           </p>
         )}
@@ -518,10 +519,9 @@ export const VerificationCenter = ({
         </div>
 
         {kyc?.verificationStatus === 'REJECTED' && (
-          <p className="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
-            <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          <Alert variant="danger" icon={XCircle} className="mt-3">
             Your previous verification was rejected. Please review your details and try again.
-          </p>
+          </Alert>
         )}
       </div>
 
@@ -577,10 +577,9 @@ export const VerificationCenter = ({
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
-          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{error}</span>
-        </div>
+        <Alert variant="danger" icon={ShieldAlert}>
+          {error}
+        </Alert>
       )}
 
       {/* Step checklist */}
@@ -595,8 +594,10 @@ export const VerificationCenter = ({
         </div>
 
         {verificationLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <div role="status" aria-label="Loading" className="space-y-2">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-14 w-full rounded-xl" />
+            ))}
           </div>
         ) : verification ? (
           <>
@@ -625,7 +626,7 @@ export const VerificationCenter = ({
                   >
                     <div className="flex items-center gap-3">
                       {step.status === 'PASSED' ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <CheckCircle2 className="h-5 w-5 text-success" />
                       ) : (
                         <Fingerprint className="h-5 w-5 text-primary" />
                       )}
@@ -659,7 +660,7 @@ export const VerificationCenter = ({
                   Complete: {STEP_LABEL[runnableIdentity.stepType]}
                 </p>
                 {!idCheckConsent && (
-                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                  <p className="mt-1 text-xs text-warning">
                     Grant identity-check consent above before running this check.
                   </p>
                 )}
@@ -709,8 +710,10 @@ export const VerificationCenter = ({
                   size="sm"
                   disabled={!identityEnabled}
                   onClick={() => identityMutation.mutate()}
+                  isLoading={identityMutation.isPending}
+                  loadingText="Checking…"
                 >
-                  {identityMutation.isPending ? 'Checking…' : 'Run identity check'}
+                  Run identity check
                 </Button>
               </div>
             )}
@@ -725,11 +728,12 @@ export const VerificationCenter = ({
                   <Button
                     className="mt-3"
                     size="sm"
-                    disabled={sendOtpMutation.isPending}
+                    icon={<Smartphone className="h-4 w-4" />}
+                    isLoading={sendOtpMutation.isPending}
+                    loadingText="Sending…"
                     onClick={() => sendOtpMutation.mutate()}
                   >
-                    <Smartphone className="mr-2 h-4 w-4" />
-                    {sendOtpMutation.isPending ? 'Sending…' : 'Send code to my phone'}
+                    Send code to my phone
                   </Button>
                 ) : (
                   <>
@@ -737,19 +741,24 @@ export const VerificationCenter = ({
                       Code sent: in development it is printed to the backend log.
                     </p>
                     <div className="mt-3 flex gap-2">
-                      <Input
-                        value={otpCode}
-                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        placeholder="6-digit code"
-                        className="w-40"
-                        inputMode="numeric"
-                      />
+                      <div className="w-40">
+                        <NumberInput
+                          aria-label="Verification code"
+                          value={otpCode}
+                          onValueChange={(value) => setOtpCode(value.slice(0, 6))}
+                          placeholder="6-digit code"
+                          maxLength={6}
+                          autoComplete="one-time-code"
+                        />
+                      </div>
                       <Button
                         size="sm"
                         disabled={!otpVerifyEnabled}
                         onClick={() => verifyOtpMutation.mutate()}
+                        isLoading={verifyOtpMutation.isPending}
+                        loadingText="Verifying…"
                       >
-                        {verifyOtpMutation.isPending ? 'Verifying…' : 'Verify code'}
+                        Verify code
                       </Button>
                     </div>
                   </>
@@ -764,7 +773,7 @@ export const VerificationCenter = ({
                   Complete: Selfie + biometric check
                 </p>
                 {!bioConsent && (
-                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                  <p className="mt-1 text-xs text-warning">
                     Grant biometric consent above before running this check.
                   </p>
                 )}
@@ -784,8 +793,14 @@ export const VerificationCenter = ({
                     <Camera className="mr-2 h-4 w-4" />
                     {selfie ? selfie.name.slice(0, 30) : 'Choose a selfie'}
                   </Button>
-                  <Button size="sm" disabled={!bioEnabled} onClick={() => bioMutation.mutate()}>
-                    {bioMutation.isPending ? 'Running…' : 'Run biometric check'}
+                  <Button
+                    size="sm"
+                    disabled={!bioEnabled}
+                    isLoading={bioMutation.isPending}
+                    loadingText="Running…"
+                    onClick={() => bioMutation.mutate()}
+                  >
+                    Run biometric check
                   </Button>
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground">
@@ -801,55 +816,44 @@ export const VerificationCenter = ({
                   Complete: Bank account check
                 </p>
                 {!bankConsent && (
-                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                  <p className="mt-1 text-xs text-warning">
                     Grant bank-account consent above before running this check.
                   </p>
                 )}
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Account number (10 digits)
-                    </label>
-                    <Input
+                  <Field label="Account number (10 digits)">
+                    <NumberInput
                       value={accountNumber}
-                      onChange={(e) =>
-                        setAccountNumber(e.target.value.replace(/\D/g, '').slice(0, 10))
-                      }
+                      onValueChange={(value) => setAccountNumber(value.slice(0, 10))}
                       placeholder="0123456789"
-                      className="w-full"
-                      inputMode="numeric"
+                      maxLength={10}
                     />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Bank code (optional)
-                    </label>
-                    <Input
+                  </Field>
+                  <Field label="Bank code (optional)">
+                    <NumberInput
                       value={bankCode}
-                      onChange={(e) => setBankCode(e.target.value)}
+                      onValueChange={setBankCode}
                       placeholder="e.g. 058"
-                      className="w-full"
                     />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Account holder name (optional: compared for a match)
-                    </label>
+                  </Field>
+                  <Field label="Account holder name (optional: compared for a match)" className="sm:col-span-2">
                     <Input
                       value={accountName}
                       onChange={(e) => setAccountName(e.target.value)}
                       placeholder="e.g. ACCT HOLDER 6789"
                       className="w-full"
                     />
-                  </div>
+                  </Field>
                 </div>
                 <Button
                   className="mt-4"
                   size="sm"
                   disabled={!bankEnabled}
                   onClick={() => bankMutation.mutate()}
+                  isLoading={bankMutation.isPending}
+                  loadingText="Checking…"
                 >
-                  {bankMutation.isPending ? 'Checking…' : 'Run bank check'}
+                  Run bank check
                 </Button>
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   Passing this step marks you financially verified (Trust Tier 3).
@@ -862,7 +866,7 @@ export const VerificationCenter = ({
               <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
                 <p className="text-sm font-semibold text-foreground">Complete: Document check</p>
                 {!docConsent && (
-                  <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
+                  <p className="mt-1 text-xs text-warning">
                     Grant document-processing consent above before running this check.
                   </p>
                 )}
@@ -883,43 +887,39 @@ export const VerificationCenter = ({
                       className="w-full"
                     />
                   </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Document number
-                    </label>
+                  <Field label="Document number">
                     <Input
                       value={documentNumber}
                       onChange={(e) => setDocumentNumber(e.target.value)}
                       placeholder="e.g. GR-2026-00123"
                       className="w-full"
                     />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Holder name (optional: compared for a match)
-                    </label>
+                  </Field>
+                  <Field label="Holder name (optional: compared for a match)" className="sm:col-span-2">
                     <Input
                       value={documentHolder}
                       onChange={(e) => setDocumentHolder(e.target.value)}
                       placeholder="e.g. HOLDER 0123"
                       className="w-full"
                     />
-                  </div>
+                  </Field>
                 </div>
                 <Button
                   className="mt-4"
                   size="sm"
                   disabled={!documentEnabled}
                   onClick={() => documentMutation.mutate()}
+                  isLoading={documentMutation.isPending}
+                  loadingText="Checking…"
                 >
-                  {documentMutation.isPending ? 'Checking…' : 'Run document check'}
+                  Run document check
                 </Button>
               </div>
             )}
 
             {verification.decision === 'REJECT' && (
               <div className="mt-3">
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-sm text-destructive">
                   This verification was rejected. If you believe this is a mistake, you can appeal
                   it for a fresh review.
                 </p>

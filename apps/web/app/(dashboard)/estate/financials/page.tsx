@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CardSkeleton } from '@getrentos/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
 import { EstateFinancialsChart } from '@/components/estate/financials/EstateFinancialsChart';
 import {
@@ -57,7 +57,7 @@ export default function EstateFinancialsPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {

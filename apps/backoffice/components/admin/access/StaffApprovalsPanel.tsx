@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Inbox, X } from 'lucide-react';
-import { Button, ConfirmDialog, PageErrorState } from '@getrentos/ui';
+import { Button, ConfirmDialog, ListSkeleton, PageErrorState } from '@getrentos/ui';
 import { Badge } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
@@ -32,6 +32,7 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.staffApprovalsList({ page, pageSize: PAGE_SIZE }),
     queryFn: () => unwrap(adminService.listApprovals({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const approvals = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -189,8 +190,8 @@ export const StaffApprovalsPanel = ({ notify }: StaffApprovalsPanelProps) => {
       </div>
 
       {isLoading ? (
-        <p className="p-5 text-sm text-muted-foreground">Loading approvals…</p>
-      ) : isError ? (
+        <ListSkeleton rows={3} label="Loading approvals" className="rounded-none border-0" />
+      ) : isError && !data ? (
         <PageErrorState
           title="Pending approvals unavailable"
           description="Approval requests could not be loaded. No request has been approved or rejected."

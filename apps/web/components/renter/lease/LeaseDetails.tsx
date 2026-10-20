@@ -1,5 +1,6 @@
 'use client';
 
+import { Card } from '@getrentos/ui';
 import { motion } from 'framer-motion';
 import { Calendar, FileText, Mail, Phone, MapPin } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
@@ -29,11 +30,8 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Lease Details</h3>
         <p className="text-xs text-muted-foreground">Full lease agreement information</p>
@@ -41,29 +39,29 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
 
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-2 mb-1">
               <MapPin className="w-4 h-4 text-primary" />
-              <span className="text-xs text-gray-500">Property</span>
+              <span className="text-xs text-muted-foreground">Property</span>
             </div>
             <p className="text-sm font-medium text-foreground">{lease.propertyName}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{lease.address}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{lease.address}</p>
           </div>
 
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="w-4 h-4 text-primary" />
-              <span className="text-xs text-gray-500">Lease Period</span>
+              <span className="text-xs text-muted-foreground">Lease Period</span>
             </div>
             <p className="text-sm font-medium text-foreground">
               {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-2 mb-1">
               <NairaSign className="w-4 h-4 text-primary" />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {leaseRentLabel(lease.rentPeriod, lease.startDate, lease.endDate)}
               </span>
             </div>
@@ -72,10 +70,10 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-2 mb-1">
               <FileText className="w-4 h-4 text-primary" />
-              <span className="text-xs text-gray-500">Security Deposit</span>
+              <span className="text-xs text-muted-foreground">Security Deposit</span>
             </div>
             <p className="text-sm font-medium text-foreground">
               {formatCurrency(lease.securityDeposit)}
@@ -83,21 +81,21 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
           </div>
         </div>
 
-        <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-          <span className="text-xs text-gray-500">Renewal Terms</span>
+        <div className="p-3 rounded-lg bg-secondary">
+          <span className="text-xs text-muted-foreground">Renewal Terms</span>
           <p className="text-sm text-foreground mt-1">{lease.renewalTerms}</p>
         </div>
 
         <div>
           <h4 className="text-sm font-medium text-foreground mb-2">Landlord Information</h4>
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
+          <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
                 {lease.landlord.name.charAt(0)}
               </div>
               <div className="flex-1">
                 <p className="font-medium text-foreground">{lease.landlord.name}</p>
-                <div className="flex flex-wrap items-center gap-3 mt-0.5 text-xs text-gray-500">
+                <div className="flex flex-wrap items-center gap-3 mt-0.5 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Mail className="w-3 h-3" />
                     <span>{lease.landlord.email}</span>
@@ -112,6 +110,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
           </div>
         </div>
       </div>
+      </Card>
     </motion.div>
   );
 };

@@ -1,12 +1,9 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-import { Pagination } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, Building2, ArrowUpDown } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { Building2, ArrowUpDown } from 'lucide-react';
 import { PropertyListingCard } from '@/components/buyer/discover/PropertyListingCard';
 import { PropertyDetailModal } from '@/components/buyer/discover/PropertyDetailModal';
 import { buyerService } from '@/services/buyerService';
@@ -15,14 +12,19 @@ import { buyerKeys } from '@/lib/queryKeys';
 import type { BuyerPropertyListing, ListingPropertyType } from '@/types/buyer';
 import { ROUTES } from '@/lib/constants/auth';
 import { PROPERTY_TYPE_OPTIONS, toApiPropertyType } from '@/lib/propertyTypes';
-import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
+import {
+  Button,
+  Pagination,
+  QueryState,
+  SearchInput,
+  Skeleton,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 
 type SortOrder = 'default' | 'price_asc' | 'price_desc';
 
 export default function BuyerDiscoverPage() {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | ListingPropertyType>('all');
@@ -66,25 +68,35 @@ export default function BuyerDiscoverPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const data = listingsQuery.data;
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
+  const savedKey = [...buyerKeys.saved, { page: 1, pageSize: 100 }];
   const savedQuery = useQuery({
-    queryKey: [...buyerKeys.saved, { page: 1, pageSize: 100 }],
+    queryKey: savedKey,
     queryFn: () => unwrap(buyerService.listSaved({ page: 1, pageSize: 100 })),
   });
   const savedIds = (savedQuery.data?.items ?? []).map((property) => property.id);
 
-  const saveMutation = useMutation({
-    mutationFn: (listingId: string) => unwrap(buyerService.saveListing(listingId)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
-    onError: () => setErrorMessage('The property could not be saved.'),
-  });
-  const unsaveMutation = useMutation({
-    mutationFn: (listingId: string) => unwrap(buyerService.unsaveListing(listingId)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: buyerKeys.saved }),
-    onError: () => setErrorMessage('The property could not be removed from your saved list.'),
+  const saveToggle = useOptimisticMutation({
+    mutationFn: ({ listing, save }: { listing: BuyerPropertyListing; save: boolean }) =>
+      unwrap(save ? buyerService.saveListing(listing.id) : buyerService.unsaveListing(listing.id)),
+    patches: () => [
+      {
+        queryKey: savedKey,
+        update: (old, { listing, save }) => {
+          const page = old as { items: BuyerPropertyListing[]; total: number };
+          const items = page.items.filter((item) => item.id !== listing.id);
+          return save
+            ? { ...page, items: [listing, ...items], total: page.total + 1 }
+            : { ...page, items, total: items.length < page.items.length ? page.total - 1 : page.total };
+        },
+      },
+    ],
+    invalidate: [buyerKeys.saved],
+    errorMessage: 'Your saved list did not update. Please try again.',
   });
 
   useEffect(() => {
@@ -96,29 +108,9 @@ export default function BuyerDiscoverPage() {
   }, [searchParams]);
   const [activeListing, setActiveListing] = useState<BuyerPropertyListing | null>(null);
 
-  const toggleSave = (propertyId: string) => {
-    const isSaved = savedIds.includes(propertyId);
-    if (isSaved) {
-      unsaveMutation.mutate(propertyId);
-    } else {
-      saveMutation.mutate(propertyId);
-    }
+  const toggleSave = (listing: BuyerPropertyListing) => {
+    saveToggle.mutate({ listing, save: !savedIds.includes(listing.id) });
   };
-
-  if (listingsQuery.isLoading || savedQuery.isLoading) return <PageLoadingState />;
-  if (listingsQuery.isError || savedQuery.isError) {
-    return (
-      <PageErrorState
-        title="Properties are unavailable"
-        description="We could not load listings and your saved-property state safely."
-        onRetry={() => {
-          void listingsQuery.refetch();
-          void savedQuery.refetch();
-        }}
-        isRetrying={listingsQuery.isFetching || savedQuery.isFetching}
-      />
-    );
-  }
 
   const typeFilters: { value: 'all' | ListingPropertyType; label: string }[] = [
     { value: 'all', label: 'All' },
@@ -127,9 +119,6 @@ export default function BuyerDiscoverPage() {
 
   return (
     <>
-      {errorMessage && (
-        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
-      )}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Discover Properties</h1>
         <p className="text-muted-foreground mt-1">
@@ -138,7 +127,7 @@ export default function BuyerDiscoverPage() {
       </div>
 
       {estateFromUrl && (
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3">
           <p className="text-sm text-muted-foreground">
             Showing only properties marketed inside{' '}
             <span className="font-medium text-foreground">
@@ -146,49 +135,45 @@ export default function BuyerDiscoverPage() {
             </span>
             .
           </p>
-          <button
-            type="button"
-            onClick={() => router.replace('/buyer/discover')}
-            className="text-sm font-medium text-primary hover:underline"
-          >
+          <Button variant="ghost" size="sm" onClick={() => router.replace('/buyer/discover')}>
             Show all properties
-          </button>
+          </Button>
         </div>
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title or city..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <button
+        <SearchInput
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          placeholder="Search by title or city..."
+          label="Search properties"
+          className="flex-1 max-w-sm"
+        />
+        <Button
+          variant="outline"
+          className="w-fit"
+          icon={<ArrowUpDown className="w-3.5 h-3.5" />}
           onClick={() => {
             setSortOrder((s) =>
               s === 'default' ? 'price_asc' : s === 'price_asc' ? 'price_desc' : 'default'
             );
             setPage(1);
           }}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-card text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors w-fit"
         >
-          <ArrowUpDown className="w-3.5 h-3.5" />
           {sortOrder === 'default'
             ? 'Sort by Price'
             : sortOrder === 'price_asc'
               ? 'Price: Low to High'
               : 'Price: High to Low'}
-        </button>
+        </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
+      <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto mb-6">
         {typeFilters.map((option) => (
           <button
             key={option.value}
+            type="button"
+            aria-pressed={typeFilter === option.value}
             onClick={() => {
               setTypeFilter(option.value);
               setPage(1);
@@ -196,7 +181,7 @@ export default function BuyerDiscoverPage() {
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
               typeFilter === option.value
                 ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {option.label}
@@ -204,30 +189,43 @@ export default function BuyerDiscoverPage() {
         ))}
       </div>
 
-      {listings.length === 0 ? (
-        <div className="bg-card rounded-2xl border border-border p-12 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
+      <QueryState
+        isLoading={listingsQuery.isLoading || savedQuery.isLoading}
+        isError={(listingsQuery.isError && !data) || (savedQuery.isError && !savedQuery.data)}
+        errorTitle="Properties are unavailable"
+        errorDescription="We could not load listings and your saved-property state safely."
+        onRetry={() => {
+          void listingsQuery.refetch();
+          void savedQuery.refetch();
+        }}
+        isRetrying={listingsQuery.isFetching || savedQuery.isFetching}
+        isEmpty={listings.length === 0}
+        empty={{
+          icon: Building2,
+          title: 'No properties match your search',
+          description: 'Try adjusting your search or filter.',
+        }}
+        loading={
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-busy="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-80 rounded-2xl" />
+            ))}
           </div>
-          <h3 className="text-lg font-semibold text-foreground">No properties match your search</h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            Try adjusting your search or filter.
-          </p>
-        </div>
-      ) : (
+        }
+      >
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {listings.map((listing, index) => (
             <PropertyListingCard
               key={listing.id}
               listing={listing}
               isSaved={savedIds.includes(listing.id)}
-              onToggleSave={() => toggleSave(listing.id)}
+              onToggleSave={() => toggleSave(listing)}
               onViewDetails={() => setActiveListing(listing)}
               delay={index * 0.05}
             />
           ))}
         </div>
-      )}
+      </QueryState>
 
       {total > 0 && (
         <Pagination
@@ -245,7 +243,7 @@ export default function BuyerDiscoverPage() {
         listing={activeListing}
         isSaved={activeListing ? savedIds.includes(activeListing.id) : false}
         onClose={() => setActiveListing(null)}
-        onToggleSave={() => activeListing && toggleSave(activeListing.id)}
+        onToggleSave={() => activeListing && toggleSave(activeListing)}
         onRequestViewing={() =>
           activeListing && router.push(`${ROUTES.BUYER_VIEWINGS}?property=${activeListing.id}`)
         }

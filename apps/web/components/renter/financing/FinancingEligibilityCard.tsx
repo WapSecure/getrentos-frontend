@@ -89,9 +89,14 @@ export const FinancingEligibilityCard = ({
             </div>
 
             {isEligible ? (
-              <Button variant="primary" className="gap-2" onClick={onApply} disabled={isPending}>
-                <Zap className="w-4 h-4" />
-                {isPending ? 'Reviewing Application...' : 'Apply for Flex'}
+              <Button
+                variant="primary"
+                onClick={onApply}
+                isLoading={isPending}
+                loadingText="Reviewing Application..."
+                icon={<Zap className="h-4 w-4" />}
+              >
+                Apply for Flex
               </Button>
             ) : (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">

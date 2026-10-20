@@ -1,14 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, KeyRound, ShieldCheck } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
+  CardSkeleton,
   ConfirmDialog,
   EmptyState,
+  Field,
   Input,
   NumberInput,
   PageErrorState,
@@ -78,6 +81,7 @@ export default function TierGrantsPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const grants = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -152,62 +156,44 @@ export default function TierGrantsPage() {
             Grant financial verification
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label
-                className="mb-1 block text-xs font-medium text-muted-foreground"
-                htmlFor="grant-user"
-              >
-                User id
-              </label>
+            <Field label="User id" className="sm:col-span-2">
               <Input
-                id="grant-user"
                 value={userId}
                 onChange={(event) => setUserId(event.target.value)}
                 placeholder="e.g. 8f8d1f9e-5540-4fcb-afd1-d13c9ed93534"
               />
-            </div>
-            <div className="sm:col-span-2">
-              <label
-                className="mb-1 block text-xs font-medium text-muted-foreground"
-                htmlFor="grant-reason"
-              >
-                Reason (audited: required)
-              </label>
+            </Field>
+            <Field label="Reason (audited: required)" className="sm:col-span-2">
               <Textarea
-                id="grant-reason"
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
                 rows={3}
                 placeholder="Offline bank statement verified at branch, ref CB-2291"
               />
-            </div>
-            <div>
-              <label
-                className="mb-1 block text-xs font-medium text-muted-foreground"
-                htmlFor="grant-expiry"
-              >
-                Expires in (days, optional)
-              </label>
+            </Field>
+            <Field label="Expires in (days, optional)">
               <NumberInput
-                id="grant-expiry"
                 value={expiresInDays}
                 onValueChange={setExpiresInDays}
                 placeholder="Blank = open-ended"
               />
-            </div>
+            </Field>
           </div>
 
-          {formError && <p className="mt-3 text-sm text-destructive">{formError}</p>}
+          {formError && (
+            <Alert variant="danger" className="mt-3">
+              {formError}
+            </Alert>
+          )}
           {granted && !formError && (
-            <p className="mt-3 flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-              <BadgeCheck className="h-4 w-4" />
+            <Alert variant="success" icon={BadgeCheck} className="mt-3">
               Grant recorded for {granted.userEmail ?? granted.userId}: they now hold trust tier 3.
-            </p>
+            </Alert>
           )}
 
           <div className="mt-4">
-            <Button onClick={submitGrant} disabled={grantMutation.isPending}>
-              {grantMutation.isPending ? 'Recording…' : 'Grant tier 3'}
+            <Button onClick={submitGrant} isLoading={grantMutation.isPending} loadingText="Recording…">
+              Grant tier 3
             </Button>
           </div>
         </div>
@@ -221,21 +207,25 @@ export default function TierGrantsPage() {
             setPage(1);
           }}
           options={STATE_OPTIONS}
+          ariaLabel="Filter by state"
+          searchable={false}
           className="w-full sm:w-44"
         />
       </div>
 
-      {isError ? (
+      {isLoading ? (
+        <div className="grid gap-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <CardSkeleton key={index} />
+          ))}
+        </div>
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load tier-3 grants"
           description="The grants register is temporarily unavailable."
           onRetry={() => void refetch()}
           isRetrying={isFetching}
         />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
       ) : grants.length === 0 ? (
         <EmptyState icon={ShieldCheck} title="No tier-3 grants match your filters" />
       ) : (
@@ -264,7 +254,7 @@ export default function TierGrantsPage() {
                     {grant.expiresAt ? `expires ${formatDate(grant.expiresAt)}` : 'no expiry'}
                   </p>
                   {grant.state === 'REVOKED' && (
-                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    <p className="mt-1 text-xs text-destructive">
                       Revoked{grant.revokedAt ? ` ${formatDate(grant.revokedAt)}` : ''}
                       {grant.revokedById ? ` by ${grant.revokedById}` : ''}
                     </p>

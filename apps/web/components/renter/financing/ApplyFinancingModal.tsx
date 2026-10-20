@@ -1,11 +1,16 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { ShieldCheck, Zap } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  RadioGroup,
+} from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { getFinancingPlanOptions } from '@/lib/financing';
 import type { FinancingPlanLength } from '@/types/financing';
@@ -15,6 +20,7 @@ interface ApplyFinancingModalProps {
   onOpenChange: (open: boolean) => void;
   rentAmount: number;
   onSubmit: (months: FinancingPlanLength) => void;
+  isSubmitting?: boolean;
 }
 
 export const ApplyFinancingModal = ({
@@ -22,6 +28,7 @@ export const ApplyFinancingModal = ({
   onOpenChange,
   rentAmount,
   onSubmit,
+  isSubmitting = false,
 }: ApplyFinancingModalProps) => {
   const [step, setStep] = useState<'select' | 'review'>('select');
   const [selectedMonths, setSelectedMonths] = useState<FinancingPlanLength>(6);
@@ -40,8 +47,6 @@ export const ApplyFinancingModal = ({
 
   const handleSubmit = () => {
     onSubmit(selectedMonths);
-    setStep('select');
-    setAgreed(false);
   };
 
   return (
@@ -60,32 +65,25 @@ export const ApplyFinancingModal = ({
 
         {step === 'select' ? (
           <div className="p-4 space-y-3">
-            {options.map((option) => (
-              <button
-                key={option.months}
-                onClick={() => setSelectedMonths(option.months)}
-                className={`w-full text-left p-4 rounded-xl border-2 transition-colors ${
-                  selectedMonths === option.months
-                    ? 'border-primary bg-accent'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold text-foreground">{option.months} months</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {option.feePercent}% service fee
-                    </p>
-                  </div>
+            <RadioGroup
+              variant="card"
+              aria-label="Repayment plan"
+              value={String(selectedMonths)}
+              onValueChange={(value) => setSelectedMonths(Number(value) as FinancingPlanLength)}
+              options={options.map((option) => ({
+                value: String(option.months),
+                label: `${option.months} months`,
+                description: `${option.feePercent}% service fee`,
+                aside: (
                   <div className="text-right">
                     <p className="text-lg font-bold text-primary">
                       {formatCurrency(option.monthlyInstallment, { compact: true })}
                     </p>
                     <p className="text-xs text-muted-foreground">/month</p>
                   </div>
-                </div>
-              </button>
-            ))}
+                ),
+              }))}
+            />
 
             <Button variant="primary" fullWidth onClick={() => setStep('review')}>
               Continue
@@ -119,31 +117,36 @@ export const ApplyFinancingModal = ({
               </p>
             </div>
 
-            <label className="flex items-start gap-2 cursor-pointer">
-              <LegacyInput
-                type="checkbox"
-                checked={agreed}
-                onChange={(e) => setAgreed(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded border-border text-primary focus:ring-primary"
-              />
-              <span className="text-xs text-muted-foreground">
-                I agree to repay {formatCurrency(selectedOption.totalRepayable, { compact: true })}{' '}
-                over {selectedOption.months} monthly installments of{' '}
-                {formatCurrency(selectedOption.monthlyInstallment, { compact: true })}.
-              </span>
-            </label>
+            <Checkbox
+              checked={agreed}
+              onCheckedChange={setAgreed}
+              label={
+                <span className="text-xs text-muted-foreground">
+                  I agree to repay{' '}
+                  {formatCurrency(selectedOption.totalRepayable, { compact: true })} over{' '}
+                  {selectedOption.months} monthly installments of{' '}
+                  {formatCurrency(selectedOption.monthlyInstallment, { compact: true })}.
+                </span>
+              }
+            />
 
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setStep('select')}>
+              <Button
+                variant="ghost"
+                className="flex-1"
+                onClick={() => setStep('select')}
+                disabled={isSubmitting}
+              >
                 Back
               </Button>
               <Button
                 variant="primary"
-                className="flex-1 gap-1.5"
+                className="flex-1"
                 onClick={handleSubmit}
                 disabled={!agreed}
+                isLoading={isSubmitting}
+                icon={<Zap className="h-3.5 w-3.5" />}
               >
-                <Zap className="w-3.5 h-3.5" />
                 Submit Application
               </Button>
             </div>

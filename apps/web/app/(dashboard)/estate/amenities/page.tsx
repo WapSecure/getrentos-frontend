@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck, Plus, Trash2 } from 'lucide-react';
-import { Button, EmptyState, LegacyInput } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  IconButton,
+  Input,
+  ListSkeleton,
+  Skeleton,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -68,7 +76,7 @@ export default function EstateAmenitiesPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -88,7 +96,7 @@ export default function EstateAmenitiesPage() {
       <div className="bg-card rounded-2xl border border-border p-4 mb-8">
         <h2 className="text-sm font-semibold text-foreground mb-3">Amenities</h2>
         {isAmenitiesLoading ? (
-          <div className="h-12 animate-pulse rounded-lg bg-secondary" aria-busy="true" />
+          <Skeleton className="h-12 w-full" />
         ) : !amenities || amenities.length === 0 ? (
           <p className="text-sm text-muted-foreground mb-3">No amenities configured yet.</p>
         ) : (
@@ -101,40 +109,45 @@ export default function EstateAmenitiesPage() {
                     <p className="text-xs text-muted-foreground truncate">{amenity.description}</p>
                   )}
                 </div>
-                <button
+                <IconButton
+                  label={`Delete ${amenity.name}`}
+                  icon={<Trash2 />}
+                  variant="danger"
+                  size="sm"
                   onClick={() => deleteAmenity.mutate(amenity.id)}
                   disabled={deleteAmenity.isPending}
-                  className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 shrink-0"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                />
               </div>
             ))}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          <LegacyInput
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Amenity name (e.g. Gym)"
+            aria-label="Amenity name"
           />
-          <LegacyInput
+          <Input
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description (optional)"
+            aria-label="Description"
           />
         </div>
         <Button
           variant="primary"
-          className="gap-2 mt-3"
-          disabled={!name.trim() || createAmenity.isPending}
+          className="mt-3"
+          icon={<Plus className="w-4 h-4" />}
+          disabled={!name.trim()}
+          isLoading={createAmenity.isPending}
+          loadingText="Adding…"
           onClick={() => createAmenity.mutate()}
         >
-          <Plus className="w-4 h-4" />
-          {createAmenity.isPending ? 'Adding…' : 'Add Amenity'}
+          Add Amenity
         </Button>
       </div>
 
@@ -142,7 +155,7 @@ export default function EstateAmenitiesPage() {
         Bookings ({bookings?.length ?? 0})
       </h2>
       {isBookingsLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : !bookings || bookings.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState

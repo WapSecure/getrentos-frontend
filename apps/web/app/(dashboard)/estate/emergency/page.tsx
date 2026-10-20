@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, RefreshCw, Siren, ShieldCheck } from 'lucide-react';
-import { Button, EmptyState, Pagination } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -136,7 +136,7 @@ export default function EstateEmergencyPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {

@@ -1,8 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, Loader2, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
+import { Lock, X } from 'lucide-react';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  IconButton,
+} from '@getrentos/ui';
 
 /**
  * A stand-in for Paystack's hosted checkout, for local development only, until
@@ -55,7 +62,7 @@ export const PaystackCheckoutSimulator = ({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent className="max-w-sm overflow-hidden p-0">
+      <DialogContent className="max-w-sm overflow-hidden p-0 sm:p-0" showClose={false}>
         <div className="flex items-center justify-between bg-[#0ba4db] px-5 py-3 text-white">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold tracking-tight">Paystack</span>
@@ -63,15 +70,14 @@ export const PaystackCheckoutSimulator = ({
               Test mode
             </span>
           </div>
-          <button
-            type="button"
+          <IconButton
+            size="sm"
+            label="Close"
+            icon={<X aria-hidden="true" />}
             onClick={handleClose}
             disabled={processing}
-            aria-label="Close"
-            className="rounded p-1 text-white/90 hover:bg-white/15 disabled:opacity-50"
-          >
-            <X className="h-4 w-4" />
-          </button>
+            className="text-white/90 hover:bg-white/15 hover:text-white disabled:opacity-50"
+          />
         </div>
 
         <div className="p-5">
@@ -90,29 +96,27 @@ export const PaystackCheckoutSimulator = ({
             </p>
           </div>
 
-          <button
-            type="button"
+          <Button
+            size="lg"
+            fullWidth
+            rounded="lg"
             onClick={handlePay}
-            disabled={processing}
-            className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0ba4db] text-sm font-semibold text-white transition-colors hover:bg-[#0a93c4] disabled:opacity-70"
+            isLoading={processing}
+            loadingText="Processing…"
+            className="mt-4 bg-[#0ba4db] text-white hover:bg-[#0a93c4]"
           >
-            {processing ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Processing…
-              </>
-            ) : (
-              <>Pay {naira(amount)}</>
-            )}
-          </button>
-          <button
-            type="button"
+            Pay {naira(amount)}
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            fullWidth
             onClick={handleClose}
             disabled={processing}
-            className="mt-2 w-full text-center text-xs font-medium text-muted-foreground hover:text-foreground disabled:opacity-50"
+            className="mt-2"
           >
             Cancel payment
-          </button>
+          </Button>
 
           <p className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
             <Lock className="h-3 w-3" />

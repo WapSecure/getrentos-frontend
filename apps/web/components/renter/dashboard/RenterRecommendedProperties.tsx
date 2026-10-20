@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { MapPin, Bed, Bath, Square, Heart, Eye, Star, Home } from 'lucide-react';
+import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
+import { IconButton } from '@getrentos/ui';
 import { formatPrice } from '@/types/renter';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
@@ -13,7 +14,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export const RenterRecommendedProperties = () => {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: listings = [] } = useQuery({
@@ -29,28 +29,33 @@ export const RenterRecommendedProperties = () => {
   const savedListings = savedListingsData?.items ?? [];
   const savedIds = savedListings.map((p) => p.id);
   const [failedImages, setFailedImages] = useState<string[]>([]);
-
-  const invalidateSaved = () => {
-    queryClient.invalidateQueries({ queryKey: renterKeys.savedListings });
-    queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
-  };
+  // Shown at once while the request runs; dropped when it settles, so a
+  // failed save falls back to the server's list.
+  const [pendingSaved, setPendingSaved] = useState<Record<string, boolean>>({});
+  const isSaved = (propertyId: string) => pendingSaved[propertyId] ?? savedIds.includes(propertyId);
 
   const saveMutation = useMutation({
-    mutationFn: (propertyId: string) => unwrap(renterService.saveListing(propertyId)),
-    onSuccess: invalidateSaved,
-  });
-
-  const unsaveMutation = useMutation({
-    mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
-    onSuccess: invalidateSaved,
+    mutationFn: ({ propertyId, save }: { propertyId: string; save: boolean }) =>
+      unwrap(
+        save ? renterService.saveListing(propertyId) : renterService.unsaveListing(propertyId)
+      ),
+    onMutate: ({ propertyId, save }) =>
+      setPendingSaved((prev) => ({ ...prev, [propertyId]: save })),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: renterKeys.savedListings }),
+        queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats }),
+      ]),
+    onSettled: (_data, _error, { propertyId }) =>
+      setPendingSaved((prev) => {
+        const next = { ...prev };
+        delete next[propertyId];
+        return next;
+      }),
   });
 
   const toggleSave = (propertyId: string) => {
-    if (savedIds.includes(propertyId)) {
-      unsaveMutation.mutate(propertyId);
-    } else {
-      saveMutation.mutate(propertyId);
-    }
+    saveMutation.mutate({ propertyId, save: !isSaved(propertyId) });
   };
 
   if (recommendedProperties.length === 0) return null;
@@ -107,24 +112,30 @@ export const RenterRecommendedProperties = () => {
                   </div>
                 )}
                 {property.verified && (
-                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded-full">
+                  <Badge variant="success" className="absolute top-2 left-2">
                     Verified
-                  </span>
+                  </Badge>
                 )}
-                <button
+                <IconButton
+                  label={isSaved(property.id) ? 'Remove from saved' : 'Save property'}
+                  aria-pressed={isSaved(property.id)}
+                  size="sm"
                   onClick={() => toggleSave(property.id)}
-                  className="absolute top-2 right-2 p-1.5 bg-white/90 dark:bg-gray-800/90 rounded-full hover:bg-white transition-colors"
-                >
-                  <Heart
-                    className={`w-3 h-3 ${savedIds.includes(property.id) ? 'text-red-500 fill-red-500' : 'text-gray-600'}`}
-                  />
-                </button>
+                  className="absolute top-2 right-2 rounded-full bg-card/90 hover:bg-card"
+                  icon={
+                    <Heart
+                      className={
+                        isSaved(property.id) ? 'fill-destructive text-destructive' : undefined
+                      }
+                    />
+                  }
+                />
               </div>
 
               {/* Property Details */}
               <div className="p-3">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-semibold text-foreground text-sm">{property.title}</h3>
+                <div className="flex justify-between items-start gap-2 mb-1">
+                  <h3 className="min-w-0 font-semibold text-foreground text-sm">{property.title}</h3>
                   <div className="flex items-center gap-0.5">
                     <Star className="w-3 h-3 fill-primary text-primary" />
                     <span className="text-xs text-muted-foreground">{property.rating}</span>
@@ -148,14 +159,14 @@ export const RenterRecommendedProperties = () => {
                     <span>{property.size} sqm</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex flex-wrap justify-between items-center gap-2">
                   <span className="text-lg font-bold text-primary">
                     {formatPrice(property.price, property.period)}
                   </span>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
+                    href={buildRoute.renterPropertyDetail(property.id)}
                   >
                     View Details
                   </Button>

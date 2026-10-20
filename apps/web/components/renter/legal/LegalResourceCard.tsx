@@ -25,7 +25,7 @@ export const LegalResourceCard = ({ resource }: LegalResourceCardProps) => {
           </p>
         ))}
       </div>
-      <p className="mt-4 pt-3 border-t border-border text-xs text-gray-400">{resource.source}</p>
+      <p className="mt-4 pt-3 border-t border-border text-xs text-muted-foreground">{resource.source}</p>
     </Card>
   );
 };

@@ -15,6 +15,7 @@ import {
   Wrench,
   Bell,
 } from 'lucide-react';
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -32,12 +33,12 @@ interface Activity {
 }
 
 const iconByType: Record<ActivityType, { icon: React.ElementType; color: string }> = {
-  application: { icon: FileText, color: 'text-blue-500' },
-  message: { icon: MessageCircle, color: 'text-purple-500' },
+  application: { icon: FileText, color: 'text-info' },
+  message: { icon: MessageCircle, color: 'text-purple' },
   payment: { icon: TrendingUp, color: 'text-primary' },
-  maintenance: { icon: Wrench, color: 'text-orange-500' },
-  lease: { icon: Heart, color: 'text-pink-500' },
-  system: { icon: CheckCircle, color: 'text-green-500' },
+  maintenance: { icon: Wrench, color: 'text-warning' },
+  lease: { icon: Heart, color: 'text-destructive' },
+  system: { icon: CheckCircle, color: 'text-success' },
 };
 
 const activityRoutes: Record<ActivityType, string> = {
@@ -137,13 +138,9 @@ export const RenterRecentActivity = () => {
       </div>
 
       <div className="border-t border-border/70 p-3 text-center">
-        <button
-          type="button"
-          onClick={() => router.push(ROUTES.RENTER_NOTIFICATIONS)}
-          className="min-h-10 rounded-lg px-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/5 hover:text-primary-hover focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
-        >
+        <Button href={ROUTES.RENTER_NOTIFICATIONS} variant="ghost" size="sm">
           View all activity
-        </button>
+        </Button>
       </div>
     </motion.div>
   );

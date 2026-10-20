@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Star, MessageCircle } from 'lucide-react';
-import { Pagination } from '@getrentos/ui';
+import { Card, EmptyState, ListSkeleton, Pagination, StatGridSkeleton } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
@@ -26,6 +26,7 @@ export default function AgentReviewsPage() {
   const { data: reviewsData, isLoading } = useQuery({
     queryKey: [...agentKeys.reviews, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(agentService.getReviews({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const { data: summary } = useQuery({
     queryKey: [...agentKeys.reviews, 'summary'],
@@ -43,7 +44,12 @@ export default function AgentReviewsPage() {
   const maxCount = Math.max(1, ...distribution.map((d) => d.count));
 
   if (isLoading) {
-    return <div className="p-10 text-center text-muted-foreground">Loading reviews…</div>;
+    return (
+      <div className="space-y-6">
+        <StatGridSkeleton count={2} className="lg:grid-cols-3" />
+        <ListSkeleton variant="cards" rows={3} label="Loading reviews" />
+      </div>
+    );
   }
 
   return (
@@ -83,18 +89,16 @@ export default function AgentReviewsPage() {
 
       <div className="space-y-4">
         {reviews.length === 0 ? (
-          <div className="bg-card rounded-2xl border border-border p-12 text-center">
-            <MessageCircle className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
-            <h3 className="text-lg font-semibold text-foreground">No reviews yet</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Reviews from clients and admins will appear here once submitted.
-            </p>
-          </div>
+          <EmptyState
+            icon={MessageCircle}
+            title="No reviews yet"
+            description="Reviews from clients and admins will appear here once submitted."
+          />
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="bg-card rounded-2xl border border-border p-4">
+            <Card key={review.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs shrink-0">
                     {getInitials(review.author)}
                   </div>
@@ -102,7 +106,7 @@ export default function AgentReviewsPage() {
                     <p className="text-sm font-medium text-foreground">
                       {review.author}
                       {review.category ? (
-                        <span className="text-xs text-gray-400 font-normal">
+                        <span className="text-xs text-muted-foreground font-normal">
                           {' '}
                           · {review.category}
                         </span>
@@ -112,13 +116,13 @@ export default function AgentReviewsPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <StarRow rating={review.rating} />
-                  <p className="text-xs text-gray-400 mt-1">{formatDate(review.date)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{formatDate(review.date)}</p>
                 </div>
               </div>
               {review.comment ? (
                 <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>
               ) : null}
-            </div>
+            </Card>
           ))
         )}
       </div>

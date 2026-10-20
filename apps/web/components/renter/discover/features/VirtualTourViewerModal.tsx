@@ -4,8 +4,14 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { CalendarCheck, Video } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  EmptyState,
+} from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { DateTimeField, isFutureDateTime } from '@/components/shared/forms/DateTimeField';
@@ -74,8 +80,8 @@ export const VirtualTourViewerModal = ({
 
   return (
     <Dialog open={!!propertyTitle} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-lg p-0">
-        <div className="p-4 border-b border-border">
+      <DialogContent className="p-0 sm:max-w-lg">
+        <div className="p-4 pr-12 border-b border-border">
           <DialogTitle className="font-semibold text-foreground">{propertyTitle}</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {mode === 'tour' && (videoTourUrl ? 'Walkthrough video' : 'No video tour yet')}
@@ -95,26 +101,25 @@ export const VirtualTourViewerModal = ({
                 className="w-full rounded-xl bg-black"
               />
             ) : (
-              <div className="rounded-xl border border-dashed border-border p-6 text-center">
-                <Video className="mx-auto h-8 w-8 text-muted-foreground" />
-                <p className="mt-2 text-sm font-medium text-foreground">
-                  This property has no video tour yet
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {live
+              <EmptyState
+                size="compact"
+                icon={Video}
+                title="This property has no video tour yet"
+                description={
+                  live
                     ? `Ask ${host} for a live video viewing and they can walk you through it.`
-                    : `Ask ${host} for a viewing to see it in person.`}
-                </p>
-              </div>
+                    : `Ask ${host} for a viewing to see it in person.`
+                }
+              />
             )}
 
             <Button
               variant="primary"
               fullWidth
-              className="gap-2 mt-4"
+              className="mt-4"
+              icon={<Video className="w-4 h-4" />}
               onClick={() => setMode('booking')}
             >
-              <Video className="w-4 h-4" />
               {live ? 'Book a Live Video Viewing' : 'Request a Viewing'}
             </Button>
           </div>
@@ -138,7 +143,7 @@ export const VirtualTourViewerModal = ({
             />
 
             {requestViewing.isError && (
-              <p className="text-xs text-red-500">
+              <p className="text-xs text-destructive">
                 Couldn&apos;t submit your viewing request. Please try again.
               </p>
             )}
@@ -150,12 +155,12 @@ export const VirtualTourViewerModal = ({
               <Button
                 variant="primary"
                 className="flex-1"
-                disabled={
-                  !isFutureDateTime(preferredTime) || !propertyId || requestViewing.isPending
-                }
+                disabled={!isFutureDateTime(preferredTime) || !propertyId}
+                isLoading={requestViewing.isPending}
+                loadingText="Submitting…"
                 onClick={() => requestViewing.mutate(preferredTime)}
               >
-                {requestViewing.isPending ? 'Submitting…' : 'Confirm'}
+                Confirm
               </Button>
             </div>
           </div>

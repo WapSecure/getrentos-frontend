@@ -22,11 +22,12 @@ import {
 import {
   Button,
   ConfirmDialog,
+  ListSkeleton,
   PageErrorState,
-  PageLoadingState,
+  Skeleton,
   StatCard,
-  Toast,
-  type ToastVariant,
+  StatGridSkeleton,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap, formatCurrency } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -117,27 +118,36 @@ export const AdminEstateOverview = () => {
   const canScan = hasAdminPermission(user?.roles, 'estate.moderate');
   const queryClient = useQueryClient();
   const [showScanConfirm, setShowScanConfirm] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const scan = useMutation({
     mutationFn: () => unwrap(adminEstateService.runDueScan()),
     onSuccess: (result) => {
-      setToast({
-        message:
-          result.flagged > 0 || result.generated > 0
-            ? `Scan complete: ${result.flagged} due(s) flagged overdue, ${result.generated} recurring due(s) generated.`
-            : 'Scan complete: no overdue flags or recurring dues to generate.',
-        variant: 'success',
-      });
+      toast.success(
+        result.flagged > 0 || result.generated > 0
+          ? `Scan complete: ${result.flagged} due(s) flagged overdue, ${result.generated} recurring due(s) generated.`
+          : 'Scan complete: no overdue flags or recurring dues to generate.'
+      );
       queryClient.invalidateQueries({ queryKey: ['admin', 'estates'] });
     },
-    onError: (error: Error) =>
-      setToast({ message: error.message || 'Scan failed. Please try again.', variant: 'error' }),
+    onError: (error: Error) => toast.error(error.message || 'Scan failed. Please try again.'),
   });
 
-  if (isLoading) return <PageLoadingState />;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-40 rounded-full" />
+          <Skeleton className="h-8 w-80 max-w-full" />
+          <Skeleton className="h-4 w-96 max-w-full" />
+        </div>
+        <StatGridSkeleton count={9} className="lg:grid-cols-3" />
+        <ListSkeleton rows={3} variant="cards" label="Loading estate queues" />
+      </div>
+    );
+  }
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <PageErrorState
         title="Could not load estate oversight"
@@ -170,10 +180,11 @@ export const AdminEstateOverview = () => {
               variant="outline"
               size="sm"
               onClick={() => setShowScanConfirm(true)}
-              disabled={scan.isPending}
+              isLoading={scan.isPending}
+              loadingText="Scanning…"
+              icon={<RefreshCw className="h-4 w-4" />}
             >
-              <RefreshCw className={`mr-1.5 h-4 w-4 ${scan.isPending ? 'animate-spin' : ''}`} />
-              {scan.isPending ? 'Scanning…' : 'Run due scan'}
+              Run due scan
             </Button>
           </div>
         )}
@@ -268,9 +279,6 @@ export const AdminEstateOverview = () => {
         confirmLabel="Run due scan"
         onConfirm={() => scan.mutate()}
       />
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };

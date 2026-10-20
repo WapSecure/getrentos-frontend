@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Card } from '@getrentos/ui';
 import { useSearchParams } from 'next/navigation';
 import { useAgentUser } from '../layout';
 import { User, Bell, Landmark, MapPin, ShieldCheck } from 'lucide-react';
@@ -58,13 +59,15 @@ export default function AgentSettingsPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">
-          <div className="bg-card rounded-xl border border-border overflow-hidden lg:sticky lg:top-20">
-            <div className="p-2 space-y-1">
+          <Card className="lg:sticky lg:top-20">
+            <nav aria-label="Settings sections" className="p-2 space-y-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
+                    type="button"
+                    aria-current={activeTab === tab.id ? 'page' : undefined}
                     onClick={() => setActiveTab(tab.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === tab.id
@@ -77,14 +80,12 @@ export default function AgentSettingsPage() {
                   </button>
                 );
               })}
-            </div>
-          </div>
+            </nav>
+          </Card>
         </div>
 
-        <div className="flex-1">
-          <div className="bg-card rounded-xl border border-border overflow-hidden p-6">
-            {renderContent()}
-          </div>
+        <div className="min-w-0 flex-1">
+          <Card className="p-6">{renderContent()}</Card>
         </div>
       </div>
     </>

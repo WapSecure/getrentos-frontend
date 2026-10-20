@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Dialog, DialogContent, Button, Select, CurrencyInput } from '@getrentos/ui';
+import { Dialog, DialogContent, Button, Field, Select, CurrencyInput } from '@getrentos/ui';
 import type { CreateDepositHoldInput } from '@/services/depositService';
 
 export interface DepositLeaseOption {
@@ -61,25 +61,26 @@ export const RecordDepositModal = ({
             </p>
           </div>
 
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium text-foreground">Tenancy</span>
+          <Field label="Tenancy" required>
             <Select
               value={leaseId}
               onValueChange={pickLease}
               placeholder="Select a tenancy"
               options={leases.map((l) => ({ value: l.id, label: l.label }))}
             />
-          </label>
+          </Field>
 
-          <label className="block space-y-1.5">
-            <span className="text-sm font-medium text-foreground">Amount held</span>
+          <Field
+            label="Amount held"
+            required
+            hint={
+              selected && !selected.securityDeposit
+                ? 'This lease has no deposit on record. Set the amount here.'
+                : undefined
+            }
+          >
             <CurrencyInput value={amount} onValueChange={setAmount} placeholder="Deposit amount" />
-            {selected && !selected.securityDeposit && (
-              <span className="text-xs text-muted-foreground">
-                This lease has no deposit on record. Set the amount here.
-              </span>
-            )}
-          </label>
+          </Field>
 
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="outline" onClick={close} disabled={isPending}>
@@ -88,9 +89,11 @@ export const RecordDepositModal = ({
             <Button
               variant="primary"
               onClick={submit}
-              disabled={!leaseId || amount <= 0 || isPending}
+              disabled={!leaseId || amount <= 0}
+              isLoading={isPending}
+              loadingText="Recording…"
             >
-              {isPending ? 'Recording…' : 'Record deposit'}
+              Record deposit
             </Button>
           </div>
         </div>

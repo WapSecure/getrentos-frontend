@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FileCheck2 } from 'lucide-react';
-import { Badge, Button, Input, Select, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, Input, Select, Textarea } from '@getrentos/ui';
 import { formatDate } from '@getrentos/shared';
 import type { LandPerfection, LandPerfectionStep } from '@/types/landPurchase';
 import { LandCaseSection, PanelMessage } from '@/components/admin/land/case/shared';
@@ -113,25 +113,31 @@ export const LandPerfectionPanel = ({
       ) : (
         canAct && (
           <div className="mt-4 space-y-4">
-            <div className="grid gap-2 sm:grid-cols-3">
-              <Input
-                value={pro.name}
-                onChange={(e) => setPro({ ...pro, name: e.target.value })}
-                placeholder="Professional's name"
-                maxLength={200}
-              />
-              <Input
-                value={pro.firm}
-                onChange={(e) => setPro({ ...pro, firm: e.target.value })}
-                placeholder="Firm (optional)"
-                maxLength={200}
-              />
-              <Input
-                value={pro.contact}
-                onChange={(e) => setPro({ ...pro, contact: e.target.value })}
-                placeholder="Phone or email (optional)"
-                maxLength={200}
-              />
+            <div className="grid items-end gap-3 sm:grid-cols-3">
+              <Field label="Professional's name">
+                <Input
+                  value={pro.name}
+                  onChange={(e) => setPro({ ...pro, name: e.target.value })}
+                  placeholder="Professional's name"
+                  maxLength={200}
+                />
+              </Field>
+              <Field label="Firm">
+                <Input
+                  value={pro.firm}
+                  onChange={(e) => setPro({ ...pro, firm: e.target.value })}
+                  placeholder="Firm (optional)"
+                  maxLength={200}
+                />
+              </Field>
+              <Field label="Contact">
+                <Input
+                  value={pro.contact}
+                  onChange={(e) => setPro({ ...pro, contact: e.target.value })}
+                  placeholder="Phone or email (optional)"
+                  maxLength={200}
+                />
+              </Field>
               <Button
                 size="xs"
                 variant="outline"
@@ -148,38 +154,44 @@ export const LandPerfectionPanel = ({
               </Button>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-2">
-              <Select
-                value={stepKey}
-                onValueChange={setStepKey}
-                ariaLabel="Step"
-                placeholder="Step"
-                options={perfection.steps.map((s) => ({ value: s.key, label: s.label }))}
-              />
-              <Select
-                value={stepStatus}
-                onValueChange={(v) => setStepStatus(v as LandPerfectionStep['status'])}
-                ariaLabel="New status"
-                placeholder="New status"
-                options={[
-                  { value: 'SUBMITTED', label: 'Submitted (not an approval)' },
-                  { value: 'APPROVED', label: 'Approved' },
-                  { value: 'REJECTED', label: 'Rejected' },
-                  { value: 'NOT_APPLICABLE', label: 'Not applicable' },
-                ]}
-              />
-              <Input
-                value={stepRef}
-                onChange={(e) => setStepRef(e.target.value)}
-                placeholder="Reference (file, approval or receipt number)"
-                maxLength={200}
-              />
-              <Input
-                value={stepNote}
-                onChange={(e) => setStepNote(e.target.value)}
-                placeholder="Note (optional)"
-                maxLength={2000}
-              />
+            <div className="grid items-end gap-3 sm:grid-cols-2">
+              <Field label="Step">
+                <Select
+                  value={stepKey}
+                  onValueChange={setStepKey}
+                  placeholder="Step"
+                  options={perfection.steps.map((s) => ({ value: s.key, label: s.label }))}
+                />
+              </Field>
+              <Field label="New status">
+                <Select
+                  value={stepStatus}
+                  onValueChange={(v) => setStepStatus(v as LandPerfectionStep['status'])}
+                  placeholder="New status"
+                  options={[
+                    { value: 'SUBMITTED', label: 'Submitted (not an approval)' },
+                    { value: 'APPROVED', label: 'Approved' },
+                    { value: 'REJECTED', label: 'Rejected' },
+                    { value: 'NOT_APPLICABLE', label: 'Not applicable' },
+                  ]}
+                />
+              </Field>
+              <Field label="Reference">
+                <Input
+                  value={stepRef}
+                  onChange={(e) => setStepRef(e.target.value)}
+                  placeholder="Reference (file, approval or receipt number)"
+                  maxLength={200}
+                />
+              </Field>
+              <Field label="Note">
+                <Input
+                  value={stepNote}
+                  onChange={(e) => setStepNote(e.target.value)}
+                  placeholder="Note (optional)"
+                  maxLength={2000}
+                />
+              </Field>
               <Button
                 size="xs"
                 variant="outline"
@@ -201,20 +213,25 @@ export const LandPerfectionPanel = ({
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <Input
-                value={instrument}
-                onChange={(e) => setInstrument(e.target.value)}
-                placeholder="Final registered instrument reference"
-                maxLength={200}
-              />
-              <Textarea
-                value={review}
-                onChange={(e) => setReview(e.target.value)}
-                rows={3}
-                maxLength={4000}
-                placeholder="Legal review of the completed file"
-              />
+            <div className="space-y-3">
+              <Field label="Final instrument reference">
+                <Input
+                  value={instrument}
+                  onChange={(e) => setInstrument(e.target.value)}
+                  placeholder="Final registered instrument reference"
+                  maxLength={200}
+                />
+              </Field>
+              <Field label="Legal review">
+                <Textarea
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  rows={3}
+                  maxLength={4000}
+                  showCount
+                  placeholder="Legal review of the completed file"
+                />
+              </Field>
               {perfection.blockers.length > 0 && (
                 <ul className="list-disc pl-4 text-xs text-muted-foreground">
                   {perfection.blockers.map((b) => (

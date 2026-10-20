@@ -11,7 +11,9 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  LegacyInput,
+  Field,
+  Input,
+  Skeleton,
 } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { ApiError, unwrap, unwrapOptional } from '@/lib/apiHelpers';
@@ -124,7 +126,7 @@ export const ExpectedDeliveriesPanel = () => {
       )}
 
       {isLoading ? (
-        <div className="mt-4 h-16 animate-pulse rounded-xl bg-secondary" aria-busy="true" />
+        <Skeleton className="mt-4 h-16 w-full rounded-xl" />
       ) : expected.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">
           You have not told the estate about any parcels yet.
@@ -216,38 +218,27 @@ export const ExpectedDeliveriesPanel = () => {
                 </DialogDescription>
 
                 <div className="mt-5 space-y-4">
-                  <div>
-                    <label
-                      htmlFor="expected-courier"
-                      className="mb-1 block text-sm font-medium text-foreground"
-                    >
-                      Who is bringing it?
-                    </label>
-                    <LegacyInput
-                      id="expected-courier"
+                  <Field label="Who is bringing it?" htmlFor="expected-courier" required>
+                    <Input
                       type="text"
                       value={courier}
                       onChange={(e) => setCourier(e.target.value)}
                       placeholder="e.g. Amazon, DHL"
                     />
-                  </div>
+                  </Field>
 
-                  <div>
-                    <label
-                      htmlFor="expected-description"
-                      className="mb-1 block text-sm font-medium text-foreground"
-                    >
-                      What is coming?{' '}
-                      <span className="font-normal text-muted-foreground">(optional)</span>
-                    </label>
-                    <LegacyInput
-                      id="expected-description"
+                  <Field
+                    label="What is coming?"
+                    htmlFor="expected-description"
+                    optionalLabel="(optional)"
+                  >
+                    <Input
                       type="text"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="e.g. a phone case"
                     />
-                  </div>
+                  </Field>
 
                   <p className="text-xs text-muted-foreground">
                     The code works for 2 days, or until you withdraw it, and it only works once.
@@ -266,10 +257,12 @@ export const ExpectedDeliveriesPanel = () => {
                   </Button>
                   <Button
                     variant="primary"
-                    disabled={courier.trim().length === 0 || declare.isPending}
+                    disabled={courier.trim().length === 0}
+                    isLoading={declare.isPending}
+                    loadingText="Getting code…"
                     onClick={() => declare.mutate()}
                   >
-                    {declare.isPending ? 'Getting code…' : 'Get code'}
+                    Get code
                   </Button>
                 </div>
               </>

@@ -213,7 +213,7 @@ export const RequestViewingModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Notes <span className="text-gray-400 font-normal">(optional)</span>
+                  Notes <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
                 <Textarea
                   value={notes}

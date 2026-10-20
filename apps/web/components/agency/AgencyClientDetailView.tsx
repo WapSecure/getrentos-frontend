@@ -5,17 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Building2, Mail, Phone, ShieldCheck, UserRound } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Select,
-  Textarea,
-  PageLoadingState,
-  PageErrorState,
-  Toast,
-  type BadgeVariant,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Badge, Button, Select, Textarea, PageLoadingState, PageErrorState, type BadgeVariant, useToast } from '@getrentos/ui';
 import {
   agencyClientService,
   AGENCY_CLIENT_STAGES,
@@ -41,7 +31,7 @@ export function AgencyClientDetailView() {
   const ownerId = String(params.ownerId);
   const queryClient = useQueryClient();
   const [note, setNote] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const queryKey = ['agency', 'client', ownerId];
   const {
@@ -58,10 +48,10 @@ export function AgencyClientDetailView() {
     mutationFn: (stage: AgencyClientStage) => unwrap(agencyClientService.setStage(ownerId, stage)),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKey, updated);
-      setToast({ message: 'Stage updated.', variant: 'success' });
+      toast.success('Stage updated.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not update stage.', variant: 'error' }),
+      toast.error(e.message || 'Could not update stage.'),
   });
 
   const noteMutation = useMutation({
@@ -71,7 +61,7 @@ export function AgencyClientDetailView() {
       setNote('');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not add note.', variant: 'error' }),
+      toast.error(e.message || 'Could not add note.'),
   });
 
   if (isLoading) return <PageLoadingState />;
@@ -197,10 +187,6 @@ export function AgencyClientDetailView() {
           </div>
         </div>
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

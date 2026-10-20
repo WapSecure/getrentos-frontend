@@ -69,7 +69,7 @@ function AttentionCard({ metric }: { metric: AttentionMetric }) {
             metric.urgent && hasAttention
               ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-destructive/10 text-destructive'
               : hasAttention
-                ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning-subtle text-warning'
                 : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground'
           }
         >
@@ -280,7 +280,7 @@ export function HomeManagementOperationsCommandCenter({
             ) : (
               <div className="px-5 py-8 text-center">
                 <CheckCircle2
-                  className="mx-auto h-7 w-7 text-green-600 dark:text-green-400"
+                  className="mx-auto h-7 w-7 text-success"
                   aria-hidden="true"
                 />
                 <p className="mt-3 font-medium text-foreground">

@@ -2,9 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 import { CalendarDays, FileText, ArrowRight, BadgeCheck } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
+import { DescriptionList } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -20,7 +21,6 @@ const formatDate = (dateString: string) => {
 };
 
 export const RenterLeaseRenewal = () => {
-  const router = useRouter();
   const { data: lease = null } = useQuery({
     queryKey: renterKeys.lease,
     queryFn: () => unwrap(renterService.getLease()),
@@ -65,61 +65,60 @@ export const RenterLeaseRenewal = () => {
       </div>
 
       <div className="p-5">
-        <div className="mb-5 rounded-2xl border border-primary/20 bg-primary/5 p-4">
-          <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-primary/10 p-2 text-primary">
-              <BadgeCheck className="h-4 w-4" aria-hidden="true" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {renewalOffer ? 'Renewal offer available' : 'Lease approaching its end date'}
-              </p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                {renewalOffer
-                  ? `Your landlord sent a renewal offer on ${formatDate(renewalOffer.offerDate)}`
-                  : `${Math.max(daysUntilEnd, 0)} days remain. Your property owner has not sent an offer yet.`}
-              </p>
-            </div>
-          </div>
+        <Alert
+          variant="info"
+          icon={BadgeCheck}
+          className="mb-5"
+          title={renewalOffer ? 'Renewal offer available' : 'Lease approaching its end date'}
+        >
+          {renewalOffer
+            ? `Your landlord sent a renewal offer on ${formatDate(renewalOffer.offerDate)}`
+            : `${Math.max(daysUntilEnd, 0)} days remain. Your property owner has not sent an offer yet.`}
+        </Alert>
+
+        <div className="mb-5 rounded-xl border border-border/70 px-4">
+          <DescriptionList
+            layout="rows"
+            items={[
+              { label: 'Property', value: lease.propertyName },
+              { label: 'Current Lease Ends', value: formatDate(lease.endDate) },
+              {
+                label: 'Current Rent',
+                value: (
+                  <>
+                    {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
+                      lease.rentAmount
+                    )}
+                    {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
+                  </>
+                ),
+              },
+              ...(renewalOffer
+                ? [
+                    {
+                      label: 'Expected Increase',
+                      value: (
+                        <span className="text-warning">
+                          {renewalOffer.increasePercentage}% (
+                          {new Intl.NumberFormat('en-NG', {
+                            style: 'currency',
+                            currency: 'NGN',
+                          }).format(renewalOffer.newRentAmount - lease.rentAmount)}
+                          )
+                        </span>
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+          />
         </div>
 
-        <dl className="mb-5 divide-y divide-border/70 rounded-xl border border-border/70 px-4">
-          <div className="flex items-start justify-between gap-4 py-3">
-            <span className="text-sm text-muted-foreground">Property</span>
-            <span className="text-sm font-medium text-foreground">{lease.propertyName}</span>
-          </div>
-          <div className="flex items-start justify-between gap-4 py-3">
-            <span className="text-sm text-muted-foreground">Current Lease Ends</span>
-            <span className="text-sm font-medium text-foreground">{formatDate(lease.endDate)}</span>
-          </div>
-          <div className="flex items-start justify-between gap-4 py-3">
-            <span className="text-sm text-muted-foreground">Current Rent</span>
-            <span className="text-sm font-medium text-foreground">
-              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
-                lease.rentAmount
-              )}
-              {leaseRentSuffix(lease.rentPeriod, lease.startDate, lease.endDate)}
-            </span>
-          </div>
-          {renewalOffer && (
-            <div className="flex items-start justify-between gap-4 py-3">
-              <span className="text-sm text-muted-foreground">Expected Increase</span>
-              <span className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
-                {renewalOffer.increasePercentage}% (
-                {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
-                  renewalOffer.newRentAmount - lease.rentAmount
-                )}
-                )
-              </span>
-            </div>
-          )}
-        </dl>
-
         <Button
+          href={`${ROUTES.RENTER_HOME}?tab=lease`}
           variant="outline"
           fullWidth
           className="gap-2"
-          onClick={() => router.push(`${ROUTES.RENTER_HOME}?tab=lease`)}
         >
           <FileText className="w-4 h-4" />
           Review lease terms

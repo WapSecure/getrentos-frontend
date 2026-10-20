@@ -1,8 +1,7 @@
 'use client';
 
-import { LegacySelect } from '@getrentos/ui';
-
 import { LayoutGrid, List } from 'lucide-react';
+import { Select } from '@getrentos/ui';
 
 interface ApplicationsFilterSortProps {
   filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
@@ -67,17 +66,13 @@ export const ApplicationsFilterSort = ({
       </div>
 
       <div className="flex items-center gap-3">
-        <LegacySelect
+        <Select
           value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as 'recent' | 'property' | 'status')}
-          className="px-4 py-1.5 text-sm cursor-pointer"
-        >
-          {sortOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </LegacySelect>
+          onValueChange={(value) => setSortBy(value as 'recent' | 'property' | 'status')}
+          options={sortOptions}
+          ariaLabel="Sort applications"
+          className="min-w-0 flex-1 sm:w-44 sm:flex-none"
+        />
 
         <div
           className="flex gap-1 rounded-xl bg-secondary p-1"

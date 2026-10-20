@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { CircleAlert, ClipboardCheck, RefreshCw, Search, ShieldCheck } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { CircleAlert, ClipboardCheck, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
+  Alert,
   Button,
   EmptyState,
-  Input,
   Pagination,
+  SearchInput,
   Select,
   Tabs,
   TabsList,
@@ -87,6 +88,7 @@ export default function AdminLandDiligencePage() {
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: landQueryKeys.queue(params),
     queryFn: () => unwrap(adminLandService.listDiligence(params)),
+    placeholderData: keepPreviousData,
   });
   const records = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -122,13 +124,10 @@ export default function AdminLandDiligencePage() {
       </div>
 
       {!canApprove && (
-        <div className="mb-6 flex gap-3 rounded-2xl border border-warning/30 bg-warning-subtle p-4 text-sm text-foreground">
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
-          <p>
-            You can review cases, record checks and request clarification. A staff member with
-            verification approval permission must make the final approve or reject decision.
-          </p>
-        </div>
+        <Alert variant="warning" icon={ShieldCheck} className="mb-6">
+          You can review cases, record checks and request clarification. A staff member with
+          verification approval permission must make the final approve or reject decision.
+        </Alert>
       )}
 
       <Tabs
@@ -149,12 +148,11 @@ export default function AdminLandDiligencePage() {
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row">
         <div className="w-full max-w-lg">
-          <Input
+          <SearchInput
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onValueChange={setSearch}
             placeholder="Search parcel, owner, plot, estate, city…"
-            leadingIcon={<Search className="h-4 w-4" />}
-            aria-label="Search land diligence records"
+            label="Search land diligence records"
           />
         </div>
         <Select
@@ -179,7 +177,7 @@ export default function AdminLandDiligencePage() {
         />
       </div>
 
-      {isError ? (
+      {isError && !data ? (
         <EmptyState
           icon={CircleAlert}
           title="The diligence queue could not be loaded"

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CircleCheck, CircleAlert, HandCoins, Loader2, RotateCcw } from 'lucide-react';
-import { Button, ConfirmDialog, Input } from '@getrentos/ui';
+import { Button, ConfirmDialog, CurrencyInput, Field } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import type { LandPurchaseDetail, LandRefundStatus } from '@/types/landPurchase';
 
@@ -121,17 +121,17 @@ export const LandRefundPanel = ({
               </Button>
               {owed > 0 && (
                 <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end">
-                  <label className="flex-1">
-                    <span className="mb-1 block text-xs text-muted-foreground">
-                      Paid back by hand (₦, up to {formatCurrency(owed)})
-                    </span>
-                    <Input
-                      inputMode="numeric"
+                  <Field
+                    label={`Paid back by hand (up to ${formatCurrency(owed)})`}
+                    className="flex-1"
+                  >
+                    <CurrencyInput
+                      prefix="₦"
                       value={amount}
-                      onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, ''))}
-                      aria-invalid={!amountValid}
+                      onValueChange={(value) => setAmount(value ? String(value) : '')}
+                      invalid={!amountValid}
                     />
-                  </label>
+                  </Field>
                   <Button
                     variant="primary"
                     size="sm"

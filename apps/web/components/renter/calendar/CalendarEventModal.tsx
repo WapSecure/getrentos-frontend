@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Bell, Repeat } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { TimePicker } from '@getrentos/ui';
 import { Checkbox } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
+import { IconButton } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
@@ -94,15 +96,13 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                   {event ? 'Update event details' : 'Create a new event'}
                 </p>
               </div>
-              <button
-                type="button"
+              <IconButton
+                label="Close event dialog"
+                icon={<X />}
+                size="sm"
                 onClick={onClose}
                 disabled={isSaving}
-                aria-label="Close event dialog"
-                className="p-1 rounded-lg hover:bg-secondary"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              />
             </div>
 
             <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
@@ -124,33 +124,26 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                 />
               </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Date <span className="text-red-500">*</span>
-                </label>
+              <Field label="Date" required>
                 <DatePicker
                   value={formData.date}
                   onChange={(v) => setFormData({ ...formData, date: v })}
                 />
-              </div>
+              </Field>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Start Time
-                  </label>
+                <Field label="Start Time">
                   <TimePicker
                     value={formData.startTime}
                     onChange={(v) => setFormData({ ...formData, startTime: v })}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">End Time</label>
+                </Field>
+                <Field label="End Time">
                   <TimePicker
                     value={formData.endTime}
                     onChange={(v) => setFormData({ ...formData, endTime: v })}
                   />
-                </div>
+                </Field>
               </div>
 
               <Field label="Event Type">
@@ -173,14 +166,21 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                 />
               </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Color</label>
+              <div role="group" aria-labelledby="calendar-event-color-label">
+                <p
+                  id="calendar-event-color-label"
+                  className="block text-sm font-medium text-foreground mb-1"
+                >
+                  Color
+                </p>
                 <div className="flex gap-2 flex-wrap">
                   {colors.map((color) => (
                     <button
                       type="button"
                       key={color}
                       onClick={() => setFormData({ ...formData, color })}
+                      aria-label={`Colour ${colors.indexOf(color) + 1}`}
+                      aria-pressed={formData.color === color}
                       className={`w-8 h-8 rounded-full border-2 transition-all ${
                         formData.color === color
                           ? 'border-foreground scale-110'
@@ -192,19 +192,22 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <Checkbox
-                    checked={Boolean(formData.reminder)}
-                    onCheckedChange={(reminder) => setFormData({ ...formData, reminder })}
-                  />
-                  <Bell className="w-4 h-4" />
-                  Set Reminder
-                </label>
+              <div className="flex flex-wrap items-center gap-4">
+                <Checkbox
+                  checked={Boolean(formData.reminder)}
+                  onCheckedChange={(reminder) => setFormData({ ...formData, reminder })}
+                  label={
+                    <span className="inline-flex items-center gap-2">
+                      <Bell className="w-4 h-4" />
+                      Set Reminder
+                    </span>
+                  }
+                />
 
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <Repeat className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                  <Repeat className="w-4 h-4" aria-hidden="true" />
                   <Select
+                    ariaLabel="Repeat"
                     value={formData.recurrence}
                     onValueChange={(value) =>
                       setFormData({ ...formData, recurrence: value as CalendarRecurrence })
@@ -217,12 +220,16 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
                     ]}
                     className="min-h-9 w-32"
                   />
-                </label>
+                </div>
               </div>
             </div>
 
+            {errorMessage && (
+              <Alert variant="danger" className="mx-4 mt-4">
+                {errorMessage}
+              </Alert>
+            )}
             <div className="p-4 border-t border-border flex gap-3">
-              {errorMessage && <p className="w-full text-sm text-destructive">{errorMessage}</p>}
               <Button
                 variant="primary"
                 fullWidth

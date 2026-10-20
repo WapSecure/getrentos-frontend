@@ -3,14 +3,17 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Dialog,
   DialogContent,
   Button,
   Badge,
+  CardSkeleton,
+  Field,
   Input,
+  PageErrorState,
   Textarea,
   CurrencyInput,
-  PageLoadingState,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { Plus, Check, X, Undo2 } from 'lucide-react';
@@ -118,6 +121,9 @@ const DeductionRow = ({
                     ? 'Answer the tenant (needed to approve)'
                     : 'Note (optional)'
               }
+              aria-label={
+                mode === 'reject' ? 'Reason for rejecting' : disputeOpen ? 'Answer' : 'Note'
+              }
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
@@ -128,7 +134,8 @@ const DeductionRow = ({
                 <Button
                   variant="danger"
                   size="sm"
-                  disabled={!text.trim() || reject.isPending}
+                  disabled={!text.trim()}
+                  isLoading={reject.isPending}
                   onClick={() => reject.mutate()}
                 >
                   Confirm reject
@@ -143,7 +150,8 @@ const DeductionRow = ({
                   variant="secondary"
                   size="sm"
                   className="gap-1.5"
-                  disabled={approve.isPending || (disputeOpen && text.trim().length < 10)}
+                  disabled={disputeOpen && text.trim().length < 10}
+                  isLoading={approve.isPending}
                   onClick={() => approve.mutate()}
                 >
                   <Check className="h-4 w-4" />
@@ -168,6 +176,7 @@ const DeductionRow = ({
         <div className="mt-3 space-y-2">
           <Textarea
             placeholder="Answer the tenant: why it stands, or that you are dropping it"
+            aria-label="Answer the tenant"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
@@ -176,6 +185,7 @@ const DeductionRow = ({
               variant="secondary"
               size="sm"
               disabled={text.trim().length < 10 || answer.isPending}
+              isLoading={answer.isPending && answer.variables === false}
               onClick={() => answer.mutate(false)}
             >
               Keep deduction
@@ -184,6 +194,7 @@ const DeductionRow = ({
               variant="ghost"
               size="sm"
               disabled={text.trim().length < 10 || answer.isPending}
+              isLoading={answer.isPending && answer.variables === true}
               onClick={() => answer.mutate(true)}
             >
               Drop deduction
@@ -191,7 +202,11 @@ const DeductionRow = ({
           </div>
         </div>
       )}
-      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 };
@@ -206,7 +221,12 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
   const [amount, setAmount] = useState<number>(0);
   const [reason, setReason] = useState('');
 
-  const { data: deposit, isLoading } = useQuery({
+  const {
+    data: deposit,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: depositId ? landlordKeys.deposit(depositId) : ['deposit', 'none'],
     queryFn: () => unwrap(depositService.get(depositId!)),
     enabled: Boolean(depositId),
@@ -247,12 +267,20 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="w-full max-w-2xl">
         <div className="max-h-[85vh] overflow-y-auto p-6">
-          {isLoading || !deposit ? (
-            <PageLoadingState />
+          {isLoading ? (
+            <CardSkeleton lines={5} />
+          ) : !deposit ? (
+            <PageErrorState
+              headingLevel="h2"
+              className="min-h-0 py-10"
+              title="This deposit did not load"
+              onRetry={() => void refetch()}
+              isRetrying={isRefetching}
+            />
           ) : (
             <div className="space-y-5">
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0">
                   <h2 className="text-lg font-semibold text-foreground">
                     {deposit.propertyTitle ?? 'Property'}
                   </h2>
@@ -280,7 +308,7 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
               </div>
 
               {deposit.returnedAt && deposit.returnedAmount != null && (
-                <p className="rounded-xl bg-success-subtle p-3 text-sm text-success">
+                <Alert variant="success">
                   {formatNaira(deposit.returnedAmount)} returned to the tenant on{' '}
                   {new Date(deposit.returnedAt).toLocaleDateString('en-NG', {
                     day: 'numeric',
@@ -288,7 +316,7 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                     year: 'numeric',
                   })}
                   .
-                </p>
+                </Alert>
               )}
 
               {/* Deductions */}
@@ -313,18 +341,23 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
               {deposit.status !== 'RETURNED' && (
                 <div className="space-y-3 rounded-xl border border-dashed border-border p-4">
                   <p className="text-sm font-medium text-foreground">Record a deduction</p>
-                  <CurrencyInput value={amount} onValueChange={setAmount} placeholder="Amount" />
-                  <Textarea
-                    placeholder="Reason, e.g. repaint, cleaning"
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    rows={2}
-                  />
+                  <Field label="Amount">
+                    <CurrencyInput value={amount} onValueChange={setAmount} placeholder="Amount" />
+                  </Field>
+                  <Field label="Reason">
+                    <Textarea
+                      placeholder="Reason, e.g. repaint, cleaning"
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      rows={2}
+                    />
+                  </Field>
                   <div className="flex justify-end">
                     <Button
                       variant="secondary"
                       className="gap-1.5"
-                      disabled={amount <= 0 || !reason.trim() || deductMutation.isPending}
+                      disabled={amount <= 0 || !reason.trim()}
+                      isLoading={deductMutation.isPending}
                       onClick={() => deductMutation.mutate()}
                     >
                       <Plus className="h-4 w-4" />
@@ -343,12 +376,14 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                   <Button
                     variant="primary"
                     className="gap-1.5"
-                    disabled={Boolean(returnBlocker) || returnMutation.isPending}
+                    disabled={Boolean(returnBlocker)}
+                    isLoading={returnMutation.isPending}
+                    loadingText="Returning…"
                     title={returnBlocker}
                     onClick={() => returnMutation.mutate()}
                   >
                     <Undo2 className="h-4 w-4" />
-                    {returnMutation.isPending ? 'Returning…' : 'Return deposit'}
+                    Return deposit
                   </Button>
                 )}
               </div>
@@ -356,7 +391,7 @@ export const DepositDetailModal = ({ depositId, onClose }: DepositDetailModalPro
                 <p className="text-right text-xs text-muted-foreground">{returnBlocker}.</p>
               )}
               {returnMutation.error && (
-                <p className="text-right text-sm text-destructive">
+                <p role="alert" className="text-right text-sm text-destructive">
                   {(returnMutation.error as Error).message}
                 </p>
               )}

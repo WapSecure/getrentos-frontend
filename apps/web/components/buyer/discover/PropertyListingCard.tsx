@@ -31,7 +31,7 @@ export const PropertyListingCard = ({
     >
       <div className="relative h-44 bg-muted">
         <div className="absolute inset-0 flex items-center justify-center">
-          <Building2 className="w-12 h-12 text-gray-400 dark:text-gray-600" />
+          <Building2 className="w-12 h-12 text-muted-foreground" />
         </div>
         {listing.ownerVerified && (
           <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-green-700 bg-green-50 dark:text-green-400 dark:bg-green-900/20">

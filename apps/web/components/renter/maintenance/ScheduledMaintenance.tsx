@@ -1,8 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Wrench, CheckCircle, AlertCircle, Plus } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import {
+  Calendar,
+  Clock,
+  Wrench,
+  CheckCircle,
+  AlertCircle,
+  Plus,
+  type LucideIcon,
+} from 'lucide-react';
+import { Badge, Button, EmptyState, type BadgeVariant } from '@getrentos/ui';
 
 interface ScheduledMaintenance {
   id: string;
@@ -20,11 +28,14 @@ interface ScheduledMaintenanceProps {
   onSchedule?: () => void;
 }
 
-const statusConfig = {
-  scheduled: { label: 'Scheduled', color: 'bg-blue-100 text-blue-800', icon: Clock },
-  in_progress: { label: 'In Progress', color: 'bg-yellow-100 text-yellow-800', icon: Wrench },
-  completed: { label: 'Completed', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+const statusConfig: Record<
+  ScheduledMaintenance['status'],
+  { label: string; variant: BadgeVariant; icon: LucideIcon }
+> = {
+  scheduled: { label: 'Scheduled', variant: 'info', icon: Clock },
+  in_progress: { label: 'In Progress', variant: 'warning', icon: Wrench },
+  completed: { label: 'Completed', variant: 'success', icon: CheckCircle },
+  cancelled: { label: 'Cancelled', variant: 'danger', icon: AlertCircle },
 };
 
 const formatDate = (dateString: string) => {
@@ -43,7 +54,7 @@ export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMainten
       animate={{ opacity: 1, y: 0 }}
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="p-4 border-b border-border flex justify-between items-center">
+      <div className="p-4 border-b border-border flex justify-between items-center gap-3">
         <div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
@@ -59,10 +70,7 @@ export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMainten
 
       <div className="divide-y divide-border">
         {schedules.length === 0 ? (
-          <div className="p-8 text-center">
-            <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">No scheduled maintenance</p>
-          </div>
+          <EmptyState icon={Calendar} title="No scheduled maintenance" size="compact" bare />
         ) : (
           schedules.map((schedule) => {
             const status = statusConfig[schedule.status];
@@ -73,8 +81,8 @@ export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMainten
                 <div className="flex flex-wrap justify-between items-start gap-2">
                   <div>
                     <h4 className="font-medium text-foreground">{schedule.title}</h4>
-                    <p className="text-sm text-gray-500 mt-0.5">{schedule.description}</p>
-                    <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
+                    <p className="text-sm text-muted-foreground mt-0.5">{schedule.description}</p>
+                    <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         <span>{formatDate(schedule.scheduledDate)}</span>
@@ -89,12 +97,9 @@ export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMainten
                       </div>
                     </div>
                   </div>
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${status.color}`}
-                  >
-                    <StatusIcon className="w-3 h-3" />
+                  <Badge variant={status.variant} icon={<StatusIcon className="w-3 h-3" />}>
                     {status.label}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             );

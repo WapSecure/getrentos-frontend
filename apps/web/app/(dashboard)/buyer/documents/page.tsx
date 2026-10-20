@@ -88,7 +88,7 @@ export default function BuyerDocumentsPage() {
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <LegacyInput
             type="text"
             value={searchQuery}
@@ -111,7 +111,7 @@ export default function BuyerDocumentsPage() {
               className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                 filter === option.value
                   ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {option.label}
@@ -142,7 +142,7 @@ export default function BuyerDocumentsPage() {
                   {doc.propertyTitle ? ` • ${doc.propertyTitle}` : ''}
                 </p>
               </div>
-              <div className="hidden sm:block text-xs text-gray-400 whitespace-nowrap">
+              <div className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
                 {formatDate(doc.uploadedAt)} • {doc.sizeLabel}
               </div>
               <div className="flex items-center gap-1 shrink-0">

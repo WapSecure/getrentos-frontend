@@ -2,7 +2,7 @@
 
 import { Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@getrentos/ui';
+import { Button, Card } from '@getrentos/ui';
 
 interface NotificationFiltersProps {
   filterType: string;
@@ -36,9 +36,11 @@ export const NotificationFilters = ({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
         className="w-full p-3 flex items-center justify-between hover:bg-secondary transition-colors"
       >
         <div className="flex items-center gap-2">
@@ -49,23 +51,24 @@ export const NotificationFilters = ({
           )}
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-gray-500" />
+          <ChevronUp className="w-4 h-4 text-muted-foreground" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
         )}
       </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">
+          <div role="group" aria-labelledby="notification-filter-type">
+            <p id="notification-filter-type" className="text-xs font-medium text-foreground mb-1">
               Notification Type
-            </label>
+            </p>
             <div className="flex flex-wrap gap-2">
               {typeOptions.map((option) => (
                 <Button
                   key={option.value}
                   variant={filterType === option.value ? 'primary' : 'secondary'}
+                  aria-pressed={filterType === option.value}
                   size="sm"
                   onClick={() => setFilterType(option.value)}
                 >
@@ -75,13 +78,16 @@ export const NotificationFilters = ({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1">Status</label>
+          <div role="group" aria-labelledby="notification-filter-status">
+            <p id="notification-filter-status" className="text-xs font-medium text-foreground mb-1">
+              Status
+            </p>
             <div className="flex flex-wrap gap-2">
               {readOptions.map((option) => (
                 <Button
                   key={option.value}
                   variant={filterRead === option.value ? 'primary' : 'secondary'}
+                  aria-pressed={filterRead === option.value}
                   size="sm"
                   onClick={() => setFilterRead(option.value)}
                 >
@@ -92,6 +98,6 @@ export const NotificationFilters = ({
           </div>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

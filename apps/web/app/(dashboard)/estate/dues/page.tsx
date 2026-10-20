@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Receipt, Plus, Settings } from 'lucide-react';
-import { Button, EmptyState, Pagination, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  Toast,
+  type ToastVariant,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -117,7 +125,7 @@ export default function EstateDuesPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -170,7 +178,7 @@ export default function EstateDuesPage() {
       </div>
 
       {isDuesLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : dues.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState

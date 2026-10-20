@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Button, EmptyState, IconButton } from '@getrentos/ui';
 
 interface Notification {
   id: string;
@@ -43,13 +44,13 @@ export const PaymentNotifications = ({
   const getColor = (type: string) => {
     switch (type) {
       case 'success':
-        return 'text-green-500 bg-green-50 dark:bg-green-900/20';
+        return 'text-success bg-success-subtle';
       case 'error':
-        return 'text-red-500 bg-red-50 dark:bg-red-900/20';
+        return 'text-destructive bg-destructive-subtle';
       case 'warning':
-        return 'text-yellow-500 bg-yellow-50 dark:bg-yellow-900/20';
+        return 'text-warning bg-warning-subtle';
       default:
-        return 'text-blue-500 bg-blue-50 dark:bg-blue-900/20';
+        return 'text-info bg-info-subtle';
     }
   };
 
@@ -66,15 +67,20 @@ export const PaymentNotifications = ({
 
   return (
     <div className="relative">
-      <button
+      <IconButton
+        label={
+          unreadCount > 0 ? `Payment notifications, ${unreadCount} unread` : 'Payment notifications'
+        }
+        icon={<Bell aria-hidden="true" />}
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
-      >
-        <Bell className="w-5 h-5 text-muted-foreground" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        )}
-      </button>
+      />
+      {unreadCount > 0 && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-2 right-2 w-2 h-2 bg-destructive rounded-full"
+        />
+      )}
 
       <AnimatePresence>
         {isOpen && (
@@ -82,39 +88,34 @@ export const PaymentNotifications = ({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-80 bg-card rounded-xl shadow-lg border border-border z-50"
+            className="absolute right-0 mt-2 w-[min(20rem,calc(100vw-2rem))] bg-card rounded-xl shadow-lg border border-border z-50"
           >
             <div className="p-3 border-b border-border flex justify-between items-center">
               <div>
                 <h3 className="font-semibold text-foreground">Notifications</h3>
-                <p className="text-xs text-gray-500">{unreadCount} unread</p>
+                <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
               </div>
               {unreadCount > 0 && (
-                <button
-                  onClick={onClearAll}
-                  className="text-xs text-primary hover:text-primary-hover"
-                >
+                <Button size="xs" variant="ghost" className="text-primary" onClick={onClearAll}>
                   Clear all
-                </button>
+                </Button>
               )}
             </div>
 
-            <div className="max-h-96 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="max-h-96 overflow-y-auto divide-y divide-border">
               {notifications.length === 0 ? (
-                <div className="p-4 text-center">
-                  <Bell className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">No notifications</p>
-                </div>
+                <EmptyState icon={Bell} title="No notifications" size="compact" bare />
               ) : (
                 notifications.map((notification) => {
                   const Icon = getIcon(notification.type);
                   const color = getColor(notification.type);
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={notification.id}
-                      className={`p-3 hover:bg-secondary transition-colors cursor-pointer ${
-                        !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                      className={`block w-full text-left p-3 hover:bg-secondary transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                        !notification.read ? 'bg-info-subtle/50' : ''
                       }`}
                       onClick={() => onMarkAsRead(notification.id)}
                     >
@@ -129,15 +130,15 @@ export const PaymentNotifications = ({
                           <p className="text-xs text-muted-foreground mt-0.5">
                             {notification.message}
                           </p>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {formatDate(notification.date)}
                           </p>
                         </div>
                         {!notification.read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 shrink-0" />
+                          <span className="w-2 h-2 bg-info rounded-full mt-2 shrink-0" />
                         )}
                       </div>
-                    </div>
+                    </button>
                   );
                 })
               )}

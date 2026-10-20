@@ -395,7 +395,7 @@ export const PublicMarketBrowser = ({
       </header>
 
       {estateFromUrl && (
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/40">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3">
           <p className="text-sm text-muted-foreground">
             Showing only {noun.many} marketed inside{' '}
             <span className="font-medium text-foreground">{humaniseSlug(estateFromUrl)}</span>.

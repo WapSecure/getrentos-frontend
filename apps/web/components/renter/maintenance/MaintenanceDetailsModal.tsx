@@ -12,8 +12,9 @@ import {
   CheckCircle,
   Wrench,
   XCircle,
+  type LucideIcon,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Badge, Button, IconButton, type BadgeVariant } from '@getrentos/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceDetailsModalProps {
@@ -23,19 +24,21 @@ interface MaintenanceDetailsModalProps {
   onUpdateStatus: (id: string, status: MaintenanceRequest['status']) => void;
 }
 
-const priorityConfig = {
-  low: { label: 'Low', color: 'bg-gray-100 text-gray-800', icon: AlertCircle },
-  medium: { label: 'Medium', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
-  high: { label: 'High', color: 'bg-orange-100 text-orange-800', icon: AlertCircle },
-  urgent: { label: 'Urgent', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+type BadgeConfig = { label: string; variant: BadgeVariant; icon: LucideIcon };
+
+const priorityConfig: Record<MaintenanceRequest['priority'], BadgeConfig> = {
+  low: { label: 'Low', variant: 'neutral', icon: AlertCircle },
+  medium: { label: 'Medium', variant: 'warning', icon: AlertCircle },
+  high: { label: 'High', variant: 'warning', icon: AlertCircle },
+  urgent: { label: 'Urgent', variant: 'danger', icon: AlertCircle },
 };
 
-const statusConfig = {
-  submitted: { label: 'Submitted', color: 'bg-blue-100 text-blue-800', icon: Clock },
-  assigned: { label: 'Assigned', color: 'bg-purple-100 text-purple-800', icon: User },
-  in_progress: { label: 'In Progress', color: 'bg-yellow-100 text-yellow-800', icon: Wrench },
-  resolved: { label: 'Resolved', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  cancelled: { label: 'Cancelled', color: 'bg-gray-100 text-gray-600', icon: XCircle },
+const statusConfig: Record<MaintenanceRequest['status'], BadgeConfig> = {
+  submitted: { label: 'Submitted', variant: 'info', icon: Clock },
+  assigned: { label: 'Assigned', variant: 'info', icon: User },
+  in_progress: { label: 'In Progress', variant: 'warning', icon: Wrench },
+  resolved: { label: 'Resolved', variant: 'success', icon: CheckCircle },
+  cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
 
 const formatDate = (value?: string | null, fallback = 'Not available') => {
@@ -54,9 +57,9 @@ const formatDate = (value?: string | null, fallback = 'Not available') => {
 };
 
 const EmergencyTimelineItem = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-md bg-card/70 px-2.5 py-2 dark:bg-black/10">
-    <p className="text-[11px] font-medium text-red-700/80 dark:text-red-300/80">{label}</p>
-    <p className="mt-0.5 text-xs font-medium text-red-900 dark:text-red-100">{value}</p>
+  <div className="rounded-md bg-card/70 px-2.5 py-2">
+    <p className="text-[11px] font-medium text-muted-foreground">{label}</p>
+    <p className="mt-0.5 text-xs font-medium text-foreground">{value}</p>
   </div>
 );
 
@@ -88,53 +91,41 @@ export const MaintenanceDetailsModal = ({
                 <h3 className="font-semibold text-foreground">Maintenance Details</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{request.propertyName}</p>
               </div>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close details" icon={<X />} size="sm" onClick={onClose} />
             </div>
 
             <div className="p-4 space-y-4">
               {/* Title & Status */}
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h4 className="text-lg font-semibold text-foreground">{request.title}</h4>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {request.isEmergency && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-300">
-                      <AlertTriangle className="h-3 w-3" />
+                    <Badge variant="danger" icon={<AlertTriangle className="h-3 w-3" />}>
                       Emergency
-                    </span>
+                    </Badge>
                   )}
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${priorityConfig[request.priority].color}`}
+                  <Badge
+                    variant={priorityConfig[request.priority].variant}
+                    icon={<PriorityIcon className="w-3 h-3" />}
                   >
-                    <PriorityIcon className="w-3 h-3" />
                     {priorityConfig[request.priority].label}
-                  </span>
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig[request.status].color}`}
+                  </Badge>
+                  <Badge
+                    variant={statusConfig[request.status].variant}
+                    icon={<StatusIcon className="w-3 h-3" />}
                   >
-                    <StatusIcon className="w-3 h-3" />
                     {statusConfig[request.status].label}
-                  </span>
+                  </Badge>
                 </div>
               </div>
 
               {request.isEmergency && (
-                <section className="rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/25">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-300" />
-                    <div>
-                      <p className="text-sm font-semibold text-red-800 dark:text-red-200">
-                        Emergency request status
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-red-700 dark:text-red-300">
-                        {request.acknowledgedAt
-                          ? `Acknowledged ${formatDate(request.acknowledgedAt)}.`
-                          : 'Awaiting acknowledgement.'}
-                      </p>
-                    </div>
-                  </div>
-
+                <Alert variant="danger" icon={AlertTriangle} title="Emergency request status">
+                  <p>
+                    {request.acknowledgedAt
+                      ? `Acknowledged ${formatDate(request.acknowledgedAt)}.`
+                      : 'Awaiting acknowledgement.'}
+                  </p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-3">
                     <EmergencyTimelineItem
                       label="Response target"
@@ -149,29 +140,29 @@ export const MaintenanceDetailsModal = ({
                       value={formatDate(request.escalationDueAt, 'Not scheduled')}
                     />
                   </div>
-                  <p className="mt-3 text-xs leading-5 text-red-700 dark:text-red-300">
+                  <p className="mt-3 text-xs leading-5">
                     These are operational service targets for this request, not a guarantee of a
                     response time. For any immediate threat to life or safety, contact local
                     emergency services first.
                   </p>
-                </section>
+                </Alert>
               )}
 
               {/* Details Grid */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="p-2 rounded-lg bg-secondary">
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">Reported</span>
+                    <Calendar className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Reported</span>
                   </div>
                   <p className="text-sm font-medium text-foreground">
                     {formatDate(request.createdAt)}
                   </p>
                 </div>
-                <div className="p-2 rounded-lg bg-gray-50 dark:bg-white/5">
+                <div className="p-2 rounded-lg bg-secondary">
                   <div className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-500">Category</span>
+                    <MapPin className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Category</span>
                   </div>
                   <p className="text-sm font-medium text-foreground capitalize">
                     {request.category}
@@ -180,17 +171,17 @@ export const MaintenanceDetailsModal = ({
               </div>
 
               {/* Description */}
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-white/5">
-                <span className="text-xs text-gray-500">Description</span>
+              <div className="p-3 rounded-lg bg-secondary">
+                <span className="text-xs text-muted-foreground">Description</span>
                 <p className="text-sm text-foreground mt-1">{request.description}</p>
               </div>
 
               {/* Vendor Info */}
               {request.assignedVendorName && (
-                <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                <div className="p-3 rounded-lg bg-purple-subtle border border-purple/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="w-4 h-4 text-purple-600" />
-                    <span className="text-sm font-medium text-purple-800 dark:text-purple-300">
+                    <User className="w-4 h-4 text-purple" />
+                    <span className="text-sm font-medium text-purple">
                       Assigned Vendor
                     </span>
                   </div>
@@ -217,11 +208,11 @@ export const MaintenanceDetailsModal = ({
               {/* Renters can only cancel a newly submitted request. */}
               {request.status === 'submitted' && (
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-foreground">Request</label>
+                  <p className="mb-2 text-sm font-medium text-foreground">Request</p>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-red-600 hover:text-red-700"
+                    className="text-destructive hover:text-destructive"
                     onClick={() => handleStatusUpdate('cancelled')}
                   >
                     Cancel request
@@ -231,17 +222,9 @@ export const MaintenanceDetailsModal = ({
 
               {/* SLA Info */}
               {request.slaResponseTime !== undefined && (
-                <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
-                      SLA Response Time
-                    </span>
-                  </div>
-                  <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                    {request.slaResponseTime} hours
-                  </p>
-                </div>
+                <Alert variant="info" icon={Clock} title="SLA Response Time">
+                  {request.slaResponseTime} hours
+                </Alert>
               )}
             </div>
           </motion.div>

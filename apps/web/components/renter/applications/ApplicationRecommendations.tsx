@@ -79,7 +79,7 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
     >
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
-          <BadgeCheck className="w-4 h-4 text-purple-600" />
+          <BadgeCheck className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-foreground">Recommendations</h3>
         </div>
       </div>
@@ -88,20 +88,21 @@ export const ApplicationRecommendations = ({ applications }: ApplicationRecommen
         {recommendations.map((rec) => (
           <div
             key={rec.id}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-secondary transition-colors"
+            className="p-3 rounded-lg bg-secondary/60 hover:bg-secondary transition-colors"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <h4 className="text-sm font-medium text-foreground">{rec.title}</h4>
-                <p className="text-xs text-gray-500 mt-0.5">{rec.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
               </div>
               <Button
                 size="sm"
                 variant="ghost"
-                className="shrink-0 gap-1 self-start whitespace-nowrap"
+                icon={<ArrowRight className="w-3 h-3" />}
+                iconPosition="right"
+                className="shrink-0 self-start whitespace-nowrap"
               >
                 {rec.action}
-                <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
           </div>

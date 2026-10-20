@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SavedPropertiesHeader } from '@/components/renter/saved/SavedPropertiesHeader';
 import { SavedPropertiesFilters } from '@/components/renter/saved/SavedPropertiesFilters';
 import { SavedPropertiesGrid } from '@/components/renter/saved/SavedPropertiesGrid';
@@ -11,9 +11,15 @@ import { RecentlyViewed } from '@/components/renter/saved/RecentlyViewed';
 import { SavedRecommendations } from '@/components/renter/saved/SavedRecommendations';
 import { BulkActions } from '@/components/renter/saved/BulkActions';
 import { ExportSavedProperties } from '@/components/renter/saved/ExportSavedProperties';
-import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
-import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import {
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
+import { renterService, type SavedListingItem } from '@/services/renterService';
+import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export default function SavedPage() {
@@ -28,7 +34,7 @@ export default function SavedPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'applied' | 'viewed'>('all');
   const [selectedSavedListings, setSelectedSavedListings] = useState<Record<string, string>>({});
   const [showExportModal, setShowExportModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const toast = useToast();
 
   const savedListingParams = {
     page,
@@ -37,9 +43,11 @@ export default function SavedPage() {
     status: filterStatus === 'all' ? undefined : filterStatus,
     sortBy,
   };
+  const savedListingsQueryKey = [...renterKeys.savedListings, savedListingParams];
   const savedListingsQuery = useQuery({
-    queryKey: [...renterKeys.savedListings, savedListingParams],
+    queryKey: savedListingsQueryKey,
     queryFn: () => unwrap(renterService.listSavedListings(savedListingParams)),
+    placeholderData: keepPreviousData,
   });
   const data = savedListingsQuery.data;
   const savedProperties = data?.items ?? [];
@@ -62,18 +70,32 @@ export default function SavedPage() {
     queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
   };
 
-  const unsaveMutation = useMutation({
+  const unsaveMutation = useOptimisticMutation({
     mutationFn: (propertyId: string) => unwrap(renterService.unsaveListing(propertyId)),
+    patches: (propertyId) => [
+      {
+        queryKey: savedListingsQueryKey,
+        update: (old) => {
+          const page = old as Paginated<SavedListingItem>;
+          return {
+            ...page,
+            items: page.items.filter((item) => item.id !== propertyId),
+            total: Math.max(0, page.total - 1),
+          };
+        },
+      },
+    ],
+    invalidate: [renterKeys.savedListings, renterKeys.wishlists, renterKeys.dashboardStats],
+    errorMessage: 'The property could not be removed from your saved list.',
     onSuccess: (_, propertyId) => {
-      invalidateSaved();
       setSelectedSavedListings((previous) => {
         const next = { ...previous };
         delete next[propertyId];
         return next;
       });
-      if (savedProperties.length === 1 && page > 1) setPage((current) => current - 1);
+      const pageNowEmpty = !savedProperties.some((property) => property.id !== propertyId);
+      if (pageNowEmpty && page > 1) setPage((current) => current - 1);
     },
-    onError: () => setErrorMessage('The property could not be removed from your saved list.'),
   });
 
   const moveMutation = useMutation({
@@ -93,7 +115,7 @@ export default function SavedPage() {
         return next;
       });
     },
-    onError: () => setErrorMessage('The property could not be moved to that wishlist.'),
+    onError: () => toast.error('The property could not be moved to that wishlist.'),
   });
 
   const handleRemoveProperty = (propertyId: string) => unsaveMutation.mutate(propertyId);
@@ -136,7 +158,7 @@ export default function SavedPage() {
         setPage((current) => current - 1);
       }
     },
-    onError: () => setErrorMessage('The selected properties could not be removed.'),
+    onError: () => toast.error('The selected properties could not be removed.'),
   });
 
   const handleDeleteSelected = () => bulkUnsaveMutation.mutate(selectedProperties);
@@ -160,7 +182,7 @@ export default function SavedPage() {
 
   const savedQueries = [savedListingsQuery, dashboardStatsQuery, wishlistsQuery];
   if (savedQueries.some((query) => query.isLoading)) return <PageLoadingState />;
-  if (savedQueries.some((query) => query.isError)) {
+  if (savedQueries.some((query) => query.isError && !query.data)) {
     return (
       <PageErrorState
         title="Saved properties are unavailable"
@@ -225,10 +247,6 @@ export default function SavedPage() {
           />
         </div>
       </div>
-
-      {errorMessage && (
-        <Toast message={errorMessage} variant="error" onClose={() => setErrorMessage(null)} />
-      )}
 
       <BulkActions
         selectedCount={selectedProperties.length}

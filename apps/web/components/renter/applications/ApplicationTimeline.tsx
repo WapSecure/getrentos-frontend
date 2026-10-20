@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CheckCircle, Circle, Clock, AlertCircle, Home, UserCheck } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 
 interface TimelineStep {
   stage: string;
@@ -24,10 +25,10 @@ const statusIconMap: Record<string, React.ElementType> = {
 };
 
 const statusColorMap: Record<string, string> = {
-  pending: 'text-yellow-500',
-  under_review: 'text-blue-500',
-  approved: 'text-green-500',
-  rejected: 'text-red-500',
+  pending: 'text-warning',
+  under_review: 'text-info',
+  approved: 'text-success',
+  rejected: 'text-destructive',
   withdrawn: 'text-muted-foreground',
 };
 
@@ -55,7 +56,7 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
 
   // Get the appropriate icon component based on status
   const StatusIcon = statusIconMap[currentStatus] || Clock;
-  const statusColor = statusColorMap[currentStatus] || 'text-gray-500';
+  const statusColor = statusColorMap[currentStatus] || 'text-muted-foreground';
   const statusLabel = getStatusLabel(currentStatus);
 
   return (
@@ -66,13 +67,13 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
           <StatusIcon className={`w-5 h-5 ${statusColor}`} />
           <span className="text-sm font-medium text-foreground capitalize">{statusLabel}</span>
         </div>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-muted-foreground">
           {completedCount}/{totalSteps} steps
         </span>
       </div>
 
       {/* Progress Bar */}
-      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div className="h-2 bg-border rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
@@ -83,7 +84,7 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
 
       {/* Timeline Steps */}
       <div className="relative">
-        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
 
         <div className="space-y-6">
           {timeline.map((step, index) => (
@@ -96,15 +97,13 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
             >
               <div
                 className={`absolute left-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                  step.completed
-                    ? 'bg-green-100 dark:bg-green-900/20'
-                    : 'bg-gray-100 dark:bg-gray-800'
+                  step.completed ? 'bg-success-subtle' : 'bg-secondary'
                 }`}
               >
                 {step.completed ? (
-                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <CheckCircle className="w-4 h-4 text-success" />
                 ) : (
-                  <Circle className="w-4 h-4 text-gray-400" />
+                  <Circle className="w-4 h-4 text-muted-foreground" />
                 )}
               </div>
 
@@ -117,9 +116,9 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
                   >
                     {step.stage}
                   </h4>
-                  {step.completed && <span className="text-xs text-green-600">✓</span>}
+                  {step.completed && <span className="text-xs text-success">✓</span>}
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {step.date === 'Pending' ? 'Awaiting confirmation' : step.date}
                 </p>
               </div>
@@ -128,70 +127,30 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
         </div>
       </div>
 
-      {/* Status Messages */}
       {currentStatus === 'approved' && (
-        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-          <div className="flex items-start gap-2">
-            <Home className="w-4 h-4 text-green-600 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-green-800 dark:text-green-300">
-                Congratulations!
-              </p>
-              <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
-                Your application has been approved. Next steps: Review lease agreement and schedule
-                move-in.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert variant="success" icon={Home} title="Congratulations!">
+          Your application has been approved. Next steps: Review lease agreement and schedule
+          move-in.
+        </Alert>
       )}
 
       {currentStatus === 'rejected' && (
-        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-600 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-red-800 dark:text-red-300">
-                Application Not Approved
-              </p>
-              <p className="text-xs text-red-700 dark:text-red-400 mt-0.5">
-                Contact the landlord for feedback or continue exploring other properties.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert variant="danger" icon={AlertCircle} title="Application Not Approved">
+          Contact the landlord for feedback or continue exploring other properties.
+        </Alert>
       )}
 
       {currentStatus === 'pending' && (
-        <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-          <div className="flex items-start gap-2">
-            <Clock className="w-4 h-4 text-yellow-600 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
-                Awaiting Review
-              </p>
-              <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-0.5">
-                Your application is being reviewed by the landlord. You&apos;ll be notified of any
-                updates.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert variant="warning" icon={Clock} title="Awaiting Review">
+          Your application is being reviewed by the landlord. You&apos;ll be notified of any
+          updates.
+        </Alert>
       )}
 
       {currentStatus === 'under_review' && (
-        <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <div className="flex items-start gap-2">
-            <UserCheck className="w-4 h-4 text-blue-600 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Under Review</p>
-              <p className="text-xs text-blue-700 dark:text-blue-400 mt-0.5">
-                The landlord is reviewing your application. Decisions typically take 2-5 business
-                days.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Alert variant="info" icon={UserCheck} title="Under Review">
+          The landlord is reviewing your application. Decisions typically take 2-5 business days.
+        </Alert>
       )}
     </div>
   );

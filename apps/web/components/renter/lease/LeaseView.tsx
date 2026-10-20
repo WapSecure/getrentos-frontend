@@ -14,15 +14,14 @@ import { UpcomingPaymentReminders } from '@/components/renter/lease/UpcomingPaym
 import { LeaseTerminationRequest } from '@/components/renter/lease/LeaseTerminationRequest';
 import { PendingLeaseCard } from '@/components/renter/lease/PendingLeaseCard';
 import { FileText } from 'lucide-react';
-import { PageErrorState, PageLoadingState, Toast, type ToastVariant } from '@getrentos/ui';
-import { useState } from 'react';
+import { EmptyState, PageErrorState, PageLoadingState, useToast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
 export const LeaseView = () => {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   // A renter whose lease is still awaiting signature has no active lease, no
   // renewal offer, no increases and no reminders yet: the API answers those with
@@ -81,16 +80,14 @@ export const LeaseView = () => {
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: renterKeys.pendingLease });
       queryClient.invalidateQueries({ queryKey: renterKeys.lease });
-      setToast({
-        message:
-          updated.status === 'awaiting_payment'
-            ? 'Signature recorded. The lease now depends on your first payment, which GetRentos holds until you have the keys.'
-            : 'Your signature was recorded.',
-        variant: 'success',
-      });
+      toast.success(
+        updated.status === 'awaiting_payment'
+          ? 'Signature recorded. The lease now depends on your first payment, which GetRentos holds until you have the keys.'
+          : 'Your signature was recorded.'
+      );
     },
     onError: (error: Error) => {
-      setToast({ message: error.message || 'Unable to sign this lease.', variant: 'error' });
+      toast.error(error.message || 'Unable to sign this lease.');
     },
   });
 
@@ -105,13 +102,6 @@ export const LeaseView = () => {
   const handleSignLease = (id: string, signatureData: string) =>
     signLeaseMutation.mutate({ id, signatureData });
 
-  // Rendered by both branches below. It used to live only in the no-active-lease
-  // branch, so a tenant signing a second lease got no success or failure feedback
-  // at all: including the error when a signature is rejected.
-  const toastNode = toast ? (
-    <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-  ) : null;
-
   const leaseQueries = [
     leaseQuery,
     pendingLeaseQuery,
@@ -120,7 +110,8 @@ export const LeaseView = () => {
     paymentRemindersQuery,
   ];
   if (leaseQueries.some((query) => query.isLoading)) return <PageLoadingState />;
-  if (leaseQueries.some((query) => query.isError)) {
+  // A failed background refresh keeps what already loaded on screen.
+  if (leaseQueries.some((query) => query.isError && query.data === undefined)) {
     return (
       <PageErrorState
         title="Lease information is unavailable"
@@ -141,17 +132,12 @@ export const LeaseView = () => {
             isPending={signLeaseMutation.isPending}
           />
         ) : (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 mx-auto mb-4 bg-secondary rounded-full flex items-center justify-center">
-              <FileText className="w-8 h-8 text-muted-foreground" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground">No Active Lease</h2>
-            <p className="text-muted-foreground mt-2">
-              You don&apos;t have an active lease agreement at the moment.
-            </p>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="No Active Lease"
+            description="You don't have an active lease agreement at the moment."
+          />
         )}
-        {toastNode}
       </>
     );
   }
@@ -199,7 +185,6 @@ export const LeaseView = () => {
           />
         </div>
       </div>
-      {toastNode}
     </>
   );
 };

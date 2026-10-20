@@ -1,6 +1,7 @@
 'use client';
 
 import { ClipboardCheck, UserCheck, Home, FileText, Clock, AlertTriangle } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { AgentTask, TaskType } from '@/types/agent';
 
@@ -17,7 +18,7 @@ interface AgentTaskListProps {
 
 export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
   return (
-    <div className="bg-card rounded-2xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Today&apos;s Tasks</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -27,9 +28,7 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
 
       <div className="divide-y divide-border">
         {tasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">
-            No tasks scheduled for today
-          </p>
+          <EmptyState icon={ClipboardCheck} title="No tasks scheduled for today" size="compact" bare />
         ) : (
           tasks.map((task) => {
             const config = typeConfig[task.type];
@@ -41,10 +40,10 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
                 className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
               >
                 <div
-                  className={`p-2 rounded-lg shrink-0 ${isOverdue ? 'bg-red-50 dark:bg-red-900/20' : 'bg-accent'}`}
+                  className={`p-2 rounded-lg shrink-0 ${isOverdue ? 'bg-destructive-subtle' : 'bg-accent'}`}
                 >
                   {isOverdue ? (
-                    <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
                   ) : (
                     <Icon className="w-4 h-4 text-primary" />
                   )}
@@ -64,6 +63,6 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
           })
         )}
       </div>
-    </div>
+    </Card>
   );
 };

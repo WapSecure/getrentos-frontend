@@ -15,7 +15,7 @@ const StarRow = ({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }
     {Array.from({ length: 5 }).map((_, i) => (
       <Star
         key={i}
-        className={`${size === 'lg' ? 'w-5 h-5' : 'w-3.5 h-3.5'} ${i < rating ? 'fill-primary text-primary' : 'text-gray-200 dark:text-gray-700'}`}
+        className={`${size === 'lg' ? 'w-5 h-5' : 'w-3.5 h-3.5'} ${i < rating ? 'fill-primary text-primary' : 'text-border'}`}
       />
     ))}
   </div>
@@ -76,7 +76,7 @@ export default function BuyerReviewsPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <StarRow rating={review.rating} />
-                  <p className="text-xs text-gray-400 mt-1">{formatDate(review.date)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{formatDate(review.date)}</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mt-3">{review.comment}</p>

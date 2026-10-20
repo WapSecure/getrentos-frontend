@@ -1,21 +1,20 @@
 'use client';
 
-import { useCallback, useState, type ReactNode } from 'react';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useCallback } from 'react';
+import { useToast, type ToastVariant } from '@getrentos/ui';
 
 export type Notify = (message: string, variant?: ToastVariant) => void;
 
-/** One toast at a time for a screen; render `toast` once and hand `notify` down. */
-export const useNotify = (): { notify: Notify; toast: ReactNode } => {
-  const [current, setCurrent] = useState<{ message: string; variant: ToastVariant } | null>(null);
+/** A screen's `notify`, shown through the app-wide toasts; hand it down to panels. */
+export const useNotify = (): { notify: Notify } => {
+  const toast = useToast();
   const notify = useCallback<Notify>(
-    (message, variant = 'success') => setCurrent({ message, variant }),
-    []
+    (message, variant = 'success') => {
+      toast.show(message, variant);
+    },
+    [toast]
   );
-  const toast = current ? (
-    <Toast message={current.message} variant={current.variant} onClose={() => setCurrent(null)} />
-  ) : null;
-  return { notify, toast };
+  return { notify };
 };
 
 /** The message of whatever a mutation threw; the API writes these for people. */

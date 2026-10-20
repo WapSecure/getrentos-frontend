@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, Card } from '@getrentos/ui';
 
 interface Payment {
   month: string;
@@ -30,36 +30,33 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
       case 'paid':
         return {
           label: 'Paid',
-          color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+          variant: 'success' as const,
           icon: CheckCircle,
         };
       case 'pending':
         return {
           label: 'Pending',
-          color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+          variant: 'warning' as const,
           icon: Clock,
         };
       case 'overdue':
         return {
           label: 'Overdue',
-          color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+          variant: 'danger' as const,
           icon: AlertCircle,
         };
       default:
         return {
           label: 'Unknown',
-          color: 'bg-gray-100 text-gray-800',
+          variant: 'neutral' as const,
           icon: Clock,
         };
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
@@ -83,18 +80,15 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
             >
               <div>
                 <p className="text-sm font-medium text-foreground">{payment.month}</p>
-                <p className="text-xs text-gray-500">{payment.date}</p>
+                <p className="text-xs text-muted-foreground">{payment.date}</p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-semibold text-foreground">
                   {formatCurrency(payment.amount)}
                 </span>
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
-                >
-                  <StatusIcon className="w-3 h-3" />
+                <Badge variant={statusConfig.variant} icon={<StatusIcon className="w-3 h-3" />}>
                   {statusConfig.label}
-                </span>
+                </Badge>
               </div>
             </motion.div>
           );
@@ -106,6 +100,7 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
           View All Payments
         </Button>
       </div>
+      </Card>
     </motion.div>
   );
 };

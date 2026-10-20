@@ -51,7 +51,7 @@ export const BuyerProfileDropdown = ({ user }: BuyerProfileDropdownProps) => {
           <p className="text-xs text-muted-foreground">Property Buyer</p>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 

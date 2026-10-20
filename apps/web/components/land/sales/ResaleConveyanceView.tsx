@@ -22,7 +22,7 @@ import { ConditionsPanel } from '../closing/ConditionsPanel';
  */
 export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
   const queryClient = useQueryClient();
-  const { notify, toast } = useNotify();
+  const { notify } = useNotify();
   const [delivering, setDelivering] = useState<LandMilestone | null>(null);
   const key = landDeveloperKeys.transactionMilestones(txId);
   const propertyHint = useSearchParams().get('property');
@@ -155,7 +155,6 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
         isSaving={deliver.isPending}
         onDeliver={(milestone, input) => deliver.mutate({ milestone, input })}
       />
-      {toast}
     </>
   );
 };

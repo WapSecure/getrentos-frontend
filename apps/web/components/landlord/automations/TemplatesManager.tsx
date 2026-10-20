@@ -13,9 +13,9 @@ import {
   EmptyState,
   Field,
   Input,
+  ListSkeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -24,7 +24,7 @@ import { MERGE_FIELDS } from './constants';
 
 export function TemplatesManager() {
   const queryClient = useQueryClient();
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -46,22 +46,18 @@ export function TemplatesManager() {
     onSuccess: () => {
       invalidate();
       setOpen(false);
-      setToast({
-        message: editingId ? 'Template updated.' : 'Template saved.',
-        variant: 'success',
-      });
+      toast.success(editingId ? 'Template updated.' : 'Template saved.');
     },
-    onError: (e: Error) => setToast({ message: e.message || 'Unable to save.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to save.'),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => unwrap(automationService.deleteTemplate(id)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Template deleted.', variant: 'success' });
+      toast.success('Template deleted.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Unable to delete.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Unable to delete.'),
   });
 
   const openCreate = () => {
@@ -79,8 +75,8 @@ export function TemplatesManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-base font-semibold text-foreground">Templates</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Reusable messages you can send as a broadcast or attach to an automation.
@@ -90,7 +86,7 @@ export function TemplatesManager() {
       </div>
 
       {isLoading ? (
-        <div className="h-24 animate-pulse rounded-2xl bg-secondary/50" />
+        <ListSkeleton variant="cards" rows={2} />
       ) : templates.length === 0 ? (
         <Card static className="p-2">
           <EmptyState
@@ -103,7 +99,7 @@ export function TemplatesManager() {
         <div className="space-y-3">
           {templates.map((t) => (
             <Card key={t.id} static className="p-4">
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-semibold text-foreground">{t.title}</h3>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
@@ -117,6 +113,7 @@ export function TemplatesManager() {
                     rounded="md"
                     icon={<Pencil className="h-4 w-4" />}
                     onClick={() => openEdit(t)}
+                    aria-label={`Edit ${t.title}`}
                   >
                     Edit
                   </Button>
@@ -126,7 +123,9 @@ export function TemplatesManager() {
                     rounded="md"
                     icon={<Trash2 className="h-4 w-4" />}
                     onClick={() => remove.mutate(t.id)}
-                    disabled={remove.isPending}
+                    disabled={remove.isPending && remove.variables !== t.id}
+                    isLoading={remove.isPending && remove.variables === t.id}
+                    aria-label={`Delete ${t.title}`}
                   >
                     Delete
                   </Button>
@@ -164,17 +163,14 @@ export function TemplatesManager() {
             <Button
               rounded="md"
               onClick={() => save.mutate()}
-              disabled={!title.trim() || !content.trim() || save.isPending}
+              disabled={!title.trim() || !content.trim()}
+              isLoading={save.isPending}
             >
-              {save.isPending ? 'Saving…' : 'Save template'}
+              Save template
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

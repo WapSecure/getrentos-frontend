@@ -16,12 +16,13 @@ import {
 import {
   Badge,
   Button,
+  CardSkeleton,
   EmptyState,
-  PageLoadingState,
+  PageErrorState,
   Select,
+  Skeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
   DatePicker,
   Field,
 } from '@getrentos/ui';
@@ -52,7 +53,7 @@ export default function AdminLandInspectionPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'verifications.review');
   const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [note, setNote] = useState('');
   const key = landQueryKeys.watchInspection(id);
   const detail = useQuery({
@@ -65,10 +66,10 @@ export default function AdminLandInspectionPage() {
     queryClient.setQueryData(key, updated);
     void queryClient.invalidateQueries({ queryKey: landQueryKeys.watchRoot });
     setNote('');
-    setToast({ message, variant: 'success' });
+    toast.success(message);
   };
   const failed = (e: unknown, fallback: string) =>
-    setToast({ message: readLandApiError(e, fallback).message, variant: 'error' });
+    toast.error(readLandApiError(e, fallback).message);
   const accept = useMutation({
     mutationFn: () => unwrap(adminLandWatchService.accept(id, note)),
     onSuccess: (d) => done(d, 'Accepted; the owner can see the report.'),
@@ -94,14 +95,15 @@ export default function AdminLandInspectionPage() {
       />
     );
   }
-  if (detail.isLoading) return <PageLoadingState />;
+  if (detail.isLoading) return <InspectionSkeleton />;
   const i = detail.data;
-  if (detail.isError || !i) {
+  if (!i) {
     return (
-      <EmptyState
-        icon={CircleAlert}
+      <PageErrorState
         title="This inspection could not be loaded"
         description={detail.error instanceof Error ? detail.error.message : undefined}
+        onRetry={() => void detail.refetch()}
+        isRetrying={detail.isFetching}
       />
     );
   }
@@ -111,9 +113,6 @@ export default function AdminLandInspectionPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <Link
         href="/admin/land/watch"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -273,7 +272,9 @@ export default function AdminLandInspectionPage() {
                   onChange={(e) => setNote(e.target.value)}
                   rows={3}
                   maxLength={2000}
+                  showCount
                   placeholder="Note (required to query or cancel; shown to the owner when accepting)"
+                  aria-label="Decision note"
                 />
                 <div className="flex flex-wrap gap-2">
                   {canDecide && AWAITING_STAFF.has(i.status) && (
@@ -362,20 +363,22 @@ function AssignInspector({
       </p>
       {!disabled && (
         <div className="space-y-2">
-          <Select
-            value={inspectorId}
-            onValueChange={setInspectorId}
-            ariaLabel="Inspector"
-            placeholder={
-              pros.isLoading
-                ? 'Loading…'
-                : options.length
-                  ? `Accredited in ${inspection.land.state}`
-                  : `Nobody accredited in ${inspection.land.state}`
-            }
-            disabled={!options.length}
-            options={options}
-          />
+          <Field label="Inspector">
+            <Select
+              value={inspectorId}
+              onValueChange={setInspectorId}
+              searchable
+              placeholder={
+                pros.isLoading
+                  ? 'Loading…'
+                  : options.length
+                    ? `Accredited in ${inspection.land.state}`
+                    : `Nobody accredited in ${inspection.land.state}`
+              }
+              disabled={!options.length}
+              options={options}
+            />
+          </Field>
           <Field label="Due by">
             <DatePicker value={dueBy} onChange={setDueBy} placeholder="When the visit is due" />
           </Field>
@@ -391,5 +394,27 @@ function AssignInspector({
         </div>
       )}
     </LandCaseSection>
+  );
+}
+
+function InspectionSkeleton() {
+  return (
+    <div role="status" aria-label="Loading inspection" className="space-y-5">
+      <Skeleton className="h-4 w-28" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-72 max-w-full" />
+        <Skeleton className="h-4 w-80 max-w-full" />
+      </div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="space-y-5">
+          <CardSkeleton lines={4} />
+          <CardSkeleton lines={5} />
+        </div>
+        <div className="space-y-5">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    </div>
   );
 }

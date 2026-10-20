@@ -4,7 +4,17 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { Button, LegacyInput, Select } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  DatePicker,
+  Field,
+  IconButton,
+  Input,
+  Select,
+  TimePicker,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -175,104 +185,73 @@ export const AddContractorPassModal = ({
                   For somebody who comes back: a cleaner, a driver, a contractor on site.
                 </p>
               </div>
-              <button onClick={handleClose} aria-label="Close" className="text-muted-foreground">
-                <X className="w-5 h-5" />
-              </button>
+              <IconButton label="Close" icon={<X />} onClick={handleClose} />
             </div>
 
             <div className="p-5 space-y-4 overflow-y-auto">
-              {(localError || error) && (
-                <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3">
-                  <p className="text-sm text-destructive">{localError ?? error}</p>
-                </div>
-              )}
+              {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Who are they working for?
-                </label>
+              <Field
+                label="Who are they working for?"
+                hint="Every arrival is recorded against this unit, so it is also the one that is told when they turn up."
+              >
                 <Select
                   value={householdId}
                   onValueChange={setHouseholdId}
                   options={householdOptions}
+                  searchable
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Every arrival is recorded against this unit, so it is also the one that is told
-                  when they turn up.
-                </p>
-              </div>
+              </Field>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Name</label>
-                  <LegacyInput
+                <Field label="Name">
+                  <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Chinedu Okafor"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Phone <span className="text-muted-foreground">(optional)</span>
-                  </label>
-                  <LegacyInput
+                </Field>
+                <Field label="Phone" optionalLabel="(optional)">
+                  <Input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. 0803 111 2222"
                   />
-                </div>
+                </Field>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Firm <span className="text-muted-foreground">(optional)</span>
-                  </label>
-                  <LegacyInput
+                <Field label="Firm" optionalLabel="(optional)">
+                  <Input
                     type="text"
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     placeholder="e.g. Zenith Electrical"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Trade <span className="text-muted-foreground">(optional)</span>
-                  </label>
-                  <LegacyInput
+                </Field>
+                <Field label="Trade" optionalLabel="(optional)">
+                  <Input
                     type="text"
                     value={trade}
                     onChange={(e) => setTrade(e.target.value)}
                     placeholder="e.g. Electrician"
                   />
-                </div>
+                </Field>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">From</label>
-                  <LegacyInput
-                    type="date"
-                    value={validFrom}
-                    onChange={(e) => setValidFrom(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Until</label>
-                  <LegacyInput
-                    type="date"
-                    value={validUntil}
-                    onChange={(e) => setValidUntil(e.target.value)}
-                  />
-                </div>
+                <Field label="From">
+                  <DatePicker value={validFrom} onChange={setValidFrom} />
+                </Field>
+                <Field label="Until">
+                  <DatePicker value={validUntil} onChange={setValidUntil} min={validFrom} />
+                </Field>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">
-                  Which days?
-                </label>
+                <p className="block text-sm font-medium text-foreground mb-1">Which days?</p>
                 <div className="flex flex-wrap gap-2">
                   {DAYS.map((day) => {
                     const selected = daysOfWeek.includes(day.value);
@@ -307,26 +286,15 @@ export const AddContractorPassModal = ({
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={restrictHours}
-                    onChange={(e) => setRestrictHours(e.target.checked)}
-                  />
-                  Only during certain hours
-                </label>
+                <Checkbox
+                  checked={restrictHours}
+                  onCheckedChange={setRestrictHours}
+                  label="Only during certain hours"
+                />
                 {restrictHours && (
                   <div className="grid grid-cols-2 gap-3 mt-2">
-                    <LegacyInput
-                      type="time"
-                      value={dailyFrom}
-                      onChange={(e) => setDailyFrom(e.target.value)}
-                    />
-                    <LegacyInput
-                      type="time"
-                      value={dailyTo}
-                      onChange={(e) => setDailyTo(e.target.value)}
-                    />
+                    <TimePicker value={dailyFrom} onChange={setDailyFrom} ariaLabel="Daily from" />
+                    <TimePicker value={dailyTo} onChange={setDailyTo} ariaLabel="Daily to" />
                   </div>
                 )}
                 {restrictHours && (
@@ -338,7 +306,7 @@ export const AddContractorPassModal = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-3 p-5 border-t border-border">
+            <div className="flex flex-wrap items-center justify-between gap-3 p-5 border-t border-border">
               <p className="text-xs text-muted-foreground">
                 The gate code is shown once, after you create this.
               </p>
@@ -346,8 +314,13 @@ export const AddContractorPassModal = ({
                 <Button variant="ghost" onClick={handleClose}>
                   Cancel
                 </Button>
-                <Button variant="primary" onClick={submit} disabled={isSubmitting}>
-                  {isSubmitting ? 'Creating…' : 'Authorise'}
+                <Button
+                  variant="primary"
+                  onClick={submit}
+                  isLoading={isSubmitting}
+                  loadingText="Creating…"
+                >
+                  Authorise
                 </Button>
               </div>
             </div>

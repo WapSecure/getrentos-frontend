@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Fingerprint } from 'lucide-react';
 import { ReviewCaseCard } from '@/components/admin/trust/ReviewCaseCard';
 import { ReviewCaseModal } from '@/components/admin/trust/ReviewCaseModal';
-import { EmptyState, PageErrorState, Pagination, Select } from '@getrentos/ui';
+import { CardSkeleton, EmptyState, PageErrorState, Pagination, Select } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -59,6 +59,7 @@ export default function TrustReviewCasesPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const cases = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -84,6 +85,8 @@ export default function TrustReviewCasesPage() {
             setPage(1);
           }}
           options={STATUS_OPTIONS}
+          ariaLabel="Filter by status"
+          searchable={false}
           className="w-full sm:w-44"
         />
         <Select
@@ -93,21 +96,25 @@ export default function TrustReviewCasesPage() {
             setPage(1);
           }}
           options={PRIORITY_OPTIONS}
+          ariaLabel="Filter by priority"
+          searchable={false}
           className="w-full sm:w-44"
         />
       </div>
 
-      {isError ? (
+      {isLoading ? (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <CardSkeleton key={index} lines={4} />
+          ))}
+        </div>
+      ) : isError && !data ? (
         <PageErrorState
           title="Could not load review cases"
           description="The trust review queue is temporarily unavailable."
           onRetry={() => void refetch()}
           isRetrying={isFetching}
         />
-      ) : isLoading ? (
-        <div className="flex justify-center py-16">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        </div>
       ) : cases.length === 0 ? (
         <EmptyState icon={Fingerprint} title="No review cases match your filters" />
       ) : (

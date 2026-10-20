@@ -34,7 +34,7 @@ export const PropertyGallery = ({
       <div className="relative h-80 bg-muted">
         {showPlaceholder ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-            <Home className="w-12 h-12 text-gray-700/40" />
+            <Home className="w-12 h-12 text-muted-foreground" />
             <p className="text-xs text-muted-foreground">No photo for this property yet</p>
           </div>
         ) : (
@@ -59,7 +59,7 @@ export const PropertyGallery = ({
             <Camera className="w-3 h-3" />
             <span>Video tour</span>
             {filmedOnSite && (
-              <span className="flex items-center gap-0.5 text-emerald-300">
+              <span className="flex items-center gap-0.5 text-success">
                 · <MapPin className="w-3 h-3" aria-hidden />
                 Filmed on site
               </span>
@@ -91,7 +91,7 @@ export const PropertyGallery = ({
             >
               {failed[index] ? (
                 <span className="flex h-full w-full items-center justify-center bg-secondary">
-                  <Home className="w-4 h-4 text-gray-400" />
+                  <Home className="w-4 h-4 text-muted-foreground" />
                 </span>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element

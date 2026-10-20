@@ -26,12 +26,12 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
       animate={{ opacity: 1, y: 0 }}
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
-      <div className="border-b border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/20">
+      <div className="border-b border-destructive/20 bg-destructive-subtle p-4">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-red-600" />
+          <AlertTriangle className="w-5 h-5 text-destructive" />
           <div>
-            <h3 className="font-semibold text-red-800 dark:text-red-300">Emergency Contacts</h3>
-            <p className="text-xs text-red-700 dark:text-red-400">
+            <h3 className="font-semibold text-destructive">Emergency Contacts</h3>
+            <p className="text-xs text-destructive/80">
               For urgent issues requiring immediate attention
             </p>
           </div>
@@ -41,14 +41,14 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
       <div className="divide-y divide-border">
         {contacts.map((contact) => (
           <div key={contact.id} className="p-4 hover:bg-secondary transition-colors">
-            <div className="flex items-start gap-3">
+            <div className="flex flex-wrap items-start gap-3">
               <div className="p-2 rounded-lg bg-secondary">
-                <User className="w-4 h-4 text-gray-500" />
+                <User className="w-4 h-4 text-muted-foreground" />
               </div>
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <h4 className="font-medium text-foreground">{contact.name}</h4>
-                <p className="text-sm text-gray-500">{contact.role}</p>
-                <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
+                <p className="text-sm text-muted-foreground">{contact.role}</p>
+                <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Phone className="w-3 h-3" />
                     <span>{contact.phone}</span>
@@ -89,7 +89,7 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
       </div>
 
       <div className="p-3 border-t border-border text-center">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           For life-threatening emergencies, please call 112 (Nigeria&apos;s emergency number) or
           your local emergency services immediately.
         </p>

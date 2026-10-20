@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { Calendar, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { Field } from '@getrentos/ui';
+import { RadioGroup } from '@getrentos/ui';
+import { Switch } from '@getrentos/ui';
 
 export const CalendarSync = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -17,9 +20,11 @@ export const CalendarSync = () => {
 
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
-      <div
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer"
+        aria-expanded={isExpanded}
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-primary/12"
       >
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
@@ -28,52 +33,34 @@ export const CalendarSync = () => {
             <p className="text-xs text-muted-foreground">Sync with external calendars</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="p-1 h-auto">
+        <span aria-hidden="true" className="p-1 text-muted-foreground">
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </Button>
-      </div>
+        </span>
+      </button>
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-foreground">Sync Calendar</span>
-            <button
-              onClick={() => setSyncEnabled(!syncEnabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                syncEnabled ? 'bg-primary' : 'bg-border'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  syncEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
+          <Switch
+            checked={syncEnabled}
+            onCheckedChange={setSyncEnabled}
+            label="Sync Calendar"
+            size="sm"
+          />
 
           {syncEnabled && (
             <>
-              <div>
-                <label className="block text-xs font-medium text-foreground mb-1">
-                  Select Calendar Service
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {providers.map((provider) => (
-                    <button
-                      key={provider.id}
-                      onClick={() => setSyncProvider(provider.id)}
-                      className={`p-2 rounded-lg text-center border transition-colors ${
-                        syncProvider === provider.id
-                          ? 'border-primary bg-accent'
-                          : 'border-border hover:border-muted-foreground'
-                      }`}
-                    >
-                      <div className="text-2xl">{provider.icon}</div>
-                      <p className="text-xs text-muted-foreground mt-1">{provider.name}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <Field label="Select Calendar Service">
+                <RadioGroup
+                  variant="card"
+                  value={syncProvider}
+                  onValueChange={setSyncProvider}
+                  options={providers.map((provider) => ({
+                    value: provider.id,
+                    label: provider.name,
+                    icon: provider.icon,
+                  }))}
+                />
+              </Field>
 
               <Button variant="primary" size="sm" fullWidth>
                 <Check className="w-4 h-4" />

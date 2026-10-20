@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Plus, Upload, Lock } from 'lucide-react';
-import { Button, EmptyState, Pagination } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -124,7 +124,7 @@ export default function EstateHouseholdsPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {
@@ -180,7 +180,7 @@ export default function EstateHouseholdsPage() {
       </div>
 
       {isHouseholdsLoading ? (
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
+        <ListSkeleton rows={3} />
       ) : households.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState

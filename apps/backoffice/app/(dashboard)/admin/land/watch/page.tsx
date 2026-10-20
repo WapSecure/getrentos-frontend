@@ -2,16 +2,20 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert, Eye, ShieldAlert } from 'lucide-react';
 import {
   Badge,
   Button,
   EmptyState,
+  ListSkeleton,
+  QueryState,
   Select,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import {
   formatDate,
@@ -43,7 +47,6 @@ export default function AdminLandWatchPage() {
   const canView = hasAdminPermission(user?.roles, 'verifications.review');
   const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
   const [tab, setTab] = useState<Tab>('inspections');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
   if (!canView) {
     return (
@@ -56,9 +59,6 @@ export default function AdminLandWatchPage() {
   }
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <div className="mb-6">
         <h1 className="type-title">Land Watch</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -66,27 +66,15 @@ export default function AdminLandWatchPage() {
           and inspectors report. Reports with doubtful GPS or media come first.
         </p>
       </div>
-      <div className="mb-5 flex gap-1 rounded-xl bg-secondary p-1 text-sm" role="tablist">
-        {(['inspections', 'incidents', 'watched'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={`rounded-lg px-3 py-1.5 font-medium ${tab === t ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
-          >
-            {t === 'inspections' ? 'Inspections' : t === 'incidents' ? 'Incidents' : 'Watched land'}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="mb-5">
+        <TabsList aria-label="Land Watch view">
+          <TabsTrigger value="inspections">Inspections</TabsTrigger>
+          <TabsTrigger value="incidents">Incidents</TabsTrigger>
+          <TabsTrigger value="watched">Watched land</TabsTrigger>
+        </TabsList>
+      </Tabs>
       {tab === 'inspections' && <InspectionQueue />}
-      {tab === 'incidents' && (
-        <Incidents
-          canDecide={canDecide}
-          notify={(message, variant = 'success') => setToast({ message, variant })}
-        />
-      )}
+      {tab === 'incidents' && <Incidents canDecide={canDecide} />}
       {tab === 'watched' && <Watched />}
     </>
   );
@@ -98,6 +86,7 @@ function InspectionQueue() {
     queryKey: landQueryKeys.watchInspections(filter),
     queryFn: () =>
       unwrap(adminLandWatchService.inspections(filter === 'open' ? undefined : filter)),
+    placeholderData: keepPreviousData,
   });
   const rank = (s: string) =>
     s === 'ESCALATED' ? 0 : s === 'REQUESTED' ? 1 : s === 'SUBMITTED' ? 2 : 3;
@@ -112,21 +101,20 @@ function InspectionQueue() {
           options={STATUS_FILTERS}
         />
       </div>
-      {query.isLoading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : query.isError ? (
-        <EmptyState
-          icon={CircleAlert}
-          title="Inspections could not be loaded"
-          description={query.error instanceof Error ? query.error.message : undefined}
-        />
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={Eye}
-          title="Nothing here"
-          description="No inspections match this filter."
-        />
-      ) : (
+      <QueryState
+        isLoading={query.isLoading}
+        isError={query.isError && !query.data}
+        onRetry={() => void query.refetch()}
+        isRetrying={query.isFetching}
+        errorTitle="Inspections could not be loaded"
+        errorDescription={query.error instanceof Error ? query.error.message : undefined}
+        isEmpty={items.length === 0}
+        empty={{
+          icon: Eye,
+          title: 'Nothing here',
+          description: 'No inspections match this filter.',
+        }}
+      >
         <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
           {items.map((i) => (
             <li key={i.id}>
@@ -165,55 +153,56 @@ function InspectionQueue() {
             </li>
           ))}
         </ul>
-      )}
+      </QueryState>
     </>
   );
 }
 
-function Incidents({
-  canDecide,
-  notify,
-}: {
-  canDecide: boolean;
-  notify: (m: string, v?: ToastVariant) => void;
-}) {
+function Incidents({ canDecide }: { canDecide: boolean }) {
   const query = useQuery({
     queryKey: landQueryKeys.watchIncidents,
     queryFn: () => unwrap(adminLandWatchService.incidents()),
   });
-  if (query.isLoading)
-    return <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
-  if (query.isError) return <EmptyState icon={CircleAlert} title="Incidents could not be loaded" />;
-  if (!query.data?.length)
-    return (
-      <EmptyState icon={Eye} title="No open incidents" description="Nothing reported is waiting." />
-    );
   return (
-    <ul className="space-y-3">
-      {query.data.map((i) => (
-        <IncidentItem key={i.id} incident={i} canDecide={canDecide} notify={notify} />
-      ))}
-    </ul>
+    <QueryState
+      isLoading={query.isLoading}
+      loading={<ListSkeleton variant="cards" rows={3} />}
+      isError={query.isError && !query.data}
+      onRetry={() => void query.refetch()}
+      isRetrying={query.isFetching}
+      errorTitle="Incidents could not be loaded"
+      isEmpty={!query.data?.length}
+      empty={{
+        icon: Eye,
+        title: 'No open incidents',
+        description: 'Nothing reported is waiting.',
+      }}
+    >
+      <ul className="space-y-3">
+        {(query.data ?? []).map((i) => (
+          <IncidentItem key={i.id} incident={i} canDecide={canDecide} />
+        ))}
+      </ul>
+    </QueryState>
   );
 }
 
 function IncidentItem({
   incident: i,
   canDecide,
-  notify,
 }: {
   incident: StaffLandWatchIncident;
   canDecide: boolean;
-  notify: (m: string, v?: ToastVariant) => void;
 }) {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [note, setNote] = useState('');
   const done = (message: string) => {
     void queryClient.invalidateQueries({ queryKey: landQueryKeys.watchRoot });
-    notify(message);
+    toast.success(message);
   };
   const failed = (e: unknown, fallback: string) =>
-    notify(readLandApiError(e, fallback).message, 'error');
+    toast.error(readLandApiError(e, fallback).message);
   const resolve = useMutation({
     mutationFn: (outcome: 'CONFIRMED' | 'DISMISSED') =>
       unwrap(adminLandWatchService.resolveIncident(i.id, outcome, note.trim())),
@@ -264,7 +253,9 @@ function IncidentItem({
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             maxLength={2000}
+            showCount
             placeholder="What was found and what happens next (the owner sees this)"
+            aria-label="What was found and what happens next"
           />
           <div className="flex flex-wrap gap-2">
             <Button
@@ -304,32 +295,37 @@ function Watched() {
     queryKey: landQueryKeys.watchSubscriptions,
     queryFn: () => unwrap(adminLandWatchService.subscriptions()),
   });
-  if (query.isLoading)
-    return <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
-  if (query.isError)
-    return <EmptyState icon={CircleAlert} title="Watched land could not be loaded" />;
-  if (!query.data?.length) return <EmptyState icon={Eye} title="Nothing is watched yet" />;
   return (
-    <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-      {query.data.map((w) => (
-        <li key={w.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground">{w.land.label}</p>
-            <p className="text-xs text-muted-foreground">
-              {w.land.city}, {w.land.state} · next inspection{' '}
-              {w.nextInspectionDue ? formatDate(w.nextInspectionDue) : '—'}
-              {w.lastInspection && ` · last ${formatDate(w.lastInspection)}`}
-            </p>
-          </div>
-          <div className="flex gap-1.5">
-            {w.openIncidents > 0 && <Badge variant="danger">{w.openIncidents} open</Badge>}
-            <Badge variant={w.status === 'ACTIVE' ? 'success' : 'neutral'}>
-              {LAND_WATCH_TIER_LABELS[w.tier].label}
-              {w.status === 'PAUSED' ? ' · paused' : ''}
-            </Badge>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <QueryState
+      isLoading={query.isLoading}
+      isError={query.isError && !query.data}
+      onRetry={() => void query.refetch()}
+      isRetrying={query.isFetching}
+      errorTitle="Watched land could not be loaded"
+      isEmpty={!query.data?.length}
+      empty={{ icon: Eye, title: 'Nothing is watched yet' }}
+    >
+      <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
+        {(query.data ?? []).map((w) => (
+          <li key={w.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground">{w.land.label}</p>
+              <p className="text-xs text-muted-foreground">
+                {w.land.city}, {w.land.state} · next inspection{' '}
+                {w.nextInspectionDue ? formatDate(w.nextInspectionDue) : '—'}
+                {w.lastInspection && ` · last ${formatDate(w.lastInspection)}`}
+              </p>
+            </div>
+            <div className="flex gap-1.5">
+              {w.openIncidents > 0 && <Badge variant="danger">{w.openIncidents} open</Badge>}
+              <Badge variant={w.status === 'ACTIVE' ? 'success' : 'neutral'}>
+                {LAND_WATCH_TIER_LABELS[w.tier].label}
+                {w.status === 'PAUSED' ? ' · paused' : ''}
+              </Badge>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </QueryState>
   );
 }

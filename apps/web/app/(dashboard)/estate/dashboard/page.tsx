@@ -18,8 +18,9 @@ import {
   Siren,
   TriangleAlert,
   Users,
+  Wallet,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, CardSkeleton, StatCard, StatGridSkeleton } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateService } from '@/services/estateService';
@@ -81,7 +82,7 @@ export default function EstateDashboardPage() {
   const { estate, isLoading } = useSelectedEstate();
   const { isPro } = useEstatePlan();
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: isStatsLoading } = useQuery({
     queryKey: estateKeys.dashboardStats(estate?.id ?? ''),
     queryFn: () => unwrap(estateService.getDashboardStats(estate!.id)),
     enabled: !!estate && isPro,
@@ -89,8 +90,9 @@ export default function EstateDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6" aria-busy="true">
-        <div className="h-32 animate-pulse rounded-2xl bg-secondary" />
+      <div className="space-y-6">
+        <CardSkeleton />
+        <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
       </div>
     );
   }
@@ -135,53 +137,42 @@ export default function EstateDashboardPage() {
         title="Analytics is a Pro feature"
         description="Upgrade to Pro to see collection stats and a 6-month dues trend for this estate."
       >
-        <section className="grid gap-3 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground">Households</p>
-            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              {stats?.totalHouseholds ?? '—'}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground">Collected this month</p>
-            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              {stats ? formatCurrency(stats.duesCollectedThisMonth, { compact: true }) : '—'}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-            <p className="text-xs text-muted-foreground">Dues outstanding</p>
-            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              {stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—'}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Siren className="h-3.5 w-3.5" />
-              Open incidents
-            </p>
-            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              {stats?.openIncidents ?? '—'}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Hammer className="h-3.5 w-3.5" />
-              Open maintenance
-            </p>
-            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              {stats?.openMaintenanceTickets ?? '—'}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/90 bg-card p-4 shadow-sm">
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <TriangleAlert className="h-3.5 w-3.5" />
-              Pending violations
-            </p>
-            <p className="mt-1 text-xl font-semibold tracking-tight text-foreground">
-              {stats?.pendingViolations ?? '—'}
-            </p>
-          </div>
-        </section>
+        {isStatsLoading ? (
+          <StatGridSkeleton count={6} className="lg:grid-cols-3 xl:grid-cols-6" />
+        ) : (
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <StatCard icon={Users} label="Households" value={stats?.totalHouseholds ?? '—'} />
+            <StatCard
+              icon={Wallet}
+              accent="emerald"
+              label="Collected this month"
+              value={stats ? formatCurrency(stats.duesCollectedThisMonth, { compact: true }) : '—'}
+            />
+            <StatCard
+              icon={Receipt}
+              accent="orange"
+              label="Dues outstanding"
+              value={stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—'}
+            />
+            <StatCard
+              icon={Siren}
+              accent="red"
+              label="Open incidents"
+              value={stats?.openIncidents ?? '—'}
+            />
+            <StatCard
+              icon={Hammer}
+              label="Open maintenance"
+              value={stats?.openMaintenanceTickets ?? '—'}
+            />
+            <StatCard
+              icon={TriangleAlert}
+              accent="orange"
+              label="Pending violations"
+              value={stats?.pendingViolations ?? '—'}
+            />
+          </section>
+        )}
 
         <EstateDuesTrendChart estateId={estate.id} />
       </ProFeatureGate>

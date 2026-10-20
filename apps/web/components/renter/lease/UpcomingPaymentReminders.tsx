@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, Bell, Clock, AlertTriangle } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, Card } from '@getrentos/ui';
 
 interface PaymentReminder {
   id: string;
@@ -31,20 +31,20 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
     if (status === 'overdue') {
       return {
         label: 'Overdue',
-        color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+        variant: 'danger' as const,
         icon: AlertTriangle,
       };
     }
     if (status === 'due' || daysRemaining <= 3) {
       return {
         label: 'Due Soon',
-        color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+        variant: 'warning' as const,
         icon: Bell,
       };
     }
     return {
       label: 'Upcoming',
-      color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+      variant: 'info' as const,
       icon: Clock,
     };
   };
@@ -58,11 +58,8 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl border border-border overflow-hidden"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card>
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-primary" />
@@ -88,25 +85,22 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
                 <div>
                   <p className="text-sm font-medium text-foreground">{reminder.propertyName}</p>
                   <div className="flex items-center gap-3 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Calendar className="w-3 h-3" />
                       <span>{formatDate(reminder.dueDate)}</span>
                     </div>
-                    <span className="text-xs text-gray-500">•</span>
+                    <span className="text-xs text-muted-foreground">•</span>
                     <span className="text-xs font-semibold text-primary">
                       {formatCurrency(reminder.amount)}
                     </span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}
-                  >
-                    <StatusIcon className="w-3 h-3" />
+                  <Badge variant={statusConfig.variant} icon={<StatusIcon className="w-3 h-3" />}>
                     {statusConfig.label}
-                  </span>
+                  </Badge>
                   {reminder.status !== 'overdue' && (
-                    <p className="text-xs text-gray-500 mt-1">{reminder.daysRemaining} days left</p>
+                    <p className="text-xs text-muted-foreground mt-1">{reminder.daysRemaining} days left</p>
                   )}
                 </div>
               </div>
@@ -130,6 +124,7 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
           View All Payments
         </Button>
       </div>
+      </Card>
     </motion.div>
   );
 };

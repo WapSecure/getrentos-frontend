@@ -104,6 +104,7 @@ export const ReferralSummaryCard = () => {
           {shareOptions.map((option) => (
             <button
               key={option.name}
+              type="button"
               onClick={option.action}
               className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-secondary transition-colors"
             >

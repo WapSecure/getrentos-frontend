@@ -16,15 +16,18 @@ import {
   Users,
 } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
+  CardSkeleton,
   EmptyState,
+  Field,
   Input,
-  PageLoadingState,
+  PageErrorState,
   Select,
+  Skeleton,
   Textarea,
-  Toast,
-  type ToastVariant,
+  useToast,
 } from '@getrentos/ui';
 import {
   formatDate,
@@ -66,7 +69,7 @@ export default function AdminLandAuthorityPage() {
   const user = useAdminUser();
   const canView = hasAdminPermission(user?.roles, 'verifications.review');
   const canDecide = hasAdminPermission(user?.roles, 'verifications.approve');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [blockers, setBlockers] = useState<string[]>([]);
 
   const key = landQueryKeys.authority(authorityId);
@@ -92,12 +95,12 @@ export default function AdminLandAuthorityPage() {
     void queryClient.invalidateQueries({ queryKey: landQueryKeys.authorityRoot });
     void queryClient.invalidateQueries({ queryKey: landQueryKeys.diligenceRoot });
     setBlockers([]);
-    setToast({ message, variant: 'success' });
+    toast.success(message);
   };
   const failed = (error: unknown, fallback: string) => {
     const info = readLandApiError(error, fallback);
     setBlockers(info.blockers);
-    setToast({ message: info.message, variant: 'error' });
+    toast.error(info.message);
   };
 
   if (!canView) {
@@ -109,14 +112,15 @@ export default function AdminLandAuthorityPage() {
       />
     );
   }
-  if (detail.isLoading) return <PageLoadingState />;
+  if (detail.isLoading) return <ClaimSkeleton />;
   const view = detail.data;
-  if (detail.isError || !view) {
+  if (!view) {
     return (
-      <EmptyState
-        icon={CircleAlert}
+      <PageErrorState
         title="This claim could not be loaded"
         description={detail.error instanceof Error ? detail.error.message : 'Claim not found.'}
+        onRetry={() => void detail.refetch()}
+        isRetrying={detail.isFetching}
       />
     );
   }
@@ -125,9 +129,6 @@ export default function AdminLandAuthorityPage() {
 
   return (
     <>
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
       <Link
         href="/admin/land/authority"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -428,29 +429,32 @@ const SignatoryItem = ({
       {mode !== 'none' && (
         <div className="mt-3 space-y-2">
           {mode === 'resolve' && (
-            <Select
-              value={outcome}
-              onValueChange={(value) => setOutcome(value as 'UPHELD' | 'DISMISSED')}
-              ariaLabel="Outcome"
-              placeholder="Outcome"
-              options={[
-                { value: 'UPHELD', label: 'Uphold: the claim is rejected' },
-                { value: 'DISMISSED', label: 'Dismiss: the objection is set aside' },
-              ]}
-            />
+            <Field label="Outcome" required>
+              <Select
+                value={outcome}
+                onValueChange={(value) => setOutcome(value as 'UPHELD' | 'DISMISSED')}
+                placeholder="Choose an outcome"
+                options={[
+                  { value: 'UPHELD', label: 'Uphold: the claim is rejected' },
+                  { value: 'DISMISSED', label: 'Dismiss: the objection is set aside' },
+                ]}
+              />
+            </Field>
           )}
           <Textarea
             value={note}
             onChange={(event) => setNote(event.target.value)}
             rows={2}
             maxLength={2000}
+            showCount
+            aria-label={mode === 'waive' ? 'Why this consent is not needed' : 'Reasons'}
             placeholder={
               mode === 'waive'
                 ? 'Why this consent is not needed (e.g. deceased, represented by another)'
                 : 'Reasons (the seller sees them)'
             }
           />
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
               variant={mode === 'resolve' && outcome === 'UPHELD' ? 'danger' : 'primary'}
@@ -517,27 +521,35 @@ const RecordObjection = ({ authorityId, onDone, onFailed }: ActionProps) => {
         Someone not on the list objects (e.g. a competing heir)
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
-        <Input
-          value={fullName}
-          onChange={(event) => setFullName(event.target.value)}
-          placeholder="Their full name"
-          maxLength={200}
-        />
-        <Input
-          value={phone}
-          onChange={(event) => setPhone(event.target.value)}
-          placeholder="Phone (optional)"
-          maxLength={40}
-        />
+        <Field label="Full name" required>
+          <Input
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            placeholder="Their full name"
+            maxLength={200}
+          />
+        </Field>
+        <Field label="Phone">
+          <Input
+            type="tel"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            placeholder="Phone (optional)"
+            maxLength={40}
+          />
+        </Field>
       </div>
-      <Textarea
-        value={reason}
-        onChange={(event) => setReason(event.target.value)}
-        rows={3}
-        maxLength={2000}
-        placeholder="What they say"
-      />
-      <div className="flex gap-2">
+      <Field label="Their objection" required>
+        <Textarea
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          rows={3}
+          maxLength={2000}
+          showCount
+          placeholder="What they say"
+        />
+      </Field>
+      <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
           variant="danger"
@@ -612,6 +624,8 @@ const LegalInquiry = ({
             onChange={(event) => setNote(event.target.value)}
             rows={3}
             maxLength={4000}
+            showCount
+            aria-label="Legal inquiry finding"
             placeholder={
               authority.legalInquiry
                 ? 'Replace with an updated finding'
@@ -625,6 +639,8 @@ const LegalInquiry = ({
               ariaLabel="Report document"
               placeholder="Attach a report from the property's documents (optional)"
               options={documents.map((d) => ({ value: d.id, label: d.name }))}
+              searchable
+              clearable
             />
           )}
           <Button
@@ -686,11 +702,13 @@ const Decision = ({
         </div>
       )}
       {blockers.length > 0 && (
-        <ul className="mb-3 space-y-1 rounded-xl bg-destructive/10 p-3 text-sm text-foreground">
-          {blockers.map((b) => (
-            <li key={b}>• {b}</li>
-          ))}
-        </ul>
+        <Alert variant="danger" className="mb-3">
+          <ul className="space-y-1">
+            {blockers.map((b) => (
+              <li key={b}>• {b}</li>
+            ))}
+          </ul>
+        </Alert>
       )}
       {!canDecide ? (
         <PanelMessage>Deciding needs the verifications approve permission.</PanelMessage>
@@ -703,6 +721,8 @@ const Decision = ({
             onChange={(event) => setNote(event.target.value)}
             rows={3}
             maxLength={2000}
+            showCount
+            aria-label="Reasons"
             placeholder="Reasons (the seller sees them; required to reject or revoke)"
           />
           {authority.status === 'PENDING_REVIEW' ? (
@@ -751,3 +771,25 @@ const Decision = ({
     </LandCaseSection>
   );
 };
+
+function ClaimSkeleton() {
+  return (
+    <div role="status" aria-label="Loading claim" className="space-y-5">
+      <Skeleton className="h-4 w-32" />
+      <div className="space-y-2">
+        <Skeleton className="h-7 w-72 max-w-full" />
+        <Skeleton className="h-4 w-56" />
+      </div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="space-y-5">
+          <CardSkeleton lines={5} />
+          <CardSkeleton lines={4} />
+        </div>
+        <div className="space-y-5">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -62,7 +62,7 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 /** One plot purchase, from the seller's side. */
 export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
   const queryClient = useQueryClient();
-  const { notify, toast } = useNotify();
+  const { notify } = useNotify();
   const [delivering, setDelivering] = useState<LandMilestone | null>(null);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [reason, setReason] = useState('');
@@ -384,7 +384,6 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         }}
       />
 
-      {toast}
     </>
   );
 };

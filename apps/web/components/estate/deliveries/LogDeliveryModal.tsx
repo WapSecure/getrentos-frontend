@@ -3,8 +3,19 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useMutation } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, X } from 'lucide-react';
-import { Button, DocumentUpload, LegacyInput, Pagination, Select } from '@getrentos/ui';
+import { X } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  DocumentUpload,
+  Field,
+  IconButton,
+  Input,
+  ListSkeleton,
+  NumberInput,
+  Pagination,
+  Select,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { ApiError, unwrap } from '@/lib/apiHelpers';
 import type { DeliveryCodeScreen, Gate, Household } from '@/types/estate';
@@ -131,55 +142,45 @@ const LogDeliveryForm = ({
       >
         <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
           <h3 className="font-semibold text-foreground">Log Delivery</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-secondary">
-            <X className="w-4 h-4" />
-          </button>
+          <IconButton label="Close" icon={<X />} size="sm" onClick={onClose} />
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1">
           <div className="rounded-lg border border-border p-3">
-            <label
-              htmlFor="delivery-code"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
-              Courier&apos;s code
-            </label>
-            <div className="flex gap-2">
-              <LegacyInput
-                id="delivery-code"
-                type="text"
-                inputMode="numeric"
-                value={code}
-                onChange={(e) => {
-                  setCode(e.target.value);
-                  // Any edit invalidates the last answer. Showing a stale "this is
-                  // for Block C" beside a code the guard has since changed is worse
-                  // than showing nothing.
-                  if (screen || checkError) {
-                    setScreen(null);
-                    setCheckError(null);
-                  }
-                }}
-                placeholder="e.g. 472913"
-              />
-              <Button
-                variant="secondary"
-                className="shrink-0"
-                disabled={code.trim().length < 6 || checkCode.isPending}
-                onClick={() => checkCode.mutate()}
-              >
-                {checkCode.isPending ? 'Checking…' : 'Check'}
-              </Button>
-            </div>
+            <Field label="Courier's code" htmlFor="delivery-code">
+              <div className="flex gap-2">
+                <NumberInput
+                  className="min-w-0 flex-1"
+                  value={code}
+                  onValueChange={(value) => {
+                    setCode(value);
+                    // Any edit invalidates the last answer. Showing a stale "this is
+                    // for Block C" beside a code the guard has since changed is worse
+                    // than showing nothing.
+                    if (screen || checkError) {
+                      setScreen(null);
+                      setCheckError(null);
+                    }
+                  }}
+                  placeholder="e.g. 472913"
+                />
+                <Button
+                  variant="secondary"
+                  className="shrink-0"
+                  disabled={code.trim().length < 6}
+                  isLoading={checkCode.isPending}
+                  loadingText="Checking…"
+                  onClick={() => checkCode.mutate()}
+                >
+                  Check
+                </Button>
+              </div>
+            </Field>
 
             {matched && (
-              <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-primary" />
-                  {screen?.unitLabel}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">{screen?.message}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{screen?.instruction}</p>
+              <Alert variant="success" title={screen?.unitLabel} className="mt-3">
+                <p className="text-xs">{screen?.message}</p>
+                <p className="mt-1 text-xs">{screen?.instruction}</p>
                 <button
                   type="button"
                   onClick={clearCode}
@@ -187,21 +188,18 @@ const LogDeliveryForm = ({
                 >
                   Use a different code
                 </button>
-              </div>
+              </Alert>
             )}
 
             {screen && !screen.matched && (
               // Worded by the server and shown as-is. The refusal says the same
               // thing whether the code was wrong, expired or already used, so this
               // screen cannot be used to work out whether a household exists here.
-              <div className="mt-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3">
-                <p className="flex items-start gap-2 text-xs text-foreground">
-                  <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600" />
-                  <span>
-                    {screen.message} {screen.instruction}
-                  </span>
+              <Alert variant="warning" className="mt-3">
+                <p className="text-xs">
+                  {screen.message} {screen.instruction}
                 </p>
-              </div>
+              </Alert>
             )}
 
             {checkError && (
@@ -222,10 +220,10 @@ const LogDeliveryForm = ({
             </p>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Household</label>
+              <p className="block text-sm font-medium text-foreground mb-1">Household</p>
               <div className="overflow-hidden rounded-lg border border-border">
                 {isHouseholdsLoading ? (
-                  <p className="px-3 py-4 text-sm text-muted-foreground">Loading households…</p>
+                  <ListSkeleton rows={3} label="Loading households" className="rounded-none border-0" />
                 ) : activeHouseholds.length === 0 ? (
                   <p className="px-3 py-4 text-sm text-muted-foreground">
                     No active households found.
@@ -275,45 +273,38 @@ const LogDeliveryForm = ({
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Courier <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <LegacyInput
+          <Field label="Courier" optionalLabel="(optional)">
+            <Input
               type="text"
               value={courier}
               onChange={(e) => setCourier(e.target.value)}
               placeholder="e.g. DHL"
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Recipient <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <LegacyInput
+          <Field label="Recipient" optionalLabel="(optional)">
+            <Input
               type="text"
               value={recipientName}
               onChange={(e) => setRecipientName(e.target.value)}
               placeholder="e.g. Ada Okafor"
             />
-          </div>
+          </Field>
 
           {gateOptions.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Gate</label>
+            <Field label="Gate">
               <Select
                 value={gateId}
                 onValueChange={setGateId}
                 options={[{ value: '', label: 'Not specified' }, ...gateOptions]}
               />
-            </div>
+            </Field>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Photo <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
+            <p className="block text-sm font-medium text-foreground mb-1">
+              Photo <span className="text-muted-foreground font-normal">(optional)</span>
+            </p>
             <DocumentUpload
               value={photo ? [{ id: 'photo', file: photo }] : []}
               onChange={(items) => setPhoto(items[0]?.file ?? null)}
@@ -331,10 +322,12 @@ const LogDeliveryForm = ({
           <Button
             variant="primary"
             fullWidth
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit}
+            isLoading={isSubmitting}
+            loadingText="Logging…"
             onClick={handleSubmit}
           >
-            {isSubmitting ? 'Logging…' : 'Log Delivery'}
+            Log Delivery
           </Button>
         </div>
       </motion.div>

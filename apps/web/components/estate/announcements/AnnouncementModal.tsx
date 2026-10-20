@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { Button, LegacyInput, Select } from '@getrentos/ui';
+import { Button, Checkbox, Field, IconButton, Input, Select, Textarea } from '@getrentos/ui';
 import type { Announcement } from '@/types/estate';
 
 interface AnnouncementModalProps {
@@ -61,68 +61,51 @@ export const AnnouncementModal = ({
               <h3 className="font-semibold text-foreground">
                 {announcement ? 'Edit Announcement' : 'New Announcement'}
               </h3>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
+              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Title</label>
-                <LegacyInput
+              <Field label="Title" required>
+                <Input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Water outage this weekend"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Message</label>
-                <textarea
+              <Field label="Message" required>
+                <Textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={5}
                   placeholder="Details for residents…"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                 />
-              </div>
+              </Field>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Priority</label>
+              <Field label="Priority">
                 <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
-              </div>
+              </Field>
 
               {!announcement && (
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Also deliver via <span className="text-gray-400 font-normal">(optional)</span>
-                  </label>
+                <fieldset>
+                  <legend className="block text-sm font-medium text-foreground mb-2">
+                    Also deliver via{' '}
+                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  </legend>
                   <div className="flex flex-wrap gap-4">
-                    <label className="flex items-center gap-2 text-sm text-foreground">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={sendSms}
-                        onChange={(e) => setSendSms(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
-                      />
-                      SMS
-                    </label>
-                    <label className="flex items-center gap-2 text-sm text-foreground">
-                      <LegacyInput
-                        type="checkbox"
-                        checked={sendWhatsApp}
-                        onChange={(e) => setSendWhatsApp(e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
-                      />
-                      WhatsApp
-                    </label>
+                    <Checkbox checked={sendSms} onCheckedChange={setSendSms} label="SMS" />
+                    <Checkbox
+                      checked={sendWhatsApp}
+                      onCheckedChange={setSendWhatsApp}
+                      label="WhatsApp"
+                    />
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     Residents always get an in-app notification. These add SMS/WhatsApp to
                     households with a phone number on file.
                   </p>
-                </div>
+                </fieldset>
               )}
             </div>
 
@@ -133,7 +116,9 @@ export const AnnouncementModal = ({
               <Button
                 variant="primary"
                 fullWidth
-                disabled={!canSubmit || isSubmitting}
+                disabled={!canSubmit}
+                isLoading={isSubmitting}
+                loadingText="Saving…"
                 onClick={() => {
                   const deliveryChannels: ('SMS' | 'WHATSAPP')[] = [];
                   if (sendSms) deliveryChannels.push('SMS');
@@ -146,7 +131,7 @@ export const AnnouncementModal = ({
                   });
                 }}
               >
-                {isSubmitting ? 'Saving…' : announcement ? 'Save Changes' : 'Post Announcement'}
+                {announcement ? 'Save Changes' : 'Post Announcement'}
               </Button>
             </div>
           </motion.div>

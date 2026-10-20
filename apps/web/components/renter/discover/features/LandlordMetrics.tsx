@@ -27,7 +27,7 @@ export const LandlordMetrics = ({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gray-50 dark:bg-white/5 rounded-lg p-3 mt-3"
+      className="bg-secondary rounded-lg p-3 mt-3"
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
@@ -36,8 +36,8 @@ export const LandlordMetrics = ({
         </div>
         {verifiedBadge && (
           <div className="flex items-center gap-1">
-            <Shield className="w-3 h-3 text-green-600" />
-            <span className="text-xs text-green-600">Verified</span>
+            <Shield className="w-3 h-3 text-success" />
+            <span className="text-xs text-success">Verified</span>
           </div>
         )}
       </div>
@@ -46,12 +46,12 @@ export const LandlordMetrics = ({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <p className="text-lg font-bold text-foreground">{responseRate}%</p>
-            <p className="text-xs text-gray-500">Response rate</p>
+            <p className="text-xs text-muted-foreground">Response rate</p>
           </div>
           {responseTime && (
             <div>
               <p className="text-lg font-bold text-foreground">{responseTime}</p>
-              <p className="text-xs text-gray-500">Avg. response</p>
+              <p className="text-xs text-muted-foreground">Avg. response</p>
             </div>
           )}
         </div>
@@ -62,13 +62,13 @@ export const LandlordMetrics = ({
           <div className="flex items-center gap-1">
             <Star className="w-3 h-3 fill-primary text-primary" />
             <span className="text-sm font-semibold text-foreground">{rating}</span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               ({totalReviews ?? 0} review{totalReviews === 1 ? '' : 's'})
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <TrendingUp className="w-3 h-3 text-green-600" />
-            <span className="text-xs text-green-600">Active</span>
+            <TrendingUp className="w-3 h-3 text-success" />
+            <span className="text-xs text-success">Active</span>
           </div>
         </div>
       )}

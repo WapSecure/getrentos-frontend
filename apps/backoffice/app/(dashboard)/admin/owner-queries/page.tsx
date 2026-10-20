@@ -1,13 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Clock, MessageSquareText } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
+  CardSkeleton,
   EmptyState,
+  ListSkeleton,
+  PageErrorState,
   Tabs,
   TabsList,
   TabsTrigger,
@@ -77,19 +81,33 @@ const Thread = ({
     onError: (err: Error) => setError(err.message),
   });
   const q = thread.data;
-  if (!q) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  const back = (
+    <Button variant="ghost" size="sm" icon={<ArrowLeft className="h-4 w-4" />} onClick={onBack}>
+      All questions
+    </Button>
+  );
+  if (!q)
+    return (
+      <div className="space-y-4">
+        {back}
+        {thread.isError ? (
+          <PageErrorState
+            title="Could not load this question"
+            onRetry={() => void thread.refetch()}
+            isRetrying={thread.isFetching}
+            headingLevel="h2"
+          />
+        ) : (
+          <CardSkeleton lines={5} />
+        )}
+      </div>
+    );
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> All questions
-      </button>
+      {back}
       <Card className="space-y-4 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
             <h2 className="text-lg font-semibold text-foreground">{q.subject}</h2>
             <p className="text-sm text-muted-foreground">
               {q.propertyTitle} · from {q.ownerName ?? 'the owner'}
@@ -146,7 +164,7 @@ const Thread = ({
             </div>
           </div>
         )}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <Alert variant="danger">{error}</Alert>}
       </Card>
     </div>
   );
@@ -162,6 +180,7 @@ export default function AdminOwnerQueriesPage() {
   const list = useQuery({
     queryKey: ['admin', 'owner-queries', 'list', filter],
     queryFn: () => unwrap(adminOwnerQueryService.list(filter === 'all' ? undefined : filter)),
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -189,7 +208,14 @@ export default function AdminOwnerQueriesPage() {
             </TabsList>
           </Tabs>
           {list.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <ListSkeleton />
+          ) : list.isError && !list.data ? (
+            <PageErrorState
+              title="Could not load owner questions"
+              onRetry={() => void list.refetch()}
+              isRetrying={list.isFetching}
+              headingLevel="h2"
+            />
           ) : (list.data ?? []).length === 0 ? (
             <EmptyState
               icon={MessageSquareText}

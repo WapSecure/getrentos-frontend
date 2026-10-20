@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 
 interface FAQ {
   id: string;
@@ -86,15 +87,12 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
 
   if (filteredFAQs.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-8 text-center">
-        <HelpCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-muted-foreground">No FAQs found for this category</p>
-      </div>
+      <EmptyState icon={HelpCircle} title="No FAQs found for this category" size="compact" />
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Frequently Asked Questions</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Quick answers to common questions</p>
@@ -106,15 +104,16 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
           return (
             <div key={faq.id}>
               <button
+                type="button"
                 onClick={() => toggleExpanded(faq.id)}
                 aria-expanded={isExpanded}
                 className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary transition-colors"
               >
                 <span className="text-sm font-medium text-foreground">{faq.question}</span>
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
                 )}
               </button>
 
@@ -127,6 +126,6 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 };

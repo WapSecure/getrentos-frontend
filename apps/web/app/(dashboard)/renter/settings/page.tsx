@@ -134,7 +134,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-sm sm:p-7">
             {renderContent()}
           </div>

@@ -132,7 +132,7 @@ const LayoutSetup = ({
 export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
   const queryClient = useQueryClient();
   const propertyId = record.property.id;
-  const { notify, toast } = useNotify();
+  const { notify } = useNotify();
   const [editOpen, setEditOpen] = useState(false);
 
   const {
@@ -224,7 +224,6 @@ export const LayoutWorkspace = ({ record }: { record: OwnerLandRecord }) => {
   return (
     <>
       {body}
-      {toast}
     </>
   );
 };

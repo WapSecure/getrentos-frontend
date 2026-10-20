@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FinancingEligibilityCard } from '@/components/renter/financing/FinancingEligibilityCard';
 import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancingModal';
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
-import { PageErrorState, PageLoadingState, Toast } from '@getrentos/ui';
+import { CardSkeleton, PageErrorState, Skeleton, useToast } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -14,7 +14,7 @@ import type { FinancingPlanLength } from '@/types/financing';
 export const FinancingView = () => {
   const queryClient = useQueryClient();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const toast = useToast();
 
   const {
     data: overview,
@@ -33,7 +33,7 @@ export const FinancingView = () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.financing });
       queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
       setIsApplyModalOpen(false);
-      setToast(
+      toast.success(
         `Approved! Your landlord has been paid in full: repay in interest-free installments.`
       );
     },
@@ -50,7 +50,7 @@ export const FinancingView = () => {
         return;
       }
       queryClient.invalidateQueries({ queryKey: renterKeys.financing });
-      setToast('Installment paid.');
+      toast.success('Installment paid.');
     },
   });
 
@@ -63,10 +63,15 @@ export const FinancingView = () => {
   };
 
   if (isLoading) {
-    return <PageLoadingState />;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-48 w-full rounded-[1.75rem]" />
+        <CardSkeleton lines={5} />
+      </div>
+    );
   }
 
-  if (isError) {
+  if (isError && !overview) {
     return (
       <PageErrorState
         title="Financing details are unavailable"
@@ -83,10 +88,12 @@ export const FinancingView = () => {
 
   return (
     <>
-      {toast && <Toast message={toast} variant="success" onClose={() => setToast(null)} />}
-
       {plan ? (
-        <ActiveFinancingPlanCard plan={plan} onPayInstallment={handlePayInstallment} />
+        <ActiveFinancingPlanCard
+          plan={plan}
+          onPayInstallment={handlePayInstallment}
+          isPaying={payInstallmentMutation.isPending}
+        />
       ) : (
         <FinancingEligibilityCard
           rentAmount={rentAmount}
@@ -101,6 +108,7 @@ export const FinancingView = () => {
         onOpenChange={setIsApplyModalOpen}
         rentAmount={rentAmount}
         onSubmit={handleApply}
+        isSubmitting={applyMutation.isPending}
       />
     </>
   );

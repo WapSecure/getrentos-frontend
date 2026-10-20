@@ -1,14 +1,22 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, ClipboardList } from 'lucide-react';
-import { Button, PageErrorState, PageLoadingState, Pagination } from '@getrentos/ui';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ClipboardList } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  Pagination,
+  SearchInput,
+  Select,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from '@getrentos/ui';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
 import type { AgentTask, TaskStatus, TaskType } from '@/types/agent';
 import { ROUTES } from '@/lib/constants/auth';
@@ -43,6 +51,7 @@ export default function AgentTasksPage() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const { data: tasksData } = tasksQuery;
   const tasks = tasksData?.items ?? [];
@@ -106,65 +115,54 @@ export default function AgentTasksPage() {
       </div>
 
       {updateStatus.error && (
-        <p className="mb-4 text-sm text-red-600" role="alert">
+        <Alert variant="danger" className="mb-4">
           Unable to update that task. Please try again.
-        </p>
+        </Alert>
       )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <LegacyInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by title or property..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <LegacySelect
-          value={typeFilter}
-          onChange={(e) => {
-            setTypeFilter(e.target.value as TypeFilter);
+        <SearchInput
+          value={searchQuery}
+          onValueChange={(value) => {
+            setSearchQuery(value);
             setPage(1);
           }}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-fit"
-        >
-          {typeOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </LegacySelect>
+          placeholder="Search by title or property..."
+          label="Search tasks"
+          className="flex-1 max-w-sm"
+        />
+        <Select
+          value={typeFilter}
+          onValueChange={(value) => {
+            setTypeFilter(value as TypeFilter);
+            setPage(1);
+          }}
+          ariaLabel="Filter by task type"
+          options={typeOptions}
+          className="sm:w-48"
+        />
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit overflow-x-auto mb-6">
-        {statusOptions.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={statusFilter === option.value}
-            onClick={() => {
-              setStatusFilter(option.value);
-              setPage(1);
-            }}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-              statusFilter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={statusFilter}
+        onValueChange={(value) => {
+          setStatusFilter(value as StatusFilter);
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList className="max-w-full">
+          {statusOptions.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {tasksQuery.isLoading ? (
-        <PageLoadingState />
-      ) : tasksQuery.isError ? (
+        <ListSkeleton variant="cards" rows={3} label="Loading tasks" />
+      ) : tasksQuery.isError && !tasksData ? (
         <PageErrorState
           title="Tasks are unavailable"
           description="We could not load your field assignments. Please try again."
@@ -172,33 +170,30 @@ export default function AgentTasksPage() {
           isRetrying={tasksQuery.isFetching}
         />
       ) : tasks.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-accent">
-            <ClipboardList className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground">
-            {hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
-          </h3>
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={ClipboardList}
+          title={hasActiveFilters ? 'No tasks match your filters' : 'No tasks yet'}
+          description={
+            hasActiveFilters
               ? 'Clear the current filters to return to all assignments.'
-              : 'Tasks assigned to you will appear here.'}
-          </p>
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              className="mt-6"
-              onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-                setTypeFilter('all');
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
-        </div>
+              : 'Tasks assigned to you will appear here.'
+          }
+          action={
+            hasActiveFilters ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setStatusFilter('all');
+                  setTypeFilter('all');
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {tasks.map((task) => (

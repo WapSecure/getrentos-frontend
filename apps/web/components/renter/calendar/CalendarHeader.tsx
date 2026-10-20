@@ -9,6 +9,7 @@ import {
   List,
 } from 'lucide-react';
 import { Button } from '@getrentos/ui';
+import { IconButton } from '@getrentos/ui';
 import { format } from 'date-fns';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
@@ -75,15 +76,21 @@ export const CalendarHeader = ({
     >
       <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/70 bg-background/70 p-2.5">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => navigateMonth(-1)} className="p-2">
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
+          <IconButton
+            label={`Previous ${viewMode}`}
+            icon={<ChevronLeft />}
+            size="sm"
+            onClick={() => navigateMonth(-1)}
+          />
           <span className="text-lg font-semibold text-foreground min-w-[150px] text-center">
             {getTitle()}
           </span>
-          <Button variant="ghost" size="sm" onClick={() => navigateMonth(1)} className="p-2">
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+          <IconButton
+            label={`Next ${viewMode}`}
+            icon={<ChevronRight />}
+            size="sm"
+            onClick={() => navigateMonth(1)}
+          />
         </div>
 
         <Button variant="outline" size="sm" onClick={goToToday}>
@@ -92,31 +99,31 @@ export const CalendarHeader = ({
 
         <div className="flex-1" />
 
-        <div className="flex gap-1 rounded-xl bg-secondary p-1" aria-label="Calendar view">
-          <Button
-            variant="ghost"
+        <div className="flex gap-1 rounded-xl bg-secondary p-1" role="group" aria-label="Calendar view">
+          <IconButton
+            label="Month view"
+            icon={<LayoutGrid />}
             size="sm"
+            aria-pressed={viewMode === 'month'}
             onClick={() => setViewMode('month')}
-            className={`p-1.5 ${viewMode === 'month' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
+            className={viewMode === 'month' ? 'bg-card text-primary shadow-sm' : undefined}
+          />
+          <IconButton
+            label="Week view"
+            icon={<List />}
             size="sm"
+            aria-pressed={viewMode === 'week'}
             onClick={() => setViewMode('week')}
-            className={`p-1.5 ${viewMode === 'week' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
-          >
-            <List className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
+            className={viewMode === 'week' ? 'bg-card text-primary shadow-sm' : undefined}
+          />
+          <IconButton
+            label="Day view"
+            icon={<CalendarIcon />}
             size="sm"
+            aria-pressed={viewMode === 'day'}
             onClick={() => setViewMode('day')}
-            className={`p-1.5 ${viewMode === 'day' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
-          >
-            <CalendarIcon className="w-4 h-4" />
-          </Button>
+            className={viewMode === 'day' ? 'bg-card text-primary shadow-sm' : undefined}
+          />
         </div>
       </div>
     </RenterPageHeader>

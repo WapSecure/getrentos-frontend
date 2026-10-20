@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, FileSpreadsheet, Upload } from 'lucide-react';
-import { Badge, Button, Card, Select, Toast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, Card, Select, useToast } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -29,7 +29,7 @@ export function PortfolioImportView() {
   const [propertyId, setPropertyId] = useState('');
   const [csv, setCsv] = useState<{ name: string; text: string } | null>(null);
   const [preview, setPreview] = useState<UnitImportResult | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const chosen = propertyId || properties[0]?.value || '';
 
   const call = async (dryRun: boolean) => {
@@ -44,19 +44,16 @@ export function PortfolioImportView() {
   const check = useMutation({
     mutationFn: () => call(true),
     onSuccess: setPreview,
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
   const commit = useMutation({
     mutationFn: () => call(false),
     onSuccess: (r) => {
       setPreview(null);
       setCsv(null);
-      setToast({
-        message: `Imported ${r.created} unit${r.created === 1 ? '' : 's'} into ${r.propertyTitle}.`,
-        variant: 'success',
-      });
+      toast.success(`Imported ${r.created} unit${r.created === 1 ? '' : 's'} into ${r.propertyTitle}.`);
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const template = `data:text/csv;charset=utf-8,${encodeURIComponent(UNITS_CSV_TEMPLATE)}`;
@@ -215,10 +212,6 @@ export function PortfolioImportView() {
             </>
           )}
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

@@ -1,7 +1,6 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { CalendarCheck } from 'lucide-react';
 import { Badge, EmptyState, PageErrorState, PageLoadingState, Button } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
@@ -16,7 +15,6 @@ const formatWhen = (iso?: string) =>
   iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : null;
 
 export default function RenterViewingsPage() {
-  const router = useRouter();
   const query = useQuery({
     queryKey: renterKeys.viewings,
     queryFn: () => unwrap(renterService.listViewingRequests()),
@@ -24,7 +22,7 @@ export default function RenterViewingsPage() {
 
   if (query.isLoading) return <PageLoadingState />;
 
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <PageErrorState
         title="Viewings are unavailable"
@@ -45,7 +43,7 @@ export default function RenterViewingsPage() {
         title="Viewing requests"
         description="Track every home you have asked to see and the times confirmed by the property owner."
         actions={
-          <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
+          <Button variant="primary" href={ROUTES.RENTER_DISCOVER}>
             Browse homes
           </Button>
         }
@@ -57,7 +55,7 @@ export default function RenterViewingsPage() {
           title="No viewing requests yet"
           description="When you ask to view a home, it shows up here so you can track whether the landlord has confirmed a time."
           action={
-            <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
+            <Button variant="primary" href={ROUTES.RENTER_DISCOVER}>
               Browse homes
             </Button>
           }
@@ -71,8 +69,8 @@ export default function RenterViewingsPage() {
                 key={viewing.id}
                 className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
                     <h2 className="font-semibold text-foreground">{viewing.propertyName}</h2>
                     {viewing.mode === 'video' && (
                       <p className="text-xs font-medium text-primary">Live video viewing</p>

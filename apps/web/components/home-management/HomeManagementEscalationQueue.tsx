@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, type ReactNode } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
   BellRing,
@@ -14,9 +14,10 @@ import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -106,7 +107,7 @@ export function HomeManagementEscalationQueue({
   const [page, setPage] = useState(1);
   const [escalationConfirmation, setEscalationConfirmation] =
     useState<HomeManagementEscalation | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const effectivePropertyId =
     selectedPropertyId && properties.some((property) => property.id === selectedPropertyId)
@@ -126,6 +127,7 @@ export function HomeManagementEscalationQueue({
           pageSize: ESCALATION_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const escalations = useMemo(() => escalationsQuery.data?.items ?? [], [escalationsQuery.data]);
@@ -156,16 +158,10 @@ export function HomeManagementEscalationQueue({
     mutationFn: ({ id }) => unwrap(homeManagementService.acknowledgeWorkOrder(id)),
     onSuccess: async () => {
       await invalidateEscalationViews();
-      setToast({
-        message: 'Escalation acknowledged and recorded in the service trail.',
-        variant: 'success',
-      });
+      toast.success('Escalation acknowledged and recorded in the service trail.');
     },
     onError: (error) => {
-      setToast({
-        message: error.message || 'Unable to acknowledge this escalation.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to acknowledge this escalation.');
     },
   });
 
@@ -174,16 +170,10 @@ export function HomeManagementEscalationQueue({
     onSuccess: async () => {
       await invalidateEscalationViews();
       setEscalationConfirmation(null);
-      setToast({
-        message: 'Work order escalated and recorded in the service trail.',
-        variant: 'success',
-      });
+      toast.success('Work order escalated and recorded in the service trail.');
     },
     onError: (error) => {
-      setToast({
-        message: error.message || 'Unable to escalate this work order.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to escalate this work order.');
     },
   });
 
@@ -258,7 +248,7 @@ export function HomeManagementEscalationQueue({
             title="Select a property to review escalations"
             description="Choose a property to load its active SLA breach queue."
           />
-        ) : escalationsQuery.isError ? (
+        ) : escalationsQuery.isError && !escalationsQuery.data ? (
           <EmptyState
             icon={CircleAlert}
             title="Escalations could not be loaded"
@@ -435,8 +425,6 @@ export function HomeManagementEscalationQueue({
           </div>
         </DialogContent>
       </Dialog>
-
-      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
     </section>
   );
 }
@@ -481,7 +469,7 @@ function EscalationLoadingState() {
   return (
     <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
       {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="h-36 animate-pulse rounded-xl bg-secondary/70" />
+        <Skeleton key={index} className="h-36 rounded-xl" />
       ))}
     </div>
   );

@@ -123,7 +123,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
             <div className="hidden md:flex flex-1 max-w-md mx-4">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <LegacyInput
                   type="text"
                   value={searchQuery}
@@ -170,12 +170,12 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                       </div>
                       <div className="max-h-96 overflow-y-auto">
                         {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-gray-500">No notifications</div>
+                          <div className="p-4 text-center text-muted-foreground">No notifications</div>
                         ) : (
                           notifications.map((notification) => (
                             <div
                               key={notification.id}
-                              className={`p-3 border-b border-gray-100 dark:border-gray-800 hover:bg-secondary cursor-pointer transition-colors ${
+                              className={`p-3 border-b border-border hover:bg-secondary cursor-pointer transition-colors ${
                                 !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
                               }`}
                               onClick={() => handleOpenNotification(notification)}
@@ -184,7 +184,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
                                 <h4 className="text-sm font-medium text-foreground">
                                   {notification.title}
                                 </h4>
-                                <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                                   {formatRelativeTime(notification.createdAt)}
                                 </span>
                               </div>
@@ -220,7 +220,7 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
           <div className="md:hidden py-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <LegacyInput
                 type="text"
                 value={searchQuery}

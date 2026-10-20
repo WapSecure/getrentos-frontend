@@ -13,7 +13,7 @@ import {
   Mail,
   UserPlus,
 } from 'lucide-react';
-import { Badge, Button, Toast, type BadgeVariant, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant, useToast } from '@getrentos/ui';
 import { useCustody } from './CustodyProvider';
 import { InviteOwnerModal } from './InviteOwnerModal';
 import { unwrap } from '@/lib/apiHelpers';
@@ -67,7 +67,7 @@ export function AgencyOwnersView() {
   const queryClient = useQueryClient();
   const { mandates, loading, error, select } = useCustody();
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const invitesQuery = useQuery({
     queryKey: ['agency', 'ownerInvites'],
@@ -80,20 +80,20 @@ export function AgencyOwnersView() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agency', 'ownerInvites'] });
       setInviteOpen(false);
-      setToast({ message: 'Invitation sent.', variant: 'success' });
+      toast.success('Invitation sent.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not send the invite.', variant: 'error' }),
+      toast.error(e.message || 'Could not send the invite.'),
   });
 
   const revokeMutation = useMutation({
     mutationFn: (id: string) => unwrap(agencyOwnerInviteService.revoke(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agency', 'ownerInvites'] });
-      setToast({ message: 'Invitation withdrawn.', variant: 'success' });
+      toast.success('Invitation withdrawn.');
     },
     onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not withdraw.', variant: 'error' }),
+      toast.error(e.message || 'Could not withdraw.'),
   });
 
   const groups = useMemo<OwnerGroup[]>(() => {
@@ -271,10 +271,6 @@ export function AgencyOwnersView() {
         isSubmitting={inviteMutation.isPending}
         error={inviteMutation.isError ? (inviteMutation.error as Error).message : null}
       />
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 }

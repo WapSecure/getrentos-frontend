@@ -1,18 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Check, X } from 'lucide-react';
 import {
   Badge,
   Button,
+  Card,
   EmptyState,
   Input,
+  ListSkeleton,
   Pagination,
-  PageLoadingState,
-  Toast,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import {
   spendApprovalService,
@@ -52,11 +55,12 @@ export function ApprovalsView() {
   const [page, setPage] = useState(1);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data, isLoading } = useQuery({
     queryKey: ['landlord', 'spend-approvals', role, page],
     queryFn: () => unwrap(spendApprovalService.list({ role, page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const approvals = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -68,10 +72,9 @@ export function ApprovalsView() {
     mutationFn: (id: string) => unwrap(spendApprovalService.approve(id)),
     onSuccess: () => {
       invalidate();
-      setToast({ message: 'Approved. The expense has been recorded.', variant: 'success' });
+      toast.success('Approved. The expense has been recorded.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not approve.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not approve.'),
   });
 
   const rejectMutation = useMutation({
@@ -81,10 +84,9 @@ export function ApprovalsView() {
       invalidate();
       setRejectingId(null);
       setRejectReason('');
-      setToast({ message: 'Request declined.', variant: 'success' });
+      toast.success('Request declined.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not decline.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not decline.'),
   });
 
   return (
@@ -98,31 +100,29 @@ export function ApprovalsView() {
 
       <MandateCountersignSection />
 
-      <SpendCapSettings onToast={setToast} />
+      <SpendCapSettings />
 
-      <div className="mb-6 flex w-fit gap-1 rounded-lg bg-secondary p-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => {
-              setRole(tab.value);
-              setPage(1);
-            }}
-            className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-              role === tab.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={role}
+        onValueChange={(value) => {
+          setRole(value as 'owner' | 'requester');
+          setPage(1);
+        }}
+        className="mb-6"
+      >
+        <TabsList>
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
-        <PageLoadingState />
+        <ListSkeleton variant="cards" rows={3} />
       ) : approvals.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card p-12">
+        <Card className="p-12">
           <EmptyState
             icon={ShieldCheck}
             title={role === 'owner' ? 'Nothing to review' : 'No requests'}
@@ -132,13 +132,13 @@ export function ApprovalsView() {
                 : 'Spend you raise above the owner’s limit will appear here.'
             }
           />
-        </div>
+        </Card>
       ) : (
         <div className="space-y-3">
           {approvals.map((a) => {
             const canDecide = role === 'owner' && a.status === 'PENDING';
             return (
-              <div key={a.id} className="rounded-2xl border border-border bg-card p-5">
+              <Card key={a.id} className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-foreground">
@@ -166,6 +166,7 @@ export function ApprovalsView() {
                     <div className="mt-3 space-y-2">
                       <Input
                         placeholder="Reason for declining"
+                        aria-label="Reason for declining"
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
                       />
@@ -173,7 +174,8 @@ export function ApprovalsView() {
                         <Button
                           variant="danger"
                           size="sm"
-                          disabled={!rejectReason.trim() || rejectMutation.isPending}
+                          disabled={!rejectReason.trim()}
+                          isLoading={rejectMutation.isPending}
                           onClick={() =>
                             rejectMutation.mutate({ id: a.id, reason: rejectReason.trim() })
                           }
@@ -198,7 +200,8 @@ export function ApprovalsView() {
                         variant="primary"
                         size="sm"
                         className="gap-1.5"
-                        disabled={approveMutation.isPending}
+                        disabled={approveMutation.isPending && approveMutation.variables !== a.id}
+                        isLoading={approveMutation.isPending && approveMutation.variables === a.id}
                         onClick={() => approveMutation.mutate(a.id)}
                       >
                         <Check className="h-4 w-4" />
@@ -215,7 +218,7 @@ export function ApprovalsView() {
                       </Button>
                     </div>
                   ))}
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -229,10 +232,6 @@ export function ApprovalsView() {
           onPageChange={setPage}
           className="mt-6"
         />
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

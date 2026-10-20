@@ -1,18 +1,19 @@
 'use client';
 
 import { useMemo, useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, CircleAlert, Clock3, Plus, Settings2, ShieldCheck } from 'lucide-react';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { NumberInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
 import {
@@ -189,7 +190,7 @@ export function HomeManagementSlaPolicies({
   const [page, setPage] = useState(1);
   const [dialogState, setDialogState] = useState<PolicyDialogState>(null);
   const [form, setForm] = useState<SlaPolicyForm>(() => createPolicyForm('MEDIUM'));
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const effectivePropertyId =
     selectedPropertyId && properties.some((property) => property.id === selectedPropertyId)
@@ -209,6 +210,7 @@ export function HomeManagementSlaPolicies({
           pageSize: SLA_POLICY_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
 
   const activePoliciesQuery = useQuery({
@@ -258,13 +260,10 @@ export function HomeManagementSlaPolicies({
     onSuccess: async () => {
       await invalidatePolicyViews();
       setDialogState(null);
-      setToast({ message: 'Service policy created and activated.', variant: 'success' });
+      toast.success('Service policy created and activated.');
     },
     onError: (error) => {
-      setToast({
-        message: error.message || 'Unable to create this service policy.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to create this service policy.');
     },
   });
 
@@ -277,13 +276,10 @@ export function HomeManagementSlaPolicies({
     onSuccess: async () => {
       await invalidatePolicyViews();
       setDialogState(null);
-      setToast({ message: 'Service policy updated.', variant: 'success' });
+      toast.success('Service policy updated.');
     },
     onError: (error) => {
-      setToast({
-        message: error.message || 'Unable to update this service policy.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Unable to update this service policy.');
     },
   });
 
@@ -393,7 +389,7 @@ export function HomeManagementSlaPolicies({
             title="Add a property before defining service standards"
             description="SLA policies are isolated per property to keep operational commitments clear and auditable."
           />
-        ) : policiesQuery.isError ? (
+        ) : policiesQuery.isError && !policiesQuery.data ? (
           <EmptyState
             icon={CircleAlert}
             title="Service policies could not be loaded"
@@ -709,8 +705,6 @@ export function HomeManagementSlaPolicies({
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
     </section>
   );
 }
@@ -728,10 +722,7 @@ function SlaPoliciesLoadingState() {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {Array.from({ length: 4 }, (_, index) => (
-        <div
-          key={index}
-          className="h-72 animate-pulse rounded-2xl border border-border bg-secondary/50"
-        />
+        <Skeleton key={index} className="h-72 rounded-2xl" />
       ))}
     </div>
   );

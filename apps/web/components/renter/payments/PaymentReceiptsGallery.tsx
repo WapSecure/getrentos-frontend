@@ -1,12 +1,20 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, Eye, Search, X } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { FilePreviewDialog } from '@getrentos/ui';
+import { FileText, Download, Eye } from 'lucide-react';
+import {
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  EmptyState,
+  FilePreviewDialog,
+  IconButton,
+  SearchInput,
+} from '@getrentos/ui';
 
 interface Receipt {
   id: string;
@@ -58,7 +66,7 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
 
   return (
     <>
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <Card>
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -68,137 +76,121 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
               </p>
             </div>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <LegacyInput
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search receipts..."
-                className="pl-10 pr-4 py-2 text-sm rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary w-full sm:w-48"
-              />
-            </div>
+            <SearchInput
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+              placeholder="Search receipts..."
+              label="Search receipts"
+              className="w-full sm:w-56"
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
-          {filteredReceipts.map((receipt, index) => (
-            <motion.div
-              key={receipt.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              className="group relative p-3 rounded-lg border border-border hover:border-primary hover:shadow-md transition-all cursor-pointer"
-              onClick={() => handleView(receipt)}
-            >
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-secondary">
-                  <FileText className="w-4 h-4 text-gray-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{receipt.fileName}</p>
-                  <p className="text-xs text-gray-500">{receipt.propertyName}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs font-semibold text-primary">
-                      {formatCurrency(receipt.amount)}
+        {filteredReceipts.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 p-4">
+            {filteredReceipts.map((receipt, index) => (
+              <motion.div
+                key={receipt.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+                className="group relative rounded-lg border border-border hover:border-primary hover:shadow-md transition-all"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleView(receipt)}
+                  className="flex w-full items-start gap-3 rounded-lg p-3 pr-20 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="p-2 rounded-lg bg-secondary">
+                    <FileText className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-medium text-foreground truncate">
+                      {receipt.fileName}
                     </span>
-                    <span className="text-xs text-gray-400">•</span>
-                    <span className="text-xs text-gray-500">{formatDate(receipt.date)}</span>
-                  </div>
+                    <span className="block text-xs text-muted-foreground">
+                      {receipt.propertyName}
+                    </span>
+                    <span className="flex items-center gap-2 mt-1">
+                      <span className="text-xs font-semibold text-primary">
+                        {formatCurrency(receipt.amount)}
+                      </span>
+                      <span className="text-xs text-muted-foreground" aria-hidden="true">
+                        •
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(receipt.date)}
+                      </span>
+                    </span>
+                  </span>
+                </button>
+
+                <div className="absolute top-2 right-2 flex gap-1 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                  <IconButton
+                    size="sm"
+                    label={`Download ${receipt.fileName}`}
+                    icon={<Download aria-hidden="true" />}
+                    onClick={() => onDownload(receipt.id)}
+                  />
+                  <IconButton
+                    size="sm"
+                    label={`View ${receipt.fileName}`}
+                    icon={<Eye aria-hidden="true" />}
+                    onClick={() => handleView(receipt)}
+                  />
                 </div>
-              </div>
-
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDownload(receipt.id);
-                  }}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <Download className="w-3 h-3 text-gray-500" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleView(receipt);
-                  }}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <Eye className="w-3 h-3 text-gray-500" />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {filteredReceipts.length === 0 && (
-          <div className="p-8 text-center">
-            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-500">No receipts found</p>
+              </motion.div>
+            ))}
           </div>
         )}
-      </div>
+
+        {filteredReceipts.length === 0 && (
+          <EmptyState icon={FileText} title="No receipts found" size="compact" bare />
+        )}
+      </Card>
 
       {/* Receipt details remain visible alongside the reusable file viewer. */}
-      {showPreview && selectedReceipt && !selectedReceipt.url && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full mx-4 overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">Receipt Preview</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{selectedReceipt.fileName}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onDownload(selectedReceipt.id)}
-                  className="p-1.5 rounded-lg hover:bg-secondary"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className="p-1.5 rounded-lg hover:bg-secondary"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+      <Dialog
+        open={showPreview && Boolean(selectedReceipt) && !selectedReceipt?.url}
+        onOpenChange={(open) => !open && setShowPreview(false)}
+      >
+        {selectedReceipt && (
+          <DialogContent className="p-0 sm:p-0">
+            <div className="p-4 pr-12 border-b border-border">
+              <DialogTitle className="font-semibold text-foreground">Receipt Preview</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                {selectedReceipt.fileName}
+              </DialogDescription>
             </div>
 
             <div className="p-6 space-y-4">
-              <div className="p-4 rounded-lg bg-gray-50 dark:bg-white/5 border border-border">
+              <div className="p-4 rounded-lg bg-secondary border border-border">
                 <div className="text-center">
-                  <FileText className="w-12 h-12 text-primary mx-auto mb-2" />
+                  <FileText className="w-12 h-12 text-primary mx-auto mb-2" aria-hidden="true" />
                   <p className="text-sm font-medium text-foreground">
                     {selectedReceipt.propertyName}
                   </p>
                   <p className="text-2xl font-bold text-primary">
                     {formatCurrency(selectedReceipt.amount)}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">{formatDate(selectedReceipt.date)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatDate(selectedReceipt.date)}
+                  </p>
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={() => onDownload(selectedReceipt.id)}
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Receipt
-                </Button>
-              </div>
+              <Button
+                variant="primary"
+                fullWidth
+                icon={<Download className="w-4 h-4" />}
+                onClick={() => onDownload(selectedReceipt.id)}
+              >
+                Download Receipt
+              </Button>
             </div>
-          </motion.div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
       <FilePreviewDialog
         open={showPreview && Boolean(selectedReceipt?.url)}
         onOpenChange={(open) => !open && setShowPreview(false)}

@@ -1,8 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { cn } from '@getrentos/shared';
+import { PageErrorState, Skeleton } from '@getrentos/ui';
 
 interface AsyncState {
   isPending: boolean;
@@ -47,37 +47,25 @@ export const ListState = ({
 }: ListStateProps) => {
   if (query.isPending) {
     return (
-      <div className="space-y-3" aria-busy="true" aria-label="Loading">
+      <div className="space-y-3" role="status" aria-busy="true" aria-label="Loading">
         {Array.from({ length: skeletonRows }).map((_, index) => (
-          <div
-            key={index}
-            className={`animate-pulse rounded-2xl border border-border bg-card ${skeletonClassName}`}
-          />
+          <Skeleton key={index} className={cn('rounded-2xl', skeletonClassName)} />
         ))}
       </div>
     );
   }
 
-  if (query.isError) {
+  // Rows already on screen stay there through a failed refresh.
+  if (query.isError && items.length === 0) {
     return (
-      <div className="bg-card rounded-2xl border border-border p-12 text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent flex items-center justify-center">
-          <AlertTriangle className="w-8 h-8 text-primary" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground">{errorTitle}</h3>
-        <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">{errorDescription}</p>
-        {query.refetch && (
-          <Button
-            variant="primary"
-            className="mt-6 gap-2"
-            disabled={query.isFetching}
-            onClick={() => void query.refetch?.()}
-          >
-            <RefreshCw className="w-4 h-4" />
-            {query.isFetching ? 'Retrying…' : 'Try again'}
-          </Button>
-        )}
-      </div>
+      <PageErrorState
+        headingLevel="h2"
+        title={errorTitle}
+        description={errorDescription}
+        onRetry={query.refetch ? () => void query.refetch?.() : undefined}
+        isRetrying={query.isFetching}
+        className="min-h-0 py-12"
+      />
     );
   }
 

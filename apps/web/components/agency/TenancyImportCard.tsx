@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, Upload, Users } from 'lucide-react';
-import { Badge, Button, Card, Select, Toast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, Card, Select, useToast } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -30,7 +30,7 @@ export function TenancyImportCard() {
   const [propertyId, setPropertyId] = useState('');
   const [csv, setCsv] = useState<{ name: string; text: string } | null>(null);
   const [preview, setPreview] = useState<TenancyImportResult | null>(null);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const chosen = propertyId || properties[0]?.value || '';
 
   const call = async (dryRun: boolean) => {
@@ -45,21 +45,18 @@ export function TenancyImportCard() {
   const check = useMutation({
     mutationFn: () => call(true),
     onSuccess: setPreview,
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
   const commit = useMutation({
     mutationFn: () => call(false),
     onSuccess: (r) => {
       setPreview(null);
       setCsv(null);
-      setToast({
-        message: `Imported ${r.imported} tenanc${r.imported === 1 ? 'y' : 'ies'} into ${r.propertyTitle}${
+      toast.success(`Imported ${r.imported} tenanc${r.imported === 1 ? 'y' : 'ies'} into ${r.propertyTitle}${
           r.schedulesStarted ? `; rent schedules started for ${r.schedulesStarted}` : ''
-        }.`,
-        variant: 'success',
-      });
+        }.`);
     },
-    onError: (e: Error) => setToast({ message: e.message, variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message),
   });
 
   if (loading || properties.length === 0) return null;
@@ -206,10 +203,6 @@ export function TenancyImportCard() {
             </>
           )}
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

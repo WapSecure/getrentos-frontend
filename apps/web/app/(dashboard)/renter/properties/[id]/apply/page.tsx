@@ -104,7 +104,7 @@ export default function PropertyApplyPage() {
 
   if (propertyQuery.isLoading || kycQuery.isLoading) return <PageLoadingState />;
 
-  if (propertyQuery.isError) {
+  if (propertyQuery.isError && !propertyQuery.data) {
     return (
       <PageErrorState
         title="Application form is unavailable"
@@ -133,8 +133,8 @@ export default function PropertyApplyPage() {
   if (submitted) {
     return (
       <div className="max-w-lg mx-auto text-center py-12">
-        <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-          <CheckCircle2 className="w-7 h-7 text-green-600 dark:text-green-400" />
+        <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-success-subtle flex items-center justify-center">
+          <CheckCircle2 className="w-7 h-7 text-success" aria-hidden="true" />
         </div>
         <h1 className="text-xl font-bold text-foreground">Application submitted</h1>
         <p className="text-muted-foreground mt-2">
@@ -142,7 +142,7 @@ export default function PropertyApplyPage() {
           has been sent to {property.landlordName || 'the landlord'}. You&apos;ll be notified as
           soon as there&apos;s an update.
         </p>
-        <div className="flex items-center justify-center gap-3 mt-6">
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}>
             View My Applications
           </Button>
@@ -156,13 +156,15 @@ export default function PropertyApplyPage() {
 
   return (
     <>
-      <button
-        onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      <Button
+        variant="ghost"
+        size="sm"
+        href={buildRoute.renterPropertyDetail(property.id)}
+        icon={<ArrowLeft className="w-4 h-4" />}
+        className="mb-4"
       >
-        <ArrowLeft className="w-4 h-4" />
         Back to property
-      </button>
+      </Button>
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Apply to rent</h1>

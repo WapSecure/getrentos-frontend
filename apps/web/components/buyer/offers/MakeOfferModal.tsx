@@ -180,7 +180,7 @@ export const MakeOfferModal = ({
                   ariaLabel="property"
                 />
                 {selectedListing && (
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Asking price: ₦{selectedListing.askingPrice.toLocaleString()}
                   </p>
                 )}
@@ -223,7 +223,7 @@ export const MakeOfferModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Deposit Amount (₦) <span className="text-gray-400 font-normal">(optional)</span>
+                  Deposit Amount (₦) <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
                 <CurrencyInput
                   prefix="₦"
@@ -236,7 +236,7 @@ export const MakeOfferModal = ({
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Message to Owner <span className="text-gray-400 font-normal">(optional)</span>
+                  Message to Owner <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
                 <Textarea
                   value={message}

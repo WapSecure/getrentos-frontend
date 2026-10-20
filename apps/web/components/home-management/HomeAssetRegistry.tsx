@@ -27,11 +27,12 @@ import {
 } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { Skeleton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -144,7 +145,7 @@ export function HomeAssetRegistry({
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<AssetForm>(initialAssetForm);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const unitsQuery = useQuery({
     enabled: isCreateOpen && Boolean(form.propertyId),
@@ -160,10 +161,10 @@ export function HomeAssetRegistry({
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.dashboard });
       setForm(initialAssetForm);
       setIsCreateOpen(false);
-      setToast({ message: 'Asset added to your home register.', variant: 'success' });
+      toast.success('Asset added to your home register.');
     },
     onError: (mutationError: Error) => {
-      setToast({ message: mutationError.message || 'Unable to add this asset.', variant: 'error' });
+      toast.error(mutationError.message || 'Unable to add this asset.');
     },
   });
 
@@ -174,13 +175,10 @@ export function HomeAssetRegistry({
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.assets() });
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.plans });
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.dashboard });
-      setToast({ message: lifecycleSuccessMessage[variables.status], variant: 'success' });
+      toast.success(lifecycleSuccessMessage[variables.status]);
     },
     onError: (mutationError: Error) => {
-      setToast({
-        message: mutationError.message || 'Unable to update the asset lifecycle.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to update the asset lifecycle.');
     },
   });
 
@@ -271,7 +269,7 @@ export function HomeAssetRegistry({
       <div className="mt-5">
         {isLoading ? (
           <AssetLoadingState />
-        ) : error ? (
+        ) : error && assets.length === 0 ? (
           <EmptyState
             icon={CircleAlert}
             title="Assets could not be loaded"
@@ -343,7 +341,7 @@ export function HomeAssetRegistry({
                       <p
                         className={
                           isWarrantyExpiring(asset.warrantyExpiresAt)
-                            ? 'font-medium text-amber-700 dark:text-amber-400'
+                            ? 'font-medium text-warning'
                             : 'text-muted-foreground'
                         }
                       >
@@ -573,10 +571,6 @@ export function HomeAssetRegistry({
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </section>
   );
 }
@@ -614,7 +608,7 @@ function AssetLoadingState() {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="h-72 animate-pulse rounded-2xl border border-border bg-card" />
+        <Skeleton key={index} className="h-72 rounded-2xl" />
       ))}
     </div>
   );

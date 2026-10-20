@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
 import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
-import { Button, LegacyInput } from '@getrentos/ui';
+import { Button, CardSkeleton, LegacyInput } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
@@ -386,7 +386,7 @@ export default function GatemanVerifyPage() {
   };
 
   if (isPostLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {

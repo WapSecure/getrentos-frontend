@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -38,23 +38,22 @@ export default function AdminLandFraudPage() {
           not a verdict. Critical signals hold up approval until cleared; high ones once confirmed.
         </p>
       </div>
-      {query.isLoading ? (
-        <div className="h-48 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : query.isError ? (
-        <EmptyState
-          icon={CircleAlert}
-          title="Signals could not be loaded"
-          description={query.error instanceof Error ? query.error.message : undefined}
-        />
-      ) : !query.data?.length ? (
-        <EmptyState
-          icon={ShieldCheck}
-          title="No open signals"
-          description="The nightly sweep and every parcel save look for new ones."
-        />
-      ) : (
+      <QueryState
+        isLoading={query.isLoading}
+        isError={query.isError && !query.data}
+        onRetry={() => void query.refetch()}
+        isRetrying={query.isFetching}
+        errorTitle="Signals could not be loaded"
+        errorDescription={query.error instanceof Error ? query.error.message : undefined}
+        isEmpty={!query.data?.length}
+        empty={{
+          icon: ShieldCheck,
+          title: 'No open signals',
+          description: 'The nightly sweep and every parcel save look for new ones.',
+        }}
+      >
         <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-          {query.data.map((row) => (
+          {(query.data ?? []).map((row) => (
             <li key={row.propertyId}>
               <Link
                 href={`/admin/land/fraud/${encodeURIComponent(row.propertyId)}`}
@@ -79,7 +78,7 @@ export default function AdminLandFraudPage() {
             </li>
           ))}
         </ul>
-      )}
+      </QueryState>
     </>
   );
 }

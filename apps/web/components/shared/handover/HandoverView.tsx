@@ -3,7 +3,18 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, Circle, Download, FileCheck2, TriangleAlert } from 'lucide-react';
-import { Badge, Button, Card, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  Field,
+  Input,
+  PageErrorState,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import {
@@ -98,9 +109,21 @@ export function HandoverView({ transferId }: { transferId: string }) {
     onError: fail,
   });
 
-  if (q.isLoading) return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
-  if (q.isError)
-    return <p className="p-6 text-sm text-destructive">{(q.error as Error).message}</p>;
+  if (q.isLoading)
+    return (
+      <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+        <CardSkeleton lines={4} />
+        <CardSkeleton lines={6} />
+      </div>
+    );
+  if (q.isError && !q.data)
+    return (
+      <PageErrorState
+        description={(q.error as Error).message}
+        onRetry={() => void q.refetch()}
+        isRetrying={q.isFetching}
+      />
+    );
   if (!h || !pack || !snap) {
     return (
       <p className="p-6 text-sm text-muted-foreground">
@@ -155,11 +178,11 @@ export function HandoverView({ transferId }: { transferId: string }) {
           <Button
             size="sm"
             variant="outline"
-            className="gap-1.5"
-            disabled={exportPack.isPending}
+            icon={<Download className="h-3.5 w-3.5" />}
+            isLoading={exportPack.isPending}
             onClick={() => exportPack.mutate()}
           >
-            <Download className="h-3.5 w-3.5" /> Export
+            Export
           </Button>
         </div>
       </div>
@@ -344,54 +367,49 @@ export function HandoverView({ transferId }: { transferId: string }) {
                 Deposit of {formatCurrency(d.amount)} ({d.tenant}, {d.unit}) you held outside
                 GetRentos
               </p>
-              <select
-                aria-label={`What happened to the ${formatCurrency(d.amount)} deposit`}
+              <Select
+                ariaLabel={`What happened to the ${formatCurrency(d.amount)} deposit`}
                 value={deposits[d.id]?.treatment ?? ''}
-                onChange={(e) =>
+                onValueChange={(value) =>
                   setDeposits((s) => ({
                     ...s,
                     [d.id]: {
                       note: s[d.id]?.note ?? '',
-                      treatment: e.target.value as DepositTreatment,
+                      treatment: value as DepositTreatment,
                     },
                   }))
                 }
-                className="mt-1 h-10 w-full cursor-pointer rounded-lg border border-border bg-background px-3 text-sm"
-              >
-                <option value="">What happened to it…</option>
-                {(Object.keys(TREATMENT) as DepositTreatment[]).map((t) => (
-                  <option key={t} value={t}>
-                    {TREATMENT[t]}
-                  </option>
-                ))}
-              </select>
-              <input
+                placeholder="What happened to it…"
+                searchable={false}
+                options={(Object.keys(TREATMENT) as DepositTreatment[]).map((t) => ({
+                  value: t,
+                  label: TREATMENT[t],
+                }))}
+                className="mt-1"
+              />
+              <Input
                 aria-label="Reference or note"
                 value={deposits[d.id]?.note ?? ''}
                 onChange={(e) =>
                   setDeposits((s) => ({ ...s, [d.id]: { ...s[d.id], note: e.target.value } }))
                 }
                 placeholder="Transfer reference or note (optional)"
-                className="mt-2 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm"
+                className="mt-2"
               />
             </div>
           ))}
-          <div>
-            <label htmlFor="ho-keys" className="block text-sm font-medium text-foreground">
-              Keys, codes and access handed over
-            </label>
+          <Field label="Keys, codes and access handed over" htmlFor="ho-keys">
             <Textarea
-              id="ho-keys"
               rows={3}
               value={keys}
               onChange={(e) => setKeys(e.target.value)}
               placeholder="e.g. Two sets of front and back keys, gate remote, alarm code shared with the new manager"
-              className="mt-1"
             />
-          </div>
+          </Field>
           <Button
             variant="primary"
-            disabled={!outgoingReady || signOutgoing.isPending}
+            disabled={!outgoingReady}
+            isLoading={signOutgoing.isPending}
             onClick={() => signOutgoing.mutate()}
           >
             Sign the handover
@@ -409,7 +427,7 @@ export function HandoverView({ transferId }: { transferId: string }) {
           <Button
             className="mt-3"
             variant="primary"
-            disabled={sign.isPending}
+            isLoading={sign.isPending}
             onClick={() => sign.mutate(canOwner ? 'owner' : 'incoming')}
           >
             {canOwner ? 'Acknowledge' : 'Accept the handover'}
@@ -421,19 +439,18 @@ export function HandoverView({ transferId }: { transferId: string }) {
         <div>
           {showDispute ? (
             <Card className="space-y-3 p-5">
-              <label htmlFor="ho-dispute" className="block text-sm font-medium text-foreground">
-                What is wrong with the handover?
-              </label>
-              <Textarea
-                id="ho-dispute"
-                rows={3}
-                value={disputeText}
-                onChange={(e) => setDisputeText(e.target.value)}
-              />
+              <Field label="What is wrong with the handover?" htmlFor="ho-dispute">
+                <Textarea
+                  rows={3}
+                  value={disputeText}
+                  onChange={(e) => setDisputeText(e.target.value)}
+                />
+              </Field>
               <div className="flex gap-2">
                 <Button
                   variant="primary"
-                  disabled={disputeText.trim().length < 10 || dispute.isPending}
+                  disabled={disputeText.trim().length < 10}
+                  isLoading={dispute.isPending}
                   onClick={() => dispute.mutate()}
                 >
                   Dispute the handover
@@ -455,11 +472,7 @@ export function HandoverView({ transferId }: { transferId: string }) {
         </div>
       )}
 
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
+      {error && <Alert variant="danger">{error}</Alert>}
     </div>
   );
 }

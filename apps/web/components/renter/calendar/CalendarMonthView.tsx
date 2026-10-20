@@ -76,19 +76,20 @@ export const CalendarMonthView = ({
                 </span>
                 <div className="flex-1 overflow-y-auto space-y-0.5 mt-0.5">
                   {dayEvents.slice(0, 3).map((event) => (
-                    <div
+                    <button
+                      type="button"
                       key={event.id}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEventClick(event);
                       }}
-                      className="text-[10px] px-1 py-0.5 rounded truncate text-white"
+                      className="block w-full text-left text-[10px] px-1 py-0.5 rounded truncate text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                       style={{
                         backgroundColor: event.color || typeColors[event.type] || 'var(--primary)',
                       }}
                     >
                       {event.title}
-                    </div>
+                    </button>
                   ))}
                   {dayEvents.length > 3 && (
                     <div className="text-[10px] text-muted-foreground px-1">

@@ -1,10 +1,11 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ClipboardCheck, CircleAlert, FileSearch, MapPin, UserRound } from 'lucide-react';
 import { Badge } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { ListSkeleton } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
@@ -19,6 +20,7 @@ export function HomeManagementInspectionFeed() {
     queryKey: [...homeManagementKeys.inspections, { page, pageSize: INSPECTION_PAGE_SIZE }],
     queryFn: () =>
       unwrap(homeManagementService.listInspections({ page, pageSize: INSPECTION_PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const inspections = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -49,8 +51,8 @@ export function HomeManagementInspectionFeed() {
 
       <div className="mt-5">
         {isLoading ? (
-          <InspectionLoadingState />
-        ) : error ? (
+          <ListSkeleton rows={3} className="rounded-2xl" />
+        ) : error && !data ? (
           <EmptyState
             icon={CircleAlert}
             title="Inspection reports could not be loaded"
@@ -123,15 +125,5 @@ export function HomeManagementInspectionFeed() {
         )}
       </div>
     </section>
-  );
-}
-
-function InspectionLoadingState() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="h-24 animate-pulse border-b border-border last:border-b-0" />
-      ))}
-    </div>
   );
 }

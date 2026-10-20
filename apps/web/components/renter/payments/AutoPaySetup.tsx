@@ -3,9 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Repeat, Shield, Zap } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { Switch } from '@getrentos/ui';
+import { Alert, Button, Card, Field, Select, Switch } from '@getrentos/ui';
 
 export const AutoPaySetup = () => {
   const [enabled, setEnabled] = useState(false);
@@ -13,7 +11,7 @@ export const AutoPaySetup = () => {
   const [dayOfMonth, setDayOfMonth] = useState(1);
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
@@ -33,10 +31,7 @@ export const AutoPaySetup = () => {
           animate={{ opacity: 1, height: 'auto' }}
           className="p-4 space-y-4"
         >
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Payment Frequency
-            </label>
+          <Field label="Payment Frequency">
             <Select
               value={frequency}
               onValueChange={setFrequency}
@@ -46,12 +41,9 @@ export const AutoPaySetup = () => {
                 { value: 'yearly', label: 'Yearly' },
               ]}
             />
-          </div>
+          </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Payment Day of Month
-            </label>
+          <Field label="Payment Day of Month">
             <Select
               value={String(dayOfMonth)}
               onValueChange={(value) => setDayOfMonth(Number(value))}
@@ -60,28 +52,17 @@ export const AutoPaySetup = () => {
                 label: String(index + 1),
               }))}
             />
-          </div>
+          </Field>
 
-          <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-            <div className="flex items-start gap-2">
-              <Shield className="w-4 h-4 text-green-600 mt-0.5" />
-              <div>
-                <p className="text-xs font-medium text-green-800 dark:text-green-300">
-                  AutoPay uses GetRentos Payment Protection
-                </p>
-                <p className="text-xs text-green-700 dark:text-green-400 mt-0.5">
-                  GetRentos holds each payment until the conditions are met
-                </p>
-              </div>
-            </div>
-          </div>
+          <Alert variant="success" icon={Shield} title="AutoPay uses GetRentos Payment Protection">
+            GetRentos holds each payment until the conditions are met
+          </Alert>
 
-          <Button variant="primary" size="sm" fullWidth>
-            <Zap className="w-4 h-4" />
+          <Button variant="primary" size="sm" fullWidth icon={<Zap className="w-4 h-4" />}>
             Activate AutoPay
           </Button>
         </motion.div>
       )}
-    </div>
+    </Card>
   );
 };

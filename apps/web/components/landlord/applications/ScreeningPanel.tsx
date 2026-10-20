@@ -9,11 +9,18 @@ import {
   ExternalLink,
   FileCheck,
   FileX,
-  Loader2,
   Phone,
   Users,
 } from 'lucide-react';
-import { Badge, Button, LegacyInput, LegacySelect, type BadgeVariant } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  CardSkeleton,
+  Input,
+  PageErrorState,
+  Select,
+  type BadgeVariant,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -127,25 +134,25 @@ const ReferenceRow = ({
 
       {editing ? (
         <div className="mt-2 space-y-2">
-          <LegacySelect
+          <Select
             value={status}
-            onChange={(event) => setStatus(event.target.value as ReferenceOutcome)}
-            aria-label="Outcome"
-            className="w-full px-2 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground"
-          >
-            {(Object.keys(outcomeLabel) as ReferenceOutcome[]).map((key) => (
-              <option key={key} value={key}>
-                {outcomeLabel[key]}
-              </option>
-            ))}
-          </LegacySelect>
-          <LegacyInput
+            onValueChange={(value) => setStatus(value as ReferenceOutcome)}
+            ariaLabel="Outcome"
+            searchable={false}
+            controlSize="sm"
+            options={(Object.keys(outcomeLabel) as ReferenceOutcome[]).map((key) => ({
+              value: key,
+              label: outcomeLabel[key],
+            }))}
+          />
+          <Input
             type="text"
             value={note}
             maxLength={500}
             onChange={(event) => setNote(event.target.value)}
             placeholder="What did they say? (optional)"
-            className="w-full px-2 py-1.5 rounded-lg border border-border bg-card text-sm text-foreground"
+            aria-label="Note"
+            controlSize="sm"
           />
           {save.isError && (
             <p role="alert" className="text-xs text-destructive">
@@ -194,23 +201,22 @@ export const ScreeningPanel = ({
   applicationId: string;
   employmentStatus: string;
 }) => {
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending, refetch, isRefetching } = useQuery({
     queryKey: landlordKeys.applicationScreening(applicationId),
     queryFn: () => unwrap(landlordService.getApplicationScreening(applicationId)),
   });
 
-  if (isPending) {
+  if (isPending) return <CardSkeleton lines={5} />;
+  if (!data) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="w-5 h-5 animate-spin text-primary" />
-      </div>
-    );
-  }
-  if (isError || !data) {
-    return (
-      <p role="alert" className="text-sm text-destructive">
-        We could not load the screening report for this applicant. Please close this and try again.
-      </p>
+      <PageErrorState
+        headingLevel="h2"
+        className="min-h-0 py-8"
+        title="The screening report did not load"
+        description="We could not load the screening report for this applicant. Please try again."
+        onRetry={() => refetch()}
+        isRetrying={isRefetching}
+      />
     );
   }
 

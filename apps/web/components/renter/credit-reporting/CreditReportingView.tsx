@@ -1,8 +1,9 @@
 import { Building2, ShieldCheck } from 'lucide-react';
+import { Alert, Card } from '@getrentos/ui';
 
 export const CreditReportingView = () => {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6">
+    <Card className="p-6">
       <div className="flex items-start gap-4">
         <div className="rounded-xl bg-secondary p-3">
           <Building2 className="h-5 w-5 text-muted-foreground" />
@@ -15,15 +16,12 @@ export const CreditReportingView = () => {
             GetRentos does not currently submit rent payments to a credit bureau. There is no
             enrollment to complete and no payment data will be shared for credit reporting.
           </p>
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-border bg-secondary/40 p-3">
-            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-            <p className="text-xs leading-5 text-muted-foreground">
-              If this service launches, it will include explicit consent, withdrawal, correction,
-              retention and dispute controls before any bureau receives data.
-            </p>
-          </div>
+          <Alert variant="neutral" icon={ShieldCheck} className="mt-4">
+            If this service launches, it will include explicit consent, withdrawal, correction,
+            retention and dispute controls before any bureau receives data.
+          </Alert>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

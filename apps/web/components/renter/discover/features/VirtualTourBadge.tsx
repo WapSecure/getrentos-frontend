@@ -18,6 +18,7 @@ export const VirtualTourBadge = ({ hasTour, onOpenTour }: VirtualTourBadgeProps)
       className="absolute top-3 right-12 z-10"
     >
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           onOpenTour();

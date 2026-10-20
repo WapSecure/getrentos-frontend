@@ -1,11 +1,9 @@
 'use client';
 
-import { Textarea } from '@getrentos/ui';
-
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Star, Send } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Alert, Button, Card, Field, Textarea } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -37,18 +35,18 @@ export const HelpFeedback = () => {
 
   if (submitted) {
     return (
-      <div className="bg-card rounded-xl border border-border overflow-hidden p-6 text-center">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-          <Star className="w-6 h-6 text-green-600 fill-green-600" />
+      <Card className="p-6 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-subtle">
+          <Star className="h-6 w-6 fill-success text-success" />
         </div>
         <p className="text-sm font-medium text-foreground">Thank you for your feedback!</p>
-        <p className="text-xs text-gray-500 mt-1">We appreciate your input</p>
-      </div>
+        <p className="mt-1 text-xs text-muted-foreground">We appreciate your input</p>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Send Feedback</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Help us improve</p>
@@ -56,8 +54,10 @@ export const HelpFeedback = () => {
 
       <div className="p-4 space-y-4">
         <div>
-          <p className="text-sm text-foreground mb-2">How was your experience?</p>
-          <div className="flex gap-1">
+          <p id="help-feedback-rating" className="text-sm text-foreground mb-2">
+            How was your experience?
+          </p>
+          <div className="flex gap-1" role="group" aria-labelledby="help-feedback-rating">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 type="button"
@@ -65,7 +65,9 @@ export const HelpFeedback = () => {
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
                 onClick={() => setRating(star)}
-                className="transition-transform hover:scale-110"
+                aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                aria-pressed={rating === star}
+                className="rounded transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Star
                   className={`w-6 h-6 ${
@@ -79,18 +81,16 @@ export const HelpFeedback = () => {
           </div>
         </div>
 
-        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">Your Feedback</label>
+        <Field label="Your Feedback">
           <Textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
             placeholder="Tell us what you think..."
             rows={3}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </div>
+        </Field>
 
         <Button
           variant="primary"
@@ -98,12 +98,12 @@ export const HelpFeedback = () => {
           onClick={handleSubmit}
           disabled={rating === 0 || submitMutation.isPending}
           isLoading={submitMutation.isPending}
-          className="gap-2"
+          loadingText="Sending feedback"
+          icon={<Send className="h-4 w-4" />}
         >
-          <Send className="w-4 h-4" />
-          {submitMutation.isPending ? 'Sending feedback' : 'Submit Feedback'}
+          Submit Feedback
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };

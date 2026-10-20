@@ -2,7 +2,7 @@
 
 import { useRenterUser } from '../layout';
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessagesHeader } from '@/components/renter/messages/MessagesHeader';
 import { MessageConversationList } from '@/components/renter/messages/MessageConversationList';
 import { MessageThread } from '@/components/renter/messages/MessageThread';
@@ -12,12 +12,19 @@ import { MessageTemplates } from '@/components/renter/messages/MessageTemplates'
 import { MessageFilters } from '@/components/renter/messages/MessageFilters';
 import { MessageReminders } from '@/components/renter/messages/MessageReminders';
 import { MessageCircle } from 'lucide-react';
-import { Conversation, Message, FilterState } from '@/types/messages';
+import { Conversation, Message, FilterState, Reminder } from '@/types/messages';
 import { renterService } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
-import { PageErrorState, PageLoadingState, Pagination, Toast } from '@getrentos/ui';
+import {
+  EmptyState,
+  PageErrorState,
+  PageLoadingState,
+  Pagination,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
 import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 export default function MessagesPage() {
@@ -25,9 +32,7 @@ export default function MessagesPage() {
   const queryClient = useQueryClient();
   const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; variant: 'success' | 'error' } | null>(
-    null
-  );
+  const toast = useToast();
   const conversationsQueryKey = [
     ...renterKeys.conversations,
     { page, pageSize: PAGE_SIZE },
@@ -35,6 +40,7 @@ export default function MessagesPage() {
   const conversationsQuery = useQuery({
     queryKey: conversationsQueryKey,
     queryFn: () => unwrap(renterService.listConversations({ page, pageSize: PAGE_SIZE })),
+    placeholderData: keepPreviousData,
   });
   const data = conversationsQuery.data;
   const conversations = data?.items ?? [];
@@ -107,55 +113,87 @@ export default function MessagesPage() {
     },
     onError: (error: Error, _variables, context) => {
       if (context) queryClient.setQueryData(conversationsQueryKey, context.previousConversations);
-      setToast({
-        message: error.message || 'Your message could not be sent. Please try again.',
-        variant: 'error',
-      });
+      toast.error(error.message || 'Your message could not be sent. Please try again.');
     },
     onSettled: invalidateConversations,
   });
 
-  const markReadMutation = useMutation({
+  const patchConversation =
+    (conversationId: string, patch: (conversation: Conversation) => Conversation) =>
+    (old: unknown) => {
+      const page = old as Paginated<Conversation>;
+      return {
+        ...page,
+        items: page.items.map((conversation) =>
+          conversation.id === conversationId ? patch(conversation) : conversation
+        ),
+      };
+    };
+
+  const markReadMutation = useOptimisticMutation({
     mutationFn: (conversationId: string) =>
       unwrap(renterService.markConversationRead(conversationId)),
-    onSuccess: invalidateConversations,
-    onError: () =>
-      setToast({ message: 'Could not mark this conversation as read.', variant: 'error' }),
+    patches: (conversationId) => [
+      {
+        queryKey: conversationsQueryKey,
+        update: patchConversation(conversationId, (c) => ({ ...c, unreadCount: 0 })),
+      },
+    ],
+    invalidate: [renterKeys.conversations],
+    errorMessage: 'Could not mark this conversation as read.',
   });
 
-  const pinMutation = useMutation({
+  const pinMutation = useOptimisticMutation({
     mutationFn: (conversationId: string) =>
       unwrap(renterService.togglePinConversation(conversationId)),
-    onSuccess: invalidateConversations,
-    onError: () =>
-      setToast({ message: 'Could not update the pinned conversation.', variant: 'error' }),
+    patches: (conversationId) => [
+      {
+        queryKey: conversationsQueryKey,
+        update: patchConversation(conversationId, (c) => ({ ...c, isPinned: !c.isPinned })),
+      },
+    ],
+    invalidate: [renterKeys.conversations],
+    errorMessage: 'Could not update the pinned conversation.',
   });
 
-  const archiveMutation = useMutation({
+  const archiveMutation = useOptimisticMutation({
     mutationFn: (conversationId: string) =>
       unwrap(renterService.toggleArchiveConversation(conversationId)),
-    onSuccess: invalidateConversations,
-    onError: () =>
-      setToast({ message: 'Could not update the archived conversation.', variant: 'error' }),
+    patches: (conversationId) => [
+      {
+        queryKey: conversationsQueryKey,
+        update: patchConversation(conversationId, (c) => ({ ...c, isArchived: !c.isArchived })),
+      },
+    ],
+    invalidate: [renterKeys.conversations],
+    errorMessage: 'Could not update the archived conversation.',
   });
 
   const addReminderMutation = useMutation({
     mutationFn: (reminderData: { message: string; date: string; time: string }) =>
       unwrap(renterService.createReminder(reminderData)),
     onSuccess: invalidateReminders,
-    onError: () => setToast({ message: 'Could not save the reminder.', variant: 'error' }),
+    onError: () => toast.error('Could not save the reminder.'),
   });
 
-  const toggleReminderMutation = useMutation({
+  const toggleReminderMutation = useOptimisticMutation({
     mutationFn: (id: string) => unwrap(renterService.toggleReminder(id)),
-    onSuccess: invalidateReminders,
-    onError: () => setToast({ message: 'Could not update the reminder.', variant: 'error' }),
+    patches: (id) => [
+      {
+        queryKey: renterKeys.reminders,
+        update: (old) =>
+          (old as Reminder[]).map((reminder) =>
+            reminder.id === id ? { ...reminder, active: !reminder.active } : reminder
+          ),
+      },
+    ],
+    errorMessage: 'Could not update the reminder.',
   });
 
   const deleteReminderMutation = useMutation({
     mutationFn: (id: string) => unwrap(renterService.deleteReminder(id)),
     onSuccess: invalidateReminders,
-    onError: () => setToast({ message: 'Could not delete the reminder.', variant: 'error' }),
+    onError: () => toast.error('Could not delete the reminder.'),
   });
 
   const handleSendMessage = async (conversationId: string, text: string, files?: File[]) => {
@@ -215,7 +253,10 @@ export default function MessagesPage() {
     return <PageLoadingState />;
   }
 
-  if (conversationsQuery.isError || remindersQuery.isError) {
+  if (
+    (conversationsQuery.isError && !data) ||
+    (remindersQuery.isError && !remindersQuery.data)
+  ) {
     return (
       <PageErrorState
         title="Messages are unavailable"
@@ -278,13 +319,11 @@ export default function MessagesPage() {
               currentUser={user}
             />
           ) : (
-            <div className="bg-card rounded-xl border border-border p-12 text-center">
-              <MessageCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground">No conversation selected</h3>
-              <p className="text-muted-foreground mt-2">
-                Select a conversation from the list to start messaging
-              </p>
-            </div>
+            <EmptyState
+              icon={MessageCircle}
+              title="No conversation selected"
+              description="Select a conversation from the list to start messaging"
+            />
           )}
         </div>
       </div>
@@ -297,10 +336,6 @@ export default function MessagesPage() {
           onPageChange={setPage}
           className="mt-6"
         />
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </>
   );

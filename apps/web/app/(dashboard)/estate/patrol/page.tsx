@@ -13,6 +13,7 @@ import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate'
 import { CheckpointRegister } from '@/components/estate/patrol/CheckpointRegister';
 import { RoutePlanner } from '@/components/estate/patrol/RoutePlanner';
 import { RoundReport } from '@/components/estate/patrol/RoundReport';
+import { CardSkeleton } from '@getrentos/ui';
 
 const TABS = [
   { value: 'report', label: 'Did it happen' },
@@ -65,7 +66,7 @@ export default function EstatePatrolPage() {
   });
 
   if (isEstateLoading) {
-    return <div className="h-32 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />;
+    return <CardSkeleton />;
   }
 
   if (!estate) {

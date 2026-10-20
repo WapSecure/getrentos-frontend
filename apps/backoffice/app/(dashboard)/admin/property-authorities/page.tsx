@@ -1,13 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building2, ShieldCheck, XCircle } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
+  Checkbox,
   EmptyState,
+  Field,
+  ListSkeleton,
   NumberInput,
   PageErrorState,
   Select,
@@ -74,6 +78,7 @@ export default function PropertyAuthoritiesPage() {
       if (!response.success) throw new Error(response.error ?? 'Could not load claims');
       return response.data ?? [];
     },
+    placeholderData: keepPreviousData,
   });
 
   const invalidate = () =>
@@ -165,39 +170,41 @@ export default function PropertyAuthoritiesPage() {
             People acting for a property they do not own: managers, agents, co-owners, POA holders.
           </p>
         </div>
-        <div className="w-56">
-          <label className="text-sm font-medium text-foreground" htmlFor="status-filter">
-            Status
-          </label>
+        <Field label="Status" className="w-full sm:w-56">
           <Select
-            ariaLabel="Filter claims by status"
             value={status}
             onValueChange={(value) => setStatus(value as StatusFilter)}
             options={STATUS_OPTIONS}
           />
-        </div>
+        </Field>
       </div>
 
       {notice && (
-        <div className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-900/20 p-3 text-sm text-green-800 dark:text-green-300">
+        <Alert variant="success" onDismiss={() => setNotice(null)}>
           {notice}
-        </div>
+        </Alert>
       )}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-800 dark:text-red-300">
+        <Alert variant="danger" onDismiss={() => setError(null)}>
           {error}
-        </div>
+        </Alert>
       )}
 
-      {claimsQuery.isError && (
+      {claimsQuery.isError && !claimsQuery.data && (
         <PageErrorState
           title="Could not load authority claims"
           description={(claimsQuery.error as Error).message}
           onRetry={() => void claimsQuery.refetch()}
+          isRetrying={claimsQuery.isFetching}
+          headingLevel="h2"
         />
       )}
 
-      {!claimsQuery.isLoading && !claimsQuery.isError && claims.length === 0 && (
+      {claimsQuery.isLoading && (
+        <ListSkeleton rows={3} variant="cards" label="Loading authority claims" />
+      )}
+
+      {claimsQuery.data && claims.length === 0 && (
         <EmptyState
           icon={Building2}
           title="Nothing here"
@@ -218,9 +225,9 @@ export default function PropertyAuthoritiesPage() {
               <div className="p-5 space-y-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <ShieldCheck className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium text-foreground">
+                      <span className="min-w-0 break-all font-medium text-foreground">
                         {claim.userEmail ?? claim.userId}
                       </span>
                       <Badge variant={meta.variant}>{meta.label}</Badge>
@@ -233,8 +240,8 @@ export default function PropertyAuthoritiesPage() {
                     {claim.note && <p className="text-sm text-muted-foreground">“{claim.note}”</p>}
                   </div>
 
-                  <div className="text-right space-y-1">
-                    <div className="flex flex-wrap gap-2 justify-end">
+                  <div className="space-y-1 sm:text-right">
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
                       <Badge variant={claim.canList ? 'info' : 'neutral'}>
                         {claim.canList ? 'Can list' : 'No listing rights'}
                       </Badge>
@@ -251,7 +258,7 @@ export default function PropertyAuthoritiesPage() {
                       </p>
                     )}
                     {claim.status === 'ACTIVE' && claim.effective && (
-                      <p className="text-xs text-green-700 dark:text-green-400">
+                      <p className="text-xs text-success">
                         Counts for publication right now
                       </p>
                     )}
@@ -281,54 +288,44 @@ export default function PropertyAuthoritiesPage() {
 
                 {isOpen && claim.status === 'PENDING' && (
                   <div className="border-t border-border pt-4 space-y-4">
-                    <label className="flex items-start gap-3 text-sm">
-                      <input
-                        type="checkbox"
-                        className="mt-1"
-                        checked={canManage}
-                        onChange={(event) => setCanManage(event.target.checked)}
-                      />
-                      <span className="text-muted-foreground">
-                        Also allow running the tenancy (units, tenants, applications, leases,
-                        maintenance, evictions, expenses). Leave this off for someone who should
-                        only advertise the property.
-                      </span>
-                    </label>
+                    <Checkbox
+                      checked={canManage}
+                      onCheckedChange={setCanManage}
+                      label="Also allow running the tenancy"
+                      description="Units, tenants, applications, leases, maintenance, evictions, expenses. Leave this off for someone who should only advertise the property."
+                    />
 
-                    <label className="flex items-start gap-3 text-sm">
-                      <input
-                        type="checkbox"
-                        className="mt-1"
-                        checked={canTransact}
-                        onChange={(event) => setCanTransact(event.target.checked)}
-                      />
-                      <span className="text-muted-foreground">
-                        Also allow money actions (release escrow, accept offers). Leave this off for
-                        someone who should only run the day-to-day.
-                      </span>
-                    </label>
+                    <Checkbox
+                      checked={canTransact}
+                      onCheckedChange={setCanTransact}
+                      label="Also allow money actions"
+                      description="Release escrow, accept offers. Leave this off for someone who should only run the day-to-day."
+                    />
 
-                    <div className="w-56">
-                      <label className="text-sm font-medium text-foreground" htmlFor="expiry">
-                        Expires after (days, optional)
-                      </label>
+                    <Field
+                      label="Expires after (days)"
+                      optionalLabel="optional"
+                      className="w-full sm:w-56"
+                    >
                       <NumberInput
-                        id="expiry"
                         value={expiresInDays}
                         onValueChange={(value) => setExpiresInDays(value)}
                       />
-                    </div>
+                    </Field>
 
-                    <Textarea
-                      placeholder="Why this mandate is being granted (recorded with the decision)"
-                      value={note}
-                      onChange={(event) => setNote(event.target.value)}
-                    />
+                    <Field label="Decision note" optionalLabel="optional">
+                      <Textarea
+                        placeholder="Why this mandate is being granted (recorded with the decision)"
+                        value={note}
+                        onChange={(event) => setNote(event.target.value)}
+                      />
+                    </Field>
 
                     <div className="flex flex-wrap gap-3">
                       <Button
                         variant="primary"
                         disabled={busy}
+                        isLoading={approve.isPending}
                         onClick={() => approve.mutate(claim)}
                       >
                         Approve mandate
@@ -336,17 +333,20 @@ export default function PropertyAuthoritiesPage() {
                     </div>
 
                     <div className="space-y-2 border-t border-border pt-4">
-                      <Textarea
-                        placeholder={`Or reject it: reason (at least ${MIN_REASON_LENGTH} characters)`}
-                        value={reason}
-                        onChange={(event) => setReason(event.target.value)}
-                      />
+                      <Field label="Or reject it">
+                        <Textarea
+                          placeholder={`Reason (at least ${MIN_REASON_LENGTH} characters)`}
+                          value={reason}
+                          onChange={(event) => setReason(event.target.value)}
+                        />
+                      </Field>
                       <Button
                         variant="outline"
                         disabled={busy || needsReason}
+                        isLoading={reject.isPending}
+                        icon={<XCircle className="h-4 w-4" />}
                         onClick={() => reject.mutate(claim)}
                       >
-                        <XCircle className="w-4 h-4" />
                         Reject claim
                       </Button>
                     </div>
@@ -355,14 +355,17 @@ export default function PropertyAuthoritiesPage() {
 
                 {isOpen && claim.status === 'ACTIVE' && (
                   <div className="border-t border-border pt-4 space-y-3">
-                    <Textarea
-                      placeholder={`Reason for revoking (at least ${MIN_REASON_LENGTH} characters)`}
-                      value={reason}
-                      onChange={(event) => setReason(event.target.value)}
-                    />
+                    <Field label="Reason for revoking" required>
+                      <Textarea
+                        placeholder={`At least ${MIN_REASON_LENGTH} characters`}
+                        value={reason}
+                        onChange={(event) => setReason(event.target.value)}
+                      />
+                    </Field>
                     <Button
                       variant="danger"
                       disabled={busy || needsReason}
+                      isLoading={revoke.isPending}
                       onClick={() => revoke.mutate(claim)}
                     >
                       Revoke mandate

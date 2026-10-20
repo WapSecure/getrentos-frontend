@@ -5,6 +5,7 @@ import { ArrowUpRight, CircleAlert, FileText, FolderOpen, Wrench } from 'lucide-
 import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { ListSkeleton } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -107,8 +108,8 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {isLoading ? (
-          <RecordsLoadingState />
-        ) : error ? (
+          <ListSkeleton rows={3} className="rounded-none border-0" />
+        ) : error && records.length === 0 ? (
           <div className="p-4">
             <EmptyState
               icon={CircleAlert}
@@ -191,18 +192,5 @@ export function HomeManagementRecordsPanel({ role }: HomeManagementRecordsPanelP
         </Button>
       </div>
     </section>
-  );
-}
-
-function RecordsLoadingState() {
-  return (
-    <div>
-      {Array.from({ length: 3 }, (_, index) => (
-        <div
-          key={index}
-          className="h-[73px] animate-pulse border-b border-border last:border-b-0"
-        />
-      ))}
-    </div>
   );
 }

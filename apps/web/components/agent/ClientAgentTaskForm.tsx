@@ -1,13 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button, Pagination } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { Input } from '@getrentos/ui';
-import { Select } from '@getrentos/ui';
-import { TimePicker } from '@getrentos/ui';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import {
+  Alert,
+  Button,
+  Card,
+  DatePicker,
+  Field,
+  Input,
+  Pagination,
+  SearchInput,
+  Select,
+  TimePicker,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -44,6 +50,7 @@ export function ClientAgentTaskForm() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const assignments = (assignmentsData?.items ?? []) as Assignment[];
   const assignmentTotal = assignmentsData?.total ?? 0;
@@ -62,6 +69,7 @@ export function ClientAgentTaskForm() {
           pageSize: PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const properties = (propertiesData?.items ?? []) as Property[];
   const propertyTotal = propertiesData?.total ?? 0;
@@ -87,7 +95,7 @@ export function ClientAgentTaskForm() {
   const active = assignments;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5">
+    <Card className="p-5">
       <h2 className="font-semibold text-foreground">Create field task</h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Tasks can only be assigned to an approved Agent for an explicitly assigned property.
@@ -136,14 +144,15 @@ export function ClientAgentTaskForm() {
         )}
         {assignmentId && (
           <div className="sm:col-span-2 space-y-3">
-            <Input
+            <SearchInput
               value={propertySearch}
-              onChange={(event) => {
-                setPropertySearch(event.target.value);
+              onValueChange={(value) => {
+                setPropertySearch(value);
                 setPropertyPage(1);
                 setPropertyId('');
               }}
               placeholder="Search properties to assign"
+              label="Search properties to assign"
             />
             {propertyTotal > 0 && (
               <Pagination
@@ -191,7 +200,9 @@ export function ClientAgentTaskForm() {
         </Field>
       </div>
       {create.error && (
-        <p className="mt-3 text-sm text-destructive">Unable to create task. Please try again.</p>
+        <Alert variant="danger" className="mt-3">
+          Unable to create task. Please try again.
+        </Alert>
       )}
       <Button
         className="mt-4"
@@ -201,6 +212,6 @@ export function ClientAgentTaskForm() {
       >
         Create task
       </Button>
-    </section>
+    </Card>
   );
 }

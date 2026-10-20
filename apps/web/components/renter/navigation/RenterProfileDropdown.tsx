@@ -75,7 +75,7 @@ export const RenterProfileDropdown = ({ user }: RenterProfileDropdownProps) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-2xl"
+            className="absolute right-0 z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border/70 bg-card shadow-2xl"
           >
             <div className="border-b border-border/70 bg-secondary/30 p-4">
               <div className="flex items-center gap-3">

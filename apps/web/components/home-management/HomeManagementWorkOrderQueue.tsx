@@ -16,6 +16,7 @@ import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { ListSkeleton } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { CurrencyInput, Input, NumberInput } from '@getrentos/ui';
@@ -23,7 +24,7 @@ import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { HomeManagementWorkOrderInvoices } from '@/components/home-management/HomeManagementWorkOrderInvoices';
 import { HomeManagementWorkOrderQuotes } from '@/components/home-management/HomeManagementWorkOrderQuotes';
 import { unwrap } from '@/lib/apiHelpers';
@@ -217,7 +218,7 @@ export function HomeManagementWorkOrderQueue({
   const [lifecycleDialog, setLifecycleDialog] = useState<WorkOrderLifecycleDialog | null>(null);
   const [lifecycleNote, setLifecycleNote] = useState('');
   const [lifecycleCost, setLifecycleCost] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const unitsQuery = useQuery({
     enabled: isCreateOpen && Boolean(form.propertyId),
@@ -285,13 +286,10 @@ export function HomeManagementWorkOrderQueue({
         unwrap(homeManagementService.approveWorkOrder(id, approvedCost)),
       onSuccess: async () => {
         await invalidateWorkOrderViews();
-        setToast({ message: 'Work order budget approved and recorded.', variant: 'success' });
+        toast.success('Work order budget approved and recorded.');
       },
       onError: (mutationError: Error) => {
-        setToast({
-          message: mutationError.message || 'Unable to approve this work order.',
-          variant: 'error',
-        });
+        toast.error(mutationError.message || 'Unable to approve this work order.');
       },
     }
   );
@@ -303,16 +301,10 @@ export function HomeManagementWorkOrderQueue({
       await invalidateWorkOrderViews();
       setForm(initialWorkOrderForm);
       setIsCreateOpen(false);
-      setToast({
-        message: 'Work order created and added to your operational queue.',
-        variant: 'success',
-      });
+      toast.success('Work order created and added to your operational queue.');
     },
     onError: (mutationError: Error) => {
-      setToast({
-        message: mutationError.message || 'Unable to create this work order.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to create this work order.');
     },
   });
 
@@ -328,16 +320,10 @@ export function HomeManagementWorkOrderQueue({
       );
       setUnitForm(initialUnitForm);
       setIsCreateUnitOpen(false);
-      setToast({
-        message: `${unit.unitName} was added and selected for this work order.`,
-        variant: 'success',
-      });
+      toast.success(`${unit.unitName} was added and selected for this work order.`);
     },
     onError: (mutationError: Error) => {
-      setToast({
-        message: mutationError.message || 'Unable to add this unit.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to add this unit.');
     },
   });
 
@@ -346,13 +332,10 @@ export function HomeManagementWorkOrderQueue({
       unwrap(homeManagementService.assignWorkOrderVendor(id, { assignedVendorId })),
     onSuccess: async () => {
       await invalidateWorkOrderViews();
-      setToast({ message: 'Vendor assignment was updated.', variant: 'success' });
+      toast.success('Vendor assignment was updated.');
     },
     onError: (mutationError) => {
-      setToast({
-        message: mutationError.message || 'Unable to update the vendor assignment.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to update the vendor assignment.');
     },
   });
 
@@ -360,13 +343,10 @@ export function HomeManagementWorkOrderQueue({
     mutationFn: ({ id }) => unwrap(homeManagementService.startWorkOrder(id)),
     onSuccess: async () => {
       await invalidateWorkOrderViews();
-      setToast({ message: 'Work order moved into progress.', variant: 'success' });
+      toast.success('Work order moved into progress.');
     },
     onError: (mutationError) => {
-      setToast({
-        message: mutationError.message || 'Unable to start this work order.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to start this work order.');
     },
   });
 
@@ -378,16 +358,10 @@ export function HomeManagementWorkOrderQueue({
       setLifecycleDialog(null);
       setLifecycleNote('');
       setLifecycleCost('');
-      setToast({
-        message: 'Work order resolved and recorded in service history.',
-        variant: 'success',
-      });
+      toast.success('Work order resolved and recorded in service history.');
     },
     onError: (mutationError) => {
-      setToast({
-        message: mutationError.message || 'Unable to resolve this work order.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to resolve this work order.');
     },
   });
 
@@ -397,16 +371,10 @@ export function HomeManagementWorkOrderQueue({
       await invalidateWorkOrderViews();
       setLifecycleDialog(null);
       setLifecycleNote('');
-      setToast({
-        message: 'Work order cancelled and recorded in service history.',
-        variant: 'success',
-      });
+      toast.success('Work order cancelled and recorded in service history.');
     },
     onError: (mutationError) => {
-      setToast({
-        message: mutationError.message || 'Unable to cancel this work order.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to cancel this work order.');
     },
   });
 
@@ -590,8 +558,8 @@ export function HomeManagementWorkOrderQueue({
 
       <div className="mt-5">
         {isLoading ? (
-          <WorkOrderLoadingState />
-        ) : error ? (
+          <ListSkeleton rows={3} className="rounded-2xl" />
+        ) : error && workOrders.length === 0 ? (
           <EmptyState
             icon={CircleAlert}
             title="Work orders could not be loaded"
@@ -892,7 +860,7 @@ export function HomeManagementWorkOrderQueue({
                               </div>
 
                               {approvalPending && (
-                                <p className="mt-3 rounded-xl bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-800 dark:text-amber-300">
+                                <p className="mt-3 rounded-xl bg-warning-subtle px-3 py-2 text-xs leading-5 text-foreground">
                                   Budget approval is required before this work can start or be
                                   resolved.
                                 </p>
@@ -1500,10 +1468,6 @@ export function HomeManagementWorkOrderQueue({
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </section>
   );
 }
@@ -1530,16 +1494,6 @@ function QueueStat({
       {icon}
       <span className="text-xs font-medium">{label}</span>
       <span className="text-sm font-semibold">{value}</span>
-    </div>
-  );
-}
-
-function WorkOrderLoadingState() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="h-40 animate-pulse border-b border-border last:border-b-0" />
-      ))}
     </div>
   );
 }

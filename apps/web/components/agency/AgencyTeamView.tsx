@@ -3,18 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Mail, UserPlus, Users } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  DatePicker,
-  EmptyState,
-  Input,
-  PageErrorState,
-  Select,
-  Toast,
-  type ToastVariant,
-} from '@getrentos/ui';
+import { Badge, Button, Card, DatePicker, EmptyState, Input, PageErrorState, Select, useToast } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser } from '@/lib/authStorage';
 import {
@@ -37,7 +26,7 @@ const endOfDay = (day: string) => (day ? new Date(`${day}T23:59:59+01:00`).toISO
 export function AgencyTeamView() {
   const queryClient = useQueryClient();
   const myId = getStoredUser<{ id?: string }>()?.id;
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<AssignableAgencyRole>('PORTFOLIO_MANAGER');
   const [endDay, setEndDay] = useState('');
@@ -66,10 +55,10 @@ export function AgencyTeamView() {
   const refresh = () => queryClient.invalidateQueries({ queryKey: KEY });
   const done = (message: string) => {
     refresh();
-    setToast({ message, variant: 'success' });
+    toast.success(message);
   };
   const fail = (e: Error) =>
-    setToast({ message: e.message || 'Something went wrong.', variant: 'error' });
+    toast.error(e.message || 'Something went wrong.');
   const run =
     <T,>(fn: () => Promise<{ success: boolean; error?: string; data?: T }>) =>
     async () => {
@@ -336,10 +325,6 @@ export function AgencyTeamView() {
             </tbody>
           </table>
         </Card>
-      )}
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
       )}
     </div>
   );

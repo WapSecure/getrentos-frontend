@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Check, X } from 'lucide-react';
-import { Badge, Button, Input, Toast, type ToastVariant } from '@getrentos/ui';
+import { Badge, Button, Card, Input, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   propertyAuthorityService,
@@ -25,7 +25,7 @@ export function MandateCountersignSection() {
   const queryKey = ['property-authority', 'awaiting-countersignature'];
   const [decliningId, setDecliningId] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState('');
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const { data: pending } = useQuery({
     queryKey,
@@ -38,15 +38,13 @@ export function MandateCountersignSection() {
     mutationFn: (id: string) => unwrap(propertyAuthorityService.countersign(id)),
     onSuccess: (result) => {
       invalidate();
-      setToast({
-        message: result.awaitingCountersign
+      toast.success(
+        result.awaitingCountersign
           ? 'Countersigned. Waiting on the other co-owners.'
-          : 'Countersigned. The mandate is now active.',
-        variant: 'success',
-      });
+          : 'Countersigned. The mandate is now active.'
+      );
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not countersign.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not countersign.'),
   });
 
   const decline = useMutation({
@@ -56,10 +54,9 @@ export function MandateCountersignSection() {
       invalidate();
       setDecliningId(null);
       setDeclineReason('');
-      setToast({ message: 'Mandate declined.', variant: 'success' });
+      toast.success('Mandate declined.');
     },
-    onError: (e: Error) =>
-      setToast({ message: e.message || 'Could not decline.', variant: 'error' }),
+    onError: (e: Error) => toast.error(e.message || 'Could not decline.'),
   });
 
   if (!pending || pending.length === 0) return null;
@@ -81,7 +78,7 @@ export function MandateCountersignSection() {
             m.relationship;
           const busy = countersign.isPending || decline.isPending;
           return (
-            <div key={m.id} className="rounded-2xl border border-border bg-card p-5">
+            <Card key={m.id} className="p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold text-foreground">{label}</p>
@@ -100,6 +97,7 @@ export function MandateCountersignSection() {
               {decliningId === m.id ? (
                 <div className="mt-3 space-y-2">
                   <Input
+                    aria-label="Reason for declining"
                     placeholder="Reason for declining (optional)"
                     value={declineReason}
                     onChange={(e) => setDeclineReason(e.target.value)}
@@ -108,7 +106,8 @@ export function MandateCountersignSection() {
                     <Button
                       variant="danger"
                       size="sm"
-                      disabled={busy}
+                      disabled={countersign.isPending}
+                      isLoading={decline.isPending}
                       onClick={() => decline.mutate({ id: m.id, reason: declineReason.trim() })}
                     >
                       Confirm decline
@@ -126,37 +125,32 @@ export function MandateCountersignSection() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <Button
                     variant="primary"
                     size="sm"
-                    className="gap-1.5"
-                    disabled={busy}
+                    icon={<Check className="h-4 w-4" />}
+                    disabled={busy && countersign.variables !== m.id}
+                    isLoading={countersign.isPending && countersign.variables === m.id}
                     onClick={() => countersign.mutate(m.id)}
                   >
-                    <Check className="h-4 w-4" />
                     Countersign
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5"
+                    icon={<X className="h-4 w-4" />}
                     disabled={busy}
                     onClick={() => setDecliningId(m.id)}
                   >
-                    <X className="h-4 w-4" />
                     Decline
                   </Button>
                 </div>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </section>
   );
 }

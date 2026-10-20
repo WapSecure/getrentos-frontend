@@ -93,7 +93,7 @@ export const BuyerOfferNegotiationModal = ({
               </button>
             </div>
 
-            <div className="p-3 bg-gray-50 dark:bg-white/5 border-b border-border flex items-center justify-between text-sm shrink-0">
+            <div className="p-3 bg-secondary border-b border-border flex items-center justify-between text-sm shrink-0">
               <span className="text-muted-foreground">
                 Asking {formatCurrency(offer.askingPrice, { compact: true })}
               </span>
@@ -127,7 +127,7 @@ export const BuyerOfferNegotiationModal = ({
                       className={`max-w-[75%] rounded-2xl p-3 ${
                         isBuyer
                           ? 'bg-primary text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-foreground'
+                          : 'bg-secondary text-foreground'
                       }`}
                     >
                       <p className="text-sm whitespace-pre-wrap break-words">{msg.text}</p>

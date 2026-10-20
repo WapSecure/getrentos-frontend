@@ -17,11 +17,12 @@ import { Button } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { DatePicker } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
+import { ListSkeleton } from '@getrentos/ui';
 import { Field } from '@getrentos/ui';
 import { Input, NumberInput } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
-import { Toast, type ToastVariant } from '@getrentos/ui';
+import { useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -122,7 +123,7 @@ export function PreventiveMaintenancePlans({
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form, setForm] = useState<PlanForm>(initialPlanForm);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   const unitsQuery = useQuery({
     enabled: isCreateOpen && Boolean(form.propertyId),
@@ -169,13 +170,10 @@ export function PreventiveMaintenancePlans({
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.dashboard });
       setForm(initialPlanForm);
       setIsCreateOpen(false);
-      setToast({ message: 'Preventive maintenance plan created.', variant: 'success' });
+      toast.success('Preventive maintenance plan created.');
     },
     onError: (mutationError: Error) => {
-      setToast({
-        message: mutationError.message || 'Unable to create the care plan.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to create the care plan.');
     },
   });
 
@@ -185,16 +183,10 @@ export function PreventiveMaintenancePlans({
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.plans });
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.assets() });
       void queryClient.invalidateQueries({ queryKey: homeManagementKeys.dashboard });
-      setToast({
-        message: 'Care completed and the next service has been scheduled.',
-        variant: 'success',
-      });
+      toast.success('Care completed and the next service has been scheduled.');
     },
     onError: (mutationError: Error) => {
-      setToast({
-        message: mutationError.message || 'Unable to complete this care plan.',
-        variant: 'error',
-      });
+      toast.error(mutationError.message || 'Unable to complete this care plan.');
     },
   });
 
@@ -277,8 +269,8 @@ export function PreventiveMaintenancePlans({
 
       <div className="mt-5">
         {isLoading ? (
-          <PlanLoadingState />
-        ) : error ? (
+          <ListSkeleton rows={3} className="rounded-2xl" />
+        ) : error && plans.length === 0 ? (
           <EmptyState
             icon={CircleAlert}
             title="Care plans could not be loaded"
@@ -357,7 +349,7 @@ export function PreventiveMaintenancePlans({
                           due
                             ? 'mt-1 font-semibold text-destructive'
                             : dueSoon
-                              ? 'mt-1 font-semibold text-amber-700 dark:text-amber-400'
+                              ? 'mt-1 font-semibold text-warning'
                               : 'mt-1 font-semibold text-foreground'
                         }
                       >
@@ -582,10 +574,6 @@ export function PreventiveMaintenancePlans({
           </form>
         </DialogContent>
       </Dialog>
-
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </section>
   );
 }
@@ -614,16 +602,6 @@ function PlanSummary({
         <span className="text-xs font-medium">{label}</span>
       </div>
       <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
-    </div>
-  );
-}
-
-function PlanLoadingState() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      {Array.from({ length: 3 }, (_, index) => (
-        <div key={index} className="h-28 animate-pulse border-b border-border last:border-b-0" />
-      ))}
     </div>
   );
 }

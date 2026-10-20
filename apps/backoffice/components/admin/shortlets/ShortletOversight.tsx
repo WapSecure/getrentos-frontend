@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  Alert,
   Badge,
   Button,
+  Card,
+  CardSkeleton,
   ConfirmDialog,
   Dialog,
   DialogContent,
@@ -16,16 +19,20 @@ import {
   Field,
   FilePreviewDialog,
   Input,
+  ListSkeleton,
   NumberInput,
   PageErrorState,
   Pagination,
+  SearchInput,
   Select,
-  Skeleton,
   StatCard,
+  StatGridSkeleton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
   Textarea,
-  Toast,
+  useToast,
   type BadgeVariant,
-  type ToastVariant,
 } from '@getrentos/ui';
 import {
   BedDouble,
@@ -175,7 +182,7 @@ export const ShortletOversight = () => {
   const [fromUrl] = useState(readUrlState);
   const [tab, setTab] = useState<Tab>(fromUrl.tab);
   const [bookingId] = useState(fromUrl.bookingId);
-  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
+  const toast = useToast();
 
   // Listings filters
   const [search, setSearch] = useState(fromUrl.search);
@@ -284,6 +291,7 @@ export const ShortletOversight = () => {
           pageSize: LISTINGS_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const listings = listingsData?.items ?? [];
 
@@ -309,6 +317,7 @@ export const ShortletOversight = () => {
           pageSize: BOOKINGS_PAGE_SIZE,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const bookings = bookingsData?.items ?? [];
 
@@ -321,6 +330,7 @@ export const ShortletOversight = () => {
   } = useQuery({
     queryKey: ['admin', 'shortlets', 'payouts', { page: payoutsPage }],
     queryFn: () => unwrap(adminShortletService.listPayouts({ page: payoutsPage, pageSize: 12 })),
+    placeholderData: keepPreviousData,
   });
   const payouts = payoutsData?.items ?? [];
 
@@ -346,6 +356,7 @@ export const ShortletOversight = () => {
         })
       ),
     enabled: canPayout || canModerate,
+    placeholderData: keepPreviousData,
   });
   const payoutAccounts = payoutAccountsData?.items ?? [];
 
@@ -391,6 +402,11 @@ export const ShortletOversight = () => {
             })
       ),
     enabled: canModerate || canPayout,
+    // Guest and host reviews render differently, so only hold rows of the same kind.
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[2] === (reviewKind === 'guest' ? 'reviews' : 'guest-reviews')
+        ? previous
+        : undefined,
   });
   const reviews = reviewsData?.items ?? [];
 
@@ -401,9 +417,9 @@ export const ShortletOversight = () => {
       setActivePayout(null);
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payouts'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payout-accounts'] });
-      setToast({ message: 'Payout retried successfully.', variant: 'success' });
+      toast.success('Payout retried successfully.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const requestHostPayout = useMutation({
@@ -413,9 +429,9 @@ export const ShortletOversight = () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payouts'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'payout-accounts'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'bookings'] });
-      setToast({ message: 'Host payout initiated.', variant: 'success' });
+      toast.success('Host payout initiated.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const interveneBooking = useMutation({
@@ -438,9 +454,9 @@ export const ShortletOversight = () => {
         refund: 'Booking fully refunded.',
         complete: 'Booking completed and deposit released.',
       };
-      setToast({ message: msg[input.action], variant: 'success' });
+      toast.success(msg[input.action]);
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const removeReview = useMutation({
@@ -455,12 +471,9 @@ export const ShortletOversight = () => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'shortlets', input.kind === 'guest' ? 'reviews' : 'guest-reviews'],
       });
-      setToast({
-        message: input.kind === 'guest' ? 'Guest review removed.' : 'Host review removed.',
-        variant: 'success',
-      });
+      toast.success(input.kind === 'guest' ? 'Guest review removed.' : 'Host review removed.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const {
@@ -479,6 +492,7 @@ export const ShortletOversight = () => {
           pageSize: 12,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const disputes = disputesData?.items ?? [];
 
@@ -504,6 +518,7 @@ export const ShortletOversight = () => {
           pageSize: 12,
         })
       ),
+    placeholderData: keepPreviousData,
   });
   const claims = claimsData?.items ?? [];
 
@@ -530,9 +545,9 @@ export const ShortletOversight = () => {
           : input.decision === 'PARTIAL'
             ? 'Claim partially approved: remainder refunded to the guest.'
             : 'Claim rejected: deposit released to the guest.';
-      setToast({ message: label, variant: 'success' });
+      toast.success(label);
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const {
@@ -550,12 +565,9 @@ export const ShortletOversight = () => {
       unwrap(adminShortletService.updateFeeConfig(input)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'fees'] });
-      setToast({
-        message: 'Platform fees & taxes saved: new bookings will use them.',
-        variant: 'success',
-      });
+      toast.success('Platform fees & taxes saved: new bookings will use them.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const {
@@ -579,7 +591,7 @@ export const ShortletOversight = () => {
       });
       setThreadDraft('');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const disputeAction = useMutation({
@@ -594,12 +606,9 @@ export const ShortletOversight = () => {
       setDisputeResolution('');
       setActiveDispute(null);
       queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'disputes'] });
-      setToast({
-        message: input.action === 'resolve' ? 'Dispute resolved.' : 'Dispute escalated.',
-        variant: 'success',
-      });
+      toast.success(input.action === 'resolve' ? 'Dispute resolved.' : 'Dispute escalated.');
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const moderation = useMutation({
@@ -628,9 +637,9 @@ export const ShortletOversight = () => {
         flag: 'Listing flagged for verification and hidden from the marketplace.',
         approve: 'Listing approved and published.',
       };
-      setToast({ message: messages[input.action], variant: 'success' });
+      toast.success(messages[input.action]);
     },
-    onError: (reason: Error) => setToast({ message: reason.message, variant: 'error' }),
+    onError: (reason: Error) => toast.error(reason.message),
   });
 
   const changeListingStatus = (value: string) => {
@@ -660,7 +669,7 @@ export const ShortletOversight = () => {
       </div>
 
       {/* Overview cards */}
-      {overviewError ? (
+      {overviewError && !overview ? (
         <PageErrorState
           title="Could not load shortlet totals"
           description="Operational totals are temporarily unavailable. No values are being estimated."
@@ -704,16 +713,12 @@ export const ShortletOversight = () => {
           />
         </div>
       ) : overviewLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-xl" />
-          ))}
-        </div>
+        <StatGridSkeleton count={6} className="grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6" />
       ) : null}
 
       {/* Tabs */}
-      <div className="max-w-full overflow-x-auto pb-1">
-        <div className="inline-flex min-w-max rounded-lg border border-border bg-card p-1 text-sm">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
+        <TabsList className="max-w-full">
           {(
             [
               'listings',
@@ -727,52 +732,44 @@ export const ShortletOversight = () => {
               'fees',
             ] as Tab[]
           ).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              className={`rounded-md px-4 py-1.5 font-medium transition-colors ${
-                tab === t
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-secondary'
-              }`}
-            >
-              {t === 'listings'
-                ? `Listings (${listingsData?.total ?? 0})`
-                : t === 'bookings'
-                  ? `Bookings (${bookingsData?.total ?? 0})`
-                  : t === 'payouts'
-                    ? `Payouts (${payoutsData?.total ?? 0})`
-                    : t === 'payout-accounts'
-                      ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
-                      : t === 'reviews'
-                        ? `Reviews (${reviewsData?.total ?? 0})`
-                        : t === 'disputes'
-                          ? `Disputes (${disputesData?.total ?? 0})`
-                          : t === 'claims'
-                            ? `Deposit claims (${claimsData?.total ?? 0})`
-                            : t === 'host-fees'
-                              ? 'Host cancellations'
-                              : 'Fees & taxes'}
-            </button>
+            <TabsTrigger key={t} value={t} className="text-sm">
+            {t === 'listings'
+              ? `Listings (${listingsData?.total ?? 0})`
+              : t === 'bookings'
+                ? `Bookings (${bookingsData?.total ?? 0})`
+                : t === 'payouts'
+                  ? `Payouts (${payoutsData?.total ?? 0})`
+                  : t === 'payout-accounts'
+                    ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
+                    : t === 'reviews'
+                      ? `Reviews (${reviewsData?.total ?? 0})`
+                      : t === 'disputes'
+                        ? `Disputes (${disputesData?.total ?? 0})`
+                        : t === 'claims'
+                          ? `Deposit claims (${claimsData?.total ?? 0})`
+                          : t === 'host-fees'
+                            ? 'Host cancellations'
+                            : 'Fees & taxes'}
+            </TabsTrigger>
           ))}
-        </div>
-      </div>
+        </TabsList>
+      </Tabs>
 
       {tab === 'listings' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-            <div className="min-w-[220px] flex-1">
-              <Input
+            <div className="min-w-0 flex-1 basis-56">
+              <SearchInput
+                label="Search by title, host, or city"
                 placeholder="Search by title, host, or city"
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
+                onValueChange={(v) => {
+                  setSearch(v);
                   setListingsPage(1);
                 }}
               />
             </div>
-            <div className="w-44">
+            <div className="w-full sm:w-44">
               <Select
                 value={listingStatus}
                 onValueChange={changeListingStatus}
@@ -781,18 +778,14 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {listingsError ? (
+          {listingsLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : listingsError && !listingsData ? (
             <SectionError
               label="shortlet listings"
               retry={() => void refetchListings()}
               retrying={listingsFetching}
             />
-          ) : listingsLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : listings.length === 0 ? (
             <EmptyState
               icon={BedDouble}
@@ -818,11 +811,11 @@ export const ShortletOversight = () => {
             total={listingsData?.total ?? 0}
             onPageChange={setListingsPage}
           />
-        </div>
+        </Card>
       ) : tab === 'bookings' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-            <div className="w-52">
+            <div className="w-full sm:w-52">
               <Select
                 value={bookingStatus}
                 onValueChange={changeBookingStatus}
@@ -831,18 +824,14 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {bookingsError ? (
+          {bookingsLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : bookingsError && !bookingsData ? (
             <SectionError
               label="shortlet bookings"
               retry={() => void refetchBookings()}
               retrying={bookingsFetching}
             />
-          ) : bookingsLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : bookings.length === 0 ? (
             <EmptyState
               icon={CalendarCheck}
@@ -870,9 +859,9 @@ export const ShortletOversight = () => {
             total={bookingsData?.total ?? 0}
             onPageChange={setBookingsPage}
           />
-        </div>
+        </Card>
       ) : tab === 'payouts' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
             <p className="text-sm font-medium">Host payout ledger</p>
             <p className="text-xs text-muted-foreground">
@@ -880,18 +869,14 @@ export const ShortletOversight = () => {
             </p>
           </div>
 
-          {payoutsError ? (
+          {payoutsLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : payoutsError && !payoutsData ? (
             <SectionError
               label="host payouts"
               retry={() => void refetchPayouts()}
               retrying={payoutsFetching}
             />
-          ) : payoutsLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : payouts.length === 0 ? (
             <EmptyState
               icon={NairaSign}
@@ -912,34 +897,31 @@ export const ShortletOversight = () => {
             total={payoutsData?.total ?? 0}
             onPageChange={setPayoutsPage}
           />
-        </div>
+        </Card>
       ) : tab === 'payout-accounts' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-            <div className="min-w-[220px] flex-1">
-              <Input
+            <div className="min-w-0 flex-1 basis-56">
+              <SearchInput
+                label="Search hosts by name"
                 placeholder="Search hosts by name"
                 value={payoutAccountsSearch}
-                onChange={(e) => {
-                  setPayoutAccountsSearch(e.target.value);
+                onValueChange={(v) => {
+                  setPayoutAccountsSearch(v);
                   setPayoutAccountsPage(1);
                 }}
               />
             </div>
           </div>
 
-          {payoutAccountsError ? (
+          {payoutAccountsLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : payoutAccountsError && !payoutAccountsData ? (
             <SectionError
               label="payout accounts"
               retry={() => void refetchPayoutAccounts()}
               retrying={payoutAccountsFetching}
             />
-          ) : payoutAccountsLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : payoutAccounts.length === 0 ? (
             <EmptyState
               icon={Wallet}
@@ -966,45 +948,34 @@ export const ShortletOversight = () => {
             total={payoutAccountsData?.total ?? 0}
             onPageChange={setPayoutAccountsPage}
           />
-        </div>
+        </Card>
       ) : tab === 'reviews' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-            <div className="flex rounded-lg border border-border p-0.5 text-sm">
-              {(
-                [
-                  { value: 'guest', label: 'Guest reviews' },
-                  { value: 'host', label: 'Host reviews' },
-                ] as const
-              ).map((k) => (
-                <button
-                  key={k.value}
-                  type="button"
-                  onClick={() => {
-                    setReviewKind(k.value);
-                    setReviewsPage(1);
-                  }}
-                  className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                    reviewKind === k.value
-                      ? 'bg-secondary text-foreground'
-                      : 'text-muted-foreground hover:bg-secondary/50'
-                  }`}
-                >
-                  {k.label}
-                </button>
-              ))}
-            </div>
-            <div className="min-w-[180px] flex-1">
-              <Input
+            <Tabs
+              value={reviewKind}
+              onValueChange={(v) => {
+                setReviewKind(v as 'guest' | 'host');
+                setReviewsPage(1);
+              }}
+            >
+              <TabsList>
+                <TabsTrigger value="guest">Guest reviews</TabsTrigger>
+                <TabsTrigger value="host">Host reviews</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className="min-w-0 flex-1 basis-44">
+              <SearchInput
+                label="Search comment, name, or listing"
                 placeholder="Search comment, name, or listing"
                 value={reviewsSearch}
-                onChange={(e) => {
-                  setReviewsSearch(e.target.value);
+                onValueChange={(v) => {
+                  setReviewsSearch(v);
                   setReviewsPage(1);
                 }}
               />
             </div>
-            <div className="w-40">
+            <div className="w-full sm:w-40">
               <Select
                 value={String(reviewsRating)}
                 onValueChange={(v) => {
@@ -1019,18 +990,14 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {reviewsError ? (
+          {reviewsLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : reviewsError && !reviewsData ? (
             <SectionError
               label={reviewKind === 'guest' ? 'guest reviews' : 'host reviews'}
               retry={() => void refetchReviews()}
               retrying={reviewsFetching}
             />
-          ) : reviewsLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : reviews.length === 0 ? (
             <EmptyState icon={Star} title="No reviews yet" description="Try adjusting filters." />
           ) : (
@@ -1058,11 +1025,11 @@ export const ShortletOversight = () => {
             total={reviewsData?.total ?? 0}
             onPageChange={setReviewsPage}
           />
-        </div>
+        </Card>
       ) : tab === 'disputes' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-            <div className="w-52">
+            <div className="w-full sm:w-52">
               <Select
                 value={disputeStatus}
                 onValueChange={changeDisputeStatus}
@@ -1071,18 +1038,14 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {disputesError ? (
+          {disputesLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : disputesError && !disputesData ? (
             <SectionError
               label="shortlet disputes"
               retry={() => void refetchDisputes()}
               retrying={disputesFetching}
             />
-          ) : disputesLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : disputes.length === 0 ? (
             <EmptyState
               icon={Gavel}
@@ -1103,23 +1066,24 @@ export const ShortletOversight = () => {
             total={disputesData?.total ?? 0}
             onPageChange={setDisputesPage}
           />
-        </div>
+        </Card>
       ) : tab === 'host-fees' ? (
         <HostCancellationFeesPanel canWaive={canPayout} />
       ) : tab === 'claims' ? (
-        <div className="rounded-xl border border-border bg-card shadow-sm">
+        <Card>
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
-            <div className="min-w-[220px] flex-1">
-              <Input
+            <div className="min-w-0 flex-1 basis-56">
+              <SearchInput
+                label="Search by host, guest, or reason"
                 placeholder="Search by host, guest, or reason"
                 value={claimSearch}
-                onChange={(e) => {
-                  setClaimSearch(e.target.value);
+                onValueChange={(v) => {
+                  setClaimSearch(v);
                   setClaimsPage(1);
                 }}
               />
             </div>
-            <div className="w-44">
+            <div className="w-full sm:w-44">
               <Select
                 value={claimStatus}
                 onValueChange={changeClaimStatus}
@@ -1128,18 +1092,14 @@ export const ShortletOversight = () => {
             </div>
           </div>
 
-          {claimsError ? (
+          {claimsLoading ? (
+            <ListSkeleton rows={4} className="rounded-none border-0" />
+          ) : claimsError && !claimsData ? (
             <SectionError
               label="deposit claims"
               retry={() => void refetchClaims()}
               retrying={claimsFetching}
             />
-          ) : claimsLoading ? (
-            <div className="space-y-2 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full rounded-lg" />
-              ))}
-            </div>
           ) : claims.length === 0 ? (
             <EmptyState
               icon={ShieldAlert}
@@ -1160,15 +1120,7 @@ export const ShortletOversight = () => {
             total={claimsData?.total ?? 0}
             onPageChange={setClaimsPage}
           />
-        </div>
-      ) : feesError ? (
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          <SectionError
-            label="fee configuration"
-            retry={() => void refetchFees()}
-            retrying={feesFetching}
-          />
-        </div>
+        </Card>
       ) : feeConfig ? (
         <FeeConfigForm
           key={feeConfig.updatedAt}
@@ -1176,10 +1128,16 @@ export const ShortletOversight = () => {
           saving={saveFees.isPending}
           onSave={(input) => saveFees.mutate(input)}
         />
+      ) : feesError ? (
+        <Card>
+          <SectionError
+            label="fee configuration"
+            retry={() => void refetchFees()}
+            retrying={feesFetching}
+          />
+        </Card>
       ) : (
-        <div className="rounded-xl border border-border bg-card shadow-sm p-5">
-          <Skeleton className="h-24 w-full rounded-lg" />
-        </div>
+        <CardSkeleton lines={4} />
       )}
 
       {activeClaim && (
@@ -1218,10 +1176,7 @@ export const ShortletOversight = () => {
             setPromiseTarget(null);
             setActiveDispute(null);
             queryClient.invalidateQueries({ queryKey: ['admin', 'shortlets', 'disputes'] });
-            setToast({
-              message: 'Report decided. The guest and host have been told.',
-              variant: 'success',
-            });
+            toast.success('Report decided. The guest and host have been told.');
           }}
         />
       )}
@@ -1266,10 +1221,7 @@ export const ShortletOversight = () => {
               publishingEligibility.data &&
               !publishingEligibility.data.eligible
             ) {
-              setToast({
-                message: `Publishing blocked: ${publishingEligibility.data.reasons.join('; ')}`,
-                variant: 'error',
-              });
+              toast.error(`Publishing blocked: ${publishingEligibility.data.reasons.join('; ')}`);
               return;
             }
             moderation.mutate({
@@ -1424,9 +1376,6 @@ export const ShortletOversight = () => {
         }}
       />
 
-      {toast && (
-        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
-      )}
     </div>
   );
 };
@@ -1443,7 +1392,7 @@ function ListingRow({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{listing.title}</p>
           <Badge variant={LISTING_STATUS_VARIANT[listing.status]}>{listing.status}</Badge>
           {listing.instantBooking && <Badge variant="info">Instant</Badge>}
@@ -1515,7 +1464,7 @@ function BookingRow({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{booking.propertyTitle}</p>
           <Badge variant={BOOKING_STATUS_VARIANT[booking.status]}>{booking.status}</Badge>
           <Badge variant={PAYMENT_STATUS_VARIANT[booking.paymentStatus]}>
@@ -1602,7 +1551,7 @@ function PayoutRow({ payout, onOpen }: { payout: AdminShortletPayout; onOpen: ()
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{payout.hostName ?? 'Host'}</p>
           <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>{payout.status}</Badge>
         </div>
@@ -1648,7 +1597,7 @@ function PayoutAccountRow({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{account.hostName}</p>
           <Badge variant={account.recipientReady ? 'success' : 'warning'}>
             {account.recipientReady ? 'Payable' : 'Not ready'}
@@ -1684,9 +1633,9 @@ function ReviewRow({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">
-            <span className="text-amber-500" aria-hidden>
+            <span className="text-warning" aria-hidden>
               {'★'.repeat(review.rating)}
             </span>
             <span
@@ -1796,22 +1745,25 @@ function PayoutDetailModal({
 
           <div className="space-y-2">
             <p className="text-sm font-medium">Covered bookings</p>
-            {error ? (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
-                <p className="text-sm text-destructive">The payout detail could not be loaded.</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3"
-                  onClick={onRetry}
-                  isLoading={retrying}
-                >
-                  Try again
-                </Button>
-              </div>
-            ) : loading ? (
-              <Skeleton className="h-24 w-full rounded-lg" />
+            {loading ? (
+              <ListSkeleton rows={2} label="Loading covered bookings" />
+            ) : error && !detail ? (
+              <Alert
+                variant="danger"
+                action={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onRetry}
+                    isLoading={retrying}
+                  >
+                    Try again
+                  </Button>
+                }
+              >
+                The payout detail could not be loaded.
+              </Alert>
             ) : detail?.bookings && detail.bookings.length > 0 ? (
               <div className="divide-y divide-border rounded-lg border border-border">
                 {detail.bookings.map((b) => (
@@ -1868,7 +1820,7 @@ function DisputeRow({ dispute, onOpen }: { dispute: AdminShortletDispute; onOpen
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 p-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{dispute.title}</p>
           <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>{dispute.status}</Badge>
           <Badge variant="neutral">{dispute.category}</Badge>
@@ -1984,30 +1936,31 @@ function DisputeThreadModal({
 
           <div className="space-y-2">
             <p className="text-sm font-medium">Thread</p>
-            {error ? (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
-                <p className="text-sm text-destructive">
-                  The dispute messages could not be loaded.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-3"
-                  onClick={onRetry}
-                  isLoading={retrying}
-                >
-                  Try again
-                </Button>
-              </div>
-            ) : loading ? (
-              <Skeleton className="h-24 w-full rounded-lg" />
+            {loading ? (
+              <ListSkeleton rows={2} label="Loading messages" />
+            ) : error && messages.length === 0 ? (
+              <Alert
+                variant="danger"
+                action={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onRetry}
+                    isLoading={retrying}
+                  >
+                    Try again
+                  </Button>
+                }
+              >
+                The dispute messages could not be loaded.
+              </Alert>
             ) : messages.length === 0 ? (
               <p className="text-sm text-muted-foreground">No messages yet.</p>
             ) : (
               messages.map((m) => (
                 <div key={m.id} className="rounded-lg border border-border p-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-2">
                     <p className="text-sm font-medium">{m.senderName}</p>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(m.timestamp, 'short')}
@@ -2024,10 +1977,17 @@ function DisputeThreadModal({
               value={draft}
               onChange={(e) => onDraftChange(e.target.value)}
               placeholder="Reply as GetRentos support…"
+              aria-label="Reply to the dispute"
               rows={2}
             />
-            <Button onClick={onReply} disabled={replying || !draft.trim()} className="self-end">
-              <Send className="mr-1.5 h-4 w-4" /> Send
+            <Button
+              onClick={onReply}
+              disabled={!draft.trim()}
+              isLoading={replying}
+              icon={<Send className="h-4 w-4" />}
+              className="self-end"
+            >
+              Send
             </Button>
           </div>
         </div>
@@ -2263,6 +2223,7 @@ function AdjudicateClaimModal({
                 required
                 minLength={10}
                 maxLength={2000}
+                showCount
               />
             </Field>
 
@@ -2270,8 +2231,13 @@ function AdjudicateClaimModal({
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={submit} disabled={!canSubmit} isLoading={pending}>
-                {pending ? 'Processing…' : 'Confirm decision'}
+              <Button
+                onClick={submit}
+                disabled={!canSubmit}
+                isLoading={pending}
+                loadingText="Processing…"
+              >
+                Confirm decision
               </Button>
             </div>
           </div>
@@ -2369,7 +2335,7 @@ function FeeConfigForm({
 
   return (
     <>
-      <div className="rounded-xl border border-border bg-card shadow-sm">
+      <Card>
         <div className="border-b border-border p-5">
           <div className="flex items-center gap-2">
             <Percent className="h-5 w-5" />
@@ -2464,11 +2430,16 @@ function FeeConfigForm({
               : ' · no tax'}{' '}
             · updated {formatDate(feeConfig.updatedAt, 'short')}
           </p>
-          <Button onClick={submit} disabled={saving || !isDirty || !!introError} isLoading={saving}>
-            {saving ? 'Saving…' : 'Save fees & taxes'}
+          <Button
+            onClick={submit}
+            disabled={!isDirty || !!introError}
+            isLoading={saving}
+            loadingText="Saving…"
+          >
+            Save fees & taxes
           </Button>
         </div>
-      </div>
+      </Card>
       <ConfirmDialog
         open={pendingInput !== null}
         onOpenChange={(open) => !open && setPendingInput(null)}

@@ -10,10 +10,10 @@ interface PropertyScoreProps {
 export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
   if (score === undefined) return null;
   const getScoreColor = () => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-blue-600';
-    if (score >= 40) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-success';
+    if (score >= 60) return 'text-info';
+    if (score >= 40) return 'text-warning';
+    return 'text-destructive';
   };
 
   const getScoreLabel = () => {
@@ -47,9 +47,8 @@ export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
             cy={currentSize.ring / 2}
             r={radius}
             fill="none"
-            stroke="#e5e7eb"
+            stroke="var(--border)"
             strokeWidth={currentSize.stroke}
-            className="dark:stroke-gray-700"
           />
           <circle
             cx={currentSize.ring / 2}
@@ -69,7 +68,7 @@ export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
       </div>
       <div>
         <div className={`font-medium ${currentSize.text} text-foreground`}>{getScoreLabel()}</div>
-        <div className={`${currentSize.label} text-gray-500`}>Property Score</div>
+        <div className={`${currentSize.label} text-muted-foreground`}>Property Score</div>
       </div>
     </motion.div>
   );

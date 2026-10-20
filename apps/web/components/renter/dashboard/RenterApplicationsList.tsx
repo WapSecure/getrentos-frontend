@@ -4,7 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { MapPin, Bed, Bath, Square, Clock, Eye, Home, CalendarDays, Building2 } from 'lucide-react';
+import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
+import { ListSkeleton } from '@getrentos/ui';
+import { QueryState } from '@getrentos/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -15,31 +18,31 @@ type PeriodType = 'month' | 'year' | 'week';
 
 const statusConfig: Record<
   ApplicationStatus,
-  { label: string; color: string; icon: React.ElementType }
+  { label: string; variant: BadgeVariant; icon: React.ElementType }
 > = {
   pending: {
     label: 'Pending Review',
-    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+    variant: 'warning',
     icon: Clock,
   },
   under_review: {
     label: 'Under Review',
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+    variant: 'info',
     icon: Building2,
   },
   approved: {
     label: 'Approved',
-    color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+    variant: 'success',
     icon: CheckCircle,
   },
   rejected: {
     label: 'Rejected',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+    variant: 'danger',
     icon: XCircle,
   },
   withdrawn: {
     label: 'Withdrawn',
-    color: 'bg-secondary text-muted-foreground',
+    variant: 'neutral',
     icon: XCircle,
   },
 };
@@ -76,7 +79,7 @@ import { ROUTES } from '@/lib/constants/auth';
 export const RenterApplicationsList = () => {
   const { t } = useLanguage();
   const router = useRouter();
-  const { data } = useQuery({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: [...renterKeys.applications, { page: 1, pageSize: 5 }],
     queryFn: () => unwrap(renterService.listMyApplications({ page: 1, pageSize: 5 })),
   });
@@ -102,6 +105,23 @@ export const RenterApplicationsList = () => {
         </Button>
       </div>
 
+      <QueryState
+        isLoading={isLoading}
+        isError={isError && !data}
+        onRetry={() => void refetch()}
+        isRetrying={isRefetching}
+        isEmpty={applications.length === 0}
+        empty={{
+          icon: Home,
+          title: 'No applications yet',
+          action: (
+            <Button href={ROUTES.RENTER_DISCOVER} variant="outline" size="sm">
+              Find a home
+            </Button>
+          ),
+        }}
+        loading={<ListSkeleton rows={3} className="rounded-none border-0" />}
+      >
       <div className="divide-y divide-border">
         {applications.map((app, index) => {
           const StatusIcon = statusConfig[app.status].icon;
@@ -122,7 +142,7 @@ export const RenterApplicationsList = () => {
                   </div>
                 </div>
 
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap justify-between items-start gap-2">
                     <div>
                       <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
@@ -165,20 +185,25 @@ export const RenterApplicationsList = () => {
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end gap-3">
-                  <span
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig[app.status].color}`}
+                  <Badge
+                    variant={statusConfig[app.status].variant}
+                    icon={<StatusIcon className="w-3 h-3" />}
                   >
-                    <StatusIcon className="w-3 h-3" />
                     {statusConfig[app.status].label}
-                  </span>
-                  <Button variant="outline" size="sm" className="hidden md:inline-flex">
+                  </Badge>
+                  <Button
+                    href={ROUTES.RENTER_APPLICATIONS}
+                    variant="outline"
+                    size="sm"
+                    className="hidden md:inline-flex"
+                  >
                     View Details
                   </Button>
                 </div>
               </div>
 
               <div className="mt-3 md:hidden">
-                <Button variant="outline" size="sm" fullWidth>
+                <Button href={ROUTES.RENTER_APPLICATIONS} variant="outline" size="sm" fullWidth>
                   View Details
                 </Button>
               </div>
@@ -186,6 +211,7 @@ export const RenterApplicationsList = () => {
           );
         })}
       </div>
+      </QueryState>
     </motion.div>
   );
 };

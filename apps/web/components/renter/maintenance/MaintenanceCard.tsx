@@ -11,8 +11,9 @@ import {
   ChevronRight,
   AlertTriangle,
   XCircle,
+  type LucideIcon,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceCardProps {
@@ -22,53 +23,55 @@ interface MaintenanceCardProps {
   onUpdateStatus?: (id: string, status: MaintenanceRequest['status']) => void;
 }
 
-const priorityConfig = {
+type BadgeConfig = { label: string; variant: BadgeVariant; icon: LucideIcon };
+
+const priorityConfig: Record<MaintenanceRequest['priority'], BadgeConfig> = {
   low: {
     label: 'Low',
-    color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+    variant: 'neutral',
     icon: AlertCircle,
   },
   medium: {
     label: 'Medium',
-    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+    variant: 'warning',
     icon: AlertCircle,
   },
   high: {
     label: 'High',
-    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
+    variant: 'warning',
     icon: AlertTriangle,
   },
   urgent: {
     label: 'Urgent',
-    color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
+    variant: 'danger',
     icon: AlertTriangle,
   },
 };
 
-const statusConfig = {
+const statusConfig: Record<MaintenanceRequest['status'], BadgeConfig> = {
   submitted: {
     label: 'Submitted',
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+    variant: 'info',
     icon: Clock,
   },
   assigned: {
     label: 'Assigned',
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
+    variant: 'info',
     icon: UserCheck,
   },
   in_progress: {
     label: 'In Progress',
-    color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+    variant: 'warning',
     icon: Wrench,
   },
   resolved: {
     label: 'Resolved',
-    color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+    variant: 'success',
     icon: CheckCircle,
   },
   cancelled: {
     label: 'Cancelled',
-    color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+    variant: 'neutral',
     icon: XCircle,
   },
 };
@@ -146,26 +149,25 @@ export const MaintenanceCard = ({
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-semibold text-foreground">{request.title}</h4>
             {request.isEmergency && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/20 dark:text-red-300">
-                <AlertTriangle className="h-3 w-3" />
+              <Badge variant="danger" icon={<AlertTriangle className="h-3 w-3" />}>
                 Emergency
-              </span>
+              </Badge>
             )}
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${priorityConfig[request.priority].color}`}
+            <Badge
+              variant={priorityConfig[request.priority].variant}
+              icon={<PriorityIcon className="w-3 h-3" />}
             >
-              <PriorityIcon className="w-3 h-3" />
               {priorityConfig[request.priority].label}
-            </span>
-            <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig[request.status].color}`}
+            </Badge>
+            <Badge
+              variant={statusConfig[request.status].variant}
+              icon={<StatusIcon className="w-3 h-3" />}
             >
-              <StatusIcon className="w-3 h-3" />
               {statusConfig[request.status].label}
-            </span>
+            </Badge>
           </div>
 
-          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">
             <span>{request.propertyName}</span>
             <span>•</span>
             <span>
@@ -175,7 +177,7 @@ export const MaintenanceCard = ({
 
           <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{request.description}</p>
 
-          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               <span>Reported {formatDate(request.createdAt)}</span>
@@ -213,8 +215,8 @@ export const MaintenanceCard = ({
               <div
                 className={`flex items-center gap-1 font-medium ${
                   request.acknowledgedAt
-                    ? 'text-green-700 dark:text-green-300'
-                    : 'text-red-700 dark:text-red-300'
+                    ? 'text-success'
+                    : 'text-destructive'
                 }`}
               >
                 {request.acknowledgedAt ? (
@@ -235,14 +237,14 @@ export const MaintenanceCard = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {request.status === 'resolved' && !request.vendorRating && onRateVendor && (
             <Button size="sm" variant="outline" onClick={handleRateVendor}>
               Rate Vendor
             </Button>
           )}
           {request.status === 'submitted' && onUpdateStatus && (
-            <Button size="sm" variant="ghost" className="text-red-500" onClick={handleCancel}>
+            <Button size="sm" variant="ghost" className="text-destructive" onClick={handleCancel}>
               Cancel Request
             </Button>
           )}

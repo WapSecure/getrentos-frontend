@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from 'lucide-react';
-import { Badge, Button } from '@getrentos/ui';
+import { Badge, Button, IconButton } from '@getrentos/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import type { RentalApplication } from '@/types/landlord';
@@ -85,29 +85,19 @@ export const ApplicationCard = ({
         </Button>
         {!isDecided && (
           <>
-            <Button
-              variant="ghost"
+            <IconButton
+              label="Request more info"
               size="sm"
-              className="px-2.5 text-muted-foreground"
-              title="Request more info"
+              icon={<MessageSquareText />}
               onClick={onRequestInfo}
-            >
-              <MessageSquareText className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="px-2.5 text-destructive hover:text-destructive"
-              title="Reject"
-              onClick={onReject}
-            >
-              <X className="w-4 h-4" />
-            </Button>
+            />
+            <IconButton label="Reject" variant="danger" size="sm" icon={<X />} onClick={onReject} />
             <Button
               variant="primary"
               size="sm"
               className="px-2.5"
               title="Approve"
+              aria-label="Approve"
               onClick={onApprove}
             >
               <Check className="w-4 h-4" />

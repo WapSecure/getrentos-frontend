@@ -1,26 +1,30 @@
 'use client';
 
-import { CurrencyInput, LegacyInput } from '@getrentos/ui';
-
-import { Textarea } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   Check,
   Upload,
   FileText,
-  Loader2,
   Eye,
   X,
   User,
   Briefcase,
   ClipboardCheck,
 } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { DatePicker } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CurrencyInput,
+  DatePicker,
+  DescriptionList,
+  Field,
+  IconButton,
+  Input,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
 import { renterService, type RenterDocument } from '@/services/renterService';
@@ -74,8 +78,14 @@ const nairaFormatter = new Intl.NumberFormat('en-NG', {
   maximumFractionDigits: 0,
 });
 
-const inputClass =
-  'w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary';
+const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Student'].map(
+  (value) => ({ value, label: value })
+);
+
+const LEASE_TERM_OPTIONS = ['6 months', '12 months', '24 months'].map((value) => ({
+  value,
+  label: value,
+}));
 
 export const ApplicationWizard = ({
   property,
@@ -184,7 +194,7 @@ export const ApplicationWizard = ({
   const goBack = () => setStepIndex((i) => Math.max(0, i - 1));
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+    <Card>
       <div className="border-b border-border bg-muted/30 px-5 py-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Step {stepIndex + 1} of {steps.length}
@@ -229,35 +239,32 @@ export const ApplicationWizard = ({
         {stepIndex === 0 && (
           <div className="space-y-3">
             <Field label="Full name">
-              <LegacyInput
+              <Input
                 value={data.fullName}
                 onChange={(e) => update('fullName', nameOnly(e.target.value))}
-                className={inputClass}
                 placeholder="e.g. David Okoro"
               />
             </Field>
             <Field label="Email">
-              <LegacyInput
+              <Input
                 type="email"
                 value={data.email}
                 onChange={(e) => update('email', e.target.value)}
-                className={inputClass}
                 placeholder="you@example.com"
               />
             </Field>
             <Field label="Phone number">
-              <LegacyInput
+              <Input
+                type="tel"
                 value={data.phone}
                 onChange={(e) => update('phone', e.target.value)}
-                className={inputClass}
                 placeholder="+234 800 000 0000"
               />
             </Field>
             <Field label="Current address">
-              <LegacyInput
+              <Input
                 value={data.currentAddress}
                 onChange={(e) => update('currentAddress', e.target.value)}
-                className={inputClass}
                 placeholder="Street, area, city"
               />
             </Field>
@@ -267,24 +274,19 @@ export const ApplicationWizard = ({
         {stepIndex === 1 && (
           <div className="space-y-3">
             <Field label="Employer (optional)">
-              <LegacyInput
+              <Input
                 value={data.employer}
                 onChange={(e) => update('employer', e.target.value)}
-                className={inputClass}
                 placeholder="Company name"
               />
             </Field>
             <Field label="Employment status">
-              <LegacySelect
+              <Select
                 value={data.employmentStatus}
-                onChange={(e) => update('employmentStatus', e.target.value)}
-                className={inputClass}
-              >
-                <option value="Employed">Employed</option>
-                <option value="Self-employed">Self-employed</option>
-                <option value="Business owner">Business owner</option>
-                <option value="Student">Student</option>
-              </LegacySelect>
+                onValueChange={(v) => update('employmentStatus', v)}
+                options={EMPLOYMENT_OPTIONS}
+                searchable={false}
+              />
             </Field>
             <Field label="Monthly income (₦)">
               {/* Shown as 1,200,000 while typing; the form keeps the plain number. */}
@@ -292,17 +294,16 @@ export const ApplicationWizard = ({
                 prefix="₦"
                 value={data.monthlyIncome}
                 onValueChange={(v) => update('monthlyIncome', v ? String(v) : '')}
-                className={inputClass}
                 placeholder="e.g. 600,000"
               />
               {incomeBelowRent && (
-                <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-500">
+                <p className="mt-1.5 text-xs text-warning">
                   This is below the monthly rent of {nairaFormatter.format(Math.round(monthlyRent))}
                   . Landlords usually look for income well above the rent, but you can still apply.
                 </p>
               )}
             </Field>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Preferred move-in date">
                 <DatePicker
                   value={data.moveInDate}
@@ -311,43 +312,38 @@ export const ApplicationWizard = ({
                 />
               </Field>
               <Field label="Lease term">
-                <LegacySelect
+                <Select
                   value={data.leaseTerm}
-                  onChange={(e) => update('leaseTerm', e.target.value)}
-                  className={inputClass}
-                >
-                  <option value="6 months">6 months</option>
-                  <option value="12 months">12 months</option>
-                  <option value="24 months">24 months</option>
-                </LegacySelect>
+                  onValueChange={(v) => update('leaseTerm', v)}
+                  options={LEASE_TERM_OPTIONS}
+                  searchable={false}
+                />
               </Field>
             </div>
 
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">
               Next of kin (optional)
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Full name">
-                <LegacyInput
+                <Input
                   value={data.nextOfKinName}
                   onChange={(e) => update('nextOfKinName', e.target.value)}
-                  className={inputClass}
                   placeholder="e.g. Ngozi Okoro"
                 />
               </Field>
               <Field label="Phone number">
-                <LegacyInput
+                <Input
+                  type="tel"
                   value={data.nextOfKinPhone}
                   onChange={(e) => update('nextOfKinPhone', e.target.value)}
-                  className={inputClass}
                   placeholder="+234 800 000 0000"
                 />
               </Field>
               <Field label="Relationship">
-                <LegacyInput
+                <Input
                   value={data.nextOfKinRelationship}
                   onChange={(e) => update('nextOfKinRelationship', e.target.value)}
-                  className={inputClass}
                   placeholder="e.g. Sibling"
                 />
               </Field>
@@ -356,28 +352,26 @@ export const ApplicationWizard = ({
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-2">
               Reference (optional)
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Full name">
-                <LegacyInput
+                <Input
                   value={data.referenceName}
                   onChange={(e) => update('referenceName', e.target.value)}
-                  className={inputClass}
                   placeholder="e.g. Previous landlord"
                 />
               </Field>
               <Field label="Phone number">
-                <LegacyInput
+                <Input
+                  type="tel"
                   value={data.referencePhone}
                   onChange={(e) => update('referencePhone', e.target.value)}
-                  className={inputClass}
                   placeholder="+234 800 000 0000"
                 />
               </Field>
               <Field label="Relationship">
-                <LegacyInput
+                <Input
                   value={data.referenceRelationship}
                   onChange={(e) => update('referenceRelationship', e.target.value)}
-                  className={inputClass}
                   placeholder="e.g. Former landlord"
                 />
               </Field>
@@ -392,16 +386,18 @@ export const ApplicationWizard = ({
               already in your documents.
             </p>
             {savedMatches.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3">
-                <p className="text-sm text-foreground">
-                  {savedMatches.length === 1
-                    ? `Your ${savedMatches[0].doc.name} is already in your documents.`
-                    : `${savedMatches.length} of these are already in your documents.`}
-                </p>
-                <Button size="sm" variant="outline" onClick={attachSavedMatches}>
-                  Use saved {savedMatches.length === 1 ? 'document' : 'documents'}
-                </Button>
-              </div>
+              <Alert
+                variant="info"
+                action={
+                  <Button size="sm" variant="outline" onClick={attachSavedMatches}>
+                    Use saved {savedMatches.length === 1 ? 'document' : 'documents'}
+                  </Button>
+                }
+              >
+                {savedMatches.length === 1
+                  ? `Your ${savedMatches[0].doc.name} is already in your documents.`
+                  : `${savedMatches.length} of these are already in your documents.`}
+              </Alert>
             )}
             {data.documents.map((doc) => {
               const isUploading =
@@ -422,7 +418,7 @@ export const ApplicationWizard = ({
                       )}
                     </span>
                     {doc.required && !doc.uploaded && (
-                      <span className="text-xs text-red-500 shrink-0">Required</span>
+                      <span className="text-xs text-destructive shrink-0">Required</span>
                     )}
                   </div>
                   <div className="flex flex-wrap items-center justify-end gap-1 shrink-0">
@@ -434,86 +430,63 @@ export const ApplicationWizard = ({
                             target="_blank"
                             rel="noopener noreferrer"
                             title="View uploaded file"
+                            aria-label={`View uploaded ${doc.name}`}
                             className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-primary hover:bg-card transition-colors"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                            <Check className="w-3.5 h-3.5 text-green-600" />
+                            <Check className="w-3.5 h-3.5 text-success" />
                           </a>
                         )}
-                        <button
-                          type="button"
+                        <IconButton
+                          size="sm"
+                          variant="danger"
+                          label={`Remove ${doc.name}`}
+                          icon={<X />}
                           onClick={() => removeDocument(doc.name)}
-                          title="Remove"
-                          className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-card transition-colors"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                        />
                       </>
                     ) : (
                       <>
                         {libraryDocs.length > 0 && (
-                          <select
-                            aria-label={`Use a saved document for ${doc.name}`}
+                          <Select
+                            ariaLabel={`Use a saved document for ${doc.name}`}
                             value=""
+                            placeholder="From your documents…"
                             disabled={isUploading}
-                            onChange={(e) => {
-                              const file = libraryDocs.find((d) => d.id === e.target.value);
+                            controlSize="sm"
+                            className="w-44 max-w-full"
+                            onValueChange={(id) => {
+                              const file = libraryDocs.find((d) => d.id === id);
                               if (file) attachLibraryDoc(doc.name, file);
                             }}
-                            className="max-w-[11rem] rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground"
-                          >
-                            <option value="">From your documents…</option>
-                            {[...libraryDocs]
+                            options={[...libraryDocs]
                               .sort(
                                 (a, b) =>
                                   Number(sameName(b.name, doc.name)) -
                                   Number(sameName(a.name, doc.name))
                               )
-                              .map((file) => (
-                                <option key={file.id} value={file.id}>
-                                  {file.name} ·{' '}
-                                  {new Date(file.uploadedAt).toLocaleDateString('en-NG')}
-                                </option>
-                              ))}
-                          </select>
-                        )}
-                        <label
-                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
-                            isUploading
-                              ? 'bg-secondary text-muted-foreground cursor-wait'
-                              : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                          }`}
-                        >
-                          {isUploading ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          ) : (
-                            <Upload className="w-3.5 h-3.5" />
-                          )}
-                          {isUploading ? 'Uploading…' : 'Upload'}
-                          <input
-                            type="file"
-                            className="hidden"
-                            disabled={isUploading}
-                            accept=".pdf,.jpg,.jpeg,.png,.webp"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              e.target.value = '';
-                              if (file) uploadMutation.mutate({ doc, file });
-                            }}
+                              .map((file) => ({
+                                value: file.id,
+                                label: `${file.name} · ${new Date(file.uploadedAt).toLocaleDateString('en-NG')}`,
+                              }))}
                           />
-                        </label>
+                        )}
+                        <UploadButton
+                          label={doc.name}
+                          isUploading={isUploading}
+                          onFile={(file) => uploadMutation.mutate({ doc, file })}
+                        />
                       </>
                     )}
                   </div>
                 </div>
               );
             })}
-            {docError && <p className="text-xs text-destructive">{docError}</p>}
+            {docError && <Alert variant="danger">{docError}</Alert>}
             <Field label="Additional notes for the landlord (optional)">
               <Textarea
                 value={data.notes}
                 onChange={(e) => update('notes', e.target.value)}
-                className={`${inputClass} min-h-20`}
                 placeholder="Anything you'd like the landlord to know"
               />
             </Field>
@@ -522,46 +495,25 @@ export const ApplicationWizard = ({
 
         {stepIndex === 3 && (
           <div className="space-y-4">
-            <div className="p-3 rounded-lg bg-secondary space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Applicant</span>
-                <span className="text-foreground font-medium">{data.fullName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Contact</span>
-                <span className="text-foreground font-medium">
-                  {data.email} · {data.phone}
-                </span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Current address</span>
-                <span className="text-foreground font-medium text-right">
-                  {data.currentAddress || '—'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Employer</span>
-                <span className="text-foreground font-medium">{data.employer || 'Not given'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Monthly income</span>
-                <span className="text-foreground font-medium">
-                  {data.monthlyIncome ? nairaFormatter.format(Number(data.monthlyIncome)) : '—'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Move-in / Term</span>
-                <span className="text-foreground font-medium">
-                  {data.moveInDate || '—'} · {data.leaseTerm}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Documents ready</span>
-                <span className="text-foreground font-medium">
-                  {data.documents.filter((d) => d.uploaded).length}/{data.documents.length}
-                </span>
-              </div>
-            </div>
+            <DescriptionList
+              layout="rows"
+              className="rounded-lg bg-secondary px-3"
+              items={[
+                { label: 'Applicant', value: data.fullName },
+                { label: 'Contact', value: `${data.email} · ${data.phone}` },
+                { label: 'Current address', value: data.currentAddress },
+                { label: 'Employer', value: data.employer || 'Not given' },
+                {
+                  label: 'Monthly income',
+                  value: data.monthlyIncome ? nairaFormatter.format(Number(data.monthlyIncome)) : '',
+                },
+                { label: 'Move-in / Term', value: `${data.moveInDate || '—'} · ${data.leaseTerm}` },
+                {
+                  label: 'Documents ready',
+                  value: `${data.documents.filter((d) => d.uploaded).length}/${data.documents.length}`,
+                },
+              ]}
+            />
             <p className="text-xs text-muted-foreground">
               By submitting, you agree to share this information with{' '}
               {property.landlordName || 'the landlord'} for the purpose of reviewing your rental
@@ -575,22 +527,55 @@ export const ApplicationWizard = ({
         <Button variant="ghost" onClick={goBack} disabled={stepIndex === 0 || isSubmitting}>
           Back
         </Button>
-        <Button variant="primary" onClick={goNext} disabled={!canAdvance() || isSubmitting}>
-          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {stepIndex === steps.length - 1
-            ? isSubmitting
-              ? 'Submitting…'
-              : 'Submit application'
-            : 'Continue'}
+        <Button
+          variant="primary"
+          onClick={goNext}
+          disabled={!canAdvance()}
+          isLoading={isSubmitting}
+          loadingText="Submitting…"
+        >
+          {stepIndex === steps.length - 1 ? 'Submit application' : 'Continue'}
         </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 
-const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <label className="block">
-    <span className="block text-xs font-medium text-muted-foreground mb-1">{label}</span>
-    {children}
-  </label>
-);
+const UploadButton = ({
+  label,
+  isUploading,
+  onFile,
+}: {
+  label: string;
+  isUploading: boolean;
+  onFile: (file: File) => void;
+}) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <Button
+        size="xs"
+        icon={<Upload className="w-3.5 h-3.5" />}
+        isLoading={isUploading}
+        loadingText="Uploading…"
+        aria-label={`Upload ${label}`}
+        onClick={() => inputRef.current?.click()}
+      >
+        Upload
+      </Button>
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        tabIndex={-1}
+        disabled={isUploading}
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (file) onFile(file);
+        }}
+      />
+    </>
+  );
+};

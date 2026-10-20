@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, FileCheck2 } from 'lucide-react';
-import { Badge, EmptyState } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -37,15 +37,19 @@ export default function AdminLandPerfectionPage() {
           Exceptions (a rejected step, or one more than 30 days late) come first.
         </p>
       </div>
-      {query.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={FileCheck2}
-          title="Nothing open"
-          description="Every completed sale's title is perfected, or none has completed yet."
-        />
-      ) : (
+      <QueryState
+        isLoading={query.isLoading}
+        isError={query.isError && !query.data}
+        onRetry={() => void query.refetch()}
+        isRetrying={query.isFetching}
+        errorTitle="Title perfection cases could not be loaded"
+        isEmpty={items.length === 0}
+        empty={{
+          icon: FileCheck2,
+          title: 'Nothing open',
+          description: "Every completed sale's title is perfected, or none has completed yet.",
+        }}
+      >
         <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
           {items.map((item) => (
             <li key={item.purchaseId}>
@@ -70,7 +74,7 @@ export default function AdminLandPerfectionPage() {
             </li>
           ))}
         </ul>
-      )}
+      </QueryState>
     </>
   );
 }

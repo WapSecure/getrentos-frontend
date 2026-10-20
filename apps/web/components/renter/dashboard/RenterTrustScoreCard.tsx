@@ -14,7 +14,9 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
+import { Alert } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
+import { CardSkeleton } from '@getrentos/ui';
 import { TrustScoreRing } from '@/components/renter/shared/TrustScoreRing';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { ROUTES } from '@/lib/constants/auth';
@@ -41,7 +43,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 export const RenterTrustScoreCard = () => {
   const { t } = useLanguage();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: renterKeys.trustScore,
     queryFn: () => unwrap(renterService.getTrustScore()),
   });
@@ -56,6 +58,8 @@ export const RenterTrustScoreCard = () => {
   const totalCount = verificationItems.length || 1;
   const progress = Math.round((verifiedCount / totalCount) * 100);
   const pendingItems = verificationItems.filter((item) => !item.verified).slice(0, 3);
+
+  if (isLoading) return <CardSkeleton lines={5} />;
 
   return (
     <motion.div
@@ -123,10 +127,9 @@ export const RenterTrustScoreCard = () => {
             </div>
           </div>
         ) : (
-          <div className="mb-5 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-3 text-sm text-foreground">
-            <CheckCircle className="h-5 w-5 text-primary" aria-hidden="true" />
+          <Alert variant="success" icon={CheckCircle} className="mb-5">
             Your verification profile is complete.
-          </div>
+          </Alert>
         )}
 
         <div className="mb-5">

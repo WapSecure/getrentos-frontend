@@ -30,7 +30,7 @@ const statusConfig: Record<
   cancelled: {
     label: 'Cancelled',
     icon: XCircle,
-    className: 'text-gray-700 bg-gray-100 dark:text-gray-400 dark:bg-gray-800',
+    className: 'text-muted-foreground bg-secondary',
   },
 };
 

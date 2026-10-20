@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Circle, AlertCircle, FileCheck, FileText } from 'lucide-react';
+import { FileCheck, FileText } from 'lucide-react';
+import { Alert, Badge, Checkbox } from '@getrentos/ui';
 
 interface ChecklistItem {
   id: string;
@@ -77,26 +78,26 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
   return (
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <button
+        type="button"
+        aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-colors"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <FileCheck className="w-5 h-5 text-primary" />
           <div className="text-left">
             <h3 className="font-semibold text-foreground">Application Checklist</h3>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {completedCount}/{totalCount} items completed
             </p>
           </div>
         </div>
         {isReady ? (
-          <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs rounded-full">
-            Ready to apply
-          </span>
+          <Badge variant="success">Ready to apply</Badge>
         ) : (
-          <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 text-xs rounded-full">
+          <Badge variant="warning">
             {requiredCompleted}/{requiredTotal} required
-          </span>
+          </Badge>
         )}
       </button>
 
@@ -104,7 +105,7 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
         <div className="p-4 pt-0 space-y-3">
           {/* Progress Bar */}
           <div className="mb-3">
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary rounded-full transition-all duration-300"
                 style={{ width: `${(completedCount / totalCount) * 100}%` }}
@@ -119,47 +120,40 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary cursor-pointer"
-              onClick={() => toggleItem(item.id)}
+              className="flex items-start gap-3 rounded-lg p-2 hover:bg-secondary"
             >
-              <button className="shrink-0">
-                {item.completed ? (
-                  <CheckCircle className="w-5 h-5 text-green-500" />
-                ) : (
-                  <Circle className="w-5 h-5 text-gray-400" />
-                )}
-              </button>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p
-                    className={`text-sm ${item.completed ? 'text-gray-500 line-through' : 'text-foreground'}`}
-                  >
-                    {item.title}
-                  </p>
-                  {item.required && <span className="text-xs text-red-500">Required</span>}
-                </div>
-                <p className="text-xs text-gray-500">{item.description}</p>
-              </div>
-              {item.completed && <FileText className="w-4 h-4 text-green-500 shrink-0" />}
+              <Checkbox
+                checked={item.completed}
+                onCheckedChange={() => toggleItem(item.id)}
+                className="flex-1"
+                label={
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={
+                        item.completed ? 'text-muted-foreground line-through' : 'text-foreground'
+                      }
+                    >
+                      {item.title}
+                    </span>
+                    {item.required && (
+                      <span className="text-xs font-normal text-destructive">Required</span>
+                    )}
+                  </span>
+                }
+                description={item.description}
+              />
+              {item.completed && <FileText className="w-4 h-4 text-success shrink-0" />}
             </motion.div>
           ))}
 
-          {/* Status Message */}
           {isReady ? (
-            <div className="mt-3 p-2 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-center">
-              <p className="text-sm text-green-700 dark:text-green-300">
-                ✅ You&apos;re ready to apply! All required items are complete.
-              </p>
-            </div>
+            <Alert variant="success" className="mt-3">
+              You&apos;re ready to apply! All required items are complete.
+            </Alert>
           ) : (
-            <div className="mt-3 p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 shrink-0" />
-                <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                  Complete all required items before submitting your application.
-                </p>
-              </div>
-            </div>
+            <Alert variant="warning" className="mt-3">
+              Complete all required items before submitting your application.
+            </Alert>
           )}
         </div>
       )}

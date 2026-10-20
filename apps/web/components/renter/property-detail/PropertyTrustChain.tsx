@@ -27,7 +27,7 @@ export const PropertyTrustChain = ({ property }: { property: Property }) => {
     <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center justify-between gap-2 mb-1">
         <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-          <ShieldCheck className="w-4 h-4 text-green-600" aria-hidden />
+          <ShieldCheck className="w-4 h-4 text-success" aria-hidden />
           Trust &amp; safety
         </h3>
         <span className="text-xs text-muted-foreground">{trustChainLabel(chain).label}</span>
@@ -47,13 +47,13 @@ export const PropertyTrustChain = ({ property }: { property: Property }) => {
                 <span
                   aria-hidden
                   className={`absolute left-[15px] top-8 bottom-[-12px] w-px ${
-                    step.met ? 'bg-green-600/40' : 'bg-border'
+                    step.met ? 'bg-success/40' : 'bg-border'
                   }`}
                 />
               )}
               <span
                 className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                  step.met ? 'bg-green-600/10 text-green-600' : 'bg-muted text-muted-foreground'
+                  step.met ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'
                 }`}
               >
                 <Icon className="h-4 w-4" aria-hidden />
@@ -68,7 +68,7 @@ export const PropertyTrustChain = ({ property }: { property: Property }) => {
                     {step.label}
                   </p>
                   {step.met && (
-                    <Check className="h-3.5 w-3.5 text-green-600 shrink-0" aria-label="verified" />
+                    <Check className="h-3.5 w-3.5 text-success shrink-0" aria-label="verified" />
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">{step.detail}</p>

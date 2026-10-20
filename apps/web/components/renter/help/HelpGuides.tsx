@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BookOpen, Clock, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, EmptyState } from '@getrentos/ui';
 
 interface Guide {
   id: string;
@@ -102,15 +103,12 @@ export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
 
   if (filteredGuides.length === 0) {
     return (
-      <div className="bg-card rounded-xl border border-border p-8 text-center">
-        <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-        <p className="text-muted-foreground">No guides found for this category</p>
-      </div>
+      <EmptyState icon={BookOpen} title="No guides found for this category" size="compact" />
     );
   }
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Step-by-Step Guides</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -124,6 +122,7 @@ export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
           return (
             <div key={guide.id}>
               <button
+                type="button"
                 onClick={() => toggleExpanded(guide.id)}
                 aria-expanded={isExpanded}
                 className="w-full flex items-start justify-between gap-4 p-4 text-left hover:bg-secondary transition-colors"
@@ -135,7 +134,7 @@ export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
                   <div className="min-w-0">
                     <h4 className="text-sm font-medium text-foreground">{guide.title}</h4>
                     <p className="text-sm text-muted-foreground mt-0.5">{guide.description}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {guide.duration}
@@ -148,9 +147,9 @@ export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
                   </div>
                 </div>
                 {isExpanded ? (
-                  <ChevronUp className="w-4 h-4 text-gray-400 shrink-0 mt-2" />
+                  <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0 mt-2" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-gray-400 shrink-0 mt-2" />
+                  <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 mt-2" />
                 )}
               </button>
 
@@ -172,6 +171,6 @@ export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 };
