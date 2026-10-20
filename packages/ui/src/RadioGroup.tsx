@@ -12,7 +12,42 @@ export interface RadioOption<T extends string = string> {
   aside?: ReactNode;
   icon?: ReactNode;
   disabled?: boolean;
+  /**
+   * The colour of this option once chosen, when the choice itself carries
+   * meaning: Pass in success, Flag in destructive. Defaults to primary.
+   */
+  tone?: RadioTone;
 }
+
+export type RadioTone = 'primary' | 'neutral' | 'success' | 'warning' | 'destructive' | 'info';
+
+// Written out in full: Tailwind only generates classes it finds as literals.
+const TONE = {
+  primary: {
+    dot: 'border-primary bg-primary',
+    card: 'border-primary bg-card shadow-[inset_0_0_0_1px_var(--primary)]',
+  },
+  neutral: {
+    dot: 'border-foreground/60 bg-foreground/60',
+    card: 'border-foreground/40 bg-secondary shadow-[inset_0_0_0_1px_var(--border)]',
+  },
+  success: {
+    dot: 'border-success bg-success',
+    card: 'border-success bg-success-subtle shadow-[inset_0_0_0_1px_var(--success)]',
+  },
+  warning: {
+    dot: 'border-warning bg-warning',
+    card: 'border-warning bg-warning-subtle shadow-[inset_0_0_0_1px_var(--warning)]',
+  },
+  destructive: {
+    dot: 'border-destructive bg-destructive',
+    card: 'border-destructive bg-destructive-subtle shadow-[inset_0_0_0_1px_var(--destructive)]',
+  },
+  info: {
+    dot: 'border-info bg-info',
+    card: 'border-info bg-info-subtle shadow-[inset_0_0_0_1px_var(--info)]',
+  },
+} as const;
 
 interface RadioGroupProps<T extends string> {
   value: T | '' | undefined;
@@ -24,6 +59,12 @@ interface RadioGroupProps<T extends string> {
   /** Columns for the card variant on wider screens. */
   columns?: 1 | 2 | 3;
   disabled?: boolean;
+  /**
+   * `automatic` (native radio behaviour): arrow keys move and choose.
+   * `manual`: arrow keys only move focus; Space or Enter chooses. Use it when
+   * choosing saves straight away, so arrowing past an option does not send it.
+   */
+  activation?: 'automatic' | 'manual';
   id?: string;
   invalid?: boolean;
   required?: boolean;
@@ -46,6 +87,7 @@ export function RadioGroup<T extends string>({
   orientation = 'vertical',
   columns = 1,
   disabled,
+  activation = 'automatic',
   id,
   invalid,
   required,
@@ -66,7 +108,7 @@ export function RadioGroup<T extends string>({
       const i = (from + delta * step + options.length) % options.length;
       if (enabled[i]) {
         refs.current[i]?.focus();
-        onValueChange(options[i].value);
+        if (activation === 'automatic') onValueChange(options[i].value);
         return;
       }
     }
@@ -105,7 +147,7 @@ export function RadioGroup<T extends string>({
             className={cn(
               'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border transition-colors',
               checked
-                ? 'border-primary bg-primary'
+                ? TONE[option.tone ?? 'primary'].dot
                 : field.invalid
                   ? 'border-destructive/70 bg-card'
                   : 'border-border bg-card'
@@ -137,13 +179,13 @@ export function RadioGroup<T extends string>({
               'group text-left focus:outline-none disabled:cursor-not-allowed',
               variant === 'card'
                 ? cn(
-                    'flex items-start gap-3 rounded-xl border bg-card p-4 transition-[border-color,box-shadow,background-color] duration-150',
+                    'flex items-start gap-3 rounded-xl border p-4 transition-[border-color,box-shadow,background-color] duration-150',
                     'focus-visible:ring-4 focus-visible:ring-primary/12',
                     checked
-                      ? 'border-primary shadow-[inset_0_0_0_1px_var(--primary)]'
+                      ? TONE[option.tone ?? 'primary'].card
                       : field.invalid
-                        ? 'border-destructive/60'
-                        : 'border-border hover:border-foreground/20',
+                        ? 'border-destructive/60 bg-card'
+                        : 'border-border bg-card hover:border-foreground/20',
                     isDisabled && 'opacity-55'
                   )
                 : cn(

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Check, XCircle, HelpCircle, FileText, Download } from 'lucide-react';
 import { Alert, Field, Skeleton, Textarea } from '@getrentos/ui';
 import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
-import { Button } from '@getrentos/ui';
+import { Button, IconLink } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -152,16 +152,15 @@ export const ReviewVerificationModal = ({
                             {doc.name}
                           </span>
                           <DocumentPreviewButton file={doc} title="View document" />
-                          <a
+                          <IconLink
                             href={doc.url}
                             target="_blank"
                             rel="noreferrer"
+                            label={`Download ${doc.name}`}
                             title="Download"
-                            aria-label={`Download ${doc.name}`}
-                            className="p-1.5 rounded-lg text-muted-foreground transition-colors hover:text-primary hover:bg-secondary"
-                          >
-                            <Download className="w-4 h-4" />
-                          </a>
+                            icon={<Download />}
+                            size="sm"
+                          />
                         </div>
                       ))}
                     </div>

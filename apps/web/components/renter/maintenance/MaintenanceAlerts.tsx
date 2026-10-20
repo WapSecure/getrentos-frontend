@@ -6,7 +6,9 @@ import {
   EmptyState,
   IconButton,
   Popover,
+  PopoverBody,
   PopoverContent,
+  PopoverHeader,
   PopoverTrigger,
 } from '@getrentos/ui';
 
@@ -60,8 +62,8 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
         )}
       </div>
 
-      <PopoverContent aria-label="Maintenance alerts">
-        <div className="p-3 border-b border-border flex justify-between items-center">
+      <PopoverContent aria-label="Maintenance alerts" layout="sections">
+        <PopoverHeader>
           <div>
             <h3 className="font-semibold text-foreground">Maintenance Alerts</h3>
             <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
@@ -71,9 +73,9 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
               Mark all read
             </Button>
           )}
-        </div>
+        </PopoverHeader>
 
-        <div className="max-h-96 overflow-y-auto divide-y divide-border">
+        <PopoverBody className="divide-y divide-border">
           {alerts.length === 0 ? (
             <EmptyState icon={BellOff} title="No alerts" size="compact" bare />
           ) : (
@@ -109,7 +111,7 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
               );
             })
           )}
-        </div>
+        </PopoverBody>
       </PopoverContent>
     </Popover>
   );

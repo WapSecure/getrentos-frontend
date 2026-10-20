@@ -70,7 +70,7 @@ export default function OwnerLayout({ children }: { children: ReactNode }) {
         <OwnerNavbar user={user} />
         <div className="flex">
           <OwnerSidebar />
-          <main className="min-w-0 flex-1 lg:ml-64 mt-16 p-6 lg:p-8">
+          <main className="min-w-0 flex-1 lg:ml-64 p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Linking, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
+import { Alert, Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -12,6 +12,7 @@ import {
   IconButton,
   ErrorState,
   Skeleton,
+  SwitchRow,
   Text,
   useTheme,
   useToast,
@@ -147,55 +148,53 @@ export default function OwnerDocuments() {
           renderItem={({ item: d }: { item: OwnerDocument }) => {
             const sharingThis = share.isPending && share.variables?.id === d.id;
             return (
-              <Card
-                elevated
-                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-              >
-                <Pressable
-                  onPress={() => d.downloadUrl && Linking.openURL(d.downloadUrl)}
-                  disabled={!d.downloadUrl}
-                  accessibilityRole="link"
-                  accessibilityLabel={
-                    d.downloadUrl
-                      ? `Open ${d.name}, ${d.propertyName}`
-                      : `${d.name}, ${d.propertyName}, download unavailable`
-                  }
-                  accessibilityState={{ disabled: !d.downloadUrl }}
-                  style={{
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: spacing.md,
-                    minHeight: 44,
-                  }}
-                >
-                  <FileText size={20} color={colors.primary} />
-                  <View style={{ flex: 1 }}>
-                    <Text variant="bodyStrong" numberOfLines={1}>
-                      {d.name}
-                    </Text>
-                    <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {d.propertyName} · {d.sizeLabel} · {formatDate(d.uploadedAt, 'short')}
-                    </Text>
-                  </View>
-                </Pressable>
-                <View style={{ alignItems: 'center' }}>
-                  <Switch
-                    value={d.sharedWithBuyer}
-                    onValueChange={(v) => share.mutate({ id: d.id, shared: v })}
-                    disabled={sharingThis}
-                    accessibilityLabel={`Share ${d.name} with the buyer`}
-                    accessibilityState={{ busy: sharingThis, disabled: sharingThis }}
-                    trackColor={{ true: colors.primary, false: colors.border }}
+              <Card elevated style={{ gap: spacing.xs }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                  <Pressable
+                    onPress={() => d.downloadUrl && Linking.openURL(d.downloadUrl)}
+                    disabled={!d.downloadUrl}
+                    accessibilityRole="link"
+                    accessibilityLabel={
+                      d.downloadUrl
+                        ? `Open ${d.name}, ${d.propertyName}`
+                        : `${d.name}, ${d.propertyName}, download unavailable`
+                    }
+                    accessibilityState={{ disabled: !d.downloadUrl }}
+                    style={{
+                      flex: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: spacing.md,
+                      minHeight: 44,
+                    }}
+                  >
+                    <FileText size={20} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {d.name}
+                      </Text>
+                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                        {d.propertyName} · {d.sizeLabel} · {formatDate(d.uploadedAt, 'short')}
+                      </Text>
+                    </View>
+                  </Pressable>
+                  <IconButton
+                    accessibilityLabel={`Delete ${d.name}`}
+                    icon={<Trash2 size={18} color={colors.mutedForeground} />}
+                    onPress={() => confirmRemove(d)}
                   />
-                  <Text variant="caption" color="mutedForeground">
-                    {d.sharedWithBuyer ? 'Shared' : 'Private'}
-                  </Text>
                 </View>
-                <IconButton
-                  accessibilityLabel={`Delete ${d.name}`}
-                  icon={<Trash2 size={18} color={colors.mutedForeground} />}
-                  onPress={() => confirmRemove(d)}
+                <SwitchRow
+                  label="Share with buyer"
+                  description={
+                    d.sharedWithBuyer
+                      ? 'Your buyer can open this document'
+                      : 'Private — only you can see it'
+                  }
+                  accessibilityLabel={`Share ${d.name} with the buyer`}
+                  value={d.sharedWithBuyer}
+                  onValueChange={(v) => share.mutate({ id: d.id, shared: v })}
+                  disabled={sharingThis}
                 />
               </Card>
             );

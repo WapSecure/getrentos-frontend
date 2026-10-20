@@ -54,7 +54,7 @@ export default function AgencyLayout({ children }: { children: ReactNode }) {
   return (
     <CustodyProvider>
       <LandlordNavbar user={user} />
-      <div className="flex min-h-screen flex-col pt-16">
+      <div className="flex min-h-screen flex-col">
         <AgencyVerificationBanner />
         {!outsideCustody && <CustodyBar />}
         <main className="flex-1">{children}</main>

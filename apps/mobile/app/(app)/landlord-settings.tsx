@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -328,54 +328,25 @@ function PreferencesCard({ initial }: { initial: LandlordNotificationPreference[
           {i > 0 ? <Divider /> : null}
           <View style={{ padding: spacing.lg, gap: spacing.sm }}>
             <Text variant="bodyStrong">{NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id}</Text>
-            <View style={{ flexDirection: 'row', gap: spacing.xl }}>
+            <View>
               {categorySendsEmail(p.id) ? (
-                <Channel
+                <SwitchRow
                   label="Email"
+                  accessibilityLabel={`${NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id} email`}
                   value={p.email}
-                  onChange={(v) => set(p.id, 'email', v)}
-                  category={NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id}
+                  onValueChange={(v) => set(p.id, 'email', v)}
                 />
               ) : null}
-              <Channel
+              <SwitchRow
                 label="Push"
+                accessibilityLabel={`${NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id} push`}
                 value={p.push}
-                onChange={(v) => set(p.id, 'push', v)}
-                category={NOTIFICATION_CATEGORY_LABEL[p.id] ?? p.id}
+                onValueChange={(v) => set(p.id, 'push', v)}
               />
             </View>
           </View>
         </View>
       ))}
     </Card>
-  );
-}
-
-function Channel({
-  label,
-  value,
-  onChange,
-  category,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (v: boolean) => void;
-  category: string;
-}) {
-  const { colors, spacing } = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-      <Text variant="caption" color="mutedForeground">
-        {label}
-      </Text>
-      {/* Two channels share a row, so this stays a bare switch with a full spoken label. */}
-      <Switch
-        value={value}
-        onValueChange={onChange}
-        accessibilityLabel={`${category} ${label}`}
-        trackColor={{ true: colors.primary, false: colors.border }}
-        ios_backgroundColor={colors.border}
-      />
-    </View>
   );
 }

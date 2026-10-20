@@ -11,13 +11,13 @@ export const DownloadApp = () => (
       <div className="rounded-2xl border border-border bg-secondary p-8 md:p-12">
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
-            <div className="mb-4 inline-block rounded-full bg-gray-200 px-3 py-1 text-xs font-medium text-primary dark:bg-white/10">
+            <div className="mb-4 inline-block rounded-full bg-secondary px-3 py-1 text-xs font-medium text-primary">
               MOBILE APP · COMING SOON
             </div>
             <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
               The GetRentos app is on its way
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-muted-foreground">
               We&apos;re building the mobile app for iOS and Android. Until it lands in the stores,
               everything works in your phone&apos;s browser, so you can list, search, apply and pay
               from wherever you are.

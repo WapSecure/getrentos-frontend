@@ -7,6 +7,9 @@ import { tourSource, type VideoStream } from '@getrentos/shared';
 import { EmbedFrame } from './EmbedFrame';
 import { VideoTourPlayer } from './VideoTourPlayer';
 
+/** The player is a cinema: black behind the video and white chrome, in either theme. */
+const ON_VIDEO = { bg: '#000', fg: '#fff' };
+
 /**
  * The listing's video tour and 360° tour, full screen in the app. When a
  * listing has both, the viewer switches between them; neither hides the other.
@@ -42,9 +45,9 @@ export function VideoTourSheet({
       presentationStyle="fullScreen"
       supportedOrientations={['portrait', 'landscape']}
     >
-      <View style={{ flex: 1, backgroundColor: '#000', paddingTop: insets.top }}>
+      <View style={{ flex: 1, backgroundColor: ON_VIDEO.bg, paddingTop: insets.top }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16 }}>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1, color: '#fff' }}>
+          <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1, color: ON_VIDEO.fg }}>
             {title}
           </Text>
           <Pressable
@@ -53,7 +56,7 @@ export function VideoTourSheet({
             accessibilityLabel="Close the tour"
             hitSlop={12}
           >
-            <X size={24} color="#fff" />
+            <X size={24} color={ON_VIDEO.fg} />
           </Pressable>
         </View>
         {videoUrl && tour ? (

@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
     minHeight: 260,
     borderRadius: 18,
     overflow: 'hidden',
+    // Camera letterbox: black in both themes, like any viewfinder.
     backgroundColor: '#000',
   },
   reticle: {

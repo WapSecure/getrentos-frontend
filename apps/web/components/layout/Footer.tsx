@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { IconLink } from '@getrentos/ui';
 import { Logo } from '@/components/ui/Logo';
 import { Mail, MapPin, MessageCircle, Phone, Twitter } from 'lucide-react';
 import { SUPPORT, whatsappLink } from '@/lib/support';
@@ -32,19 +33,19 @@ export const Footer = () => (
       <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-4">
           <Logo size="md" />
-          <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             Property services for renters, landlords, owners, buyers, realtors and agents.
           </p>
           <div className="flex items-center gap-3 pt-2">
-            <a
+            <IconLink
               href={`https://x.com/${SITE_TWITTER_HANDLE.replace('@', '')}`}
               target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${SITE_NAME} on X`}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-600 transition-all hover:bg-primary hover:text-white dark:bg-white/10 dark:text-gray-400"
-            >
-              <Twitter className="h-4 w-4" />
-            </a>
+              label={`${SITE_NAME} on X`}
+              icon={<Twitter />}
+              variant="secondary"
+              size="sm"
+              className="rounded-full hover:bg-primary hover:text-primary-foreground"
+            />
           </div>
         </div>
 

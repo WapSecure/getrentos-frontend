@@ -141,9 +141,10 @@ export default function ShortletDetail() {
     borderRadius: 20,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    backgroundColor: solidHeader ? 'transparent' : 'rgba(255,255,255,0.94)',
+    // Over the photo the buttons sit on a card-coloured disc so they read in either theme.
+    backgroundColor: solidHeader ? 'transparent' : colors.card,
   };
-  const iconColor = solidHeader ? colors.foreground : '#161b22';
+  const iconColor = colors.foreground;
 
   const policy = listing
     ? CANCELLATION_POLICIES.find((p) => p.value === listing.cancellationPolicy)

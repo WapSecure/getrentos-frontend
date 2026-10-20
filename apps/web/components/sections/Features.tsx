@@ -66,11 +66,11 @@ export const Features = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {features.map((feature) => (
           <MarketingCard key={feature.title} className="p-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-secondary">
               <feature.icon className="h-6 w-6 text-primary" />
             </div>
             <h3 className="mb-2 text-lg font-semibold text-foreground">{feature.title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{feature.description}</p>
+            <p className="text-sm text-muted-foreground">{feature.description}</p>
           </MarketingCard>
         ))}
       </div>

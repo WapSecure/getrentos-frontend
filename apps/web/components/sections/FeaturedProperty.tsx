@@ -59,7 +59,7 @@ export const FeaturedProperty = () => (
               {example.badges.map((badge) => (
                 <li
                   key={badge}
-                  className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-foreground dark:bg-white/10"
+                  className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-foreground"
                 >
                   {badge}
                 </li>
@@ -86,8 +86,8 @@ export const FeaturedProperty = () => (
             aria-hidden="true"
           >
             <div className="relative z-10 text-center">
-              <Building2 className="mx-auto mb-4 h-24 w-24 text-gray-400 dark:text-white/20" />
-              <p className="text-gray-500">Sample illustration</p>
+              <Building2 className="mx-auto mb-4 h-24 w-24 text-muted-foreground/40" />
+              <p className="text-muted-foreground">Sample illustration</p>
             </div>
           </div>
         </div>

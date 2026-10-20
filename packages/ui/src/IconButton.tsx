@@ -1,6 +1,12 @@
 'use client';
 
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import {
+  forwardRef,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+} from 'react';
+import Link from 'next/link';
 import { cn } from '@getrentos/shared';
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
@@ -78,3 +84,63 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
 );
 
 IconButton.displayName = 'IconButton';
+
+export interface IconLinkProps
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'children' | 'href'> {
+  /** Required: an icon alone has no name for a screen reader. Also shown as the tooltip. */
+  label: string;
+  icon: ReactNode;
+  href: string;
+  variant?: IconButtonProps['variant'];
+  size?: IconButtonProps['size'];
+}
+
+/**
+ * IconButton's look for a link: download a file, open a document in a new
+ * tab. In-app paths go through next/link; anything with a scheme, a download
+ * or a new tab is a plain anchor. A new tab gets noopener by default.
+ */
+export const IconLink = forwardRef<HTMLAnchorElement, IconLinkProps>(
+  ({ label, icon, href, variant = 'ghost', size = 'md', className, title, target, rel, download, ...rest }, ref) => {
+    const classes = cn(
+      'inline-flex shrink-0 items-center justify-center rounded-lg transition-[background-color,border-color,color] duration-150',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+      VARIANTS[variant],
+      SIZES[size],
+      className
+    );
+    const content = (
+      <span aria-hidden="true" className="inline-flex">
+        {icon}
+      </span>
+    );
+    const shared = {
+      ...rest,
+      ref,
+      'aria-label': rest['aria-label'] ?? label,
+      title: title ?? label,
+      className: classes,
+    };
+    const external = /^[a-z][a-z\d+.-]*:/i.test(href) || target === '_blank' || download !== undefined;
+    if (!external) {
+      return (
+        <Link href={href} {...shared}>
+          {content}
+        </Link>
+      );
+    }
+    return (
+      <a
+        href={href}
+        target={target}
+        rel={rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined)}
+        download={download}
+        {...shared}
+      >
+        {content}
+      </a>
+    );
+  }
+);
+
+IconLink.displayName = 'IconLink';

@@ -56,8 +56,8 @@ export const Hero = () => (
     </div>
 
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2" aria-hidden="true">
-      <div className="hero-scroll-cue flex h-10 w-6 justify-center rounded-full border-2 border-gray-400 dark:border-gray-500">
-        <div className="mt-2 h-2 w-1 rounded-full bg-gray-400 dark:bg-gray-500" />
+      <div className="hero-scroll-cue flex h-10 w-6 justify-center rounded-full border-2 border-muted-foreground/60">
+        <div className="mt-2 h-2 w-1 rounded-full bg-muted-foreground/60" />
       </div>
     </div>
   </section>

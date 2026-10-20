@@ -42,7 +42,8 @@ export function TrustChip({
     info: { fg: colors.primary, bg: colors.infoSubtle },
     purple: { fg: colors.purple, bg: colors.purpleSubtle },
     neutral: { fg: colors.foreground, bg: colors.secondary },
-    onImage: { fg: '#161b22', bg: 'rgba(255,255,255,0.92)' },
+    // Over a photo: a card-coloured pill, so it reads in light and dark mode.
+    onImage: { fg: colors.foreground, bg: colors.card },
   };
   const c = map[tone];
   return (

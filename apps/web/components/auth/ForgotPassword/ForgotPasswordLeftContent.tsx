@@ -19,9 +19,9 @@ export const ForgotPasswordLeftContent = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/20 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary border border-border mb-6">
               <BadgeCheck className="w-3 h-3 text-primary" />
-              <span className="text-xs font-medium text-gray-700 dark:text-white/80">
+              <span className="text-xs font-medium text-foreground">
                 FORGOT PASSWORD
               </span>
             </div>
@@ -31,26 +31,26 @@ export const ForgotPasswordLeftContent = () => {
               <span className="block text-primary mt-2">we&apos;ve got your back.</span>
             </h1>
 
-            <p className="text-lg text-gray-600 dark:text-white/70 mb-8 leading-relaxed">
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
               Enter your email or phone number and we&apos;ll send you a verification code to reset
               your password.
             </p>
 
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary">
                 <Key className="w-5 h-5 text-primary" />
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Secure Reset Process</h3>
-                  <p className="text-xs text-gray-500 dark:text-white/60">
+                  <p className="text-xs text-muted-foreground">
                     Multi-step verification ensures security
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary">
                 <Lock className="w-5 h-5 text-primary" />
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Create Strong Password</h3>
-                  <p className="text-xs text-gray-500 dark:text-white/60">
+                  <p className="text-xs text-muted-foreground">
                     Use a unique password you haven&apos;t used before
                   </p>
                 </div>
@@ -60,7 +60,7 @@ export const ForgotPasswordLeftContent = () => {
         </div>
 
         <div className="mt-12 pt-6 border-t border-border">
-          <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-white/40">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <CheckCircle className="w-3 h-3 text-primary" /> Secure
             </span>
