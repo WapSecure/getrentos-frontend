@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck } from 'lucide-react-native';
@@ -22,6 +22,7 @@ import {
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerPaymentMethod() {
   const { colors, spacing } = useTheme();
@@ -36,7 +37,7 @@ export default function BuyerPaymentMethod() {
         eyebrow="Buyer finance"
         title="Payment method"
         subtitle="The account you pay deposits from"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.data ? (

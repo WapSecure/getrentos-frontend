@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,7 @@ import { Sheet } from '@/components/Sheet';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_TONE = { active: 'success', expiring: 'warning', expired: 'danger' } as const;
 
@@ -113,7 +114,7 @@ export default function Documents() {
         eyebrow="Renter workspace"
         title="Documents"
         subtitle="Lease files, identity and shared records"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setUploadOpen(true)}

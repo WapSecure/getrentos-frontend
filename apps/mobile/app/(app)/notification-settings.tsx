@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -24,6 +24,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 const CHANNELS: { key: 'email' | 'push' | 'inApp'; label: string }[] = [
   { key: 'push', label: 'Push' },
@@ -78,7 +79,7 @@ export default function NotificationSettings() {
         eyebrow="Communication"
         title="Notifications"
         subtitle="Choose what reaches you and where"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <ScrollView

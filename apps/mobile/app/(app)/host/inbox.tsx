@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostConversation } from '@/lib/api/hostShortlets';
 import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Guests' messages, unread first. */
 export default function HostInbox() {
@@ -63,7 +64,7 @@ export default function HostInbox() {
           gap: spacing.md,
         }}
       >
-        <DetailHeader eyebrow="Hosting" title="Guest messages" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Hosting" title="Guest messages" onBack={() => goBack()} />
         {(query.data?.items.length ?? 0) > 4 ? (
           <TextField
             placeholder="Search guests or homes"

@@ -22,6 +22,7 @@ import { realtorApi, type RealtorProfile } from '@/lib/api/realtor';
 import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function RealtorProfileScreen() {
   const { colors, spacing, radius } = useTheme();
@@ -46,7 +47,7 @@ export default function RealtorProfileScreen() {
           eyebrow="Account"
           title="Profile"
           subtitle="How clients and buyers see you"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />

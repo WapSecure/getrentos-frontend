@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Vote } from 'lucide-react-native';
 import {
@@ -16,6 +16,7 @@ import {
 import { residentApi, type Poll } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function PollCard({
   poll,
@@ -130,7 +131,7 @@ export default function ResidentPolls() {
         eyebrow="Community voice"
         title="Polls"
         subtitle="Vote on decisions that affect your estate"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         {query.isLoading ? (

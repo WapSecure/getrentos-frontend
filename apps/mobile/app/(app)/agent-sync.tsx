@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { qk } from '@/lib/query/keys';
 import { agentSyncApi, type AgentSyncItem } from '@/lib/api/agentSync';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_ICON: Record<AgentSyncItem['syncStatus'], typeof CheckCircle> = {
   synced: CheckCircle,
@@ -35,7 +36,7 @@ export default function AgentSync() {
         eyebrow="Offline readiness"
         title="Sync status"
         subtitle="Track field records waiting to upload"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <QueryState

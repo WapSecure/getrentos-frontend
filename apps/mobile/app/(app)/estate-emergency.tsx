@@ -36,6 +36,7 @@ import {
 import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 const POLL_MS = 8000;
 
@@ -99,7 +100,7 @@ export default function EstateEmergency() {
             ? `${muster.statusLabel} · declared ${formatDate(muster.declaredAt, 'medium')} at ${formatTime(muster.declaredAt)}`
             : 'Alert every resident and take a roll call'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.isError && !muster ? (

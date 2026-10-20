@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageCircle } from 'lucide-react-native';
@@ -26,6 +26,7 @@ import {
 } from '@/lib/api/preferences';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function WhatsAppSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -38,7 +39,7 @@ export default function WhatsAppSettings() {
         eyebrow="Communication"
         title="WhatsApp"
         subtitle="Manage important updates outside the app"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={saved?.connected ? <Badge label="Connected" tone="success" /> : null}
       />
 

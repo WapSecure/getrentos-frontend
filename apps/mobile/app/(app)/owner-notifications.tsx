@@ -28,6 +28,7 @@ import { routeForNotification } from '@/lib/notificationRoutes';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 /**
  * The API's `type` is an open string, so match on the meaningful prefix and
@@ -93,7 +94,7 @@ export default function OwnerNotifications() {
         subtitle={
           unread > 0 ? `${unread} unread update${unread === 1 ? '' : 's'}` : 'You are all caught up'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           unread > 0 ? (
             <Button

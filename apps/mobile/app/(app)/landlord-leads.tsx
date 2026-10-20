@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordLeads() {
   const { colors, spacing, radius } = useTheme();
@@ -83,7 +84,7 @@ export default function LandlordLeads() {
               ? `${query.data.total} lead${query.data.total === 1 ? '' : 's'}${stale > 0 ? ` · ${stale} gone cold` : ''}`
               : 'Enquiries and follow-up activity'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             stale > 0 ? (
               <Pressable

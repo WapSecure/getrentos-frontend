@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerPreferences } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const FLOORS = [50, 70, 80, 90];
 
@@ -40,7 +41,7 @@ export default function OwnerSettings() {
         eyebrow="Settings"
         title="Selling preferences"
         subtitle="How offers reach you"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />

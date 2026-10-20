@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -47,6 +47,7 @@ import {
 import type { Household } from '@/lib/api/estateManager';
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type Filter = DeliveryLogStatus | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
@@ -131,7 +132,7 @@ export default function EstateDeliveries() {
                 : `${total.toLocaleString('en-NG')} parcel${total === 1 ? '' : 's'}`
               : 'Parcels taken in at the gate'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <View style={{ flexDirection: 'row', gap: spacing.xs }}>
               <IconButton

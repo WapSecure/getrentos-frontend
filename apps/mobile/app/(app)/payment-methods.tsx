@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -31,6 +31,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { AddPaymentMethodSheet } from '@/components/payments/AddPaymentMethodSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const TYPE_ICON: Record<SavedPaymentMethod['type'], typeof CreditCard> = {
   card: CreditCard,
@@ -85,7 +86,7 @@ export default function PaymentMethods() {
         eyebrow="Wallet"
         title="Payment methods"
         subtitle="Cards, bank accounts and preferred checkout"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <ScrollView

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { RefreshControl, SectionList, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { History } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, ListSkeleton, Text, useTheme } from '@getrentos
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type TimelineEvent } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const dayKey = (iso: string) => iso.slice(0, 10);
 const dayLabel = (key: string) => {
@@ -54,7 +55,7 @@ export default function Activity() {
           paddingBottom: spacing.sm,
         }}
       >
-        <DetailHeader eyebrow="Home care" title="Activity" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Home care" title="Activity" onBack={() => goBack()} />
       </View>
       {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />

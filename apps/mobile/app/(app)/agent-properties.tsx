@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,6 +8,7 @@ import { Card, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentAssignedProperty } from '@/lib/api/agent';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function AgentProperties() {
   const { colors, spacing, radius } = useTheme();
@@ -36,7 +37,7 @@ export default function AgentProperties() {
               ? `${items.length} assigned propert${items.length === 1 ? 'y' : 'ies'}`
               : 'Client properties under your care'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

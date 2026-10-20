@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, Share, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -43,6 +43,7 @@ import { gatemanApi } from '@/lib/api/gateman';
 import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 type View_ =
   | 'CHECKED_IN'
@@ -165,7 +166,7 @@ export default function EstateVisitors() {
                     : `${total.toLocaleString('en-NG')} passes`
               : undefined
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Issue a visitor pass"

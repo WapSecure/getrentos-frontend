@@ -16,6 +16,7 @@ import {
 import type { BuyerListing } from '@/lib/api/buyer';
 import { useBuyerSaved } from '@/hooks/useBuyerSaved';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerSaved() {
   const { colors, spacing } = useTheme();
@@ -91,7 +92,7 @@ export default function BuyerSaved() {
               ? `${items.length} saved home${items.length === 1 ? '' : 's'}`
               : 'Your property shortlist'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

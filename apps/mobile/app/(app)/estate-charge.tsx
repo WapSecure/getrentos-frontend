@@ -34,6 +34,7 @@ import {
 } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -148,7 +149,7 @@ export default function EstateCharge() {
         <DetailHeader
           eyebrow={estate?.name ?? 'Dues'}
           title="Charge dues"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         <Card elevated style={{ gap: spacing.md }}>

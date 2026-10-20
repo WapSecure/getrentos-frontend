@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Check, FileText } from 'lucide-react-native';
@@ -22,6 +22,7 @@ import { residentApi, type GovernanceRecord, type GovernanceRecordType } from '@
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const TYPE_LABEL: Record<GovernanceRecordType, string> = {
   bylaws: 'Bylaws',
@@ -58,7 +59,7 @@ export default function ResidentGovernance() {
         eyebrow="Community records"
         title="Governance"
         subtitle="Bylaws, minutes and required signatures"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         <QueryState

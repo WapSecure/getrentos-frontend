@@ -32,6 +32,7 @@ import { haptics } from '@/lib/haptics';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { VendorPicker } from '@/components/homecare/VendorPicker';
+import { goBack } from '@/lib/goBack';
 
 export default function NewWorkOrder() {
   const { colors, spacing, radius } = useTheme();
@@ -115,7 +116,7 @@ export default function NewWorkOrder() {
           gap: spacing.xl,
         }}
       >
-        <DetailHeader eyebrow="Home care" title="New work order" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Home care" title="New work order" onBack={() => goBack()} />
 
         <Section title="Where">
           {homes.isPending ? (

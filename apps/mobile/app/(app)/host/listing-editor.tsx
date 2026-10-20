@@ -39,6 +39,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Stepper, Thumb } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 interface Draft {
   propertyId: string;
@@ -590,7 +591,7 @@ function EditForm({ listing }: { listing: HostListing }) {
           eyebrow="Edit listing"
           title={listing.title}
           subtitle="Price and stay rules"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <PriceStep d={d} patch={patch} />
         <StayStep d={d} patch={patch} />

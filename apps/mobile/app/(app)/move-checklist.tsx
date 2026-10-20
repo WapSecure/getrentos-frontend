@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckSquare } from 'lucide-react-native';
@@ -9,6 +9,7 @@ import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { renterApi, type MoveInChecklistItem } from '@/lib/api/renter';
 import { ChecklistSection } from '@/components/checklist/ChecklistSection';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function MoveChecklist() {
   const { colors, spacing } = useTheme();
@@ -65,7 +66,7 @@ export default function MoveChecklist() {
         eyebrow="Moving journey"
         title="Move checklist"
         subtitle="Stay organized before and after moving day"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {isLoading ? (

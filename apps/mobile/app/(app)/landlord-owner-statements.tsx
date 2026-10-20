@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +25,7 @@ import { landlordApi, PAYOUT_TONE, type OwnerStatement } from '@/lib/api/landlor
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordOwnerStatements() {
   const { colors, spacing, radius } = useTheme();
@@ -85,7 +86,7 @@ export default function LandlordOwnerStatements() {
         eyebrow="Owner reporting"
         title="Owner statements"
         subtitle="Payout summaries and issued reports"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setCreating(true)}

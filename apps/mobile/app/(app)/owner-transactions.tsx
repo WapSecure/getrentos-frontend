@@ -19,6 +19,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerEscrowStatus, type OwnerTransaction } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
   {
@@ -80,7 +81,7 @@ export default function OwnerTransactions() {
           eyebrow="Selling"
           title="Sales in progress"
           subtitle="Where each accepted sale stands"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

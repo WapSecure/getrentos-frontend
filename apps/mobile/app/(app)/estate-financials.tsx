@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -47,6 +47,7 @@ import {
   type ReportPeriod,
 } from '@/lib/api/estateGovernance';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { goBack } from '@/lib/goBack';
 
 /**
  * The estate's money. Reports (what came in, what's outstanding, the trend and
@@ -142,7 +143,7 @@ export default function EstateFinancials() {
           eyebrow={estate?.name ?? 'Estate office'}
           title="Financials"
           subtitle="Dues collected, statements and payouts"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             locked ? null : (
               <IconButton

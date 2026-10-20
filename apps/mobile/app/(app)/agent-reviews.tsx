@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { qk } from '@/lib/query/keys';
 import { agentReviewsApi, type AgentReview } from '@/lib/api/agentReviews';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function AgentReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -41,7 +42,7 @@ export default function AgentReviews() {
               ? `${summaryQuery.data.averageRating.toFixed(1)} average from ${summaryQuery.data.reviewCount} review${summaryQuery.data.reviewCount === 1 ? '' : 's'}`
               : 'Client feedback and rating trends'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

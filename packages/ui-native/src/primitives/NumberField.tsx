@@ -45,6 +45,7 @@ export const NumberField = forwardRef<TextInput, NumberFieldProps>(function Numb
     currency,
     rightAccessory,
     leftIcon,
+    maxLength,
     ...rest
   },
   ref
@@ -58,9 +59,13 @@ export const NumberField = forwardRef<TextInput, NumberFieldProps>(function Numb
       {...rest}
       value={display}
       onChangeText={(text) => {
-        const next = sanitizeNumber(text, places);
+        const clean = sanitizeNumber(text, places);
         // Amounts drop leading zeros ("007" is 7); codes keep them.
-        onValueChange(symbol ? next.replace(/^0+(?=\d)/, '') : next);
+        const next = symbol ? clean.replace(/^0+(?=\d)/, '') : clean;
+        // The limit counts digits, not the dashes or spaces in a pasted
+        // "0123-456-789" or the commas shown in a grouped amount, so it is
+        // applied here rather than as the native maxLength.
+        onValueChange(maxLength ? next.slice(0, maxLength) : next);
       }}
       keyboardType={places > 0 ? 'decimal-pad' : 'number-pad'}
       inputMode={places > 0 ? 'decimal' : 'numeric'}

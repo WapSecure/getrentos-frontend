@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -32,6 +32,7 @@ import { landWatchApi } from '@/lib/api/landWatch';
 import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const KINDS: LandWatchIncidentKind[] = [
   'ENCROACHMENT',
@@ -84,7 +85,7 @@ export default function LandWatchDetail() {
           eyebrow="Land Watch"
           title={w?.land.label ?? 'Land Watch'}
           subtitle={w ? `${w.land.city}, ${w.land.state}` : undefined}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !w ? (
           <ErrorState onRetry={() => query.refetch()} />

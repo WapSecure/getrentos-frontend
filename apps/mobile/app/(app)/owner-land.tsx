@@ -42,6 +42,7 @@ import {
   type BoundaryCorner,
 } from '@getrentos/shared';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /**
  * Land stays private until ownership and diligence are verified. This is
@@ -85,7 +86,7 @@ export default function OwnerLand() {
           eyebrow="Portfolio"
           title="Land"
           subtitle="Private until ownership and diligence are verified"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Register land"

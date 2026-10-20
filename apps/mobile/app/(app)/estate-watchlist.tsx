@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -46,6 +46,7 @@ import { pickPhoto } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 type View_ = 'ACTIVE' | 'LIFTED' | 'ALL';
 
@@ -111,7 +112,7 @@ export default function EstateWatchlist() {
           eyebrow={estate?.name ?? 'Gate'}
           title="Watch list"
           subtitle="Who the gate should stop or flag"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add to the watch list"

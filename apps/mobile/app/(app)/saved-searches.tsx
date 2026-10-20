@@ -20,6 +20,7 @@ import { PROPERTY_TYPE_LABEL } from '@/lib/api/properties';
 import { ApiError } from '@/lib/api/client';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function filterSummary(s: SavedSearch): string {
   const parts: string[] = [];
@@ -78,7 +79,7 @@ export default function SavedSearches() {
         eyebrow="Property discovery"
         title="Saved searches"
         subtitle="Alerts and reusable property filters"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <View style={{ flex: 1 }}>

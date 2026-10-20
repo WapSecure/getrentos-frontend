@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ import {
 import { UploadBuyerDocumentSheet } from '@/components/buyer/UploadBuyerDocumentSheet';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -76,7 +77,7 @@ export default function BuyerDocuments() {
               ? `${items.length} secure file${items.length === 1 ? '' : 's'}`
               : 'Proof of funds and purchase files'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               onPress={() => setUploadOpen(true)}

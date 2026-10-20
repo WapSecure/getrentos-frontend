@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Linking, Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { UploadOwnerDocumentSheet } from '@/components/owner/UploadOwnerDocumentSheet';
+import { goBack } from '@/lib/goBack';
 
 export default function OwnerDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -106,7 +107,7 @@ export default function OwnerDocuments() {
           eyebrow="Selling"
           title="Documents"
           subtitle="Share transfer papers with your buyer"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Upload a document"

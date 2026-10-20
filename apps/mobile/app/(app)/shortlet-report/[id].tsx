@@ -26,6 +26,7 @@ import { ApiError } from '@/lib/api/client';
 import { capturePhoto, pickPhotos } from '@/lib/filePicker';
 import { PROBLEM_OPTIONS, formatDeadline, promiseState } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 const MAX_PHOTOS = 6;
 const MIN_DESCRIPTION = 20;
@@ -105,7 +106,7 @@ export default function GuestPromiseReport() {
           eyebrow="Guest Promise"
           title="Report a problem"
           subtitle={b?.propertyTitle}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {!b ? (

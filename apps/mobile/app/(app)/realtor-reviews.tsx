@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorReview } from '@/lib/api/realtor';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** What clients say, with the rating spread. */
 export default function RealtorReviews() {
@@ -42,7 +43,7 @@ export default function RealtorReviews() {
               ? `${summaryQuery.data.averageRating.toFixed(1)} average from ${summaryQuery.data.reviewCount} review${summaryQuery.data.reviewCount === 1 ? '' : 's'}`
               : 'Client feedback and rating trends'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type BookingView, type HostBooking } from '@/lib/api/hostShortlets';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StayCard } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 const VIEWS: { value: BookingView; label: string; empty: string }[] = [
   { value: 'requests', label: 'Requests', empty: 'No requests waiting. Nice.' },
@@ -55,7 +56,7 @@ export default function HostBookings() {
           gap: spacing.md,
         }}
       >
-        <DetailHeader eyebrow="Hosting" title="Bookings" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Hosting" title="Bookings" onBack={() => goBack()} />
         <SegmentedControl
           accessibilityLabel="Which bookings"
           value={view}

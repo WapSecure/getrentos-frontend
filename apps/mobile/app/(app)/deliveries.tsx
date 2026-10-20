@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Image, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react-native';
 import {
@@ -27,6 +27,7 @@ import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 /**
  * A household's parcels: what is coming, and what has already been taken in.
@@ -78,7 +79,7 @@ export default function ResidentDeliveries() {
         eyebrow="Household activity"
         title="Deliveries"
         subtitle="Parcels received at the gate, and ones on their way"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen
         refreshing={query.isRefetching || expectedQuery.isRefetching}

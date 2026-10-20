@@ -37,6 +37,7 @@ import { Sheet } from '@/components/Sheet';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { HostFeeNote } from '@/components/host/HostUI';
 import { WITHHELD } from '@/lib/withdrawal';
+import { goBack } from '@/lib/goBack';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -89,7 +90,7 @@ export default function HostEarnings() {
         gap: spacing.xl,
       }}
     >
-      <DetailHeader eyebrow="Hosting" title="Earnings & payouts" onBack={() => router.back()} />
+      <DetailHeader eyebrow="Hosting" title="Earnings & payouts" onBack={() => goBack()} />
 
       {summary.isError && !summary.data ? (
         <ErrorState onRetry={() => summary.refetch()} />

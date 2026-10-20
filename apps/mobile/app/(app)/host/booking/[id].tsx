@@ -50,6 +50,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { BOOKING_STATUS, StatusPill, Thumb } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 type Panel = 'cancel' | 'claim' | 'dispute' | 'review' | null;
 
@@ -119,7 +120,7 @@ export default function HostBookingDetail() {
           eyebrow="Booking"
           title={b?.guestName ?? 'Guest'}
           subtitle={b?.propertyTitle}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !b ? (
           <ErrorState onRetry={() => query.refetch()} />

@@ -25,6 +25,7 @@ import { supportApi, SUPPORT_CATEGORIES, type SupportThread } from '@/lib/api/su
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Support() {
   const { colors, spacing, radius } = useTheme();
@@ -44,7 +45,7 @@ export default function Support() {
         eyebrow="GetRentos care"
         title="Support"
         subtitle="Track conversations with our support team"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setComposeOpen(true)}

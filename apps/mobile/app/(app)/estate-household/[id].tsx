@@ -33,6 +33,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 /** One home: how to reach the resident, what they owe, and their account link. */
 export default function EstateHousehold() {
@@ -128,7 +129,7 @@ export default function EstateHousehold() {
         <DetailHeader
           eyebrow="Household"
           title={h?.unitLabel ?? 'Household'}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             h ? (
               <IconButton

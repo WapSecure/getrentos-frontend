@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -23,6 +23,7 @@ import {
 } from '@/lib/api/buyerSettings';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const PROPERTY_TYPES = ['Apartment', 'House', 'Duplex', 'Bungalow', 'Land', 'Commercial'];
 
@@ -39,7 +40,7 @@ export default function BuyerSearchPreferences() {
         eyebrow="Property discovery"
         title="Search preferences"
         subtitle="Tune budgets, locations and match alerts"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.data ? (
@@ -61,8 +62,9 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
   const qc = useQueryClient();
   const toast = useToast();
 
-  const [minBudget, setMinBudget] = useState(String(data.minBudget ?? ''));
-  const [maxBudget, setMaxBudget] = useState(String(data.maxBudget ?? ''));
+  // 0 means no limit, so it shows as an empty field rather than a typed "0".
+  const [minBudget, setMinBudget] = useState(data.minBudget ? String(data.minBudget) : '');
+  const [maxBudget, setMaxBudget] = useState(data.maxBudget ? String(data.maxBudget) : '');
   const [preferredLocations, setPreferredLocations] = useState(data.preferredLocations ?? '');
   const [preferredTypes, setPreferredTypes] = useState<string[]>(data.preferredTypes ?? []);
   const [notifyOnMatch, setNotifyOnMatch] = useState(data.notifyOnMatch ?? true);
@@ -106,6 +108,7 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
               label="Min budget"
               value={minBudget}
               onValueChange={setMinBudget}
+              placeholder="No minimum"
               currency
             />
           </View>
@@ -114,6 +117,7 @@ function SearchPreferencesForm({ data }: { data: BuyerSearchPreferencesData }) {
               label="Max budget"
               value={maxBudget}
               onValueChange={setMaxBudget}
+              placeholder="No maximum"
               currency
             />
           </View>

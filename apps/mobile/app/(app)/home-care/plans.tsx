@@ -7,7 +7,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, CheckCircle2, Plus } from 'lucide-react-native';
@@ -44,6 +44,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill } from '@/components/host/HostUI';
 import { VendorPicker } from '@/components/homecare/VendorPicker';
+import { goBack } from '@/lib/goBack';
 
 const FREQUENCIES = [
   { days: 30, label: 'Monthly' },
@@ -96,7 +97,7 @@ export default function Plans() {
           eyebrow="Home care"
           title="Preventive maintenance"
           subtitle="Servicing before things break"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add a plan"

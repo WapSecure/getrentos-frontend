@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Image, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock, KeyRound, Plus, UserPlus } from 'lucide-react-native';
 import {
@@ -29,6 +29,7 @@ import { qk } from '@/lib/query/keys';
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   pending: 'Pending',
@@ -145,7 +146,7 @@ export default function ResidentVisitorPasses() {
         eyebrow="Access control"
         title="Visitor Passes"
         subtitle="Invite guests and approve gate arrivals"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setIssueOpen(true)}

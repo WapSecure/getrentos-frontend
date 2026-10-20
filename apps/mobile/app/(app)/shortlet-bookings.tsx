@@ -40,6 +40,7 @@ import {
   stayTab,
   type StayTab,
 } from '@/lib/stays';
+import { goBack } from '@/lib/goBack';
 
 const TABS: { value: StayTab; label: string }[] = [
   { value: 'upcoming', label: 'Upcoming' },
@@ -89,7 +90,7 @@ export default function MyStays() {
         <DetailHeader
           eyebrow="Short stays"
           title="My stays"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <View style={{ flexDirection: 'row' }}>
               <IconButton

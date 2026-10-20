@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Star } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function OwnerReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -40,7 +41,7 @@ export default function OwnerReviews() {
         eyebrow="Reputation"
         title="Reviews"
         subtitle="What buyers say about selling with you"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {s ? (

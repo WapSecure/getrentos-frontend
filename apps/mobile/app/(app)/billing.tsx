@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Platform, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check, Minus, BadgeCheck } from 'lucide-react-native';
@@ -41,6 +41,7 @@ import {
 } from '@/lib/purchases';
 import { openLegal } from '@/lib/links';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const PERSONA: Partial<Record<string, PlanPersona>> = {
   landlord: 'landlord',
@@ -95,7 +96,7 @@ export default function Billing() {
         eyebrow="Account"
         title="Plan & billing"
         subtitle="What’s included and your receipts"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {mine.isError && !mine.data ? (

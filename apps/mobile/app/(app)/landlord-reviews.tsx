@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { landlordApi, type LandlordReview } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
 import { StarRating } from '@/components/reviews/StarRating';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordReviews() {
   const { colors, spacing, radius } = useTheme();
@@ -33,7 +34,7 @@ export default function LandlordReviews() {
         eyebrow="Reputation"
         title="Reviews"
         subtitle="Tenant feedback and performance trends"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.isError && !query.data ? (

@@ -122,7 +122,7 @@ export default function RealtorHome() {
       accessory={
         <IconButton
           onPress={() => router.push('/(app)/realtor-notifications')}
-          accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          accessibilityLabel="Notifications"
           badge={unread}
           icon={<Bell size={21} color={colors.foreground} />}
         />

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -45,6 +45,7 @@ import {
 } from '@/lib/api/estateGate';
 import { formatDate, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type View_ = 'inside' | 'all';
 
@@ -121,7 +122,7 @@ export default function EstateVehicles() {
                 : `${total.toLocaleString('en-NG')} logged`
               : 'Cars in and out of the estate'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <View style={{ flexDirection: 'row', gap: spacing.xs }}>
               <IconButton

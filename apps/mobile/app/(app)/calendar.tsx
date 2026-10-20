@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Calendar as CalendarIcon, MapPin, Plus } from 'lucide-react-native';
@@ -24,6 +24,7 @@ import {
 import { CalendarEventSheet } from '@/components/calendar/CalendarEventSheet';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function groupByDate(events: CalendarEvent[]): { date: string; events: CalendarEvent[] }[] {
   const sorted = [...events].sort((a, b) => {
@@ -54,7 +55,7 @@ export default function CalendarScreen() {
         eyebrow="Your schedule"
         title="Calendar"
         subtitle="Viewings, payments and important dates"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setCreating(true)}

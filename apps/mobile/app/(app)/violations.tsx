@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { TriangleAlert } from 'lucide-react-native';
 import {
@@ -16,6 +16,7 @@ import { residentApi, type ViolationStatus } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_LABEL: Record<ViolationStatus, string> = {
   reported: 'Reported',
@@ -52,7 +53,7 @@ export default function ResidentViolations() {
         eyebrow="Community standards"
         title="Violations"
         subtitle="Household notices and resolutions"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         <QueryState

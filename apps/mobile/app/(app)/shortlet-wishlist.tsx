@@ -10,6 +10,7 @@ import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletListing } from '@/lib/api/shortlets';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function ShortletWishlist() {
   const { colors, spacing } = useTheme();
@@ -46,7 +47,7 @@ export default function ShortletWishlist() {
         eyebrow="Shortlet shortlist"
         title="Saved stays"
         subtitle="Favorite stays ready for comparison"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <QueryState

@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerProfile } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function OwnerProfileScreen() {
   const { colors, spacing, radius } = useTheme();
@@ -42,7 +43,7 @@ export default function OwnerProfileScreen() {
           eyebrow="Account"
           title="Profile"
           subtitle="How buyers and realtors see you"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />

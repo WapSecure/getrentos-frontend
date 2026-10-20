@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { shortletsApi, type ShortletConversation } from '@/lib/api/shortlets';
 import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Conversations with hosts, unread first. */
 export default function GuestMessages() {
@@ -55,7 +56,7 @@ export default function GuestMessages() {
           paddingBottom: spacing.md,
         }}
       >
-        <DetailHeader eyebrow="Short stays" title="Messages" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Short stays" title="Messages" onBack={() => goBack()} />
       </View>
       {query.isError && !query.data ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>

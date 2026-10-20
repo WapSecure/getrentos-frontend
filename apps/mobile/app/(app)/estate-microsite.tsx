@@ -8,7 +8,7 @@ import {
   Share,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -45,6 +45,7 @@ import {
 } from '@/lib/api/estateGovernance';
 import { pickPhoto } from '@/lib/filePicker';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 /**
  * The estate's public page on the website: one link to share with residents
@@ -95,7 +96,7 @@ export default function EstateMicrosite() {
           eyebrow={estate?.name ?? 'Public page'}
           title="Microsite"
           subtitle="The estate’s page on the web"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             query.data ? (
               <StatusPill label={live ? 'Live' : 'Draft'} tone={live ? 'success' : 'neutral'} />

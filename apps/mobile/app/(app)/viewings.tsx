@@ -1,5 +1,5 @@
 import { RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { Calendar } from 'lucide-react-native';
@@ -14,6 +14,7 @@ import {
 import { formatDate, formatTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
+import { goBack } from '@/lib/goBack';
 
 export default function Viewings() {
   const { colors, spacing, radius } = useTheme();
@@ -26,7 +27,7 @@ export default function Viewings() {
         eyebrow="Property discovery"
         title="Viewings"
         subtitle="Requests, confirmations and tour dates"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <QueryState

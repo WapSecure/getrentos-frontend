@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, Vote, X } from 'lucide-react-native';
@@ -35,6 +35,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 const MAX_OPTIONS = 10;
 
@@ -94,7 +95,7 @@ export default function EstatePolls() {
           eyebrow={estate?.name ?? 'Community'}
           title="Polls"
           subtitle="One vote per household"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="New poll"

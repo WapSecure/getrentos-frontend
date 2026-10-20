@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -20,6 +20,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerNotificationSettings() {
   const { colors, spacing } = useTheme();
@@ -64,7 +65,7 @@ export default function BuyerNotificationSettings() {
         eyebrow="Buyer alerts"
         title="Notifications"
         subtitle="Choose how purchase updates reach you"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <View style={{ flex: 1 }}>

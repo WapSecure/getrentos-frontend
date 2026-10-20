@@ -24,6 +24,7 @@ import { MoveToWishlistSheet } from '@/components/property/MoveToWishlistSheet';
 import { RecentlyViewedStrip } from '@/components/property/RecentlyViewedStrip';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { withTrustLabel } from '@/lib/trustLabel';
+import { goBack } from '@/lib/goBack';
 
 export default function Saved() {
   const { colors, spacing } = useTheme();
@@ -92,7 +93,7 @@ export default function Saved() {
         eyebrow="Your shortlist"
         title="Saved homes"
         subtitle="Organize and compare favorite listings"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setManageOpen(true)}

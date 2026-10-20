@@ -1,5 +1,5 @@
 import { Alert, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,6 +25,7 @@ import { formatDate, formatTime } from '@/lib/format';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function BuyerViewings() {
   const { colors, spacing, radius } = useTheme();
@@ -76,7 +77,7 @@ export default function BuyerViewings() {
               ? `${items.length} scheduled request${items.length === 1 ? '' : 's'}`
               : 'Your property tour schedule'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

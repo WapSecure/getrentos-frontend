@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import { qk } from '@/lib/query/keys';
 import { canCounter, realtorApi, type RealtorOffer } from '@/lib/api/realtor';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { OfferCard } from '@/components/realtor/RealtorUI';
+import { goBack } from '@/lib/goBack';
 
 type View_ = 'open' | 'closed';
 
@@ -48,7 +49,7 @@ export default function RealtorOffers() {
           eyebrow="Deals"
           title="Offers"
           subtitle="Negotiate for your clients; they accept"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <SegmentedControl
           accessibilityLabel="Which offers"

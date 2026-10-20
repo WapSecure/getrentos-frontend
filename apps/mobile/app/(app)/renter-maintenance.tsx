@@ -27,6 +27,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Maintenance() {
   const { colors, spacing, radius } = useTheme();
@@ -77,7 +78,7 @@ export default function Maintenance() {
         eyebrow="Home care"
         title="Maintenance"
         subtitle="Report and track repair requests"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => router.push('/(app)/report-maintenance')}

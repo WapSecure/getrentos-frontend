@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SegmentedControl, useTheme } from '@getrentos/ui-native';
@@ -17,6 +17,7 @@ import {
   planRefusal,
   retryUnlessPlanGate,
 } from '@/lib/api/estateGate';
+import { goBack } from '@/lib/goBack';
 
 type Tab = 'report' | 'routes' | 'checkpoints';
 
@@ -85,7 +86,7 @@ export default function EstatePatrol() {
         eyebrow={estate?.name ?? 'Gate'}
         title="Patrols"
         subtitle="Checkpoints, the rounds that walk them, and whether they happened"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {gated ? (
         <EnterpriseUpsell

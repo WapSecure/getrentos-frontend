@@ -1,11 +1,12 @@
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bell, CheckCheck, type LucideIcon } from 'lucide-react-native';
 import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { relativeTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 /** What a notification row needs, whichever portal's API it came from. */
 export interface InboxNotification {
@@ -71,7 +72,7 @@ export function NotificationsInbox({
         subtitle={
           unread > 0 ? `${unread} unread update${unread === 1 ? '' : 's'}` : 'You are all caught up'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           unread > 0 ? (
             <Pressable

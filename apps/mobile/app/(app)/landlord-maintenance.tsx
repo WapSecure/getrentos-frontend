@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,6 +28,7 @@ import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Requests still needing the landlord to act. */
 const OPEN = ['pending', 'acknowledged', 'in_progress'];
@@ -97,7 +98,7 @@ export default function LandlordMaintenanceScreen() {
                 : 'Nothing open'
               : 'Track repairs and vendor work'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

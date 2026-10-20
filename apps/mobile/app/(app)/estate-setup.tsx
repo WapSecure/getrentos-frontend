@@ -31,6 +31,7 @@ import {
 import { getCitiesFor, NIGERIA_STATE_CITIES } from '@/lib/locationCities';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 const STATE_OPTIONS = Object.keys(NIGERIA_STATE_CITIES).map((s) => ({ value: s, label: s }));
 
@@ -107,7 +108,7 @@ export default function EstateSetup() {
           eyebrow="Estate office"
           title={another ? 'Add an estate' : 'Set up your estate'}
           subtitle="Tell us about the community you manage"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         <View

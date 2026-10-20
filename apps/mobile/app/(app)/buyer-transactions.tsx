@@ -31,6 +31,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** The happy path, in order: the same five stages the web shows. */
 const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] = [
@@ -174,7 +175,7 @@ export default function BuyerTransactions() {
           eyebrow="Buyer finance"
           title="Transactions"
           subtitle="Deposits, payment protection and completion"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {all.length > 0 ? (
           <ScrollView

@@ -30,6 +30,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Payments() {
   const { colors, spacing, radius } = useTheme();
@@ -77,7 +78,7 @@ export default function Payments() {
         eyebrow="Renter finance"
         title="Payments"
         subtitle="Rent, receipts and payment history"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             <IconButton

@@ -29,6 +29,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordListings() {
   const { colors, spacing, radius } = useTheme();
@@ -84,7 +85,7 @@ export default function LandlordListings() {
           eyebrow="Marketplace"
           title="Listings"
           subtitle={query.data ? `${live} live of ${items.length}` : 'Publish and manage vacancies'}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               onPress={() => setCreating(true)}

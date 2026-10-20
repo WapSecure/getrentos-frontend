@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -22,6 +22,7 @@ import { landlordApi, type MicrositeSettings } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordMicrosite() {
   const { colors, spacing, radius } = useTheme();
@@ -33,7 +34,7 @@ export default function LandlordMicrosite() {
         eyebrow="Public presence"
         title="Microsite"
         subtitle="Your branded property portfolio page"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           query.data ? (
             <Badge

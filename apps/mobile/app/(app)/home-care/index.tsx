@@ -31,6 +31,7 @@ import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import { isUpgradeError } from '@/components/host/HostUI';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
 import { HomeCareProGate } from '@/components/homecare/HomeCareProGate';
+import { goBack } from '@/lib/goBack';
 
 /**
  * Keeping the homes in shape: what's broken, what's due, and what's overdue,
@@ -89,7 +90,7 @@ export default function HomeCare() {
         eyebrow="Home care"
         title="Maintenance"
         subtitle="Repairs, assets and upkeep across your homes"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           d ? (
             <IconButton

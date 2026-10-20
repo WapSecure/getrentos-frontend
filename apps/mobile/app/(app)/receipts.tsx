@@ -1,5 +1,5 @@
 import { Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,7 @@ import { qk } from '@/lib/query/keys';
 import { paymentsApi, type Receipt } from '@/lib/api/payments';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function Receipts() {
   const { colors, spacing, radius } = useTheme();
@@ -44,7 +45,7 @@ export default function Receipts() {
           eyebrow="Payment records"
           title="Receipts"
           subtitle="Verified proof of completed payments"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           style={{ flex: 1 }}
         />
       </View>

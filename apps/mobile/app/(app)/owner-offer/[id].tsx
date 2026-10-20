@@ -33,6 +33,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 import { Sheet } from '@/components/Sheet';
+import { goBack } from '@/lib/goBack';
 
 const FINANCING: Record<string, string> = {
   cash: 'Cash',
@@ -108,7 +109,7 @@ export default function OwnerOfferDetail() {
         <DetailHeader
           eyebrow="Offer"
           title={offer?.propertyName ?? 'Offer'}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {offers.isError && !offers.data ? (

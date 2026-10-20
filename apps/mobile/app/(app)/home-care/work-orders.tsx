@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { homeCareApi, type WorkOrder, type WorkOrderView } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { WorkOrderCard } from '@/components/homecare/WorkOrderCard';
+import { goBack } from '@/lib/goBack';
 
 const RANK: Record<string, number> = { URGENT: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 
@@ -81,7 +82,7 @@ export default function WorkOrders() {
         <DetailHeader
           eyebrow="Home care"
           title="Work orders"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="New work order"

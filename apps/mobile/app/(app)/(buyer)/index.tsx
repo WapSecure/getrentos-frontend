@@ -74,7 +74,7 @@ export default function BuyerHome() {
       accessory={
         <IconButton
           onPress={() => router.push('/(app)/buyer-notification-inbox')}
-          accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+          accessibilityLabel="Notifications"
           badge={unread}
           icon={<Bell size={21} color={colors.foreground} />}
         />

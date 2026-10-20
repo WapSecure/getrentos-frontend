@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Clock, Mail, MessageCircle, Phone } from 'lucid
 import { Card, Divider, Text, useTheme } from '@getrentos/ui-native';
 import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const SUPPORT_EMAIL = 'support@getrentos.test';
 const SUPPORT_PHONE = '+2348000000000';
@@ -47,7 +48,7 @@ export default function HelpCenter() {
         eyebrow="Help centre"
         title="Help"
         subtitle="Answers and ways to reach the GetRentos team"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <ScrollView

@@ -26,6 +26,7 @@ import {
   type StaffMember,
 } from '@/lib/api/estateStaffSetup';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 /** The estate's gatemen: who can check visitors in, add one, or take one off the gate. */
 export default function EstateStaff() {
@@ -93,7 +94,7 @@ export default function EstateStaff() {
           eyebrow={estate?.name ?? 'Estate'}
           title="Staff"
           subtitle={query.data ? staffCount(total) : 'Your gatemen'}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add a gateman"

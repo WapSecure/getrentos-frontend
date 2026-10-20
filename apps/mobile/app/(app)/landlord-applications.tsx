@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +30,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 /** Statuses that still await the landlord's decision. */
 const OPEN_STATUSES: ApplicationStatus[] = ['pending', 'under_review'];
@@ -101,7 +102,7 @@ export default function LandlordApplications() {
                 : 'Nothing awaiting a decision'
               : 'Review prospective tenants'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

@@ -26,6 +26,7 @@ import {
 } from '@getrentos/ui-native';
 import type { TrustBadge, TrustProfile, VerificationItem } from '@/lib/api/buyerTrustProfile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const ICONS: Record<string, typeof Shield> = {
   User,
@@ -74,7 +75,7 @@ export function TrustProfileView({
         eyebrow={eyebrow}
         title="Trust & verification"
         subtitle={subtitle}
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.isLoading ? (

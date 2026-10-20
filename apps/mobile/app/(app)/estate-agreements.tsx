@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ShieldCheck, Trees } from 'lucide-react-native';
@@ -21,6 +21,7 @@ import { estateAgreementsApi, MIN_REASON, type EstateAgreement } from '@/lib/api
 import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 type Closing = { agreement: EstateAgreement; action: 'decline' | 'revoke' };
 
@@ -55,7 +56,7 @@ export default function EstateAgreements() {
           eyebrow="Marketing"
           title="Estate requests"
           subtitle="Estates that want to advertise your property"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <Card style={{ flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.secondary }}>
           <ShieldCheck size={18} color={colors.primary} />

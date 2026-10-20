@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Share, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertTriangle, CalendarSync, Link2, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
@@ -25,6 +25,7 @@ import { relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
+import { goBack } from '@/lib/goBack';
 
 const SOURCES = ['Airbnb', 'Booking.com', 'Vrbo', 'Other'] as const;
 
@@ -92,7 +93,7 @@ export default function HostCalendarSync() {
         eyebrow="Calendar sync"
         title="Other sites"
         subtitle="Never sell the same night twice"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {sync.isError && !sync.data ? (
         <ErrorState onRetry={() => sync.refetch()} />

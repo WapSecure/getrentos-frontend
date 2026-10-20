@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Check, RotateCcw } from 'lucide-react-native';
@@ -21,6 +21,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { StatusPill } from '@/components/host/HostUI';
 import { ContactActions, ScheduleViewingSheet, ViewingRow } from '@/components/realtor/RealtorUI';
+import { goBack } from '@/lib/goBack';
 
 /** The open stages in order; won and lost are endings, shown separately. */
 const TRACK = LEAD_STAGES.filter((s) => s.value !== 'LOST');
@@ -93,7 +94,7 @@ export default function RealtorLead() {
           eyebrow="Lead"
           title={l?.fullName ?? 'Lead'}
           subtitle={l ? `Came in ${relativeTime(l.createdAt)}` : undefined}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {lead.isError && !l ? (

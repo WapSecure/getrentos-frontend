@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,6 +34,7 @@ import { formatDate, formatTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { VideoCallAction } from '@/components/viewings/VideoCallAction';
+import { goBack } from '@/lib/goBack';
 
 const FILTERS: { value: LandlordViewingStatus | undefined; label: string }[] = [
   { value: 'requested', label: 'To confirm' },
@@ -97,7 +98,7 @@ export default function LandlordViewings() {
           eyebrow="Leasing"
           title="Viewings"
           subtitle="Confirm visits and host video viewings"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
           {FILTERS.map((f) => (

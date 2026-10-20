@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -53,6 +53,7 @@ import {
 } from '@/lib/api/estateGate';
 import type { Household } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
+import { goBack } from '@/lib/goBack';
 
 type Filter = ContractorPassStatus | 'all';
 const FILTERS: { value: Filter; label: string }[] = [
@@ -162,7 +163,7 @@ export default function EstateContractors() {
               ? `${total} ${total === 1 ? 'authorisation' : 'authorisations'}`
               : 'People allowed to keep coming back'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             locked ? undefined : (
               <IconButton

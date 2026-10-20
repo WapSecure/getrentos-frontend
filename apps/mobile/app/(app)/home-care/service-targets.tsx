@@ -33,6 +33,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { Stepper } from '@/components/host/HostUI';
 import { PriorityTag } from '@/components/homecare/WorkOrderCard';
+import { goBack } from '@/lib/goBack';
 
 /** Sensible starting targets (minutes) when a home has none for a priority. */
 const DEFAULTS: Record<Priority, { respond: number; resolve: number; escalate: number }> = {
@@ -91,7 +92,7 @@ export default function ServiceTargets() {
           eyebrow="Home care"
           title="Response times"
           subtitle="Promises for each priority, per home"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {(homes.data?.length ?? 0) > 1 ? (
           <ScrollView

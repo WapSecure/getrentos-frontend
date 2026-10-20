@@ -7,7 +7,7 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -45,6 +45,7 @@ import { PriorityTag, STATUS_TONE } from '@/components/homecare/WorkOrderCard';
 import { VendorPicker } from '@/components/homecare/VendorPicker';
 import { InvoicesSection, QuotesSection } from '@/components/homecare/WorkOrderMoney';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
+import { goBack } from '@/lib/goBack';
 
 type Panel = 'assign' | 'approve' | 'resolve' | 'cancel' | null;
 const err = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
@@ -145,7 +146,7 @@ export default function WorkOrderDetail() {
           subtitle={
             w ? [w.unit.property?.title, w.unit.unitName].filter(Boolean).join(' · ') : undefined
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {!w ? (
           <>

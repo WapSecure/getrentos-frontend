@@ -14,6 +14,7 @@ import {
 } from '@/lib/api/agent';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const SUBJECT_TYPES: AgentVerificationSubjectType[] = ['TENANT', 'BUYER', 'PROPERTY'];
 const SUBJECT_LABEL: Record<AgentVerificationSubjectType, string> = {
@@ -67,7 +68,7 @@ export default function AgentVerifications() {
           eyebrow="Trust operations"
           title="Verifications"
           subtitle="Identity and property field checks"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

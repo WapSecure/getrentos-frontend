@@ -37,6 +37,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { LocationFields } from '@/components/forms/LocationFields';
 import { LocationPicker } from '@/components/property/LocationPicker';
 import type { MapPoint } from '@/lib/api/geocode';
+import { goBack } from '@/lib/goBack';
 
 const TYPES: { value: CreateOwnerPropertyInput['propertyType']; label: string }[] = [
   { value: 'APARTMENT', label: 'Apartment' },
@@ -153,7 +154,7 @@ export default function OwnerAddProperty() {
           eyebrow="Your portfolio"
           title="Add a property"
           subtitle="Verified ownership lets you list it for sale"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         <TextField

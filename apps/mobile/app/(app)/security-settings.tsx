@@ -39,6 +39,7 @@ import {
 } from '@/lib/appLock';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
+import { goBack } from '@/lib/goBack';
 
 export default function SecuritySettings() {
   const { colors, spacing } = useTheme();
@@ -54,7 +55,7 @@ export default function SecuritySettings() {
         eyebrow="Account protection"
         title="Security"
         subtitle="Identity, password and two-factor authentication"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <ScrollView

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -23,6 +23,7 @@ import { agentApi, type AgentWorkOrder, type AgentWorkOrderStatus } from '@/lib/
 import { ApiError } from '@/lib/api/client';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_META: Record<AgentWorkOrderStatus, { label: string; tone: BadgeTone }> = {
   SUBMITTED: { label: 'To do', tone: 'neutral' },
@@ -106,7 +107,7 @@ export default function AgentWorkOrders() {
           eyebrow="Field operations"
           title="Work orders"
           subtitle="On-site jobs assigned to you. Start, add photos, report done — the owner closes it."
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

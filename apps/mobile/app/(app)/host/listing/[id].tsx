@@ -39,6 +39,7 @@ import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { StatusPill, listingStatus } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 /** Everything about one listing, one tap from each tool. */
 export default function HostListingDetail() {
@@ -118,7 +119,7 @@ export default function HostListingDetail() {
           eyebrow="Listing"
           title={l?.title ?? 'Listing'}
           subtitle={l ? `${l.city}, ${l.state}` : undefined}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
       </View>
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +29,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordDocuments() {
   const { colors, spacing, radius } = useTheme();
@@ -62,7 +63,7 @@ export default function LandlordDocuments() {
         eyebrow="Property records"
         title="Documents"
         subtitle="Ownership, leases and compliance files"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setCreating(true)}

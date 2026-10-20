@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -16,6 +16,7 @@ import { ownerApi, type OwnerNotificationPreference } from '@/lib/api/owner';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 const LABEL: Record<string, string> = {
   offers: 'New offers and counters',
@@ -68,7 +69,7 @@ export default function OwnerNotificationSettings() {
         eyebrow="Selling"
         title="Notifications"
         subtitle="Choose how selling updates reach you"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       <View style={{ flex: 1 }}>

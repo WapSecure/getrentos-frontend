@@ -1,5 +1,5 @@
 import { ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -18,6 +18,7 @@ import { ApiError } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 const COPY: Record<string, { label: string; hint: string }> = {
   offers: { label: 'Offers', hint: 'A buyer offers or counters on your listing' },
@@ -76,7 +77,7 @@ export default function RealtorNotificationSettings() {
         eyebrow="Settings"
         title="Alerts"
         subtitle="What buzzes your phone, and what’s emailed"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       {query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />

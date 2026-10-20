@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +29,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function tone(status: string) {
   return EVICTION_TONE[status.toLowerCase() as EvictionStatus] ?? 'neutral';
@@ -99,7 +100,7 @@ export default function LandlordEvictions() {
               : 'No active cases'
             : 'Notices, filings and resolutions'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setCreating(true)}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Clock, MapPin, Repeat, Siren } from 'lucide-react-native';
@@ -34,6 +34,7 @@ import {
   type OnSiteEntry,
 } from '@/lib/api/estateGate';
 import { formatDate, formatTime } from '@/lib/format';
+import { goBack } from '@/lib/goBack';
 
 /** Re-read while somebody is inside: elapsed times move by the minute, not the second. */
 const BOARD_POLL_MS = 30_000;
@@ -112,7 +113,7 @@ export default function EstateDwell() {
         eyebrow={estate?.name ?? 'Gate'}
         title="Dwell analytics"
         subtitle="Who is still inside, and how long visits run"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {locked || refusal ? (

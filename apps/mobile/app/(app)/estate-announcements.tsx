@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Alert, RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ import { estateManagerApi, type Announcement } from '@/lib/api/estateManager';
 import { formatDate, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { goBack } from '@/lib/goBack';
 
 /** Everything the office has told residents, newest first, with edit and delete. */
 export default function EstateAnnouncements() {
@@ -78,7 +79,7 @@ export default function EstateAnnouncements() {
           eyebrow={estate?.name ?? 'Estate'}
           title="Announcements"
           subtitle="What your residents have been told"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="New announcement"

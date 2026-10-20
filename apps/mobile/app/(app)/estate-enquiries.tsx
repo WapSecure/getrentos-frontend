@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ import {
   type EstateLead,
   type LeadMarket,
 } from '@/lib/api/estateMarketplace';
+import { goBack } from '@/lib/goBack';
 
 type Market = 'ALL' | LeadMarket;
 
@@ -84,7 +85,7 @@ export default function EstateEnquiries() {
           eyebrow={estate?.name ?? 'Marketplace'}
           title="Enquiries"
           subtitle="People interested in homes you market"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         <SegmentedControl
           accessibilityLabel="Which market"

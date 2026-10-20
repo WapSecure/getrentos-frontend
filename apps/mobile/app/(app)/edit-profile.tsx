@@ -22,6 +22,7 @@ import { pickImage } from '@/lib/filePicker';
 import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ChangeEmailSheet } from '@/components/account/ChangeEmailSheet';
+import { goBack } from '@/lib/goBack';
 
 export default function EditProfile() {
   const { colors, spacing } = useTheme();
@@ -44,7 +45,7 @@ export default function EditProfile() {
           eyebrow="Your account"
           title="Edit profile"
           subtitle="Photo, contact details and personal bio"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           style={{ flex: 1 }}
         />
       </View>

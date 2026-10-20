@@ -58,6 +58,7 @@ import {
   stayRefund,
   tripDay,
 } from '@/lib/stays';
+import { goBack } from '@/lib/goBack';
 
 type SheetName = 'message' | 'dispute' | 'review' | null;
 
@@ -121,7 +122,7 @@ export default function StayDetail() {
           gap: spacing.lg,
         }}
       >
-        <DetailHeader eyebrow="Your stay" title="Stay" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Your stay" title="Stay" onBack={() => goBack()} />
         {stays.isPending ? (
           <DetailSkeleton />
         ) : stays.isError && !stays.data ? (
@@ -164,7 +165,7 @@ export default function StayDetail() {
           eyebrow="Your stay"
           title={b.propertyTitle}
           subtitle={b.city}
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
 
         {/* Where it stands */}

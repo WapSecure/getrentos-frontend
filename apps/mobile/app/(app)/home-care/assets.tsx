@@ -36,6 +36,7 @@ import { useMyHomes } from '@/hooks/useMyHomes';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill, type Tone } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 const STATUS: Record<AssetStatus, { label: string; tone: Tone }> = {
   ACTIVE: { label: 'Working', tone: 'success' },
@@ -105,7 +106,7 @@ export default function Assets() {
           eyebrow="Home care"
           title="Assets"
           subtitle="Appliances and equipment in each home"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="Add an asset"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Banknote, Camera } from 'lucide-react-native';
@@ -33,6 +33,7 @@ import { pickImage } from '@/lib/filePicker';
 import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -55,7 +56,7 @@ export default function LandlordSettings() {
         eyebrow="Landlord workspace"
         title="Settings"
         subtitle="Profile, payout and portfolio automation"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {profile.isError && !profile.data ? (

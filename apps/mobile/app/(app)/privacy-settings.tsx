@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Globe, Lock, Users } from 'lucide-react-native';
@@ -24,6 +24,7 @@ import {
 } from '@/lib/api/preferences';
 import { ApiError } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const VISIBILITY: { id: ProfileVisibility; label: string; icon: typeof Globe }[] = [
   { id: 'public', label: 'Public', icon: Globe },
@@ -49,7 +50,7 @@ export default function PrivacySettings() {
         eyebrow="Your data"
         title="Privacy"
         subtitle="Control visibility and information sharing"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
 
       {query.data ? (

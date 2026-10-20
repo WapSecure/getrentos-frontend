@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { useCaptureQueue } from '@/lib/inspectionCaptureQueue';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 const WORDS: Partial<Record<LandInspectionStatus, [string, BadgeTone]>> = {
   ASSIGNED: ['To do', 'info'],
@@ -56,7 +57,7 @@ export default function LandInspections() {
           eyebrow="Land"
           title="Inspections"
           subtitle="Visits assigned to you"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
         />
         {query.isError && !query.data ? (
           <ErrorState onRetry={() => query.refetch()} />

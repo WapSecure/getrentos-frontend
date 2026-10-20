@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Linking, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,6 +22,7 @@ import { ApiError } from '@/lib/api/client';
 import { AddVendorSheet } from '@/components/landlord/AddVendorSheet';
 import { StarRating } from '@/components/reviews/StarRating';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordVendors() {
   const { colors, spacing, radius } = useTheme();
@@ -55,7 +56,7 @@ export default function LandlordVendors() {
         subtitle={
           query.data ? `${query.data.total} on your list` : 'Your trusted service providers'
         }
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setAdding(true)}

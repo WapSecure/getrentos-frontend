@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Linking, Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ import {
 import { UploadAgentDocumentSheet } from '@/components/agent/UploadAgentDocumentSheet';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -57,7 +58,7 @@ export default function AgentDocuments() {
         eyebrow="Field operations"
         title="Documents"
         subtitle="Inspection, verification and identity files"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
         accessory={
           <IconButton
             onPress={() => setUploadOpen(true)}

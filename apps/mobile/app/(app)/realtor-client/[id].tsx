@@ -22,6 +22,7 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ContactActions } from '@/components/realtor/RealtorUI';
+import { goBack } from '@/lib/goBack';
 
 /** One client: how to reach them, and the properties they've trusted you with. */
 export default function RealtorClientDetail() {
@@ -76,11 +77,7 @@ export default function RealtorClientDetail() {
         gap: spacing.lg,
       }}
     >
-      <DetailHeader
-        eyebrow="Client"
-        title={c ? clientName(c) : 'Client'}
-        onBack={() => router.back()}
-      />
+      <DetailHeader eyebrow="Client" title={c ? clientName(c) : 'Client'} onBack={() => goBack()} />
       {clients.isError && !clients.data ? (
         <ErrorState onRetry={() => clients.refetch()} />
       ) : clients.isPending ? (

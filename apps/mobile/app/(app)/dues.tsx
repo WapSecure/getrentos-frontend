@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from 'lucide-react-native';
@@ -19,6 +19,7 @@ import { residentApi, type Due, type DueCategory, type DueStatus } from '@/lib/a
 import { qk } from '@/lib/query/keys';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 const STATUS_LABEL: Record<DueStatus, string> = {
   pending: 'Pending',
@@ -79,7 +80,7 @@ export default function ResidentDues() {
         eyebrow="Estate finance"
         title="Dues"
         subtitle="Charges, payments and recurring obligations"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
         <QueryState

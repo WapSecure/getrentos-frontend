@@ -37,6 +37,7 @@ import { Sheet } from '@/components/Sheet';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
 import { RevenueTrendChart } from '@/components/landlord/RevenueTrendChart';
 import { CommissionRow } from '@/components/realtor/CommissionRow';
+import { goBack } from '@/lib/goBack';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -96,7 +97,7 @@ export default function RealtorCommissions() {
           gap: spacing.xl,
         }}
       >
-        <DetailHeader eyebrow="Getting paid" title="Commissions" onBack={() => router.back()} />
+        <DetailHeader eyebrow="Getting paid" title="Commissions" onBack={() => goBack()} />
 
         {isUpgradeError(summary.error) ? (
           <ProGate />

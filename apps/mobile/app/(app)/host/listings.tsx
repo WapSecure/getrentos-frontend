@@ -19,6 +19,7 @@ import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type HostListing } from '@/lib/api/hostShortlets';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ListingRow } from '@/components/host/HostUI';
+import { goBack } from '@/lib/goBack';
 
 type Filter = 'all' | 'live' | 'paused' | 'other';
 
@@ -68,7 +69,7 @@ export default function HostListings() {
           eyebrow="Hosting"
           title="Listings"
           subtitle="Price, calendar and house rules per home"
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               accessibilityLabel="New listing"

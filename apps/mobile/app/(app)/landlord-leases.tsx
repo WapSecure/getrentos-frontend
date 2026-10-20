@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -26,6 +26,7 @@ import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
 import { SignLeaseSheet } from '@/components/landlord/SignLeaseSheet';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function LandlordLeases() {
   const { colors, spacing, radius } = useTheme();
@@ -90,7 +91,7 @@ export default function LandlordLeases() {
               ? `${query.data.total} lease${query.data.total === 1 ? '' : 's'}${awaitingSignature > 0 ? ` · ${awaitingSignature} awaiting signature` : ''}`
               : 'Create, sign and renew agreements'
           }
-          onBack={() => router.back()}
+          onBack={() => goBack()}
           accessory={
             <IconButton
               onPress={() => setCreating(true)}

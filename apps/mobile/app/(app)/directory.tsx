@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { router } from 'expo-router';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Contact } from 'lucide-react-native';
 import {
@@ -16,6 +16,7 @@ import { residentApi, type ResidentHousehold } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
 
 export default function ResidentDirectory() {
   const { colors, spacing } = useTheme();
@@ -53,7 +54,7 @@ export default function ResidentDirectory() {
         eyebrow="Community"
         title="Directory"
         subtitle="Connect with opted-in neighbors"
-        onBack={() => router.back()}
+        onBack={() => goBack()}
       />
       <Screen>
         <Card elevated>
