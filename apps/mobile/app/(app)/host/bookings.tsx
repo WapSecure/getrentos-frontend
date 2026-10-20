@@ -75,6 +75,7 @@ export default function HostBookings() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(b) => b.id}
           refreshControl={refresh}

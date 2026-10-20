@@ -100,6 +100,7 @@ export default function LandlordDocuments() {
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(d) => d.id}
           renderItem={({ item }: { item: LandlordDocument }) => (

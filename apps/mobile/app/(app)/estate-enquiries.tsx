@@ -126,6 +126,7 @@ export default function EstateEnquiries() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={leads}
           keyExtractor={(l) => l.id}
           refreshControl={refresh}

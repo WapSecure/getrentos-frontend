@@ -203,6 +203,7 @@ export default function EstateVisitors() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(p) => p.id}
           refreshControl={refresh}

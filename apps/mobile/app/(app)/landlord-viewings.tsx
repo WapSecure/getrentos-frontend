@@ -122,6 +122,7 @@ export default function LandlordViewings() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(v) => v.id}
           renderItem={({ item }: { item: LandlordViewingRequest }) => (

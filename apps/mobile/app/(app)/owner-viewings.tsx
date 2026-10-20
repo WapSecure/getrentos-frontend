@@ -128,6 +128,7 @@ export default function OwnerViewings() {
         }
       >
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(v) => v.id}
           renderItem={({ item }: { item: OwnerViewing }) => (

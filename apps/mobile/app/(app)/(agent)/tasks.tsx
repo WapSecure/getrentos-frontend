@@ -84,6 +84,7 @@ export default function AgentTasks() {
         }}
       >
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(task) => task.id}
           contentContainerStyle={{

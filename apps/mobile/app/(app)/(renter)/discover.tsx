@@ -340,6 +340,7 @@ export default function Discover() {
         />
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}

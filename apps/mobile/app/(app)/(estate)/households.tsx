@@ -138,6 +138,7 @@ export default function EstateHouseholds() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(h) => h.id}
           keyboardDismissMode="on-drag"

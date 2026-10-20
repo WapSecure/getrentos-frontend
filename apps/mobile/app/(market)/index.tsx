@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, type FlashListRef } from '@shopify/flash-list';
 import {
   BedDouble,
   Building2,
@@ -316,6 +316,14 @@ function Listings({
   const items = useMemo(() => query.data?.pages.flatMap((p) => p.items) ?? [], [query.data]);
   const total = query.data?.pages[0]?.total ?? 0;
 
+  // A new search, sort or filter starts from the top. The list stays mounted
+  // while results load (keepPreviousData), so it would otherwise stay anchored
+  // to whichever card was in view, which may now sit at the bottom.
+  const listRef = useRef<FlashListRef<MarketCard>>(null);
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [filters]);
+
   const onEndReached = useCallback(() => {
     if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
   }, [query]);
@@ -523,6 +531,10 @@ function Listings({
   return (
     <>
       <FlashList
+        ref={listRef}
+        // Results are replaced wholesale on a new search or sort; anchoring to
+        // the card that was in view would leave the user at the bottom.
+        maintainVisibleContentPosition={{ disabled: true }}
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
@@ -687,6 +699,7 @@ function EstatesDirectory({
 
   return (
     <FlashList
+      maintainVisibleContentPosition={{ disabled: true }}
       data={items}
       keyExtractor={(e) => e.estateId}
       keyboardDismissMode="on-drag"

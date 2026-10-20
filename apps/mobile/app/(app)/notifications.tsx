@@ -298,6 +298,7 @@ export default function Notifications() {
         )
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(n) => n.id}
           renderItem={renderItem}

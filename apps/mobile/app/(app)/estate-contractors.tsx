@@ -198,6 +198,7 @@ export default function EstateContractors() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(p) => p.id}
           refreshControl={refresh}

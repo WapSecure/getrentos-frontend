@@ -159,6 +159,7 @@ export default function EstateDues() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(d) => d.id}
           refreshControl={refresh}

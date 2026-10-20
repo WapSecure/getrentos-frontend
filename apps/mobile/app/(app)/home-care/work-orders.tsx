@@ -113,6 +113,7 @@ export default function WorkOrders() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(w) => w.id}
           refreshControl={refresh}

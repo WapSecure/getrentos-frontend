@@ -145,6 +145,7 @@ export default function EstateWatchlist() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(e) => e.id}
           refreshControl={refresh}

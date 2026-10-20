@@ -173,6 +173,7 @@ export default function EstateDeliveries() {
         </View>
       ) : (
         <FlashList
+          maintainVisibleContentPosition={{ disabled: true }}
           data={items}
           keyExtractor={(l) => l.id}
           refreshControl={refresh}
