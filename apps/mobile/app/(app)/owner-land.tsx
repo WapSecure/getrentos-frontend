@@ -39,6 +39,7 @@ import {
   boundaryAreaSqm,
   boundaryCorners,
   boundaryGeometry,
+  boundarySignOffText,
   type BoundaryCorner,
 } from '@getrentos/shared';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -311,6 +312,40 @@ function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => void }) {
           zoom={r.latitude != null ? 17 : 12}
           height={260}
         />
+        {r.boundary ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing.sm,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Badge
+              label={
+                r.boundary.signOff.status === 'SIGNED_OFF'
+                  ? 'Surveyor signed off'
+                  : r.boundary.signOff.status === 'REJECTED'
+                    ? 'Needs correcting'
+                    : 'Not yet checked'
+              }
+              tone={
+                r.boundary.signOff.status === 'SIGNED_OFF'
+                  ? 'success'
+                  : r.boundary.signOff.status === 'REJECTED'
+                    ? 'danger'
+                    : 'neutral'
+              }
+            />
+            <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+              Version {r.boundary.version}. {boundarySignOffText(r.boundary.signOff)}
+              {r.boundary.signOff.status === 'REJECTED' && r.boundary.signOff.note
+                ? `: “${r.boundary.signOff.note}”`
+                : '.'}{' '}
+              Redrawing the outline starts a new version.
+            </Text>
+          </View>
+        ) : null}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
             {corners.length >= 3

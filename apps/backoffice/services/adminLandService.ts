@@ -1,5 +1,5 @@
 import { authFetch, safeCall, toQuery } from '@getrentos/shared';
-import type { ApiResponse } from '@getrentos/shared';
+import type { ApiResponse, LandBoundaryVersion } from '@getrentos/shared';
 import type { Paginated } from '@/services/adminService';
 import type {
   AdminLandDiligenceDetail,
@@ -75,6 +75,11 @@ export const adminLandService = {
    * The case with every document on the property and whether the review cites
    * it. Files come back behind short-lived signed URLs.
    */
+  /** Every outline the parcel has had, newest first, with each one's surveyor sign-off. */
+  listBoundaryVersions(propertyId: string): Promise<ApiResponse<LandBoundaryVersion[]>> {
+    return safeCall(() => authFetch(`${base(propertyId)}/boundary/versions`));
+  },
+
   getDiligenceDetail(propertyId: string): Promise<ApiResponse<AdminLandDiligenceDetail>> {
     return safeCall(() => authFetch(base(propertyId)));
   },

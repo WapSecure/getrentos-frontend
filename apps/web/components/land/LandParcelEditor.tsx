@@ -8,6 +8,7 @@ import {
   Field,
   Input,
   NumberInput,
+  SegmentedControl,
   Select,
   Switch,
   Textarea,
@@ -17,8 +18,17 @@ import {
   boundaryAreaMismatch,
   boundaryCorners,
   boundaryGeometry,
+  fromWgs84,
+  toWgs84,
   type BoundaryCorner,
+  type CrsCode,
 } from '@getrentos/shared';
+import { BoundaryHistory } from './boundary/BoundaryHistory';
+import {
+  SurveyCoordinatesEntry,
+  completeRows,
+  type SurveyRow,
+} from './boundary/SurveyCoordinatesEntry';
 import { LandDiligenceBadge } from './LandDiligenceBadge';
 import { ParcelBoundaryMap, formatArea } from '@/components/maps/ParcelBoundaryMap';
 import {
@@ -83,8 +93,38 @@ export const LandParcelEditor = ({
     [record.parcel?.boundaryGeometry]
   );
   const [corners, setCorners] = useState<BoundaryCorner[]>(savedCorners ?? []);
+  // An outline entered from a survey plan opens back in the plan's own grid.
+  const savedFromPlan = record.boundary?.source === 'SURVEY_COORDINATES';
+  const [mode, setMode] = useState<'draw' | 'survey'>(savedFromPlan ? 'survey' : 'draw');
+  const [crs, setCrs] = useState<CrsCode>(
+    savedFromPlan && record.boundary ? record.boundary.coordinateSystem.code : 'EPSG:26331'
+  );
+  const [surveyRows, setSurveyRows] = useState<SurveyRow[]>(() =>
+    savedFromPlan && savedCorners && record.boundary
+      ? savedCorners.map((c) => {
+          const [x, y] = fromWgs84(
+            [c.longitude, c.latitude],
+            record.boundary!.coordinateSystem.code
+          );
+          return { easting: x.toFixed(2), northing: y.toFixed(2) };
+        })
+      : [
+          { easting: '', northing: '' },
+          { easting: '', northing: '' },
+          { easting: '', northing: '' },
+          { easting: '', northing: '' },
+        ]
+  );
+  const surveyCorners = useMemo(
+    () =>
+      completeRows(surveyRows).map((point) => {
+        const [longitude, latitude] = toWgs84(point, crs);
+        return { latitude, longitude };
+      }),
+    [surveyRows, crs]
+  );
   const areaMismatch = boundaryAreaMismatch(
-    corners,
+    mode === 'survey' ? surveyCorners : corners,
     Number(parcel.areaValue) || 0,
     parcel.areaUnit
   );
@@ -111,11 +151,20 @@ export const LandParcelEditor = ({
   };
 
   const handleSave = async () => {
+    // Survey-plan beacons go to the API as entered, with their coordinate
+    // system, so the boundary history keeps the plan's own numbers.
+    const plan = completeRows(surveyRows);
+    const surveyOutline =
+      plan.length >= 3 ? { type: 'Polygon', coordinates: [[...plan, plan[0]]] } : null;
     // Fewer than 3 corners is no outline: clear a saved one, otherwise send nothing.
-    const outline = boundaryGeometry(corners) ?? (savedCorners ? null : undefined);
+    const outline =
+      mode === 'survey'
+        ? (surveyOutline ?? (savedCorners ? null : undefined))
+        : (boundaryGeometry(corners) ?? (savedCorners ? null : undefined));
     await onSave({
       ...parcel,
       boundaryGeometry: outline,
+      ...(mode === 'survey' && surveyOutline ? { boundaryCrs: crs } : {}),
       areaValue: Number(parcel.areaValue) || 0,
       frontage: parcel.frontage ? Number(parcel.frontage) : undefined,
       depth: parcel.depth ? Number(parcel.depth) : undefined,
@@ -344,14 +393,41 @@ export const LandParcelEditor = ({
         <Field
           className="mt-4"
           label="Plot outline"
-          hint="Click each corner of the plot on the map, following your survey plan. Drag a corner to adjust it. Buyers see the outline once the land is verified."
+          hint={
+            mode === 'draw'
+              ? 'Click each corner of the plot on the map, following your survey plan. Drag a corner to adjust it. Buyers see the outline once the land is verified.'
+              : 'Enter the beacon coordinates exactly as the survey plan gives them. We convert them for the map and keep the plan’s numbers on record.'
+          }
         >
-          <ParcelBoundaryMap corners={corners} onChange={setCorners} center={pin} />
-          {corners.length > 0 && corners.length < 3 && (
-            <p className="mt-1 text-xs text-warning">
-              An outline needs at least 3 corners; with fewer it won’t be saved.
-            </p>
+          <SegmentedControl
+            aria-label="How to enter the outline"
+            className="mb-3"
+            value={mode}
+            onValueChange={setMode}
+            segments={[
+              { value: 'draw', label: 'Draw on the map' },
+              { value: 'survey', label: 'Survey plan coordinates' },
+            ]}
+          />
+          {mode === 'draw' ? (
+            <>
+              <ParcelBoundaryMap corners={corners} onChange={setCorners} center={pin} />
+              {corners.length > 0 && corners.length < 3 && (
+                <p className="mt-1 text-xs text-warning">
+                  An outline needs at least 3 corners; with fewer it won’t be saved.
+                </p>
+              )}
+            </>
+          ) : (
+            <SurveyCoordinatesEntry
+              crs={crs}
+              onCrsChange={setCrs}
+              rows={surveyRows}
+              onRowsChange={setSurveyRows}
+              pin={pin}
+            />
           )}
+          <BoundaryHistory propertyId={record.property.id} status={record.boundary} />
           {areaMismatch && (
             <p role="status" className="mt-1 text-xs text-warning">
               The outline covers about {formatArea(areaMismatch.outlinedSqm)}, but the area above is{' '}

@@ -10,3 +10,4 @@ export * from './trustLabel';
 export * from './landAuthority';
 export * from './landWatch';
 export * from './months';
+export * from './coordinateSystems';

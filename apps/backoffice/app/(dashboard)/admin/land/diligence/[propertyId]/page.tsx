@@ -30,6 +30,7 @@ import { LandDecisionBar } from '@/components/admin/land/case/LandDecisionBar';
 import { LandEncumbrancesPanel } from '@/components/admin/land/case/LandEncumbrancesPanel';
 import { LandEvidenceSection } from '@/components/admin/land/case/LandEvidenceSection';
 import { LandParcelFacts } from '@/components/admin/land/case/LandParcelFacts';
+import { LandBoundaryVersionsPanel } from '@/components/admin/land/case/LandBoundaryVersionsPanel';
 import { LandReviewersPanel } from '@/components/admin/land/case/LandReviewersPanel';
 import { LandRiskPanel } from '@/components/admin/land/case/LandRiskPanel';
 import { LandTitleHistoryPanel } from '@/components/admin/land/case/LandTitleHistoryPanel';
@@ -172,6 +173,7 @@ export default function AdminLandDiligenceCasePage() {
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="min-w-0 space-y-5">
             <LandParcelFacts detail={detail} />
+            <LandBoundaryVersionsPanel propertyId={propertyId} />
             <LandEvidenceSection
               {...panelProps}
               detail={detail}
