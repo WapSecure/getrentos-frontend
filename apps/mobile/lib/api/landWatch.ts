@@ -3,7 +3,12 @@ import type {
   LandBoundaryCondition,
   LandWatchDetail,
   LandWatchIncidentKind,
+  LandWatchJob,
+  LandWatchJobKind,
+  LandWatchOption,
   LandWatchSummary,
+  LandWatchTerms,
+  LandWatchTier,
 } from '@getrentos/shared';
 import { apiFetch, apiUpload } from './client';
 import { appendFile, type PickedFile } from './documents';
@@ -17,9 +22,20 @@ export interface CaptureFields {
   note?: string;
 }
 
+const jobPath = (watchId: string, jobId: string) =>
+  `/land/watch/${encodeURIComponent(watchId)}/jobs/${encodeURIComponent(jobId)}`;
+
 /** Land Watch for owners and buyers, and the inspector's field desk. */
 export const landWatchApi = {
   mine: () => apiFetch<LandWatchSummary[]>('/land/watch'),
+  terms: () => apiFetch<LandWatchTerms>('/land/watch/terms'),
+  options: () => apiFetch<LandWatchOption[]>('/land/watch/options'),
+  /** The owner has read the disclaimer on screen before this is called. */
+  subscribe: (body: { propertyId?: string; landPlotId?: string; tier: LandWatchTier }) =>
+    apiFetch<LandWatchDetail>('/land/watch', {
+      method: 'POST',
+      body: { ...body, acceptDisclaimer: true },
+    }),
   get: (id: string) => apiFetch<LandWatchDetail>(`/land/watch/${encodeURIComponent(id)}`),
   reportIncident: (
     id: string,
@@ -34,6 +50,33 @@ export const landWatchApi = {
       `/land/watch/${encodeURIComponent(id)}/reminders/${encodeURIComponent(reminderId)}/paid`,
       { method: 'POST', body: {} }
     ),
+
+  /** Vendor work on a Managed watch. None of these are optimistic: each is a commitment. */
+  watchJobs: (watchId: string) =>
+    apiFetch<LandWatchJob[]>(`/land/watch/${encodeURIComponent(watchId)}/jobs`),
+  requestJob: (watchId: string, body: { kind: LandWatchJobKind; description: string }) =>
+    apiFetch<LandWatchJob>(`/land/watch/${encodeURIComponent(watchId)}/jobs`, {
+      method: 'POST',
+      body,
+    }),
+  acceptQuote: (watchId: string, jobId: string, quoteId: string) =>
+    apiFetch<LandWatchJob>(
+      `${jobPath(watchId, jobId)}/quotes/${encodeURIComponent(quoteId)}/accept`,
+      { method: 'POST', body: {} }
+    ),
+  declineQuote: (watchId: string, jobId: string, quoteId: string) =>
+    apiFetch<LandWatchJob>(
+      `${jobPath(watchId, jobId)}/quotes/${encodeURIComponent(quoteId)}/decline`,
+      { method: 'POST', body: {} }
+    ),
+  cancelJob: (watchId: string, jobId: string, reason: string) =>
+    apiFetch<LandWatchJob>(`${jobPath(watchId, jobId)}/cancel`, {
+      method: 'POST',
+      body: { reason },
+    }),
+  /** Books an independent inspection of the finished work (once, when COMPLETED). */
+  requestJobCheck: (watchId: string, jobId: string) =>
+    apiFetch<LandWatchJob>(`${jobPath(watchId, jobId)}/check`, { method: 'POST', body: {} }),
 
   jobs: () => apiFetch<InspectorJob[]>('/land/inspections'),
   job: (id: string) => apiFetch<InspectorJob>(`/land/inspections/${encodeURIComponent(id)}`),

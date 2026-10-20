@@ -4,6 +4,9 @@ import type {
   LandBoundaryCondition,
   LandWatchDetail,
   LandWatchIncidentKind,
+  LandWatchJob,
+  LandWatchJobKind,
+  LandWatchOption,
   LandWatchReminderKind,
   LandWatchSummary,
   LandWatchTerms,
@@ -29,6 +32,7 @@ export interface CaptureMeta {
 /** Land Watch for owners and buyers, and the inspector's desk. */
 export const landWatchService = {
   terms: () => safeCall(() => authFetch<LandWatchTerms>('/land/watch/terms')),
+  options: () => safeCall(() => authFetch<LandWatchOption[]>('/land/watch/options')),
   mine: () => safeCall(() => authFetch<LandWatchSummary[]>('/land/watch')),
   get: (id: string) => safeCall(() => authFetch<LandWatchDetail>(watchPath(id))),
   subscribe: (input: { propertyId?: string; landPlotId?: string; tier: LandWatchTier }) =>
@@ -63,6 +67,26 @@ export const landWatchService = {
     ),
   removeReminder: (id: string, reminderId: string) =>
     send<LandWatchDetail>(`${watchPath(id)}/reminders/${encodeURIComponent(reminderId)}`, 'DELETE'),
+
+  jobs: (id: string) => safeCall(() => authFetch<LandWatchJob[]>(`${watchPath(id)}/jobs`)),
+  requestJob: (id: string, input: { kind: LandWatchJobKind; description: string }) =>
+    send<LandWatchJob>(`${watchPath(id)}/jobs`, 'POST', input),
+  acceptQuote: (id: string, jobId: string, quoteId: string) =>
+    send<LandWatchJob>(
+      `${watchPath(id)}/jobs/${encodeURIComponent(jobId)}/quotes/${encodeURIComponent(quoteId)}/accept`,
+      'POST'
+    ),
+  declineQuote: (id: string, jobId: string, quoteId: string) =>
+    send<LandWatchJob>(
+      `${watchPath(id)}/jobs/${encodeURIComponent(jobId)}/quotes/${encodeURIComponent(quoteId)}/decline`,
+      'POST'
+    ),
+  cancelJob: (id: string, jobId: string, reason: string) =>
+    send<LandWatchJob>(`${watchPath(id)}/jobs/${encodeURIComponent(jobId)}/cancel`, 'POST', {
+      reason,
+    }),
+  requestJobCheck: (id: string, jobId: string) =>
+    send<LandWatchJob>(`${watchPath(id)}/jobs/${encodeURIComponent(jobId)}/check`, 'POST'),
 
   myJobs: () => safeCall(() => authFetch<InspectorJob[]>('/land/inspections')),
   job: (id: string) => safeCall(() => authFetch<InspectorJob>(jobPath(id))),

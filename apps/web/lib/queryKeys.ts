@@ -261,7 +261,9 @@ export const landKeys = {
   consentRequests: ['land', 'consent-requests'] as const,
   watches: ['land', 'watch'] as const,
   watch: (id: string) => ['land', 'watch', id] as const,
+  watchJobs: (id: string) => ['land', 'watch', id, 'jobs'] as const,
   watchTerms: ['land', 'watch', 'terms'] as const,
+  watchOptions: ['land', 'watch', 'options'] as const,
   inspectorJobs: ['land', 'inspections'] as const,
   inspectorJob: (id: string) => ['land', 'inspections', id] as const,
 };

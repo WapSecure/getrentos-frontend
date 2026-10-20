@@ -30,8 +30,9 @@ import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 import { humaniseEnum, landQueryKeys, readLandApiError } from '@/lib/landDiligence';
 import { adminLandWatchService } from '@/services/adminLandWatchService';
+import { LandWatchJobs } from '@/components/admin/land/LandWatchJobs';
 
-type Tab = 'inspections' | 'incidents' | 'watched';
+type Tab = 'inspections' | 'incidents' | 'jobs' | 'watched';
 const STATUS_FILTERS: { value: 'open' | LandInspectionStatus; label: string }[] = [
   { value: 'open', label: 'Needing staff' },
   { value: 'REQUESTED', label: 'Unassigned' },
@@ -70,11 +71,13 @@ export default function AdminLandWatchPage() {
         <TabsList aria-label="Land Watch view">
           <TabsTrigger value="inspections">Inspections</TabsTrigger>
           <TabsTrigger value="incidents">Incidents</TabsTrigger>
+          <TabsTrigger value="jobs">Vendor jobs</TabsTrigger>
           <TabsTrigger value="watched">Watched land</TabsTrigger>
         </TabsList>
       </Tabs>
       {tab === 'inspections' && <InspectionQueue />}
       {tab === 'incidents' && <Incidents canDecide={canDecide} />}
+      {tab === 'jobs' && <LandWatchJobs />}
       {tab === 'watched' && <Watched />}
     </>
   );
