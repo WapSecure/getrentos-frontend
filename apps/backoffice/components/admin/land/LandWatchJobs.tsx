@@ -369,7 +369,8 @@ function JobDetail({ job, onMode }: { job: StaffLandWatchJob; onMode: (mode: Mod
           </Button>
         )}
         {canQuote && (
-          <Button variant="outline" onClick={() => onMode('quote')}>
+          // The next step for staff, not "Cancel job", is where the keyboard lands.
+          <Button variant="outline" autoFocus onClick={() => onMode('quote')}>
             Add a quote
           </Button>
         )}
@@ -379,12 +380,12 @@ function JobDetail({ job, onMode }: { job: StaffLandWatchJob; onMode: (mode: Mod
           </Button>
         )}
         {s === 'APPROVED' && (
-          <Button isLoading={start.isPending} onClick={() => start.mutate()}>
+          <Button autoFocus isLoading={start.isPending} onClick={() => start.mutate()}>
             Mark started
           </Button>
         )}
         {s === 'IN_PROGRESS' && (
-          <Button disabled={noProof} onClick={() => onMode('complete')}>
+          <Button autoFocus={!noProof} disabled={noProof} onClick={() => onMode('complete')}>
             Complete
           </Button>
         )}

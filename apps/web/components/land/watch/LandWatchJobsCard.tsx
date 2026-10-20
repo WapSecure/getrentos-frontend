@@ -330,7 +330,12 @@ const JobItem = ({
                   )}
                   {open && (
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Button size="sm" disabled={expired || busy} onClick={() => setAccepting(q)}>
+                      <Button
+                        size="sm"
+                        disabled={expired || busy}
+                        onClick={() => setAccepting(q)}
+                        aria-label={`Accept ${q.vendorName}'s quote`}
+                      >
                         Accept
                       </Button>
                       <Button
@@ -339,6 +344,7 @@ const JobItem = ({
                         disabled={busy}
                         isLoading={decline.isPending && decline.variables === q.id}
                         onClick={() => decline.mutate(q.id)}
+                        aria-label={`Decline ${q.vendorName}'s quote`}
                       >
                         Decline
                       </Button>
