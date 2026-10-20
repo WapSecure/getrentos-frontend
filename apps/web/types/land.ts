@@ -272,6 +272,7 @@ export const LAND_ASSURANCE_TIER_LABELS: Record<LandAssuranceTier, string> = {
 export interface LandTrustLabel {
   kind:
     | 'OWNERSHIP_DOCUMENTS'
+    | 'SELLER_AUTHORITY'
     | 'TITLE_REVIEW'
     | 'OFFICIAL_SEARCH'
     | 'PARCEL_SURVEYED'
