@@ -58,6 +58,7 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
       required,
       'aria-describedby': describedBy,
       'aria-invalid': ariaInvalid,
+      maxLength,
       ...props
     },
     ref
@@ -82,8 +83,9 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
           cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
         }
       }
-      if (cleaned !== raw) onValueChange(cleaned);
-      else onValueChange(raw);
+      // The limit counts digits, so a pasted "0123-456-789" keeps all ten; a
+      // native maxLength would cut the pasted text before it is cleaned.
+      onValueChange(maxLength && maxLength > 0 ? cleaned.slice(0, maxLength) : cleaned);
     };
 
     return (
