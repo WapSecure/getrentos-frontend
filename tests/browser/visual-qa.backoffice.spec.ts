@@ -17,6 +17,7 @@ test.describe('authenticated admin visual QA', () => {
       baseURL: testInfo.project.use.baseURL as string,
       viewport: testInfo.project.use.viewport,
       colorScheme: testInfo.project.use.colorScheme,
+      reducedMotion: 'reduce',
     });
     page = await context.newPage();
     await signIn(page, account!, true);

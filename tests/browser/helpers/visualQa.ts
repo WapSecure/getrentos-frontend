@@ -45,6 +45,9 @@ export async function auditVisualPage(page: Page, path: string, testInfo: TestIn
     );
     await page.waitForLoadState('networkidle').catch(() => undefined);
     await page.evaluate(() => document.fonts.ready);
+    // Auth and dashboard illustrations use staggered Framer Motion entrances.
+    // Audit the settled UI, not a translucent intermediate animation frame.
+    await page.waitForTimeout(1_200);
     const layout = await page.evaluate(() => {
       const viewportWidth = window.innerWidth;
       const documentWidth = document.documentElement.scrollWidth;
