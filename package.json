@@ -18,6 +18,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "test:e2e:visual": "playwright test --config=playwright.visual.config.ts",
+    "test:e2e:visual:report": "playwright show-report playwright-visual-report",
     "test:e2e:visual:update": "E2E_VISUAL_COMPARE=1 playwright test --config=playwright.visual.config.ts --update-snapshots",
     "test:e2e:visual:compare": "E2E_VISUAL_COMPARE=1 playwright test --config=playwright.visual.config.ts",
     "preflight:feature": "node scripts/repo-preflight.mjs feature",

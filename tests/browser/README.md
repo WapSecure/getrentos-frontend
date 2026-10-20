@@ -31,7 +31,7 @@ serious or critical WCAG 2.1 A/AA violations.
 
 ```sh
 pnpm test:e2e:visual
-pnpm test:e2e:report
+pnpm test:e2e:visual:report
 ```
 
 Protected coverage also accepts `E2E_BUYER_EMAIL`, `E2E_AGENT_EMAIL`,
