@@ -33,7 +33,7 @@ export interface OptimisticMutationOptions<TData, TVars> {
  * For small, reversible changes only. Payments, submissions, approvals and
  * anything that must be confirmed by the server should wait for the response.
  */
-export function useOptimisticMutation<TData, TVars>({
+export function useOptimisticMutation<TData = unknown, TVars = void>({
   mutationFn,
   patches,
   invalidate = [],

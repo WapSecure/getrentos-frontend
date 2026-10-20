@@ -12,19 +12,42 @@ export const Skeleton = ({ className }: { className?: string }) => {
   );
 };
 
+/**
+ * Whole-page placeholder for route loading: a title, a row of stat tiles and
+ * a list, so the page fills in where the content will be instead of spinning.
+ */
 export const PageLoadingState = () => {
   return (
     <div
       role="status"
       aria-live="polite"
       aria-label="Loading page"
-      className="flex min-h-[60vh] items-center justify-center"
+      className="mx-auto w-full max-w-6xl space-y-6 px-4 py-6 sm:px-6"
     >
-      <div
-        aria-hidden="true"
-        className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent motion-reduce:animate-none"
-      />
       <span className="sr-only">Loading page…</span>
+      <div className="space-y-2.5">
+        <Skeleton className="h-7 w-56 max-w-[70%]" />
+        <Skeleton className="h-4 w-80 max-w-[90%]" />
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="space-y-3 rounded-xl border border-border bg-card p-5">
+            <Skeleton className="h-3 w-1/2" />
+            <Skeleton className="h-7 w-2/3" />
+          </div>
+        ))}
+      </div>
+      <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4 p-4">
+            <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className={cn('h-3.5', index % 2 ? 'w-1/3' : 'w-2/5')} />
+              <Skeleton className="h-3 w-3/5" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -56,12 +79,15 @@ export const ListSkeleton = ({
   rows = 4,
   variant = 'rows',
   label = 'Loading',
+  bare = false,
   className,
 }: {
   rows?: number;
   /** `rows`: avatar + two lines in one bordered list. `cards`: separate cards. */
   variant?: 'rows' | 'cards';
   label?: string;
+  /** Drop the outer border and background, for a list placed inside a Card. */
+  bare?: boolean;
   className?: string;
 }) => (
   <div
@@ -70,7 +96,10 @@ export const ListSkeleton = ({
     aria-label={label}
     className={cn(
       variant === 'rows'
-        ? 'divide-y divide-border overflow-hidden rounded-xl border border-border bg-card'
+        ? cn(
+            'divide-y divide-border',
+            !bare && 'overflow-hidden rounded-xl border border-border bg-card'
+          )
         : 'space-y-3',
       className
     )}
