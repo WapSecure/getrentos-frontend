@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { FileText, ImageIcon, Upload, X, Eye } from 'lucide-react';
 import { cn } from '@getrentos/shared';
 import { FilePreviewDialog } from './FilePreviewDialog';
+import { useFieldControl } from './fieldContext';
 
 export interface PendingUpload {
   id: string;
@@ -41,6 +42,9 @@ interface DocumentUploadProps {
   label?: string;
   hint?: string;
   disabled?: boolean;
+  /** Opens the camera straight away on phones, e.g. `environment` for a photo of a fault. */
+  capture?: 'user' | 'environment';
+  id?: string;
   className?: string;
 }
 
@@ -69,8 +73,14 @@ export function DocumentUpload({
   label = 'Documents',
   hint,
   disabled,
+  capture,
+  id,
   className,
 }: DocumentUploadProps) {
+  // Inside a Field, the drop zone is named by the Field's label and its own
+  // prompt, and carries the Field's hint and error.
+  const field = useFieldControl({ id });
+  const promptId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,10 +146,18 @@ export function DocumentUpload({
           addFiles(e.dataTransfer.files);
         }}
         onClick={() => !disabled && inputRef.current?.click()}
+        id={field.id}
         role="button"
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled || undefined}
+        aria-labelledby={field.labelId ? `${field.labelId} ${promptId}` : undefined}
+        aria-describedby={field.ariaProps['aria-describedby']}
+        aria-invalid={field.ariaProps['aria-invalid']}
         onKeyDown={(e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && !disabled) inputRef.current?.click();
+          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
         }}
         className={cn(
           'cursor-pointer border-2 border-dashed rounded-xl px-4 py-6 text-center transition-colors',
@@ -148,7 +166,7 @@ export function DocumentUpload({
         )}
       >
         <Upload className="mx-auto h-6 w-6 text-muted-foreground" />
-        <p className="mt-1.5 text-xs text-muted-foreground">
+        <p id={promptId} className="mt-1.5 text-xs text-muted-foreground">
           <span className="text-primary font-medium">Click to browse</span> or drag &amp; drop
           {multiple ? ' files' : ' a file'}
         </p>
@@ -158,7 +176,9 @@ export function DocumentUpload({
           type="file"
           accept={accept}
           multiple={multiple}
+          capture={capture}
           disabled={disabled}
+          tabIndex={-1}
           className="hidden"
           onChange={(e) => {
             addFiles(e.target.files);

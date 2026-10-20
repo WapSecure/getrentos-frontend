@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  DocumentUpload,
   EmptyState,
   Field,
   Input,
@@ -15,6 +16,7 @@ import {
   Skeleton,
   Textarea,
   useToast,
+  type PendingUpload,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -63,7 +65,7 @@ export default function RentReconciliationPage() {
   const user = useAdminUser();
   const canAct = hasAdminPermission(user?.roles, 'rentfinance.approve');
   const [period, setPeriod] = useState(lastEndedMonth());
-  const [csv, setCsv] = useState<{ name: string; text: string } | null>(null);
+  const [csv, setCsv] = useState<PendingUpload[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const toast = useToast();
@@ -89,10 +91,11 @@ export default function RentReconciliationPage() {
     (r.items ?? []).filter((i) => i.kind !== 'MATCHED').length;
 
   const upload = useMutation({
-    mutationFn: () => unwrap(adminJournalService.reconcileCsv(period, csv!.text)),
+    mutationFn: async () =>
+      unwrap(adminJournalService.reconcileCsv(period, await csv[0]!.file.text())),
     onSuccess: (r) => {
       done(r);
-      setCsv(null);
+      setCsv([]);
       if (exceptions(r)) toast.error(`${exceptions(r)} line(s) need a look.`);
       else toast.success('Everything matched.');
     },
@@ -131,45 +134,40 @@ export default function RentReconciliationPage() {
       </div>
 
       {canAct && (
-        <Card className="mb-6 flex flex-wrap items-end gap-3 p-5">
-          <Field label="Month">
-            <Input
-              value={period}
-              onChange={(e) => setPeriod(e.target.value.trim())}
-              placeholder="YYYY-MM"
-              inputMode="numeric"
-              className="w-32"
-            />
-          </Field>
-          <Field label="Gateway export (CSV)">
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                setCsv(f ? { name: f.name, text: await f.text() } : null);
-              }}
-              className="block max-w-full text-sm text-muted-foreground file:mr-3 file:cursor-pointer file:rounded-lg file:border file:border-border file:bg-secondary file:px-3 file:py-2 file:text-sm file:text-foreground"
-            />
-          </Field>
-          <Button
-            variant="primary"
-            disabled={!csv || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
-            isLoading={upload.isPending}
-            loadingText="Matching…"
-            onClick={() => upload.mutate()}
-          >
-            Reconcile export
-          </Button>
-          <Button
-            variant="outline"
-            disabled={!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
-            isLoading={pull.isPending}
-            loadingText="Pulling…"
-            onClick={() => pull.mutate()}
-          >
-            Pull from gateway
-          </Button>
+        <Card className="mb-6 space-y-4 p-5">
+          <div className="grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)]">
+            <Field label="Month">
+              <Input
+                value={period}
+                onChange={(e) => setPeriod(e.target.value.trim())}
+                placeholder="YYYY-MM"
+                inputMode="numeric"
+              />
+            </Field>
+            <Field label="Gateway export (CSV)">
+              <DocumentUpload value={csv} onChange={setCsv} accept=".csv,text/csv" label="" />
+            </Field>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant="primary"
+              disabled={!csv.length || !/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+              isLoading={upload.isPending}
+              loadingText="Matching…"
+              onClick={() => upload.mutate()}
+            >
+              Reconcile export
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)}
+              isLoading={pull.isPending}
+              loadingText="Pulling…"
+              onClick={() => pull.mutate()}
+            >
+              Pull from gateway
+            </Button>
+          </div>
         </Card>
       )}
 

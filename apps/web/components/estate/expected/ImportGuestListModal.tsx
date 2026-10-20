@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Upload } from 'lucide-react';
 import {
@@ -10,8 +10,10 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DocumentUpload,
   Field,
   Select,
+  type PendingUpload,
 } from '@getrentos/ui';
 import { DateTimeField, isCompleteDateTime } from '@/components/shared/forms/DateTimeField';
 import { estateService } from '@/services/estateService';
@@ -42,10 +44,10 @@ export const ImportGuestListModal = ({
   onOpenChange: (open: boolean) => void;
 }) => {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [householdId, setHouseholdId] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [upload, setUpload] = useState<PendingUpload[]>([]);
+  const file = upload[0]?.file ?? null;
   const [result, setResult] = useState<GuestListImportResult | null>(null);
 
   const householdsQuery = useQuery({
@@ -70,10 +72,9 @@ export const ImportGuestListModal = ({
   const reset = () => {
     setHouseholdId('');
     setExpiresAt('');
-    setFile(null);
+    setUpload([]);
     setResult(null);
     importMutation.reset();
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const close = (next: boolean) => {
@@ -138,23 +139,12 @@ export const ImportGuestListModal = ({
               </p>
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="guest-file" className="block text-sm font-medium text-foreground">
-                The list
-              </label>
-              <input
-                ref={fileInputRef}
-                id="guest-file"
-                type="file"
-                accept=".csv,text/csv"
-                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-                className="block w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:text-foreground"
-              />
-              <p className="text-xs leading-5 text-muted-foreground">
-                A CSV with a name column, and optional phone and purpose columns. The first row is
-                read as headings.
-              </p>
-            </div>
+            <Field
+              label="The list"
+              hint="A CSV with a name column, and optional phone and purpose columns. The first row is read as headings."
+            >
+              <DocumentUpload value={upload} onChange={setUpload} accept=".csv,text/csv" label="" />
+            </Field>
 
             {importMutation.isError && (
               <Alert variant="danger">

@@ -66,6 +66,9 @@ interface Metric {
 }
 
 const CARD_WIDTH = 200;
+// The trust badge sits on a photo behind a fixed navy scrim, in either theme,
+// so its colours are fixed too; the theme's success green is too dark on it.
+const ON_SCRIM = { bg: 'rgba(9,32,66,0.72)', partial: '#4ade80' };
 
 export default function RenterHome() {
   const { profile } = useAuth();
@@ -405,13 +408,13 @@ function HeroCard({
                 paddingVertical: 6,
                 paddingHorizontal: 10,
                 borderRadius: radius.full,
-                backgroundColor: trust?.tone === 'verified' ? colors.success : 'rgba(9,32,66,0.72)',
+                backgroundColor: trust?.tone === 'verified' ? colors.success : ON_SCRIM.bg,
                 flexShrink: 1,
               }}
             >
               <ShieldCheck
                 size={12}
-                color={trust?.tone === 'partial' ? '#4ade80' : colors.primaryForeground}
+                color={trust?.tone === 'partial' ? ON_SCRIM.partial : colors.primaryForeground}
               />
               <Text
                 variant="caption"
