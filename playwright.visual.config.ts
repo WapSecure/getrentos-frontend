@@ -21,7 +21,13 @@ const projects = (application: 'web' | 'backoffice', baseURL: string) => [
   ...viewports.map(({ name, viewport }) => ({
     name: `${application}-${name}`,
     testMatch: new RegExp(`visual-qa\\.${application}\\.spec\\.ts$`),
-    use: { ...devices['Desktop Chrome'], baseURL, viewport, colorScheme: 'light' as const },
+    use: {
+      ...devices['Desktop Chrome'],
+      baseURL,
+      viewport,
+      colorScheme: 'light' as const,
+      reducedMotion: 'reduce' as const,
+    },
   })),
   {
     name: `${application}-dark`,
@@ -31,6 +37,7 @@ const projects = (application: 'web' | 'backoffice', baseURL: string) => [
       baseURL,
       viewport: { width: 1440, height: 900 },
       colorScheme: 'dark' as const,
+      reducedMotion: 'reduce' as const,
     },
   },
 ];

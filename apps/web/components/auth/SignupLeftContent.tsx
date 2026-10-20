@@ -92,9 +92,7 @@ export const SignupLeftContent = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-foreground mb-1">{feature.title}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {feature.description}
-                    </p>
+                    <p className="text-xs text-foreground/70">{feature.description}</p>
                   </div>
                 </motion.div>
               ))}
