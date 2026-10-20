@@ -50,6 +50,7 @@ import { landKeys } from '@/lib/queryKeys';
 import { landWatchService } from '@/services/landWatchService';
 import { errorMessage } from '../developer/feedback';
 import { InspectionReportCard } from './InspectionReportCard';
+import { LandWatchJobsCard } from './LandWatchJobsCard';
 
 type Notify = (message: string, variant?: ToastVariant) => void;
 const TIERS: LandWatchTier[] = ['ESSENTIAL', 'PROTECTED', 'MANAGED'];
@@ -358,7 +359,10 @@ const WatchDetail = ({
         <p className="mt-3 max-w-3xl text-xs text-muted-foreground">{w.disclaimer}</p>
       </div>
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <InspectionsCard watch={w} onSaved={saved} onFailed={failed} />
+        <div className="space-y-6">
+          <InspectionsCard watch={w} onSaved={saved} onFailed={failed} />
+          <LandWatchJobsCard watch={w} notify={notify} />
+        </div>
         <div className="space-y-6">
           <IncidentsCard watch={w} onSaved={saved} onFailed={failed} />
           <RemindersCard watch={w} onSaved={saved} onFailed={failed} />

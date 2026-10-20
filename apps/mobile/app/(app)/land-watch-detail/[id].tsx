@@ -33,6 +33,7 @@ import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { VendorWorkSection } from '@/components/landWatch/VendorWorkSection';
 
 const KINDS: LandWatchIncidentKind[] = [
   'ENCROACHMENT',
@@ -70,7 +71,7 @@ export default function LandWatchDetail() {
         refreshControl={
           <RefreshControl
             refreshing={query.isRefetching}
-            onRefresh={() => query.refetch()}
+            onRefresh={() => qc.invalidateQueries({ queryKey: qk.landWatch(id) })}
             tintColor={colors.mutedForeground}
           />
         }
@@ -188,6 +189,8 @@ export default function LandWatchDetail() {
                 onPress={() => setReporting(true)}
               />
             ) : null}
+
+            <VendorWorkSection watchId={w.id} tier={w.tier} status={w.status} />
 
             <Text variant="heading">Reminders</Text>
             {!w.reminders.length ? (
