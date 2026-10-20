@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Field, Textarea } from '@getrentos/ui';
+import { Badge, Button, Field, RadioGroup, Textarea } from '@getrentos/ui';
 import { FileCheck2 } from 'lucide-react';
 import { formatDate } from '@/lib/format';
 import type { LandDiligenceCheckStatus } from '@/types/land';
@@ -9,21 +9,18 @@ import type { LandReviewCheck, LandReviewDocument } from '@/types/landReviewer';
 import { ReviewCheckEvidence, type ReviewEvidenceActions } from './ReviewCheckEvidence';
 import { decisionProblem, hasCitedDocument } from './reviewRules';
 
-const CHOICES: { value: LandDiligenceCheckStatus; label: string; tone: string }[] = [
+const CHOICES: { value: LandDiligenceCheckStatus; label: string }[] = [
   {
     value: 'PASSED',
     label: 'Pass',
-    tone: 'peer-checked:border-success peer-checked:bg-success/10 peer-checked:text-success',
   },
   {
     value: 'FLAGGED',
     label: 'Flag',
-    tone: 'peer-checked:border-destructive peer-checked:bg-destructive/10 peer-checked:text-destructive',
   },
   {
     value: 'NOT_APPLICABLE',
     label: 'N/A',
-    tone: 'peer-checked:border-info peer-checked:bg-info/10 peer-checked:text-info',
   },
 ];
 
@@ -62,8 +59,6 @@ export const ReviewCheckRow = ({
   const changed =
     status !== null && (status !== check.status || note.trim() !== (check.note ?? '').trim());
   const badge = STATUS_BADGE[check.status];
-  const name = `check-${check.key}`;
-
   return (
     <li className="rounded-2xl border border-border bg-card p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -100,28 +95,13 @@ export const ReviewCheckRow = ({
             if (status && !problem) onDecide(status, note);
           }}
         >
-          <fieldset>
-            <legend className="sr-only">Decision for {check.label}</legend>
-            <div className="flex flex-wrap gap-2">
-              {CHOICES.map((choice) => (
-                <label key={choice.value} className="cursor-pointer">
-                  <input
-                    type="radio"
-                    name={name}
-                    value={choice.value}
-                    checked={status === choice.value}
-                    onChange={() => setStatus(choice.value)}
-                    className="peer sr-only"
-                  />
-                  <span
-                    className={`inline-flex min-h-10 min-w-16 items-center justify-center rounded-lg border border-border px-3 text-sm font-medium text-foreground transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-primary ${choice.tone}`}
-                  >
-                    {choice.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          <RadioGroup
+            value={status ?? ''}
+            onValueChange={setStatus}
+            options={CHOICES}
+            orientation="horizontal"
+            aria-label={`Decision for ${check.label}`}
+          />
           <Field
             label="Your note"
             required={status === 'FLAGGED' || (status === 'NOT_APPLICABLE' && check.required)}

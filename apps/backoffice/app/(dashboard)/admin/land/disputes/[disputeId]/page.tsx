@@ -18,6 +18,7 @@ import {
 import {
   Badge,
   Button,
+  Checkbox,
   EmptyState,
   Input,
   PageLoadingState,
@@ -299,14 +300,11 @@ export default function AdminLandDisputePage() {
                 placeholder="Add a note to the case"
               />
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={noteShared}
-                    onChange={(event) => setNoteShared(event.target.checked)}
-                  />
-                  Share with the parties
-                </label>
+                <Checkbox
+                  checked={noteShared}
+                  onCheckedChange={setNoteShared}
+                  label="Share with the parties"
+                />
                 <Button
                   size="sm"
                   variant="outline"

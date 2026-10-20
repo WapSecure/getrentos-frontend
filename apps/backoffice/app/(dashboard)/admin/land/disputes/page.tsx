@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, Gavel, PauseCircle } from 'lucide-react';
-import { Badge, EmptyState, Pagination, Select } from '@getrentos/ui';
+import { Badge, Checkbox, EmptyState, Pagination, Select } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -82,17 +82,14 @@ export default function AdminLandDisputesPage() {
             options={statusOptions}
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={heldOnly}
-            onChange={(event) => {
-              setHeldOnly(event.target.checked);
-              setPage(1);
-            }}
-          />
-          On hold only
-        </label>
+        <Checkbox
+          checked={heldOnly}
+          onCheckedChange={(checked) => {
+            setHeldOnly(checked);
+            setPage(1);
+          }}
+          label="On hold only"
+        />
       </div>
 
       {query.isLoading ? (
