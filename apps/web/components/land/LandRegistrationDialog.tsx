@@ -259,7 +259,7 @@ export const LandRegistrationDialog = ({
                 placeholder="Survey reference"
               />
             </Field>
-            <Field label="Estimated value (₦)">
+            <Field label="Estimated value">
               <CurrencyInput
                 prefix="₦"
                 min="0"
@@ -267,7 +267,7 @@ export const LandRegistrationDialog = ({
                 onValueChange={(v) => setEstimatedValue(v === 0 ? '' : String(v))}
               />
             </Field>
-            <Field label="Purchase price (₦)">
+            <Field label="Purchase price">
               <CurrencyInput
                 prefix="₦"
                 min="0"

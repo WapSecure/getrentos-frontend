@@ -256,7 +256,7 @@ export const AddOwnerPropertyModal = ({
               />
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Purchase Price (₦)">
+                <Field label="Purchase Price">
                   <CurrencyInput
                     prefix="₦"
                     min={0}
@@ -264,7 +264,7 @@ export const AddOwnerPropertyModal = ({
                     onValueChange={(v) => update('purchasePrice', v === 0 ? '' : String(v))}
                   />
                 </Field>
-                <Field label="Estimated Value (₦)">
+                <Field label="Estimated Value">
                   <CurrencyInput
                     prefix="₦"
                     min={0}

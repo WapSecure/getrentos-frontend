@@ -690,7 +690,7 @@ export function LegalCaseDetail({
               owner&rsquo;s account on their next statement.
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <Field label="Amount (₦)" required>
+              <Field label="Amount" required>
                 <CurrencyInput
                   prefix="₦"
                   value={costAmount}

@@ -207,7 +207,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
                   options={billingCycleOptions}
                 />
               </Field>
-              <Field label="Amount (₦)" required>
+              <Field label="Amount" required>
                 <CurrencyInput
                   prefix="₦"
                   min={1}

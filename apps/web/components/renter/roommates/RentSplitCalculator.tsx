@@ -81,7 +81,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
       </div>
 
       <div className="p-4 space-y-4">
-        <Field label="Total rent (₦)">
+        <Field label="Total rent">
           <CurrencyInput prefix="₦" value={totalRent} onValueChange={setTotalRent} />
         </Field>
 

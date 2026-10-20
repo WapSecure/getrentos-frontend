@@ -112,7 +112,7 @@ export const CreateDuesModal = ({
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <Field label="Amount (₦)" required>
+              <Field label="Amount" required>
                 <CurrencyInput
                   prefix="₦"
                   value={amount}

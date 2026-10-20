@@ -17,7 +17,7 @@ export const PropertyValueFields = ({
   onPurchasePriceChange,
 }: PropertyValueFieldsProps) => (
   <div className="grid gap-3 sm:grid-cols-2">
-    <Field label="Current value (₦)" hint="What you would sell it for today.">
+    <Field label="Current value" hint="What you would sell it for today.">
       <CurrencyInput
         prefix="₦"
         value={estimatedValue}
@@ -25,7 +25,7 @@ export const PropertyValueFields = ({
         placeholder="e.g. 120000000"
       />
     </Field>
-    <Field label="Purchase price (₦)" hint="What you paid for it.">
+    <Field label="Purchase price" hint="What you paid for it.">
       <CurrencyInput
         prefix="₦"
         value={purchasePrice}

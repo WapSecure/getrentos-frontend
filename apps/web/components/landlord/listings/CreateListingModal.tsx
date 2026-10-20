@@ -201,7 +201,7 @@ export const CreateListingModal = ({
                       onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
                     />
                   </Field>
-                  <Field label="Security Deposit (₦)">
+                  <Field label="Security Deposit">
                     <CurrencyInput
                       prefix="₦"
                       value={securityDeposit}

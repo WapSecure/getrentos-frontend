@@ -145,7 +145,7 @@ export const BuyerOfferNegotiationModal = ({
 
             {isCountering ? (
               <div className="p-4 border-t border-border space-y-3 shrink-0">
-                <Field label="New Offer Amount (₦)">
+                <Field label="New Offer Amount">
                   <CurrencyInput
                     prefix="₦"
                     min={0}

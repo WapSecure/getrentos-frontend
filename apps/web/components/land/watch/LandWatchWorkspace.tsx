@@ -767,7 +767,7 @@ const RemindersCard = ({ watch, onSaved, onFailed }: SectionProps) => {
             <Field label="Due" required>
               <DatePicker value={dueDate} onChange={setDueDate} placeholder="Choose the due date" />
             </Field>
-            <Field label="Amount (₦)">
+            <Field label="Amount">
               <CurrencyInput
                 value={amount}
                 onValueChange={(v) => setAmount(v ? String(v) : '')}

@@ -92,8 +92,7 @@ export function AgencyProtectionView() {
   });
 
   if (isLoading) return <PageLoadingState />;
-  if (!data)
-    return <PageErrorState title="Couldn’t load attestations" onRetry={() => refetch()} />;
+  if (!data) return <PageErrorState title="Couldn’t load attestations" onRetry={() => refetch()} />;
 
   const canSave = form.schemeName.trim().length >= 2 && !!form.effectiveFrom;
 
@@ -143,7 +142,7 @@ export function AgencyProtectionView() {
                 placeholder="Optional"
               />
             </Field>
-            <Field label="Cover amount (₦)">
+            <Field label="Cover amount">
               <CurrencyInput
                 value={form.coverageAmount}
                 onValueChange={(v) =>

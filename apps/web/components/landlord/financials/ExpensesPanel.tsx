@@ -235,7 +235,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
                   options={categoryOptions}
                 />
               </Field>
-              <Field label="Amount (₦)" required>
+              <Field label="Amount" required>
                 <CurrencyInput
                   prefix="₦"
                   min={1}

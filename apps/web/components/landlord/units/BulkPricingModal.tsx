@@ -166,7 +166,7 @@ export function BulkPricingModal({ isOpen, onClose, properties }: BulkPricingMod
                 />
               </Field>
               <Field
-                label="New rent (₦)"
+                label="New rent"
                 required
                 className="sm:col-span-2"
                 hint="Applied to the selected units and to any live advert for them, so the price the market sees does not drift from the one you set."

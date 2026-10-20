@@ -120,7 +120,7 @@ export const AddUnitModal = ({
               </div>
 
               <Field
-                label="Rent (₦)"
+                label="Rent"
                 hint="Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what the advert will ask for."
               >
                 <div className="flex gap-2">

@@ -279,7 +279,7 @@ export const ApplicationWizard = ({
                 searchable={false}
               />
             </Field>
-            <Field label="Monthly income (₦)">
+            <Field label="Monthly income">
               {/* Shown as 1,200,000 while typing; the form keeps the plain number. */}
               <CurrencyInput
                 prefix="₦"

@@ -323,7 +323,7 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                   {s?.status !== 'ENDED' && (
                     <>
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <Field label="Rent per period (₦)">
+                        <Field label="Rent per period">
                           <CurrencyInput
                             prefix="₦"
                             value={amount}

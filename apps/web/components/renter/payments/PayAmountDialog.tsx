@@ -66,7 +66,7 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
 
           {mode === 'part' && (
             <Field
-              label="Amount (₦)"
+              label="Amount"
               hint={`At least ${formatCurrency(Math.min(MIN_PART_PAYMENT, owed))}. The rest stays owed on this charge. The first rent on a new lease has to be paid in full.`}
             >
               <CurrencyInput

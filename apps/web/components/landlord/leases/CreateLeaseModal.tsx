@@ -205,14 +205,14 @@ export const CreateLeaseModal = ({
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <Field label="Rent Amount (₦)" required>
+                    <Field label="Rent Amount" required>
                       <CurrencyInput
                         prefix="₦"
                         value={rentAmount}
                         onValueChange={(v) => setRentAmount(v === 0 ? '' : String(v))}
                       />
                     </Field>
-                    <Field label="Deposit (₦)">
+                    <Field label="Deposit">
                       <CurrencyInput
                         prefix="₦"
                         value={securityDeposit}

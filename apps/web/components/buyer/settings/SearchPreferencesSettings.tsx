@@ -70,7 +70,7 @@ export const SearchPreferencesSettings = () => {
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Min Budget (₦)">
+          <Field label="Min Budget">
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -79,7 +79,7 @@ export const SearchPreferencesSettings = () => {
               placeholder="e.g. 50,000,000"
             />
           </Field>
-          <Field label="Max Budget (₦)">
+          <Field label="Max Budget">
             <CurrencyInput
               prefix="₦"
               min={0}

@@ -217,7 +217,7 @@ const EditOwnerPropertyForm = ({
           }}
         />
 
-        <Field label="Estimated Value (₦)">
+        <Field label="Estimated Value">
           <CurrencyInput
             prefix="₦"
             min={0}

@@ -197,7 +197,7 @@ export const MakeOfferModal = ({
                 />
               </Field>
 
-              <Field label="Offer Amount (₦)" required>
+              <Field label="Offer Amount" required>
                 <CurrencyInput
                   prefix="₦"
                   min={0}
@@ -215,7 +215,7 @@ export const MakeOfferModal = ({
                 />
               </Field>
 
-              <Field label="Deposit Amount (₦)" optionalLabel="(optional)">
+              <Field label="Deposit Amount" optionalLabel="(optional)">
                 <CurrencyInput
                   prefix="₦"
                   min={0}

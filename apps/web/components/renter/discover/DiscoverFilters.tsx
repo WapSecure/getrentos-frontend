@@ -112,7 +112,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
 
             {/* Price Range: Min and Max side by side, full card width */}
             <div className="grid grid-cols-2 gap-2">
-              <Field label="Min price (₦)">
+              <Field label="Min price">
                 <CurrencyInput
                   prefix="₦"
                   value={filters.minPrice}
@@ -120,7 +120,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
                   placeholder="Min"
                 />
               </Field>
-              <Field label="Max price (₦)">
+              <Field label="Max price">
                 <CurrencyInput
                   prefix="₦"
                   value={filters.maxPrice}

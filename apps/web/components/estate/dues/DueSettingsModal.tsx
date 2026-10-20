@@ -54,7 +54,7 @@ export const DueSettingsModal = ({
 
             <div className="p-4 space-y-4">
               <Field
-                label="Flat late fee (₦)"
+                label="Flat late fee"
                 hint="Added once to a due the moment it becomes overdue. Set to ₦0 to disable late fees."
               >
                 <CurrencyInput

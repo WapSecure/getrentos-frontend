@@ -327,7 +327,7 @@ export const CreateSaleListingModal = ({
                 />
               </Field>
 
-              <Field label="Asking Price (₦)" required>
+              <Field label="Asking Price" required>
                 <CurrencyInput
                   prefix="₦"
                   min={0}
@@ -381,8 +381,8 @@ export const CreateSaleListingModal = ({
           {step === 1 && (
             <>
               <p className="text-xs text-muted-foreground">
-                Photos and the video tour belong to the property, so every listing of it shows
-                them. Anything you add here is saved to the property when you create the listing.
+                Photos and the video tour belong to the property, so every listing of it shows them.
+                Anything you add here is saved to the property when you create the listing.
               </p>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-foreground">
@@ -462,9 +462,7 @@ export const CreateSaleListingModal = ({
                   <div
                     key={feature}
                     className={`rounded-lg border px-3 py-2 transition-colors ${
-                      form.features.includes(feature)
-                        ? 'border-primary bg-accent'
-                        : 'border-border'
+                      form.features.includes(feature) ? 'border-primary bg-accent' : 'border-border'
                     }`}
                   >
                     <Checkbox
