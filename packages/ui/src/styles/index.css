@@ -398,6 +398,18 @@
   }
 }
 
+/* The app headers are sticky: keep anything scrolled or tabbed to clear of
+   them. Below lg they carry a search row under the top bar. */
+html {
+  scroll-padding-top: 9rem;
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-top: 5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:focus-within {
     scroll-behavior: auto;

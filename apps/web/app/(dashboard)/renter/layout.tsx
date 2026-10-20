@@ -86,7 +86,7 @@ export default function RenterLayout({ children }: { children: ReactNode }) {
           <main
             id="main-content"
             tabIndex={-1}
-            className="relative mt-32 min-w-0 flex-1 p-4 sm:p-6 md:mt-16 lg:ml-64 lg:px-8 lg:py-9"
+            className="relative min-w-0 flex-1 p-4 sm:p-6 lg:ml-64 lg:px-8 lg:py-9"
           >
             <div className="mx-auto max-w-[90rem]">{children}</div>
           </main>
