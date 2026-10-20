@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
-import { Input, Skeleton } from '@getrentos/ui';
+import { Button, Input, Skeleton, ToggleChip } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminSearchService, type AdminSearchType } from '@/services/adminSearchService';
 
@@ -107,18 +107,17 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
               aria-label="Filter search by record type"
             >
               {(['all', ...search.data.availableTypes] as const).map((item) => (
-                <button
+                <ToggleChip
                   key={item}
-                  type="button"
-                  aria-pressed={type === item}
-                  onClick={() => {
+                  size="sm"
+                  pressed={type === item}
+                  onPressedChange={() => {
                     setType(item);
                     setActive(0);
                   }}
-                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs ${type === item ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground hover:bg-secondary/70'}`}
                 >
                   {item === 'all' ? 'All' : typeLabel(item)}
-                </button>
+                </ToggleChip>
               ))}
             </div>
           )}
@@ -145,12 +144,12 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
-          ) : search.isError ? (
-            <div className="p-4 text-sm text-destructive" role="alert">
-              Search is unavailable.{' '}
-              <button type="button" className="underline" onClick={() => void search.refetch()}>
+          ) : search.isError && !search.data ? (
+            <div className="flex flex-wrap items-center gap-2 p-4 text-sm text-destructive" role="alert">
+              Search is unavailable.
+              <Button size="xs" variant="outline" onClick={() => void search.refetch()}>
                 Retry
-              </button>
+              </Button>
             </div>
           ) : results.length === 0 ? (
             <p className="p-4 text-sm text-muted-foreground" role="status">

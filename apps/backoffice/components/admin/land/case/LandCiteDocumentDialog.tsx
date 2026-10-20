@@ -136,15 +136,15 @@ export const LandCiteDocumentDialog = ({
             {onUploadInstead && (
               <p className="text-sm text-muted-foreground">
                 Not on the property yet?{' '}
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                <Button
+                  variant="link"
+                  className="gap-1 whitespace-normal font-medium"
                   onClick={() => onUploadInstead(checkKey || undefined)}
                   disabled={isPending}
                 >
                   <Upload className="h-3.5 w-3.5" aria-hidden="true" />
                   Upload a document and cite it
-                </button>
+                </Button>
               </p>
             )}
 

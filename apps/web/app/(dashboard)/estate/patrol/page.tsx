@@ -13,7 +13,7 @@ import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate'
 import { CheckpointRegister } from '@/components/estate/patrol/CheckpointRegister';
 import { RoutePlanner } from '@/components/estate/patrol/RoutePlanner';
 import { RoundReport } from '@/components/estate/patrol/RoundReport';
-import { CardSkeleton } from '@getrentos/ui';
+import { CardSkeleton, Tabs, TabsContent, TabsList, TabsTrigger } from '@getrentos/ui';
 
 const TABS = [
   { value: 'report', label: 'Did it happen' },
@@ -84,27 +84,25 @@ export default function EstatePatrolPage() {
           </p>
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {TABS.map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              aria-pressed={tab === item.value}
-              onClick={() => setTab(item.value)}
-              className={`min-h-10 rounded-xl border px-4 text-sm transition-colors ${
-                tab === item.value
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border bg-card text-foreground hover:border-foreground/20'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+          <TabsList className="mb-6 max-w-full">
+            {TABS.map((item) => (
+              <TabsTrigger key={item.value} value={item.value}>
+                {item.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {tab === 'report' && <RoundReport estateId={estate.id} />}
-        {tab === 'routes' && <RoutePlanner estateId={estate.id} />}
-        {tab === 'checkpoints' && <CheckpointRegister estateId={estate.id} />}
+          <TabsContent value="report">
+            <RoundReport estateId={estate.id} />
+          </TabsContent>
+          <TabsContent value="routes">
+            <RoutePlanner estateId={estate.id} />
+          </TabsContent>
+          <TabsContent value="checkpoints">
+            <CheckpointRegister estateId={estate.id} />
+          </TabsContent>
+        </Tabs>
       </>
     </EstateFeatureGate>
   );

@@ -10,7 +10,7 @@ import { ReferralCodeField } from '@/components/auth/SignupForm/ReferralCodeFiel
 import { SignupLeftContent } from '@/components/auth/SignupLeftContent';
 import { AuthMethodTabs } from '@/components/auth/AuthMethodTabs';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import { Alert, Button, ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
 
@@ -62,14 +62,15 @@ export default function SignupPage() {
 
   return (
     <main className="relative flex min-h-screen bg-background">
-      <button
+      <Button
+        variant="outline"
+        rounded="lg"
         onClick={handleBack}
-        className="fixed left-4 top-4 z-30 flex min-h-11 items-center gap-2 rounded-xl border border-border bg-card/90 px-3 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 sm:left-6 sm:top-6"
-        aria-label="Go back"
+        icon={<ArrowLeft className="h-4 w-4" aria-hidden="true" />}
+        className="fixed left-4 top-4 z-30 min-h-11 bg-card/90 px-3 font-medium text-muted-foreground backdrop-blur sm:left-6 sm:top-6"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        <span>{step === 'otp' ? 'Back to signup' : 'Back'}</span>
-      </button>
+        {step === 'otp' ? 'Back to signup' : 'Back'}
+      </Button>
 
       <div className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6">
         <ThemeToggle />
@@ -95,14 +96,15 @@ export default function SignupPage() {
                 </h1>
               </div>
               {step === 'otp' && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  rounded="lg"
                   onClick={handleStartOver}
-                  className="flex min-h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+                  icon={<RefreshCw className="h-4 w-4" aria-hidden="true" />}
+                  className="shrink-0 px-3"
                 >
-                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
                   Start over
-                </button>
+                </Button>
               )}
             </div>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
@@ -119,10 +121,9 @@ export default function SignupPage() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="mb-5 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
-                role="alert"
+                className="mb-5"
               >
-                {error}
+                <Alert variant="danger">{error}</Alert>
               </motion.div>
             )}
           </AnimatePresence>

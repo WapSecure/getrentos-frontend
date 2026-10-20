@@ -1,6 +1,6 @@
 'use client';
 
-import { Pagination, EmptyState, SearchInput } from '@getrentos/ui';
+import { Pagination, EmptyState, SearchInput, Skeleton, ToggleChip } from '@getrentos/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Users } from 'lucide-react';
@@ -54,9 +54,11 @@ export default function LandlordTenantsPage() {
         {/* Zero is a claim about the portfolio, so wait until it has been read
             before making it. */}
         <p className="text-muted-foreground mt-1">
-          {isPending
-            ? 'Counting your tenants…'
-            : `${total} tenant${total === 1 ? '' : 's'} across your portfolio`}
+          {isPending ? (
+            <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
+          ) : (
+            `${total} tenant${total === 1 ? '' : 's'} across your portfolio`
+          )}
         </p>
       </div>
 
@@ -67,23 +69,19 @@ export default function LandlordTenantsPage() {
           placeholder="Search tenants or properties..."
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
+        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter tenants by rent status">
           {rentStatusFilters.map((option) => (
-            <button
+            <ToggleChip
               key={option.value}
-              type="button"
-              onClick={() => {
+              size="sm"
+              pressed={rentFilter === option.value}
+              onPressedChange={() => {
                 setRentFilter(option.value);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                rentFilter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
             >
               {option.label}
-            </button>
+            </ToggleChip>
           ))}
         </div>
       </div>

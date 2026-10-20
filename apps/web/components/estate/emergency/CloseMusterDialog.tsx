@@ -1,9 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Alert, Button, Field, IconButton, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Textarea,
+} from '@getrentos/ui';
 import type { MusterTally } from '@/types/estate';
 
 /** The API's floor on a closing note, kept in step so the form cannot under-run it. */
@@ -50,86 +57,73 @@ export const CloseMusterDialog = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            className="bg-card rounded-xl max-w-md w-full p-5"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Stand the roll down"
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="md">
+        <DialogTitle className="pr-8 text-lg font-semibold text-foreground">
+          Stand the roll down?
+        </DialogTitle>
+
+        <DialogDescription className="mt-1 text-sm text-muted-foreground">
+          The roll is frozen and every household is told the estate has stood down. Nobody can be
+          marked afterwards: the record says what the estate knew at the time, and a line added
+          later is indistinguishable from a correction to a mistake nobody made.
+        </DialogDescription>
+
+        {needsNote && (
+          <Alert variant="warning" className="mt-3">
+            {tally.unaccounted === 1
+              ? 'One person on the roll has not been answered for.'
+              : `${tally.unaccounted} people on the roll have not been answered for.`}{' '}
+            The estate can stand down anyway, but it has to say what happens next.
+          </Alert>
+        )}
+
+        <Field
+          className="mt-4"
+          label={needsNote ? 'What happens next for the names left?' : 'Anything to record?'}
+          required={needsNote}
+          optionalLabel="(optional)"
+          hint={
+            needsNote
+              ? `At least ${NOTE_MIN_LENGTH} characters. This is the only place that says the estate looked and did not find them.`
+              : undefined
+          }
+        >
+          <Textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            maxLength={1000}
+            placeholder={
+              needsNote
+                ? 'e.g. Blocks A-C were searched twice; the fire service has the list of unreached visitors.'
+                : 'e.g. All clear given by the fire service at 14:40.'
+            }
+            showCount
+          />
+        </Field>
+
+        {error && (
+          <Alert variant="danger" className="mt-3">
+            {error}
+          </Alert>
+        )}
+
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <Button variant="ghost" onClick={handleClose}>
+            Keep the roll open
+          </Button>
+          <Button
+            variant="primary"
+            disabled={needsNote && tooShort}
+            isLoading={isSubmitting}
+            loadingText="Standing down…"
+            onClick={() => onConfirm(note.trim() || undefined)}
           >
-            <div className="flex items-start justify-between gap-4">
-              <h2 className="text-lg font-semibold text-foreground">Stand the roll down?</h2>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
-
-            <p className="text-sm text-muted-foreground mt-1">
-              The roll is frozen and every household is told the estate has stood down. Nobody can
-              be marked afterwards: the record says what the estate knew at the time, and a line
-              added later is indistinguishable from a correction to a mistake nobody made.
-            </p>
-
-            {needsNote && (
-              <Alert variant="warning" className="mt-3">
-                {tally.unaccounted === 1
-                  ? 'One person on the roll has not been answered for.'
-                  : `${tally.unaccounted} people on the roll have not been answered for.`}{' '}
-                The estate can stand down anyway, but it has to say what happens next.
-              </Alert>
-            )}
-
-            <Field
-              className="mt-4"
-              label={needsNote ? 'What happens next for the names left?' : 'Anything to record?'}
-              required={needsNote}
-              optionalLabel="(optional)"
-              hint={
-                needsNote
-                  ? `At least ${NOTE_MIN_LENGTH} characters. This is the only place that says the estate looked and did not find them.`
-                  : undefined
-              }
-            >
-              <Textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={3}
-                maxLength={1000}
-                placeholder={
-                  needsNote
-                    ? 'e.g. Blocks A-C were searched twice; the fire service has the list of unreached visitors.'
-                    : 'e.g. All clear given by the fire service at 14:40.'
-                }
-                showCount
-              />
-            </Field>
-
-            {error && (
-              <Alert variant="danger" className="mt-3">
-                {error}
-              </Alert>
-            )}
-
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="ghost" onClick={handleClose}>
-                Keep the roll open
-              </Button>
-              <Button
-                variant="primary"
-                disabled={needsNote && tooShort}
-                isLoading={isSubmitting}
-                loadingText="Standing down…"
-                onClick={() => onConfirm(note.trim() || undefined)}
-              >
-                Stand the roll down
-              </Button>
-            </div>
-          </motion.div>
+            Stand the roll down
+          </Button>
         </div>
-      )}
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   );
 };

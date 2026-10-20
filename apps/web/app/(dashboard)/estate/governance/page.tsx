@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, useToast } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, ToggleChip, useToast } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -122,17 +122,15 @@ export default function EstateGovernancePage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter records by type">
         {typeFilters.map((filter) => (
-          <Button
+          <ToggleChip
             key={filter.value}
-            variant={typeFilter === filter.value ? 'primary' : 'ghost'}
-            size="sm"
-            aria-pressed={typeFilter === filter.value}
-            onClick={() => setTypeFilter(filter.value)}
+            pressed={typeFilter === filter.value}
+            onPressedChange={() => setTypeFilter(filter.value)}
           >
             {filter.label}
-          </Button>
+          </ToggleChip>
         ))}
       </div>
 

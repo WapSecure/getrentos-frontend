@@ -18,6 +18,10 @@ import {
   Badge,
   Button,
   CardSkeleton,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   EmptyState,
   ListSkeleton,
   PageErrorState,
@@ -235,22 +239,17 @@ function RealtorDetailDialog({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size="xl" padded={false}>
         {isLoading ? (
           <div className="space-y-4 p-5">
+            <DialogTitle className="sr-only">Loading realtor case</DialogTitle>
             <CardSkeleton lines={2} />
             <CardSkeleton lines={4} />
           </div>
         ) : isError || !data ? (
           <div className="p-8 text-center">
-            <p className="text-destructive">Could not load the realtor case.</p>
+            <DialogTitle className="text-destructive">Could not load the realtor case.</DialogTitle>
             <Button className="mt-3" variant="ghost" onClick={onClose}>
               Close
             </Button>
@@ -258,8 +257,8 @@ function RealtorDetailDialog({
         ) : (
           <RealtorCase360 detail={data} onClose={onClose} actions={actions} />
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -293,22 +292,22 @@ function RealtorCase360({
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5">
-        <div>
-          <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5 pr-12">
+        <div className="min-w-0">
+          <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold text-foreground">
             {detail.legalName}
             {detail.licenses[0] && (
               <Badge variant={LICENSE_VARIANT[detail.licenses[0].status as LicenseStatus]}>
                 {LICENSE_LABEL[detail.licenses[0].status as LicenseStatus]}
               </Badge>
             )}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {detail.email ?? 'No email'}
             {detail.phone ? ` · ${detail.phone}` : ''} · Joined {formatDate(detail.createdAt)}
-          </p>
+          </DialogDescription>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge variant={detail.accountStatus === 'ACTIVE' ? 'success' : 'neutral'}>
             {detail.accountStatus}
           </Badge>
@@ -436,9 +435,9 @@ function RealtorCase360({
                       <Badge variant="neutral">{c.status}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
                       {c.status === 'ACTIVE' && (
-                        <button
-                          type="button"
-                          className="font-medium text-destructive hover:underline"
+                        <Button
+                          variant="link"
+                          className="text-xs font-medium text-destructive"
                           onClick={() =>
                             actions.request({
                               title: 'Revoke this client relationship?',
@@ -456,7 +455,7 @@ function RealtorCase360({
                           }
                         >
                           Revoke
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

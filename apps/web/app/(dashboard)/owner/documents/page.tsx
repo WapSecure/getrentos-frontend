@@ -1,16 +1,17 @@
 'use client';
 
 import {
-  Pagination,
   Button,
-  DocumentUploadDialog,
-  DocumentRowActions,
   DocumentPreviewButton,
-  type UploadedDocumentData,
+  DocumentRowActions,
+  DocumentUploadDialog,
   EmptyState,
-  SearchInput,
   ListSkeleton,
   PageErrorState,
+  Pagination,
+  SearchInput,
+  SegmentedControl,
+  type UploadedDocumentData,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -144,26 +145,17 @@ export default function OwnerDocumentsPage() {
           placeholder="Search documents..."
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
-          {categoryFilters.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
-                setFilter(option.value);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          size="sm"
+          aria-label="Filter by category"
+          value={filter}
+          onValueChange={(value) => {
+            setFilter(value);
+            setPage(1);
+          }}
+          segments={categoryFilters}
+          className="max-w-full overflow-x-auto"
+        />
       </div>
 
       {isLoading ? (

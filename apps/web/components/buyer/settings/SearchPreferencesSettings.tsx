@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, CurrencyInput, Field, Input, Switch, useToast } from '@getrentos/ui';
+import { Button, CurrencyInput, Field, Input, Switch, ToggleChip, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { buyerService } from '@/services/buyerService';
@@ -92,21 +92,15 @@ export const SearchPreferencesSettings = () => {
 
         <div>
           <p className="block text-sm font-medium text-foreground mb-2">Preferred Property Types</p>
-          <div className="flex flex-wrap gap-2">
+          <div role="group" aria-label="Preferred Property Types" className="flex flex-wrap gap-2">
             {propertyTypeOptions.map((type) => (
-              <button
+              <ToggleChip
                 key={type}
-                type="button"
-                aria-pressed={preferredTypes.includes(type)}
-                onClick={() => toggleType(type)}
-                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  preferredTypes.includes(type)
-                    ? 'border-primary bg-accent text-primary'
-                    : 'border-border text-muted-foreground'
-                }`}
+                pressed={preferredTypes.includes(type)}
+                onPressedChange={() => toggleType(type)}
               >
                 {type}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>

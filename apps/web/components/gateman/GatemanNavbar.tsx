@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LogOut, KeyRound, Car, Package, Siren } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import { PostSwitcher } from '@/components/gateman/PostSwitcher';
-import { ThemeToggle } from '@getrentos/ui';
+import { Button, ThemeToggle } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { logoutSession } from '@/lib/apiClient';
 
@@ -41,13 +41,15 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-label={item.label}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-accent text-primary'
                       : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-4 h-4" aria-hidden="true" />
                   <span className="hidden sm:inline">{item.label}</span>
                 </Link>
               );
@@ -55,15 +57,16 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
             <span className="hidden lg:block text-sm text-muted-foreground">{user?.fullName}</span>
             <PostSwitcher />
             <ThemeToggle />
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleSignOut}
               aria-label="Sign out"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-destructive hover:bg-destructive-subtle"
+              icon={<LogOut className="w-4 h-4" aria-hidden="true" />}
+              className="text-destructive hover:bg-destructive-subtle hover:text-destructive"
             >
-              <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sign out</span>
-            </button>
+            </Button>
           </div>
         </div>
       </div>

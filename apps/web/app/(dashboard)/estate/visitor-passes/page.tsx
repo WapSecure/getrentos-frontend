@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination, ToggleChip } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -144,20 +144,18 @@ export default function EstateVisitorPassesPage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter passes by status">
         {statusFilters.map((filter) => (
-          <Button
+          <ToggleChip
             key={filter.value}
-            variant={statusFilter === filter.value ? 'primary' : 'ghost'}
-            size="sm"
-            aria-pressed={statusFilter === filter.value}
-            onClick={() => {
+            pressed={statusFilter === filter.value}
+            onPressedChange={() => {
               setStatusFilter(filter.value);
               setPage(1);
             }}
           >
             {filter.label}
-          </Button>
+          </ToggleChip>
         ))}
       </div>
 

@@ -317,7 +317,7 @@ export function OwnerStatementsView() {
       </ProFeatureGate>
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
-        <DialogContent className="max-w-lg p-0">
+        <DialogContent padded={false} className="sm:max-w-lg">
           <form onSubmit={submit} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Generate statement
@@ -380,7 +380,7 @@ export function OwnerStatementsView() {
       </Dialog>
 
       <Dialog open={!!detailId} onOpenChange={(open) => !open && setDetailId(null)}>
-        <DialogContent className="max-w-lg p-0">
+        <DialogContent padded={false} className="sm:max-w-lg">
           {!detail && isDetailLoading && (
             <div className="p-6">
               <DialogTitle className="sr-only">Statement</DialogTitle>

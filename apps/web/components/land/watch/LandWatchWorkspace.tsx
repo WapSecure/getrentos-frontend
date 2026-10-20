@@ -139,51 +139,57 @@ const WatchList = ({ onOpen, notify }: { onOpen: (id: string) => void; notify: N
         <ul className="grid gap-4 md:grid-cols-2">
           {items.map((w) => (
             <li key={w.id}>
-              <button type="button" onClick={() => onOpen(w.id)} className="w-full text-left">
-                <Card hover static className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold text-foreground">{w.land.label}</p>
-                      <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-                        {[w.land.city, w.land.state].filter(Boolean).join(', ')}
-                      </p>
-                    </div>
-                    <Badge variant={w.status === 'ACTIVE' ? 'success' : 'neutral'}>
-                      {LAND_WATCH_TIER_LABELS[w.tier].label}
-                      {w.status === 'PAUSED' ? ' · paused' : ''}
-                    </Badge>
+              <Card interactive static className="p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-foreground">
+                      <button
+                        type="button"
+                        onClick={() => onOpen(w.id)}
+                        className="text-left after:absolute after:inset-0 focus:outline-none"
+                      >
+                        {w.land.label}
+                      </button>
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                      {[w.land.city, w.land.state].filter(Boolean).join(', ')}
+                    </p>
                   </div>
-                  <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <dt className="text-muted-foreground">Last inspection</dt>
-                      <dd className="text-foreground">
-                        {w.lastInspection ? formatDate(w.lastInspection) : 'None yet'}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Next due</dt>
-                      <dd className="text-foreground">
-                        {w.nextInspectionDue ? formatDate(w.nextInspectionDue) : '—'}
-                      </dd>
-                    </div>
-                  </dl>
-                  {(w.openIncidents > 0 || w.nextReminder) && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {w.openIncidents > 0 && (
-                        <Badge variant="danger">
-                          {w.openIncidents} open incident{w.openIncidents === 1 ? '' : 's'}
-                        </Badge>
-                      )}
-                      {w.nextReminder && (
-                        <Badge variant="info">
-                          {w.nextReminder.label} · {formatDate(w.nextReminder.dueDate)}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              </button>
+                  <Badge variant={w.status === 'ACTIVE' ? 'success' : 'neutral'}>
+                    {LAND_WATCH_TIER_LABELS[w.tier].label}
+                    {w.status === 'PAUSED' ? ' · paused' : ''}
+                  </Badge>
+                </div>
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <dt className="text-muted-foreground">Last inspection</dt>
+                    <dd className="text-foreground">
+                      {w.lastInspection ? formatDate(w.lastInspection) : 'None yet'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">Next due</dt>
+                    <dd className="text-foreground">
+                      {w.nextInspectionDue ? formatDate(w.nextInspectionDue) : '—'}
+                    </dd>
+                  </div>
+                </dl>
+                {(w.openIncidents > 0 || w.nextReminder) && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {w.openIncidents > 0 && (
+                      <Badge variant="danger">
+                        {w.openIncidents} open incident{w.openIncidents === 1 ? '' : 's'}
+                      </Badge>
+                    )}
+                    {w.nextReminder && (
+                      <Badge variant="info">
+                        {w.nextReminder.label} · {formatDate(w.nextReminder.dueDate)}
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </Card>
             </li>
           ))}
         </ul>

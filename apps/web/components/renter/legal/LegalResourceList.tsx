@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Button } from '@getrentos/ui';
+import { ToggleChip } from '@getrentos/ui';
 import { LEGAL_RESOURCES, type LegalResourceCategory } from '@/lib/content/legalResources';
 import { LegalResourceCard } from './LegalResourceCard';
 
@@ -27,25 +27,23 @@ export const LegalResourceList = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant={activeCategory === 'all' ? 'primary' : 'ghost'}
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+        <ToggleChip
           size="sm"
-          aria-pressed={activeCategory === 'all'}
-          onClick={() => setActiveCategory('all')}
+          pressed={activeCategory === 'all'}
+          onPressedChange={() => setActiveCategory('all')}
         >
           All
-        </Button>
+        </ToggleChip>
         {categories.map((category) => (
-          <Button
+          <ToggleChip
             key={category}
-            variant={activeCategory === category ? 'primary' : 'ghost'}
             size="sm"
-            aria-pressed={activeCategory === category}
-            onClick={() => setActiveCategory(category)}
+            pressed={activeCategory === category}
+            onPressedChange={() => setActiveCategory(category)}
           >
             {categoryLabels[category]}
-          </Button>
+          </ToggleChip>
         ))}
       </div>
 

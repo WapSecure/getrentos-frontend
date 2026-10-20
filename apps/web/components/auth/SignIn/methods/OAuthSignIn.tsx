@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Button } from '@getrentos/ui';
 import { authService } from '@/services/authService';
 
 function GoogleMark() {
@@ -52,14 +53,18 @@ export const OAuthSignIn = () => {
         <div className="h-px flex-1 bg-border" />
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="xl"
+        rounded="lg"
+        fullWidth
         onClick={handleGoogle}
-        className="w-full inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground shadow-sm transition-all hover:border-foreground/25 hover:bg-secondary hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+        icon={<GoogleMark />}
+        className="gap-3 text-sm"
       >
-        <GoogleMark />
         Continue with Google
-      </button>
+      </Button>
 
       <p className="text-center text-xs leading-5 text-muted-foreground">
         By continuing you agree to our{' '}

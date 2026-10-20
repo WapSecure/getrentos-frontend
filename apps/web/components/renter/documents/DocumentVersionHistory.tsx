@@ -88,9 +88,7 @@ export const DocumentVersionHistory = ({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-foreground">v{version.version}</span>
-                      {version.isCurrent && (
-                        <Badge variant="success">Current</Badge>
-                      )}
+                      {version.isCurrent && <Badge variant="success">Current</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {formatDate(version.date)} • {version.size} • by {version.user}
@@ -104,14 +102,14 @@ export const DocumentVersionHistory = ({
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <IconButton
-                    label="Download version"
+                    label={`Download version ${version.version}`}
                     size="sm"
                     icon={<Download />}
                     onClick={() => handleDownload(version.id)}
                   />
                   {!version.isCurrent && (
                     <IconButton
-                      label="Restore this version"
+                      label={`Restore version ${version.version}`}
                       size="sm"
                       icon={<RotateCcw />}
                       onClick={() => handleRestore(version.id)}

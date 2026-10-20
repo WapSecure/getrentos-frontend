@@ -11,6 +11,7 @@ import {
 } from '@getrentos/ui/DropdownMenu';
 import { ThemeSwitch } from '@/components/layout/ThemeSwitch';
 import { Logo } from '@/components/ui/Logo';
+import { Button, IconButton } from '@getrentos/ui';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { ROUTES, getDashboardRoute, getUserRole } from '@/lib/constants/auth';
 import { ESTATE_MARKETPLACE_ROUTES } from '@/lib/constants/auth';
@@ -50,7 +51,7 @@ const PAGE_LINKS: NavLink[] = [
 /** Every item is a single, unbreakable line; nothing is allowed to shrink or wrap. */
 const linkBase =
   'inline-flex shrink-0 items-center whitespace-nowrap rounded-lg px-1 py-1 text-sm font-medium transition-colors';
-const linkIdle = 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white';
+const linkIdle = 'text-muted-foreground hover:text-foreground';
 const linkActive = 'text-primary';
 
 const isCurrent = (pathname: string, href: string) => !href.includes('#') && pathname === href;
@@ -99,7 +100,7 @@ export const Navigation = () => {
         aria-label="Main"
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? 'border-b border-border/60 bg-white/80 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-white/65 dark:bg-background/80 dark:supports-backdrop-filter:bg-background/70'
+            ? 'border-b border-border/60 bg-background/80 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/70'
             : 'bg-transparent'
         }`}
       >
@@ -160,12 +161,9 @@ export const Navigation = () => {
                     Sign in
                   </Link>
                   <ThemeSwitch />
-                  <Link
-                    href={ROUTES.SIGNUP}
-                    className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary-hover hover:shadow-md"
-                  >
+                  <Button href={ROUTES.SIGNUP} size="sm" rounded="full" className="shrink-0 px-5">
                     Get early access
-                  </Link>
+                  </Button>
                 </>
               ) : (
                 <>
@@ -186,22 +184,20 @@ export const Navigation = () => {
 
             <div className="flex shrink-0 items-center gap-3 lg:hidden">
               <ThemeSwitch />
-              <button
-                type="button"
+              <IconButton
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={isMobileMenuOpen}
-                className="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
-              >
-                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </button>
+                className="text-foreground"
+                icon={isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              />
             </div>
           </div>
         </div>
       </nav>
 
       {isMobileMenuOpen && (
-        <div className="nav-drop fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-border/60 bg-white/95 backdrop-blur-xl lg:hidden dark:bg-background/95">
+        <div className="nav-drop fixed inset-x-0 top-16 z-40 max-h-[calc(100vh-4rem)] overflow-y-auto border-b border-border/60 bg-background/95 backdrop-blur-xl lg:hidden">
           <div className="flex flex-col gap-1 p-4">
             <p className="px-4 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Marketplaces
@@ -211,7 +207,7 @@ export const Navigation = () => {
                 key={link.href}
                 href={link.href}
                 onClick={closeMenu}
-                className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+                className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 {link.label}
               </Link>
@@ -223,7 +219,7 @@ export const Navigation = () => {
                 key={link.href}
                 href={link.href}
                 onClick={closeMenu}
-                className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+                className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 {link.label}
               </Link>
@@ -235,7 +231,7 @@ export const Navigation = () => {
                 <Link
                   href={ROUTES.LOGIN}
                   onClick={closeMenu}
-                  className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+                  className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   Sign in
                 </Link>
@@ -252,7 +248,7 @@ export const Navigation = () => {
                 <Link
                   href={dashboardHref}
                   onClick={closeMenu}
-                  className="rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
+                  className="rounded-lg px-4 py-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   Dashboard
                 </Link>

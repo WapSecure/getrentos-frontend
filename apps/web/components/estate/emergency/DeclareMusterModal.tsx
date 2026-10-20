@@ -1,9 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Siren, X } from 'lucide-react';
-import { Alert, Button, Field, IconButton, Input, Select, Textarea } from '@getrentos/ui';
+import { Siren } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  Input,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import type { EmergencyKind } from '@/types/estate';
 
 /** The API's floor on a description, kept in step so the form cannot under-run it. */
@@ -100,96 +110,79 @@ export const DeclareMusterModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            className="bg-card rounded-xl max-w-lg w-full max-h-[90vh] flex flex-col"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Raise the alarm"
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="lg">
+        <DialogTitle className="flex items-center gap-2 pr-8 text-lg font-semibold text-foreground">
+          <Siren className="w-5 h-5 text-destructive" aria-hidden="true" />
+          Raise the alarm
+        </DialogTitle>
+        <DialogDescription className="mt-1 text-sm text-muted-foreground">
+          Every household in the estate is told immediately, and the roll is taken as it stands
+          right now.
+        </DialogDescription>
+
+        <div className="mt-5 space-y-4">
+          {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
+
+          <Field
+            label="What is happening?"
+            hint="This decides the words every resident is sent, so it is worth a second before the tap."
           >
-            <div className="flex items-start justify-between gap-4 p-5 border-b border-border">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <Siren className="w-5 h-5 text-destructive" />
-                  Raise the alarm
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Every household in the estate is told immediately, and the roll is taken as it
-                  stands right now.
-                </p>
-              </div>
-              <IconButton label="Close" icon={<X />} onClick={handleClose} />
-            </div>
+            <Select
+              value={kind}
+              onValueChange={(value) => setKind(value as EmergencyKind)}
+              options={KIND_OPTIONS}
+            />
+          </Field>
 
-            <div className="p-5 space-y-4 overflow-y-auto">
-              {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
+          <Field
+            label="What did you see?"
+            hint="In your own words. This is the line a fire officer, an insurer or a family reads afterwards, and it is the only place your account of it survives."
+          >
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              maxLength={1000}
+              showCount
+              placeholder="e.g. Smoke on the third floor of Block C, coming from the stairwell."
+            />
+          </Field>
 
-              <Field
-                label="What is happening?"
-                hint="This decides the words every resident is sent, so it is worth a second before the tap."
-              >
-                <Select
-                  value={kind}
-                  onValueChange={(value) => setKind(value as EmergencyKind)}
-                  options={KIND_OPTIONS}
-                />
-              </Field>
-
-              <Field
-                label="What did you see?"
-                hint="In your own words. This is the line a fire officer, an insurer or a family reads afterwards, and it is the only place your account of it survives."
-              >
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  maxLength={1000}
-                  showCount
-                  placeholder="e.g. Smoke on the third floor of Block C, coming from the stairwell."
-                />
-              </Field>
-
-              <Field
-                label="Where should everybody gather?"
-                optionalLabel="(optional)"
-                hint="Leave it blank if you have not decided. Residents are told to leave by the nearest exit instead: nobody is kept waiting on a form field."
-              >
-                <Input
-                  type="text"
-                  value={assemblyPoint}
-                  onChange={(e) => setAssemblyPoint(e.target.value)}
-                  maxLength={160}
-                  placeholder="e.g. the car park by the second gate"
-                />
-              </Field>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 p-5 border-t border-border">
-              <p className="text-xs text-muted-foreground">
-                You can stand the roll down once the estate is out.
-              </p>
-              <div className="flex gap-2">
-                <Button variant="ghost" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={submit}
-                  isLoading={isSubmitting}
-                  loadingText="Raising…"
-                >
-                  Raise the alarm
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+          <Field
+            label="Where should everybody gather?"
+            optionalLabel="(optional)"
+            hint="Leave it blank if you have not decided. Residents are told to leave by the nearest exit instead: nobody is kept waiting on a form field."
+          >
+            <Input
+              type="text"
+              value={assemblyPoint}
+              onChange={(e) => setAssemblyPoint(e.target.value)}
+              maxLength={160}
+              placeholder="e.g. the car park by the second gate"
+            />
+          </Field>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            You can stand the roll down once the estate is out.
+          </p>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={submit}
+              isLoading={isSubmitting}
+              loadingText="Raising…"
+            >
+              Raise the alarm
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

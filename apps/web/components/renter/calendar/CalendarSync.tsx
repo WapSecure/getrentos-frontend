@@ -2,10 +2,7 @@
 
 import { useState } from 'react';
 import { Calendar, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@getrentos/ui';
-import { Field } from '@getrentos/ui';
-import { RadioGroup } from '@getrentos/ui';
-import { Switch } from '@getrentos/ui';
+import { Button, Field, RadioGroup, Switch } from '@getrentos/ui';
 
 export const CalendarSync = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -62,8 +59,7 @@ export const CalendarSync = () => {
                 />
               </Field>
 
-              <Button variant="primary" size="sm" fullWidth>
-                <Check className="w-4 h-4" />
+              <Button variant="primary" size="sm" fullWidth icon={<Check className="w-4 h-4" />}>
                 Connect {providers.find((p) => p.id === syncProvider)?.name}
               </Button>
             </>

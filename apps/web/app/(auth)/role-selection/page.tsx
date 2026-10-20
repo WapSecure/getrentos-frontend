@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { RoleCard } from '@/components/auth/RoleSelection/RoleCard';
 import { MultiRoleToggle } from '@/components/auth/RoleSelection/MultiRoleToggle';
 import { Logo } from '@/components/ui/Logo';
-import { ThemeToggle } from '@getrentos/ui';
+import { Button, ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { ROLES } from '@/lib/constants/auth';
 
@@ -128,24 +128,18 @@ export default function RoleSelectionPage() {
       >
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <MultiRoleToggle enabled={canAddMoreRoles} onToggle={setCanAddMoreRoles} variant="bar" />
-          <button
+          <Button
             onClick={handleContinue}
-            disabled={signupData.selectedRoles.length === 0 || isLoading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-hover hover:shadow-md active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+            disabled={signupData.selectedRoles.length === 0}
+            isLoading={isLoading}
+            size="lg"
+            rounded="lg"
+            icon={<ArrowRight className="h-4 w-4" />}
+            iconPosition="right"
+            className="w-full px-8 text-sm sm:w-auto"
           >
-            {isLoading ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                className="h-5 w-5 rounded-full border-2 border-background border-t-transparent"
-              />
-            ) : (
-              <>
-                Create Account
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
+            Create Account
+          </Button>
         </div>
       </motion.div>
     </div>

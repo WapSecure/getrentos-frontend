@@ -89,9 +89,9 @@ export default function AdminLandPurchasesPage() {
             {purchase.reference}
           </Link>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            <button
-              type="button"
-              className="hover:text-primary hover:underline"
+            <Button
+              variant="link"
+              className="text-xs font-normal text-muted-foreground hover:text-primary"
               onClick={(event) => {
                 event.stopPropagation();
                 setLayout({ id: purchase.layoutId, name: purchase.layoutName });
@@ -100,7 +100,7 @@ export default function AdminLandPurchasesPage() {
               title="Show only this layout"
             >
               {purchase.layoutName}
-            </button>
+            </Button>
             {` · Plot ${purchase.plotNumber}`}
             {purchase.block && ` · Block ${purchase.block}`}
           </p>

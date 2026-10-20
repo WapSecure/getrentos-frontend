@@ -296,15 +296,13 @@ export const SavedPropertyCard = ({
         <PropertyPhoto src={property.image} alt={property.title} className="h-48">
           {selectButton}
 
-          <button
-            type="button"
+          <IconButton
+            size="sm"
+            label="Remove from saved"
             onClick={() => onRemove(property.id)}
-            className="absolute top-2 right-2 p-1.5 bg-card/90 rounded-full hover:bg-card transition-colors z-10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30"
-            aria-label="Remove from saved"
-            title="Remove from saved"
-          >
-            <Heart className="w-4 h-4 text-destructive fill-destructive" aria-hidden="true" />
-          </button>
+            className="absolute top-2 right-2 z-10 rounded-full bg-card/90 hover:bg-card"
+            icon={<Heart className="text-destructive fill-destructive" />}
+          />
 
           <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded-lg text-sm font-bold z-10">
             {formatPrice()}

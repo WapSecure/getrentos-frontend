@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Field, NumberInput, useToast } from '@getrentos/ui';
+import { Button, Field, NumberInput, ToggleChip, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
@@ -94,19 +94,13 @@ export const BusinessPreferencesSettings = () => {
             className="flex flex-wrap gap-2"
           >
             {serviceAreaOptions.map((area) => (
-              <button
+              <ToggleChip
                 key={area}
-                type="button"
-                aria-pressed={serviceAreas.includes(area)}
-                onClick={() => toggleArea(area)}
-                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  serviceAreas.includes(area)
-                    ? 'border-primary bg-accent text-primary'
-                    : 'border-border text-muted-foreground'
-                }`}
+                pressed={serviceAreas.includes(area)}
+                onPressedChange={() => toggleArea(area)}
               >
                 {area}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>
@@ -124,19 +118,13 @@ export const BusinessPreferencesSettings = () => {
             className="flex flex-wrap gap-2"
           >
             {propertyTypeOptions.map((type) => (
-              <button
+              <ToggleChip
                 key={type.value}
-                type="button"
-                aria-pressed={propertyTypes.includes(type.value)}
-                onClick={() => toggleType(type.value)}
-                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  propertyTypes.includes(type.value)
-                    ? 'border-primary bg-accent text-primary'
-                    : 'border-border text-muted-foreground'
-                }`}
+                pressed={propertyTypes.includes(type.value)}
+                onPressedChange={() => toggleType(type.value)}
               >
                 {type.label}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>

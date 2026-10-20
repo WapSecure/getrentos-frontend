@@ -1,8 +1,6 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { Button, Input } from '@getrentos/ui';
+import { Button, Checkbox, Field, IconButton, Input } from '@getrentos/ui';
 
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +17,7 @@ interface PhoneSignupProps {
 export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const { setData } = useSignupStore();
 
   const {
@@ -67,149 +65,92 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
 
   return (
     <form method="post" onSubmit={handleSubmit(onSubmitForm)} className="space-y-5">
-      {/* Full Name */}
-      <div className="relative">
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Full Name
-        </label>
-        <div
-          className={`relative transition-all duration-200 ${focusedField === 'name' ? 'transform scale-[1.02]' : ''}`}
-        >
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            {...register('fullName')}
-            onFocus={() => setFocusedField('name')}
-            onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.fullName ? 'border-destructive' : 'border-border'
-            }`}
-            placeholder="John Doe"
-          />
-        </div>
-        {errors.fullName && (
-          <p className="mt-1 text-sm text-destructive">{errors.fullName.message}</p>
-        )}
-      </div>
+      <Field label="Full name" error={errors.fullName?.message}>
+        <Input
+          type="text"
+          autoComplete="name"
+          {...register('fullName')}
+          leadingIcon={<User className="w-4 h-4" />}
+          inputClassName="py-3"
+          placeholder="John Doe"
+        />
+      </Field>
 
-      {/* Phone Number */}
-      <div className="relative">
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Phone Number
-        </label>
-        <div
-          className={`relative transition-all duration-200 ${focusedField === 'phone' ? 'transform scale-[1.02]' : ''}`}
-        >
-          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="tel"
-            {...register('phone')}
-            onFocus={() => setFocusedField('phone')}
-            onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-4 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.phone ? 'border-destructive' : 'border-border'
-            }`}
-            placeholder="+1 234 567 8900"
-          />
-        </div>
-        {errors.phone && (
-          <p className="mt-1 text-sm text-destructive">{errors.phone.message}</p>
-        )}
-      </div>
+      <Field label="Phone number" error={errors.phone?.message}>
+        <Input
+          type="tel"
+          autoComplete="tel"
+          {...register('phone')}
+          leadingIcon={<Phone className="w-4 h-4" />}
+          inputClassName="py-3"
+          placeholder="+1 234 567 8900"
+        />
+      </Field>
 
-      {/* Password */}
-      <div className="relative">
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Password
-        </label>
-        <div
-          className={`relative transition-all duration-200 ${focusedField === 'password' ? 'transform scale-[1.02]' : ''}`}
-        >
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            {...register('password')}
-            onFocus={() => setFocusedField('password')}
-            onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.password ? 'border-destructive' : 'border-border'
-            }`}
-            placeholder="Create a password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        </div>
-
-        {/* Password Strength Indicator */}
+      <Field
+        label="Password"
+        error={errors.password?.message}
+        hint={password ? `Password strength: ${strengthText}` : undefined}
+      >
+        <Input
+          type={showPassword ? 'text' : 'password'}
+          autoComplete="new-password"
+          {...register('password')}
+          leadingIcon={<Lock className="w-4 h-4" />}
+          inputClassName="py-3"
+          placeholder="Create a password"
+          trailingIcon={
+            <IconButton
+              size="sm"
+              className="-mr-2"
+              label={showPassword ? 'Hide password' : 'Show password'}
+              icon={showPassword ? <EyeOff /> : <Eye />}
+              onClick={() => setShowPassword(!showPassword)}
+            />
+          }
+        />
         {password && (
-          <div className="mt-2 space-y-1">
-            <div className="flex gap-1">
-              {[1, 2, 3, 4].map((level) => (
-                <div
-                  key={level}
-                  className={`h-1 flex-1 rounded-full transition-all ${
-                    strengthLevel >= level
-                      ? level === 1
-                        ? 'bg-destructive'
-                        : level === 2
-                          ? 'bg-warning'
-                          : level === 3
-                            ? 'bg-info'
-                            : 'bg-success'
-                      : 'bg-muted'
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Password strength: {strengthText}
-            </p>
+          <div className="flex gap-1" aria-hidden="true">
+            {[1, 2, 3, 4].map((level) => (
+              <div
+                key={level}
+                className={`h-1 flex-1 rounded-full transition-all ${
+                  strengthLevel >= level
+                    ? level === 1
+                      ? 'bg-destructive'
+                      : level === 2
+                        ? 'bg-warning'
+                        : level === 3
+                          ? 'bg-info'
+                          : 'bg-success'
+                    : 'bg-muted'
+                }`}
+              />
+            ))}
           </div>
         )}
+      </Field>
 
-        {errors.password && (
-          <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
-        )}
-      </div>
-
-      {/* Confirm Password */}
-      <div className="relative">
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Confirm Password
-        </label>
-        <div
-          className={`relative transition-all duration-200 ${focusedField === 'confirm' ? 'transform scale-[1.02]' : ''}`}
-        >
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type={showConfirmPassword ? 'text' : 'password'}
-            {...register('confirmPassword')}
-            onFocus={() => setFocusedField('confirm')}
-            onBlur={() => setFocusedField(null)}
-            className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-card text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
-              errors.confirmPassword ? 'border-destructive' : 'border-border'
-            }`}
-            placeholder="Confirm your password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          >
-            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        </div>
-
-        {/* Password Match Indicator */}
-        {confirmPassword && password && (
-          <div className="mt-1 flex items-center gap-1">
+      <Field label="Confirm password" error={errors.confirmPassword?.message}>
+        <Input
+          type={showConfirmPassword ? 'text' : 'password'}
+          autoComplete="new-password"
+          {...register('confirmPassword')}
+          leadingIcon={<Lock className="w-4 h-4" />}
+          inputClassName="py-3"
+          placeholder="Confirm your password"
+          trailingIcon={
+            <IconButton
+              size="sm"
+              className="-mr-2"
+              label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+              icon={showConfirmPassword ? <EyeOff /> : <Eye />}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            />
+          }
+        />
+        {confirmPassword && password && !errors.confirmPassword && (
+          <div className="flex items-center gap-1">
             {password === confirmPassword ? (
               <>
                 <CheckCircle className="w-3 h-3 text-success" />
@@ -220,38 +161,39 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
             )}
           </div>
         )}
+      </Field>
 
-        {errors.confirmPassword && (
-          <p className="mt-1 text-sm text-destructive">
-            {errors.confirmPassword.message}
-          </p>
-        )}
-      </div>
-
-      {/* Terms Agreement */}
-      <div className="flex items-start gap-2">
-        <LegacyInput
-          type="checkbox"
-          id="terms"
-          required
-          className="mt-1 w-4 h-4 rounded border-border text-primary focus:ring-primary"
-        />
-        <label htmlFor="terms" className="text-xs text-muted-foreground">
-          I agree to the{' '}
-          <a href="/terms" className="text-primary hover:underline">
-            Terms of Service
-          </a>{' '}
-          and{' '}
-          <a href="/privacy" className="text-primary hover:underline">
-            Privacy Policy
-          </a>
-        </label>
-      </div>
+      <Checkbox
+        required
+        checked={agreedToTerms}
+        onCheckedChange={setAgreedToTerms}
+        label={
+          <span className="text-xs font-normal text-muted-foreground">
+            I agree to the{' '}
+            <a
+              href="/terms"
+              onClick={(e) => e.stopPropagation()}
+              className="text-primary hover:underline"
+            >
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a
+              href="/privacy"
+              onClick={(e) => e.stopPropagation()}
+              className="text-primary hover:underline"
+            >
+              Privacy Policy
+            </a>
+          </span>
+        }
+      />
 
       {/* Submit Button */}
       <Button
         type="submit"
-        disabled={!isValid}
+        disabled={!isValid || !agreedToTerms}
+
         isLoading={isLoading}
         fullWidth
         size="lg"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Field, NumberInput, SaveButton, Switch } from '@getrentos/ui';
+import { Field, NumberInput, SaveButton, Switch, ToggleChip } from '@getrentos/ui';
 
 const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
 const dayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -38,19 +38,13 @@ export const FieldPreferencesSettings = () => {
           </p>
           <div role="group" aria-labelledby="field-service-areas" className="flex flex-wrap gap-2">
             {serviceAreaOptions.map((area) => (
-              <button
+              <ToggleChip
                 key={area}
-                type="button"
-                aria-pressed={serviceAreas.includes(area)}
-                onClick={() => toggleArea(area)}
-                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  serviceAreas.includes(area)
-                    ? 'border-primary bg-accent text-primary'
-                    : 'border-border text-muted-foreground'
-                }`}
+                pressed={serviceAreas.includes(area)}
+                onPressedChange={() => toggleArea(area)}
               >
                 {area}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>
@@ -61,19 +55,13 @@ export const FieldPreferencesSettings = () => {
           </p>
           <div role="group" aria-labelledby="field-available-days" className="flex flex-wrap gap-2">
             {dayOptions.map((day) => (
-              <button
+              <ToggleChip
                 key={day}
-                type="button"
-                aria-pressed={availableDays.includes(day)}
-                onClick={() => toggleDay(day)}
-                className={`w-11 h-9 rounded-lg text-sm border transition-colors ${
-                  availableDays.includes(day)
-                    ? 'border-primary bg-accent text-primary'
-                    : 'border-border text-muted-foreground'
-                }`}
+                pressed={availableDays.includes(day)}
+                onPressedChange={() => toggleDay(day)}
               >
                 {day}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>

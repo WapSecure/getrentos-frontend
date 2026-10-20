@@ -70,13 +70,13 @@ function MagicLinkVerifyContent() {
             </a>
           </>
         ) : (
-          <>
-            <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-3" />
+          <div role="status" aria-live="polite">
+            <Loader2 className="w-8 h-8 text-primary animate-spin motion-reduce:animate-none mx-auto mb-3" />
             <h1 className="text-lg font-semibold text-foreground">Signing you in…</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Verifying your secure sign-in link.
             </p>
-          </>
+          </div>
         )}
       </div>
     </div>

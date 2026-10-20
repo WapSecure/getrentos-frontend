@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Building2, Percent, PiggyBank, TrendingUp, Users } from 'lucide-react';
 import {
   Alert,
+  Button,
   EmptyState,
   PageErrorState,
   Select,
@@ -218,13 +219,13 @@ export function PortfolioView() {
                     </td>
                     <td className="px-3 py-3 text-right">
                       {row.capRate === null ? (
-                        <button
-                          type="button"
+                        <Button
+                          variant="link"
                           onClick={() => setEditing(row)}
-                          className="text-xs font-medium text-primary hover:underline"
+                          className="text-xs font-medium"
                         >
                           Add value
-                        </button>
+                        </Button>
                       ) : (
                         <>
                           <span className="font-medium text-foreground">
@@ -245,13 +246,13 @@ export function PortfolioView() {
                     </td>
                     <td className="px-3 py-3 text-right">
                       {row.yieldOnCost === null ? (
-                        <button
-                          type="button"
+                        <Button
+                          variant="link"
                           onClick={() => setEditing(row)}
-                          className="text-xs font-medium text-primary hover:underline"
+                          className="text-xs font-medium"
                         >
                           Add price
-                        </button>
+                        </Button>
                       ) : (
                         percent(row.yieldOnCost)
                       )}

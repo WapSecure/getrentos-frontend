@@ -1,9 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, AlertTriangle, FileText } from 'lucide-react';
-import { Alert, Button, Field, IconButton, Input, Select, Switch, Textarea } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  IconButton,
+  Input,
+  Select,
+  Switch,
+  Textarea,
+} from '@getrentos/ui';
 import type {
   CreateMaintenanceRequestInput,
   MaintenanceCategory,
@@ -181,226 +193,200 @@ export const ReportMaintenanceModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl mx-4"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="maintenance-report-title"
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent size="lg">
+        <DialogTitle className="pr-8 font-semibold text-foreground">
+          Report Maintenance Issue
+        </DialogTitle>
+        <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+          Provide details about the issue you&apos;re experiencing
+        </DialogDescription>
+
+        <div className="mt-4 space-y-4">
+          <section
+            className={`rounded-xl border p-4 transition-colors ${
+              formData.isEmergency
+                ? 'border-destructive/30 bg-destructive-subtle'
+                : 'border-border bg-secondary/30'
+            }`}
+            aria-labelledby="emergency-maintenance-title"
           >
-            <div className="bg-card sticky top-0 z-10 flex items-center justify-between border-b border-border p-4">
-              <div>
-                <h3 id="maintenance-report-title" className="font-semibold text-foreground">
-                  Report Maintenance Issue
-                </h3>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Provide details about the issue you&apos;re experiencing
-                </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex gap-3">
+                <span
+                  className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                    formData.isEmergency
+                      ? 'bg-destructive/10 text-destructive'
+                      : 'bg-secondary text-muted-foreground'
+                  }`}
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                </span>
+                <div>
+                  <h4
+                    id="emergency-maintenance-title"
+                    className="text-sm font-semibold text-foreground"
+                  >
+                    Emergency maintenance
+                  </h4>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    Use this only for immediate property hazards, such as active flooding, exposed
+                    wiring, or an insecure entry.
+                  </p>
+                </div>
               </div>
-              <IconButton
-                label="Close maintenance report"
-                icon={<X />}
-                size="sm"
-                onClick={handleClose}
+              <Switch
+                aria-label="Mark this as emergency maintenance"
+                checked={formData.isEmergency}
+                onCheckedChange={handleEmergencyToggle}
                 disabled={isSubmitting}
+                className="mt-0.5"
               />
             </div>
 
-            <div className="space-y-4 p-4">
-              <section
-                className={`rounded-xl border p-4 transition-colors ${
-                  formData.isEmergency
-                    ? 'border-destructive/30 bg-destructive-subtle'
-                    : 'border-border bg-secondary/30'
-                }`}
-                aria-labelledby="emergency-maintenance-title"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex gap-3">
-                    <span
-                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                        formData.isEmergency
-                          ? 'bg-destructive/10 text-destructive'
-                          : 'bg-secondary text-muted-foreground'
-                      }`}
-                    >
-                      <AlertTriangle className="h-4 w-4" />
-                    </span>
-                    <div>
-                      <h4
-                        id="emergency-maintenance-title"
-                        className="text-sm font-semibold text-foreground"
-                      >
-                        Emergency maintenance
-                      </h4>
-                      <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                        Use this only for immediate property hazards, such as active flooding,
-                        exposed wiring, or an insecure entry.
-                      </p>
-                    </div>
-                  </div>
-                  <Switch
-                    aria-label="Mark this as emergency maintenance"
-                    checked={formData.isEmergency}
-                    onCheckedChange={handleEmergencyToggle}
-                    disabled={isSubmitting}
-                    className="mt-0.5"
-                  />
-                </div>
-
-                {formData.isEmergency && (
-                  <div className="mt-3 rounded-lg border border-destructive/20 bg-card/70 p-3 text-xs leading-5 text-destructive">
-                    <p className="font-medium">Submitted as an urgent emergency request.</p>
-                    <p className="mt-1">
-                      For fire, medical emergencies, a gas smell, or any immediate threat to life,
-                      move to safety and call local emergency services first.
-                    </p>
-                  </div>
-                )}
-              </section>
-
-              <Field label="Issue Title" required error={errors.title}>
-                <Input
-                  type="text"
-                  value={formData.title}
-                  onChange={(event) => handleChange('title', event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="Brief description of the issue"
-                />
-              </Field>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="Category" required error={errors.category}>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) =>
-                      handleChange('category', value as MaintenanceCategory | '')
-                    }
-                    disabled={isSubmitting}
-                    placeholder="Select category"
-                    options={categories.map((category) => ({
-                      value: category.value,
-                      label: `${category.icon} ${category.label}`,
-                    }))}
-                  />
-                </Field>
-
-                <Field
-                  label="Priority"
-                  required
-                  hint={
-                    formData.isEmergency ? 'Emergency requests are submitted as urgent.' : undefined
-                  }
-                  error={formData.isEmergency ? undefined : errors.priority}
-                >
-                  <Select
-                    value={formData.isEmergency ? 'urgent' : formData.priority}
-                    onValueChange={(value) =>
-                      handleChange('priority', value as MaintenancePriority | '')
-                    }
-                    disabled={isSubmitting || formData.isEmergency}
-                    placeholder="Select priority"
-                    options={priorities.map((priority) => ({
-                      value: priority.value,
-                      label: `${priority.label} - ${priority.description}`,
-                    }))}
-                  />
-                </Field>
+            {formData.isEmergency && (
+              <div className="mt-3 rounded-lg border border-destructive/20 bg-card/70 p-3 text-xs leading-5 text-destructive">
+                <p className="font-medium">Submitted as an urgent emergency request.</p>
+                <p className="mt-1">
+                  For fire, medical emergencies, a gas smell, or any immediate threat to life, move
+                  to safety and call local emergency services first.
+                </p>
               </div>
+            )}
+          </section>
 
-              <Field label="Description" required error={errors.description}>
-                <Textarea
-                  value={formData.description}
-                  onChange={(event) => handleChange('description', event.target.value)}
-                  disabled={isSubmitting}
-                  placeholder="Include what happened, where it is, and whether it is getting worse."
-                  rows={4}
-                />
-              </Field>
+          <Field label="Issue Title" required error={errors.title}>
+            <Input
+              type="text"
+              value={formData.title}
+              onChange={(event) => handleChange('title', event.target.value)}
+              disabled={isSubmitting}
+              placeholder="Brief description of the issue"
+            />
+          </Field>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-foreground">
-                  Photos (Optional)
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  disabled={isSubmitting || photos.length >= MAX_PHOTOS}
-                  onChange={(event) => {
-                    handlePhotosSelected(event.target.files);
-                    event.target.value = '';
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isSubmitting || photos.length >= MAX_PHOTOS}
-                  className="w-full cursor-pointer rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Camera className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Click to upload photos</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    PNG, JPG up to 10MB: up to {MAX_PHOTOS} photos
-                  </p>
-                </button>
-                {photoError && <p className="mt-1 text-xs text-destructive">{photoError}</p>}
-                {photos.length > 0 && (
-                  <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                    {photos.map((photo, index) => (
-                      <li
-                        key={`${photo.name}-${photo.lastModified}-${index}`}
-                        className="group relative aspect-square overflow-hidden rounded-lg border border-border"
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, not a remote/optimizable image */}
-                        <img
-                          src={photoPreviewUrls[index]}
-                          alt={photo.name}
-                          className="h-full w-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removePhoto(index)}
-                          disabled={isSubmitting}
-                          aria-label={`Remove ${photo.name}`}
-                          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 disabled:cursor-not-allowed"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Category" required error={errors.category}>
+              <Select
+                value={formData.category}
+                onValueChange={(value) =>
+                  handleChange('category', value as MaintenanceCategory | '')
+                }
+                disabled={isSubmitting}
+                placeholder="Select category"
+                options={categories.map((category) => ({
+                  value: category.value,
+                  label: `${category.icon} ${category.label}`,
+                }))}
+              />
+            </Field>
 
-              {submitError && <Alert variant="danger">{submitError}</Alert>}
+            <Field
+              label="Priority"
+              required
+              hint={
+                formData.isEmergency ? 'Emergency requests are submitted as urgent.' : undefined
+              }
+              error={formData.isEmergency ? undefined : errors.priority}
+            >
+              <Select
+                value={formData.isEmergency ? 'urgent' : formData.priority}
+                onValueChange={(value) =>
+                  handleChange('priority', value as MaintenancePriority | '')
+                }
+                disabled={isSubmitting || formData.isEmergency}
+                placeholder="Select priority"
+                options={priorities.map((priority) => ({
+                  value: priority.value,
+                  label: `${priority.label} - ${priority.description}`,
+                }))}
+              />
+            </Field>
+          </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant={formData.isEmergency ? 'danger' : 'primary'}
-                  fullWidth
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  <FileText className="w-4 h-4" />
-                  {formData.isEmergency ? 'Submit Emergency Request' : 'Submit Request'}
-                </Button>
-                <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+          <Field label="Description" required error={errors.description}>
+            <Textarea
+              value={formData.description}
+              onChange={(event) => handleChange('description', event.target.value)}
+              disabled={isSubmitting}
+              placeholder="Include what happened, where it is, and whether it is getting worse."
+              rows={4}
+            />
+          </Field>
+
+          <div>
+            <p className="mb-1 block text-sm font-medium text-foreground">Photos (Optional)</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={isSubmitting || photos.length >= MAX_PHOTOS}
+              onChange={(event) => {
+                handlePhotosSelected(event.target.files);
+                event.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isSubmitting || photos.length >= MAX_PHOTOS}
+              className="w-full cursor-pointer rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Camera className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Click to upload photos</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                PNG, JPG up to 10MB: up to {MAX_PHOTOS} photos
+              </p>
+            </button>
+            {photoError && <p className="mt-1 text-xs text-destructive">{photoError}</p>}
+            {photos.length > 0 && (
+              <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {photos.map((photo, index) => (
+                  <li
+                    key={`${photo.name}-${photo.lastModified}-${index}`}
+                    className="group relative aspect-square overflow-hidden rounded-lg border border-border"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, not a remote/optimizable image */}
+                    <img
+                      src={photoPreviewUrls[index]}
+                      alt={photo.name}
+                      className="h-full w-full object-cover"
+                    />
+                    <IconButton
+                      label={`Remove ${photo.name}`}
+                      icon={<X />}
+                      size="sm"
+                      onClick={() => removePhoto(index)}
+                      disabled={isSubmitting}
+                      className="absolute right-1 top-1 h-7 w-7 rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/70 hover:text-white group-hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {submitError && <Alert variant="danger">{submitError}</Alert>}
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant={formData.isEmergency ? 'danger' : 'primary'}
+              fullWidth
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              isLoading={isSubmitting}
+              icon={<FileText className="w-4 h-4" />}
+            >
+              {formData.isEmergency ? 'Submit Emergency Request' : 'Submit Request'}
+            </Button>
+            <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
+              Cancel
+            </Button>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   );
 };

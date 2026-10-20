@@ -167,7 +167,7 @@ export const RenterSupportPage = () => {
                 type="button"
                 aria-current={activeThread?.id === thread.id ? 'true' : undefined}
                 onClick={() => setSelectedId(thread.id)}
-                className={`w-full rounded-xl border bg-card p-3 text-left transition-colors ${
+                className={`w-full rounded-xl border bg-card p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   activeThread?.id === thread.id
                     ? 'border-primary/40 ring-1 ring-primary/20'
                     : 'border-border/80 hover:border-primary/30'

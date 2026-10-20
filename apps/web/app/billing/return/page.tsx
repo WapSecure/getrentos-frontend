@@ -1,12 +1,12 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { billingService, type MyBilling } from '@/services/billingService';
 import { unwrap } from '@/lib/apiHelpers';
 import { useProCheckout } from '@/hooks/useProCheckout';
+import { Button, Skeleton } from '@getrentos/ui';
 
 /**
  * Where the payment gateway returns the customer.
@@ -59,30 +59,27 @@ function BillingReturnContent() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 text-center">
       {view.status === 'pending' && (
-        <>
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <div role="status" aria-live="polite" className="flex flex-col items-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary motion-reduce:animate-none" />
           <h1 className="mt-4 text-xl font-semibold text-foreground">Confirming your payment…</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             This only takes a moment. Please don&apos;t close this page.
           </p>
-        </>
+        </div>
       )}
 
       {view.status === 'ok' && (
         <>
-          <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
+          <CheckCircle2 className="h-12 w-12 text-success" />
           <h1 className="mt-4 text-xl font-semibold text-foreground">You&apos;re on Pro</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {view.detail?.trialEndsAt
               ? `Your free trial runs until ${new Date(view.detail.trialEndsAt).toLocaleDateString()}. We'll only charge you after that: cancel any time before then.`
               : 'Your Pro plan is active.'}
           </p>
-          <Link
-            href="/"
-            className="mt-6 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
-          >
+          <Button href="/" className="mt-6">
             Back to GetRentos
-          </Link>
+          </Button>
         </>
       )}
 
@@ -96,12 +93,9 @@ function BillingReturnContent() {
             {view.message} If you were charged, your plan will be activated automatically: you
             don&apos;t need to pay again.
           </p>
-          <Link
-            href="/"
-            className="mt-6 rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground"
-          >
+          <Button href="/" variant="outline" className="mt-6">
             Back to GetRentos
-          </Link>
+          </Button>
         </>
       )}
     </div>
@@ -112,8 +106,14 @@ export default function BillingReturnPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-6">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <div
+          role="status"
+          aria-label="Loading"
+          className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6"
+        >
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <Skeleton className="mt-4 h-6 w-2/3" />
+          <Skeleton className="mt-3 h-4 w-full" />
         </div>
       }
     >

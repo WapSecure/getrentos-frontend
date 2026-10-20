@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Users, AlertCircle } from 'lucide-react';
+import { Switch } from '@getrentos/ui';
 
 interface MultiRoleToggleProps {
   enabled: boolean;
@@ -12,22 +13,7 @@ interface MultiRoleToggleProps {
 
 export const MultiRoleToggle = ({ enabled, onToggle, variant = 'card' }: MultiRoleToggleProps) => {
   const switchControl = (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={enabled}
-      aria-label="Enable multiple roles"
-      onClick={() => onToggle(!enabled)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-        enabled ? 'bg-primary' : 'bg-muted'
-      }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        }`}
-      />
-    </button>
+    <Switch checked={enabled} onCheckedChange={onToggle} aria-label="Enable multiple roles" />
   );
 
   if (variant === 'bar') {

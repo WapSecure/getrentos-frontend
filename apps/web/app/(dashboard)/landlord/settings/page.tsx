@@ -3,6 +3,7 @@
 import { useLandlordUser } from '../layout';
 import { useState } from 'react';
 import { User, Bell, Landmark, Zap } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/landlord/settings/NotificationSettings';
 import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
@@ -45,7 +46,7 @@ export default function LandlordSettingsPage() {
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">
-          <div className="bg-card rounded-xl border border-border overflow-hidden lg:sticky lg:top-20">
+          <Card className="lg:sticky lg:top-20">
             <div className="p-2 space-y-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -67,13 +68,11 @@ export default function LandlordSettingsPage() {
                 );
               })}
             </div>
-          </div>
+          </Card>
         </div>
 
-        <div className="flex-1">
-          <div className="bg-card rounded-xl border border-border overflow-hidden p-6">
-            {renderContent()}
-          </div>
+        <div className="flex-1 min-w-0">
+          <Card className="p-4 sm:p-6">{renderContent()}</Card>
         </div>
       </div>
     </>

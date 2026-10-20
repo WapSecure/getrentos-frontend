@@ -2,9 +2,19 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Save } from 'lucide-react';
-import { Button, IconButton, Input, useOptimisticMutation, useToast } from '@getrentos/ui';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  Field,
+  IconButton,
+  Input,
+  useOptimisticMutation,
+  useToast,
+} from '@getrentos/ui';
 import { renterService, type SavedSearch } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -108,81 +118,73 @@ export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearch
   };
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        className="flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors"
+    <>
+      <Button
+        variant="link"
+        onClick={() => setIsOpen(true)}
+        aria-haspopup="dialog"
+        className="gap-1 font-normal"
       >
         <Bell className="w-4 h-4" />
         Save this search
-      </button>
+      </Button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute top-full left-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
-          >
-            <div className="p-4">
-              <h3 className="font-semibold text-foreground mb-2">Save this search</h3>
-              <p className="text-xs text-muted-foreground mb-3">
-                Get notified when new properties match your criteria
-              </p>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent size="sm" padded={false}>
+          <div className="p-4 pr-12">
+            <DialogTitle className="font-semibold text-foreground mb-2">
+              Save this search
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mb-3">
+              Get notified when new properties match your criteria
+            </DialogDescription>
+            <Field label="Search name" className="mb-3">
               <Input
                 type="text"
                 value={searchName}
                 onChange={(e) => setSearchName(e.target.value)}
-                aria-label="Search name"
                 placeholder="e.g., 2-bed in Ikeja under ₦200k"
-                className="mb-3"
               />
-              <Button
-                size="sm"
-                fullWidth
-                onClick={handleSave}
-                disabled={!searchName.trim()}
-                isLoading={saveMutation.isPending}
-                icon={<Save className="w-3 h-3" />}
-              >
-                Save Search
-              </Button>
-            </div>
+            </Field>
+            <Button
+              size="sm"
+              fullWidth
+              onClick={handleSave}
+              disabled={!searchName.trim()}
+              isLoading={saveMutation.isPending}
+              icon={<Save className="w-3 h-3" />}
+            >
+              Save Search
+            </Button>
+          </div>
 
-            {savedSearches.length > 0 && (
-              <div className="border-t border-border p-4">
-                <h4 className="text-sm font-medium text-foreground mb-2">Your saved searches</h4>
-                <div className="space-y-2">
-                  {savedSearches.map((search) => (
-                    <div
-                      key={search.id}
-                      className="flex items-center justify-between gap-2 text-sm"
+          {savedSearches.length > 0 && (
+            <div className="border-t border-border p-4">
+              <h4 className="text-sm font-medium text-foreground mb-2">Your saved searches</h4>
+              <div className="space-y-2">
+                {savedSearches.map((search) => (
+                  <div key={search.id} className="flex items-center justify-between gap-2 text-sm">
+                    <button
+                      type="button"
+                      onClick={() => handleApplySearch(search)}
+                      className="min-w-0 text-muted-foreground hover:text-primary text-left flex-1"
                     >
-                      <button
-                        type="button"
-                        onClick={() => handleApplySearch(search)}
-                        className="min-w-0 text-muted-foreground hover:text-primary text-left flex-1"
-                      >
-                        {search.name}
-                      </button>
-                      <IconButton
-                        label={`Delete saved search ${search.name}`}
-                        icon={<X />}
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDelete(search.id)}
-                      />
-                    </div>
-                  ))}
-                </div>
+                      {search.name}
+                    </button>
+                    <IconButton
+                      label={`Delete saved search ${search.name}`}
+                      icon={<X />}
+                      size="sm"
+                      variant="danger"
+                      onClick={() => handleDelete(search.id)}
+                    />
+                  </div>
+                ))}
               </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

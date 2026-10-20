@@ -1,76 +1,136 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { keepPreviousData, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { Bell } from 'lucide-react';
-import { IconButton, useOptimisticMutation } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  IconButton,
+  Pagination,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  useOptimisticMutation,
+} from '@getrentos/ui';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 import { formatRelativeTime } from '@/lib/format';
 import { notificationHref, type NotificationPortal } from '@/lib/notificationHref';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 
-interface BellNotification {
+export interface BellNotification {
   id: string;
   type: string;
   title: string;
-  body: string;
+  /** The text under the title; the renter feed calls it `message`. */
+  body?: string;
+  message?: string;
   read: boolean;
   createdAt: string;
   actionUrl?: string;
   conversationId?: string;
+  action?: { url: string };
+}
+
+/** A feed is either a bare list or one page of a paginated list. */
+export type BellFeed = BellNotification[] | { items: BellNotification[]; total?: number };
+
+interface FeedSourceProps {
+  /** The feed's cache key. With `pageSize`, the page is appended as `{ page, pageSize }`. */
+  queryKey: QueryKey;
+  fetchNotifications: (params: { page: number; pageSize?: number }) => Promise<BellFeed>;
+  markRead: (id: string) => Promise<unknown>;
+  markAllRead: () => Promise<unknown>;
+  /** Asks the server for the page size and keys the cache by page. */
+  pageSize?: number;
+  /** Pages through the feed inside the panel when it has more than one page. */
+  paginate?: boolean;
+  /** Refetches everything under `queryKey` once a mark-read settles. */
+  refetchAfterMarking?: boolean;
+  /** Refreshes the feed when the backend pushes `notification:new`. Defaults to true. */
+  realtime?: boolean;
+  viewAllHref?: string;
+  viewAllLabel?: string;
+}
+
+/** A `GET <basePath>`, `PATCH <basePath>/:id/read` and `POST <basePath>/read-all` feed. */
+interface BasePathProps {
+  basePath: string;
+}
+
+type NotificationBellProps = { portal: NotificationPortal } & (FeedSourceProps | BasePathProps);
+
+const basePathSource = (portal: NotificationPortal, basePath: string): FeedSourceProps => ({
+  queryKey: ['notifications', portal],
+  fetchNotifications: () => unwrap(safeCall(() => authFetch<BellNotification[]>(basePath))),
+  markRead: (id) =>
+    unwrap(safeCall(() => authFetch(`${basePath}/${id}/read`, { method: 'PATCH' }))),
+  markAllRead: () => unwrap(safeCall(() => authFetch(`${basePath}/read-all`, { method: 'POST' }))),
+});
+
+const markFeedRead = (old: unknown, isTarget: (id: string) => boolean): unknown => {
+  const read = (n: BellNotification) => (isTarget(n.id) ? { ...n, read: true } : n);
+  if (Array.isArray(old)) return (old as BellNotification[]).map(read);
+  const page = old as { items: BellNotification[] };
+  return { ...page, items: page.items.map(read) };
+};
+
+function RealtimeRefresh({ onNotification }: { onNotification: () => void }) {
+  useRealtimeEvent('notification:new', onNotification);
+  return null;
 }
 
 /**
- * A portal's notification bell over a `GET <basePath>`, `PATCH <basePath>/:id/read`
- * and `POST <basePath>/read-all` feed. Clicking an item marks it read and opens
- * what it is about (lib/notificationHref.ts).
+ * A portal's notification bell. Clicking an item marks it read and opens what
+ * it is about (lib/notificationHref.ts). Each portal brings its own feed; the
+ * panel, the unread dot and the optimistic mark-read are shared.
  */
-export function NotificationBell({
-  portal,
-  basePath,
-}: {
-  portal: NotificationPortal;
-  basePath: string;
-}) {
+export function NotificationBell(props: NotificationBellProps) {
+  const { portal } = props;
+  const {
+    queryKey: baseKey,
+    fetchNotifications,
+    markRead: markReadFn,
+    markAllRead: markAllReadFn,
+    pageSize,
+    paginate = false,
+    refetchAfterMarking = false,
+    realtime = true,
+    viewAllHref,
+    viewAllLabel = 'View all notifications',
+  } = 'basePath' in props ? basePathSource(portal, props.basePath) : props;
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const queryKey = ['notifications', portal] as const;
+  const [page, setPage] = useState(1);
+  const queryKey: QueryKey = pageSize ? [...baseKey, { page, pageSize }] : baseKey;
 
-  const { data: notifications = [] } = useQuery({
+  const { data } = useQuery({
     queryKey,
-    queryFn: () => unwrap(safeCall(() => authFetch<BellNotification[]>(basePath))),
+    queryFn: () => fetchNotifications({ page, pageSize }),
+    placeholderData: paginate ? keepPreviousData : undefined,
   });
-  const refresh = () => queryClient.invalidateQueries({ queryKey });
+  const notifications = (Array.isArray(data) ? data : data?.items) ?? [];
+  const total = (Array.isArray(data) ? data.length : data?.total) ?? 0;
+
+  const invalidate = refetchAfterMarking ? [baseKey] : [];
   const markRead = useOptimisticMutation({
-    mutationFn: (id: string) =>
-      unwrap(safeCall(() => authFetch(`${basePath}/${id}/read`, { method: 'PATCH' }))),
-    patches: (id: string) => [
-      {
-        queryKey,
-        update: (old) =>
-          (old as BellNotification[]).map((n) => (n.id === id ? { ...n, read: true } : n)),
-      },
-    ],
+    mutationFn: (id: string) => markReadFn(id),
+    patches: (id: string) => [{ queryKey, update: (old) => markFeedRead(old, (n) => n === id) }],
+    invalidate,
   });
   const markAllRead = useOptimisticMutation<unknown, void>({
-    mutationFn: () =>
-      unwrap(safeCall(() => authFetch(`${basePath}/read-all`, { method: 'POST' }))),
-    patches: () => [
-      {
-        queryKey,
-        update: (old) => (old as BellNotification[]).map((n) => ({ ...n, read: true })),
-      },
-    ],
+    mutationFn: () => markAllReadFn(),
+    patches: () => [{ queryKey, update: (old) => markFeedRead(old, () => true) }],
+    invalidate,
   });
-
-  // Real-time: refresh the bell when the backend pushes a new notification.
-  useRealtimeEvent('notification:new', refresh);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  // Mark it read, then open what it is about (if it is about something).
   const openNotification = (notification: BellNotification) => {
     if (!notification.read) markRead.mutate(notification.id);
     const href = notificationHref(portal, notification);
@@ -81,69 +141,87 @@ export function NotificationBell({
   };
 
   return (
-    <div className="relative">
-      <IconButton
-        onClick={() => setOpen(!open)}
-        label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-        aria-expanded={open}
-        className="relative"
-        icon={
-          <>
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-            )}
-          </>
-        }
-      />
+    <>
+      {realtime && (
+        <RealtimeRefresh
+          onNotification={() => queryClient.invalidateQueries({ queryKey: baseKey })}
+        />
+      )}
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          if (next) setPage(1);
+          setOpen(next);
+        }}
+      >
+        <div className="relative">
+          <PopoverTrigger asChild>
+            <IconButton
+              label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+              icon={<Bell className="w-5 h-5" />}
+            />
+          </PopoverTrigger>
+          {unreadCount > 0 && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background"
+            />
+          )}
+        </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
-          >
-            <div className="p-3 border-b border-border flex justify-between items-center">
-              <h3 className="font-semibold text-foreground">Notifications</h3>
-              {unreadCount > 0 && (
+        <PopoverContent aria-label="Notifications">
+          <div className="p-3 border-b border-border flex justify-between items-center gap-2">
+            <h3 className="font-semibold text-foreground">Notifications</h3>
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="xs" onClick={() => markAllRead.mutate()}>
+                Mark all as read
+              </Button>
+            )}
+          </div>
+          <div className="max-h-96 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <EmptyState icon={Bell} title="No notifications" size="compact" bare />
+            ) : (
+              notifications.map((notification) => (
                 <button
                   type="button"
-                  onClick={() => markAllRead.mutate()}
-                  className="text-xs text-primary hover:text-primary-hover"
+                  key={notification.id}
+                  className={`block w-full p-3 text-left border-b border-border hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                    !notification.read ? 'bg-accent' : ''
+                  }`}
+                  onClick={() => openNotification(notification)}
                 >
-                  Mark all as read
+                  <div className="flex justify-between items-start gap-2 mb-1">
+                    <h4 className="min-w-0 text-sm font-medium text-foreground">
+                      {notification.title}
+                    </h4>
+                    <span className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
+                      {formatRelativeTime(notification.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {notification.body ?? notification.message}
+                  </p>
                 </button>
-              )}
+              ))
+            )}
+          </div>
+          {paginate && pageSize && total > pageSize && (
+            <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
+          )}
+          {viewAllHref && (
+            <div className="p-2 border-t border-border">
+              <Link
+                href={viewAllHref}
+                onClick={() => setOpen(false)}
+                className="block w-full rounded-md text-center text-sm text-primary hover:text-primary-hover py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {viewAllLabel}
+              </Link>
             </div>
-            <div className="max-h-96 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">No notifications</div>
-              ) : (
-                notifications.map((notification) => (
-                  <button
-                    type="button"
-                    key={notification.id}
-                    className={`block w-full text-left p-3 border-b border-border hover:bg-secondary transition-colors ${
-                      !notification.read ? 'bg-accent' : ''
-                    }`}
-                    onClick={() => openNotification(notification)}
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="text-sm font-medium text-foreground">{notification.title}</h4>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                        {formatRelativeTime(notification.createdAt)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{notification.body}</p>
-                  </button>
-                ))
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+        </PopoverContent>
+      </Popover>
+    </>
   );
 }

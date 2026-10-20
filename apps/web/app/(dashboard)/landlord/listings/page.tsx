@@ -11,6 +11,7 @@ import {
   EmptyState,
   PageErrorState,
   Skeleton,
+  ToggleChip,
   useOptimisticMutation,
   useToast,
 } from '@getrentos/ui';
@@ -124,7 +125,7 @@ export default function LandlordListingsPage() {
           <h1 className="text-2xl font-bold text-foreground">Listings</h1>
           <p className="text-muted-foreground mt-1">
             {isLoadingListings || (listingsFailed && listings.length === 0) ? (
-              'Loading your listings…'
+              <Skeleton className="inline-block h-4 w-64 max-w-full align-middle" />
             ) : (
               <>
                 {publishedCount} active listing{publishedCount === 1 ? '' : 's'} •{' '}
@@ -142,21 +143,16 @@ export default function LandlordListingsPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto mb-6">
+      <div className="mb-6 flex gap-2 overflow-x-auto" role="group" aria-label="Filter listings by status">
         {statusFilters.map((option) => (
-          <button
+          <ToggleChip
             key={option.value}
-            type="button"
-            aria-pressed={filter === option.value}
-            onClick={() => setFilter(option.value)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-              filter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
+            size="sm"
+            pressed={filter === option.value}
+            onPressedChange={() => setFilter(option.value)}
           >
             {option.label}
-          </button>
+          </ToggleChip>
         ))}
       </div>
 
@@ -219,7 +215,6 @@ export default function LandlordListingsPage() {
       />
 
       <ListingPreviewModal listing={previewListing} onClose={() => setPreviewListing(null)} />
-
     </>
   );
 }

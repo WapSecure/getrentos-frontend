@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Gavel, Clock, CheckCircle2, XCircle } from 'lucide-react';
-import { Button, Textarea, useToast } from '@getrentos/ui';
+import { Button, Field, Textarea, useToast } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import {
   trustAppealService,
@@ -115,14 +115,15 @@ export const AppealControl = ({
     <div className="mt-2">
       {open ? (
         <div className="space-y-2">
-          <Textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={3}
-            placeholder={`Tell us why you are appealing ${subject} (at least 10 characters).`}
-            aria-label="Reason for your appeal"
-          />
-          <div className="flex gap-2">
+          <Field label="Reason for your appeal" hint="At least 10 characters.">
+            <Textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              placeholder={`Tell us why you are appealing ${subject}.`}
+            />
+          </Field>
+          <div className="flex flex-wrap gap-2">
             <Button
               size="sm"
               disabled={reason.trim().length < 10}
@@ -146,14 +147,14 @@ export const AppealControl = ({
           </div>
         </div>
       ) : (
-        <button
-          type="button"
+        <Button
+          variant="link"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
+          className="gap-1.5 text-xs font-medium"
         >
           <Gavel className="h-3.5 w-3.5" />
           Appeal this decision
-        </button>
+        </Button>
       )}
     </div>
   );

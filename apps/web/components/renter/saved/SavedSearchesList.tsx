@@ -14,7 +14,7 @@ import {
   Bed,
   Wallet,
 } from 'lucide-react';
-import { Badge, Button, Card, EmptyState, IconButton, useToast } from '@getrentos/ui';
+import { Badge, Button, Card, EmptyState, IconButton, ListSkeleton, useToast } from '@getrentos/ui';
 import { renterService, type SavedSearch } from '@/services/renterService';
 import { ROUTES } from '@/lib/constants/auth';
 
@@ -22,12 +22,17 @@ export const SavedSearchesList = () => {
   const router = useRouter();
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const toast = useToast();
 
   useEffect(() => {
     const load = async () => {
-      const res = await renterService.listSavedSearches();
-      if (res.success && res.data) setSavedSearches(res.data);
+      try {
+        const res = await renterService.listSavedSearches();
+        if (res.success && res.data) setSavedSearches(res.data);
+      } finally {
+        setIsLoading(false);
+      }
     };
     load();
   }, []);
@@ -88,6 +93,15 @@ export const SavedSearchesList = () => {
       </div>
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <Card>
+        {header}
+        <ListSkeleton rows={2} bare label="Loading saved searches" />
+      </Card>
+    );
+  }
 
   if (savedSearches.length === 0) {
     return (

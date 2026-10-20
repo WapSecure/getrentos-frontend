@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button, IconButton } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import {
   DateTimeField,
   isCompleteDateTime,
@@ -45,21 +43,15 @@ export const BookAmenityModal = ({
     !!amenity && isFutureDateTime(startsAt) && isCompleteDateTime(endsAt) && !endsBeforeStart;
 
   return (
-    <AnimatePresence>
-      {isOpen && amenity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <h3 className="font-semibold text-foreground">Book {amenity.name}</h3>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
+    <Dialog open={isOpen && !!amenity} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="sm">
+        {amenity && (
+          <>
+            <DialogTitle className="text-lg font-semibold text-foreground">
+              Book {amenity.name}
+            </DialogTitle>
 
-            <div className="p-4 space-y-4">
+            <div className="mt-4 space-y-4">
               <DateTimeField label="Starts" value={startsAt} onChange={setStartsAt} requireFuture />
               <div>
                 <DateTimeField
@@ -81,13 +73,12 @@ export const BookAmenityModal = ({
               )}
             </div>
 
-            <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
+            <div className="mt-6 flex flex-wrap justify-end gap-2">
+              <Button variant="ghost" onClick={handleClose}>
                 Cancel
               </Button>
               <Button
                 variant="primary"
-                fullWidth
                 disabled={!canSubmit}
                 isLoading={isSubmitting}
                 loadingText="Booking…"
@@ -102,9 +93,9 @@ export const BookAmenityModal = ({
                 Book
               </Button>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };

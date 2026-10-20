@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function GlobalError({
@@ -11,7 +12,7 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en">
-      <body className="bg-[#f5f7fa] dark:bg-background">
+      <body className="bg-background">
         <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-6">
             <span className="text-2xl font-bold text-background">!</span>
@@ -30,13 +31,9 @@ export default function GlobalError({
           )}
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={reset}
-              className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-medium text-sm hover:bg-primary-hover transition-colors"
-            >
+            <Button onClick={reset} rounded="full" className="px-6">
               Try Again
-            </button>
+            </Button>
             {/* global-error replaces the root layout, so next/link's router context can't be relied on here */}
             <a
               href={ROUTES.HOME}

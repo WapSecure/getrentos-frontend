@@ -93,26 +93,28 @@ export const DiscoverPropertyCard = ({
 
         <TrustChainBadge chain={property.trustChain} fallbackVerified={property.verified} />
 
-        <button
+        <IconButton
           onClick={handleSaveClick}
           // Icon-only, and the same heart repeats down every card, so without a
           // name a screen reader offers a column of identical "button"s with no
           // way to tell which property each one saves. The label also carries
           // the current state, which the fill colour only conveys visually.
-          aria-label={
+          label={
             isSaved
               ? `Remove ${property.title} from your shortlist`
               : `Save ${property.title} to your shortlist`
           }
           title={isSaved ? 'Remove from shortlist' : 'Save to shortlist'}
-          className="absolute right-3 top-3 z-10 flex min-h-9 min-w-9 items-center justify-center rounded-lg bg-card/95 text-foreground shadow-sm transition-colors hover:bg-card"
-        >
-          {isSaved ? (
-            <Heart className="w-4 h-4 text-destructive fill-destructive" />
-          ) : (
-            <Heart className="w-4 h-4 text-muted-foreground" />
-          )}
-        </button>
+          size="sm"
+          className="absolute right-3 top-3 z-10 h-9 w-9 bg-card/95 text-foreground shadow-sm hover:bg-card"
+          icon={
+            isSaved ? (
+              <Heart className="w-4 h-4 text-destructive fill-destructive" />
+            ) : (
+              <Heart className="w-4 h-4 text-muted-foreground" />
+            )
+          }
+        />
 
         <div className="absolute bottom-3 left-3 z-10 rounded-md bg-card/95 px-2.5 py-1.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm">
           {formatPrice()}

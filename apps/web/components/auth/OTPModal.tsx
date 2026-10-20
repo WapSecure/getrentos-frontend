@@ -1,9 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
-import { Alert, Button, IconButton } from '@getrentos/ui';
+import { CheckCircle, RefreshCw, ArrowRight } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@getrentos/ui';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OTPModalProps {
@@ -82,92 +88,65 @@ export const OTPModal = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="relative w-full max-w-md mx-4 bg-card rounded-2xl shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Close button */}
-          <IconButton
-            onClick={onClose}
-            label="Close"
-            size="sm"
-            icon={<X className="w-5 h-5" />}
-            className="absolute top-4 right-4"
-          />
-
-          <div className="p-6">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Verify Your {method === 'email' ? 'Email' : 'Phone'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                We sent a verification code to{' '}
-                <span className="font-medium text-foreground">{identifier}</span>
-              </p>
-            </div>
-
-            {error && (
-              <Alert variant="danger" className="mb-4">
-                {error}
-              </Alert>
-            )}
-
-            <div className="mb-6">
-              <OtpInput
-                value={otp}
-                onChange={(value) => {
-                  setOtp(value);
-                  setError(null);
-                }}
-                disabled={isVerifying}
-              />
-            </div>
-
-            <div className="text-center mb-6">
-              {!canResend ? (
-                <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
-              ) : (
-                <button
-                  onClick={handleResend}
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary-hover transition-colors"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  Resend code
-                </button>
-              )}
-            </div>
-
-            <Button
-              onClick={handleVerify}
-              disabled={otp.join('').length !== 6 || isVerifying}
-              variant="primary"
-              size="lg"
-              fullWidth
-              isLoading={isVerifying}
-            >
-              Verify & Continue
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && onClose()}>
+      <DialogContent size="md">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-primary" />
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          <DialogTitle className="text-xl font-semibold text-foreground mb-2">
+            Verify Your {method === 'email' ? 'Email' : 'Phone'}
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            We sent a verification code to{' '}
+            <span className="font-medium text-foreground">{identifier}</span>
+          </DialogDescription>
+        </div>
+
+        {error && (
+          <Alert variant="danger" className="mb-4">
+            {error}
+          </Alert>
+        )}
+
+        <div className="mb-6">
+          <OtpInput
+            value={otp}
+            onChange={(value) => {
+              setOtp(value);
+              setError(null);
+            }}
+            disabled={isVerifying}
+          />
+        </div>
+
+        <div className="text-center mb-6">
+          {!canResend ? (
+            <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
+          ) : (
+            <Button
+              variant="link"
+              onClick={handleResend}
+              icon={<RefreshCw className="w-3 h-3" />}
+            >
+              Resend code
+            </Button>
+          )}
+        </div>
+
+        <Button
+          onClick={handleVerify}
+          disabled={otp.join('').length !== 6 || isVerifying}
+          variant="primary"
+          size="lg"
+          fullWidth
+          isLoading={isVerifying}
+        >
+          Verify & Continue
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </DialogContent>
+    </Dialog>
   );
 };

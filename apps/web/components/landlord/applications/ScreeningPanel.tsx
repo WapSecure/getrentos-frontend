@@ -181,13 +181,13 @@ const ReferenceRow = ({
           </div>
         </div>
       ) : (
-        <button
-          type="button"
+        <Button
+          variant="link"
           onClick={() => setEditing(true)}
-          className="mt-1.5 text-xs font-medium text-primary hover:underline"
+          className="mt-1.5 text-xs font-medium"
         >
           {reference.status === 'not_contacted' ? 'Record outcome' : 'Update outcome'}
-        </button>
+        </Button>
       )}
     </div>
   );

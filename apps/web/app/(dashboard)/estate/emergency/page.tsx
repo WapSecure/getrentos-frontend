@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, RefreshCw, Siren, ShieldCheck } from 'lucide-react';
-import { Alert, Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, EmptyState, ListSkeleton, Pagination, ToggleChip } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -169,13 +169,12 @@ export default function EstateEmergencyPage() {
         {!active && (
           <Button
             variant="primary"
-            className="gap-2"
+            icon={<Siren className="w-4 h-4" />}
             onClick={() => {
               declareMuster.reset();
               setIsDeclareOpen(true);
             }}
           >
-            <Siren className="w-4 h-4" />
             Raise the alarm
           </Button>
         )}
@@ -282,21 +281,15 @@ export default function EstateEmergencyPage() {
 
           <MusterTallyStrip tally={muster.tally} tallyLabel={muster.tallyLabel} />
 
-          <div className="flex gap-2 overflow-x-auto">
+          <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter roll call">
             {rollFilters.map((filter) => (
-              <button
+              <ToggleChip
                 key={filter.value}
-                type="button"
-                aria-pressed={rollFilter === filter.value}
-                onClick={() => setRollFilter(filter.value)}
-                className={`px-4 py-2 rounded-lg text-sm whitespace-nowrap border ${
-                  rollFilter === filter.value
-                    ? 'border-primary bg-primary/10 text-foreground'
-                    : 'border-border text-muted-foreground'
-                }`}
+                pressed={rollFilter === filter.value}
+                onPressedChange={() => setRollFilter(filter.value)}
               >
                 {filter.label}
-              </button>
+              </ToggleChip>
             ))}
           </div>
 

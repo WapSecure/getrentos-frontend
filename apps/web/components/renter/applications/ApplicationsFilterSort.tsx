@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutGrid, List } from 'lucide-react';
-import { Select } from '@getrentos/ui';
+import { SegmentedControl, Select } from '@getrentos/ui';
 
 interface ApplicationsFilterSortProps {
   filterStatus: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
@@ -74,34 +74,17 @@ export const ApplicationsFilterSort = ({
           className="min-w-0 flex-1 sm:w-44 sm:flex-none"
         />
 
-        <div
-          className="flex gap-1 rounded-xl bg-secondary p-1"
-          role="group"
+        <SegmentedControl
           aria-label="Application view"
-        >
-          <button
-            type="button"
-            aria-label="Grid view"
-            aria-pressed={viewMode === 'grid'}
-            onClick={() => setViewMode('grid')}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
-              viewMode === 'grid' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
-            }`}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            aria-label="List view"
-            aria-pressed={viewMode === 'list'}
-            onClick={() => setViewMode('list')}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
-              viewMode === 'list' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'
-            }`}
-          >
-            <List className="w-4 h-4" />
-          </button>
-        </div>
+          iconOnly
+          value={viewMode}
+          onValueChange={setViewMode}
+          segments={[
+            { value: 'grid', label: 'Grid view', icon: <LayoutGrid /> },
+            { value: 'list', label: 'List view', icon: <List /> },
+          ]}
+          className="shrink-0"
+        />
       </div>
     </div>
   );

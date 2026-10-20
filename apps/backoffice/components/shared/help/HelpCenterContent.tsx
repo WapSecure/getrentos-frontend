@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { HelpCircle, ChevronDown, Mail, Phone, Clock, ScrollText } from 'lucide-react';
+import { Card } from '@getrentos/ui';
 
 interface FAQItem {
   question: string;
@@ -56,15 +57,12 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div
-                key={faq.question}
-                className="bg-card border border-border rounded-xl overflow-hidden"
-              >
+              <Card key={faq.question} static>
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between gap-3 p-4 text-left"
+                  className="w-full flex items-center justify-between gap-3 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 >
                   <span className="text-sm font-medium text-foreground">{faq.question}</span>
                   <ChevronDown
@@ -78,13 +76,13 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
                     {faq.answer}
                   </p>
                 )}
-              </div>
+              </Card>
             );
           })}
         </div>
 
         <div className="space-y-4">
-          <div className="bg-card border border-border rounded-xl p-4">
+          <Card static className="p-4">
             <h3 className="text-sm font-semibold text-foreground mb-3">Internal Escalation</h3>
             <div className="space-y-3">
               <a
@@ -125,7 +123,7 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
                 </span>
               </a>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </>

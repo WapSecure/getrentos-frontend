@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Copy, Plus } from 'lucide-react';
+import { Check, Copy, Package, Plus } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -11,6 +12,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  EmptyState,
   Field,
   Input,
   Skeleton,
@@ -113,24 +115,31 @@ export const ExpectedDeliveriesPanel = () => {
             take a parcel in your name without it.
           </p>
         </div>
-        <Button variant="primary" className="gap-2 shrink-0" onClick={() => setIsDeclareOpen(true)}>
-          <Plus className="w-4 h-4" />
+        <Button
+          variant="primary"
+          className="shrink-0"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setIsDeclareOpen(true)}
+        >
           Get a code
         </Button>
       </div>
 
       {error && !isDeclareOpen && (
-        <p role="alert" className="mt-3 text-sm text-destructive">
+        <Alert variant="danger" className="mt-3">
           {error}
-        </p>
+        </Alert>
       )}
 
       {isLoading ? (
         <Skeleton className="mt-4 h-16 w-full rounded-xl" />
       ) : expected.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">
-          You have not told the estate about any parcels yet.
-        </p>
+        <EmptyState
+          icon={Package}
+          size="compact"
+          className="mt-4"
+          title="You have not told the estate about any parcels yet."
+        />
       ) : (
         <div className="mt-4">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -153,14 +162,16 @@ export const ExpectedDeliveriesPanel = () => {
                 <div className="flex shrink-0 items-center gap-2">
                   <Badge variant={statusVariantFor(row.status)}>{row.statusLabel}</Badge>
                   {row.live && (
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      aria-label={`Withdraw ${row.summary}`}
                       onClick={() => withdraw.mutate(row.id)}
                       disabled={withdraw.isPending}
-                      className="text-xs text-muted-foreground underline hover:text-foreground disabled:opacity-50"
+                      isLoading={withdraw.isPending && withdraw.variables === row.id}
                     >
                       Withdraw
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -170,104 +181,98 @@ export const ExpectedDeliveriesPanel = () => {
       )}
 
       <Dialog open={isDeclareOpen} onOpenChange={(open) => !open && closeDeclare()}>
-        <DialogContent className="max-w-md p-0">
-          <div className="p-6">
-            {issued ? (
-              <>
-                <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-                  Code for your courier
-                </DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                  {issued.guidance}
-                </DialogDescription>
+        <DialogContent size="md">
+          {issued ? (
+            <>
+              <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+                Code for your courier
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                {issued.guidance}
+              </DialogDescription>
 
-                <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Give this to the courier
-                  </p>
-                  <p className="mt-1 font-mono text-3xl font-bold tracking-[0.3em] text-foreground">
-                    {issued.code}
-                  </p>
-                  <Button variant="ghost" className="mt-2 gap-2" onClick={copyCode}>
-                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                    {copied ? 'Copied' : 'Copy code'}
-                  </Button>
-                </div>
+              <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4 text-center">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Give this to the courier
+                </p>
+                <p className="mt-1 font-mono text-3xl font-bold tracking-[0.3em] text-foreground">
+                  {issued.code}
+                </p>
+                <Button
+                  variant="ghost"
+                  className="mt-2"
+                  icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  onClick={copyCode}
+                >
+                  {copied ? 'Copied' : 'Copy code'}
+                </Button>
+              </div>
 
-                {/* Said plainly, because a resident who assumes they can look it
-                    up later will not save it, and then cannot get it back. */}
-                <p className="mt-3 text-xs text-muted-foreground">
-                  This is the only time the code is shown. If you lose it, withdraw this parcel and
-                  get a new one.
+              {/* Said plainly, because a resident who assumes they can look it
+                  up later will not save it, and then cannot get it back. */}
+              <p className="mt-3 text-xs text-muted-foreground">
+                This is the only time the code is shown. If you lose it, withdraw this parcel and
+                get a new one.
+              </p>
+
+              <div className="mt-6 border-t border-border pt-5">
+                <Button variant="primary" fullWidth onClick={closeDeclare}>
+                  Done
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
+                What are you expecting?
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
+                The estate will see this until the code stops working, so the guard can check a
+                courier&apos;s claim.
+              </DialogDescription>
+
+              <div className="mt-5 space-y-4">
+                <Field label="Who is bringing it?" required>
+                  <Input
+                    type="text"
+                    value={courier}
+                    onChange={(e) => setCourier(e.target.value)}
+                    placeholder="e.g. Amazon, DHL"
+                  />
+                </Field>
+
+                <Field label="What is coming?" optionalLabel="(optional)">
+                  <Input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="e.g. a phone case"
+                  />
+                </Field>
+
+                <p className="text-xs text-muted-foreground">
+                  The code works for 2 days, or until you withdraw it, and it only works once.
                 </p>
 
-                <div className="mt-6 border-t border-border pt-5">
-                  <Button variant="primary" fullWidth onClick={closeDeclare}>
-                    Done
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-                  What are you expecting?
-                </DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                  The estate will see this until the code stops working, so the guard can check a
-                  courier&apos;s claim.
-                </DialogDescription>
+                {error && <Alert variant="danger">{error}</Alert>}
+              </div>
 
-                <div className="mt-5 space-y-4">
-                  <Field label="Who is bringing it?" htmlFor="expected-courier" required>
-                    <Input
-                      type="text"
-                      value={courier}
-                      onChange={(e) => setCourier(e.target.value)}
-                      placeholder="e.g. Amazon, DHL"
-                    />
-                  </Field>
-
-                  <Field
-                    label="What is coming?"
-                    htmlFor="expected-description"
-                    optionalLabel="(optional)"
-                  >
-                    <Input
-                      type="text"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="e.g. a phone case"
-                    />
-                  </Field>
-
-                  <p className="text-xs text-muted-foreground">
-                    The code works for 2 days, or until you withdraw it, and it only works once.
-                  </p>
-
-                  {error && (
-                    <p role="alert" className="text-sm text-destructive">
-                      {error}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-6 flex justify-end gap-3 border-t border-border pt-5">
-                  <Button variant="ghost" onClick={closeDeclare}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    disabled={courier.trim().length === 0}
-                    isLoading={declare.isPending}
-                    loadingText="Getting code…"
-                    onClick={() => declare.mutate()}
-                  >
-                    Get code
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
+              <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-border pt-5">
+                <Button variant="ghost" onClick={closeDeclare}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled={courier.trim().length === 0}
+                  isLoading={declare.isPending}
+                  loadingText="Getting code…"
+                  onClick={() => declare.mutate()}
+                >
+                  Get code
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </Card>

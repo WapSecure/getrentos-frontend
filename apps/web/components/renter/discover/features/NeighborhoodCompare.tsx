@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { GitCompare, MapPin } from 'lucide-react';
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -61,14 +62,14 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
 
   return (
     <>
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+        className="gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
       >
         <GitCompare className="w-3 h-3" />
         Area insights
-      </button>
+      </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="p-0 sm:max-w-3xl">

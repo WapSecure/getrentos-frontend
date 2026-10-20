@@ -1,9 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button, Checkbox, Field, IconButton, Input, Select, Textarea } from '@getrentos/ui';
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Field,
+  Input,
+  Select,
+  Textarea,
+} from '@getrentos/ui';
 import type { Announcement } from '@/types/estate';
 
 interface AnnouncementModalProps {
@@ -48,95 +56,82 @@ export const AnnouncementModal = ({
   const canSubmit = title.trim().length > 0 && body.trim().length > 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <h3 className="font-semibold text-foreground">
-                {announcement ? 'Edit Announcement' : 'New Announcement'}
-              </h3>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="md">
+        <DialogTitle className="text-lg font-semibold text-foreground">
+          {announcement ? 'Edit Announcement' : 'New Announcement'}
+        </DialogTitle>
 
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              <Field label="Title" required>
-                <Input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Water outage this weekend"
+        <div className="mt-4 space-y-4">
+          <Field label="Title" required>
+            <Input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Water outage this weekend"
+            />
+          </Field>
+
+          <Field label="Message" required>
+            <Textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              rows={5}
+              placeholder="Details for residents…"
+            />
+          </Field>
+
+          <Field label="Priority">
+            <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
+          </Field>
+
+          {!announcement && (
+            <fieldset>
+              <legend className="block text-sm font-medium text-foreground mb-2">
+                Also deliver via{' '}
+                <span className="text-muted-foreground font-normal">(optional)</span>
+              </legend>
+              <div className="flex flex-wrap gap-4">
+                <Checkbox checked={sendSms} onCheckedChange={setSendSms} label="SMS" />
+                <Checkbox
+                  checked={sendWhatsApp}
+                  onCheckedChange={setSendWhatsApp}
+                  label="WhatsApp"
                 />
-              </Field>
-
-              <Field label="Message" required>
-                <Textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={5}
-                  placeholder="Details for residents…"
-                />
-              </Field>
-
-              <Field label="Priority">
-                <Select value={priority} onValueChange={setPriority} options={priorityOptions} />
-              </Field>
-
-              {!announcement && (
-                <fieldset>
-                  <legend className="block text-sm font-medium text-foreground mb-2">
-                    Also deliver via{' '}
-                    <span className="text-muted-foreground font-normal">(optional)</span>
-                  </legend>
-                  <div className="flex flex-wrap gap-4">
-                    <Checkbox checked={sendSms} onCheckedChange={setSendSms} label="SMS" />
-                    <Checkbox
-                      checked={sendWhatsApp}
-                      onCheckedChange={setSendWhatsApp}
-                      label="WhatsApp"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Residents always get an in-app notification. These add SMS/WhatsApp to
-                    households with a phone number on file.
-                  </p>
-                </fieldset>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3 shrink-0">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canSubmit}
-                isLoading={isSubmitting}
-                loadingText="Saving…"
-                onClick={() => {
-                  const deliveryChannels: ('SMS' | 'WHATSAPP')[] = [];
-                  if (sendSms) deliveryChannels.push('SMS');
-                  if (sendWhatsApp) deliveryChannels.push('WHATSAPP');
-                  onSubmit({
-                    title: title.trim(),
-                    body: body.trim(),
-                    priority: priority as 'NORMAL' | 'URGENT',
-                    ...(deliveryChannels.length > 0 ? { deliveryChannels } : {}),
-                  });
-                }}
-              >
-                {announcement ? 'Save Changes' : 'Post Announcement'}
-              </Button>
-            </div>
-          </motion.div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Residents always get an in-app notification. These add SMS/WhatsApp to households
+                with a phone number on file.
+              </p>
+            </fieldset>
+          )}
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <Button variant="ghost" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!canSubmit}
+            isLoading={isSubmitting}
+            loadingText="Saving…"
+            onClick={() => {
+              const deliveryChannels: ('SMS' | 'WHATSAPP')[] = [];
+              if (sendSms) deliveryChannels.push('SMS');
+              if (sendWhatsApp) deliveryChannels.push('WHATSAPP');
+              onSubmit({
+                title: title.trim(),
+                body: body.trim(),
+                priority: priority as 'NORMAL' | 'URGENT',
+                ...(deliveryChannels.length > 0 ? { deliveryChannels } : {}),
+              });
+            }}
+          >
+            {announcement ? 'Save Changes' : 'Post Announcement'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

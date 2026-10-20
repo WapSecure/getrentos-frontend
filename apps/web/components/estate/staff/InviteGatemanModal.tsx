@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button, Field, IconButton, Input } from '@getrentos/ui';
+import { Button, Dialog, DialogContent, DialogTitle, Field, Input } from '@getrentos/ui';
 
 interface InviteGatemanModalProps {
   isOpen: boolean;
@@ -28,53 +26,41 @@ export const InviteGatemanModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="sm">
+        <DialogTitle className="text-lg font-semibold text-foreground">Add Gateman</DialogTitle>
+
+        <div className="mt-5 space-y-3">
+          <Field
+            label="Platform account email"
+            required
+            error={error || undefined}
+            hint="They must already have a GetRentos account with this email."
           >
-            <div className="p-4 border-b border-border flex justify-between items-center">
-              <h3 className="font-semibold text-foreground">Add Gateman</h3>
-              <IconButton label="Close" icon={<X />} size="sm" onClick={handleClose} />
-            </div>
-
-            <div className="p-4 space-y-3">
-              <Field
-                label="Platform account email"
-                hint="They must already have a GetRentos account with this email."
-              >
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="gateman@example.com"
-                />
-              </Field>
-              {error && <p className="text-xs text-destructive">{error}</p>}
-            </div>
-
-            <div className="p-4 border-t border-border flex gap-3">
-              <Button variant="ghost" fullWidth onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!email.trim()}
-                isLoading={isSubmitting}
-                loadingText="Adding…"
-                onClick={() => onSubmit(email.trim())}
-              >
-                Add Gateman
-              </Button>
-            </div>
-          </motion.div>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="gateman@example.com"
+            />
+          </Field>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 flex flex-wrap justify-end gap-2">
+          <Button variant="ghost" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!email.trim()}
+            isLoading={isSubmitting}
+            loadingText="Adding…"
+            onClick={() => onSubmit(email.trim())}
+          >
+            Add Gateman
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

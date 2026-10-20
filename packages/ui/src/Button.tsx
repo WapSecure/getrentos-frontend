@@ -12,7 +12,11 @@ export interface ButtonProps extends Omit<
   /** With `href`: open in a new tab ("_blank") and the link's rel. External tabs get noopener by default. */
   target?: string;
   rel?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  /**
+   * `link` is an inline text action ("Resend code", "Dispute this") that sits
+   * in a sentence or a dense row: no box, no minimum height, underlined on hover.
+   */
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -85,6 +89,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-card text-foreground border border-border shadow-xs hover:border-foreground/25 hover:bg-secondary/60 hover:shadow-sm',
       ghost: 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground',
       danger: 'bg-destructive text-destructive-foreground shadow-xs hover:brightness-95',
+      link: 'bg-transparent text-primary underline-offset-4 hover:underline',
     };
 
     const sizes = {
@@ -106,7 +111,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const combinedClassName = cn(
       baseStyles,
       variants[variant],
-      sizes[size],
+      // A text link keeps the line's height: no padding box around it.
+      variant === 'link' ? 'min-h-0 p-0 text-sm' : sizes[size],
       roundedStyles[rounded],
       fullWidth && 'w-full',
       shadow && 'shadow-lg hover:shadow-xl transition-shadow',

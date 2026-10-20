@@ -12,6 +12,7 @@ import {
   PageErrorState,
   Pagination,
   SearchInput,
+  ToggleChip,
   useToast,
 } from '@getrentos/ui';
 import { LeadCard } from '@/components/landlord/leads/LeadCard';
@@ -172,45 +173,35 @@ export default function LandlordLeadsPage() {
           label="Search leads"
           className="flex-1 max-w-sm"
         />
-        <button
-          type="button"
-          aria-pressed={staleOnly}
-          onClick={() => {
+        <ToggleChip
+          pressed={staleOnly}
+          onPressedChange={() => {
             setStaleOnly((current) => !current);
             setPage(1);
             setSelectedLeadIds([]);
           }}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap border ${
-            staleOnly
-              ? 'bg-warning-subtle border-warning/40 text-warning'
-              : 'bg-card border-border text-muted-foreground hover:text-foreground'
-          }`}
+          icon={<Flame />}
+          className="self-start sm:self-center"
         >
-          <Flame className="w-4 h-4" />
           Going cold
-        </button>
+        </ToggleChip>
       </div>
 
       <div className="mb-6">
-        <div className="flex gap-1 p-1 bg-secondary rounded-lg max-w-full w-fit overflow-x-auto">
+        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter leads by status">
           {filterOptions.map((option) => (
-            <button
+            <ToggleChip
               key={option.value}
-              type="button"
-              aria-pressed={filter === option.value}
-              onClick={() => {
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
                 setFilter(option.value);
                 setPage(1);
                 setSelectedLeadIds([]);
               }}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-                filter === option.value
-                  ? 'bg-card text-primary shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
             >
               {option.label}
-            </button>
+            </ToggleChip>
           ))}
         </div>
       </div>

@@ -1,8 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronDown, DoorOpen, MapPin } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@getrentos/ui';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 
 /**
@@ -16,18 +22,6 @@ import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 export const PostSwitcher = () => {
   const { estate, estates, gate, gates, needsGateChoice, selectEstate, selectGate, isLoading } =
     useGatemanPost();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Nothing to choose and nothing to warn about: a lone gate on a lone estate is
   // already known, so the control would only take up room. Stays mounted while
@@ -41,102 +35,87 @@ export const PostSwitcher = () => {
     gate?.name ?? (isLoading ? 'Loading post…' : needsGateChoice ? 'Which gate?' : 'No gate');
 
   return (
-    <div ref={dropdownRef} className="relative">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen(!isOpen)}
+    <DropdownMenu>
+      <DropdownMenuTrigger
         disabled={isLoading}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors max-w-[10rem] sm:max-w-[14rem] ${
+        className={`group flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors max-w-[10rem] sm:max-w-[14rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           needsGateChoice && !isLoading
             ? 'border-warning/40 bg-warning-subtle text-warning'
             : 'border-border hover:bg-secondary'
         } ${isLoading ? 'opacity-60' : ''}`}
       >
-        <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+        <MapPin className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
         <span className="text-sm font-medium truncate">{label}</span>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className="w-3.5 h-3.5 text-muted-foreground shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+          aria-hidden="true"
         />
-      </button>
+      </DropdownMenuTrigger>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="absolute right-0 mt-2 w-72 bg-card rounded-xl shadow-lg border border-border z-50 overflow-hidden"
-          >
-            {estates.length > 1 && (
-              <>
-                <div className="p-3 border-b border-border">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Your Estates
-                  </p>
-                </div>
-                <div className="py-2 max-h-56 overflow-y-auto">
-                  {estates.map((option) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onClick={() => selectEstate(option.id)}
-                      className="w-full flex items-center justify-between gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors text-left"
-                    >
-                      <span className="truncate">{option.name}</span>
-                      {option.id === estate?.id && (
-                        <Check className="w-4 h-4 text-primary shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div className="p-3 border-y border-border">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                This Gate
-              </p>
+      <DropdownMenuContent className="w-72">
+        {estates.length > 1 && (
+          <>
+            <DropdownMenuLabel className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Your Estates
+            </DropdownMenuLabel>
+            <div className="max-h-56 overflow-y-auto">
+              {estates.map((option) => (
+                <DropdownMenuItem
+                  key={option.id}
+                  // Changing estate keeps the menu open: the guard still has to
+                  // pick a gate on the new estate.
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    selectEstate(option.id);
+                  }}
+                  className="justify-between"
+                >
+                  <span className="truncate">{option.name}</span>
+                  {option.id === estate?.id && (
+                    <Check className="w-4 h-4 text-primary shrink-0" aria-label="Selected" />
+                  )}
+                </DropdownMenuItem>
+              ))}
             </div>
-            <div className="py-2 max-h-56 overflow-y-auto">
-              {gates.length === 0 ? (
-                <p className="px-4 py-2 text-sm text-muted-foreground">
-                  This estate has no named gates yet. Arrivals are still recorded, just without a
-                  barrier.
-                </p>
-              ) : (
-                gates.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => {
-                      selectGate(option.id);
-                      setIsOpen(false);
-                    }}
-                    className="w-full flex items-center justify-between gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors text-left"
-                  >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <DoorOpen className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="truncate">{option.name}</span>
-                    </span>
-                    {option.id === gate?.id && <Check className="w-4 h-4 text-primary shrink-0" />}
-                  </button>
-                ))
-              )}
-            </div>
-
-            {needsGateChoice && (
-              <div className="border-t border-border px-4 py-3 bg-warning-subtle">
-                <p className="text-xs text-warning">
-                  This estate has more than one gate. Pick the one you&apos;re standing at so
-                  arrivals are recorded against it.
-                </p>
-              </div>
-            )}
-          </motion.div>
+            <DropdownMenuSeparator />
+          </>
         )}
-      </AnimatePresence>
-    </div>
+
+        <DropdownMenuLabel className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+          This Gate
+        </DropdownMenuLabel>
+        <div className="max-h-56 overflow-y-auto">
+          {gates.length === 0 ? (
+            <p className="px-3 py-2 text-sm text-muted-foreground">
+              This estate has no named gates yet. Arrivals are still recorded, just without a
+              barrier.
+            </p>
+          ) : (
+            gates.map((option) => (
+              <DropdownMenuItem
+                key={option.id}
+                onSelect={() => selectGate(option.id)}
+                className="justify-between"
+              >
+                <span className="flex items-center gap-2 min-w-0">
+                  <DoorOpen className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                  <span className="truncate">{option.name}</span>
+                </span>
+                {option.id === gate?.id && (
+                  <Check className="w-4 h-4 text-primary shrink-0" aria-label="Selected" />
+                )}
+              </DropdownMenuItem>
+            ))
+          )}
+        </div>
+
+        {needsGateChoice && (
+          <p className="mt-1.5 rounded-xl bg-warning-subtle px-3 py-3 text-xs text-warning">
+            This estate has more than one gate. Pick the one you&apos;re standing at so arrivals
+            are recorded against it.
+          </p>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };

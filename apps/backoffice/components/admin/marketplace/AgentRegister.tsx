@@ -199,22 +199,17 @@ function AgentDetailDialog({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[88vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size="xl" padded={false}>
         {isLoading ? (
           <div className="space-y-4 p-5">
+            <DialogTitle className="sr-only">Loading agent case</DialogTitle>
             <CardSkeleton lines={2} />
             <CardSkeleton lines={4} />
           </div>
         ) : isError || !data ? (
           <div className="p-8 text-center">
-            <p className="text-destructive">Could not load the agent case.</p>
+            <DialogTitle className="text-destructive">Could not load the agent case.</DialogTitle>
             <Button className="mt-3" variant="ghost" onClick={onClose}>
               Close
             </Button>
@@ -222,8 +217,8 @@ function AgentDetailDialog({
         ) : (
           <AgentCase360 detail={data} onClose={onClose} actions={actions} />
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -261,20 +256,20 @@ function AgentCase360({
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5">
-        <div>
-          <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5 pr-12">
+        <div className="min-w-0">
+          <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold text-foreground">
             {detail.legalName}
             {detail.verificationStatus === 'APPROVED' && (
               <Badge variant="success">
                 <BadgeCheck className="mr-1 h-3.5 w-3.5" /> Verified
               </Badge>
             )}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {detail.email ?? 'No email'}
             {detail.phone ? ` · ${detail.phone}` : ''} · Joined {formatDate(detail.createdAt)}
-          </p>
+          </DialogDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={detail.accountStatus === 'ACTIVE' ? 'success' : 'neutral'}>
@@ -367,9 +362,9 @@ function AgentCase360({
                       <Badge variant="neutral">{c.status}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
                       {c.status === 'ACTIVE' && (
-                        <button
-                          type="button"
-                          className="font-medium text-destructive hover:underline"
+                        <Button
+                          variant="link"
+                          className="text-xs font-medium text-destructive"
                           onClick={() =>
                             actions.request({
                               title: 'Revoke this client relationship?',
@@ -383,7 +378,7 @@ function AgentCase360({
                           }
                         >
                           Revoke
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -413,18 +408,18 @@ function AgentCase360({
                       {(t.status === 'ASSIGNED' ||
                         t.status === 'IN_PROGRESS' ||
                         t.status === 'OVERDUE') && (
-                        <button
-                          type="button"
-                          className="text-xs font-medium text-primary hover:underline"
+                        <Button
+                          variant="link"
+                          className="text-xs font-medium"
                           onClick={() => setReassigning(t)}
                         >
                           Reassign
-                        </button>
+                        </Button>
                       )}
                       {t.status === 'CANCELLED' && (
-                        <button
-                          type="button"
-                          className="text-xs font-medium text-primary hover:underline"
+                        <Button
+                          variant="link"
+                          className="text-xs font-medium"
                           onClick={() =>
                             actions.request({
                               title: 'Reopen this cancelled task?',
@@ -443,7 +438,7 @@ function AgentCase360({
                           }
                         >
                           Reopen
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>

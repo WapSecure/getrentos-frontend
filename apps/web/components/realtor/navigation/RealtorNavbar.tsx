@@ -3,29 +3,23 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
 import {
-  Button,
-  EmptyState,
   IconButton,
-  Pagination,
   SearchInput,
   ThemeToggle,
-  useOptimisticMutation,
 } from '@getrentos/ui';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
 import { navGroups } from '../dashboard/RealtorSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
-import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
-import { notificationHref } from '@/lib/notificationHref';
+import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 
 interface RealtorNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -45,92 +39,21 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
     }
   };
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notificationPage, setNotificationPage] = useState(1);
-  const { data: notificationsPage } = useQuery({
-    queryKey: [
-      ...realtorKeys.notifications,
-      { page: notificationPage, pageSize: NOTIFICATIONS_PAGE_SIZE },
-    ],
-    queryFn: () =>
-      unwrap(
-        realtorService.getNotifications({
-          page: notificationPage,
-          pageSize: NOTIFICATIONS_PAGE_SIZE,
-        })
-      ),
-    placeholderData: keepPreviousData,
-  });
-  const notifications = notificationsPage?.items ?? [];
-  const notificationsTotal = notificationsPage?.total ?? 0;
 
-  const notificationsKey = [
-    ...realtorKeys.notifications,
-    { page: notificationPage, pageSize: NOTIFICATIONS_PAGE_SIZE },
-  ];
-  type NotificationsPage = NonNullable<typeof notificationsPage>;
-  const markRead = useOptimisticMutation({
-    mutationFn: (id: string) => unwrap(realtorService.markNotificationRead(id)),
-    patches: (id) => [
-      {
-        queryKey: notificationsKey,
-        update: (old) => {
-          const page = old as NotificationsPage;
-          return {
-            ...page,
-            items: page.items.map((n) => (n.id === id ? { ...n, read: true } : n)),
-          };
-        },
-      },
-    ],
-    invalidate: [realtorKeys.notifications],
-  });
-  const markAllRead = useOptimisticMutation({
-    mutationFn: () => unwrap(realtorService.markAllNotificationsRead()),
-    patches: () => [
-      {
-        queryKey: notificationsKey,
-        update: (old) => {
-          const page = old as NotificationsPage;
-          return { ...page, items: page.items.map((n) => ({ ...n, read: true })) };
-        },
-      },
-    ],
-    invalidate: [realtorKeys.notifications],
-  });
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleMarkAsRead = (id: string) => {
-    markRead.mutate(id);
-  };
-
-  // Mark it read, then open what it is about (if it is about something).
-  const handleOpenNotification = (notification: {
-    id: string;
-    type: string;
-    read: boolean;
-    actionUrl?: string;
-    conversationId?: string;
-    action?: { url: string };
-  }) => {
-    if (!notification.read) handleMarkAsRead(notification.id);
-    const href = notificationHref('realtor', notification);
-    if (href) {
-      setShowNotifications(false);
-      router.push(href);
-    }
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllRead.mutate();
-  };
 
   return (
     <>
@@ -174,88 +97,20 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
             <div className="flex items-center gap-3">
               <ThemeToggle />
 
-              <div className="relative">
-                <IconButton
-                  label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
-                  aria-expanded={showNotifications}
-                  onClick={() => {
-                    if (!showNotifications) setNotificationPage(1);
-                    setShowNotifications(!showNotifications);
-                  }}
-                  className="relative"
-                  icon={
-                    <>
-                      <Bell />
-                      {unreadCount > 0 && (
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-                      )}
-                    </>
-                  }
-                />
-
-                <AnimatePresence>
-                  {showNotifications && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-card rounded-xl shadow-lg border border-border z-50"
-                    >
-                      <div className="p-3 border-b border-border flex justify-between items-center">
-                        <h3 className="font-semibold text-foreground">Notifications</h3>
-                        {unreadCount > 0 && (
-                          <Button variant="ghost" size="xs" onClick={handleMarkAllAsRead}>
-                            Mark all as read
-                          </Button>
-                        )}
-                      </div>
-                      <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <EmptyState icon={Bell} title="No notifications" size="compact" bare />
-                        ) : (
-                          notifications.map((notification) => (
-                            <button
-                              type="button"
-                              key={notification.id}
-                              className={`block w-full text-left p-3 border-b border-border hover:bg-secondary transition-colors ${
-                                !notification.read ? 'bg-info-subtle/50' : ''
-                              }`}
-                              onClick={() => handleOpenNotification(notification)}
-                            >
-                              <div className="flex justify-between items-start mb-1">
-                                <h4 className="text-sm font-medium text-foreground">
-                                  {notification.title}
-                                </h4>
-                                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                                  {formatRelativeTime(notification.createdAt)}
-                                </span>
-                              </div>
-                              <p className="text-xs text-muted-foreground">{notification.body}</p>
-                            </button>
-                          ))
-                        )}
-                      </div>
-                      {notificationsTotal > NOTIFICATIONS_PAGE_SIZE && (
-                        <Pagination
-                          page={notificationPage}
-                          pageSize={NOTIFICATIONS_PAGE_SIZE}
-                          total={notificationsTotal}
-                          onPageChange={setNotificationPage}
-                        />
-                      )}
-                      <div className="p-2 border-t border-border">
-                        <Link
-                          href={ROUTES.REALTOR_DASHBOARD}
-                          className="block w-full text-center text-sm text-primary hover:text-primary-hover py-1"
-                          onClick={() => setShowNotifications(false)}
-                        >
-                          View all notifications
-                        </Link>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              <NotificationBell
+                portal="realtor"
+                queryKey={realtorKeys.notifications}
+                pageSize={NOTIFICATIONS_PAGE_SIZE}
+                paginate
+                fetchNotifications={({ page, pageSize }) =>
+                  unwrap(realtorService.getNotifications({ page, pageSize }))
+                }
+                markRead={(id) => unwrap(realtorService.markNotificationRead(id))}
+                markAllRead={() => unwrap(realtorService.markAllNotificationsRead())}
+                refetchAfterMarking
+                realtime={false}
+                viewAllHref={ROUTES.REALTOR_DASHBOARD}
+              />
 
               <RealtorProfileDropdown user={user} />
 

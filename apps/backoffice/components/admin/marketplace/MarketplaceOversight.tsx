@@ -22,6 +22,10 @@ import {
   Button,
   CardSkeleton,
   ConfirmDialog,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   EmptyState,
   ListSkeleton,
   PageErrorState,
@@ -456,23 +460,18 @@ function ListingDetailDialog({
     queryFn: () => unwrap(adminMarketplaceService.listingDetail(listingId)),
   });
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="listing-detail-title"
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-xl"
-        onClick={(event) => event.stopPropagation()}
-      >
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size="lg" showClose={false}>
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 id="listing-detail-title" className="text-lg font-semibold">
+          <div className="min-w-0">
+            <DialogTitle className="text-lg font-semibold text-foreground">
               Listing inspection
-            </h2>
-            {data && <p className="text-sm text-muted-foreground">{data.title}</p>}
+            </DialogTitle>
+            {data && (
+              <DialogDescription className="text-sm text-muted-foreground">
+                {data.title}
+              </DialogDescription>
+            )}
           </div>
           <Button variant="outline" onClick={onClose}>
             Close
@@ -618,8 +617,8 @@ function ListingDetailDialog({
             </section>
           </div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -760,22 +759,17 @@ function OfferDetailDialog({
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent size="lg" padded={false}>
         {isLoading ? (
           <div className="space-y-4 p-5">
+            <DialogTitle className="sr-only">Loading offer case</DialogTitle>
             <CardSkeleton lines={2} />
             <CardSkeleton lines={4} />
           </div>
         ) : isError || !data ? (
           <div className="p-8 text-center">
-            <p className="text-destructive">Could not load the offer case.</p>
+            <DialogTitle className="text-destructive">Could not load the offer case.</DialogTitle>
             <Button className="mt-3" variant="ghost" onClick={onClose}>
               Close
             </Button>
@@ -783,8 +777,8 @@ function OfferDetailDialog({
         ) : (
           <OfferCase360 detail={data} onClose={onClose} actions={actions} />
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -814,17 +808,17 @@ function OfferCase360({
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5">
-        <div>
-          <h2 className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border p-5 pr-12">
+        <div className="min-w-0">
+          <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-semibold text-foreground">
             {detail.listingTitle}
             <Badge variant={OFFER_STATUS_VARIANT[detail.status]}>
               {OFFER_STATUS_LABEL[detail.status]}
             </Badge>
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-muted-foreground">
             {detail.city}, {detail.state} · Offered {formatDate(detail.createdAt, 'short')}
-          </p>
+          </DialogDescription>
         </div>
         <p className="text-xl font-semibold">{formatCurrency(detail.amount)}</p>
       </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@getrentos/ui';
 import { OtpInput } from '@/components/auth/OtpInput';
 
 interface OtpStepProps {
@@ -45,14 +46,14 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
 
   return (
     <div className="space-y-6">
-      <button
-        type="button"
+      <Button
+        variant="link"
         onClick={onBack}
-        className="flex items-center gap-2 text-sm text-muted-foreground"
+        icon={<ArrowLeft className="w-4 h-4" />}
+        className="text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="w-4 h-4" />
         Back
-      </button>
+      </Button>
 
       <div className="text-center">
         <motion.div
@@ -78,13 +79,12 @@ export const OtpStep = ({ method, identifier, otp, setOtp, onBack, onResend }: O
         {!canResend ? (
           <p className="text-sm text-muted-foreground">Resend code in {formatTime(timeLeft)}</p>
         ) : (
-          <button
-            type="button"
+          <Button
+            variant="link"
             onClick={handleResend}
-            className="text-sm text-primary hover:text-primary-hover transition-colors"
           >
             Resend code
-          </button>
+          </Button>
         )}
       </div>
     </div>

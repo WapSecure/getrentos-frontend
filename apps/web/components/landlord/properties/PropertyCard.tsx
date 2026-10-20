@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  IconButton,
 } from '@getrentos/ui';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
@@ -95,7 +96,7 @@ export const PropertyCard = ({
             e.stopPropagation();
             onVerify?.();
           }}
-          className="absolute top-3 left-3 rounded-full hover:opacity-80 transition-opacity"
+          className="absolute top-3 left-3 rounded-full hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title={verification.label}
         >
           <Badge
@@ -107,15 +108,14 @@ export const PropertyCard = ({
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label={`More actions for ${property.name}`}
+            <IconButton
+              label={`More actions for ${property.name}`}
               title="More actions"
+              size="sm"
+              icon={<MoreVertical />}
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-3 right-3 p-1.5 rounded-lg bg-card/90 backdrop-blur-sm hover:bg-card transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <MoreVertical className="w-4 h-4 text-foreground" />
-            </button>
+              className="absolute top-3 right-3 bg-card/90 text-foreground backdrop-blur-sm hover:bg-card"
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onSelect={() => onEdit?.()}>

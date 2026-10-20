@@ -11,6 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  IconButton,
   Skeleton,
   useOptimisticMutation,
 } from '@getrentos/ui';
@@ -50,14 +51,16 @@ export function AdminNotificationMenu() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label={query.isError ? 'Notifications unavailable' : `Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
-          className="relative rounded-lg p-2 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          <Bell className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
-          {unreadCount > 0 && <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" aria-hidden="true" />}
-        </button>
+        <IconButton
+          label={query.isError ? 'Notifications unavailable' : `Notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
+          className="relative"
+          icon={
+            <>
+              <Bell aria-hidden="true" />
+              {unreadCount > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" aria-hidden="true" />}
+            </>
+          }
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[min(20rem,calc(100vw-2rem))] p-1.5">
         <div className="flex items-center justify-between gap-2 px-2 py-1">

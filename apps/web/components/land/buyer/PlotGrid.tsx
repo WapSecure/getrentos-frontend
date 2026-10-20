@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Checkbox, Select } from '@getrentos/ui';
+import { SearchX } from 'lucide-react';
+import { Checkbox, EmptyState, Select } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { LAND_PLOT_STATUS_LABELS, type LandPlot, type LandPlotStatus } from '@/types/landBuyer';
 import { PLOT_STATUS_STYLES, plotLabel } from './landSaleLogic';
@@ -81,23 +82,14 @@ export const PlotGrid = ({
             />
           </div>
         )}
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-          <Checkbox
-            checked={cornerOnly}
-            onCheckedChange={setCornerOnly}
-            aria-label="Corner plots only"
-          />
-          Corner plots
-        </label>
+        <Checkbox checked={cornerOnly} onCheckedChange={setCornerOnly} label="Corner plots" />
         <span className="text-xs text-muted-foreground sm:ml-auto" aria-live="polite">
           {visible.length} of {plots.length} plots
         </span>
       </div>
 
       {visible.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          No plots match these filters.
-        </p>
+        <EmptyState icon={SearchX} title="No plots match these filters." size="compact" />
       ) : (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
           {visible.map((plot) => {

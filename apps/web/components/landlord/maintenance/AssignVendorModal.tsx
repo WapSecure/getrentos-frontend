@@ -2,9 +2,17 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
-import { HardHat, Loader2, X, Star } from 'lucide-react';
-import { Alert, EmptyState, IconButton, ListSkeleton, Pagination } from '@getrentos/ui';
+import { HardHat, Loader2, Star } from 'lucide-react';
+import {
+  Alert,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+} from '@getrentos/ui';
 import { visitToIso, VisitTimeField } from '@/components/landlord/maintenance/VisitTimeField';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -46,90 +54,84 @@ export const AssignVendorModal = ({
   const total = data?.total ?? 0;
 
   return (
-    <AnimatePresence>
+    <Dialog open={!!request} onOpenChange={(next) => !next && onClose()}>
       {request && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[80vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center gap-3 shrink-0">
-              <div className="min-w-0">
-                <h3 className="font-semibold text-foreground">Assign Vendor</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{request.issueTitle}</p>
-              </div>
-              <IconButton label="Close" size="sm" icon={<X />} onClick={onClose} />
+        <DialogContent padded={false} className="flex flex-col">
+          <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
+            <div className="min-w-0">
+              <DialogTitle className="font-semibold text-foreground">Assign Vendor</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                {request.issueTitle}
+              </DialogDescription>
             </div>
+          </div>
 
-            <div className="p-4 space-y-2 overflow-y-auto flex-1">
-              <VisitTimeField
-                value={visit}
-                onChange={setVisit}
-                label="Visit date & time (optional)"
+          <div className="p-4 space-y-2 overflow-y-auto flex-1">
+            <VisitTimeField
+              value={visit}
+              onChange={setVisit}
+              label="Visit date & time (optional)"
+            />
+            {error && <Alert variant="danger">{error}</Alert>}
+            {isPending ? (
+              <ListSkeleton rows={3} />
+            ) : vendors.length === 0 ? (
+              <EmptyState
+                icon={HardHat}
+                title="No active vendors"
+                description="No active vendors in your directory. Add or reactivate one from the Vendors page."
+                size="compact"
               />
-              {error && <Alert variant="danger">{error}</Alert>}
-              {isPending ? (
-                <ListSkeleton rows={3} />
-              ) : vendors.length === 0 ? (
-                <EmptyState
-                  icon={HardHat}
-                  title="No active vendors"
-                  description="No active vendors in your directory. Add or reactivate one from the Vendors page."
-                  size="compact"
-                />
-              ) : (
-                vendors.map((vendor) => {
-                  const isAssigning = assigningVendorId === vendor.id;
-                  return (
-                    <button
-                      key={vendor.id}
-                      type="button"
-                      aria-busy={isAssigning || undefined}
-                      onClick={() => onAssign(request.id, vendor.id, visitToIso(visit))}
-                      disabled={assigningVendorId !== null}
-                      className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">{vendor.name}</p>
-                        <p className="text-xs text-muted-foreground">{vendor.serviceType}</p>
+            ) : (
+              vendors.map((vendor) => {
+                const isAssigning = assigningVendorId === vendor.id;
+                return (
+                  <button
+                    key={vendor.id}
+                    type="button"
+                    aria-busy={isAssigning || undefined}
+                    onClick={() => onAssign(request.id, vendor.id, visitToIso(visit))}
+                    disabled={assigningVendorId !== null}
+                    className="w-full flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{vendor.name}</p>
+                      <p className="text-xs text-muted-foreground">{vendor.serviceType}</p>
+                    </div>
+                    {isAssigning ? (
+                      <Loader2
+                        aria-label="Assigning"
+                        className="w-3.5 h-3.5 animate-spin text-primary motion-reduce:animate-none"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        {vendor.ratingCount > 0 ? (
+                          <>
+                            <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                            {vendor.rating.toFixed(1)}
+                            <span>({vendor.ratingCount})</span>
+                          </>
+                        ) : (
+                          'No ratings yet'
+                        )}
                       </div>
-                      {isAssigning ? (
-                        <Loader2
-                          aria-label="Assigning"
-                          className="w-3.5 h-3.5 animate-spin text-primary motion-reduce:animate-none"
-                        />
-                      ) : (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          {vendor.ratingCount > 0 ? (
-                            <>
-                              <Star className="w-3.5 h-3.5 fill-primary text-primary" />
-                              {vendor.rating.toFixed(1)}
-                              <span>({vendor.ratingCount})</span>
-                            </>
-                          ) : (
-                            'No ratings yet'
-                          )}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })
-              )}
-              {total > 0 && (
-                <Pagination
-                  page={page}
-                  pageSize={PAGE_SIZE}
-                  total={total}
-                  onPageChange={setPage}
-                  className="pt-3"
-                />
-              )}
-            </div>
-          </motion.div>
-        </div>
+                    )}
+                  </button>
+                );
+              })
+            )}
+            {total > 0 && (
+              <Pagination
+                page={page}
+                pageSize={PAGE_SIZE}
+                total={total}
+                onPageChange={setPage}
+                className="pt-3"
+              />
+            )}
+          </div>
+        </DialogContent>
       )}
-    </AnimatePresence>
+    </Dialog>
   );
 };

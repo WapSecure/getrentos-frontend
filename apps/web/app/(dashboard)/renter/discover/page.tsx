@@ -17,6 +17,7 @@ import {
   Button,
   PageErrorState,
   PageLoadingState,
+  SegmentedControl,
   useOptimisticMutation,
   useToast,
 } from '@getrentos/ui';
@@ -159,38 +160,25 @@ export default function DiscoverPage() {
             <div className="flex-1">
               <DiscoverFilters onApplyFilters={handleApplyFilters} />
             </div>
-            <div
-              className="flex items-center gap-1 rounded-lg border border-border bg-secondary/60 p-1"
-              role="group"
+            <SegmentedControl
               aria-label="Property results view"
-            >
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                aria-label="Show properties as a grid"
-                aria-pressed={viewMode === 'grid'}
-                className={`flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
-                  viewMode === 'grid'
-                    ? 'bg-card text-primary shadow-sm'
-                    : 'text-muted-foreground hover:bg-card/70 hover:text-foreground'
-                }`}
-              >
-                <LayoutGrid className="h-5 w-5" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('map')}
-                aria-label="Show properties on a map"
-                aria-pressed={viewMode === 'map'}
-                className={`flex min-h-10 min-w-10 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
-                  viewMode === 'map'
-                    ? 'bg-card text-primary shadow-sm'
-                    : 'text-muted-foreground hover:bg-card/70 hover:text-foreground'
-                }`}
-              >
-                <Map className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
+              value={viewMode}
+              onValueChange={setViewMode}
+              iconOnly
+              className="self-start lg:self-center"
+              segments={[
+                {
+                  value: 'grid',
+                  label: 'Show properties as a grid',
+                  icon: <LayoutGrid className="h-4 w-4" />,
+                },
+                {
+                  value: 'map',
+                  label: 'Show properties on a map',
+                  icon: <Map className="h-4 w-4" />,
+                },
+              ]}
+            />
           </div>
 
           {estateFromUrl && (

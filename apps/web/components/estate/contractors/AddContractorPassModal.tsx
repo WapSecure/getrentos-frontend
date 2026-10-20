@@ -1,19 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
   Button,
   Checkbox,
   DatePicker,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
   Field,
-  IconButton,
   Input,
   Select,
   TimePicker,
+  ToggleChip,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -167,166 +169,146 @@ export const AddContractorPassModal = ({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            className="bg-card rounded-xl max-w-lg w-full overflow-hidden max-h-[90vh] flex flex-col"
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent size="lg">
+        <DialogTitle className="pr-8 text-lg font-semibold text-foreground">
+          Authorise a regular visitor
+        </DialogTitle>
+        <DialogDescription className="mt-1 text-sm text-muted-foreground">
+          For somebody who comes back: a cleaner, a driver, a contractor on site.
+        </DialogDescription>
+
+        <div className="mt-5 space-y-4">
+          {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
+
+          <Field
+            label="Who are they working for?"
+            hint="Every arrival is recorded against this unit, so it is also the one that is told when they turn up."
           >
-            <div className="flex items-center justify-between p-5 border-b border-border">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
-                  Authorise a regular visitor
-                </h2>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  For somebody who comes back: a cleaner, a driver, a contractor on site.
-                </p>
-              </div>
-              <IconButton label="Close" icon={<X />} onClick={handleClose} />
+            <Select
+              value={householdId}
+              onValueChange={setHouseholdId}
+              options={householdOptions}
+              searchable
+            />
+          </Field>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Name">
+              <Input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Chinedu Okafor"
+              />
+            </Field>
+            <Field label="Phone" optionalLabel="(optional)">
+              <Input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 0803 111 2222"
+              />
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Firm" optionalLabel="(optional)">
+              <Input
+                type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="e.g. Zenith Electrical"
+              />
+            </Field>
+            <Field label="Trade" optionalLabel="(optional)">
+              <Input
+                type="text"
+                value={trade}
+                onChange={(e) => setTrade(e.target.value)}
+                placeholder="e.g. Electrician"
+              />
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="From">
+              <DatePicker value={validFrom} onChange={setValidFrom} />
+            </Field>
+            <Field label="Until">
+              <DatePicker value={validUntil} onChange={setValidUntil} min={validFrom} />
+            </Field>
+          </div>
+
+          <div>
+            <p className="block text-sm font-medium text-foreground mb-1">Which days?</p>
+            <div role="group" aria-label="Which days?" className="flex flex-wrap gap-2">
+              {DAYS.map((day) => {
+                const selected = daysOfWeek.includes(day.value);
+                return (
+                  <ToggleChip
+                    key={day.value}
+                    pressed={selected}
+                    onPressedChange={() =>
+                      setDaysOfWeek((current) =>
+                        selected
+                          ? current.filter((value) => value !== day.value)
+                          : [...current, day.value]
+                      )
+                    }
+                  >
+                    {day.short}
+                  </ToggleChip>
+                );
+              })}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {daysOfWeek.length === 0
+                ? 'Any day. Selecting days restricts admission to them: useful for a cleaner who only comes on Tuesdays.'
+                : 'They can only be admitted on the days selected.'}
+            </p>
+          </div>
 
-            <div className="p-5 space-y-4 overflow-y-auto">
-              {(localError || error) && <Alert variant="danger">{localError ?? error}</Alert>}
-
-              <Field
-                label="Who are they working for?"
-                hint="Every arrival is recorded against this unit, so it is also the one that is told when they turn up."
-              >
-                <Select
-                  value={householdId}
-                  onValueChange={setHouseholdId}
-                  options={householdOptions}
-                  searchable
-                />
-              </Field>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Name">
-                  <Input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Chinedu Okafor"
-                  />
-                </Field>
-                <Field label="Phone" optionalLabel="(optional)">
-                  <Input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. 0803 111 2222"
-                  />
-                </Field>
+          <div>
+            <Checkbox
+              checked={restrictHours}
+              onCheckedChange={setRestrictHours}
+              label="Only during certain hours"
+            />
+            {restrictHours && (
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <TimePicker value={dailyFrom} onChange={setDailyFrom} ariaLabel="Daily from" />
+                <TimePicker value={dailyTo} onChange={setDailyTo} ariaLabel="Daily to" />
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Firm" optionalLabel="(optional)">
-                  <Input
-                    type="text"
-                    value={company}
-                    onChange={(e) => setCompany(e.target.value)}
-                    placeholder="e.g. Zenith Electrical"
-                  />
-                </Field>
-                <Field label="Trade" optionalLabel="(optional)">
-                  <Input
-                    type="text"
-                    value={trade}
-                    onChange={(e) => setTrade(e.target.value)}
-                    placeholder="e.g. Electrician"
-                  />
-                </Field>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="From">
-                  <DatePicker value={validFrom} onChange={setValidFrom} />
-                </Field>
-                <Field label="Until">
-                  <DatePicker value={validUntil} onChange={setValidUntil} min={validFrom} />
-                </Field>
-              </div>
-
-              <div>
-                <p className="block text-sm font-medium text-foreground mb-1">Which days?</p>
-                <div className="flex flex-wrap gap-2">
-                  {DAYS.map((day) => {
-                    const selected = daysOfWeek.includes(day.value);
-                    return (
-                      <button
-                        key={day.value}
-                        type="button"
-                        aria-pressed={selected}
-                        onClick={() =>
-                          setDaysOfWeek((current) =>
-                            selected
-                              ? current.filter((value) => value !== day.value)
-                              : [...current, day.value]
-                          )
-                        }
-                        className={`px-3 py-1.5 rounded-lg text-sm border ${
-                          selected
-                            ? 'border-primary bg-primary/10 text-foreground'
-                            : 'border-border text-muted-foreground'
-                        }`}
-                      >
-                        {day.short}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {daysOfWeek.length === 0
-                    ? 'Any day. Selecting days restricts admission to them: useful for a cleaner who only comes on Tuesdays.'
-                    : 'They can only be admitted on the days selected.'}
-                </p>
-              </div>
-
-              <div>
-                <Checkbox
-                  checked={restrictHours}
-                  onCheckedChange={setRestrictHours}
-                  label="Only during certain hours"
-                />
-                {restrictHours && (
-                  <div className="grid grid-cols-2 gap-3 mt-2">
-                    <TimePicker value={dailyFrom} onChange={setDailyFrom} ariaLabel="Daily from" />
-                    <TimePicker value={dailyTo} onChange={setDailyTo} ariaLabel="Daily to" />
-                  </div>
-                )}
-                {restrictHours && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Judged in the estate&apos;s own local time. An end earlier than the start is
-                    read as crossing midnight, for a night shift.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 p-5 border-t border-border">
-              <p className="text-xs text-muted-foreground">
-                The gate code is shown once, after you create this.
+            )}
+            {restrictHours && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Judged in the estate&apos;s own local time. An end earlier than the start is read as
+                crossing midnight, for a night shift.
               </p>
-              <div className="flex gap-2">
-                <Button variant="ghost" onClick={handleClose}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={submit}
-                  isLoading={isSubmitting}
-                  loadingText="Creating…"
-                >
-                  Authorise
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+            )}
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            The gate code is shown once, after you create this.
+          </p>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={submit}
+              isLoading={isSubmitting}
+              loadingText="Creating…"
+            >
+              Authorise
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };

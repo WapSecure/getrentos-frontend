@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
-import { Pagination, EmptyState } from '@getrentos/ui';
+import { Pagination, EmptyState, ToggleChip } from '@getrentos/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { landlordService } from '@/services/landlordService';
@@ -77,23 +77,19 @@ export default function LandlordApplicationsPage() {
         </p>
       </div>
 
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit mb-6 overflow-x-auto">
+      <div className="mb-6 flex gap-2 overflow-x-auto" role="group" aria-label="Filter applications by status">
         {statusFilters.map((option) => (
-          <button
+          <ToggleChip
             key={option.value}
-            type="button"
-            onClick={() => {
+            size="sm"
+            pressed={filter === option.value}
+            onPressedChange={() => {
               setFilter(option.value);
               setPage(1);
             }}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
-              filter === option.value
-                ? 'bg-card text-primary shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
           >
             {option.label}
-          </button>
+          </ToggleChip>
         ))}
       </div>
 

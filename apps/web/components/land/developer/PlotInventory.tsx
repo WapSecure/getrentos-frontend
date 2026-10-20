@@ -12,12 +12,12 @@ import {
   EmptyState,
   Input,
   Pagination,
+  ToggleChip,
 } from '@getrentos/ui';
 import { EyeOff, Grid3x3, Pencil, Plus, RotateCcw, Search, Upload } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
-import { cn } from '@/lib/cn';
 import { landDeveloperService } from '@/services/landDeveloperService';
 import { LAND_AREA_UNIT_LABELS } from '@/types/land';
 import {
@@ -218,28 +218,22 @@ export const PlotInventory = ({ propertyId, layoutStatus, notify }: PlotInventor
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="-mx-1 overflow-x-auto px-1">
           <div
-            className="flex w-max gap-1 rounded-lg bg-secondary p-1"
+            className="flex w-max gap-2"
             role="group"
             aria-label="Plot status"
           >
             {filterOptions.map((option) => (
-              <button
+              <ToggleChip
                 key={option.label}
-                type="button"
-                aria-pressed={status === option.value}
-                onClick={() => {
+                size="sm"
+                pressed={status === option.value}
+                onPressedChange={() => {
                   setStatus(option.value);
                   setPage(1);
                 }}
-                className={cn(
-                  'whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                  status === option.value
-                    ? 'bg-card text-primary shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
               >
                 {option.label}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>

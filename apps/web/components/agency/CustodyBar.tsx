@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
@@ -17,7 +17,15 @@ import {
   Wrench,
   MessageSquareText,
 } from 'lucide-react';
-import { Badge, Button, Skeleton } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  Skeleton,
+} from '@getrentos/ui';
 import { useCustody } from './CustodyProvider';
 import {
   grantsNothing,
@@ -52,25 +60,6 @@ import {
 export function CustodyBar() {
   const { mandates, live, selected, select, loading, error } = useCustody();
   const [open, setOpen] = useState(false);
-  const wrapper = useRef<HTMLDivElement>(null);
-
-  // Close on an outside click or Escape, so the switcher behaves like a menu
-  // rather than a mode.
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: MouseEvent) => {
-      if (!wrapper.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', onPointerDown);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
 
   if (loading) {
     return (
@@ -120,9 +109,7 @@ export function CustodyBar() {
   }
 
   return (
-    <div
-      ref={wrapper}
-      className="relative flex flex-wrap items-center gap-3 border-b border-border bg-muted/40 px-4 py-2 text-sm"
+    <div className="relative flex flex-wrap items-center gap-3 border-b border-border bg-muted/40 px-4 py-2 text-sm"
     >
       {selected ? (
         <>
@@ -244,58 +231,44 @@ export function CustodyBar() {
         All clients
       </Button>
 
-      <Button
-        variant="outline"
-        size="xs"
-        rounded="sm"
-        onClick={() => setOpen((wasOpen) => !wasOpen)}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-        iconPosition="right"
-        icon={
-          <ChevronDown
-            className={
-              open ? 'h-4 w-4 rotate-180 transition-transform' : 'h-4 w-4 transition-transform'
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="xs"
+            rounded="sm"
+            iconPosition="right"
+            icon={
+              <ChevronDown
+                className={
+                  open ? 'h-4 w-4 rotate-180 transition-transform' : 'h-4 w-4 transition-transform'
+                }
+                aria-hidden
+              />
             }
-            aria-hidden
-          />
-        }
-      >
-        Switch client
-      </Button>
-
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute right-4 top-full z-50 mt-1 max-h-80 w-80 overflow-auto rounded-md border border-border bg-popover p-1 shadow-lg"
-        >
+          >
+            Switch client
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="max-h-80 w-80 overflow-auto">
           {selected && (
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  select(null);
-                  setOpen(false);
-                }}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-muted-foreground hover:bg-accent"
-              >
-                Clear selection
-              </button>
-            </li>
+            <DropdownMenuItem
+              onSelect={() => select(null)}
+              className="py-1.5 text-muted-foreground"
+            >
+              Clear selection
+            </DropdownMenuItem>
           )}
           {mandates.map((mandate) => (
             <MandateOption
               key={mandate.id}
               mandate={mandate}
               chosen={mandate.id === selected?.id}
-              onChoose={() => {
-                select(mandate.id);
-                setOpen(false);
-              }}
+              onChoose={() => select(mandate.id)}
             />
           ))}
-        </ul>
-      )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {live.length > 0 && live.length !== mandates.length && (
         <span className="text-xs text-muted-foreground">
@@ -317,31 +290,24 @@ function MandateOption({
 }) {
   const live = isLive(mandate);
   return (
-    <li>
-      <button
-        type="button"
-        role="option"
-        aria-selected={chosen}
-        onClick={onChoose}
-        className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left hover:bg-accent"
-      >
-        <Check
-          className={`mt-0.5 h-4 w-4 shrink-0 ${chosen ? 'text-primary' : 'text-transparent'}`}
-          aria-hidden
-        />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-medium">{mandate.propertyTitle ?? 'Property'}</span>
-          <span className="block truncate text-xs text-muted-foreground">
-            {mandate.ownerName ?? 'the owner'} · {noticeSummary(mandate)}
-          </span>
-          {!live && (
-            <span className="mt-0.5 block text-xs text-warning">
-              {MANDATE_STATUS_LABELS[mandate.status]}
-              {mandate.status !== 'ACTIVE' && ' — you cannot act under this one yet'}
-            </span>
-          )}
+    <DropdownMenuItem onSelect={onChoose} className="items-start gap-2 py-1.5">
+      <Check
+        className={`mt-0.5 h-4 w-4 shrink-0 ${chosen ? 'text-primary' : 'text-transparent'}`}
+        aria-hidden
+      />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-medium">{mandate.propertyTitle ?? 'Property'}</span>
+        <span className="block truncate text-xs text-muted-foreground">
+          {mandate.ownerName ?? 'the owner'} · {noticeSummary(mandate)}
         </span>
-      </button>
-    </li>
+        {!live && (
+          <span className="mt-0.5 block text-xs text-warning">
+            {MANDATE_STATUS_LABELS[mandate.status]}
+            {mandate.status !== 'ACTIVE' && ' — you cannot act under this one yet'}
+          </span>
+        )}
+      </span>
+      {chosen && <span className="sr-only">(selected)</span>}
+    </DropdownMenuItem>
   );
 }

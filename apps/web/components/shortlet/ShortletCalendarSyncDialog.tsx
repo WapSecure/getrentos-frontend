@@ -206,13 +206,13 @@ export function ShortletCalendarSyncDialog({
                     </Button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    className="cursor-pointer text-xs text-muted-foreground underline underline-offset-2"
+                  <Button
+                    variant="link"
+                    className="whitespace-normal text-left text-xs font-normal text-muted-foreground underline"
                     onClick={() => setConfirmReset(true)}
                   >
                     Shared this link by mistake? Reset it
-                  </button>
+                  </Button>
                 )}
               </section>
 

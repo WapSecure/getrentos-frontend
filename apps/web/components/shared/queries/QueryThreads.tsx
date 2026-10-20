@@ -185,13 +185,15 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
   const resolved = q.status === 'RESOLVED';
   return (
     <div className="space-y-4">
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={onBack}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        icon={<ArrowLeft className="h-4 w-4" aria-hidden />}
+        className="-ml-3"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden /> All questions
-      </button>
+        All questions
+      </Button>
       <Card className="p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -233,13 +235,14 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
 
         {(!resolved || isOwner) && (
           <div className="mt-4 border-t border-border pt-4">
-            <Textarea
-              rows={3}
-              aria-label="Reply"
-              value={reply}
-              onChange={(e) => setReply(e.target.value)}
-              placeholder={resolved ? 'Write to reopen this question' : 'Write a reply'}
-            />
+            <Field label="Reply">
+              <Textarea
+                rows={3}
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                placeholder={resolved ? 'Write to reopen this question' : 'Write a reply'}
+              />
+            </Field>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button
                 isLoading={send.isPending}
@@ -349,7 +352,7 @@ export const QueryThreads = ({ as }: { as: 'owner' | 'manager' }) => {
                   <button
                     type="button"
                     onClick={() => setOpenId(q.id)}
-                    className="flex w-full flex-col gap-1 p-4 text-left hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex w-full flex-col gap-1 p-4 text-left hover:bg-muted/40 focus-visible:outline-none focus-visible:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
                       <p className="font-medium text-foreground">{q.subject}</p>
