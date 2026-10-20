@@ -37,7 +37,7 @@ interface Options<TData, TVars> {
  * Use it for small, reversible changes. Payments, submissions and anything
  * that must be confirmed by the server should wait for the response instead.
  */
-export function useOptimisticMutation<TData, TVars>({
+export function useOptimisticMutation<TData = unknown, TVars = void>({
   mutationFn,
   patches,
   invalidate = [],
