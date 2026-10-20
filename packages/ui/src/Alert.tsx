@@ -36,7 +36,7 @@ const TONES: Record<AlertVariant, { box: string; icon: string; Icon: LucideIcon 
 
 /**
  * An inline message inside a page or form: what happened, or what to know
- * before acting. Danger and warning are announced; the others are read in
+ * before acting. Danger interrupts screen readers; the others are read in
  * order. For something that comes and goes after an action, use a toast.
  */
 export function Alert({
@@ -52,7 +52,7 @@ export function Alert({
   const Icon = icon === undefined ? tone.Icon : icon;
   return (
     <div
-      role={variant === 'danger' || variant === 'warning' ? 'alert' : 'status'}
+      role={variant === 'danger' ? 'alert' : 'status'}
       className={cn('flex gap-3 rounded-xl border px-4 py-3.5 text-sm', tone.box, className)}
     >
       {Icon && (
