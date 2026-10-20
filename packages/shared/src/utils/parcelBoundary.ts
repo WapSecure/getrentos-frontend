@@ -46,7 +46,8 @@ export function boundaryGeometry(corners: BoundaryCorner[]): ParcelBoundaryGeome
   return { type: 'Polygon', coordinates: [[...ring, ring[0]]] };
 }
 
-const EARTH_RADIUS_M = 6_371_008.8;
+const WGS84_A = 6_378_137;
+const WGS84_E2 = 0.00669437999014;
 
 /**
  * Approximate area enclosed by the corners, in square metres. Plots are small
@@ -55,11 +56,18 @@ const EARTH_RADIUS_M = 6_371_008.8;
  */
 export function boundaryAreaSqm(corners: BoundaryCorner[]): number {
   if (corners.length < 3) return 0;
-  const toRad = Math.PI / 180;
-  const meanLat = (corners.reduce((sum, c) => sum + c.latitude, 0) / corners.length) * toRad;
+  // Metres per degree on the WGS 84 ellipsoid at the plot's latitude (the
+  // API's ringAreaSqm does the same), so both report the same area.
+  const meanLat = corners.reduce((sum, c) => sum + c.latitude, 0) / corners.length;
+  const phi = (meanLat * Math.PI) / 180;
+  const w = 1 - WGS84_E2 * Math.sin(phi) ** 2;
+  const perRadian = Math.PI / 180;
+  const mLat = ((WGS84_A * (1 - WGS84_E2)) / w ** 1.5) * perRadian;
+  const mLng = ((WGS84_A * Math.cos(phi)) / Math.sqrt(w)) * perRadian;
+  const [origin] = corners;
   const xy = corners.map((c) => [
-    c.longitude * toRad * EARTH_RADIUS_M * Math.cos(meanLat),
-    c.latitude * toRad * EARTH_RADIUS_M,
+    (c.longitude - origin.longitude) * mLng,
+    (c.latitude - origin.latitude) * mLat,
   ]);
   let twice = 0;
   for (let i = 0; i < xy.length; i++) {
