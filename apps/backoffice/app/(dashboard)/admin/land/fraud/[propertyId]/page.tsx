@@ -23,6 +23,7 @@ import {
   adminLandFraudService,
   bandTone,
   LAND_FRAUD_SIGNAL_LABELS,
+  representativeLinkText,
   severityTone,
   type LandFraudAssessment,
   type LandFraudSignal,
@@ -225,6 +226,7 @@ function SignalItem({
             waiting.
           </p>
         )}
+        {s.code === 'REPRESENTATIVE_LINKED' && <p>{representativeLinkText(s.detail)}</p>}
         <p className="mt-1 text-xs">
           First seen {formatDate(s.firstSeenAt)} · last seen {formatDate(s.lastSeenAt)}
           {s.fraudAlertId && ' · in Fraud & Risk'}
