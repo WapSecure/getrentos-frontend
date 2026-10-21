@@ -58,6 +58,8 @@ export const PlotReservePanel = ({
   const [touring, setTouring] = useState(false);
   const [inspecting, setInspecting] = useState(false);
 
+  // Conditional approval: reservations open once the estate's conditions are met.
+  const conditionsOpen = (layout.openConditions?.length ?? 0) > 0;
   const reserve = useMutation({
     mutationFn: (plotId: string) => unwrap(landBuyerService.reserve(plotId)),
     onSuccess: (reservation) => {
@@ -148,7 +150,7 @@ export const PlotReservePanel = ({
           fullWidth
           icon={<Lock className="h-4 w-4" />}
           isLoading={reserve.isPending}
-          disabled={reserve.isPending}
+          disabled={reserve.isPending || conditionsOpen}
           onClick={() => {
             setError(null);
             reserve.mutate(plot.id);
@@ -156,6 +158,12 @@ export const PlotReservePanel = ({
         >
           Reserve for {layout.reservationHoldHours} hours
         </Button>
+      )}
+
+      {conditionsOpen && (
+        <p className="text-xs text-muted-foreground">
+          Reservations open once the conditions on this estate are met.
+        </p>
       )}
 
       {error && (

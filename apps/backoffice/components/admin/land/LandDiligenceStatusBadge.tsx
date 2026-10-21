@@ -3,8 +3,10 @@ import {
   CheckCircle2,
   Clock3,
   FileClock,
+  CircleDashed,
   HelpCircle,
   type LucideIcon,
+  PauseCircle,
   XCircle,
 } from 'lucide-react';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
@@ -19,6 +21,8 @@ const statusConfiguration: Record<LandDiligenceStatus, StatusConfiguration> = {
   VERIFIED: { label: 'Verified', variant: 'success', icon: CheckCircle2 },
   REJECTED: { label: 'Rejected', variant: 'danger', icon: XCircle },
   EXPIRED: { label: 'Expired', variant: 'warning', icon: AlertCircle },
+  CONDITIONAL: { label: 'Verified with conditions', variant: 'info', icon: CircleDashed },
+  SUSPENDED: { label: 'Suspended', variant: 'danger', icon: PauseCircle },
 };
 
 export function normalizeLandDiligenceStatus(

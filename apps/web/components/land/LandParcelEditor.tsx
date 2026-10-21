@@ -30,6 +30,7 @@ import {
   type SurveyRow,
 } from './boundary/SurveyCoordinatesEntry';
 import { LandDiligenceBadge } from './LandDiligenceBadge';
+import { OwnerDiligenceConditions } from './conditions/OwnerDiligenceConditions';
 import { ParcelBoundaryMap, formatArea } from '@/components/maps/ParcelBoundaryMap';
 import {
   LAND_AREA_UNIT_LABELS,
@@ -140,6 +141,12 @@ export const LandParcelEditor = ({
     if (diligence?.status === 'VERIFIED') {
       return 'This parcel passed the current diligence review and can be published once ownership verification is approved.';
     }
+    if (diligence?.status === 'CONDITIONAL') {
+      return 'This parcel passed diligence subject to conditions. It can be listed now; reservations and offers open once the conditions are met.';
+    }
+    if (diligence?.status === 'SUSPENDED') {
+      return 'This parcel is off the market while GetRentos looks into an issue.';
+    }
     if (diligence?.status === 'ACTION_REQUIRED' || diligence?.status === 'REJECTED') {
       return diligence.findings || 'Review the compliance note and upload the requested evidence.';
     }
@@ -189,11 +196,15 @@ export const LandParcelEditor = ({
           <LandDiligenceBadge status={diligence?.status} />
         </div>
 
-        {diligence?.findings && diligence.status !== 'VERIFIED' && (
-          <Alert variant="warning" title="Compliance note" className="mt-4">
-            {diligence.findings}
-          </Alert>
-        )}
+        <OwnerDiligenceConditions propertyId={record.property.id} diligence={diligence} />
+
+        {diligence?.findings &&
+          diligence.status !== 'VERIFIED' &&
+          diligence.status !== 'CONDITIONAL' && (
+            <Alert variant="warning" title="Compliance note" className="mt-4">
+              {diligence.findings}
+            </Alert>
+          )}
 
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
@@ -206,7 +217,7 @@ export const LandParcelEditor = ({
             Upload title evidence
           </Button>
           {record.property.verificationStatus === 'APPROVED' &&
-            diligence?.status === 'VERIFIED' && (
+            (diligence?.status === 'VERIFIED' || diligence?.status === 'CONDITIONAL') && (
               <span className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-success">
                 <ShieldCheck className="h-4 w-4" />
                 Eligible for a sale listing

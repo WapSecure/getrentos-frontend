@@ -25,6 +25,7 @@ import {
   LandStaleCaseBanner,
 } from '@/components/admin/land/case/LandApprovalBanner';
 import { LandAssignmentCard } from '@/components/admin/land/case/LandAssignmentCard';
+import { LandConditionsPanel } from '@/components/admin/land/case/LandConditionsPanel';
 import { LandConflictsPanel } from '@/components/admin/land/case/LandConflictsPanel';
 import { LandDecisionBar } from '@/components/admin/land/case/LandDecisionBar';
 import { LandEncumbrancesPanel } from '@/components/admin/land/case/LandEncumbrancesPanel';
@@ -175,6 +176,11 @@ export default function AdminLandDiligenceCasePage() {
             <LandParcelFacts detail={detail} />
             <LandBoundaryVersionsPanel propertyId={propertyId} />
             <LandEvidenceSection
+              {...panelProps}
+              detail={detail}
+              onResolveUrl={resolveDocumentUrl}
+            />
+            <LandConditionsPanel
               {...panelProps}
               detail={detail}
               onResolveUrl={resolveDocumentUrl}

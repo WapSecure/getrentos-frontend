@@ -1,5 +1,13 @@
 import { Badge } from '@getrentos/ui';
-import { AlertTriangle, CheckCircle2, Clock3, FileSearch, XCircle } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  CircleDashed,
+  Clock3,
+  FileSearch,
+  PauseCircle,
+  XCircle,
+} from 'lucide-react';
 import { LAND_DILIGENCE_LABELS, type LandDiligenceStatus } from '@/types/land';
 
 const STATUS_CONFIG: Record<
@@ -12,6 +20,8 @@ const STATUS_CONFIG: Record<
   VERIFIED: { variant: 'success', icon: CheckCircle2 },
   REJECTED: { variant: 'danger', icon: XCircle },
   EXPIRED: { variant: 'warning', icon: Clock3 },
+  CONDITIONAL: { variant: 'info', icon: CircleDashed },
+  SUSPENDED: { variant: 'danger', icon: PauseCircle },
 };
 
 interface LandDiligenceBadgeProps {

@@ -1,5 +1,5 @@
 import type { LandClosingFields } from './landClosing';
-import type { LandNotVerifiedItem, LandTrustLabel } from './land';
+import type { LandNotVerifiedItem, LandOpenCondition, LandTrustLabel } from './land';
 
 /**
  * Developer estate (layout) sales as the buyer and the public see them.
@@ -113,6 +113,8 @@ export interface PublicLandLayoutDetail extends PublicLandLayoutSummary {
   labels?: LandTrustLabel[];
   /** Checks not verified on the master parcel; the buyer accepts these to purchase. */
   notVerified?: LandNotVerifiedItem[];
+  /** CONDITIONAL master parcel: what must be met before plots can be reserved. */
+  openConditions?: LandOpenCondition[];
   plots: LandPlot[];
   paymentPlans: PublicLandPaymentPlan[];
 }
