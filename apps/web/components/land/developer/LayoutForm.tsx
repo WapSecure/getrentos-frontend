@@ -23,6 +23,7 @@ interface FormState {
   layoutApprovalReference: string;
   layoutPlanDocumentId: string;
   reservationHoldHours: string;
+  inspectionHoldDays: string;
   documentationFee: number;
   surveyFee: number;
   developmentLevy: number;
@@ -34,6 +35,7 @@ const fromLayout = (layout?: OwnerLandLayout): FormState => ({
   layoutApprovalReference: layout?.layoutApprovalReference ?? '',
   layoutPlanDocumentId: layout?.layoutPlanDocumentId ?? '',
   reservationHoldHours: String(layout?.reservationHoldHours ?? 48),
+  inspectionHoldDays: String(layout?.inspectionHoldDays ?? 7),
   documentationFee: layout?.fees.documentationFee ?? 0,
   surveyFee: layout?.fees.surveyFee ?? 0,
   developmentLevy: layout?.fees.developmentLevy ?? 0,
@@ -60,7 +62,12 @@ export const LayoutForm = ({
     !Number.isInteger(holdHours) || holdHours < 1 || holdHours > 336
       ? 'Between 1 and 336 hours (14 days).'
       : undefined;
-  const canSubmit = name.length >= 2 && !holdError;
+  const inspectionDays = Number(form.inspectionHoldDays);
+  const inspectionError =
+    !Number.isInteger(inspectionDays) || inspectionDays < 0 || inspectionDays > 14
+      ? 'Between 0 and 14 days.'
+      : undefined;
+  const canSubmit = name.length >= 2 && !holdError && !inspectionError;
   const feeTotal = form.documentationFee + form.surveyFee + form.developmentLevy;
 
   const handleSubmit = (event: FormEvent) => {
@@ -76,6 +83,7 @@ export const LayoutForm = ({
       layoutApprovalReference: reference || (layout ? null : undefined),
       layoutPlanDocumentId: documentId || (layout ? null : undefined),
       reservationHoldHours: holdHours,
+      inspectionHoldDays: inspectionDays,
       documentationFee: form.documentationFee,
       surveyFee: form.surveyFee,
       developmentLevy: form.developmentLevy,
@@ -130,6 +138,19 @@ export const LayoutForm = ({
             integer
             value={form.reservationHoldHours}
             onValueChange={(value) => set('reservationHoldHours', value)}
+          />
+        </Field>
+        <Field
+          label="Hold while a buyer's inspection runs (days)"
+          htmlFor={`${id}-inspection-hold`}
+          error={inspectionError}
+          hint="A buyer with an independent inspection under way can hold a plot until two days after their report, up to this many days. 0 turns it off."
+        >
+          <NumberInput
+            id={`${id}-inspection-hold`}
+            integer
+            value={form.inspectionHoldDays}
+            onValueChange={(value) => set('inspectionHoldDays', value)}
           />
         </Field>
       </div>

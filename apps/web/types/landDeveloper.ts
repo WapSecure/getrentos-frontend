@@ -57,6 +57,8 @@ export interface LandLayout {
   layoutApprovalReference?: string;
   layoutPlanDocumentId?: string;
   reservationHoldHours: number;
+  /** Days a buyer may hold a plot while their inspection runs; 0 turns it off. */
+  inspectionHoldDays: number;
   fees: LandLayoutFees;
   publishedAt?: string;
   closedAt?: string;
@@ -124,6 +126,7 @@ export interface LandLayoutInput {
   layoutApprovalReference?: string | null;
   layoutPlanDocumentId?: string | null;
   reservationHoldHours?: number;
+  inspectionHoldDays?: number;
   documentationFee?: number;
   surveyFee?: number;
   developmentLevy?: number;
