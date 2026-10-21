@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button } from '@getrentos/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Badge, Button, Checkbox } from '@getrentos/ui';
 import {
   Clock,
   CornerDownRight,
@@ -22,6 +22,10 @@ import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
 import { useAddRole } from '@/hooks/useAddRole';
 import { landBuyerService } from '@/services/landBuyerService';
+import {
+  prePurchaseInspectionKeys,
+  prePurchaseInspectionService,
+} from '@/services/landPrePurchaseInspectionService';
 import {
   LAND_PLOT_STATUS_LABELS,
   type LandPlot,
@@ -60,8 +64,34 @@ export const PlotReservePanel = ({
 
   // Conditional approval: reservations open once the estate's conditions are met.
   const conditionsOpen = (layout.openConditions?.length ?? 0) > 0;
+  const terms = layout.reservationTerms;
+  const [accepted, setAccepted] = useState(false);
+  const [byInspection, setByInspection] = useState(false);
+  // A buyer with an open inspection of this plot may hold it while the inspection runs.
+  const inspections = useQuery({
+    queryKey: prePurchaseInspectionKeys.mine,
+    queryFn: () => unwrap(prePurchaseInspectionService.mine()),
+    enabled: viewer === 'buyer' && Boolean(terms?.subjectToInspection),
+  });
+  const openInspection = plot
+    ? inspections.data?.find(
+        (inspection) =>
+          inspection.plotId === plot.id &&
+          inspection.status !== 'ACCEPTED' &&
+          inspection.status !== 'CANCELLED'
+      )
+    : undefined;
+  const holdByInspection = byInspection && Boolean(openInspection && terms?.subjectToInspection);
   const reserve = useMutation({
-    mutationFn: (plotId: string) => unwrap(landBuyerService.reserve(plotId)),
+    mutationFn: (plotId: string) =>
+      unwrap(
+        landBuyerService.reserve(plotId, {
+          acceptedTermsVersion: terms.version,
+          ...(holdByInspection && openInspection
+            ? { subjectToInspectionId: openInspection.id }
+            : {}),
+        })
+      ),
     onSuccess: (reservation) => {
       setHeld(reservation);
       queryClient.invalidateQueries({ queryKey: landLayoutKeys.detail(layout.id) });
@@ -146,18 +176,46 @@ export const PlotReservePanel = ({
           </Button>
         </div>
       ) : (
-        <Button
-          fullWidth
-          icon={<Lock className="h-4 w-4" />}
-          isLoading={reserve.isPending}
-          disabled={reserve.isPending || conditionsOpen}
-          onClick={() => {
-            setError(null);
-            reserve.mutate(plot.id);
-          }}
-        >
-          Reserve for {layout.reservationHoldHours} hours
-        </Button>
+        <div className="space-y-3">
+          <div className="rounded-xl bg-secondary/50 p-3">
+            <p className="text-xs font-medium text-foreground">Reservation terms</p>
+            <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs text-muted-foreground">
+              {terms.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+              {holdByInspection && terms.subjectToInspection && (
+                <li>{terms.subjectToInspection}</li>
+              )}
+            </ul>
+          </div>
+          {openInspection && terms.subjectToInspection && (
+            <Checkbox
+              checked={byInspection}
+              onCheckedChange={setByInspection}
+              label="Hold it while my inspection runs"
+              description={`Up to ${layout.inspectionHoldDays} days, ending two days after your report is ready.`}
+            />
+          )}
+          <Checkbox
+            checked={accepted}
+            onCheckedChange={setAccepted}
+            label="I have read and accept these terms"
+          />
+          <Button
+            fullWidth
+            icon={<Lock className="h-4 w-4" />}
+            isLoading={reserve.isPending}
+            disabled={!accepted || reserve.isPending || conditionsOpen}
+            onClick={() => {
+              setError(null);
+              reserve.mutate(plot.id);
+            }}
+          >
+            {holdByInspection
+              ? 'Reserve while my inspection runs'
+              : `Reserve for ${layout.reservationHoldHours} hours`}
+          </Button>
+        </div>
       )}
 
       {conditionsOpen && (
