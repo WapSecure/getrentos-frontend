@@ -11,7 +11,7 @@ export default function LandlordRealtorsPage() {
           Choose which realtors and agents can work on your properties, and hand tasks to an agent.
         </p>
       </div>
-      <ClientRealtorAccess />
+      <ClientRealtorAccess showHeader={false} />
       <ClientAgentAccess />
       <ClientAgentTaskForm />
     </div>

@@ -10,6 +10,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
 import {
+  MANDATE_SCOPE_CHIP,
   MANDATE_SCOPE_LABELS,
   formatDay,
   grantsNothing,
@@ -87,9 +88,7 @@ export function MandateDetailView() {
             {mandate.propertyTitle ?? 'Property'}
           </h1>
           <MandateStatusBadge status={mandate.status} />
-          {live && (
-            <Badge variant="success">In force</Badge>
-          )}
+          {live && <Badge variant="success">In force</Badge>}
         </div>
         <p className="text-sm text-muted-foreground">
           {mandate.ownerName ?? 'the owner'}
@@ -102,9 +101,7 @@ export function MandateDetailView() {
         </p>
       </header>
 
-      {act.isError && (
-        <Alert variant="danger">{(act.error as Error).message}</Alert>
-      )}
+      {act.isError && <Alert variant="danger">{(act.error as Error).message}</Alert>}
 
       <Card static className="p-4">
         <h2 className="text-sm font-semibold">What was agreed</h2>
@@ -132,7 +129,7 @@ export function MandateDetailView() {
                 title={MANDATE_SCOPE_LABELS[scope]}
                 className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground"
               >
-                {scope}
+                {MANDATE_SCOPE_CHIP[scope]}
               </span>
             ))}
             <span className="sr-only">Capabilities granted by this scope:</span>
