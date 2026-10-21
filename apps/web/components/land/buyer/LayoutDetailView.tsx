@@ -17,6 +17,7 @@ import { PlotGrid, PlotStatusLegend } from './PlotGrid';
 import { PlotLayoutMap, hasPlotOutlines } from './PlotLayoutMap';
 import { PlotReservePanel } from './PlotReservePanel';
 import { plotLabel, quotePlot } from './landSaleLogic';
+import { EstateCommitmentsSection } from '../estate-infrastructure/EstateCommitmentsSection';
 
 /** One estate: its facts, fees, plot map, plans and the reserve flow. */
 export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
@@ -132,6 +133,8 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
           <FeesCard fees={layout.fees} />
         </aside>
       </div>
+
+      <EstateCommitmentsSection layoutId={layout.id} />
 
       <section aria-labelledby="plans-heading" className="space-y-4">
         <div>
