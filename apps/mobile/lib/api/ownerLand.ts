@@ -10,7 +10,9 @@ export type LandDiligenceStatus =
   | 'ACTION_REQUIRED'
   | 'VERIFIED'
   | 'REJECTED'
-  | 'EXPIRED';
+  | 'EXPIRED'
+  | 'CONDITIONAL'
+  | 'SUSPENDED';
 
 export const LAND_AREA_UNITS: { value: LandAreaUnit; label: string }[] = [
   { value: 'SQUARE_METERS', label: 'sqm' },
@@ -40,6 +42,8 @@ export const DILIGENCE: Record<
   VERIFIED: { label: 'Verified', tone: 'success' },
   REJECTED: { label: 'Not verified', tone: 'danger' },
   EXPIRED: { label: 'Expired', tone: 'warning' },
+  CONDITIONAL: { label: 'Verified with conditions', tone: 'info' },
+  SUSPENDED: { label: 'Suspended', tone: 'danger' },
 };
 
 export interface LandParcelInput {

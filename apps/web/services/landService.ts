@@ -1,6 +1,7 @@
 import type { LandBoundaryVersion } from '@getrentos/shared';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
+  LandDiligence,
   LandOwnershipProofInput,
   LandParcelInput,
   OwnerLandApiRecord,
@@ -113,6 +114,23 @@ export const landService = {
     safeCall(() => authFetch<LandBoundaryVersion[]>(`/owner/land/${propertyId}/boundary/versions`)),
 
   /** Puts the parcel into the diligence review queue (or back into it after changes). */
+  /** Evidence that a condition of a conditional approval is met, for GetRentos to check. */
+  attachConditionEvidence: (
+    propertyId: string,
+    conditionId: string,
+    documentId: string,
+    note?: string
+  ) =>
+    safeCall(() =>
+      authFetch<LandDiligence>(
+        `/owner/land/${encodeURIComponent(propertyId)}/diligence/conditions/${encodeURIComponent(conditionId)}/evidence`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ documentId, ...(note?.trim() ? { note: note.trim() } : {}) }),
+        }
+      )
+    ),
+
   submitForReview: (propertyId: string) =>
     safeCall(async () =>
       mapOwnerLand(

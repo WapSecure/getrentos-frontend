@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { OpenConditionsNotice } from './OpenConditionsNotice';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, MapPin, ScanSearch, ShieldCheck, Video } from 'lucide-react';
@@ -55,7 +56,8 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
   }
   const labels = listing.data?.diligence?.labels ?? [];
   const notVerified = listing.data?.diligence?.notVerified ?? [];
-  const hasChecks = labels.length > 0 || notVerified.length > 0;
+  const openConditions = listing.data?.diligence?.openConditions ?? [];
+  const hasChecks = labels.length > 0 || notVerified.length > 0 || openConditions.length > 0;
   if (
     !tier &&
     !hasChecks &&
@@ -134,6 +136,12 @@ export const ListingMarketSection = ({ listingId }: { listingId: string }) => {
           propertyId={listing.data.propertyId}
           landTitle={listing.data.title}
         />
+      )}
+
+      {openConditions.length > 0 && (
+        <div className="mt-5">
+          <OpenConditionsNotice conditions={openConditions} action="offers" />
+        </div>
       )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">

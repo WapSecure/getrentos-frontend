@@ -88,10 +88,39 @@ export const adminLandService = {
     propertyId: string,
     data: Pick<
       LandDiligenceDecisionInput,
-      'findings' | 'checklist' | 'expiresAt' | 'expectedVersion'
+      'findings' | 'checklist' | 'expiresAt' | 'expectedVersion' | 'conditions'
     > = {}
   ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
     return post(`${base(propertyId)}/approve`, data);
+  },
+
+  /** Settle one condition of a conditional approval; the last one turns the case VERIFIED. */
+  settleCondition(
+    propertyId: string,
+    conditionId: string,
+    outcome: 'meet' | 'waive',
+    data: { note: string; expectedVersion?: number }
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return post(`${base(propertyId)}/conditions/${encodeURIComponent(conditionId)}/${outcome}`, {
+      ...data,
+      note: data.note.trim(),
+    });
+  },
+
+  /** Take a verified or conditional approval off the market, with a reason the owner sees. */
+  suspendDiligence(
+    propertyId: string,
+    data: { reason: string; expectedVersion?: number }
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return post(`${base(propertyId)}/suspend`, { ...data, reason: data.reason.trim() });
+  },
+
+  /** End a suspension; refused while a hold, encumbrance or conflict remains. */
+  resumeDiligence(
+    propertyId: string,
+    data: { note: string; expectedVersion?: number }
+  ): Promise<ApiResponse<LandDiligenceReviewSummary>> {
+    return post(`${base(propertyId)}/resume`, { ...data, note: data.note.trim() });
   },
 
   rejectDiligence(
