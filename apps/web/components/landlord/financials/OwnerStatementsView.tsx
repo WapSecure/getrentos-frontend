@@ -281,7 +281,7 @@ export function OwnerStatementsView() {
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
-                    {formatDate(statement.periodStart)}: {formatDate(statement.periodEnd)}
+                    {formatDate(statement.periodStart)} – {formatDate(statement.periodEnd)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Generated {formatDate(statement.generatedAt)}
@@ -391,7 +391,7 @@ export function OwnerStatementsView() {
             <div className="p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-                  {formatDate(detail.periodStart)}: {formatDate(detail.periodEnd)}
+                  {formatDate(detail.periodStart)} – {formatDate(detail.periodEnd)}
                 </DialogTitle>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant={detail.status === 'ISSUED' ? 'success' : 'neutral'}>

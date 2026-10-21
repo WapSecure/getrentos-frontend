@@ -18,7 +18,7 @@ export default function AgencyRealtorAccessPage() {
           Approve realtors and assign them the properties you manage for your clients.
         </p>
       </div>
-      <ClientRealtorAccess />
+      <ClientRealtorAccess showHeader={false} />
     </div>
   );
 }
