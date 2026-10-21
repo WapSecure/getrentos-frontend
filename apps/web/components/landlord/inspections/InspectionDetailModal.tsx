@@ -1,10 +1,13 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DocumentUpload,
   Button,
   Badge,
   CardSkeleton,
@@ -15,6 +18,7 @@ import {
   Textarea,
   CurrencyInput,
   type BadgeVariant,
+  type PendingUpload,
 } from '@getrentos/ui';
 import { Plus, Camera, Share2, CheckCircle2 } from 'lucide-react';
 import {
@@ -57,8 +61,9 @@ export const InspectionDetailModal = ({
   onChanged,
 }: InspectionDetailModalProps) => {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  /** The finding a photo is being added to, while the photo picker is open. */
+  const [photoFor, setPhotoFor] = useState<{ id: string; area: string } | null>(null);
+  const [pendingPhotos, setPendingPhotos] = useState<PendingUpload[]>([]);
 
   // New-item form state.
   const [area, setArea] = useState('');
@@ -105,10 +110,15 @@ export const InspectionDetailModal = ({
   });
 
   const addPhotoMutation = useMutation({
-    mutationFn: ({ itemId, file }: { itemId: string; file: File }) =>
-      unwrap(inspectionService.addPhoto(inspectionId!, itemId, file)),
-    onSuccess: afterChange,
-    onSettled: () => setUploadingItemId(null),
+    mutationFn: async ({ itemId, files }: { itemId: string; files: File[] }) => {
+      for (const file of files)
+        await unwrap(inspectionService.addPhoto(inspectionId!, itemId, file));
+    },
+    onSuccess: () => {
+      setPhotoFor(null);
+      setPendingPhotos([]);
+      afterChange();
+    },
   });
 
   const completeMutation = useMutation({
@@ -121,15 +131,11 @@ export const InspectionDetailModal = ({
     onSuccess: afterChange,
   });
 
-  const pickPhotoFor = (itemId: string) => {
-    setUploadingItemId(itemId);
-    fileInputRef.current?.click();
-  };
-
-  const onFileChosen = (file: File | undefined) => {
-    if (file && uploadingItemId) {
-      addPhotoMutation.mutate({ itemId: uploadingItemId, file });
-    }
+  const closePhotoPicker = () => {
+    if (addPhotoMutation.isPending) return;
+    setPhotoFor(null);
+    setPendingPhotos([]);
+    addPhotoMutation.reset();
   };
 
   const isDraft = inspection?.status === 'DRAFT';
@@ -218,10 +224,7 @@ export const InspectionDetailModal = ({
                           variant="ghost"
                           size="sm"
                           className="mt-2 gap-1.5"
-                          onClick={() => pickPhotoFor(item.id)}
-                          disabled={addPhotoMutation.isPending && uploadingItemId !== item.id}
-                          isLoading={uploadingItemId === item.id && addPhotoMutation.isPending}
-                          loadingText="Uploading…"
+                          onClick={() => setPhotoFor({ id: item.id, area: item.area })}
                           aria-label={`Add photo of ${item.area}`}
                         >
                           <Camera className="h-4 w-4" />
@@ -296,7 +299,7 @@ export const InspectionDetailModal = ({
                     Complete
                   </Button>
                 )}
-                {isCompleted && (
+                {isCompleted && inspection.canShareWithOwner && (
                   <Button
                     variant="primary"
                     className="gap-1.5"
@@ -313,17 +316,58 @@ export const InspectionDetailModal = ({
           )}
         </div>
 
-        {/* Shared hidden file input for per-item photo uploads. */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            onFileChosen(e.target.files?.[0]);
-            e.target.value = '';
-          }}
-        />
+        <Dialog open={photoFor !== null} onOpenChange={(open) => !open && closePhotoPicker()}>
+          <DialogContent className="w-full max-w-md">
+            <div className="space-y-4 p-6">
+              <div>
+                <DialogTitle className="text-lg font-semibold text-foreground">
+                  Add photos{photoFor ? ` of ${photoFor.area}` : ''}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  They become part of the inspection record.
+                </DialogDescription>
+              </div>
+              <DocumentUpload
+                value={pendingPhotos}
+                onChange={setPendingPhotos}
+                accept=".jpg,.jpeg,.png,.webp"
+                multiple
+                capture="environment"
+                label="Photos"
+                hint="JPG, PNG or WebP, up to 10 MB each."
+                disabled={addPhotoMutation.isPending}
+              />
+              {addPhotoMutation.isError && (
+                <p className="text-sm text-destructive">
+                  {(addPhotoMutation.error as Error).message || 'A photo did not upload.'}
+                </p>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={closePhotoPicker}
+                  disabled={addPhotoMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() =>
+                    photoFor &&
+                    addPhotoMutation.mutate({
+                      itemId: photoFor.id,
+                      files: pendingPhotos.map((p) => p.file),
+                    })
+                  }
+                  disabled={pendingPhotos.length === 0}
+                  isLoading={addPhotoMutation.isPending}
+                  loadingText="Uploading…"
+                >
+                  Upload
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );
