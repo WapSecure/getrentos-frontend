@@ -201,8 +201,15 @@ export const DiscoverPropertyCard = ({
           <NeighborhoodCompare listingId={property.id} propertyLocation={property.location} />
         </div>
 
-        <Button size="sm" variant="secondary" onClick={onApply} fullWidth className="mt-3">
-          Apply for this property
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={onApply}
+          disabled={property.acceptingApplications === false}
+          fullWidth
+          className="mt-3"
+        >
+          {property.acceptingApplications === false ? 'Let — not accepting applications' : 'Apply for this property'}
         </Button>
       </div>
     </article>
