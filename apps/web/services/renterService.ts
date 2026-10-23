@@ -184,6 +184,10 @@ export interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  /** Scheduled auto-release date (ISO) for funds held by GetRentos. Present only while held. */
+  releaseDate?: string;
+  /** Short machine reason the money is held (e.g. 'rent_hold'). Present only while held. */
+  heldReason?: string;
   /** Present when the payment is initialized with a real gateway (redirect here to complete checkout). */
   authorizationUrl?: string;
   /** Gateway reference for the payment currently being processed. */

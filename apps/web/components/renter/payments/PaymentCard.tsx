@@ -26,6 +26,8 @@ interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  releaseDate?: string;
+  heldReason?: string;
 }
 
 interface PaymentCardProps {
@@ -146,6 +148,9 @@ export const PaymentCard = ({
               <div className="flex items-center gap-1">
                 <Shield className="w-3 h-3" />
                 <span>Your money: {escrowLabel(payment.escrowStatus)}</span>
+                {payment.escrowStatus === 'held' && payment.releaseDate && (
+                  <span>· releases to your landlord on {formatDate(payment.releaseDate)}</span>
+                )}
               </div>
             )}
           </div>
