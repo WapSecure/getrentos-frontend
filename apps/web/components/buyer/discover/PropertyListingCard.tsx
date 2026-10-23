@@ -42,6 +42,11 @@ export const PropertyListingCard = ({
             Verified Owner
           </Badge>
         )}
+        {listing.acceptingOffers === false && (
+          <Badge variant="secondary" className="absolute top-3 right-14">
+            Under offer
+          </Badge>
+        )}
         <IconButton
           label={isSaved ? 'Remove from saved' : 'Save property'}
           aria-pressed={isSaved}
