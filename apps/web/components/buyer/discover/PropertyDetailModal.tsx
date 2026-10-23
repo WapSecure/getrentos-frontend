@@ -207,8 +207,9 @@ export const PropertyDetailModal = ({
             size="sm"
             icon={<Handshake className="w-3.5 h-3.5" />}
             onClick={onMakeOffer}
+            disabled={listing?.acceptingOffers === false}
           >
-            Offer
+            {listing?.acceptingOffers === false ? 'Under offer' : 'Offer'}
           </Button>
         </div>
       </DialogContent>

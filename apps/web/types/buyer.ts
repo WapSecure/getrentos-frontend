@@ -26,6 +26,8 @@ export interface BuyerPropertyListing {
   title: string;
   propertyType: ListingPropertyType;
   askingPrice: number;
+  /** False when the listing is already under offer / sold — not accepting new offers. */
+  acceptingOffers?: boolean;
   /** Left out until the property is verified; see addressHidden. */
   address?: string;
   addressHidden?: boolean;

@@ -237,6 +237,11 @@ export const MakeOfferModal = ({
         )}
 
         <div className="p-4 border-t border-border flex flex-wrap gap-3 shrink-0">
+          {selectedListing?.acceptingOffers === false && (
+            <p role="alert" className="w-full text-sm text-destructive">
+              This property is already under offer and is no longer accepting new offers.
+            </p>
+          )}
           {submitError && (
             <p role="alert" className="w-full text-sm text-destructive">
               {submitError}
@@ -255,7 +260,13 @@ export const MakeOfferModal = ({
             className="flex-1"
             icon={<Send className="w-3.5 h-3.5" />}
             onClick={() => void handleSubmit()}
-            disabled={!propertyId || !offerAmount || needsAcceptance || isSubmitting}
+            disabled={
+              !propertyId ||
+              !offerAmount ||
+              needsAcceptance ||
+              isSubmitting ||
+              selectedListing?.acceptingOffers === false
+            }
             isLoading={isSubmitting}
           >
             Submit Offer
