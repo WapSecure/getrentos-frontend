@@ -2,14 +2,26 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Check, CircleAlert, HelpCircle, ShieldCheck, XCircle } from 'lucide-react';
+import {
+  Check,
+  CircleAlert,
+  HelpCircle,
+  PauseCircle,
+  PlayCircle,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  XCircle,
+} from 'lucide-react';
 import {
   Button,
+  ConfirmDialog,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
   Field,
+  IconButton,
   Textarea,
   DatePicker,
 } from '@getrentos/ui';
@@ -54,12 +66,43 @@ export const LandDecisionBar = ({
   const [findings, setFindings] = useState(diligence.findings ?? '');
   const [expiresAt, setExpiresAt] = useState(toDateInput(diligence.expiresAt));
   const [minDate] = useState(tomorrowDateInput);
+  // Approving with conditions makes the case CONDITIONAL: listed, not yet open to reservations or offers.
+  const [conditions, setConditions] = useState<{ text: string; dueAt: string }[]>([]);
+  const [pause, setPause] = useState<'suspend' | 'resume' | null>(null);
+  const [pauseNote, setPauseNote] = useState('');
 
   const blockers = detail.approvalBlockers ?? [];
   const isOpen = OPEN_STATUSES.has(String(diligence.status));
   const awaitingSecond = Boolean(diligence.awaitingSecondApproval);
   const firstIsMine = gaveFirstApproval(detail, currentUserName);
   const isFirstOfTwo = Boolean(detail.requiresDualApproval) && !awaitingSecond;
+
+  const filledConditions = conditions.filter((condition) => condition.text.trim() !== '');
+  const conditionsValid = filledConditions.every((condition) => condition.text.trim().length >= 10);
+
+  const pauseMutation = useMutation({
+    mutationFn: (action: 'suspend' | 'resume') =>
+      unwrap(
+        action === 'suspend'
+          ? adminLandService.suspendDiligence(propertyId, {
+              reason: pauseNote,
+              expectedVersion: diligence.version,
+            })
+          : adminLandService.resumeDiligence(propertyId, {
+              note: pauseNote,
+              expectedVersion: diligence.version,
+            })
+      ),
+    onSuccess: (_result, action) => {
+      invalidate();
+      onSuccess(
+        action === 'suspend'
+          ? 'Suspended. The land is off the market and the owner has been told.'
+          : 'Resumed. The owner has been told.'
+      );
+    },
+    onError: (error) => onError(error, 'Unable to change the suspension.', { versioned: true }),
+  });
 
   const decide = useMutation({
     mutationFn: (decision: DecisionMode) => {
@@ -70,6 +113,14 @@ export const LandDecisionBar = ({
             findings: findings.trim() || undefined,
             expiresAt: isFirstOfTwo ? undefined : fromDateInput(expiresAt),
             expectedVersion,
+            ...(!isFirstOfTwo && filledConditions.length
+              ? {
+                  conditions: filledConditions.map((condition) => ({
+                    text: condition.text.trim(),
+                    ...(condition.dueAt ? { dueAt: fromDateInput(condition.dueAt) } : {}),
+                  })),
+                }
+              : {}),
           })
         );
       }
@@ -84,11 +135,14 @@ export const LandDecisionBar = ({
       invalidate();
       setMode(null);
       setReason('');
+      setConditions([]);
       onSuccess(
         decision === 'approve'
           ? isFirstOfTwo
             ? 'First approval recorded. A different reviewer must now give the second.'
-            : 'Land diligence approved. The listing can proceed once every publishing rule is met.'
+            : filledConditions.length
+              ? 'Approved with conditions. The land can be listed; reservations and offers open once every condition is settled.'
+              : 'Land diligence approved. The listing can proceed once every publishing rule is met.'
           : decision === 'reject'
             ? 'Land diligence rejected and the owner has been notified.'
             : 'Clarification requested from the owner.'
@@ -101,12 +155,66 @@ export const LandDecisionBar = ({
   });
 
   if (!isOpen) {
+    const status = String(diligence.status);
+    const canSuspend = canApprove && (status === 'VERIFIED' || status === 'CONDITIONAL');
+    const canResume = canApprove && status === 'SUSPENDED';
     return (
-      <div className="rounded-2xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground">
-        This case is {String(diligence.status).replaceAll('_', ' ').toLowerCase()}
-        {diligence.reviewedByName && ` (decided by ${diligence.reviewedByName})`}. Decisions open
-        again when the owner resubmits.
-      </div>
+      <>
+        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-secondary/40 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            {status === 'SUSPENDED' ? (
+              <>
+                Suspended{diligence.suspension?.bySystem ? ' automatically' : ''}
+                {diligence.suspension?.reason ? `: ${diligence.suspension.reason}` : '.'} Resume it
+                once nothing blocks the land.
+              </>
+            ) : (
+              <>
+                This case is {status.replaceAll('_', ' ').toLowerCase()}
+                {diligence.reviewedByName && ` (decided by ${diligence.reviewedByName})`}. Decisions
+                open again when the owner resubmits.
+              </>
+            )}
+          </p>
+          {(canSuspend || canResume) && (
+            <Button
+              variant={canResume ? 'primary' : 'outline'}
+              className={canResume ? undefined : 'text-destructive'}
+              disabled={stale || pauseMutation.isPending}
+              icon={
+                canResume ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />
+              }
+              onClick={() => setPause(canResume ? 'resume' : 'suspend')}
+            >
+              {canResume ? 'Resume' : 'Suspend'}
+            </Button>
+          )}
+        </div>
+        <ConfirmDialog
+          open={pause !== null}
+          onOpenChange={(open) => {
+            if (!open) {
+              setPause(null);
+              setPauseNote('');
+            }
+          }}
+          title={pause === 'resume' ? 'Resume this land' : 'Suspend this land'}
+          description={
+            pause === 'resume'
+              ? 'It goes back to what it was before (or expired, if its review lapsed meanwhile). Refused while a dispute hold, encumbrance or conflict remains.'
+              : 'It comes off the market at once: no listing, reservations or offers until it is resumed. The owner sees your reason.'
+          }
+          confirmLabel={pause === 'resume' ? 'Resume' : 'Suspend'}
+          tone={pause === 'resume' ? 'primary' : 'danger'}
+          promptLabel={pause === 'resume' ? 'What was resolved' : 'Reason'}
+          promptValue={pauseNote}
+          onPromptChange={setPauseNote}
+          promptRequired
+          promptMinLength={pause === 'resume' ? 5 : 10}
+          isLoading={pauseMutation.isPending}
+          onConfirm={() => (pause ? pauseMutation.mutateAsync(pause) : undefined)}
+        />
+      </>
     );
   }
 
@@ -214,6 +322,80 @@ export const LandDecisionBar = ({
                       />
                     </Field>
                   )}
+                  {!isFirstOfTwo && (
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Conditions</p>
+                        <p className="text-xs text-muted-foreground">
+                          Optional. With conditions the land is listed and buyers see them, but
+                          reservations and offers wait until each is met or waived.
+                        </p>
+                      </div>
+                      {conditions.map((condition, index) => (
+                        <div key={index} className="space-y-2 rounded-xl border border-border p-3">
+                          <div className="flex items-start gap-2">
+                            <Field
+                              label={`Condition ${index + 1}`}
+                              className="flex-1"
+                              error={
+                                condition.text.trim() && condition.text.trim().length < 10
+                                  ? 'At least 10 characters.'
+                                  : undefined
+                              }
+                            >
+                              <Textarea
+                                rows={2}
+                                maxLength={500}
+                                value={condition.text}
+                                placeholder="e.g. Governor's consent to the 2019 assignment is registered"
+                                onChange={(event) =>
+                                  setConditions((current) =>
+                                    current.map((row, i) =>
+                                      i === index ? { ...row, text: event.target.value } : row
+                                    )
+                                  )
+                                }
+                              />
+                            </Field>
+                            <IconButton
+                              label="Remove condition"
+                              icon={<Trash2 className="h-4 w-4" />}
+                              className="mt-6"
+                              onClick={() =>
+                                setConditions((current) => current.filter((_, i) => i !== index))
+                              }
+                            />
+                          </div>
+                          <Field label="Expected by" hint="Optional.">
+                            <DatePicker
+                              value={condition.dueAt}
+                              min={minDate}
+                              clearable
+                              onChange={(next) =>
+                                setConditions((current) =>
+                                  current.map((row, i) =>
+                                    i === index ? { ...row, dueAt: next } : row
+                                  )
+                                )
+                              }
+                            />
+                          </Field>
+                        </div>
+                      ))}
+                      {conditions.length < 10 && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          icon={<Plus className="h-4 w-4" />}
+                          onClick={() =>
+                            setConditions((current) => [...current, { text: '', dueAt: '' }])
+                          }
+                        >
+                          Add a condition
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </>
               ) : (
                 <Field
@@ -242,7 +424,11 @@ export const LandDecisionBar = ({
                 <Button
                   variant={mode === 'reject' ? 'danger' : 'primary'}
                   onClick={() => decide.mutate(mode)}
-                  disabled={(mode !== 'approve' && !reasonValid) || decide.isPending}
+                  disabled={
+                    (mode !== 'approve' && !reasonValid) ||
+                    (mode === 'approve' && !conditionsValid) ||
+                    decide.isPending
+                  }
                   isLoading={decide.isPending}
                   icon={
                     mode === 'approve' ? (

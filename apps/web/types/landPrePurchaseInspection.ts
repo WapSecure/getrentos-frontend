@@ -11,6 +11,8 @@ export interface PrePurchaseInspection extends LandWatchInspection {
   state: string;
   instructions?: string | null;
   reinspectionOfId?: string;
+  /** Set for an estate plot's inspection; it can back a reservation held subject to it. */
+  plotId?: string;
   questions: PrePurchaseInspectionQuestion[];
   disclaimer: string;
 }

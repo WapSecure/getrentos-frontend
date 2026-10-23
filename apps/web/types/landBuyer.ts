@@ -1,5 +1,5 @@
 import type { LandClosingFields } from './landClosing';
-import type { LandNotVerifiedItem, LandTrustLabel } from './land';
+import type { LandNotVerifiedItem, LandOpenCondition, LandTrustLabel } from './land';
 
 /**
  * Developer estate (layout) sales as the buyer and the public see them.
@@ -107,12 +107,25 @@ export interface PublicLandLayoutSummary {
   publishedAt?: string;
 }
 
+/** What a reservation means; the buyer accepts `version` to reserve. */
+export interface LandReservationTerms {
+  version: string;
+  points: string[];
+  /** The extra term when the hold is subject to the buyer's inspection; absent when not offered. */
+  subjectToInspection?: string;
+}
+
 export interface PublicLandLayoutDetail extends PublicLandLayoutSummary {
   reservationHoldHours: number;
+  /** Days a plot may be held while the buyer's inspection runs; 0 when not offered. */
+  inspectionHoldDays: number;
+  reservationTerms: LandReservationTerms;
   /** The master parcel's scoped trust labels. */
   labels?: LandTrustLabel[];
   /** Checks not verified on the master parcel; the buyer accepts these to purchase. */
   notVerified?: LandNotVerifiedItem[];
+  /** CONDITIONAL master parcel: what must be met before plots can be reserved. */
+  openConditions?: LandOpenCondition[];
   plots: LandPlot[];
   paymentPlans: PublicLandPaymentPlan[];
 }
@@ -136,6 +149,9 @@ export interface LandReservation {
   status: LandReservationStatus;
   expiresAt: string;
   createdAt: string;
+  termsVersion?: string;
+  /** Held subject to this pre-purchase inspection. */
+  subjectToInspectionId?: string;
 }
 
 export interface LandMilestone {

@@ -7,7 +7,41 @@ export type LandDiligenceStatus =
   | 'ACTION_REQUIRED'
   | 'VERIFIED'
   | 'REJECTED'
-  | 'EXPIRED';
+  | 'EXPIRED'
+  /** Approved subject to conditions: public, but not open to reservations or offers yet. */
+  | 'CONDITIONAL'
+  /** Paused by staff or the system (a dispute hold, an encumbrance): off the market. */
+  | 'SUSPENDED';
+
+/** One condition of a CONDITIONAL approval, as the owner and staff see it. */
+export interface LandDiligenceCondition {
+  id: string;
+  text: string;
+  dueAt?: string;
+  status: 'OPEN' | 'MET' | 'WAIVED';
+  hasEvidence?: boolean;
+  evidenceDocumentId?: string;
+  evidenceNote?: string;
+  evidenceAt?: string;
+  decidedAt?: string;
+  decidedByName?: string;
+  decisionNote?: string;
+}
+
+/** Why and since when a case is SUSPENDED. */
+export interface LandDiligenceSuspension {
+  at: string;
+  reason: string;
+  /** True when a dispute hold or new encumbrance did it, not a person. */
+  bySystem: boolean;
+  from?: LandDiligenceStatus;
+}
+
+/** What a CONDITIONAL approval still waits on, as buyers see it. */
+export interface LandOpenCondition {
+  text: string;
+  dueAt?: string;
+}
 
 export type LandEncumbranceStatus = 'UNKNOWN' | 'CLEAR' | 'FLAGGED';
 
@@ -66,6 +100,8 @@ export interface LandDiligence {
   slaDueAt?: string;
   riskScore?: number;
   assuranceTier?: LandAssuranceTier;
+  conditions?: LandDiligenceCondition[];
+  suspension?: LandDiligenceSuspension;
 }
 
 export interface LandParcelInput {
@@ -249,6 +285,8 @@ export const LAND_DILIGENCE_LABELS: Record<LandDiligenceStatus, string> = {
   VERIFIED: 'Verified',
   REJECTED: 'Not verified',
   EXPIRED: 'Expired',
+  CONDITIONAL: 'Verified with conditions',
+  SUSPENDED: 'Suspended',
 };
 
 export const LAND_TITLE_TYPE_LABELS: Record<LandTitleType, string> = {
@@ -272,6 +310,7 @@ export const LAND_ASSURANCE_TIER_LABELS: Record<LandAssuranceTier, string> = {
 export interface LandTrustLabel {
   kind:
     | 'OWNERSHIP_DOCUMENTS'
+    | 'SELLER_AUTHORITY'
     | 'TITLE_REVIEW'
     | 'OFFICIAL_SEARCH'
     | 'PARCEL_SURVEYED'
@@ -307,4 +346,6 @@ type PublicLandDiligence = Pick<
 > & {
   labels?: LandTrustLabel[];
   notVerified?: LandNotVerifiedItem[];
+  /** CONDITIONAL: what must still be met before reservations and offers open. */
+  openConditions?: LandOpenCondition[];
 };

@@ -19,7 +19,8 @@ import { realtorService } from '@/services/realtorService';
 
 const PAGE_SIZE = 10;
 
-export function ClientRealtorAccess() {
+/** `showHeader={false}` when the page already gives its own heading. */
+export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolean } = {}) {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [page, setPage] = useState(1);
@@ -102,12 +103,14 @@ export function ClientRealtorAccess() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Realtor access</h1>
-        <p className="mt-1 text-muted-foreground">
-          Approve representatives and choose exactly which properties they may manage.
-        </p>
-      </div>
+      {showHeader && (
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Realtor access</h1>
+          <p className="mt-1 text-muted-foreground">
+            Approve representatives and choose exactly which properties they may manage.
+          </p>
+        </div>
+      )}
       <div className="mb-6 max-w-md">
         <SearchInput
           value={search}

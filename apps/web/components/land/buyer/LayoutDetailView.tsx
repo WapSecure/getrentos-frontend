@@ -17,6 +17,8 @@ import { PlotGrid, PlotStatusLegend } from './PlotGrid';
 import { PlotLayoutMap, hasPlotOutlines } from './PlotLayoutMap';
 import { PlotReservePanel } from './PlotReservePanel';
 import { plotLabel, quotePlot } from './landSaleLogic';
+import { EstateCommitmentsSection } from '../estate-infrastructure/EstateCommitmentsSection';
+import { OpenConditionsNotice } from '../market/OpenConditionsNotice';
 
 /** One estate: its facts, fees, plot map, plans and the reserve flow. */
 export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
@@ -113,6 +115,8 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
         </dl>
       </div>
 
+      <OpenConditionsNotice conditions={layout.openConditions} action="plot reservations" />
+
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section aria-labelledby="plots-heading" className="space-y-4">
           <div className="flex flex-wrap items-end justify-between gap-2">
@@ -132,6 +136,8 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
           <FeesCard fees={layout.fees} />
         </aside>
       </div>
+
+      <EstateCommitmentsSection layoutId={layout.id} />
 
       <section aria-labelledby="plans-heading" className="space-y-4">
         <div>

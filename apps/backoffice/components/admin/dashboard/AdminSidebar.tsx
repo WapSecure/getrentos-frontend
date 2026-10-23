@@ -11,6 +11,7 @@ import {
   Users,
   ShieldCheck,
   Fingerprint,
+  Construction,
   Gavel,
   BadgeCheck,
   AlertTriangle,
@@ -210,6 +211,12 @@ const navItems: NavItem[] = [
     label: 'Inspection Questions',
     href: '/admin/land/inspection-questions',
     icon: MessageCircleQuestion,
+    permission: 'verifications.review',
+  },
+  {
+    label: 'Estate Infrastructure',
+    href: '/admin/land/infrastructure',
+    icon: Construction,
     permission: 'verifications.review',
   },
   {

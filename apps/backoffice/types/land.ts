@@ -12,7 +12,32 @@ export type LandDiligenceStatus =
   | 'ACTION_REQUIRED'
   | 'VERIFIED'
   | 'REJECTED'
-  | 'EXPIRED';
+  | 'EXPIRED'
+  | 'CONDITIONAL'
+  | 'SUSPENDED';
+
+/** A condition of a CONDITIONAL approval. */
+export interface AdminLandDiligenceCondition {
+  id: string;
+  text: string;
+  dueAt?: string;
+  status: 'OPEN' | 'MET' | 'WAIVED';
+  hasEvidence?: boolean;
+  evidenceDocumentId?: string;
+  evidenceNote?: string;
+  evidenceAt?: string;
+  decidedAt?: string;
+  decidedByName?: string;
+  decisionNote?: string;
+}
+
+/** Why and since when a case is SUSPENDED. */
+export interface AdminLandDiligenceSuspension {
+  at: string;
+  reason: string;
+  bySystem: boolean;
+  from?: LandDiligenceStatus;
+}
 
 export type LandAssuranceTier = 'BASIC' | 'STANDARD' | 'PREMIUM';
 
@@ -98,6 +123,8 @@ export interface LandDiligenceReviewSummary {
   reviewedAt?: string | null;
   expiresAt?: string | null;
   reviewedByName?: string | null;
+  conditions?: AdminLandDiligenceCondition[];
+  suspension?: AdminLandDiligenceSuspension;
 }
 
 export interface LandDiligenceRecord {
@@ -128,6 +155,8 @@ export interface LandDiligenceDecisionInput {
   expiresAt?: string;
   /** The case version the reviewer decided on. */
   expectedVersion?: number;
+  /** Approve subject to these: the case becomes CONDITIONAL. */
+  conditions?: { text: string; dueAt?: string }[];
 }
 
 export interface LandDiligenceCheckInput {

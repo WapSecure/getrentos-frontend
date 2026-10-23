@@ -19,6 +19,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
@@ -67,6 +68,7 @@ const ManagedMandateCard = ({
   onToggleSelected: (id: string) => void;
 }) => {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [managerUserId, setManagerUserId] = useState('');
   const [deliveryPartner, setDeliveryPartner] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,7 @@ const ManagedMandateCard = ({
       unwrap(adminManagedService.activate(mandate.id, managerUserId, deliveryPartner || undefined)),
     onSuccess: () => {
       setError(null);
+      toast.success(`${mandate.propertyTitle ?? 'The engagement'} is now managed by GetRentos.`);
       void queryClient.invalidateQueries({ queryKey: ['admin', 'managed-mandates'] });
     },
     onError: (err: Error) => setError(err.message || 'Could not activate the engagement.'),

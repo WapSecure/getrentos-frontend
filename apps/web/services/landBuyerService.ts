@@ -54,8 +54,19 @@ export const landLayoutService = {
 /** The buyer side of developer plot sales and land resale conveyance. */
 export const landBuyerService = {
   // ---- Reservations ----
-  reserve: (plotId: string) =>
-    safeCall(() => post<LandReservation>(`/buyer/land/plots/${plotId}/reserve`)),
+  /** Hold a plot on the terms the buyer accepted; optionally while their inspection of it runs. */
+  reserve: (
+    plotId: string,
+    input: { acceptedTermsVersion: string; subjectToInspectionId?: string }
+  ) =>
+    safeCall(() =>
+      post<LandReservation>(`/buyer/land/plots/${plotId}/reserve`, {
+        acceptedTermsVersion: input.acceptedTermsVersion,
+        ...(input.subjectToInspectionId
+          ? { subjectToInspectionId: input.subjectToInspectionId }
+          : {}),
+      })
+    ),
 
   listReservations: () => safeCall(() => authFetch<LandReservation[]>('/buyer/land/reservations')),
 

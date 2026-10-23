@@ -78,7 +78,7 @@ export function ClientAgentAccess() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Field Agent access</h1>
+        <h2 className="text-xl font-semibold text-foreground">Field Agent access</h2>
         <p className="mt-1 text-muted-foreground">
           Approve Agents and assign only the properties they may work on.
         </p>
