@@ -35,6 +35,8 @@ interface Payment {
   description: string;
   dueDate: string;
   escrowStatus: 'not_funded' | 'held' | 'pending_review' | 'released' | 'frozen';
+  releaseDate?: string;
+  heldReason?: string;
   periodStart?: string;
   periodEnd?: string;
   lines?: InvoiceLine[];
@@ -157,6 +159,17 @@ export const PaymentDetailsModal = ({
           {/* Where the money is */}
           <Alert variant="info" icon={Shield} title="Where your money is">
             {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
+            {payment.escrowStatus === 'held' && payment.releaseDate && (
+              <p className="text-xs mt-1">
+                Releases to your landlord on{' '}
+                {new Date(payment.releaseDate).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+                . Held under GetRentos Payment Protection until then, so you have the home in hand first.
+              </p>
+            )}
           </Alert>
 
           {/* Description */}
