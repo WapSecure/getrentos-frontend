@@ -237,11 +237,18 @@ export default function PropertyDetailPage() {
                 <Square className="w-4 h-4" />
                 <span>{property.size} sqm</span>
               </div>
-              {property.availableFrom && (
-                <div className="flex items-center gap-1.5">
+              {property.acceptingApplications === false ? (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span>Available {property.availableFrom}</span>
+                  <span>Let — not accepting applications</span>
                 </div>
+              ) : (
+                property.availableFrom && (
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" />
+                    <span>Available {property.availableFrom}</span>
+                  </div>
+                )
               )}
             </div>
 
@@ -249,9 +256,10 @@ export default function PropertyDetailPage() {
               <Button
                 variant="primary"
                 className="flex-1"
+                disabled={property.acceptingApplications === false}
                 onClick={() => router.push(buildRoute.renterPropertyApply(property.id))}
               >
-                Apply Now
+                {property.acceptingApplications === false ? 'Not accepting applications' : 'Apply Now'}
               </Button>
               <Button
                 variant="outline"

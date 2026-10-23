@@ -130,6 +130,21 @@ export default function PropertyApplyPage() {
     );
   }
 
+  if (property.acceptingApplications === false) {
+    return (
+      <EmptyState
+        icon={Search}
+        title="No longer accepting applications"
+        description="This unit has been let, so it isn't accepting new applications. No application has been submitted and no documents were shared."
+        action={
+          <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
+            Find another home
+          </Button>
+        }
+      />
+    );
+  }
+
   if (submitted) {
     return (
       <div className="max-w-lg mx-auto text-center py-12">
