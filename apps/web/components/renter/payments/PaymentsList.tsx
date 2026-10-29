@@ -30,6 +30,7 @@ interface PaymentsListProps {
   onPayNow: (id: string) => void;
   onDownloadReceipt: (id: string) => void;
   onDispute: (id: string) => void;
+  onConfirmMoveIn: (id: string) => void;
 }
 
 export const PaymentsList = ({
@@ -37,6 +38,7 @@ export const PaymentsList = ({
   onPayNow,
   onDownloadReceipt,
   onDispute,
+  onConfirmMoveIn,
 }: PaymentsListProps) => {
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -127,6 +129,7 @@ export const PaymentsList = ({
                   onPayNow={() => onPayNow(payment.id)}
                   onDownloadReceipt={() => onDownloadReceipt(payment.id)}
                   onDispute={() => onDispute(payment.id)}
+                  onConfirmMoveIn={() => onConfirmMoveIn(payment.id)}
                 />
               </motion.div>
             ))
@@ -142,6 +145,7 @@ export const PaymentsList = ({
           payment={selectedPayment}
           onDownloadReceipt={onDownloadReceipt}
           onDispute={onDispute}
+          onConfirmMoveIn={onConfirmMoveIn}
         />
       )}
     </>

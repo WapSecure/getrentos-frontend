@@ -36,6 +36,7 @@ interface PaymentCardProps {
   onPayNow: () => void;
   onDownloadReceipt: () => void;
   onDispute: () => void;
+  onConfirmMoveIn: () => void;
 }
 
 const methodIcons: Record<Payment['method'], typeof CreditCard> = {
@@ -60,6 +61,7 @@ export const PaymentCard = ({
   onPayNow,
   onDownloadReceipt,
   onDispute,
+  onConfirmMoveIn,
 }: PaymentCardProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -182,6 +184,19 @@ export const PaymentCard = ({
                 className="whitespace-nowrap"
               >
                 Pay now
+              </Button>
+            )}
+            {payment.status === 'paid' && payment.escrowStatus === 'held' && (
+              <Button
+                size="sm"
+                variant="primary"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onConfirmMoveIn();
+                }}
+                className="whitespace-nowrap"
+              >
+                Confirm move-in
               </Button>
             )}
             {payment.status === 'paid' && (

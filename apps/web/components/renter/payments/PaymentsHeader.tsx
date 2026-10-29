@@ -43,7 +43,8 @@ export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderPro
                 Payments use GetRentos Payment Protection
               </p>
               <p className="text-xs text-muted-foreground">
-                Your funds are held securely until conditions are met
+                Your rent is held until you confirm move-in — then released to your landlord, or
+                released automatically after a few days
               </p>
             </div>
             <Lock className="w-4 h-4 text-primary ml-auto" />

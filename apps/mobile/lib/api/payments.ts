@@ -84,6 +84,10 @@ export const paymentsApi = {
   dispute: (id: string, reason: string) =>
     apiFetch<Payment>(`/renter/payments/${id}/dispute`, { method: 'POST', body: { reason } }),
 
+  /** Confirm move-in and release held rent. Step-up handled by the api client. */
+  confirmMoveIn: (id: string) =>
+    apiFetch<Payment>(`/renter/payments/${id}/confirm-move-in`, { method: 'POST' }),
+
   listMethods: () => apiFetch<SavedPaymentMethod[]>('/renter/payments/methods'),
 
   addMethod: (input: CreatePaymentMethodInput) =>

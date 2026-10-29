@@ -1212,6 +1212,16 @@ export const renterService = {
     );
   },
 
+  /**
+   * Confirm move-in and release the held rent to the landlord. Step-up protected
+   * on the API; the shared client handles the "confirm it's you" prompt + replay.
+   */
+  async confirmMoveIn(paymentId: string): Promise<ApiResponse<Payment>> {
+    return safeCall(() =>
+      authFetch(`/renter/payments/${paymentId}/confirm-move-in`, { method: 'POST' })
+    );
+  },
+
   async listPaymentMethods(): Promise<ApiResponse<PaymentMethod[]>> {
     return safeCall(() => authFetch('/renter/payments/methods'));
   },

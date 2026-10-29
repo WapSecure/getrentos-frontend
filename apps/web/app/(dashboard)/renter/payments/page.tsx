@@ -56,6 +56,7 @@ export default function PaymentsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showExportModal, setShowExportModal] = useState(false);
   const [disputingPaymentId, setDisputingPaymentId] = useState<string | null>(null);
+  const [confirmingMoveInId, setConfirmingMoveInId] = useState<string | null>(null);
   const [showPayAllConfirm, setShowPayAllConfirm] = useState(false);
   const [simCheckout, setSimCheckout] = useState<{ amount: number; run: () => void } | null>(null);
   const [payingPaymentId, setPayingPaymentId] = useState<string | null>(null);
@@ -250,6 +251,32 @@ export default function PaymentsPage() {
     setDisputingPaymentId(null);
   };
 
+  const handleConfirmMoveIn = (paymentId: string) => {
+    setConfirmingMoveInId(paymentId);
+  };
+
+  const confirmMoveInMutation = useMutation({
+    mutationFn: (paymentId: string) => unwrap(renterService.confirmMoveIn(paymentId)),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.payments });
+      queryClient.invalidateQueries({ queryKey: ['renter', 'rent-accounts'] });
+      pushNotification({
+        type: 'success',
+        title: 'Move-in confirmed',
+        message: `Your rent for ${updated.propertyName} has been released to your landlord.`,
+      });
+    },
+    onError: (error: Error) => {
+      pushNotification({
+        type: 'error',
+        title: 'Rent Not Released',
+        message: error.message || 'We could not release this payment. Please try again.',
+      });
+    },
+  });
+
+  const confirmingMoveInPayment = payments.find((p) => p.id === confirmingMoveInId) ?? null;
+
   const handleMarkNotificationAsRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
@@ -360,6 +387,7 @@ export default function PaymentsPage() {
             onPayNow={handlePayNow}
             onDownloadReceipt={handleDownloadReceipt}
             onDispute={handleDispute}
+            onConfirmMoveIn={handleConfirmMoveIn}
           />
           <PaymentReceiptsGallery receipts={receipts} onDownload={handleDownloadReceipt} />
         </div>
@@ -396,6 +424,21 @@ export default function PaymentsPage() {
         open={!!disputingPaymentId}
         onOpenChange={(open) => !open && setDisputingPaymentId(null)}
         onSubmit={handleSubmitDispute}
+      />
+      <ConfirmDialog
+        open={!!confirmingMoveInId}
+        onOpenChange={(open) => !open && setConfirmingMoveInId(null)}
+        title="Confirm move-in?"
+        description={
+          confirmingMoveInPayment
+            ? `This releases ₦${confirmingMoveInPayment.amount.toLocaleString()} for ${confirmingMoveInPayment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`
+            : ''
+        }
+        confirmLabel="Yes, release to landlord"
+        onConfirm={() => {
+          if (confirmingMoveInId) confirmMoveInMutation.mutate(confirmingMoveInId);
+          setConfirmingMoveInId(null);
+        }}
       />
       <ConfirmDialog
         open={showPayAllConfirm}
