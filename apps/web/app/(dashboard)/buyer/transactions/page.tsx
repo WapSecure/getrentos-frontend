@@ -52,7 +52,7 @@ export default function BuyerTransactionsPage() {
     onSuccess: invalidate,
   });
 
-  const handleMakePayment = (transactionId: string, stage: 'deposit' | 'final') => {
+  const handleMakePayment = (transactionId: string, stage: 'deposit' | 'release') => {
     if (stage === 'deposit') depositMutation.mutate(transactionId);
     else releaseMutation.mutate(transactionId);
   };
@@ -63,8 +63,6 @@ export default function BuyerTransactionsPage() {
     { value: 'all', label: 'All' },
     { value: 'deposit_pending', label: 'Deposit Pending' },
     { value: 'funds_held', label: 'Funds Held' },
-    { value: 'verification', label: 'Verification' },
-    { value: 'final_payment', label: 'Final Payment' },
     { value: 'released', label: 'Completed' },
     { value: 'frozen', label: 'Frozen' },
     { value: 'disputed', label: 'Disputed' },

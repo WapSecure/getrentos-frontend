@@ -33,7 +33,12 @@ import { ApiError } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
-/** The happy path, in order: the same five stages the web shows. */
+/**
+ * The happy path, in order — the live stages the backend actually drives:
+ * deposit → held → released. (VERIFICATION_PENDING / SETTLEMENT_PENDING exist in
+ * the enum but no transaction is ever moved into them, so they are not shown.)
+ * Mirrors the web stepper.
+ */
 const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] = [
   {
     key: 'deposit_pending',
@@ -43,17 +48,8 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'funds_held',
     label: 'Funds held',
-    description: 'Your deposit is received and held safely by GetRentos.',
-  },
-  {
-    key: 'verification',
-    label: 'Verification',
-    description: 'Ownership and transfer documents are under compliance review.',
-  },
-  {
-    key: 'final_payment',
-    label: 'Final payment',
-    description: 'Release the balance to the seller to complete the purchase.',
+    description:
+      'Your payment is held safely by GetRentos. Once you have received the property and its documents, confirm receipt to release the funds to the seller.',
   },
   {
     key: 'released',
@@ -68,7 +64,7 @@ const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => 
   {
     value: 'active',
     label: 'In progress',
-    match: (s) => ['deposit_pending', 'funds_held', 'verification', 'final_payment'].includes(s),
+    match: (s) => ['deposit_pending', 'funds_held'].includes(s),
   },
   {
     value: 'attention',
@@ -327,24 +323,25 @@ function TransactionCard({
         <StageTimeline status={tx.escrowStatus} />
       )}
 
-      {tx.escrowStatus === 'deposit_pending' ||
-      tx.escrowStatus === 'final_payment' ||
-      tx.escrowStatus === 'funds_held' ||
-      tx.escrowStatus === 'verification' ? (
+      {tx.escrowStatus === 'deposit_pending' || tx.escrowStatus === 'funds_held' ? (
         <View style={{ gap: spacing.sm }}>
           {tx.escrowStatus === 'deposit_pending' ? (
             <Button label="Pay deposit" loading={depositing} onPress={onDeposit} />
           ) : null}
-          {tx.escrowStatus === 'final_payment' ? (
-            <Button label="Release funds to seller" loading={releasing} onPress={onRelease} />
-          ) : null}
-          {tx.escrowStatus === 'funds_held' || tx.escrowStatus === 'verification' ? (
-            <Button
-              label="Request refund"
-              variant="outline"
-              loading={refunding}
-              onPress={onRefund}
-            />
+          {tx.escrowStatus === 'funds_held' ? (
+            <>
+              <Button
+                label="Confirm receipt & release to seller"
+                loading={releasing}
+                onPress={onRelease}
+              />
+              <Button
+                label="Request refund"
+                variant="outline"
+                loading={refunding}
+                onPress={onRefund}
+              />
+            </>
           ) : null}
         </View>
       ) : null}
