@@ -1,10 +1,18 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
 import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
-import { Alert, Button, Card, CardSkeleton, ListSkeleton, NumberInput } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Card,
+  CardSkeleton,
+  ListSkeleton,
+  NumberInput,
+  Pagination,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
@@ -50,6 +58,9 @@ async function decodeQrFromFile(file: File): Promise<string | null> {
   const code = jsQR(imageData.data, imageData.width, imageData.height);
   return code?.data ?? null;
 }
+
+/** Visitors per page in "Inside now". */
+const INSIDE_PAGE_SIZE = 20;
 
 const formatTime = (value: string) =>
   new Intl.DateTimeFormat('en-NG', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
@@ -124,20 +135,28 @@ export default function GatemanVerifyPage() {
     refetchInterval: 15_000,
   });
 
-  const { data: checkInsData, isLoading: isInsideLoading } = useQuery({
+  // Paged from the server: a busy estate can have hundreds of people inside, and
+  // a single capped fetch silently hid everyone past the cap from check-out.
+  const [insidePage, setInsidePage] = useState(1);
+  const {
+    data: checkInsData,
+    isLoading: isInsideLoading,
+    isFetching: isInsideFetching,
+  } = useQuery({
     queryKey: [
       ...estateKeys.visitorPasses(estate?.id ?? '', 'checked_in'),
-      { page: 1, pageSize: 100, purpose: 'today-check-ins' },
+      { page: insidePage, pageSize: INSIDE_PAGE_SIZE, purpose: 'today-check-ins' },
     ],
     queryFn: () =>
       unwrap(
         estateService.listVisitorPasses(estate!.id, {
           status: 'checked_in',
-          page: 1,
-          pageSize: 100,
+          page: insidePage,
+          pageSize: INSIDE_PAGE_SIZE,
         })
       ),
     enabled: !!estate,
+    placeholderData: keepPreviousData,
   });
   // Everyone currently on the estate, not just today's arrivals: a visitor who
   // arrived yesterday and never checked out is exactly the case this list exists
@@ -155,6 +174,11 @@ export default function GatemanVerifyPage() {
       .map((write) => write.payload.passId)
   );
   const inside = (checkInsData?.items ?? []).filter((pass) => !leaving.has(pass.id));
+  const insideTotal = Math.max(0, (checkInsData?.total ?? 0) - leaving.size);
+  // Checking out the last visitor on a later page leaves it empty: step back.
+  if (checkInsData && checkInsData.items.length === 0 && insidePage > 1) {
+    setInsidePage(insidePage - 1);
+  }
 
   // Admits waiting in the queue are hidden from the walk-in panel for the same
   // reason departures are hidden from "inside now": at the gate the barrier is
@@ -692,7 +716,7 @@ export default function GatemanVerifyPage() {
 
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3">
-            Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
+            Inside now{insideTotal > 0 ? ` (${insideTotal})` : ''}
           </h2>
           {isInsideLoading ? (
             <ListSkeleton rows={2} />
@@ -731,6 +755,16 @@ export default function GatemanVerifyPage() {
                 </div>
               ))}
             </div>
+          )}
+          {(checkInsData?.total ?? 0) > INSIDE_PAGE_SIZE && (
+            <Pagination
+              page={insidePage}
+              pageSize={INSIDE_PAGE_SIZE}
+              total={checkInsData?.total ?? 0}
+              onPageChange={setInsidePage}
+              isLoading={isInsideFetching}
+              className="mt-4"
+            />
           )}
         </div>
       </div>
