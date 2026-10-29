@@ -43,7 +43,7 @@ export const PropertyListingCard = ({
           </Badge>
         )}
         {listing.acceptingOffers === false && (
-          <Badge variant="secondary" className="absolute top-3 right-14">
+          <Badge variant="neutral" className="absolute top-3 right-14">
             Under offer
           </Badge>
         )}
