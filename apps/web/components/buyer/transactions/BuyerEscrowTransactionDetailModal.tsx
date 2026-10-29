@@ -27,8 +27,8 @@ import { LandConveyanceEntry } from '@/components/land/buyer/LandConveyanceEntry
 interface BuyerEscrowTransactionDetailModalProps {
   transaction: BuyerEscrowTransaction | null;
   onClose: () => void;
-  onMakePayment: (transactionId: string, stage: 'deposit' | 'final') => void;
-  /** A deposit or final payment is on its way to the server. */
+  onMakePayment: (transactionId: string, stage: 'deposit' | 'release') => void;
+  /** A deposit, or a release of the held funds, is on its way to the server. */
   isPaying?: boolean;
 }
 
@@ -51,17 +51,8 @@ const escrowSteps: { key: BuyerEscrowStatus; label: string; description: string 
   {
     key: 'funds_held',
     label: 'Funds Held',
-    description: 'Your deposit is received and held safely by GetRentos.',
-  },
-  {
-    key: 'verification',
-    label: 'Verification',
-    description: 'Ownership and transfer documents are under compliance review.',
-  },
-  {
-    key: 'final_payment',
-    label: 'Final Payment',
-    description: 'Remit the balance of the purchase price to proceed.',
+    description:
+      'Your payment is held safely by GetRentos. Once you have received the property and its documents, confirm receipt to release the funds to the owner.',
   },
   {
     key: 'released',
@@ -78,6 +69,12 @@ export const BuyerEscrowTransactionDetailModal = ({
 }: BuyerEscrowTransactionDetailModalProps) => {
   const router = useRouter();
   const [showActivityLog, setShowActivityLog] = useState(false);
+  const [confirmingRelease, setConfirmingRelease] = useState(false);
+
+  const handleClose = () => {
+    setConfirmingRelease(false);
+    onClose();
+  };
 
   if (!transaction) return null;
 
@@ -85,10 +82,10 @@ export const BuyerEscrowTransactionDetailModal = ({
   const isRefunded = transaction.escrowStatus === 'refunded';
   const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
   const canDeposit = transaction.escrowStatus === 'deposit_pending';
-  const canPayFinal = transaction.escrowStatus === 'final_payment';
+  const canRelease = transaction.escrowStatus === 'funds_held';
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()}>
+    <Dialog open onOpenChange={(next) => !next && handleClose()}>
       <DialogContent padded={false} className="flex flex-col overflow-hidden sm:max-w-lg">
         <div className="p-4 pr-12 border-b border-border shrink-0">
           <DialogTitle className="font-semibold text-foreground">
@@ -172,18 +169,48 @@ export const BuyerEscrowTransactionDetailModal = ({
                             Make Deposit Payment
                           </Button>
                         )}
-                        {isActive && step.key === 'final_payment' && canPayFinal && (
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            className="mt-2"
-                            icon={<Wallet className="w-3.5 h-3.5" />}
-                            isLoading={isPaying}
-                            onClick={() => onMakePayment(transaction.id, 'final')}
-                          >
-                            Pay Final Balance
-                          </Button>
-                        )}
+                        {isActive &&
+                          step.key === 'funds_held' &&
+                          canRelease &&
+                          (confirmingRelease ? (
+                            <div className="mt-2 space-y-2">
+                              <Alert variant="warning" icon={ShieldAlert}>
+                                Releasing pays the held funds to {transaction.ownerName} and cannot
+                                be undone. Only release once you have received the property and the
+                                documents you paid for. If something is wrong, contact support
+                                instead.
+                              </Alert>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  icon={<ShieldCheck className="w-3.5 h-3.5" />}
+                                  isLoading={isPaying}
+                                  onClick={() => onMakePayment(transaction.id, 'release')}
+                                >
+                                  Yes, release to owner
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={isPaying}
+                                  onClick={() => setConfirmingRelease(false)}
+                                >
+                                  Not yet
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              className="mt-2"
+                              icon={<ShieldCheck className="w-3.5 h-3.5" />}
+                              onClick={() => setConfirmingRelease(true)}
+                            >
+                              Confirm receipt &amp; release to owner
+                            </Button>
+                          ))}
                       </div>
                     </div>
                   );
@@ -196,8 +223,8 @@ export const BuyerEscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            The money you pay is held safely by GetRentos and only paid to the owner once all
-            verification conditions are met: protecting both you and the seller.
+            The money you pay is held safely by GetRentos and only released to the owner once the
+            sale completes: protecting both you and the seller.
           </Alert>
 
           {transaction.releasedAt && (
@@ -250,7 +277,7 @@ export const BuyerEscrowTransactionDetailModal = ({
         </div>
 
         <div className="p-4 border-t border-border flex gap-3 shrink-0">
-          <Button variant="ghost" className="flex-1" onClick={onClose}>
+          <Button variant="ghost" className="flex-1" onClick={handleClose}>
             Close
           </Button>
           <Button
