@@ -50,10 +50,13 @@ export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenu
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Open ${roleLabel.toLowerCase()} account menu`}
           className="group flex min-h-11 items-center gap-3 rounded-xl p-1.5 pr-2 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
+          <span className="sr-only">Open account menu</span>
+          <span
+            aria-hidden="true"
+            className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground"
+          >
             {initials}
           </span>
           <span className="hidden text-left sm:block">

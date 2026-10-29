@@ -87,7 +87,9 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
           }
         }}
         placeholder="Search people, payments, bookings…"
+        role="combobox"
         aria-label="Search backoffice records"
+        aria-autocomplete="list"
         aria-expanded={open}
         aria-controls={resultsId}
         aria-activedescendant={results[active] ? `${resultsId}-${active}` : undefined}
@@ -145,7 +147,10 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : search.isError && !search.data ? (
-            <div className="flex flex-wrap items-center gap-2 p-4 text-sm text-destructive" role="alert">
+            <div
+              className="flex flex-wrap items-center gap-2 p-4 text-sm text-destructive"
+              role="alert"
+            >
               Search is unavailable.
               <Button size="xs" variant="outline" onClick={() => void search.refetch()}>
                 Retry

@@ -8,9 +8,7 @@ import {
   SearchInput,
   StatGridSkeleton,
   TableSkeleton,
-  Tabs,
-  TabsList,
-  TabsTrigger,
+  ToggleChip,
 } from '@getrentos/ui';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
 import { PaymentsTable } from '@/components/landlord/payments/PaymentsTable';
@@ -116,22 +114,25 @@ export function PaymentsView() {
           placeholder="Search this page by tenant or property..."
           label="Search this page by tenant or property"
         />
-        <Tabs
-          value={filter}
-          onValueChange={(value) => {
-            setFilter(value as 'all' | RentPaymentStatus);
-            setPage(1);
-          }}
-          className="max-w-full"
+        <div
+          className="flex max-w-full gap-1 overflow-x-auto pb-1"
+          role="group"
+          aria-label="Filter payments by status"
         >
-          <TabsList className="max-w-full">
-            {statusFilters.map((option) => (
-              <TabsTrigger key={option.value} value={option.value}>
-                {option.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          {statusFilters.map((option) => (
+            <ToggleChip
+              key={option.value}
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
+            >
+              {option.label}
+            </ToggleChip>
+          ))}
+        </div>
       </div>
 
       {paymentsQuery.isLoading ? (

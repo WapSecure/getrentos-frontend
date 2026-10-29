@@ -39,7 +39,7 @@ export const DisputeCard = ({ dispute, onClick, delay = 0 }: DisputeCardProps) =
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
       onClick={onClick}
-      className="w-full cursor-pointer rounded-2xl border border-border/90 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+      className="min-w-0 w-full max-w-full cursor-pointer overflow-hidden rounded-2xl border border-border/90 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">

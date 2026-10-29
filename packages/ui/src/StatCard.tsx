@@ -64,7 +64,7 @@ export const StatCard = ({
           <p className={cn('font-semibold tracking-[-0.03em] text-foreground', valueSize)}>
             {formattedValue}
           </p>
-          {subtitle && <p className="text-xs text-muted-foreground/70 mt-1">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-xs text-foreground/70">{subtitle}</p>}
         </div>
       </div>
     </div>

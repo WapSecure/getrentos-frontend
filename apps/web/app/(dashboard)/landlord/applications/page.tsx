@@ -77,7 +77,11 @@ export default function LandlordApplicationsPage() {
         </p>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto" role="group" aria-label="Filter applications by status">
+      <div
+        className="mb-6 flex w-full max-w-full gap-2 overflow-x-auto pb-1"
+        role="group"
+        aria-label="Filter applications by status"
+      >
         {statusFilters.map((option) => (
           <ToggleChip
             key={option.value}
@@ -100,7 +104,7 @@ export default function LandlordApplicationsPage() {
         skeletonClassName="h-32"
         empty={<EmptyState icon={FileText} title="No applications found" />}
       >
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {applications.map((application, index) => (
             <ApplicationCard
               key={application.id}

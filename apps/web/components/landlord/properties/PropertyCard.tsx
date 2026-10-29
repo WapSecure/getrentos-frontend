@@ -146,7 +146,7 @@ export const PropertyCard = ({
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-foreground truncate">{property.name}</h3>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground whitespace-nowrap">
+          <span className="whitespace-nowrap rounded-full bg-secondary px-2 py-0.5 text-xs text-foreground/75">
             {propertyTypeLabels[property.type]}
           </span>
         </div>

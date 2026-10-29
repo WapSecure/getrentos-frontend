@@ -14,9 +14,7 @@ import {
   PageErrorState,
   Pagination,
   SearchInput,
-  Tabs,
-  TabsList,
-  TabsTrigger,
+  ToggleChip,
   useToast,
 } from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
@@ -127,7 +125,7 @@ export default function RealtorListingsPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -136,23 +134,27 @@ export default function RealtorListingsPage() {
           }}
           placeholder="Search by title or client..."
           label="Search listings"
-          className="flex-1 max-w-sm"
+          className="min-w-0 flex-1 sm:max-w-sm"
         />
-        <Tabs
-          value={filter}
-          onValueChange={(value) => {
-            setFilter(value as StatusFilter);
-            setPage(1);
-          }}
+        <div
+          className="flex w-full min-w-0 max-w-full gap-1 overflow-x-auto pb-1 sm:w-auto"
+          role="group"
+          aria-label="Filter listings by status"
         >
-          <TabsList className="max-w-full">
-            {filterOptions.map((option) => (
-              <TabsTrigger key={option.value} value={option.value}>
-                {option.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+          {filterOptions.map((option) => (
+            <ToggleChip
+              key={option.value}
+              size="sm"
+              pressed={filter === option.value}
+              onPressedChange={() => {
+                setFilter(option.value);
+                setPage(1);
+              }}
+            >
+              {option.label}
+            </ToggleChip>
+          ))}
+        </div>
       </div>
 
       {isLoading ? (
@@ -193,7 +195,7 @@ export default function RealtorListingsPage() {
           }
         />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing) => (
             <RealtorListingCard
               key={listing.id}

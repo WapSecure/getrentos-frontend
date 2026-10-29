@@ -59,6 +59,10 @@ export function Select({
     () => options.find((option) => option.value === value),
     [options, value]
   );
+  const visibleLabel = selected
+    ? (selected.searchText ??
+      (typeof selected.label === 'string' ? selected.label : selected.value))
+    : placeholder;
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -123,7 +127,7 @@ export function Select({
         <button
           type="button"
           id={field.id}
-          aria-label={ariaLabel}
+          aria-label={ariaLabel ? `${visibleLabel} ${ariaLabel}` : undefined}
           aria-haspopup="listbox"
           aria-expanded={open}
           {...field.ariaProps}

@@ -107,7 +107,7 @@ export const RenterRecommendedProperties = () => {
                       <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto">
                         <Home className="w-6 h-6 text-primary" />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-2">No photo yet</p>
+                      <p className="mt-2 text-xs text-foreground/75">No photo yet</p>
                     </div>
                   </div>
                 )}
@@ -135,7 +135,9 @@ export const RenterRecommendedProperties = () => {
               {/* Property Details */}
               <div className="p-3">
                 <div className="flex justify-between items-start gap-2 mb-1">
-                  <h3 className="min-w-0 font-semibold text-foreground text-sm">{property.title}</h3>
+                  <h3 className="min-w-0 font-semibold text-foreground text-sm">
+                    {property.title}
+                  </h3>
                   <div className="flex items-center gap-0.5">
                     <Star className="w-3 h-3 fill-primary text-primary" />
                     <span className="text-xs text-muted-foreground">{property.rating}</span>

@@ -47,7 +47,7 @@ export function DataTable<T>({
     <div
       className={cn('overflow-hidden rounded-xl border border-border bg-card shadow-xs', className)}
     >
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0}>
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10">
             <tr className="border-b border-border/80 bg-muted/40 text-left">

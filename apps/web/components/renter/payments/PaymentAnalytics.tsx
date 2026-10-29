@@ -65,14 +65,14 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <NairaSign className="w-3 h-3 text-primary" />
-              <span className="text-xs text-muted-foreground">Total Paid</span>
+              <span className="text-xs text-foreground/75">Total Paid</span>
             </div>
             <p className="text-lg font-bold text-foreground">{formatCurrency(totalPaid)}</p>
           </div>
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <TrendingUp className="w-3 h-3 text-primary" />
-              <span className="text-xs text-muted-foreground">Avg Payment</span>
+              <span className="text-xs text-foreground/75">Avg Payment</span>
             </div>
             <p className="text-lg font-bold text-foreground">{formatCurrency(averagePayment)}</p>
           </div>
@@ -81,10 +81,10 @@ export const PaymentAnalytics = ({ payments }: PaymentAnalyticsProps) => {
         <div className="p-3 rounded-lg bg-secondary">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3 text-primary" />
-            <span className="text-xs text-muted-foreground">Average per active month</span>
+            <span className="text-xs text-foreground/75">Average per active month</span>
           </div>
           <p className="text-lg font-bold text-foreground">{formatCurrency(monthlyAverage)}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-0.5 text-xs text-foreground/75">
             Across {paidMonths.size} month{paidMonths.size === 1 ? '' : 's'} represented
           </p>
         </div>

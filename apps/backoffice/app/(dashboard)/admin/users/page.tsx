@@ -9,13 +9,13 @@ import {
   DataTable,
   PageErrorState,
   SearchInput,
+  SegmentedControl,
   useToast,
   type Column,
 } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
-import { Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
 import { getInitials, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -246,22 +246,18 @@ export default function AdminUsersPage() {
         />
       </div>
 
-      <Tabs
-        value={statusFilter}
-        onValueChange={(value) => {
-          setStatusFilter(value as StatusFilter);
-          setPage(1);
-        }}
-        className="mb-6"
-      >
-        <TabsList>
-          {statusOptions.map((option) => (
-            <TabsTrigger key={option.value} value={option.value}>
-              {option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <div className="mb-6 max-w-full overflow-x-auto pb-1">
+        <SegmentedControl
+          value={statusFilter}
+          onValueChange={(value) => {
+            setStatusFilter(value);
+            setPage(1);
+          }}
+          segments={statusOptions}
+          aria-label="Filter users by account status"
+          size="sm"
+        />
+      </div>
 
       {isError && !data ? (
         <PageErrorState

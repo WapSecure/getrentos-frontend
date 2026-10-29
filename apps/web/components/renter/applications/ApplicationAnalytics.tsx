@@ -77,14 +77,14 @@ export const ApplicationAnalytics = ({ applications }: ApplicationAnalyticsProps
           <div className="p-2 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-primary" />
-              <span className="text-xs text-muted-foreground">Pending</span>
+              <span className="text-xs text-foreground/75">Pending</span>
             </div>
             <p className="text-sm font-semibold text-foreground">{pending}</p>
           </div>
           <div className="p-2 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <TrendingUp className="w-3 h-3 text-primary" />
-              <span className="text-xs text-muted-foreground">Total</span>
+              <span className="text-xs text-foreground/75">Total</span>
             </div>
             <p className="text-sm font-semibold text-foreground">{total}</p>
           </div>

@@ -87,12 +87,12 @@ export default function OwnerTransactionsPage() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput
           value={searchQuery}
           onValueChange={setSearchQuery}
           placeholder="Search by property or buyer..."
-          className="flex-1 max-w-sm"
+          className="min-w-0 flex-1 sm:max-w-sm"
         />
         <SegmentedControl
           size="sm"
@@ -103,7 +103,7 @@ export default function OwnerTransactionsPage() {
             setPage(1);
           }}
           segments={filterOptions}
-          className="max-w-full overflow-x-auto"
+          className="w-full min-w-0 max-w-full justify-start overflow-x-auto sm:w-auto"
         />
       </div>
 
@@ -126,7 +126,7 @@ export default function OwnerTransactionsPage() {
           }
         />
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {transactions.map((transaction, index) => (
             <EscrowTransactionCard
               key={transaction.id}

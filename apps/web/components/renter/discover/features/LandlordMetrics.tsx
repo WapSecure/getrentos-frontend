@@ -32,7 +32,7 @@ export const LandlordMetrics = ({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <MessageCircle className="w-3 h-3 text-primary" />
-          <span className="text-xs text-muted-foreground">Landlord Response</span>
+          <span className="text-xs text-foreground/75">Landlord Response</span>
         </div>
         {verifiedBadge && (
           <div className="flex items-center gap-1">
@@ -46,12 +46,12 @@ export const LandlordMetrics = ({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <p className="text-lg font-bold text-foreground">{responseRate}%</p>
-            <p className="text-xs text-muted-foreground">Response rate</p>
+            <p className="text-xs text-foreground/75">Response rate</p>
           </div>
           {responseTime && (
             <div>
               <p className="text-lg font-bold text-foreground">{responseTime}</p>
-              <p className="text-xs text-muted-foreground">Avg. response</p>
+              <p className="text-xs text-foreground/75">Avg. response</p>
             </div>
           )}
         </div>
@@ -62,7 +62,7 @@ export const LandlordMetrics = ({
           <div className="flex items-center gap-1">
             <Star className="w-3 h-3 fill-primary text-primary" />
             <span className="text-sm font-semibold text-foreground">{rating}</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-foreground/75">
               ({totalReviews ?? 0} review{totalReviews === 1 ? '' : 's'})
             </span>
           </div>

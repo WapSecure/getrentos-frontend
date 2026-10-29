@@ -380,8 +380,8 @@ export default function PaymentsPage() {
       />
       <PaymentsStats payments={payments} />
 
-      <div className="mt-7 grid items-start gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
+      <div className="mt-7 grid grid-cols-1 items-start gap-6 xl:grid-cols-12">
+        <div className="min-w-0 space-y-6 xl:col-span-8">
           <PaymentsList
             payments={payments}
             onPayNow={handlePayNow}
@@ -391,7 +391,7 @@ export default function PaymentsPage() {
           />
           <PaymentReceiptsGallery receipts={receipts} onDownload={handleDownloadReceipt} />
         </div>
-        <div className="space-y-6 xl:col-span-4">
+        <div className="min-w-0 space-y-6 xl:col-span-4">
           <PaymentNotifications
             notifications={notifications}
             onMarkAsRead={handleMarkNotificationAsRead}

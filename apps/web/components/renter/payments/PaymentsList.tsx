@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { PaymentCard } from './PaymentCard';
 import { PaymentDetailsModal } from './PaymentDetailsModal';
 import { CreditCard } from 'lucide-react';
-import { Card, EmptyState, SearchInput, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import { Card, EmptyState, SearchInput } from '@getrentos/ui';
 
 interface Payment {
   id: string;
@@ -91,20 +91,27 @@ export const PaymentsList = ({
           </div>
 
           {/* Status Filters */}
-          <Tabs
-            value={filterStatus}
-            onValueChange={(value) =>
-              setFilterStatus(value as 'all' | 'paid' | 'pending' | 'overdue' | 'processing')
-            }
+          <div
+            role="group"
+            aria-label="Payment status"
+            className="mt-4 flex max-w-full gap-1 overflow-x-auto rounded-xl border border-border/70 bg-secondary/80 p-1"
           >
-            <TabsList aria-label="Payment status" className="mt-4 max-w-full">
-              {statusOptions.map((option) => (
-                <TabsTrigger key={option.value} value={option.value}>
-                  {option.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={filterStatus === option.value}
+                onClick={() =>
+                  setFilterStatus(
+                    option.value as 'all' | 'paid' | 'pending' | 'overdue' | 'processing'
+                  )
+                }
+                className="shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-4 focus-visible:ring-primary/12 aria-pressed:bg-card aria-pressed:text-primary aria-pressed:shadow-sm"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="divide-y divide-border">

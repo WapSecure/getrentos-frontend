@@ -32,7 +32,7 @@ export const ApplicationCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="bg-card rounded-2xl border border-border p-4"
+      className="min-w-0 rounded-2xl border border-border bg-card p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -60,13 +60,13 @@ export const ApplicationCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-muted-foreground/60">Monthly Income</p>
+          <p className="text-xs text-foreground/70">Monthly Income</p>
           <p className="text-sm font-medium text-foreground">
             {formatCurrency(application.monthlyIncome, { compact: true })}
           </p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground/60">Applied</p>
+          <p className="text-xs text-foreground/70">Applied</p>
           <p className="text-sm font-medium text-foreground">
             {formatDate(application.applicationDate)}
           </p>

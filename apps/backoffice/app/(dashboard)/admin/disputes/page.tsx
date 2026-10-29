@@ -10,9 +10,7 @@ import {
   EmptyState,
   PageErrorState,
   SearchInput,
-  Tabs,
-  TabsList,
-  TabsTrigger,
+  SegmentedControl,
 } from '@getrentos/ui';
 import { Pagination } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -269,25 +267,21 @@ export default function AdminDisputesPage() {
         />
       </div>
 
-      <Tabs
-        value={statusFilter}
-        onValueChange={(value) => {
-          setStatusFilter(value as StatusFilter);
-          setPage(1);
-        }}
-        className="mb-6"
-      >
-        <TabsList className="max-w-full">
-          {statusOptions.map((option) => (
-            <TabsTrigger key={option.value} value={option.value}>
-              {option.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <div className="mb-6 max-w-full overflow-x-auto pb-1">
+        <SegmentedControl
+          value={statusFilter}
+          onValueChange={(value) => {
+            setStatusFilter(value);
+            setPage(1);
+          }}
+          segments={statusOptions}
+          aria-label="Filter disputes by status"
+          size="sm"
+        />
+      </div>
 
       {isLoading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}

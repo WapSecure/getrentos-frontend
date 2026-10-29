@@ -95,7 +95,7 @@ export function SegmentedControl<T extends string>({
               iconOnly && (size === 'sm' ? 'w-7 px-0' : 'w-8 px-0'),
               active
                 ? 'bg-card text-foreground shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
+                : 'text-foreground/75 hover:text-foreground'
             )}
           >
             {segment.icon && (
@@ -110,7 +110,7 @@ export function SegmentedControl<T extends string>({
                   'rounded-full px-1.5 text-xs tabular-nums',
                   segment.countTone === 'warning'
                     ? 'bg-warning-subtle text-warning'
-                    : 'bg-foreground/[0.06] text-muted-foreground'
+                    : 'bg-foreground/[0.06] text-foreground/75'
                 )}
               >
                 {segment.count}
