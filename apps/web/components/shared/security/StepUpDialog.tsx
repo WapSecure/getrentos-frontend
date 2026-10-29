@@ -21,6 +21,7 @@ type Pending = { resolve: (token: string | null) => void };
 
 const COPY: Record<StepUpMethod, { label: string; hint: string }> = {
   totp: { label: 'Two-factor code', hint: 'Enter the 6-digit code from your authenticator app.' },
+  transaction_pin: { label: 'Transaction PIN', hint: 'Enter your 4-digit transaction PIN.' },
   password: { label: 'Password', hint: 'Enter your GetRentos password.' },
   email_code: { label: 'Code from your email', hint: 'We’ll email you a 6-digit code.' },
 };
@@ -90,9 +91,11 @@ export function StepUpDialog() {
       const body =
         method === 'password'
           ? { password: value }
-          : method === 'totp'
-            ? { code: value }
-            : { code: value, reference };
+          : method === 'transaction_pin'
+            ? { pin: value }
+            : method === 'totp'
+              ? { code: value }
+              : { code: value, reference };
       const res = await authFetch<{ stepUpToken: string; expiresIn: number }>(
         '/users/me/security/step-up',
         { method: 'POST', body: JSON.stringify(body) }
@@ -137,10 +140,16 @@ export function StepUpDialog() {
               <span className="text-sm font-medium">{copy.label}</span>
               <Input
                 autoFocus
-                type={method === 'password' ? 'password' : 'text'}
+                type={method === 'password' || method === 'transaction_pin' ? 'password' : 'text'}
                 inputMode={method === 'password' ? undefined : 'numeric'}
-                autoComplete={method === 'password' ? 'current-password' : 'one-time-code'}
-                maxLength={method === 'password' ? 200 : 6}
+                autoComplete={
+                  method === 'password'
+                    ? 'current-password'
+                    : method === 'transaction_pin'
+                      ? 'off'
+                      : 'one-time-code'
+                }
+                maxLength={method === 'password' ? 200 : method === 'transaction_pin' ? 4 : 6}
                 value={value}
                 onChange={(e) =>
                   setValue(
@@ -169,7 +178,12 @@ export function StepUpDialog() {
               disabled={
                 busy ||
                 !method ||
-                (!needsCode && (method === 'password' ? !value : value.length !== 6))
+                (!needsCode &&
+                  (method === 'password'
+                    ? !value
+                    : method === 'transaction_pin'
+                      ? value.length !== 4
+                      : value.length !== 6))
               }
             >
               {needsCode ? 'Email me a code' : 'Confirm'}
