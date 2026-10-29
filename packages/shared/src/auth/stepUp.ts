@@ -10,7 +10,7 @@ export const STEP_UP_HEADER = 'x-step-up-token';
 export const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED';
 
 /** How the account proves it's the holder: its strongest factor wins. */
-export type StepUpMethod = 'totp' | 'transaction_pin' | 'password' | 'email_code';
+export type StepUpMethod = 'passkey' | 'totp' | 'transaction_pin' | 'password' | 'email_code';
 
 type Handler = () => Promise<string | null>;
 

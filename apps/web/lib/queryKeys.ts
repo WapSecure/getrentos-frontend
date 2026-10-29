@@ -143,6 +143,7 @@ export const renterKeys = {
   profile: ['renter', 'profile'] as const,
   twoFactor: ['renter', 'settings', 'twoFactor'] as const,
   securityOverview: ['renter', 'settings', 'securityOverview'] as const,
+  passkeys: ['renter', 'settings', 'passkeys'] as const,
   inspections: ['renter', 'inspections'] as const,
 };
 

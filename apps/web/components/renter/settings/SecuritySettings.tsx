@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { KeyRound, Shield, X } from 'lucide-react';
+import { Fingerprint, KeyRound, Shield, Trash2, X } from 'lucide-react';
+import { startRegistration } from '@simplewebauthn/browser';
 import { Button, IconButton, Input, NumberInput, Switch, useToast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -55,6 +56,46 @@ export const SecuritySettings = () => {
   const hasPin = !!security?.hasTransactionPin;
   const pinMismatch = pinConfirm.length === 4 && pin !== pinConfirm;
   const pinReady = pinPassword.length > 0 && pin.length === 4 && pin === pinConfirm;
+
+  // ---- Passkeys ----
+  const { data: passkeyData } = useQuery({
+    queryKey: renterKeys.passkeys,
+    queryFn: () => unwrap(renterService.listPasskeys()),
+  });
+  const passkeys = passkeyData?.passkeys ?? [];
+
+  const addPasskeyMutation = useMutation({
+    mutationFn: async () => {
+      const options = await unwrap(renterService.startPasskeyRegistration());
+      // Browser prompts for Face ID / fingerprint / security key here.
+      const attestation = await startRegistration({ optionsJSON: options as never });
+      const label =
+        typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent)
+          ? 'This phone'
+          : 'This device';
+      return unwrap(renterService.finishPasskeyRegistration(attestation, label));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.passkeys });
+      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      toast.success('Passkey added');
+    },
+    onError: (err: Error) => {
+      // A user cancelling the browser prompt is not an error worth shouting about.
+      if (/NotAllowedError|AbortError|cancel/i.test(err.message)) return;
+      toast.error(err.message || 'Could not add that passkey');
+    },
+  });
+
+  const removePasskeyMutation = useMutation({
+    mutationFn: (id: string) => unwrap(renterService.removePasskey(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.passkeys });
+      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      toast.success('Passkey removed');
+    },
+    onError: (err: Error) => toast.error(err.message || 'Could not remove that passkey'),
+  });
 
   const [step, setStep] = useState<TwoFactorStep>('idle');
   const [enroll, setEnroll] = useState<TwoFactorEnroll | null>(null);
@@ -113,6 +154,60 @@ export const SecuritySettings = () => {
       </p>
 
       <div className="space-y-6">
+        {/* Passkey — the strongest factor */}
+        <div className="p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="p-2 rounded-lg bg-info-subtle">
+                <Fingerprint className="w-5 h-5 text-info" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-medium text-foreground">Passkey</h3>
+                <p className="text-sm text-muted-foreground">
+                  The strongest way to confirm money actions — Face ID, fingerprint, or a security
+                  key. Nothing to remember, and it can&apos;t be phished.
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => addPasskeyMutation.mutate()}
+              isLoading={addPasskeyMutation.isPending}
+            >
+              Add passkey
+            </Button>
+          </div>
+
+          {passkeys.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {passkeys.map((pk) => (
+                <li
+                  key={pk.id}
+                  className="flex items-center justify-between gap-3 p-2 rounded-lg bg-muted/50 border border-border"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">
+                      {pk.deviceName || 'Passkey'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Added {new Date(pk.createdAt).toLocaleDateString()}
+                      {pk.lastUsedAt
+                        ? ` · last used ${new Date(pk.lastUsedAt).toLocaleDateString()}`
+                        : ''}
+                    </p>
+                  </div>
+                  <IconButton
+                    size="sm"
+                    label="Remove passkey"
+                    icon={<Trash2 />}
+                    onClick={() => removePasskeyMutation.mutate(pk.id)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* Two-Factor Authentication */}
         <div className="p-4 rounded-lg border border-border">
           <div className="flex items-center justify-between gap-3">

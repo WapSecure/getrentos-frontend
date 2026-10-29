@@ -1464,9 +1464,14 @@ export const renterService = {
   },
 
   // ---- Transaction PIN (global account-security surface) ----
-  /** Whether a transaction PIN is set, and which factor step-up will ask for. */
+  /** Whether a transaction PIN / passkey is set, and which factor step-up asks for. */
   async getSecurityOverview(): Promise<
-    ApiResponse<{ hasPassword: boolean; hasTransactionPin: boolean; stepUpMethod: string }>
+    ApiResponse<{
+      hasPassword: boolean;
+      hasTransactionPin: boolean;
+      hasPasskey: boolean;
+      stepUpMethod: string;
+    }>
   > {
     return safeCall(() => authFetch('/users/me/security'));
   },
@@ -1482,6 +1487,40 @@ export const renterService = {
         body: JSON.stringify({ currentPassword, pin }),
       })
     );
+  },
+
+  // ---- Passkeys (WebAuthn) ----
+  async listPasskeys(): Promise<
+    ApiResponse<{
+      hasPasskey: boolean;
+      passkeys: { id: string; deviceName: string | null; createdAt: string; lastUsedAt: string | null }[];
+    }>
+  > {
+    return safeCall(() => authFetch('/users/me/security/passkey'));
+  },
+
+  /** WebAuthn creation options to pass to the browser's startRegistration(). */
+  async startPasskeyRegistration(): Promise<ApiResponse<Record<string, unknown>>> {
+    return safeCall(() =>
+      authFetch('/users/me/security/passkey/register/options', { method: 'POST' })
+    );
+  },
+
+  /** Complete registration with the authenticator's attestation response. */
+  async finishPasskeyRegistration(
+    response: unknown,
+    deviceName?: string
+  ): Promise<ApiResponse<{ hasPasskey: true }>> {
+    return safeCall(() =>
+      authFetch('/users/me/security/passkey/register/verify', {
+        method: 'POST',
+        body: JSON.stringify({ response, deviceName }),
+      })
+    );
+  },
+
+  async removePasskey(id: string): Promise<ApiResponse<{ removed: true }>> {
+    return safeCall(() => authFetch(`/users/me/security/passkey/${id}`, { method: 'DELETE' }));
   },
 
   // ---- Saved searches ----
