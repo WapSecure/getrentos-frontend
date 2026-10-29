@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronRight,
   Database,
+  Fingerprint,
   KeyRound,
   Mail,
   Phone,
@@ -28,8 +29,14 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { securityApi, type SecurityOverview, type TwoFactorEnrollment } from '@/lib/api/security';
+import {
+  securityApi,
+  type PasskeySummary,
+  type SecurityOverview,
+  type TwoFactorEnrollment,
+} from '@/lib/api/security';
 import { ApiError } from '@/lib/api/client';
+import { isPasskeySupported, registerPasskey } from '@/lib/passkey';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
   biometricSupport,
@@ -74,6 +81,7 @@ export default function SecuritySettings() {
           <>
             <EmailSection />
             <PhoneVerificationSection overview={overview.data} />
+            <PasskeySection />
             <TwoFactorSection overview={overview.data} />
             {overview.data.hasPassword ? <TransactionPinSection overview={overview.data} /> : null}
             {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
@@ -477,6 +485,99 @@ function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
           </View>
         </View>
       )}
+    </Card>
+  );
+}
+
+/**
+ * Passkeys (WebAuthn): the strongest step-up factor. Shown only where the
+ * device supports it (needs a native build + hosted association files, so it is
+ * absent in Expo Go / on the web).
+ */
+function PasskeySection() {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const supported = isPasskeySupported();
+  const list = useQuery({ queryKey: qk.passkeys, queryFn: securityApi.listPasskeys, enabled: supported });
+
+  const addMutation = useMutation({
+    mutationFn: async () => {
+      const options = await securityApi.startPasskeyRegistration();
+      const attestation = await registerPasskey(options); // OS Face ID / fingerprint / security-key prompt
+      return securityApi.finishPasskeyRegistration(attestation, 'This phone');
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.passkeys });
+      qc.invalidateQueries({ queryKey: qk.security });
+      toast.show('Passkey added.', 'success');
+    },
+    onError: (err) => {
+      // Cancelling the OS prompt is not an error worth shouting about.
+      if (err instanceof Error && /cancel|NotAllowed|UserCancelled/i.test(err.message)) return;
+      toast.show(err instanceof ApiError ? err.message : 'Could not add that passkey.', 'error');
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: (id: string) => securityApi.removePasskey(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.passkeys });
+      qc.invalidateQueries({ queryKey: qk.security });
+      toast.show('Passkey removed.', 'success');
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not remove that passkey.', 'error'),
+  });
+
+  if (!supported) return null;
+  const passkeys: PasskeySummary[] = list.data?.passkeys ?? [];
+
+  return (
+    <Card elevated>
+      <SectionHeader icon={<Fingerprint size={16} color={colors.primary} />} title="Passkey" />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: spacing.sm,
+        }}
+      >
+        <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+          The strongest way to confirm money actions — Face ID, fingerprint, or a security key. It
+          can’t be phished.
+        </Text>
+        <Button
+          label="Add"
+          size="sm"
+          loading={addMutation.isPending}
+          onPress={() => addMutation.mutate()}
+        />
+      </View>
+      {passkeys.map((pk) => (
+        <View
+          key={pk.id}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: spacing.sm,
+          }}
+        >
+          <Text variant="callout" style={{ flex: 1 }}>
+            {pk.deviceName || 'Passkey'}
+          </Text>
+          <Pressable
+            onPress={() => removeMutation.mutate(pk.id)}
+            accessibilityRole="button"
+            accessibilityLabel="Remove passkey"
+            hitSlop={8}
+          >
+            <Trash2 size={16} color={colors.destructive} />
+          </Pressable>
+        </View>
+      ))}
     </Card>
   );
 }

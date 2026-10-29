@@ -5,6 +5,7 @@ import { Button, FormAlert, OtpInput, PasswordField, Text, useTheme } from '@get
 import { Sheet } from '@/components/Sheet';
 import { securityApi, type StepUpMethod } from '@/lib/api/security';
 import { ApiError } from '@/lib/api/client';
+import { authenticatePasskey } from '@/lib/passkey';
 import { registerStepUpPrompt, rememberStepUpToken } from '@/lib/stepUp';
 
 /**
@@ -84,6 +85,16 @@ export function StepUpSheet() {
       finish(res.stepUpToken);
     });
 
+  const confirmWithPasskey = () =>
+    run(async () => {
+      const options = await securityApi.startPasskeyStepUp();
+      const assertion = await authenticatePasskey(options); // OS biometric / security-key prompt
+      const res = await securityApi.confirmStepUp({ passkeyResponse: assertion });
+      rememberStepUpToken(res.stepUpToken, res.expiresIn);
+      finish(res.stepUpToken);
+    });
+
+  const isPasskey = method === 'passkey';
   const needsCode = method === 'email_code' && !reference;
   const ready =
     method === 'password'
@@ -104,7 +115,11 @@ export function StepUpSheet() {
             </Text>
           </View>
 
-          {!method ? null : needsCode ? (
+          {!method ? null : isPasskey ? (
+            <Text variant="callout">
+              Use your device passkey — Face ID, fingerprint, or a security key.
+            </Text>
+          ) : needsCode ? (
             <Text variant="callout">We’ll email you a 6-digit code.</Text>
           ) : method === 'password' ? (
             <PasswordField
@@ -133,10 +148,10 @@ export function StepUpSheet() {
           {error ? <FormAlert message={error} /> : null}
 
           <Button
-            label={needsCode ? 'Email me a code' : 'Confirm'}
+            label={isPasskey ? 'Use passkey' : needsCode ? 'Email me a code' : 'Confirm'}
             loading={busy}
-            disabled={!method || (!needsCode && !ready)}
-            onPress={() => (needsCode ? sendCode() : confirm())}
+            disabled={!method || (!isPasskey && !needsCode && !ready)}
+            onPress={() => (isPasskey ? confirmWithPasskey() : needsCode ? sendCode() : confirm())}
           />
           <Button label="Cancel" variant="ghost" onPress={() => finish(null)} />
         </View>
