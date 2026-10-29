@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { GatemanNavbar } from '@/components/gateman/GatemanNavbar';
 import { GateQueueSync } from '@/components/gateman/GateQueueSync';
 import { GatemanPostProvider } from '@/lib/gateman/GatemanPostProvider';
@@ -25,6 +25,7 @@ export const useGatemanUser = () => useContext(GatemanUserContext);
 
 export default function GatemanLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<GatemanUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -78,7 +79,11 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
         <div className="min-h-screen bg-background">
           <GatemanNavbar user={user} />
           <main>
-            <div className="max-w-lg mx-auto p-6 lg:p-8">{children}</div>
+            <div
+              className={`${pathname === ROUTES.GATEMAN_DASHBOARD ? 'max-w-6xl' : 'max-w-lg'} mx-auto p-6 lg:p-8`}
+            >
+              {children}
+            </div>
           </main>
         </div>
       </GatemanPostProvider>

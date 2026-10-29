@@ -401,325 +401,338 @@ export default function GatemanVerifyPage() {
   const standingPassNote = result?.pass ? describeStandingPass(result.pass) : null;
 
   return (
-    <div className="space-y-8">
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
-          <KeyRound className="w-7 h-7" />
+    <div className="space-y-8 lg:grid lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:space-y-0">
+      {/* On a gatehouse screen the check-in card stays in view on the left while
+          the queue at the barrier and the people inside fill the right. */}
+      <div className="space-y-6 lg:sticky lg:top-24">
+        <div className="text-center lg:flex lg:items-center lg:gap-4 lg:text-left">
+          <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3 shrink-0 lg:mx-0 lg:mb-0">
+            <KeyRound className="w-7 h-7" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {gate ? `${gate.name} · ` : ''}
+              Scan the visitor&apos;s QR code, or enter their 6-digit PIN to check them in.
+            </p>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {gate ? `${gate.name} · ` : ''}
-          Scan the visitor&apos;s QR code, or enter their 6-digit PIN to check them in.
-        </p>
+
+        {/* The barrier is part of the record, so a guard who has not said which one
+            they are at is told plainly: but is never blocked from recording an
+            arrival, because a real person is standing in front of them. */}
+        {needsGateChoice && (
+          <Alert variant="warning">
+            This estate has more than one gate. Use the gate picker above to say which one
+            you&apos;re at, so arrivals are recorded against it. You can still check people in
+            without choosing.
+          </Alert>
+        )}
+
+        <Card className="p-6 space-y-4">
+          <input
+            ref={scanInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (file) handleScanFile(file);
+            }}
+          />
+          <Button
+            variant="outline"
+            fullWidth
+            icon={<QrCode className="w-4 h-4" />}
+            disabled={verify.isPending}
+            isLoading={isScanning}
+            loadingText="Reading photo…"
+            onClick={() => scanInputRef.current?.click()}
+          >
+            Scan QR
+          </Button>
+
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex-1 h-px bg-border" />
+            or enter the PIN
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <NumberInput
+            value={pin}
+            onValueChange={(value) => setPin(value.slice(0, 6))}
+            maxLength={6}
+            placeholder="000000"
+            aria-label="Visitor PIN"
+            inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
+          />
+          <Button
+            variant="primary"
+            fullWidth
+            disabled={pin.length !== 6}
+            isLoading={verify.isPending}
+            loadingText="Verifying…"
+            onClick={() => {
+              setResult(null);
+              setBlocked(null);
+              verify.mutate({ code: pin });
+            }}
+          >
+            Check In
+          </Button>
+
+          {/* The visitor who has nothing arranged. Raising a request is not the
+              same as letting them in: the household is asked first. */}
+          <Button
+            variant="outline"
+            fullWidth
+            className="gap-2"
+            disabled={verify.isPending}
+            onClick={() => {
+              setResult(null);
+              setBlocked(null);
+              setWalkInOpen(true);
+            }}
+          >
+            <UserPlus className="w-4 h-4" />
+            Visitor with no pass
+          </Button>
+
+          {blocked && (
+            <WatchlistBlockedNotice
+              message={blocked.refusal.message}
+              matches={blocked.refusal.matches}
+              onOverride={overrideWatchlist}
+              onDefer={() => {
+                setBlocked(null);
+                setOverrideError(null);
+                setPin('');
+              }}
+              isOverriding={verify.isPending || admit.isPending}
+              error={overrideError}
+            />
+          )}
+
+          {result?.pass && (
+            <Alert
+              variant="success"
+              icon={CheckCircle2}
+              title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
+            >
+              <p className="text-xs">{result.pass.residentName}</p>
+              {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
+            </Alert>
+          )}
+          {result?.queued && (
+            <Alert variant="warning" icon={CloudOff} title="Saved on this device">
+              <p className="text-xs">
+                {result.queued} could not reach the estate, so it is stored here and will be sent
+                automatically once there is a connection. The visitor can go through.
+              </p>
+            </Alert>
+          )}
+          {result?.requested && (
+            <Alert variant="info" icon={UserPlus} title="Asked the household">
+              <p className="text-xs">{result.requested}</p>
+            </Alert>
+          )}
+          {result?.warning && <WatchlistWarning warning={result.warning} />}
+          {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
+        </Card>
+
+        {/* The queue is shown here, where a guard acts, rather than as a banner over
+            the whole app. Each line is a real arrival or departure the estate has
+            not been told about yet. */}
+        {queue.length > 0 && (
+          <Card className="p-4">
+            <div className="flex items-start gap-3">
+              <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Waiting to send ({queue.length})
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Saved in this browser. They go to the estate as soon as there is a connection.
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {queue.map((write) => (
+                    <li key={write.id} className="text-xs text-muted-foreground">
+                      {write.type === 'check-in' ? 'Arrival' : 'Departure'} · {write.payload.label}{' '}
+                      · {formatTime(write.createdAt)}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  isLoading={isSending}
+                  loadingText="Sending…"
+                  onClick={() => void sendNow()}
+                >
+                  Send now
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {replaySummary &&
+          (replaySummary.unconfirmed.length > 0 || replaySummary.rejected.length > 0) && (
+            <Alert variant="warning" icon={CloudOff} onDismiss={() => clearGateReplaySummary()}>
+              {replaySummary.unconfirmed.length > 0 && (
+                <p className="font-medium">
+                  Couldn&apos;t confirm {replaySummary.unconfirmed.length} saved entr
+                  {replaySummary.unconfirmed.length === 1 ? 'y' : 'ies'} (
+                  {replaySummary.unconfirmed.join(', ')}). Check the pass.
+                </p>
+              )}
+              {replaySummary.rejected.length > 0 && (
+                <p className="font-medium mt-1">
+                  {replaySummary.rejected.length} saved entr
+                  {replaySummary.rejected.length === 1 ? 'y was' : 'ies were'} refused by the estate
+                  ({replaySummary.rejected.join(', ')}).
+                </p>
+              )}
+            </Alert>
+          )}
       </div>
 
-      {/* The barrier is part of the record, so a guard who has not said which one
-          they are at is told plainly: but is never blocked from recording an
-          arrival, because a real person is standing in front of them. */}
-      {needsGateChoice && (
-        <Alert variant="warning">
-          This estate has more than one gate. Use the gate picker above to say which one you&apos;re
-          at, so arrivals are recorded against it. You can still check people in without choosing.
-        </Alert>
-      )}
+      <div className="space-y-8">
+        {/* Walk-ins sit above "inside now": an approved visitor is standing at the
+            barrier right now, which is the most urgent thing on the screen. */}
+        {(awaiting.length > 0 || readyToAdmit.length > 0 || decided.length > 0) && (
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-foreground">At the gate</h2>
 
-      <Card className="p-6 space-y-4">
-        <input
-          ref={scanInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            e.target.value = '';
-            if (file) handleScanFile(file);
-          }}
-        />
-        <Button
-          variant="outline"
-          fullWidth
-          icon={<QrCode className="w-4 h-4" />}
-          disabled={verify.isPending}
-          isLoading={isScanning}
-          loadingText="Reading photo…"
-          onClick={() => scanInputRef.current?.click()}
-        >
-          Scan QR
-        </Button>
-
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <div className="flex-1 h-px bg-border" />
-          or enter the PIN
-          <div className="flex-1 h-px bg-border" />
-        </div>
-
-        <NumberInput
-          value={pin}
-          onValueChange={(value) => setPin(value.slice(0, 6))}
-          maxLength={6}
-          placeholder="000000"
-          aria-label="Visitor PIN"
-          inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
-        />
-        <Button
-          variant="primary"
-          fullWidth
-          disabled={pin.length !== 6}
-          isLoading={verify.isPending}
-          loadingText="Verifying…"
-          onClick={() => {
-            setResult(null);
-            setBlocked(null);
-            verify.mutate({ code: pin });
-          }}
-        >
-          Check In
-        </Button>
-
-        {/* The visitor who has nothing arranged. Raising a request is not the
-            same as letting them in: the household is asked first. */}
-        <Button
-          variant="outline"
-          fullWidth
-          className="gap-2"
-          disabled={verify.isPending}
-          onClick={() => {
-            setResult(null);
-            setBlocked(null);
-            setWalkInOpen(true);
-          }}
-        >
-          <UserPlus className="w-4 h-4" />
-          Visitor with no pass
-        </Button>
-
-        {blocked && (
-          <WatchlistBlockedNotice
-            message={blocked.refusal.message}
-            matches={blocked.refusal.matches}
-            onOverride={overrideWatchlist}
-            onDefer={() => {
-              setBlocked(null);
-              setOverrideError(null);
-              setPin('');
-            }}
-            isOverriding={verify.isPending || admit.isPending}
-            error={overrideError}
-          />
-        )}
-
-        {result?.pass && (
-          <Alert
-            variant="success"
-            icon={CheckCircle2}
-            title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
-          >
-            <p className="text-xs">{result.pass.residentName}</p>
-            {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
-          </Alert>
-        )}
-        {result?.queued && (
-          <Alert variant="warning" icon={CloudOff} title="Saved on this device">
-            <p className="text-xs">
-              {result.queued} could not reach the estate, so it is stored here and will be sent
-              automatically once there is a connection. The visitor can go through.
-            </p>
-          </Alert>
-        )}
-        {result?.requested && (
-          <Alert variant="info" icon={UserPlus} title="Asked the household">
-            <p className="text-xs">{result.requested}</p>
-          </Alert>
-        )}
-        {result?.warning && <WatchlistWarning warning={result.warning} />}
-        {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
-      </Card>
-
-      {/* Walk-ins sit above "inside now": an approved visitor is standing at the
-          barrier right now, which is the most urgent thing on the screen. */}
-      {(awaiting.length > 0 || readyToAdmit.length > 0 || decided.length > 0) && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">At the gate</h2>
-
-          {/* Answered requests come first: the guard is holding the visitor and
-              needs to know whether to open the barrier or turn them away. */}
-          {decided.map((pass) => (
-            <Card key={pass.id} className="border-destructive/30 p-4">
-              <div className="flex items-start gap-3">
-                <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {pass.unitLabel} · {pass.residentName}
-                  </p>
-                  <p className="text-xs text-destructive mt-0.5">
-                    {pass.status === 'denied'
-                      ? 'Refused: do not admit them.'
-                      : 'No answer: do not admit them.'}
-                  </p>
-                  {pass.status === 'denied' && pass.denialReason && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Reason: {pass.denialReason}
+            {/* Answered requests come first: the guard is holding the visitor and
+                needs to know whether to open the barrier or turn them away. */}
+            {decided.map((pass) => (
+              <Card key={pass.id} className="border-destructive/30 p-4">
+                <div className="flex items-start gap-3">
+                  <XCircle className="w-5 h-5 shrink-0 mt-0.5 text-destructive" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {pass.unitLabel} · {pass.residentName}
                     </p>
-                  )}
+                    <p className="text-xs text-destructive mt-0.5">
+                      {pass.status === 'denied'
+                        ? 'Refused: do not admit them.'
+                        : 'No answer: do not admit them.'}
+                    </p>
+                    {pass.status === 'denied' && pass.denialReason && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Reason: {pass.denialReason}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
 
-          {readyToAdmit.map((pass) => (
-            <Card key={pass.id} className="border-success/30 p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-success" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {pass.unitLabel} · {pass.residentName}
-                  </p>
-                  <p className="text-xs text-success mt-0.5">
-                    Approved
-                    {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''}: let them in
-                  </p>
+            {readyToAdmit.map((pass) => (
+              <Card key={pass.id} className="border-success/30 p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-success" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {pass.unitLabel} · {pass.residentName}
+                    </p>
+                    <p className="text-xs text-success mt-0.5">
+                      Approved
+                      {pass.respondedAt ? ` at ${formatTime(pass.respondedAt)}` : ''}: let them in
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={admit.isPending}
-                isLoading={admit.isPending && admit.variables?.pass.id === pass.id}
-                loadingText="Admitting…"
-                onClick={() => admit.mutate({ pass })}
-              >
-                Admit
-              </Button>
-            </Card>
-          ))}
+                <Button
+                  variant="primary"
+                  fullWidth
+                  disabled={admit.isPending}
+                  isLoading={admit.isPending && admit.variables?.pass.id === pass.id}
+                  loadingText="Admitting…"
+                  onClick={() => admit.mutate({ pass })}
+                >
+                  Admit
+                </Button>
+              </Card>
+            ))}
 
-          {awaiting.map((pass) => (
-            <Card key={pass.id} className="p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {pass.unitLabel} · asked {formatTime(pass.createdAt)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Waiting for {pass.residentName} to answer. If nobody does by{' '}
-                    {formatTime(pass.expiresAt)}, they cannot be admitted.
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={cancelWalkIn.isPending}
-                isLoading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
-                onClick={() => cancelWalkIn.mutate(pass)}
-              >
-                Cancel request
-              </Button>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* The queue is shown here, where a guard acts, rather than as a banner over
-          the whole app. Each line is a real arrival or departure the estate has
-          not been told about yet. */}
-      {queue.length > 0 && (
-        <Card className="p-4">
-          <div className="flex items-start gap-3">
-            <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">
-                Waiting to send ({queue.length})
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Saved in this browser. They go to the estate as soon as there is a connection.
-              </p>
-              <ul className="mt-2 space-y-1">
-                {queue.map((write) => (
-                  <li key={write.id} className="text-xs text-muted-foreground">
-                    {write.type === 'check-in' ? 'Arrival' : 'Departure'} · {write.payload.label} ·{' '}
-                    {formatTime(write.createdAt)}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3"
-                isLoading={isSending}
-                loadingText="Sending…"
-                onClick={() => void sendNow()}
-              >
-                Send now
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {replaySummary &&
-        (replaySummary.unconfirmed.length > 0 || replaySummary.rejected.length > 0) && (
-          <Alert variant="warning" icon={CloudOff} onDismiss={() => clearGateReplaySummary()}>
-            {replaySummary.unconfirmed.length > 0 && (
-              <p className="font-medium">
-                Couldn&apos;t confirm {replaySummary.unconfirmed.length} saved entr
-                {replaySummary.unconfirmed.length === 1 ? 'y' : 'ies'} (
-                {replaySummary.unconfirmed.join(', ')}). Check the pass.
-              </p>
-            )}
-            {replaySummary.rejected.length > 0 && (
-              <p className="font-medium mt-1">
-                {replaySummary.rejected.length} saved entr
-                {replaySummary.rejected.length === 1 ? 'y was' : 'ies were'} refused by the estate (
-                {replaySummary.rejected.join(', ')}).
-              </p>
-            )}
-          </Alert>
-        )}
-
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">
-          Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
-        </h2>
-        {isInsideLoading ? (
-          <ListSkeleton rows={2} />
-        ) : inside.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No visitors are on the estate right now.</p>
-        ) : (
-          <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-            {inside.map((pass) => (
-              <div key={pass.id} className="p-3 flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{pass.visitorName}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {pass.unitLabel}
-                    {pass.checkedInAt ? ` · in since ${formatTime(pass.checkedInAt)}` : ''}
-                  </p>
+            {awaiting.map((pass) => (
+              <Card key={pass.id} className="p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <CloudOff className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{pass.visitorName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {pass.unitLabel} · asked {formatTime(pass.createdAt)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Waiting for {pass.residentName} to answer. If nobody does by{' '}
+                      {formatTime(pass.expiresAt)}, they cannot be admitted.
+                    </p>
+                  </div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="shrink-0"
-                  icon={<LogOut className="w-3.5 h-3.5" />}
-                  disabled={checkOut.isPending}
-                  isLoading={checkOut.isPending && checkOut.variables?.id === pass.id}
-                  aria-label={`Check out ${pass.visitorName}`}
-                  onClick={() => {
-                    setResult(null);
-                    checkOut.mutate(pass);
-                  }}
+                  disabled={cancelWalkIn.isPending}
+                  isLoading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
+                  onClick={() => cancelWalkIn.mutate(pass)}
                 >
-                  Check out
+                  Cancel request
                 </Button>
-              </div>
+              </Card>
             ))}
           </div>
         )}
+
+        <div>
+          <h2 className="text-sm font-semibold text-foreground mb-3">
+            Inside now{inside.length > 0 ? ` (${inside.length})` : ''}
+          </h2>
+          {isInsideLoading ? (
+            <ListSkeleton rows={2} />
+          ) : inside.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No visitors are on the estate right now.
+            </p>
+          ) : (
+            <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
+              {inside.map((pass) => (
+                <div key={pass.id} className="p-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {pass.visitorName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {pass.unitLabel}
+                      {pass.checkedInAt ? ` · in since ${formatTime(pass.checkedInAt)}` : ''}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    icon={<LogOut className="w-3.5 h-3.5" />}
+                    disabled={checkOut.isPending}
+                    isLoading={checkOut.isPending && checkOut.variables?.id === pass.id}
+                    aria-label={`Check out ${pass.visitorName}`}
+                    onClick={() => {
+                      setResult(null);
+                      checkOut.mutate(pass);
+                    }}
+                  >
+                    Check out
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <WalkInDialog
