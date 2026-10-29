@@ -23,7 +23,14 @@ export type RealtorListingStatus =
   | 'CLOSED';
 export type LeadStatus = 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'CLOSED' | 'LOST';
 export type ViewingStatus = 'REQUESTED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
-export type RealtorOfferStatus = 'SUBMITTED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED';
+export type RealtorOfferStatus =
+  | 'SUBMITTED'
+  | 'COUNTERED'
+  | 'ACCEPTED'
+  | 'REJECTED'
+  | 'WITHDRAWN'
+  | 'EXPIRED'
+  | 'CLOSED';
 export type CommissionStatus = 'available' | 'paid' | 'void';
 export type DocumentCategory =
   | 'agency_agreement'
@@ -510,6 +517,8 @@ export const OFFER_STATUS: Record<RealtorOfferStatus, { label: string; tone: Ton
   COUNTERED: { label: 'Countered', tone: 'info' },
   ACCEPTED: { label: 'Accepted', tone: 'success' },
   REJECTED: { label: 'Declined', tone: 'neutral' },
+  WITHDRAWN: { label: 'Withdrawn', tone: 'neutral' },
+  EXPIRED: { label: 'Expired', tone: 'neutral' },
   CLOSED: { label: 'Closed', tone: 'neutral' },
 };
 export const canCounter = (s: RealtorOfferStatus) => s === 'SUBMITTED' || s === 'COUNTERED';

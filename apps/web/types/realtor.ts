@@ -10,7 +10,14 @@ export type LeadStage =
   | 'closed_won'
   | 'closed_lost';
 export type ViewingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
-export type RealtorOfferStatus = 'submitted' | 'countered' | 'accepted' | 'rejected' | 'closed';
+export type RealtorOfferStatus =
+  | 'submitted'
+  | 'countered'
+  | 'accepted'
+  | 'rejected'
+  | 'withdrawn'
+  | 'expired'
+  | 'closed';
 
 /**
  * The ledger's own states. There is no "invoiced": commission becomes real when

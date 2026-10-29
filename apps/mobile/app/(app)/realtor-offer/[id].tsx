@@ -89,8 +89,8 @@ export default function RealtorOfferDetail() {
                   On the table
                 </Text>
                 <StatusPill
-                  label={OFFER_STATUS[o.status].label}
-                  tone={OFFER_STATUS[o.status].tone}
+                  label={(OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED).label}
+                  tone={(OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED).tone}
                 />
               </View>
               <Price amount={currentAmount(o)} variant="title" />
