@@ -1,6 +1,6 @@
 'use client';
 
-import { Receipt } from 'lucide-react';
+import { ReceiptText } from 'lucide-react';
 import { Badge, Button, EmptyState } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { escrowStatusBadges, paymentStatusBadges } from '@/lib/statusBadge';
@@ -13,7 +13,7 @@ interface PaymentsTableProps {
 
 export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) => {
   if (payments.length === 0) {
-    return <EmptyState icon={Receipt} title="No payments found" />;
+    return <EmptyState icon={ReceiptText} title="No payments found" />;
   }
 
   return (

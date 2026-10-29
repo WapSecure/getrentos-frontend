@@ -11,7 +11,7 @@ import {
   ClipboardList,
   Clock3,
   Hammer,
-  Receipt,
+  ReceiptText,
   RefreshCw,
   Scroll,
   ShieldAlert,
@@ -78,7 +78,7 @@ const modules = [
     label: 'Invoices',
     description: 'Vendor invoice register',
     href: '/admin/maintenance/invoices',
-    icon: Receipt,
+    icon: ReceiptText,
   },
 ] as const;
 

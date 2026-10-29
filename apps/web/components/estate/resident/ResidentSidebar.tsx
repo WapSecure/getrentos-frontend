@@ -2,7 +2,7 @@
 
 import {
   LayoutDashboard,
-  Receipt,
+  ReceiptText,
   KeyRound,
   Megaphone,
   TriangleAlert,
@@ -27,7 +27,7 @@ interface NavItem {
 export const residentNavItems: NavItem[] = [
   { label: 'Dashboard', href: ROUTES.RESIDENT_DASHBOARD, icon: LayoutDashboard },
   { label: 'Announcements', href: ROUTES.RESIDENT_ANNOUNCEMENTS, icon: Megaphone },
-  { label: 'Dues', href: ROUTES.RESIDENT_DUES, icon: Receipt },
+  { label: 'Dues', href: ROUTES.RESIDENT_DUES, icon: ReceiptText },
   { label: 'Visitor Passes', href: ROUTES.RESIDENT_VISITOR_PASSES, icon: KeyRound },
   { label: 'Deliveries', href: ROUTES.RESIDENT_DELIVERIES, icon: Package },
   { label: 'Violations', href: ROUTES.RESIDENT_VIOLATIONS, icon: TriangleAlert },

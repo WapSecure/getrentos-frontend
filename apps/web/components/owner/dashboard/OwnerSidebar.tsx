@@ -25,7 +25,7 @@ import {
   MessageSquareText,
   ClipboardCheck,
   PiggyBank,
-  Receipt,
+  ReceiptText,
 } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n/translations';
@@ -58,7 +58,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.properties', href: ROUTES.OWNER_PROPERTIES, icon: Building2 },
   { labelKey: 'sidebar.land_marketplace', href: ROUTES.OWNER_LAND, icon: MapPinned },
   // Literal label: plot sales on the owner's estates, apart from whole-parcel sales.
-  { label: 'Plot sales', href: OWNER_LAND_SALES_ROUTE, icon: Receipt },
+  { label: 'Plot sales', href: OWNER_LAND_SALES_ROUTE, icon: ReceiptText },
   { labelKey: 'sidebar.shortlets', href: ROUTES.OWNER_SHORTLETS, icon: BedDouble },
   // Stays the owner booked as a guest, apart from the ones they host above.
   { label: 'My stays', href: ROUTES.OWNER_BOOKINGS, icon: Luggage },

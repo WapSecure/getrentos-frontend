@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Building2,
   Users,
-  Receipt,
+  ReceiptText,
   KeyRound,
   ShieldCheck,
   ShieldAlert,
@@ -77,7 +77,7 @@ export const navItems: NavItem[] = [
   { label: 'Enquiries', href: ESTATE_MARKETPLACE_ROUTES.ESTATE_LEADS, icon: Inbox },
   { label: 'Announcements', href: ROUTES.ESTATE_ANNOUNCEMENTS, icon: Megaphone },
   { label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
-  { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: Receipt },
+  { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: ReceiptText },
   { label: 'Visitor Passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
   // Directly after the passes it reads, because it is the outstanding half of
   // the same thing: Visitor Passes lists what was issued, and this answers the

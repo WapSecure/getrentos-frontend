@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Coins, Landmark, Receipt, Wallet } from 'lucide-react';
+import { AlertTriangle, Coins, Landmark, ReceiptText, Wallet } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -467,7 +467,7 @@ export function StatementsQueue() {
     eyebrow: 'Owner Statements',
     title: 'Owner statement register',
     description: 'Landlord owner statements with net payouts across managed properties.',
-    icon: Receipt,
+    icon: ReceiptText,
     filters: [{ key: 'status', label: 'Status', options: statementStatusOptions }],
     listFn: (params) => adminRentFinanceService.listStatements(params),
     exportFn: (params) => adminRentFinanceService.exportStatements(params),

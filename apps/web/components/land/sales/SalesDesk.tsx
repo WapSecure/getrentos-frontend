@@ -15,7 +15,7 @@ import {
   Select,
   ToggleChip,
 } from '@getrentos/ui';
-import { Receipt, Search } from 'lucide-react';
+import { ReceiptText, Search } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landDeveloperKeys } from '@/lib/landDeveloperQueryKeys';
@@ -240,11 +240,7 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
 
       <div className="mb-4 mt-8 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="-mx-1 overflow-x-auto px-1">
-          <div
-            className="flex w-max gap-2"
-            role="group"
-            aria-label="Purchase status"
-          >
+          <div className="flex w-max gap-2" role="group" aria-label="Purchase status">
             {statusOptions.map((option) => (
               <ToggleChip
                 key={option.label}
@@ -298,7 +294,7 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
           isLoading={isLoading}
           emptyState={
             <EmptyState
-              icon={Receipt}
+              icon={ReceiptText}
               title={filtered ? 'No purchases match these filters' : 'No plot purchases yet'}
               description={
                 filtered

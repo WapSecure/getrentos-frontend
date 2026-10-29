@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Coins, Receipt, Percent, Settings2 } from 'lucide-react';
+import { ArrowLeft, Coins, ReceiptText, Percent, Settings2 } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -110,8 +110,7 @@ export function AgencyCommissionsView() {
   ];
 
   if (isLoading) return <PageLoadingState />;
-  if (!data)
-    return <PageErrorState title="Couldn’t load commissions" onRetry={() => refetch()} />;
+  if (!data) return <PageErrorState title="Couldn’t load commissions" onRetry={() => refetch()} />;
 
   const startEditing = () => {
     setLettingPct(String(data.config.lettingPct));
@@ -160,7 +159,7 @@ export function AgencyCommissionsView() {
           accent="emerald"
         />
         <StatCard
-          icon={Receipt}
+          icon={ReceiptText}
           label="Paid out"
           value={data.totals.paid}
           isCurrency

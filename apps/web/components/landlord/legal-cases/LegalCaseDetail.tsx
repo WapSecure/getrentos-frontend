@@ -10,7 +10,7 @@ import {
   Landmark,
   Lock,
   MoreVertical,
-  Receipt,
+  ReceiptText,
   ShieldAlert,
 } from 'lucide-react';
 import {
@@ -363,7 +363,7 @@ export function LegalCaseDetail({
           <div className="mt-3 rounded-xl border border-border bg-muted/30 px-4 py-3">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                <ReceiptText className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
                 Costs to the owner
               </span>
               <span className="text-sm font-semibold text-foreground">
@@ -682,7 +682,7 @@ export function LegalCaseDetail({
         {costOpen && (
           <section className="mt-4 rounded-xl border border-border p-4">
             <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden />
+              <ReceiptText className="h-4 w-4 text-muted-foreground" aria-hidden />
               Record a cost
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">

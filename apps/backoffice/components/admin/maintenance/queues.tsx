@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, Clock3, Hammer, Receipt, Scroll, Wrench } from 'lucide-react';
+import { CalendarClock, Clock3, Hammer, ReceiptText, Scroll, Wrench } from 'lucide-react';
 import { Badge, Button, ConfirmDialog, useToast, type BadgeVariant } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMaintenanceService } from '@/services/adminMaintenanceService';
@@ -727,7 +727,17 @@ function useRecordDocuments() {
 
   const attach = useMutation({
     meta: { showGlobalError: true },
-    mutationFn: ({ id, kind, file, note }: { id: string; kind: 'quote' | 'invoice'; file: File; note?: string }) =>
+    mutationFn: ({
+      id,
+      kind,
+      file,
+      note,
+    }: {
+      id: string;
+      kind: 'quote' | 'invoice';
+      file: File;
+      note?: string;
+    }) =>
       unwrap(
         kind === 'quote'
           ? adminMaintenanceService.addQuoteDocument(id, file, note)
@@ -762,7 +772,10 @@ function useRecordDocuments() {
 
   return {
     /** Opens the dialog for a quote or an invoice row. */
-    open: (kind: 'quote' | 'invoice', record: { id: string; label: string; subtitle: string; documents?: EvidenceItem[] }) =>
+    open: (
+      kind: 'quote' | 'invoice',
+      record: { id: string; label: string; subtitle: string; documents?: EvidenceItem[] }
+    ) =>
       setOpen({
         kind,
         id: record.id,
@@ -851,36 +864,36 @@ export function QuotesQueue() {
         </Button>
         {quote.status === 'SUBMITTED' ? (
           <>
-          <Button
-            size="xs"
-            onClick={() =>
-              actions.request({
-                title: 'Approve quote?',
-                description: `${naira(quote.amount)} will become the accepted maintenance quote.`,
-                label: 'Approve',
-                reasonRequired: false,
-                run: () => unwrap(adminMaintenanceService.decideQuote(quote.id, 'APPROVED')),
-              })
-            }
-          >
-            Approve
-          </Button>
-          <Button
-            size="xs"
-            variant="danger"
-            onClick={() =>
-              actions.request({
-                title: 'Reject quote?',
-                description: 'The submitting operator will see the recorded reason.',
-                label: 'Reject',
-                reasonRequired: true,
-                run: (reason) =>
-                  unwrap(adminMaintenanceService.decideQuote(quote.id, 'REJECTED', reason)),
-              })
-            }
-          >
-            Reject
-          </Button>
+            <Button
+              size="xs"
+              onClick={() =>
+                actions.request({
+                  title: 'Approve quote?',
+                  description: `${naira(quote.amount)} will become the accepted maintenance quote.`,
+                  label: 'Approve',
+                  reasonRequired: false,
+                  run: () => unwrap(adminMaintenanceService.decideQuote(quote.id, 'APPROVED')),
+                })
+              }
+            >
+              Approve
+            </Button>
+            <Button
+              size="xs"
+              variant="danger"
+              onClick={() =>
+                actions.request({
+                  title: 'Reject quote?',
+                  description: 'The submitting operator will see the recorded reason.',
+                  label: 'Reject',
+                  reasonRequired: true,
+                  run: (reason) =>
+                    unwrap(adminMaintenanceService.decideQuote(quote.id, 'REJECTED', reason)),
+                })
+              }
+            >
+              Reject
+            </Button>
           </>
         ) : null}
       </div>
@@ -902,7 +915,7 @@ export function InvoicesQueue() {
     eyebrow: 'Vendor Invoices',
     title: 'Vendor invoice register',
     description: 'Platform-wide vendor invoices across the finance-ready lifecycle.',
-    icon: Receipt,
+    icon: ReceiptText,
     filters: [{ key: 'status', label: 'Status', options: invoiceStatusOptions }],
     listFn: (params) => adminMaintenanceService.listVendorInvoices(params),
     getRowKey: (inv) => inv.id,
@@ -965,37 +978,38 @@ export function InvoicesQueue() {
         </Button>
         {invoice.status === 'SUBMITTED' ? (
           <>
-          <Button
-            size="xs"
-            onClick={() =>
-              actions.request({
-                title: 'Approve invoice?',
-                description: 'Approval marks this invoice finance-ready; it does not mark it paid.',
-                label: 'Approve',
-                reasonRequired: true,
-                run: (reason) =>
-                  unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'APPROVED', reason)),
-              })
-            }
-          >
-            Approve
-          </Button>
-          <Button
-            size="xs"
-            variant="danger"
-            onClick={() =>
-              actions.request({
-                title: 'Reject invoice?',
-                description: 'The rejection reason is retained in the audit trail.',
-                label: 'Reject',
-                reasonRequired: true,
-                run: (reason) =>
-                  unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'REJECTED', reason)),
-              })
-            }
-          >
-            Reject
-          </Button>
+            <Button
+              size="xs"
+              onClick={() =>
+                actions.request({
+                  title: 'Approve invoice?',
+                  description:
+                    'Approval marks this invoice finance-ready; it does not mark it paid.',
+                  label: 'Approve',
+                  reasonRequired: true,
+                  run: (reason) =>
+                    unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'APPROVED', reason)),
+                })
+              }
+            >
+              Approve
+            </Button>
+            <Button
+              size="xs"
+              variant="danger"
+              onClick={() =>
+                actions.request({
+                  title: 'Reject invoice?',
+                  description: 'The rejection reason is retained in the audit trail.',
+                  label: 'Reject',
+                  reasonRequired: true,
+                  run: (reason) =>
+                    unwrap(adminMaintenanceService.decideInvoice(invoice.id, 'REJECTED', reason)),
+                })
+              }
+            >
+              Reject
+            </Button>
           </>
         ) : null}
         {invoice.status === 'APPROVED' ? (

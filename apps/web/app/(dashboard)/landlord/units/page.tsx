@@ -4,7 +4,7 @@ import { Button, EmptyState, Pagination, SearchInput, Select, useToast } from '@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Receipt, Tag, DoorClosed } from 'lucide-react';
+import { Plus, ReceiptText, Tag, DoorClosed } from 'lucide-react';
 import { UnitsTable } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
@@ -191,7 +191,7 @@ function LandlordUnitsPageContent() {
             variant="outline"
             onClick={() => setIsBulkChargeOpen(true)}
             disabled={totalUnits === 0}
-            icon={<Receipt className="w-4 h-4" />}
+            icon={<ReceiptText className="w-4 h-4" />}
           >
             Bulk charge
           </Button>
@@ -236,9 +236,7 @@ function LandlordUnitsPageContent() {
         errorTitle="We couldn't load your units"
         skeletonClassName="h-16"
         skeletonRows={4}
-        empty={
-          <EmptyState icon={DoorClosed} title="No units found" />
-        }
+        empty={<EmptyState icon={DoorClosed} title="No units found" />}
       >
         <UnitsTable
           units={units}

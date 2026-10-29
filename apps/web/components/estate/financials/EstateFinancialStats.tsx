@@ -1,6 +1,6 @@
 'use client';
 
-import { Wallet, AlertCircle, Receipt, Users } from 'lucide-react';
+import { Wallet, AlertCircle, ReceiptText, Users } from 'lucide-react';
 import { StatCard } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 
@@ -31,7 +31,7 @@ export const EstateFinancialStats = ({
       value={formatCurrency(duesOutstanding, { compact: true })}
     />
     <StatCard
-      icon={Receipt}
+      icon={ReceiptText}
       accent="orange"
       label="Late Fees Collected"
       value={formatCurrency(lateFeesCollected, { compact: true })}

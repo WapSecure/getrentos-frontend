@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, Receipt } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, ReceiptText } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
 import {
   Alert,
@@ -219,7 +219,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
 
           <div className="divide-y divide-border max-h-64 overflow-y-auto">
             {expenses.length === 0 ? (
-              <EmptyState icon={Receipt} title="No expenses recorded" size="compact" bare />
+              <EmptyState icon={ReceiptText} title="No expenses recorded" size="compact" bare />
             ) : (
               expenses.map((expense) => (
                 <div key={expense.id} className="flex items-center justify-between gap-3 py-3">

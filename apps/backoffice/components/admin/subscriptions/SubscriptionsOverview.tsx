@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { CreditCard, Receipt, TriangleAlert, TrendingUp } from 'lucide-react';
+import { CreditCard, ReceiptText, TriangleAlert, TrendingUp } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -303,7 +303,7 @@ function SubscriptionRow({
                 aria-expanded={invoicesOpen}
                 className="mt-1 gap-1 text-xs font-medium"
               >
-                <Receipt className="h-3 w-3" />
+                <ReceiptText className="h-3 w-3" />
                 {invoicesOpen ? 'Hide payments' : 'Payment history'}
               </Button>
             )}

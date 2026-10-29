@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Receipt, Trash2 } from 'lucide-react';
+import { Plus, ReceiptText, Trash2 } from 'lucide-react';
 import {
   Button,
   CurrencyInput,
@@ -159,7 +159,7 @@ export function ExpensesPanel({ properties }: ExpensesPanelProps) {
       ) : expenses.length === 0 ? (
         <div className="p-8">
           <EmptyState
-            icon={Receipt}
+            icon={ReceiptText}
             title="No expenses recorded yet"
             description="Record utilities, insurance, tax, or repair costs to see real profitability above."
           />

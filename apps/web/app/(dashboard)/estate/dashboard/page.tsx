@@ -13,7 +13,7 @@ import {
   MapPin,
   Megaphone,
   Package,
-  Receipt,
+  ReceiptText,
   ShieldCheck,
   Siren,
   TriangleAlert,
@@ -44,7 +44,12 @@ const modules = [
     href: ROUTES.ESTATE_HOUSEHOLDS,
     icon: Users,
   },
-  { label: 'Dues', description: 'Track and collect dues', href: ROUTES.ESTATE_DUES, icon: Receipt },
+  {
+    label: 'Dues',
+    description: 'Track and collect dues',
+    href: ROUTES.ESTATE_DUES,
+    icon: ReceiptText,
+  },
   {
     label: 'Visitor Passes',
     description: 'Issue entry passes',
@@ -149,7 +154,7 @@ export default function EstateDashboardPage() {
               value={stats ? formatCurrency(stats.duesCollectedThisMonth, { compact: true }) : '—'}
             />
             <StatCard
-              icon={Receipt}
+              icon={ReceiptText}
               accent="orange"
               label="Dues outstanding"
               value={stats ? formatCurrency(stats.duesOutstanding, { compact: true }) : '—'}

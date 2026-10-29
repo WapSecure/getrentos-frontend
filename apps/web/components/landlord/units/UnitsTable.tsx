@@ -14,7 +14,7 @@ import {
   Input,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, Receipt } from 'lucide-react';
+import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, ReceiptText } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { rentSuffix } from '@/lib/leaseTerm';
 import type { Unit, UnitOccupancyStatus } from '@/types/landlord';
@@ -126,7 +126,7 @@ export const UnitsTable = ({
                       <DropdownMenuContent align="end">
                         {unit.occupancyStatus === 'occupied' && (
                           <DropdownMenuItem onSelect={() => onChargeUnit(unit)}>
-                            <Receipt className="w-3.5 h-3.5" />
+                            <ReceiptText className="w-3.5 h-3.5" />
                             Charge rent
                           </DropdownMenuItem>
                         )}
