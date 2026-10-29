@@ -386,7 +386,7 @@ export const estateService = {
 
   async listVisitorPasses(
     estateId: string,
-    query: EstatePageQuery & { status?: string } = {}
+    query: EstatePageQuery & { status?: string; search?: string } = {}
   ): Promise<ApiResponse<Paginated<VisitorPass>>> {
     return safeCall(() => authFetch(`/estate/${estateId}/visitor-passes${toQuery(query)}`));
   },
