@@ -72,6 +72,33 @@ export default function Payments() {
     );
   };
 
+  const confirmMoveInMutation = useMutation({
+    mutationFn: (id: string) => paymentsApi.confirmMoveIn(id),
+    onSuccess: () => {
+      toast.show('Move-in confirmed — rent released to your landlord.', 'success');
+      qc.invalidateQueries({ queryKey: qk.renter.payments(1, 50) });
+      qc.invalidateQueries({ queryKey: qk.renter.lease });
+      qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not release this payment.', 'error'),
+  });
+
+  const confirmMoveIn = (payment: Payment) => {
+    Alert.alert(
+      'Confirm move-in?',
+      `This releases ₦${payment.amount.toLocaleString()} for ${payment.propertyName} to your landlord now. Only confirm once you've moved in — it can't be undone.`,
+      [
+        { text: 'Not yet', style: 'cancel' },
+        {
+          text: 'Release to landlord',
+          style: 'destructive',
+          onPress: () => confirmMoveInMutation.mutate(payment.id),
+        },
+      ]
+    );
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
@@ -119,8 +146,10 @@ export default function Payments() {
               <PaymentRow
                 payment={item}
                 paying={payMutation.isPending && payMutation.variables === item.id}
+                releasing={confirmMoveInMutation.isPending && confirmMoveInMutation.variables === item.id}
                 onPay={() => confirmPay(item)}
                 onDispute={() => setDisputePayment(item)}
+                onConfirmMoveIn={() => confirmMoveIn(item)}
               />
             </View>
           )}
@@ -147,16 +176,21 @@ export default function Payments() {
 function PaymentRow({
   payment: p,
   paying,
+  releasing,
   onPay,
   onDispute,
+  onConfirmMoveIn,
 }: {
   payment: Payment;
   paying: boolean;
+  releasing: boolean;
   onPay: () => void;
   onDispute: () => void;
+  onConfirmMoveIn: () => void;
 }) {
   const { colors, spacing } = useTheme();
   const payable = p.status === 'pending' || p.status === 'overdue';
+  const releasable = p.status === 'paid' && p.escrowStatus === 'held' && !p.disputeReason;
   const disputable = (p.status === 'paid' || p.status === 'overdue') && !p.disputeReason;
 
   return (
@@ -200,6 +234,15 @@ function PaymentRow({
             loadingLabel="Paying…"
             onPress={onPay}
           />
+        ) : releasable ? (
+          <Button
+            label="Confirm move-in"
+            size="sm"
+            fullWidth={false}
+            loading={releasing}
+            loadingLabel="Releasing…"
+            onPress={onConfirmMoveIn}
+          />
         ) : p.receiptUrl ? (
           <Pressable
             onPress={() => Linking.openURL(p.receiptUrl!)}
@@ -214,6 +257,12 @@ function PaymentRow({
           </Pressable>
         ) : null}
       </View>
+
+      {releasable ? (
+        <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+          Held under GetRentos Payment Protection — confirm move-in to release it to your landlord.
+        </Text>
+      ) : null}
 
       {p.disputeReason ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: spacing.sm }}>

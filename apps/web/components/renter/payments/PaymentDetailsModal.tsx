@@ -48,6 +48,7 @@ interface PaymentDetailsModalProps {
   payment: Payment;
   onDownloadReceipt: (id: string) => void;
   onDispute: (id: string) => void;
+  onConfirmMoveIn: (id: string) => void;
 }
 
 export const PaymentDetailsModal = ({
@@ -56,6 +57,7 @@ export const PaymentDetailsModal = ({
   payment,
   onDownloadReceipt,
   onDispute,
+  onConfirmMoveIn,
 }: PaymentDetailsModalProps) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-NG', {
@@ -159,15 +161,22 @@ export const PaymentDetailsModal = ({
           {/* Where the money is */}
           <Alert variant="info" icon={Shield} title="Where your money is">
             {escrowStatusBadges[payment.escrowStatus]?.label ?? payment.escrowStatus}
-            {payment.escrowStatus === 'held' && payment.releaseDate && (
+            {payment.escrowStatus === 'held' && (
               <p className="text-xs mt-1">
-                Releases to your landlord on{' '}
-                {new Date(payment.releaseDate).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
-                . Held under GetRentos Payment Protection until then, so you have the home in hand first.
+                Held under GetRentos Payment Protection so you have the home in hand first.{' '}
+                {payment.releaseDate ? (
+                  <>
+                    It releases to your landlord on{' '}
+                    {new Date(payment.releaseDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                    , or sooner — the moment you confirm you&apos;ve moved in.
+                  </>
+                ) : (
+                  <>It stays held until you confirm you&apos;ve moved in.</>
+                )}
               </p>
             )}
           </Alert>
@@ -180,6 +189,16 @@ export const PaymentDetailsModal = ({
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2 pt-2">
+            {payment.escrowStatus === 'held' && (
+              <Button
+                variant="primary"
+                className="flex-1"
+                icon={<CheckCircle className="w-4 h-4" />}
+                onClick={() => onConfirmMoveIn(payment.id)}
+              >
+                Confirm move-in &amp; release
+              </Button>
+            )}
             {payment.receiptUrl && (
               <Button
                 variant="primary"
