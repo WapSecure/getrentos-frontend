@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, Pause, Play, Plus, Receipt, Trash2 } from 'lucide-react';
+import { CalendarClock, Pause, Play, Plus, ReceiptText, Trash2 } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -462,7 +462,7 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                     isLoading={issueNow.isPending}
                     onClick={() => issueNow.mutate()}
                   >
-                    <Receipt className="w-3.5 h-3.5" /> Raise next invoice now
+                    <ReceiptText className="w-3.5 h-3.5" /> Raise next invoice now
                   </Button>
                 </>
               )}

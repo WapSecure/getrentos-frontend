@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
 import { Alert, Button, CurrencyInput, DatePicker, Field, Select } from '@getrentos/ui';
-import { Receipt } from 'lucide-react';
+import { ReceiptText } from 'lucide-react';
 import type { Unit } from '@/types/landlord';
 
 export interface ChargeUnitInput {
@@ -153,7 +153,7 @@ const ChargeUnitForm = ({
               })
             }
           >
-            <Receipt className="w-4 h-4" />
+            <ReceiptText className="w-4 h-4" />
             Charge unit
           </Button>
         </div>

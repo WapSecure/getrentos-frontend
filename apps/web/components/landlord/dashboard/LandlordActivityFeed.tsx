@@ -1,6 +1,6 @@
 'use client';
 
-import { CreditCard, Wrench, CalendarClock, UserPlus, Receipt } from 'lucide-react';
+import { CreditCard, Wrench, CalendarClock, UserPlus, ReceiptText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
@@ -32,7 +32,7 @@ const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; co
     color: 'text-info',
   },
   expense: {
-    icon: Receipt,
+    icon: ReceiptText,
     bg: 'bg-destructive/10',
     color: 'text-destructive',
   },

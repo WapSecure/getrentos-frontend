@@ -1,6 +1,6 @@
 'use client';
 
-import { Folder, FolderOpen, FileText, Receipt, ClipboardCheck, Shield } from 'lucide-react';
+import { Folder, FolderOpen, FileText, ReceiptText, ClipboardCheck, Shield } from 'lucide-react';
 
 interface DocumentCategoriesProps {
   categories: Record<string, number>;
@@ -11,7 +11,7 @@ interface DocumentCategoriesProps {
 
 const categoryIcons: Record<string, React.ElementType> = {
   'Lease Agreements': FileText,
-  Receipts: Receipt,
+  Receipts: ReceiptText,
   'Inspection Reports': ClipboardCheck,
   Insurance: Shield,
   Miscellaneous: FileText,

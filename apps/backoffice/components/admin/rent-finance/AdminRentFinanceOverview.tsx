@@ -9,7 +9,7 @@ import {
   Clock3,
   Coins,
   Landmark,
-  Receipt,
+  ReceiptText,
   ShieldAlert,
   Wallet,
 } from 'lucide-react';
@@ -61,7 +61,7 @@ const modules = [
     label: 'Owner statements',
     description: 'Statement register & line items',
     href: '/admin/rent-finance/statements',
-    icon: Receipt,
+    icon: ReceiptText,
   },
   {
     label: 'Payout accounts',

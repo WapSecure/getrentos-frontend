@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Receipt, Plus, Settings } from 'lucide-react';
+import { ReceiptText, Plus, Settings } from 'lucide-react';
 import {
   Button,
   CardSkeleton,
@@ -183,7 +183,7 @@ export default function EstateDuesPage() {
       ) : dues.length === 0 ? (
         <div className="bg-card rounded-2xl border border-border p-12">
           <EmptyState
-            icon={Receipt}
+            icon={ReceiptText}
             title="No dues yet"
             description="Charge a levy or service charge to one or all households in this estate."
           />

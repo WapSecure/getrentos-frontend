@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BarChart3, Eye, FileText, LayoutGrid, Receipt, ShieldCheck } from 'lucide-react';
+import { BarChart3, Eye, FileText, LayoutGrid, ReceiptText, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { LAND_DEVELOPER_ROUTES } from '@/lib/constants/landDeveloperRoutes';
 
@@ -33,7 +33,7 @@ const SECTIONS: {
     href: LAND_DEVELOPER_ROUTES.authority,
   },
   { key: 'layout', label: 'Estate layout', icon: LayoutGrid, href: LAND_DEVELOPER_ROUTES.layout },
-  { key: 'sales', label: 'Sales', icon: Receipt, href: LAND_DEVELOPER_ROUTES.purchases },
+  { key: 'sales', label: 'Sales', icon: ReceiptText, href: LAND_DEVELOPER_ROUTES.purchases },
   { key: 'analytics', label: 'Analytics', icon: BarChart3, href: LAND_DEVELOPER_ROUTES.analytics },
   // Land Watch lives at /land/watch for owners and buyers alike.
   { key: 'watch', label: 'Land Watch', icon: Eye, href: () => '/land/watch' },

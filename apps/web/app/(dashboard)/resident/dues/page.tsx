@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Receipt, Repeat } from 'lucide-react';
+import { ReceiptText, Repeat } from 'lucide-react';
 import { Badge, Button, EmptyState, ListSkeleton } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -77,7 +77,7 @@ export default function ResidentDuesPage() {
         <ListSkeleton rows={3} />
       ) : dues.length === 0 ? (
         <EmptyState
-          icon={Receipt}
+          icon={ReceiptText}
           title="No dues yet"
           description="Your estate manager hasn't charged any dues to your household."
         />

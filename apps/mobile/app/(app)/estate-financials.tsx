@@ -8,7 +8,7 @@ import {
   Download,
   FileBarChart,
   Plus,
-  Receipt,
+  ReceiptText,
   Users,
   Wallet,
   type LucideIcon,
@@ -197,7 +197,7 @@ export default function EstateFinancials() {
                     amount={s?.duesOutstanding}
                   />
                   <Tile
-                    Icon={Receipt}
+                    Icon={ReceiptText}
                     tint={colors.warning}
                     label="Late fees collected"
                     amount={s?.lateFeesCollected}

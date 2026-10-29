@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Home, KeyRound, Megaphone, Package, Receipt, TriangleAlert } from 'lucide-react';
+import { Home, KeyRound, Megaphone, Package, ReceiptText, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -106,7 +106,7 @@ export default function ResidentDashboardPage() {
           className="group rounded-2xl border border-border/90 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
         >
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-            <Receipt className="w-4 h-4" />
+            <ReceiptText className="w-4 h-4" />
             Outstanding dues
           </div>
           <p className="text-2xl font-bold text-foreground">

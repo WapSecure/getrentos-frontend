@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Receipt } from 'lucide-react';
+import { ReceiptText } from 'lucide-react';
 import {
   Button,
   Checkbox,
@@ -239,7 +239,7 @@ export function BulkChargeModal({ isOpen, onClose, properties }: BulkChargeModal
                 <ListSkeleton rows={3} />
               ) : eligibleUnits.length === 0 ? (
                 <EmptyState
-                  icon={Receipt}
+                  icon={ReceiptText}
                   title="No occupied units"
                   description={`No occupied units on this page${propertyId ? ' for this property' : ''}. Only units with a tenant can be charged.`}
                   size="compact"

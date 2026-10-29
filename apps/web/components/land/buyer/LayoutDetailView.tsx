@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Badge, PageErrorState, Skeleton } from '@getrentos/ui';
-import { ArrowLeft, BadgeCheck, FileCheck2, MapPin, Receipt } from 'lucide-react';
+import { ArrowLeft, BadgeCheck, FileCheck2, MapPin, ReceiptText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
@@ -183,7 +183,7 @@ const FeesCard = ({
 }) => (
   <section aria-labelledby="fees-heading" className="rounded-2xl border border-border bg-card p-5">
     <h2 id="fees-heading" className="flex items-center gap-2 font-semibold text-foreground">
-      <Receipt className="h-4 w-4 text-primary" aria-hidden /> Fees on every plot
+      <ReceiptText className="h-4 w-4 text-primary" aria-hidden /> Fees on every plot
     </h2>
     <dl className="mt-3 space-y-1.5 text-sm">
       {[

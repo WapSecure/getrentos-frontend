@@ -19,7 +19,7 @@ import {
   FileSearch,
   MapPin,
   Plus,
-  Receipt,
+  ReceiptText,
   Ruler,
   ShieldCheck,
   Gavel,
@@ -197,7 +197,7 @@ export const OwnerLandWorkspace = () => {
             href={LAND_DEVELOPER_ROUTES.purchases()}
             variant="outline"
             rounded="lg"
-            icon={<Receipt className="h-4 w-4" />}
+            icon={<ReceiptText className="h-4 w-4" />}
           >
             Plot sales
           </Button>

@@ -18,7 +18,7 @@ import {
   MapPin,
   MessageCircle,
   Phone,
-  Receipt,
+  ReceiptText,
   ShieldCheck,
   Wrench,
 } from 'lucide-react';
@@ -310,7 +310,7 @@ export function HomeOverviewView() {
           label="Next rent"
           value={nextPayment ? formatter.format(nextPayment.amount) : '—'}
           detail={nextPayment ? `Due ${formatDate(nextPayment.dueDate)}` : 'No upcoming payment'}
-          icon={Receipt}
+          icon={ReceiptText}
           tone="green"
           valueClassName={nextPayment ? 'text-xl' : undefined}
         />
@@ -398,9 +398,7 @@ export function HomeOverviewView() {
                       {request.isEmergency && (
                         <span
                           className={`mt-1 block text-xs font-medium ${
-                            request.acknowledgedAt
-                              ? 'text-success'
-                              : 'text-destructive'
+                            request.acknowledgedAt ? 'text-success' : 'text-destructive'
                           }`}
                         >
                           {request.acknowledgedAt ? 'Acknowledged' : 'Awaiting acknowledgement'}
