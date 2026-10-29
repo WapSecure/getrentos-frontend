@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
 import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
@@ -12,6 +12,7 @@ import {
   ListSkeleton,
   NumberInput,
   Pagination,
+  SearchInput,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -138,6 +139,15 @@ export default function GatemanVerifyPage() {
   // Paged from the server: a busy estate can have hundreds of people inside, and
   // a single capped fetch silently hid everyone past the cap from check-out.
   const [insidePage, setInsidePage] = useState(1);
+  const [insideSearch, setInsideSearch] = useState('');
+  const [insideQuery, setInsideQuery] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInsideQuery(insideSearch.trim());
+      setInsidePage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [insideSearch]);
   const {
     data: checkInsData,
     isLoading: isInsideLoading,
@@ -145,7 +155,12 @@ export default function GatemanVerifyPage() {
   } = useQuery({
     queryKey: [
       ...estateKeys.visitorPasses(estate?.id ?? '', 'checked_in'),
-      { page: insidePage, pageSize: INSIDE_PAGE_SIZE, purpose: 'today-check-ins' },
+      {
+        page: insidePage,
+        pageSize: INSIDE_PAGE_SIZE,
+        search: insideQuery,
+        purpose: 'today-check-ins',
+      },
     ],
     queryFn: () =>
       unwrap(
@@ -153,6 +168,7 @@ export default function GatemanVerifyPage() {
           status: 'checked_in',
           page: insidePage,
           pageSize: INSIDE_PAGE_SIZE,
+          search: insideQuery || undefined,
         })
       ),
     enabled: !!estate,
@@ -716,13 +732,25 @@ export default function GatemanVerifyPage() {
 
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3">
-            Inside now{insideTotal > 0 ? ` (${insideTotal})` : ''}
+            Inside now
+            {insideQuery ? ` · ${insideTotal} found` : insideTotal > 0 ? ` (${insideTotal})` : ''}
           </h2>
+          {(insideTotal > 0 || insideSearch) && (
+            <SearchInput
+              value={insideSearch}
+              onValueChange={setInsideSearch}
+              placeholder="Visitor, phone, unit or resident"
+              label="Search visitors inside"
+              className="mb-3"
+            />
+          )}
           {isInsideLoading ? (
             <ListSkeleton rows={2} />
           ) : inside.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No visitors are on the estate right now.
+              {insideQuery
+                ? `No one inside matches "${insideQuery}".`
+                : 'No visitors are on the estate right now.'}
             </p>
           ) : (
             <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
