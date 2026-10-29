@@ -11,6 +11,10 @@ import {
   Input,
 } from '@getrentos/ui';
 import {
+  startAuthentication,
+  type PublicKeyCredentialRequestOptionsJSON,
+} from '@simplewebauthn/browser';
+import {
   authFetch,
   registerStepUpHandler,
   rememberStepUpToken,
@@ -20,6 +24,7 @@ import {
 type Pending = { resolve: (token: string | null) => void };
 
 const COPY: Record<StepUpMethod, { label: string; hint: string }> = {
+  passkey: { label: 'Passkey', hint: 'Use your device passkey — Face ID, fingerprint, or a security key.' },
   totp: { label: 'Two-factor code', hint: 'Enter the 6-digit code from your authenticator app.' },
   transaction_pin: { label: 'Transaction PIN', hint: 'Enter your 4-digit transaction PIN.' },
   password: { label: 'Password', hint: 'Enter your GetRentos password.' },
@@ -83,6 +88,28 @@ export function StepUpDialog() {
     }
   };
 
+  const confirmWithPasskey = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const options = await authFetch<PublicKeyCredentialRequestOptionsJSON>(
+        '/users/me/security/step-up/passkey/options',
+        { method: 'POST' }
+      );
+      const assertion = await startAuthentication({ optionsJSON: options });
+      const res = await authFetch<{ stepUpToken: string; expiresIn: number }>(
+        '/users/me/security/step-up',
+        { method: 'POST', body: JSON.stringify({ passkeyResponse: assertion }) }
+      );
+      rememberStepUpToken(res.stepUpToken, res.expiresIn);
+      finish(res.stepUpToken);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'That passkey check did not pass. Try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const confirm = async () => {
     if (!method) return;
     setBusy(true);
@@ -110,6 +137,7 @@ export function StepUpDialog() {
   };
 
   const needsCode = method === 'email_code' && !reference;
+  const isPasskey = method === 'passkey';
   const copy = method ? COPY[method] : null;
 
   return (
@@ -127,13 +155,14 @@ export function StepUpDialog() {
           className="mt-4 space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            if (needsCode) void sendCode();
+            if (isPasskey) void confirmWithPasskey();
+            else if (needsCode) void sendCode();
             else void confirm();
           }}
         >
           {!copy ? (
             <p className="text-sm text-muted-foreground">Loading…</p>
-          ) : needsCode ? (
+          ) : isPasskey || needsCode ? (
             <p className="text-sm text-muted-foreground">{copy.hint}</p>
           ) : (
             <label className="block space-y-1">
@@ -178,7 +207,8 @@ export function StepUpDialog() {
               disabled={
                 busy ||
                 !method ||
-                (!needsCode &&
+                (!isPasskey &&
+                  !needsCode &&
                   (method === 'password'
                     ? !value
                     : method === 'transaction_pin'
@@ -186,7 +216,7 @@ export function StepUpDialog() {
                       : value.length !== 6))
               }
             >
-              {needsCode ? 'Email me a code' : 'Confirm'}
+              {isPasskey ? 'Use passkey' : needsCode ? 'Email me a code' : 'Confirm'}
             </Button>
           </div>
         </form>
