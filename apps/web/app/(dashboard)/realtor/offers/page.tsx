@@ -18,20 +18,19 @@ import {
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
-import { mapRealtorOffer, realtorService } from '@/services/realtorService';
+import { mapRealtorOffer, realtorService, type RealtorOfferApi } from '@/services/realtorService';
 
 type StatusFilter = 'all' | RealtorOfferStatus;
 
 const PAGE_SIZE = 10;
 
-const OFFER_STATUS_TO_API_STATUS: Record<
-  RealtorOfferStatus,
-  'SUBMITTED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED'
-> = {
+const OFFER_STATUS_TO_API_STATUS: Record<RealtorOfferStatus, RealtorOfferApi['status']> = {
   submitted: 'SUBMITTED',
   countered: 'COUNTERED',
   accepted: 'ACCEPTED',
   rejected: 'REJECTED',
+  withdrawn: 'WITHDRAWN',
+  expired: 'EXPIRED',
   closed: 'CLOSED',
 };
 

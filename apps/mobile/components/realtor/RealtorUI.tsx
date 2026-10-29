@@ -159,7 +159,7 @@ export function ViewingRow({
 
 export function OfferCard({ o }: { o: RealtorOffer }) {
   const { colors, spacing } = useTheme();
-  const s = OFFER_STATUS[o.status];
+  const s = OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED;
   const amount = currentAmount(o);
   const gap = vsAsking(amount, o.listing.price);
   const title = o.listing.listingTitle || o.listing.property.title;

@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, RefreshCcw, CheckCircle2, XCircle, Archive } from 'lucide-react';
+import { Clock, RefreshCcw, CheckCircle2, XCircle, Archive, Undo2, Hourglass } from 'lucide-react';
 import { Badge, Card, type BadgeVariant } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { RealtorOffer, RealtorOfferStatus } from '@/types/realtor';
@@ -13,6 +13,8 @@ const statusConfig: Record<
   countered: { label: 'Countered', icon: RefreshCcw, variant: 'info' },
   accepted: { label: 'Accepted', icon: CheckCircle2, variant: 'success' },
   rejected: { label: 'Rejected', icon: XCircle, variant: 'danger' },
+  withdrawn: { label: 'Withdrawn', icon: Undo2, variant: 'neutral' },
+  expired: { label: 'Expired', icon: Hourglass, variant: 'neutral' },
   closed: { label: 'Closed', icon: Archive, variant: 'neutral' },
 };
 
@@ -23,7 +25,7 @@ interface RealtorOfferCardProps {
 }
 
 export const RealtorOfferCard = ({ offer, onClick }: RealtorOfferCardProps) => {
-  const status = statusConfig[offer.status];
+  const status = statusConfig[offer.status] ?? statusConfig.closed;
   const StatusIcon = status.icon;
   const diffPct =
     offer.askingPrice > 0

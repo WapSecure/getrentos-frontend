@@ -109,7 +109,7 @@ export interface RealtorViewingApi {
 export interface RealtorOfferApi {
   id: string;
   amount: number;
-  status: 'SUBMITTED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED' | 'CLOSED';
+  status: 'SUBMITTED' | 'COUNTERED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN' | 'EXPIRED' | 'CLOSED';
   createdAt: string;
   buyer: { id: string; legalName: string | null; email: string };
   listing: {
@@ -309,6 +309,8 @@ export function mapRealtorOffer(offer: RealtorOfferApi): RealtorOffer {
     COUNTERED: 'countered',
     ACCEPTED: 'accepted',
     REJECTED: 'rejected',
+    WITHDRAWN: 'withdrawn',
+    EXPIRED: 'expired',
     CLOSED: 'closed',
   };
   const buyerName = offer.buyer.legalName || 'Lead';
