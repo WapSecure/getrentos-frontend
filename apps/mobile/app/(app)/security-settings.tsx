@@ -75,6 +75,7 @@ export default function SecuritySettings() {
             <EmailSection />
             <PhoneVerificationSection overview={overview.data} />
             <TwoFactorSection overview={overview.data} />
+            {overview.data.hasPassword ? <TransactionPinSection overview={overview.data} /> : null}
             {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
             {isRenter ? <DataExportSection /> : null}
             {overview.data.hasPassword ? <DangerSection /> : null}
@@ -381,6 +382,99 @@ function TwoFactorSection({ overview }: { overview: SecurityOverview }) {
             loading={enrollMutation.isPending}
             onPress={() => enrollMutation.mutate()}
           />
+        </View>
+      )}
+    </Card>
+  );
+}
+
+/**
+ * A transaction PIN: a separate secret from the login password, required to
+ * step up money actions. Shown only for accounts that have a password, since
+ * setting the PIN is confirmed with it.
+ */
+function TransactionPinSection({ overview }: { overview: SecurityOverview }) {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
+  const [confirm, setConfirm] = useState('');
+
+  const reset = () => {
+    setOpen(false);
+    setPassword('');
+    setPin('');
+    setConfirm('');
+  };
+
+  const mutation = useMutation({
+    mutationFn: () => securityApi.setTransactionPin(password, pin),
+    onSuccess: () => {
+      qc.setQueryData<SecurityOverview>(qk.security, (old) =>
+        old ? { ...old, hasTransactionPin: true } : old
+      );
+      reset();
+      toast.show('Transaction PIN saved.', 'success');
+    },
+    onError: (err) =>
+      toast.show(err instanceof ApiError ? err.message : 'Could not save your PIN.', 'error'),
+  });
+
+  const mismatch = confirm.length === 4 && pin !== confirm;
+  const ready = password.length > 0 && pin.length === 4 && pin === confirm;
+
+  return (
+    <Card elevated>
+      <SectionHeader icon={<KeyRound size={16} color={colors.primary} />} title="Transaction PIN" />
+      {!open ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: spacing.sm,
+          }}
+        >
+          <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+            {overview.hasTransactionPin
+              ? 'Required to release or refund money — a separate secret from your password.'
+              : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough.'}
+          </Text>
+          <Button
+            label={overview.hasTransactionPin ? 'Change' : 'Set PIN'}
+            size="sm"
+            variant="secondary"
+            onPress={() => setOpen(true)}
+          />
+        </View>
+      ) : (
+        <View style={{ gap: spacing.sm }}>
+          <PasswordField label="Current password" value={password} onChangeText={setPassword} />
+          <NumberField code label="New 4-digit PIN" value={pin} onValueChange={setPin} maxLength={4} />
+          <NumberField
+            code
+            label="Confirm PIN"
+            value={confirm}
+            onValueChange={setConfirm}
+            maxLength={4}
+          />
+          {mismatch ? (
+            <Text variant="caption" color="destructive">
+              Those PINs don’t match.
+            </Text>
+          ) : null}
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <Button label="Cancel" variant="ghost" style={{ flex: 1 }} onPress={reset} />
+            <Button
+              label="Save PIN"
+              style={{ flex: 1 }}
+              loading={mutation.isPending}
+              disabled={!ready}
+              onPress={() => mutation.mutate()}
+            />
+          </View>
         </View>
       )}
     </Card>

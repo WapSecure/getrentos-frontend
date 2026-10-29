@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, X } from 'lucide-react';
-import { Button, IconButton, NumberInput, Switch, useToast } from '@getrentos/ui';
+import { KeyRound, Shield, X } from 'lucide-react';
+import { Button, IconButton, Input, NumberInput, Switch, useToast } from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -24,6 +24,37 @@ export const SecuritySettings = () => {
     queryKey: renterKeys.twoFactor,
     queryFn: () => unwrap(renterService.getTwoFactorStatus()),
   });
+
+  const { data: security } = useQuery({
+    queryKey: renterKeys.securityOverview,
+    queryFn: () => unwrap(renterService.getSecurityOverview()),
+  });
+
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinPassword, setPinPassword] = useState('');
+  const [pin, setPin] = useState('');
+  const [pinConfirm, setPinConfirm] = useState('');
+
+  const resetPin = () => {
+    setPinOpen(false);
+    setPinPassword('');
+    setPin('');
+    setPinConfirm('');
+  };
+
+  const setPinMutation = useMutation({
+    mutationFn: () => unwrap(renterService.setTransactionPin(pinPassword, pin)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.securityOverview });
+      resetPin();
+      toast.success('Transaction PIN saved');
+    },
+    onError: (err: Error) => toast.error(err.message || 'Could not save your PIN'),
+  });
+
+  const hasPin = !!security?.hasTransactionPin;
+  const pinMismatch = pinConfirm.length === 4 && pin !== pinConfirm;
+  const pinReady = pinPassword.length > 0 && pin.length === 4 && pin === pinConfirm;
 
   const [step, setStep] = useState<TwoFactorStep>('idle');
   const [enroll, setEnroll] = useState<TwoFactorEnroll | null>(null);
@@ -186,6 +217,86 @@ export const SecuritySettings = () => {
                   disabled={code.length !== 6}
                 >
                   Disable 2FA
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Transaction PIN */}
+        <div className="p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="p-2 rounded-lg bg-info-subtle">
+                <KeyRound className="w-5 h-5 text-info" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-medium text-foreground">Transaction PIN</h3>
+                <p className="text-sm text-muted-foreground">
+                  {hasPin
+                    ? 'Required to release or refund money — a separate secret from your password'
+                    : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough'}
+                </p>
+              </div>
+            </div>
+            {!pinOpen && (
+              <Button variant={hasPin ? 'outline' : 'primary'} onClick={() => setPinOpen(true)}>
+                {hasPin ? 'Change PIN' : 'Set PIN'}
+              </Button>
+            )}
+          </div>
+
+          {pinOpen && (
+            <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-foreground">
+                  {hasPin ? 'Change your PIN' : 'Set your PIN'}
+                </h4>
+                <IconButton size="sm" label="Cancel" onClick={resetPin} icon={<X />} />
+              </div>
+              <label className="block space-y-1">
+                <span className="text-sm font-medium">Current password</span>
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  value={pinPassword}
+                  onChange={(e) => setPinPassword(e.target.value)}
+                  placeholder="Your GetRentos password"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-sm font-medium">New 4-digit PIN</span>
+                <NumberInput
+                  aria-label="New transaction PIN"
+                  value={pin}
+                  onValueChange={(value) => setPin(value.slice(0, 4))}
+                  placeholder="4-digit PIN"
+                  maxLength={4}
+                  autoComplete="off"
+                />
+              </label>
+              <label className="block space-y-1">
+                <span className="text-sm font-medium">Confirm PIN</span>
+                <NumberInput
+                  aria-label="Confirm transaction PIN"
+                  value={pinConfirm}
+                  onValueChange={(value) => setPinConfirm(value.slice(0, 4))}
+                  placeholder="Re-enter PIN"
+                  maxLength={4}
+                  autoComplete="off"
+                />
+              </label>
+              {pinMismatch && <p className="text-sm text-destructive">Those PINs don’t match.</p>}
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={resetPin}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => setPinMutation.mutate()}
+                  isLoading={setPinMutation.isPending}
+                  disabled={!pinReady}
+                >
+                  Save PIN
                 </Button>
               </div>
             </div>

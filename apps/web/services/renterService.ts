@@ -1463,6 +1463,27 @@ export const renterService = {
     );
   },
 
+  // ---- Transaction PIN (global account-security surface) ----
+  /** Whether a transaction PIN is set, and which factor step-up will ask for. */
+  async getSecurityOverview(): Promise<
+    ApiResponse<{ hasPassword: boolean; hasTransactionPin: boolean; stepUpMethod: string }>
+  > {
+    return safeCall(() => authFetch('/users/me/security'));
+  },
+
+  /** Set or change the transaction PIN, confirmed with the current password. */
+  async setTransactionPin(
+    currentPassword: string,
+    pin: string
+  ): Promise<ApiResponse<{ hasTransactionPin: true }>> {
+    return safeCall(() =>
+      authFetch('/users/me/security/transaction-pin', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, pin }),
+      })
+    );
+  },
+
   // ---- Saved searches ----
   async listSavedSearches(): Promise<ApiResponse<SavedSearch[]>> {
     return safeCall(() => authFetch('/renter/saved-searches'));

@@ -16,12 +16,14 @@ export interface SecurityOverview {
   phoneVerified: boolean;
   /** False for accounts that only ever signed in with Google or Apple. */
   hasPassword: boolean;
+  /** Whether a transaction PIN (a separate secret from the password) is set. */
+  hasTransactionPin: boolean;
   twoFactor: TwoFactorStatus;
   /** How this account confirms sensitive changes: its strongest factor. */
   stepUpMethod: StepUpMethod;
 }
 
-export type StepUpMethod = 'totp' | 'password' | 'email_code';
+export type StepUpMethod = 'totp' | 'transaction_pin' | 'password' | 'email_code';
 
 /** Account security for every role — the person's, not a portal's. */
 export const securityApi = {
@@ -68,10 +70,17 @@ export const securityApi = {
       method: 'POST',
     }),
 
-  confirmStepUp: (input: { password?: string; code?: string; reference?: string }) =>
+  confirmStepUp: (input: { password?: string; pin?: string; code?: string; reference?: string }) =>
     apiFetch<{ stepUpToken: string; expiresIn: number }>('/users/me/security/step-up', {
       method: 'POST',
       body: input,
+    }),
+
+  /** Set or change the transaction PIN, confirmed with the current password. */
+  setTransactionPin: (currentPassword: string, pin: string) =>
+    apiFetch<{ hasTransactionPin: true }>('/users/me/security/transaction-pin', {
+      method: 'POST',
+      body: { currentPassword, pin },
     }),
 
   /** Behind step-up: the API asks for confirmation first, handled by apiFetch. */

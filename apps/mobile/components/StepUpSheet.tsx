@@ -74,16 +74,23 @@ export function StepUpSheet() {
       const res = await securityApi.confirmStepUp(
         method === 'password'
           ? { password: value }
-          : method === 'totp'
-            ? { code: value }
-            : { code: value, reference: reference ?? undefined }
+          : method === 'transaction_pin'
+            ? { pin: value }
+            : method === 'totp'
+              ? { code: value }
+              : { code: value, reference: reference ?? undefined }
       );
       rememberStepUpToken(res.stepUpToken, res.expiresIn);
       finish(res.stepUpToken);
     });
 
   const needsCode = method === 'email_code' && !reference;
-  const ready = method === 'password' ? value.length > 0 : value.length === 6;
+  const ready =
+    method === 'password'
+      ? value.length > 0
+      : method === 'transaction_pin'
+        ? value.length === 4
+        : value.length === 6;
 
   return (
     <Sheet open={open} onClose={() => finish(null)} title="Confirm it’s you">
@@ -107,6 +114,11 @@ export function StepUpSheet() {
               autoFocus
               autoComplete="current-password"
             />
+          ) : method === 'transaction_pin' ? (
+            <View style={{ gap: spacing.xs }}>
+              <Text variant="callout">Enter your 4-digit transaction PIN.</Text>
+              <OtpInput value={value} onChange={setValue} length={4} invalid={!!error} />
+            </View>
           ) : (
             <View style={{ gap: spacing.xs }}>
               <Text variant="callout">
