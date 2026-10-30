@@ -40,7 +40,11 @@ export const PaymentMethodSettings = () => {
     onSuccess: (result) => {
       setVerified(result.verified);
       queryClient.invalidateQueries({ queryKey: buyerKeys.paymentMethod });
-      toast.success('Payment method updated and verified.');
+      toast.success(
+        result.verified
+          ? 'Payment method updated and verified.'
+          : 'Payment method saved. Verification is still pending.'
+      );
     },
     onError: (error) => toast.error(error.message || 'Unable to update your payment method.'),
   });
@@ -58,7 +62,8 @@ export const PaymentMethodSettings = () => {
         </Alert>
       ) : (
         <p className="text-xs text-muted-foreground mb-6">
-          Add your bank details: your account will be marked as verified once you save.
+          Add your bank details. Saving does not verify account ownership; verification is shown
+          here once the bank check is complete.
         </p>
       )}
 
