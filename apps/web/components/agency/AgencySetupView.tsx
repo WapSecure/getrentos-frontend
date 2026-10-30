@@ -49,9 +49,10 @@ const FIELD_ORDER: FieldKey[] = [
 ];
 const fieldId = (key: FieldKey) => `agency-setup-${key}`;
 
-/** RC or BN, then the digits, as printed on the certificate (e.g. RC1234567). */
-const CAC_NUMBER = /^(RC|BN)[\s-]?\d+$/i;
-const CAC_HINT = 'Enter it as printed on the certificate, e.g. RC1234567 or BN1234567.';
+/** RC, BN or IT, then 4 to 9 digits, as printed on the certificate (same rule as the API). */
+const CAC_NUMBER = /^(BN|RC|IT)\s?-?\d{4,9}$/i;
+const CAC_HINT =
+  'Enter it as printed on the certificate, e.g. RC 1234567, BN 3456789 or IT 123456.';
 
 function validate(form: AgencyProfileInput): FieldErrors {
   const errors: FieldErrors = {};
@@ -285,7 +286,7 @@ export function AgencySetupView() {
                 <Input
                   value={form.registrationNumber}
                   onChange={(e) => set({ registrationNumber: e.target.value })}
-                  placeholder="e.g. RC1234567"
+                  placeholder="e.g. RC 1234567"
                   autoComplete="off"
                 />
               </Field>
