@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Eraser, PenLine, Upload } from 'lucide-react';
 import { cn } from '@getrentos/shared';
 
@@ -36,6 +36,7 @@ export function SignaturePad({
   const [hasDrawn, setHasDrawn] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const hintId = useId();
 
   useEffect(() => {
     if (mode !== 'draw') return;
@@ -163,6 +164,7 @@ export function SignaturePad({
         <button
           type="button"
           className={tabClass(mode === 'draw')}
+          aria-pressed={mode === 'draw'}
           onClick={() => switchMode('draw')}
         >
           <PenLine className="h-3.5 w-3.5" />
@@ -171,6 +173,7 @@ export function SignaturePad({
         <button
           type="button"
           className={tabClass(mode === 'upload')}
+          aria-pressed={mode === 'upload'}
           onClick={() => switchMode('upload')}
         >
           <Upload className="h-3.5 w-3.5" />
@@ -183,12 +186,18 @@ export function SignaturePad({
           <div className="relative rounded-xl border border-border bg-card overflow-hidden">
             <canvas
               ref={canvasRef}
+              role="img"
+              tabIndex={0}
+              aria-label={
+                hasDrawn ? 'Signature drawing area, signature drawn' : 'Signature drawing area'
+              }
+              aria-describedby={hintId}
               style={{ width, height, touchAction: 'none' }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
               onPointerUp={finishStroke}
               onPointerLeave={finishStroke}
-              className="cursor-crosshair block w-full"
+              className="cursor-crosshair block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
             />
             {!hasDrawn && (
               <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
@@ -196,6 +205,10 @@ export function SignaturePad({
               </p>
             )}
           </div>
+          <p id={hintId} className="text-xs text-muted-foreground">
+            Draw with a mouse, finger or pen. Using a keyboard? Choose Upload to add an image of
+            your signature instead.
+          </p>
           <button
             type="button"
             onClick={handleClearDrawing}
