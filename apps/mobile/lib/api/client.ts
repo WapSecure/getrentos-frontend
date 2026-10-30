@@ -70,8 +70,13 @@ export interface ApiRequest extends Omit<RequestInit, 'body' | 'headers'> {
 type Hooks = {
   getAccessToken: () => string | null;
   refresh: () => Promise<string | null>;
+  /** The account was suspended mid-session: end it and say why. */
+  onSuspended?: (message: string) => Promise<void> | void;
 };
 let hooks: Hooks = { getAccessToken: () => null, refresh: async () => null };
+
+/** The API's code for "this account is suspended", on any authenticated request. */
+export const ACCOUNT_SUSPENDED = 'ACCOUNT_SUSPENDED';
 export function configureApi(next: Hooks) {
   hooks = next;
 }
@@ -166,6 +171,10 @@ export async function apiFetch<T>(path: string, options: ApiRequest = {}): Promi
   try {
     return await readJson<T>(res);
   } catch (err) {
+    if (err instanceof ApiError && err.code === ACCOUNT_SUSPENDED && token) {
+      await hooks.onSuspended?.(err.message);
+      throw err;
+    }
     // A sensitive change: confirm it's the account holder, then replay once.
     if (err instanceof ApiError && err.code === STEP_UP_REQUIRED && !_stepUp) {
       clearStepUpToken();
