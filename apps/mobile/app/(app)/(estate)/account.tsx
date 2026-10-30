@@ -28,6 +28,7 @@ import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
 import { useEstate } from '@/hooks/useEstate';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -36,7 +37,7 @@ export default function EstateAccount() {
   const { colors, spacing } = useTheme();
   const { estate, estates, estateId, select } = useEstate();
   const [switching, setSwitching] = useState(false);
-  const verified = !!profile?.isVerified;
+  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
 
   const office: SettingsItem[] = [
     {
@@ -142,8 +143,8 @@ export default function EstateAccount() {
       key: 'identity',
       label: 'Identity verification',
       icon: ShieldCheck,
-      value: verified ? 'Verified' : 'Not verified',
-      tone: verified ? 'success' : 'warning',
+      value: identityLabel,
+      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
     {

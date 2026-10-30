@@ -14,6 +14,7 @@ import {
   SearchInput,
   SegmentedControl,
   Skeleton,
+  useToast,
 } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -28,6 +29,7 @@ function BuyerOffersPageContent() {
   const searchParams = useSearchParams();
   const defaultPropertyId = searchParams.get('property') || undefined;
   const queryClient = useQueryClient();
+  const toast = useToast();
   const PAGE_SIZE = 9;
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,6 +72,7 @@ function BuyerOffersPageContent() {
     onSuccess: () => {
       invalidate();
       setIsMakeOfferOpen(false);
+      toast.success('Offer sent. We will let you know when the seller responds.');
     },
   });
   const withdrawMutation = useMutation({

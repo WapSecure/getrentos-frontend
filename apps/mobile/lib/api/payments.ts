@@ -36,6 +36,10 @@ export interface Payment {
   reference?: string;
   /** Present once this payment has been disputed and is under review. */
   disputeReason?: string;
+  /** While the money is held, when it releases to the landlord automatically. */
+  releaseDate?: string;
+  /** What is still owed on this charge after any part-payments. */
+  outstanding?: number;
 }
 
 export interface Receipt {
@@ -78,8 +82,11 @@ export const paymentsApi = {
   listReceipts: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<Receipt>>(`/renter/payments/receipts?page=${page}&pageSize=${pageSize}`),
 
-  payNow: (id: string, method?: PaymentMethod) =>
-    apiFetch<Payment>(`/renter/payments/${id}/pay`, { method: 'POST', body: { method } }),
+  payNow: (id: string, method?: PaymentMethod, amount?: number) =>
+    apiFetch<Payment>(`/renter/payments/${id}/pay`, {
+      method: 'POST',
+      body: amount ? { method, amount } : { method },
+    }),
 
   dispute: (id: string, reason: string) =>
     apiFetch<Payment>(`/renter/payments/${id}/dispute`, { method: 'POST', body: { reason } }),

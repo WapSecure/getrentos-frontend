@@ -6,11 +6,10 @@ import { Badge, Card } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
+// Only the states the backend drives a sale through: deposit → held → released.
 const escrowSteps: { key: SaleEscrowStatus; label: string }[] = [
   { key: 'deposit_pending', label: 'Deposit Pending' },
   { key: 'funds_held', label: 'Funds Held' },
-  { key: 'verification', label: 'Verification' },
-  { key: 'final_payment', label: 'Final Payment' },
   { key: 'released', label: 'Released' },
 ];
 
@@ -57,9 +56,7 @@ export const EscrowTransactionCard = ({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate font-semibold text-foreground">{transaction.propertyName}</h3>
-            <p className="truncate text-xs text-muted-foreground">
-              Buyer: {transaction.buyerName}
-            </p>
+            <p className="truncate text-xs text-muted-foreground">Buyer: {transaction.buyerName}</p>
           </div>
           <Badge
             variant={

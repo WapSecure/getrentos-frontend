@@ -29,6 +29,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DisputePaymentSheet } from '@/components/payments/DisputePaymentSheet';
+import { PayAmountSheet } from '@/components/payments/PayAmountSheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -37,6 +38,7 @@ export default function Payments() {
   const qc = useQueryClient();
   const toast = useToast();
   const [disputePayment, setDisputePayment] = useState<Payment | null>(null);
+  const [payPayment, setPayPayment] = useState<Payment | null>(null);
 
   const query = useQuery({
     queryKey: qk.renter.payments(1, 50),
@@ -46,7 +48,8 @@ export default function Payments() {
   const items = query.data?.items ?? [];
 
   const payMutation = useMutation({
-    mutationFn: (id: string) => paymentsApi.payNow(id, 'card'),
+    mutationFn: ({ id, amount }: { id: string; amount?: number }) =>
+      paymentsApi.payNow(id, 'card', amount),
     onSuccess: async (payment) => {
       if (payment.authorizationUrl) {
         await WebBrowser.openBrowserAsync(payment.authorizationUrl);
@@ -61,17 +64,6 @@ export default function Payments() {
       toast.show(err instanceof ApiError ? err.message : 'Could not process the payment.', 'error'),
   });
 
-  const confirmPay = (payment: Payment) => {
-    Alert.alert(
-      'Pay rent?',
-      `You're about to pay ₦${payment.amount.toLocaleString()} for ${payment.propertyName}.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Pay now', onPress: () => payMutation.mutate(payment.id) },
-      ]
-    );
-  };
-
   const confirmMoveInMutation = useMutation({
     mutationFn: (id: string) => paymentsApi.confirmMoveIn(id),
     onSuccess: () => {
@@ -81,7 +73,10 @@ export default function Payments() {
       qc.invalidateQueries({ queryKey: qk.renter.dashboardStats });
     },
     onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not release this payment.', 'error'),
+      toast.show(
+        err instanceof ApiError ? err.message : 'Could not release this payment.',
+        'error'
+      ),
   });
 
   const confirmMoveIn = (payment: Payment) => {
@@ -145,9 +140,11 @@ export default function Payments() {
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
               <PaymentRow
                 payment={item}
-                paying={payMutation.isPending && payMutation.variables === item.id}
-                releasing={confirmMoveInMutation.isPending && confirmMoveInMutation.variables === item.id}
-                onPay={() => confirmPay(item)}
+                paying={payMutation.isPending && payMutation.variables?.id === item.id}
+                releasing={
+                  confirmMoveInMutation.isPending && confirmMoveInMutation.variables === item.id
+                }
+                onPay={() => setPayPayment(item)}
                 onDispute={() => setDisputePayment(item)}
                 onConfirmMoveIn={() => confirmMoveIn(item)}
               />
@@ -163,6 +160,15 @@ export default function Payments() {
           }
         />
       )}
+
+      <PayAmountSheet
+        payment={payPayment}
+        onClose={() => setPayPayment(null)}
+        onPay={(amount) => {
+          if (payPayment) payMutation.mutate({ id: payPayment.id, amount });
+          setPayPayment(null);
+        }}
+      />
 
       <DisputePaymentSheet
         open={!!disputePayment}
@@ -224,7 +230,7 @@ function PaymentRow({
           marginTop: spacing.md,
         }}
       >
-        <Price amount={p.amount} variant="heading" />
+        <Price amount={payable ? (p.outstanding ?? p.amount) : p.amount} variant="heading" />
         {payable ? (
           <Button
             label="Pay now"
@@ -260,7 +266,9 @@ function PaymentRow({
 
       {releasable ? (
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-          Held under GetRentos Payment Protection — confirm move-in to release it to your landlord.
+          {p.releaseDate
+            ? `Held under GetRentos Payment Protection — releases to your landlord automatically on ${formatDate(p.releaseDate, 'short')}, or sooner if you confirm move-in.`
+            : 'Held under GetRentos Payment Protection — confirm move-in to release it to your landlord.'}
         </Text>
       ) : null}
 

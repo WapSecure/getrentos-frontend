@@ -217,11 +217,15 @@ export function MessageThread({
           windowSize={9}
           removeClippedSubviews={Platform.OS === 'android'}
           ListEmptyComponent={
-            <EmptyState
-              icon={<MessageCircle size={34} color={colors.mutedForeground} />}
-              title="Start the conversation"
-              description={emptyDescription}
-            />
+            // The inverted list un-flips its empty component through `style`, which
+            // EmptyState doesn't take; a plain View carries it.
+            <View>
+              <EmptyState
+                icon={<MessageCircle size={34} color={colors.mutedForeground} />}
+                title="Start the conversation"
+                description={emptyDescription}
+              />
+            </View>
           }
           renderItem={({ item }) => {
             const mine = item.kind === 'pending' || item.m.mine;

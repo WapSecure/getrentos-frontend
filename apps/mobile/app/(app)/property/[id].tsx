@@ -427,7 +427,8 @@ export default function PropertyDetail() {
           />
           <View style={{ flex: 1 }}>
             <Button
-              label="Apply to rent"
+              label={p.acceptingApplications === false ? 'Let · not accepting applications' : 'Apply to rent'}
+              disabled={p.acceptingApplications === false}
               onPress={() => router.push(`/(app)/property/${id}/apply`)}
             />
           </View>

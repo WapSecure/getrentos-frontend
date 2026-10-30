@@ -22,6 +22,7 @@ import {
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
@@ -30,7 +31,7 @@ const go = (href: Href) => () => router.push(href);
 
 export default function BuyerAccount() {
   const { profile } = useAuth();
-  const verified = !!profile?.isVerified;
+  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
 
   const buying: SettingsItem[] = [
     {
@@ -122,8 +123,8 @@ export default function BuyerAccount() {
       label: 'Identity verification',
       description: verified ? undefined : 'Verify your ID to make offers',
       icon: ShieldCheck,
-      value: verified ? 'Verified' : 'Not verified',
-      tone: verified ? 'success' : 'warning',
+      value: identityLabel,
+      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
     {
