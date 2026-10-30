@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Briefcase, Package, UserCheck } from 'lucide-react-native';
+import { Briefcase, Lock, Package, UserCheck } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
@@ -14,6 +14,7 @@ import {
 } from '@getrentos/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { gatemanApi } from '@/lib/api/gateman';
+import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { qk } from '@/lib/query/keys';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
@@ -47,7 +48,10 @@ export default function GatemanExpected() {
     queryKey: qk.gateman.expectedToday(estate?.id ?? ''),
     queryFn: () => gatemanApi.getExpectedToday(estate!.id),
     enabled: !!estate,
+    retry: retryUnlessPlanGate,
   });
+  // A guard can't change the estate's plan, so this is a calm notice, not an upsell.
+  const notOnPlan = !!planRefusal(boardQuery.error);
 
   const board = boardQuery.data;
   const total = board ? board.visitors.length + board.contractors.length + board.parcels.length : 0;
@@ -66,6 +70,12 @@ export default function GatemanExpected() {
             <Skeleton height={72} radius={12} />
             <Skeleton height={120} radius={12} />
           </View>
+        ) : notOnPlan && !board ? (
+          <EmptyState
+            icon={<Lock size={28} />}
+            title="Expected today isn’t on your estate’s plan"
+            description="Check visitors in by their pass as usual. The estate office can tell you more."
+          />
         ) : boardQuery.isError && !board ? (
           <ErrorState
             title="Could not read the board"

@@ -11,10 +11,13 @@ export function ProUpsell({
   title,
   description,
   perks,
+  note = 'The plan is the estate owner’s. If that isn’t you, ask them to upgrade.',
 }: {
   title: string;
   description: string;
   perks: string[];
+  /** Who holds the plan; null when the viewer is the one who upgrades. */
+  note?: string | null;
 }) {
   const { colors, spacing } = useTheme();
   return (
@@ -46,9 +49,11 @@ export function ProUpsell({
         </View>
       ))}
       <Button label="See Pro" onPress={() => router.push('/(app)/billing')} />
-      <Text variant="caption" color="mutedForeground" center>
-        The plan is the estate owner’s. If that isn’t you, ask them to upgrade.
-      </Text>
+      {note ? (
+        <Text variant="caption" color="mutedForeground" center>
+          {note}
+        </Text>
+      ) : null}
     </Card>
   );
 }
