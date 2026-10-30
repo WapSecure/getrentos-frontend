@@ -58,3 +58,19 @@ export interface TrustProfile {
   stats: TrustProfileStat[];
   scoreBreakdown?: TrustScoreBreakdown;
 }
+
+/**
+ * Plain-language explanation of the caller's own trust score, from
+ * GET /trust-score/explanation. The numbers come from the deterministic score
+ * engine; `summary`/`strengths`/`improvements` are phrased (by AI when
+ * configured, else a deterministic template — see `source`).
+ */
+export interface TrustExplanation {
+  total: number;
+  summary: string;
+  strengths: string[];
+  improvements: string[];
+  source: 'ai' | 'heuristic';
+  model: string | null;
+  generatedAt: string;
+}
