@@ -66,6 +66,24 @@ interface RenterInspectionApi {
   property: { title: string; address: string };
 }
 
+interface RenterConditionReportApi {
+  id: string;
+  type: 'MOVE_IN' | 'MOVE_OUT' | 'ROUTINE';
+  propertyTitle: string | null;
+  conductedAt: string | null;
+  createdAt: string;
+  summaryNotes: string | null;
+  items: {
+    area: string;
+    condition: 'GOOD' | 'FAIR' | 'POOR' | 'DAMAGED';
+    notes: string | null;
+    estimatedCost: number | null;
+    photos: { url: string; name: string }[];
+  }[];
+  tenantAcknowledgedAt: string | null;
+  tenantComment: string | null;
+}
+
 export interface MoveInChecklistItem {
   key: string;
   title: string;
@@ -1298,28 +1316,67 @@ export const renterService = {
 
   // ---- Inspections ----
   async listInspections(): Promise<ApiResponse<RenterInspection[]>> {
-    const response = await safeCall(() => authFetch<RenterInspectionApi[]>('/renter/inspections'));
-    if (response.success && response.data) {
-      return {
-        ...response,
-        data: response.data.map((inspection) => ({
-          id: inspection.id,
-          type: inspection.type.toLowerCase() as RenterInspection['type'],
-          scheduledDate: inspection.scheduledAt,
-          propertyName: inspection.property.title,
-          propertyAddress: inspection.property.address,
-          overallCondition: (inspection.overallCondition?.toLowerCase() ||
-            undefined) as RenterInspection['overallCondition'],
-          rooms: inspection.rooms,
-          acknowledgedAt: inspection.acknowledgedAt || undefined,
-        })),
-      };
+    const [agentVisits, conditionReports] = await Promise.all([
+      safeCall(() => authFetch<RenterInspectionApi[]>('/renter/inspections')),
+      safeCall(() => authFetch<RenterConditionReportApi[]>('/renter/property-inspections')),
+    ]);
+    if (!agentVisits.success && !conditionReports.success) {
+      return { success: false, error: agentVisits.error, message: agentVisits.message };
     }
-    return { success: false, error: response.error, message: response.message };
+    const fromAgents: RenterInspection[] = (agentVisits.data ?? []).map((inspection) => ({
+      id: inspection.id,
+      source: 'agent',
+      type: inspection.type.toLowerCase() as RenterInspection['type'],
+      scheduledDate: inspection.scheduledAt,
+      propertyName: inspection.property.title,
+      propertyAddress: inspection.property.address,
+      overallCondition: (inspection.overallCondition?.toLowerCase() ||
+        undefined) as RenterInspection['overallCondition'],
+      rooms: inspection.rooms,
+      acknowledgedAt: inspection.acknowledgedAt || undefined,
+    }));
+    const fromReports: RenterInspection[] = (conditionReports.data ?? []).map((report) => ({
+      id: report.id,
+      source: 'condition_report',
+      type: report.type === 'ROUTINE' ? 'periodic' : (report.type.toLowerCase() as RenterInspection['type']),
+      scheduledDate: report.conductedAt ?? report.createdAt,
+      propertyName: report.propertyTitle ?? 'Your home',
+      propertyAddress: report.propertyTitle ?? 'Your home',
+      rooms: report.items.map((item) => ({
+        room: item.area,
+        condition: item.condition.toLowerCase() as RenterInspection['rooms'][number]['condition'],
+        notes: item.notes ?? undefined,
+        photoCount: item.photos.length,
+        photos: item.photos,
+        estimatedCost: item.estimatedCost ?? undefined,
+      })),
+      summaryNotes: report.summaryNotes ?? undefined,
+      acknowledgedAt: report.tenantAcknowledgedAt ?? undefined,
+      tenantComment: report.tenantComment ?? undefined,
+    }));
+    return {
+      success: true,
+      data: [...fromReports, ...fromAgents].sort(
+        (a, b) => new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime()
+      ),
+    };
   },
 
-  async acknowledgeInspection(id: string): Promise<ApiResponse<void>> {
-    return safeCall(() => authFetch(`/renter/inspections/${id}/acknowledge`, { method: 'POST' }));
+  async acknowledgeInspection(
+    inspection: Pick<RenterInspection, 'id' | 'source'>,
+    comment?: string
+  ): Promise<ApiResponse<void>> {
+    if (inspection.source === 'condition_report') {
+      return safeCall(() =>
+        authFetch(`/renter/property-inspections/${inspection.id}/acknowledge`, {
+          method: 'POST',
+          body: JSON.stringify(comment?.trim() ? { comment: comment.trim() } : {}),
+        })
+      );
+    }
+    return safeCall(() =>
+      authFetch(`/renter/inspections/${inspection.id}/acknowledge`, { method: 'POST' })
+    );
   },
 
   // ---- Notifications ----

@@ -34,6 +34,12 @@ export const TrustExplanationCard = () => {
   const data = query.data;
   if (query.isError || !data) return null;
 
+  // Defensive: the explanation can come from the AI path, whose list fields are
+  // not guaranteed to arrive as arrays — never let a malformed payload crash the
+  // page this card sits on.
+  const strengths = Array.isArray(data.strengths) ? data.strengths : [];
+  const improvements = Array.isArray(data.improvements) ? data.improvements : [];
+
   return (
     <Card>
       <div className="p-4 border-b border-border">
@@ -49,13 +55,13 @@ export const TrustExplanationCard = () => {
       <div className="p-4 space-y-4">
         <p className="text-sm text-foreground whitespace-pre-line">{data.summary}</p>
 
-        {data.strengths.length > 0 && (
+        {strengths.length > 0 && (
           <section className="space-y-1.5">
             <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               What&apos;s working
             </h4>
             <ul className="space-y-1.5">
-              {data.strengths.map((s, i) => (
+              {strengths.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <CheckCircle2
                     aria-hidden="true"
@@ -68,13 +74,13 @@ export const TrustExplanationCard = () => {
           </section>
         )}
 
-        {data.improvements.length > 0 && (
+        {improvements.length > 0 && (
           <section className="space-y-1.5">
             <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Next steps
             </h4>
             <ul className="space-y-1.5">
-              {data.improvements.map((s, i) => (
+              {improvements.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                   <ArrowUpRight
                     aria-hidden="true"

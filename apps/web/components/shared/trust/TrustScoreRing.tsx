@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { trustBand } from '@/lib/trustScore';
 
 interface TrustScoreRingProps {
   score: number;
@@ -13,18 +14,16 @@ export const TrustScoreRing = ({ score, size = 160, strokeWidth = 12 }: TrustSco
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (score / 100) * circumference;
 
-  const getScoreColor = () => {
-    if (score >= 90) return '#10b981';
-    if (score >= 70) return '#3b82f6';
-    if (score >= 50) return '#eab308';
-    return '#ef4444';
-  };
+  // Label + colours follow the same trust STAGE ladder as the stage banner and
+  // the rest of the app, so a score never reads "Established" in one place and
+  // "Fair" in another.
+  const bandLabel = trustBand(score).label;
 
-  const getScoreLabel = () => {
-    if (score >= 90) return 'Excellent';
-    if (score >= 70) return 'Good';
-    if (score >= 50) return 'Fair';
-    return 'Needs Improvement';
+  const getScoreColor = () => {
+    if (score >= 85) return '#10b981'; // Highly trusted
+    if (score >= 50) return '#3b82f6'; // Trusted / Established
+    if (score >= 25) return '#eab308'; // Building
+    return '#9ca3af'; // New
   };
 
   return (
@@ -67,16 +66,16 @@ export const TrustScoreRing = ({ score, size = 160, strokeWidth = 12 }: TrustSco
           <span className="text-sm text-muted-foreground">Trust Score</span>
           <span
             className={`text-xs font-medium mt-1 ${
-              score >= 90
+              score >= 85
                 ? 'text-success'
-                : score >= 70
+                : score >= 50
                   ? 'text-info'
-                  : score >= 50
+                  : score >= 25
                     ? 'text-warning'
-                    : 'text-destructive'
+                    : 'text-muted-foreground'
             }`}
           >
-            {getScoreLabel()}
+            {bandLabel}
           </span>
         </div>
       </div>

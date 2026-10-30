@@ -44,10 +44,13 @@ export const ActiveFinancingPlanCard = ({
               </div>
               <h1 className="text-xl font-bold text-foreground">{plan.propertyName}</h1>
             </div>
-            <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
-              Landlord paid in full
-              {plan.landlordPaidAt ? ` on ${formatDate(plan.landlordPaidAt)}` : ''}
-            </Badge>
+            {plan.landlordPaidAt ? (
+              <Badge variant="success" icon={<ShieldCheck className="h-3.5 w-3.5" />}>
+                Landlord paid in full on {formatDate(plan.landlordPaidAt)}
+              </Badge>
+            ) : (
+              <Badge variant="warning">Landlord payment being arranged</Badge>
+            )}
           </div>
         </div>
 

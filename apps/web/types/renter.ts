@@ -163,13 +163,17 @@ export interface TimelineStep {
 }
 
 export type RenterInspectionType = 'move_in' | 'move_out' | 'periodic' | 'other';
-export type RenterRoomCondition = 'excellent' | 'good' | 'fair' | 'poor';
+export type RenterRoomCondition = 'excellent' | 'good' | 'fair' | 'poor' | 'damaged';
 
 export interface RenterInspectionRoom {
   room: string;
   condition: RenterRoomCondition;
   notes?: string;
   photoCount?: number;
+  /** Signed photo links, when the report carries them. */
+  photos?: { url: string; name: string }[];
+  /** The landlord's estimate to put it right, in naira. */
+  estimatedCost?: number;
 }
 
 export interface RenterInspection {
@@ -181,6 +185,14 @@ export interface RenterInspection {
   overallCondition?: RenterRoomCondition;
   rooms: RenterInspectionRoom[];
   acknowledgedAt?: string;
+  /**
+   * Where the record comes from: a visit by an agent ('agent'), or the
+   * landlord's condition report on the tenancy ('condition_report') — the one
+   * deposit deductions cite.
+   */
+  source: 'agent' | 'condition_report';
+  summaryNotes?: string;
+  tenantComment?: string;
 }
 
 export interface Application {

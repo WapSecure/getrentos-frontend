@@ -36,6 +36,7 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'subscriptions.manage',
   'managed.view',
   'managed.operate',
+  'ai.observe',
 ];
 
 export const ADMIN_ROLE_DETAILS: Record<

@@ -32,6 +32,7 @@ export const landlordKeys = {
   financialStats: (period: string) => ['landlord', 'financialStats', period] as const,
   financialChart: ['landlord', 'financialChart'] as const,
   portfolioAnalytics: ['landlord', 'portfolioAnalytics'] as const,
+  portfolioBriefing: ['landlord', 'portfolioBriefing'] as const,
   expenses: (params?: { propertyId?: string; category?: string }) =>
     ['landlord', 'expenses', params?.propertyId ?? 'all', params?.category ?? 'all'] as const,
   managementFeeConfig: (propertyId: string) =>
