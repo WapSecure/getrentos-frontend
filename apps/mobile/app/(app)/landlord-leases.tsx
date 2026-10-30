@@ -19,7 +19,13 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { CreateLeaseSheet } from '@/components/landlord/CreateLeaseSheet';
-import { landlordApi, LEASE_STATUS_TONE, type LandlordLease } from '@/lib/api/landlord';
+import {
+  landlordApi,
+  LEASE_STATUS_LABEL,
+  LEASE_STATUS_TONE,
+  type LandlordLease,
+  type LeaseStatus,
+} from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
 import { RenewLeaseSheet } from '@/components/landlord/RenewLeaseSheet';
@@ -177,7 +183,10 @@ function LeaseCard({
           <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
             {l.tenantName}
           </Text>
-          <Badge label={l.status} tone={LEASE_STATUS_TONE[l.status]} />
+          <Badge
+            label={LEASE_STATUS_LABEL[l.status] ?? l.status}
+            tone={LEASE_STATUS_TONE[l.status] ?? 'neutral'}
+          />
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>
@@ -198,6 +207,14 @@ function LeaseCard({
           <SignatureChip label="Tenant" signed={l.tenantSigned} />
         </View>
 
+        {LEASE_STATUS_NOTE[l.status] ? (
+          <Text variant="caption" color="mutedForeground">
+            {l.status === 'awaiting_payment' && l.paymentDueAt
+              ? `Tenant has signed. Their first rent is due by ${formatDate(l.paymentDueAt, 'short')}; you countersign once GetRentos holds it.`
+              : LEASE_STATUS_NOTE[l.status]}
+          </Text>
+        ) : null}
+
         <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: 2 }}>
           {l.status === 'draft' ? (
             <LeaseAction
@@ -208,12 +225,13 @@ function LeaseCard({
               filled
             />
           ) : null}
-          {!l.landlordSigned ? (
+          {!l.landlordSigned && SIGNABLE.has(l.status) ? (
             <LeaseAction
-              icon={<PenLine size={13} color={colors.primary} />}
-              label="Sign"
+              icon={<PenLine size={13} color={colors.primaryForeground} />}
+              label="Countersign"
               onPress={onSign}
               busy={busy}
+              filled
             />
           ) : null}
           {l.status === 'signed' || l.status === 'active' || l.status === 'expired' ? (
@@ -235,6 +253,17 @@ function LeaseCard({
     </Card>
   );
 }
+
+/** The landlord countersigns only once the tenant's rent is held; earlier, the note says what it waits for. */
+const SIGNABLE = new Set<LeaseStatus>(['awaiting_landlord']);
+
+const LEASE_STATUS_NOTE: Partial<Record<LeaseStatus, string>> = {
+  sent: 'Waiting for the tenant to sign. You countersign once they have paid the rent to GetRentos.',
+  awaiting_payment:
+    'Tenant has signed. You countersign once their first rent is held by GetRentos.',
+  awaiting_landlord: 'GetRentos is holding the rent. Countersign to confirm you have handed over.',
+  lapsed: 'This lease lapsed unpaid and the unit is back on the market.',
+};
 
 function LeaseAction({
   icon,
