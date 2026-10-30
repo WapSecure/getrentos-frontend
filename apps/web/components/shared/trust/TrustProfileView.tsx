@@ -6,6 +6,7 @@ import { Card, CardSkeleton, PageErrorState, Skeleton, StatGridSkeleton } from '
 import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
 import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
 import { TrustExplanationCard } from '@/components/shared/trust/TrustExplanationCard';
+import { TrustStageBanner } from '@/components/shared/trust/TrustStageBanner';
 import { VerificationList } from '@/components/shared/trust/VerificationList';
 import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';
@@ -55,6 +56,12 @@ export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustPr
         <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         <p className="text-muted-foreground mt-1">{subtitle}</p>
       </div>
+
+      {breakdown?.stage && (
+        <div className="mb-6">
+          <TrustStageBanner stage={breakdown.stage} total={trustScore} />
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <Card className="p-6 flex items-center justify-center">

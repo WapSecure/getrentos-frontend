@@ -35,8 +35,16 @@ export interface TrustScoreDimension {
   weight: number;
 }
 
+/** Plain-language stage over the 0–100 score (New / Building / …). */
+export interface TrustStage {
+  id: string;
+  label: string;
+  blurb: string;
+  min: number;
+}
+
 /**
- * How the score decomposes (dimension.v1). Optional: the backend only sends it
+ * How the score decomposes (dimension.v2). Optional: the backend only sends it
  * while the dimension engine is on, so the UI must degrade gracefully.
  */
 export interface TrustScoreBreakdown {
@@ -45,6 +53,8 @@ export interface TrustScoreBreakdown {
   earned: number;
   penalty: number;
   dimensions: TrustScoreDimension[];
+  /** The stage band this score sits in, for a wording-first UI. */
+  stage?: TrustStage;
   reasonCodes: string[];
 }
 

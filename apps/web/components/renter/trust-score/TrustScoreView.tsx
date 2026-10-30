@@ -14,6 +14,7 @@ import { TrustScoreBenefits } from '@/components/renter/trust-score/TrustScoreBe
 import { TrustScoreComparison } from '@/components/renter/trust-score/TrustScoreComparison';
 import { ScoreFactors } from '@/components/renter/trust-score/ScoreFactors';
 import { TrustExplanationCard } from '@/components/shared/trust/TrustExplanationCard';
+import { TrustStageBanner } from '@/components/shared/trust/TrustStageBanner';
 import { TrustScoreTips } from '@/components/renter/trust-score/TrustScoreTips';
 import { ScoreForecast } from '@/components/renter/trust-score/ScoreForecast';
 import { ScoreNotifications } from '@/components/renter/trust-score/ScoreNotifications';
@@ -49,6 +50,11 @@ export const TrustScoreView = () => {
 
   return (
     <>
+      {scoreBreakdown?.stage && (
+        <div className="mb-6">
+          <TrustStageBanner stage={scoreBreakdown.stage} total={trustScore} />
+        </div>
+      )}
       <TrustScoreHeader trustScore={trustScore} />
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
