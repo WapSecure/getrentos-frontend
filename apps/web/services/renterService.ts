@@ -16,6 +16,7 @@ import type {
   TrustScoreHistoryItem,
   Badge,
   TrustScoreBreakdown,
+  TrustExplanation,
 } from '@/types/trust-score';
 import type { Conversation, Reminder } from '@/types/messages';
 import type { SupportMessage, SupportThread } from '@/types/support';
@@ -814,6 +815,10 @@ export const renterService = {
   // ---- Trust score ----
   async getTrustScore(): Promise<ApiResponse<TrustScoreOverview>> {
     return safeCall(() => authFetch('/renter/trust-score'));
+  },
+
+  async getTrustExplanation(): Promise<ApiResponse<TrustExplanation>> {
+    return safeCall(() => authFetch('/trust-score/explanation'));
   },
 
   // ---- Flex financing ----

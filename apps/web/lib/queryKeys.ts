@@ -111,6 +111,7 @@ export const renterKeys = {
   roommateInvites: ['renter', 'roommateInvites'] as const,
   calendarEvents: ['renter', 'calendarEvents'] as const,
   trustScore: ['renter', 'trustScore'] as const,
+  trustExplanation: ['renter', 'trustExplanation'] as const,
   financing: ['renter', 'financing'] as const,
   documents: ['renter', 'documents'] as const,
   documentSummary: ['renter', 'documents', 'summary'] as const,
