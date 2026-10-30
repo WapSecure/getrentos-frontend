@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ThemeProvider, QueryProvider } from '@getrentos/ui';
+import { StepUpDialog } from '@/components/security/StepUpDialog';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -12,7 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background">
         <ThemeProvider>
-          <QueryProvider loginPath="/admin/login">{children}</QueryProvider>
+          <QueryProvider loginPath="/admin/login">
+            {children}
+            <StepUpDialog />
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -19,6 +19,7 @@ export * from './Field';
 export * from './FilePreview';
 export * from './FilePreviewDialog';
 export * from './Input';
+export * from './StepUpDialog';
 export * from './LanguageToggle';
 export * from './LegacyInput';
 export * from './LegacySelect';
