@@ -49,7 +49,8 @@ interface AuthContextValue {
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
-  signInWithMagicLink: (token: string) => Promise<void>;
+  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  signInWithMagicLink: (token: string) => Promise<{ requiresTwoFactor: boolean }>;
   /** Provider sign-in (system browser). Throws `OAuthCancelled` if dismissed. */
   /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
   signInWithProvider: (provider: 'google') => Promise<{ requiresTwoFactor: boolean }>;
@@ -234,8 +235,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithMagicLink = useCallback(
     async (token: string) => {
-      const session = await authApi.verifyMagicLink(token);
-      applySession(session);
+      const result = await authApi.verifyMagicLink(token);
+      if (isTwoFactorChallenge(result)) {
+        const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
+        setPendingTwoFactor({ challengeToken, profile: prof });
+        return { requiresTwoFactor: true };
+      }
+      applySession(result);
+      return { requiresTwoFactor: false };
     },
     [applySession]
   );

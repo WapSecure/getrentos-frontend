@@ -185,6 +185,21 @@ export const InspectionDetailModal = ({
                 </p>
               )}
 
+              {inspection.leaseId && inspection.status !== 'DRAFT' && (
+                <p className="text-sm text-muted-foreground">
+                  {inspection.tenantAcknowledgedAt
+                    ? `The tenant acknowledged this report on ${new Intl.DateTimeFormat('en-NG', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        timeZone: 'Africa/Lagos',
+                      }).format(new Date(inspection.tenantAcknowledgedAt))}${
+                        inspection.tenantComment ? `: “${inspection.tenantComment}”` : '.'
+                      }`
+                    : 'The tenant can see this report and has not acknowledged it yet.'}
+                </p>
+              )}
+
               {/* Items */}
               <div className="space-y-3">
                 {inspection.items.length === 0 ? (

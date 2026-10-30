@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as Linking from 'expo-linking';
+import { router } from 'expo-router';
 import { useToast } from '@getrentos/ui-native';
 import { ApiError } from '../api/client';
 import { useAuth } from './AuthProvider';
@@ -33,8 +34,9 @@ export function useMagicLink() {
       handled.current.add(token);
 
       try {
-        await deps.current.signInWithMagicLink(token);
-        deps.current.toast.show('Signed in.', 'success');
+        const { requiresTwoFactor } = await deps.current.signInWithMagicLink(token);
+        if (requiresTwoFactor) router.push('/(auth)/two-factor');
+        else deps.current.toast.show('Signed in.', 'success');
       } catch (err) {
         deps.current.toast.show(
           err instanceof ApiError ? err.message : 'That sign-in link is invalid or expired.',
