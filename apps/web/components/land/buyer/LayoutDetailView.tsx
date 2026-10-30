@@ -107,7 +107,9 @@ export const LayoutDetailView = ({ layoutId }: { layoutId: string }) => {
                 ? layout.priceTo !== undefined && layout.priceTo !== layout.priceFrom
                   ? `${formatCurrency(layout.priceFrom, { compact: true })} – ${formatCurrency(layout.priceTo, { compact: true })}`
                   : formatCurrency(layout.priceFrom)
-                : 'Sold out'
+                : layout.plots.some((p) => p.status === 'RESERVED')
+                  ? 'All reserved'
+                  : 'Sold out'
             }
           />
           <Stat label="Reservation hold" value={`${layout.reservationHoldHours} hours`} />

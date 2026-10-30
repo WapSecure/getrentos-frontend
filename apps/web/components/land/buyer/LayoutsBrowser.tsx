@@ -20,7 +20,8 @@ import type { PublicLandLayoutSummary } from '@/types/landBuyer';
 const PAGE_SIZE = 12;
 
 const priceRange = (layout: PublicLandLayoutSummary) => {
-  if (layout.priceFrom === undefined) return 'Sold out';
+  // No plot is on sale right now; some may only be reserved and come back.
+  if (layout.priceFrom === undefined) return 'None available';
   if (layout.priceTo === undefined || layout.priceTo === layout.priceFrom) {
     return formatCurrency(layout.priceFrom, { compact: true });
   }
