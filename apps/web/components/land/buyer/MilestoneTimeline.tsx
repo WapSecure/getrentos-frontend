@@ -225,7 +225,7 @@ export const MilestoneTimeline = ({
         title={`Confirm “${confirming?.label ?? ''}”?`}
         description={
           showRelease && confirming && confirming.releaseBps > 0
-            ? `Only confirm once you have it in hand. Confirming releases ${bpsToPercent(confirming.releaseBps)} of the price from escrow to the developer, and cannot be undone.`
+            ? `Only confirm once you have it in hand. Confirming releases ${bpsToPercent(confirming.releaseBps)} of the price held by GetRentos to the developer, and cannot be undone.`
             : 'Only confirm once you have it in hand. Confirming tells us the step is done and cannot be undone.'
         }
         confirmLabel="Confirm step"

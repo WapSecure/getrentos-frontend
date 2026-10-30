@@ -347,6 +347,14 @@ export interface ArrearsSummary {
   overdueCount: number;
 }
 
+export const LANDLORD_PAYMENT_LABEL: Record<LandlordPaymentStatus, string> = {
+  paid: 'Paid',
+  pending: 'Pending',
+  overdue: 'Overdue',
+  processing: 'Processing',
+  failed: 'Failed',
+};
+
 export const LANDLORD_PAYMENT_TONE: Record<
   LandlordPaymentStatus,
   'success' | 'warning' | 'danger' | 'info'
