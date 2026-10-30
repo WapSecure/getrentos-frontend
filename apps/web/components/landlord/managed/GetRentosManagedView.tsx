@@ -8,6 +8,7 @@ import {
   Award,
   Briefcase,
   Building2,
+  CalendarClock,
   Check,
   Clock,
   MapPin,
@@ -36,6 +37,7 @@ import {
   managedSla,
   mine as myMandates,
   managedBreakFee,
+  noticeEndsAt,
   recordHandover,
   submit as submitMandate,
   terminate as terminateMandate,
@@ -55,6 +57,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ManagedIntakeDialog } from './ManagedIntakeDialog';
 import { ManagedIntakePanel } from './ManagedIntakePanel';
 import { formatCurrency } from '@/lib/format';
+import { formatMoment } from '@/components/agency/mandatePresentation';
 
 /**
  * "Let GetRentos manage it": the owner-facing opt-in.
@@ -96,6 +99,9 @@ const INTAKE_STAGE: Record<string, string> = {
 };
 
 /** Live = opted in, pending, or active — anything that is not an ended state. */
+/** The shortest reason the API accepts for ending or withdrawing an engagement. */
+const END_REASON_MIN = 10;
+
 const isLiveEngagement = (m: ManagementMandateDto) => !ENDED_STATUSES.includes(m.status);
 
 /** Terminated but the handover pack has not been exchanged yet — still winding down. */
@@ -452,6 +458,16 @@ export const GetRentosManagedView = () => {
                           Portfolio manager: {managed.managerName}
                         </p>
                       )}
+                      {activeMandate?.noticeServedAt && (
+                        <p className="mt-0.5 flex items-center gap-1 text-sm text-warning">
+                          <CalendarClock className="h-3.5 w-3.5" aria-hidden />
+                          {activeMandate.managerIsGetRentos
+                            ? 'GetRentos'
+                            : (activeMandate.managerOrganizationName ?? 'Your manager')}{' '}
+                          served notice on {formatMoment(activeMandate.noticeServedAt)}; management
+                          ends {formatMoment(noticeEndsAt(activeMandate))}.
+                        </p>
+                      )}
                       {managed?.deliveryPartnerName && (
                         <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                           <Briefcase className="h-3.5 w-3.5" aria-hidden />
@@ -492,8 +508,18 @@ export const GetRentosManagedView = () => {
                       <span className="text-sm text-muted-foreground">
                         {firmMandate.managerOrganizationName ?? 'A firm'}
                       </span>
-                      <Badge variant={firmMandate.status === 'ACTIVE' ? 'success' : 'warning'}>
-                        {firmMandate.status === 'ACTIVE' ? 'Managed by firm' : 'Firm pending'}
+                      <Badge
+                        variant={
+                          firmMandate.status === 'ACTIVE' && !firmMandate.noticeServedAt
+                            ? 'success'
+                            : 'warning'
+                        }
+                      >
+                        {firmMandate.status !== 'ACTIVE'
+                          ? 'Firm pending'
+                          : firmMandate.noticeServedAt
+                            ? 'Under notice'
+                            : 'Managed by firm'}
                       </Badge>
                       {firmMandate.status === 'ACTIVE' && !openIntake && (
                         <Button
@@ -580,16 +606,26 @@ export const GetRentosManagedView = () => {
                     <Textarea
                       className="mt-2"
                       aria-label="Why you are ending it"
+                      aria-describedby={`end-reason-hint-${activeMandate.id}`}
                       value={endReason}
                       onChange={(event) => setEndReason(event.target.value)}
                       rows={2}
-                      placeholder="Why are you ending it? Enter at least 10 characters."
+                      placeholder="Why are you ending it?"
                     />
+                    <p
+                      id={`end-reason-hint-${activeMandate.id}`}
+                      aria-live="polite"
+                      className="mt-1 text-xs text-muted-foreground"
+                    >
+                      {endReason.trim().length < END_REASON_MIN
+                        ? `Give a reason of at least ${END_REASON_MIN} characters to ${isPendingMandate ? 'cancel' : 'end management'} (${endReason.trim().length}/${END_REASON_MIN}).`
+                        : 'Your reason is shared with the manager and kept on the record.'}
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       <Button
                         variant="danger"
                         size="sm"
-                        disabled={endReason.trim().length < 10}
+                        disabled={endReason.trim().length < END_REASON_MIN}
                         isLoading={endBusy}
                         onClick={() =>
                           endEngagement.mutate({ id: activeMandate.id, reason: endReason.trim() })

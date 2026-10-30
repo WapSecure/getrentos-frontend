@@ -199,7 +199,7 @@ export const PaymentCard = ({
                 Confirm move-in
               </Button>
             )}
-            {payment.status === 'paid' && (
+            {payment.status === 'paid' && payment.escrowStatus === 'held' && (
               <Button
                 size="sm"
                 variant="ghost"

@@ -209,7 +209,7 @@ export const PaymentDetailsModal = ({
                 Download Receipt
               </Button>
             )}
-            {payment.status === 'overdue' && (
+            {payment.status === 'paid' && payment.escrowStatus === 'held' && (
               <Button
                 variant="danger"
                 className="flex-1"

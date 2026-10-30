@@ -15,9 +15,9 @@ interface FinancingEligibilityCardProps {
 const steps = [
   {
     icon: Zap,
-    title: 'We pay your landlord today',
+    title: 'We pay your landlord',
     description:
-      'The full amount is paid to GetRentos and passed on to your landlord straight away: no waiting.',
+      'GetRentos pays the full rent to your landlord. Your plan shows the date once the payment has been made.',
   },
   {
     icon: Clock,

@@ -2,14 +2,15 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AlertCircle, CheckCircle2, Loader2, UserPlus } from 'lucide-react';
+import { AlertCircle, Building2, CheckCircle2, Loader2, UserPlus } from 'lucide-react';
 import { isAuthenticated, getStoredUser } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, BACKEND_ROLE_TO_ID } from '@/lib/constants/auth';
 import { agencyOwnerInviteService } from '@/services/agencyOwnerInviteService';
 import { Logo } from '@/components/ui/Logo';
 import { Button, Skeleton } from '@getrentos/ui';
+import { currentPath, withNext } from '@/lib/nextPath';
 
-type Phase = 'loading' | 'needs-auth' | 'claiming' | 'done' | 'error';
+type Phase = 'loading' | 'needs-auth' | 'ready' | 'claiming' | 'done' | 'error';
 
 function dashboardHref(): string {
   try {
@@ -28,10 +29,14 @@ function ClaimContent() {
   const [firm, setFirm] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [message, setMessage] = useState<string>('');
+  const [token, setToken] = useState<string>('');
+  const [claimError, setClaimError] = useState<string>('');
+  const [returnTo, setReturnTo] = useState<string>('');
 
   useEffect(() => {
     const run = async () => {
       const token = searchParams.get('token');
+      setReturnTo(currentPath());
       if (!token) {
         setPhase('error');
         setMessage('This invitation link is invalid.');
@@ -43,6 +48,7 @@ function ClaimContent() {
         setMessage(info.message || 'This invitation is not valid.');
         return;
       }
+      setToken(token);
       setFirm(info.data.organizationName);
       setEmail(info.data.email);
 
@@ -66,18 +72,24 @@ function ClaimContent() {
         setPhase('needs-auth');
         return;
       }
-      setPhase('claiming');
-      const res = await agencyOwnerInviteService.claim(token);
-      if (res.success) {
-        setPhase('done');
-      } else {
-        setPhase('error');
-        setMessage(res.message || 'We could not accept this invitation.');
-      }
+      // Nothing is accepted until the owner says so on the summary below.
+      setPhase('ready');
     };
 
     void run();
   }, [searchParams]);
+
+  const accept = async () => {
+    setClaimError('');
+    setPhase('claiming');
+    const res = await agencyOwnerInviteService.claim(token);
+    if (res.success) {
+      setPhase('done');
+    } else {
+      setPhase('ready');
+      setClaimError(res.message || 'We could not accept this invitation.');
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
@@ -112,6 +124,34 @@ function ClaimContent() {
               Go to your dashboard
             </a>
           </>
+        ) : phase === 'ready' ? (
+          <>
+            <Building2 className="mx-auto mb-3 h-8 w-8 text-primary" />
+            <h1 className="text-lg font-semibold text-foreground">
+              {firm} invited you to work with them
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {firm} is a property management firm on GetRentos. If you accept, your account (
+              <strong>{email}</strong>) is connected to {firm}, and they can set up management of
+              your property with you.
+            </p>
+            {claimError && (
+              <p role="alert" className="mt-3 text-sm text-destructive">
+                {claimError}
+              </p>
+            )}
+            <div className="mt-5 flex flex-col gap-2">
+              <Button onClick={() => void accept()} rounded="full" fullWidth>
+                Accept invitation
+              </Button>
+              <a
+                href={dashboardHref()}
+                className="inline-block text-sm font-medium text-primary hover:text-primary-hover"
+              >
+                Not now
+              </a>
+            </div>
+          </>
         ) : phase === 'needs-auth' ? (
           <>
             <UserPlus className="mx-auto mb-3 h-8 w-8 text-primary" />
@@ -119,15 +159,15 @@ function ClaimContent() {
               {firm} invited you to GetRentos
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Create an account or sign in with <strong>{email}</strong> to accept, then open this
-              invitation link again.
+              Create an account or sign in with <strong>{email}</strong>. You will come back here to
+              review and accept the invitation.
             </p>
             <div className="mt-5 flex flex-col gap-2">
-              <Button href={`${ROUTES.SIGNUP}?email=${encodeURIComponent(email)}`} rounded="full" fullWidth>
+              <Button href={withNext(ROUTES.SIGNUP, returnTo, { email })} rounded="full" fullWidth>
                 Create an account
               </Button>
               <a
-                href={ROUTES.LOGIN}
+                href={withNext(ROUTES.LOGIN, returnTo, { reason: 'invite' })}
                 className="inline-block text-sm font-medium text-primary hover:text-primary-hover"
               >
                 I already have an account

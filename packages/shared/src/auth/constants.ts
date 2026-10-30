@@ -537,14 +537,26 @@ export const getDashboardRoute = (roleId: string): string => {
   return roleMap[roleId] || ROUTES.DASHBOARD;
 };
 
+/** Roles granted by invitation (never at sign-up) that decide where an account lands. */
+const INVITED_ROLE_PRECEDENCE: readonly string[] = ['GATEMAN'];
+
 /**
  * The portal a signed-in account lands in: its first role the web app has a
  * portal for. Taking roles[0] blindly sent an account whose first role had no
  * mapping to the renter fallback, and a non-renter then bounced between the
  * renter guard and that same fallback forever.
  */
-export const resolvePrimaryRoleId = (backendRoles: readonly string[] | undefined | null): string =>
-  (backendRoles ?? []).map((r) => BACKEND_ROLE_TO_ID[r]).find(Boolean) ?? 'renter';
+export const resolvePrimaryRoleId = (
+  backendRoles: readonly string[] | undefined | null
+): string => {
+  const roles = backendRoles ?? [];
+  // A role only an estate can grant outranks the public role the person signed
+  // up with: a gate guard's account always also holds a sign-up role, and the
+  // gate console is the device's whole job.
+  const invited = INVITED_ROLE_PRECEDENCE.find((role) => roles.includes(role));
+  if (invited) return BACKEND_ROLE_TO_ID[invited];
+  return roles.map((r) => BACKEND_ROLE_TO_ID[r]).find(Boolean) ?? 'renter';
+};
 
 // Helper function to get role from stored user
 export const getUserRole = (): string | null => {

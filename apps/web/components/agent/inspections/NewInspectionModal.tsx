@@ -269,7 +269,7 @@ export const NewInspectionModal = ({
                             ))}
                           </div>
                         )}
-                        <label className="flex w-fit cursor-pointer items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
+                        <label className="flex w-fit cursor-pointer items-center gap-1.5 rounded text-xs text-muted-foreground hover:text-primary focus-within:text-primary focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                           <Camera className="h-3.5 w-3.5" />
                           {uploadingRoom === room.room && room.room
                             ? 'Uploading…'
@@ -279,7 +279,9 @@ export const NewInspectionModal = ({
                           <input
                             type="file"
                             accept="image/*"
-                            className="hidden"
+                            // Visually hidden but still in the tab order, so the
+                            // chooser opens from the keyboard; the label names it.
+                            className="sr-only"
                             disabled={!taskId || !room.room.trim() || uploadingRoom !== null}
                             onChange={(e) => {
                               void uploadPhoto(room.room, e.target.files?.[0]);

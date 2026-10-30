@@ -29,6 +29,7 @@ import {
 } from '@/services/mandateService';
 import { MandateActionButtons } from './MandateActionButtons';
 import { useMandateActions, type ReasonAction, type SimpleAction } from './useMandateActions';
+import { describeAgencyError } from './agencyAccess';
 
 /**
  * The engagements a firm holds, and what can be done to each one.
@@ -79,7 +80,7 @@ export function MandateListView() {
   };
 
   if (error && !data) {
-    return <PageErrorState description={(error as Error).message} onRetry={invalidate} />;
+    return <PageErrorState description={describeAgencyError(error)} onRetry={invalidate} />;
   }
 
   const mandates = data ?? [];

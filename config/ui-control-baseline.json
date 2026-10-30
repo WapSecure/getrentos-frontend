@@ -106,7 +106,7 @@
     {
       "path": "apps/web/components/agent/inspections/NewInspectionModal.tsx",
       "tag": "input",
-      "fingerprint": "8b91c3970376ca7d",
+      "fingerprint": "1909c704dbbfc5e9",
       "line": 279,
       "classification": "platform-bridge",
       "rationale": "Native file/hidden input used as a browser integration point; the visible control must remain shared.",

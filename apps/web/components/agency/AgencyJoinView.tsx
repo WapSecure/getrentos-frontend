@@ -7,6 +7,16 @@ import { Alert, Button, Card, Skeleton } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { agencyTeamService } from '@/services/agencyTeamService';
+import { logoutSession } from '@/lib/apiClient';
+import { ROUTES } from '@/lib/constants/auth';
+import { currentPath, withNext } from '@/lib/nextPath';
+
+/** Signs out and comes back to this invitation as someone else. */
+async function switchAccount() {
+  const back = withNext(ROUTES.LOGIN, currentPath(), { reason: 'invite' });
+  await logoutSession();
+  window.location.assign(back);
+}
 
 /** Where a staff invitation link lands: see what it is, then join. */
 export function AgencyJoinView() {
@@ -76,9 +86,14 @@ export function AgencyJoinView() {
                   : 'This invitation is no longer open.'}
               </p>
             ) : !p.emailMatches ? (
-              <p className="mt-3 text-sm text-muted-foreground">
-                It was sent to <strong>{p.email}</strong>. Sign in with that email to accept it.
-              </p>
+              <>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  It was sent to <strong>{p.email}</strong>. Sign in with that email to accept it.
+                </p>
+                <Button className="mt-4" variant="outline" onClick={() => void switchAccount()}>
+                  Sign out and switch account
+                </Button>
+              </>
             ) : (
               <>
                 <Button

@@ -43,8 +43,6 @@ export interface RenterProperty {
   amenities?: string[];
   landlordId?: string;
   landlordName?: string;
-  landlordEmail?: string;
-  landlordPhone?: string;
   landlordRating?: number;
   landlordReviews?: number;
   landlordVerified?: boolean;

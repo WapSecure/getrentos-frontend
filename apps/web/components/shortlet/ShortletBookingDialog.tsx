@@ -17,7 +17,7 @@ import {
   NumberInput,
 } from '@getrentos/ui';
 import { CreditCard, MapPin } from 'lucide-react';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -35,6 +35,12 @@ const DISCOUNT_LABEL: Record<ShortletDiscountType, string> = {
 };
 
 /** The `YYYY-MM-DD` day after `date`, in the UTC keys the API's calendar uses. */
+/** True when a booking attempt was refused only for an unverified identity. */
+const isIdentityGate = (error: unknown) =>
+  (error instanceof VerificationRequiredError
+    ? error.reason
+    : (error as { reason?: string } | null)?.reason) === 'IDENTITY_REQUIRED';
+
 const nextDay = (date: string) => {
   const day = new Date(`${date}T00:00:00.000Z`);
   day.setUTCDate(day.getUTCDate() + 1);
@@ -182,7 +188,7 @@ export function ShortletBookingDialog({
               <DatePicker
                 value={checkOut}
                 onChange={setCheckOut}
-                min={checkIn || TODAY}
+                min={checkIn ? nextDay(checkIn) : TODAY}
                 disabledDates={blockedCheckOuts}
                 placeholder="Select check-out"
               />
@@ -206,7 +212,7 @@ export function ShortletBookingDialog({
                   <span className="font-semibold">
                     {formatCurrency(availability.estimatedTotal ?? 0)}
                   </span>{' '}
-                  total
+                  for the stay
                   {availability.estimatedTax ? (
                     <span className="text-muted-foreground">
                       {' '}
@@ -218,6 +224,16 @@ export function ShortletBookingDialog({
               ) : (
                 <p className="text-destructive">{availability.reason}</p>
               )}
+              {availability.available && listing.deposit ? (
+                <p className="mt-1 text-muted-foreground">
+                  Plus a {formatCurrency(listing.deposit)} refundable security deposit, charged with
+                  your payment:{' '}
+                  <span className="font-medium text-foreground">
+                    {formatCurrency((availability.estimatedTotal ?? 0) + listing.deposit)}
+                  </span>{' '}
+                  in total.
+                </p>
+              ) : null}
               {availability.available && availability.discountAmount ? (
                 <p className="mt-1 text-success">
                   {DISCOUNT_LABEL[availability.discountType ?? 'WEEKLY']} (
@@ -239,6 +255,12 @@ export function ShortletBookingDialog({
             href={guestRoutes.verification}
             verificationHref={guestRoutes.verification}
           />
+          {listing.instantBooking && isIdentityGate(bookError) && (
+            <p className="text-sm text-muted-foreground">
+              Instant booking needs a verified identity. Not ready to verify yet? You can still
+              message the host about your dates.
+            </p>
+          )}
 
           {createdBooking ? (
             <div className="space-y-3">

@@ -58,7 +58,7 @@ export const ApplyFinancingModal = ({
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {step === 'select'
-              ? `We'll pay your landlord ${formatCurrency(rentAmount, { compact: true })} today`
+              ? `GetRentos pays your landlord ${formatCurrency(rentAmount, { compact: true })}; you repay monthly`
               : 'Confirm your repayment terms'}
           </DialogDescription>
         </div>

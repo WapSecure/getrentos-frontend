@@ -138,6 +138,13 @@ export interface PartnerFirm {
   name: string;
 }
 
+/** A staff member who can be named portfolio manager. */
+export interface PortfolioManagerOption {
+  id: string;
+  name: string;
+  email: string | null;
+}
+
 /** Counts for the GetRentos Managed ops queues. */
 export interface ManagedQueueCounts {
   awaitingActivation: number;
@@ -158,6 +165,13 @@ export const adminManagedService = {
   },
 
   /** Vetted firms ops can designate as a delivery partner. */
+  /** Staff who can run a managed engagement — readable by every managed-ops role. */
+  listPortfolioManagers(): Promise<ApiResponse<PortfolioManagerOption[]>> {
+    return safeCall(() =>
+      authFetch<PortfolioManagerOption[]>('/admin/management-mandates/portfolio-managers')
+    );
+  },
+
   listPartnerFirms(): Promise<ApiResponse<PartnerFirm[]>> {
     return safeCall(() => authFetch<PartnerFirm[]>('/admin/management-mandates/partner-firms'));
   },
