@@ -1,6 +1,7 @@
 'use client';
 
 import { HomeTeamCard } from './HomeTeamCard';
+import { HeldMoneyCard } from './HeldMoneyCard';
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -135,6 +136,13 @@ export function HomeOverviewView() {
     queryKey: renterKeys.upcomingPaymentReminders,
     queryFn: () => unwrap(renterService.getUpcomingPaymentReminders()),
   });
+  // A lease waiting on the renter (signature, first payment or handover) only
+  // has its card on the Lease tab, so the Overview points to it.
+  const pendingLeaseQuery = useQuery({
+    queryKey: renterKeys.pendingLease,
+    queryFn: () => unwrapOptional(renterService.getPendingLease(), null),
+  });
+  const pendingLease = pendingLeaseQuery.data ?? null;
 
   const lease = leaseQuery.data;
   const maintenanceRequests = useMemo(
@@ -193,6 +201,7 @@ export function HomeOverviewView() {
   if (!lease) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
+        {pendingLease && <PendingLeaseNudge status={pendingLease.status} />}
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-primary">
           <House className="h-8 w-8" />
         </div>
@@ -256,7 +265,11 @@ export function HomeOverviewView() {
         </div>
       </section>
 
+      {pendingLease && <PendingLeaseNudge status={pendingLease.status} />}
+
       <HomeTeamCard />
+
+      <HeldMoneyCard />
 
       {hasDataError && (
         <Alert
@@ -613,6 +626,44 @@ export function HomeOverviewView() {
         </Card>
       </section>
     </div>
+  );
+}
+
+const PENDING_LEASE_NUDGE: Record<string, { title: string; body: string; cta: string }> = {
+  sent: {
+    title: 'A lease is waiting for your signature',
+    body: 'Read the terms and sign it from the Lease tab.',
+    cta: 'Review and sign',
+  },
+  awaiting_payment: {
+    title: 'Pay the first rent to keep your lease',
+    body: 'You have signed. The lease lapses if the first payment is not made by the deadline.',
+    cta: 'See what to pay',
+  },
+  awaiting_landlord: {
+    title: 'Your payment is held by GetRentos',
+    body: 'The landlord has been asked to confirm handover.',
+    cta: 'View lease',
+  },
+};
+
+function PendingLeaseNudge({ status }: { status: string }) {
+  const copy = PENDING_LEASE_NUDGE[status];
+  if (!copy) return null;
+  return (
+    <Alert
+      variant="info"
+      icon={FileText}
+      title={copy.title}
+      className="mb-6 text-left"
+      action={
+        <Button href={`${ROUTES.RENTER_HOME}?tab=lease`} size="sm" rounded="lg">
+          {copy.cta}
+        </Button>
+      }
+    >
+      {copy.body}
+    </Alert>
   );
 }
 
