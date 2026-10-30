@@ -26,6 +26,8 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
+import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
 export default function LandlordOwnerStatements() {
   const { colors, spacing, radius } = useTheme();
@@ -38,7 +40,10 @@ export default function LandlordOwnerStatements() {
   const query = useQuery({
     queryKey: qk.landlord.ownerStatements(),
     queryFn: () => landlordApi.ownerStatements(),
+    retry: retryUnlessPlanGate,
   });
+  // Owner statements are Pro: a Free landlord gets the upgrade, not a retry that can't work.
+  const locked = !!planRefusal(query.error);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['landlord', 'owner-statements'] });
   const fail = (e: unknown, fallback: string) =>
@@ -88,15 +93,30 @@ export default function LandlordOwnerStatements() {
         subtitle="Payout summaries and issued reports"
         onBack={() => goBack()}
         accessory={
-          <IconButton
-            onPress={() => setCreating(true)}
-            accessibilityLabel="Generate a statement"
-            icon={<Plus size={20} color={colors.primary} />}
-          />
+          locked ? null : (
+            <IconButton
+              onPress={() => setCreating(true)}
+              accessibilityLabel="Generate a statement"
+              icon={<Plus size={20} color={colors.primary} />}
+            />
+          )
         }
       />
 
-      {query.isError && !query.data ? (
+      {locked ? (
+        <View style={{ paddingHorizontal: spacing.xl }}>
+          <ProUpsell
+            title="Owner statements are part of Pro"
+            description="Send owners a clear statement of rent collected, costs and what was paid out."
+            perks={[
+              'Statements for any period, per owner',
+              'Issue and pay out in one step',
+              'Retry a failed payout from the statement',
+            ]}
+            note={null}
+          />
+        </View>
+      ) : query.isError && !query.data ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (
         <FlashList
