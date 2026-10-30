@@ -80,6 +80,9 @@ export interface InspectionDetail extends InspectionListItem {
   conductedByName: string | null;
   items: InspectionItem[];
   summary: InspectionSummary;
+  /** When the tenant confirmed they have seen the report, and any note they added. */
+  tenantAcknowledgedAt?: string | null;
+  tenantComment?: string | null;
 }
 
 export interface CreateInspectionInput {

@@ -17,6 +17,9 @@ interface DisputePaymentDialogProps {
   onSubmit: (reason: string) => Promise<void>;
 }
 
+const MIN_REASON = 10;
+const MAX_REASON = 1000;
+
 export const DisputePaymentDialog = ({
   open,
   onOpenChange,
@@ -27,12 +30,22 @@ export const DisputePaymentDialog = ({
 
   const handleClose = (next: boolean) => {
     if (isSubmitting) return;
-    if (!next) setReason('');
+    if (!next) {
+      setReason('');
+      setAttempted(false);
+    }
     onOpenChange(next);
   };
 
+  const trimmed = reason.trim();
+  const tooShort = trimmed.length < MIN_REASON;
+  const [attempted, setAttempted] = useState(false);
+  const reasonError =
+    attempted && tooShort ? `Say what is wrong in at least ${MIN_REASON} characters.` : undefined;
+
   const handleSubmit = async () => {
-    if (!reason.trim() || isSubmitting) return;
+    setAttempted(true);
+    if (tooShort || isSubmitting) return;
     setIsSubmitting(true);
     try {
       await onSubmit(reason.trim());
@@ -57,10 +70,16 @@ export const DisputePaymentDialog = ({
         </div>
 
         <div className="p-4 space-y-3">
-          <Field label="Reason for dispute" required>
+          <Field
+            label="Reason for dispute"
+            required
+            error={reasonError}
+            hint={`${trimmed.length}/${MAX_REASON} characters`}
+          >
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
+              maxLength={MAX_REASON}
               rows={4}
               placeholder="e.g. I was charged twice for the same month's rent"
             />
@@ -70,7 +89,7 @@ export const DisputePaymentDialog = ({
             variant="primary"
             fullWidth
             onClick={() => void handleSubmit()}
-            disabled={!reason.trim() || isSubmitting}
+            disabled={isSubmitting}
             isLoading={isSubmitting}
           >
             Submit Dispute
