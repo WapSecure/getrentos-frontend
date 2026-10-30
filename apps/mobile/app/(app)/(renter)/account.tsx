@@ -31,6 +31,7 @@ import {
 } from 'lucide-react-native';
 import { Avatar, Button, Card, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
@@ -39,7 +40,7 @@ const go = (href: Href) => () => router.push(href);
 export default function Account() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const verified = !!profile?.isVerified;
+  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
 
   const confirmSignOut = () =>
     Alert.alert('Sign out of GetRentos?', 'You can sign back in any time.', [
@@ -128,8 +129,8 @@ export default function Account() {
       key: 'identity',
       label: 'Identity verification',
       icon: ShieldCheck,
-      value: verified ? 'Verified' : 'Not verified',
-      tone: verified ? 'success' : 'warning',
+      value: identityLabel,
+      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
     {
@@ -261,7 +262,7 @@ export default function Account() {
         ) : null}
       </View>
 
-      {!verified ? (
+      {identityKnown && !verified ? (
         <Pressable
           onPress={go('/(app)/verify-identity')}
           accessibilityRole="button"

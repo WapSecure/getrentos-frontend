@@ -30,6 +30,7 @@ import {
 } from 'lucide-react-native';
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
@@ -38,7 +39,7 @@ const go = (href: Href) => () => router.push(href);
 export default function LandlordAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
-  const verified = !!profile?.isVerified;
+  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
 
   const renting: SettingsItem[] = [
     {
@@ -178,8 +179,8 @@ export default function LandlordAccount() {
       label: 'Identity verification',
       description: verified ? undefined : 'Required to publish listings',
       icon: ShieldCheck,
-      value: verified ? 'Verified' : 'Not verified',
-      tone: verified ? 'success' : 'warning',
+      value: identityLabel,
+      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
     {
