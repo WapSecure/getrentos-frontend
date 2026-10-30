@@ -44,7 +44,11 @@ import { ApiError } from '@/lib/api/client';
 import { formatDate, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
-import { StatusPill } from '@/components/host/HostUI';
+import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
+import { ProUpsell } from '@/components/estate/governance/ProUpsell';
+import { VerificationGateNotice } from '@/components/VerificationGateNotice';
+import { readGate } from '@/lib/verificationGate';
+import { kycApi } from '@/lib/api/kyc';
 
 const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
@@ -576,7 +580,41 @@ function InviteClientForm({
     },
     onSettled: () => onSubmittingChange(false),
   });
+  // Known up front: an unverified realtor is told before filling the form, not after.
+  const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
+  const knownUnverified = kyc.data?.identityVerified === false;
+  const gateError = readGate(invite.error)
+    ? invite.error
+    : knownUnverified
+      ? new ApiError('Identity verification is required.', 403, 'IDENTITY_REQUIRED')
+      : null;
+  const atPlanLimit = isUpgradeError(invite.error);
   const c = check.data;
+  if (atPlanLimit) {
+    return (
+      <ProUpsell
+        title="You’ve reached the Free plan’s client limit"
+        description="Free covers up to five clients. Pro lets you represent as many owners and landlords as you work with."
+        perks={['No limit on clients', 'Commission payouts straight to your bank']}
+        note={null}
+      />
+    );
+  }
+  if (gateError) {
+    return (
+      <View style={{ gap: spacing.md }}>
+        <Text variant="callout" color="mutedForeground">
+          Owners and landlords on GetRentos can let you represent their properties once you’re
+          verified.
+        </Text>
+        <VerificationGateNotice
+          error={gateError}
+          scoreHref="/(app)/realtor-trust-profile"
+          onNavigate={onDone}
+        />
+      </View>
+    );
+  }
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
