@@ -2,6 +2,7 @@
 
 import { CheckCircle, Clock, AlertCircle, TrendingUp, Award, Users } from 'lucide-react';
 import { StatCard } from '@getrentos/ui';
+import { trustBand } from '@/lib/trustScore';
 import type { VerificationItem, Badge, TrustScoreHistoryItem } from '@/types/trust-score';
 
 interface TrustScoreStatsProps {
@@ -63,7 +64,7 @@ export const TrustScoreStats = ({
       <StatCard
         icon={Users}
         label="Trust Level"
-        value={trustScore >= 70 ? 'Verified' : 'Standard'}
+        value={trustBand(trustScore).label}
         accent="primary"
       />
     </div>

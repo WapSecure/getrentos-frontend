@@ -90,7 +90,7 @@ export const RenterTrustScoreCard = () => {
           <TrustScoreRing score={trustScore} size={104} strokeWidth={8} />
           <div className="min-w-0">
             <p className="font-semibold text-foreground">
-              {trustBand(trustScore).label} Trust Score
+              Your trust standing: {trustBand(trustScore).label}
             </p>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               Complete your profile to make applications easier to review.
