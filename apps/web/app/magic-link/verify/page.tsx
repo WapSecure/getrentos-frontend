@@ -6,7 +6,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { authService } from '@/services/authService';
-import { isSafeInternalPath } from '@getrentos/shared';
+import { safeNextPath } from '@/lib/nextPath';
 import { Logo } from '@/components/ui/Logo';
 
 function MagicLinkVerifyContent() {
@@ -50,9 +50,7 @@ function MagicLinkVerifyContent() {
           false
         );
 
-        router.replace(
-          isSafeInternalPath(redirectTo) ? redirectTo : getDashboardRoute(primaryRoleId)
-        );
+        router.replace(safeNextPath(redirectTo) ?? getDashboardRoute(primaryRoleId));
       } else {
         setError(response.message || 'This sign-in link is invalid or has expired.');
       }

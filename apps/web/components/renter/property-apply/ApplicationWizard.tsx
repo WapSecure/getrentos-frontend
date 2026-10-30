@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Check, Upload, FileText, Eye, X, User, Briefcase, ClipboardCheck } from 'lucide-react';
 import {
@@ -69,6 +69,16 @@ const nairaFormatter = new Intl.NumberFormat('en-NG', {
   maximumFractionDigits: 0,
 });
 
+const FIELD_IDS = {
+  fullName: 'apply-full-name',
+  email: 'apply-email',
+  phone: 'apply-phone',
+  currentAddress: 'apply-current-address',
+  monthlyIncome: 'apply-monthly-income',
+} as const;
+
+const documentUploadId = (index: number) => `apply-document-${index}`;
+
 const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Student'].map(
   (value) => ({ value, label: value })
 );
@@ -86,6 +96,20 @@ export const ApplicationWizard = ({
 }: ApplicationWizardProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<ApplicationFormData>(initialData);
+  // Errors stay quiet until the renter tries to continue, then show inline.
+  const [showErrors, setShowErrors] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const isFirstRender = useRef(true);
+
+  // A new step replaces the whole form, so move focus to its heading rather
+  // than leaving it on a button that no longer exists.
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    headingRef.current?.focus();
+  }, [stepIndex]);
 
   const update = <K extends keyof ApplicationFormData>(key: K, value: ApplicationFormData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -156,25 +180,46 @@ export const ApplicationWizard = ({
   const incomeBelowRent =
     data.monthlyIncome.trim() !== '' && incomeValue > 0 && incomeValue < monthlyRent;
 
-  const canAdvance = () => {
-    if (stepIndex === 0)
-      return Boolean(
-        data.fullName.trim() &&
-        data.email.trim() &&
-        isValidPhone(data.phone) &&
-        data.currentAddress.trim()
-      );
+  const missingDocuments = data.documents.filter((d) => d.required && !d.uploaded);
+
+  /** What is missing on a step, keyed by the id of the control to fix, in screen order. */
+  const stepErrors = (index: number): [string, string][] => {
+    const errors: [string, string][] = [];
+    if (index === 0) {
+      if (!data.fullName.trim()) errors.push([FIELD_IDS.fullName, 'Enter your full name.']);
+      if (!data.email.trim()) errors.push([FIELD_IDS.email, 'Enter your email address.']);
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim()))
+        errors.push([FIELD_IDS.email, 'Enter an email address like name@example.com.']);
+      if (!data.phone.trim()) errors.push([FIELD_IDS.phone, 'Enter your phone number.']);
+      else if (!isValidPhone(data.phone))
+        errors.push([FIELD_IDS.phone, 'Enter a phone number with at least 10 digits.']);
+      if (!data.currentAddress.trim())
+        errors.push([FIELD_IDS.currentAddress, 'Enter your current address.']);
+    }
     // Employer is `@IsOptional()` on the API's SubmitApplicationDto, and this
-    // same step offers "Student" as an employment status. Requiring it here
-    // hard-blocked anyone without an employer: they had to invent one: with
-    // Continue disabled and no explanation of what was missing.
-    if (stepIndex === 1) return data.monthlyIncome.trim();
-    if (stepIndex === 2) return data.documents.filter((d) => d.required).every((d) => d.uploaded);
-    return true;
+    // same step offers "Student" as an employment status, so only income is required.
+    if (index === 1 && !data.monthlyIncome.trim())
+      errors.push([FIELD_IDS.monthlyIncome, 'Enter your monthly income.']);
+    if (index === 2 && missingDocuments.length > 0)
+      errors.push([
+        documentUploadId(data.documents.indexOf(missingDocuments[0])),
+        `Add ${missingDocuments.map((d) => d.name).join(', ')}.`,
+      ]);
+    return errors;
   };
+
+  const currentErrors = stepErrors(stepIndex);
+  const errorFor = (id: string) =>
+    showErrors ? currentErrors.find(([key]) => key === id)?.[1] : undefined;
 
   const goNext = () => {
     if (isSubmitting) return;
+    if (currentErrors.length > 0) {
+      setShowErrors(true);
+      document.getElementById(currentErrors[0][0])?.focus();
+      return;
+    }
+    setShowErrors(false);
     if (stepIndex < steps.length - 1) {
       setStepIndex((i) => i + 1);
     } else {
@@ -182,7 +227,10 @@ export const ApplicationWizard = ({
     }
   };
 
-  const goBack = () => setStepIndex((i) => Math.max(0, i - 1));
+  const goBack = () => {
+    setShowErrors(false);
+    setStepIndex((i) => Math.max(0, i - 1));
+  };
 
   return (
     <Card>
@@ -190,9 +238,19 @@ export const ApplicationWizard = ({
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Step {stepIndex + 1} of {steps.length}
         </p>
-        <h2 className="mt-1 text-lg font-semibold text-foreground">{steps[stepIndex].label}</h2>
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-1 text-lg font-semibold text-foreground focus:outline-none"
+        >
+          {steps[stepIndex].label}
+        </h2>
       </div>
-      <ol aria-label="Application progress" className="flex overflow-x-auto border-b border-border">
+      {/* Wraps to two rows on narrow screens instead of scrolling sideways. */}
+      <ol
+        aria-label="Application progress"
+        className="grid grid-cols-2 border-b border-border sm:grid-cols-4"
+      >
         {steps.map((step, i) => {
           const Icon = step.icon;
           const isActive = i === stepIndex;
@@ -201,7 +259,7 @@ export const ApplicationWizard = ({
             <li
               key={step.key}
               aria-current={isActive ? 'step' : undefined}
-              className={`flex-1 min-w-27.5 flex items-center gap-2 px-3 py-3 text-xs font-medium border-b-2 transition-colors ${
+              className={`min-w-0 flex items-center gap-2 px-3 py-3 text-xs font-medium border-b-2 transition-colors ${
                 isActive
                   ? 'border-primary text-primary'
                   : isDone
@@ -227,16 +285,33 @@ export const ApplicationWizard = ({
       </ol>
 
       <div className="p-5 space-y-4">
+        {showErrors && currentErrors.length > 0 && (
+          <Alert variant="danger" title="Before you continue">
+            {currentErrors.length === 1
+              ? currentErrors[0][1]
+              : `${currentErrors.length} things need your attention on this step.`}
+          </Alert>
+        )}
         {stepIndex === 0 && (
           <div className="space-y-3">
-            <Field label="Full name">
+            <Field
+              label="Full name"
+              htmlFor={FIELD_IDS.fullName}
+              error={errorFor(FIELD_IDS.fullName)}
+              required
+            >
               <Input
                 value={data.fullName}
                 onChange={(e) => update('fullName', nameOnly(e.target.value))}
                 placeholder="e.g. David Okoro"
               />
             </Field>
-            <Field label="Email">
+            <Field
+              label="Email"
+              htmlFor={FIELD_IDS.email}
+              error={errorFor(FIELD_IDS.email)}
+              required
+            >
               <Input
                 type="email"
                 value={data.email}
@@ -244,7 +319,12 @@ export const ApplicationWizard = ({
                 placeholder="you@example.com"
               />
             </Field>
-            <Field label="Phone number">
+            <Field
+              label="Phone number"
+              htmlFor={FIELD_IDS.phone}
+              error={errorFor(FIELD_IDS.phone)}
+              required
+            >
               <Input
                 type="tel"
                 value={data.phone}
@@ -252,7 +332,12 @@ export const ApplicationWizard = ({
                 placeholder="+234 800 000 0000"
               />
             </Field>
-            <Field label="Current address">
+            <Field
+              label="Current address"
+              htmlFor={FIELD_IDS.currentAddress}
+              error={errorFor(FIELD_IDS.currentAddress)}
+              required
+            >
               <Input
                 value={data.currentAddress}
                 onChange={(e) => update('currentAddress', e.target.value)}
@@ -279,7 +364,12 @@ export const ApplicationWizard = ({
                 searchable={false}
               />
             </Field>
-            <Field label="Monthly income">
+            <Field
+              label="Monthly income"
+              htmlFor={FIELD_IDS.monthlyIncome}
+              error={errorFor(FIELD_IDS.monthlyIncome)}
+              required
+            >
               {/* Shown as 1,200,000 while typing; the form keeps the plain number. */}
               <CurrencyInput
                 prefix="₦"
@@ -390,7 +480,10 @@ export const ApplicationWizard = ({
                   : `${savedMatches.length} of these are already in your documents.`}
               </Alert>
             )}
-            {data.documents.map((doc) => {
+            {showErrors && missingDocuments.length > 0 && (
+              <p className="text-xs text-destructive">{currentErrors[0]?.[1]}</p>
+            )}
+            {data.documents.map((doc, docIndex) => {
               const isUploading =
                 uploadMutation.isPending && uploadMutation.variables?.doc.name === doc.name;
               return (
@@ -463,6 +556,7 @@ export const ApplicationWizard = ({
                           />
                         )}
                         <UploadButton
+                          id={documentUploadId(docIndex)}
                           label={doc.name}
                           isUploading={isUploading}
                           onFile={(file) => uploadMutation.mutate({ doc, file })}
@@ -523,7 +617,6 @@ export const ApplicationWizard = ({
         <Button
           variant="primary"
           onClick={goNext}
-          disabled={!canAdvance()}
           isLoading={isSubmitting}
           loadingText="Submitting…"
         >
@@ -535,10 +628,12 @@ export const ApplicationWizard = ({
 };
 
 const UploadButton = ({
+  id,
   label,
   isUploading,
   onFile,
 }: {
+  id?: string;
   label: string;
   isUploading: boolean;
   onFile: (file: File) => void;
@@ -547,6 +642,7 @@ const UploadButton = ({
   return (
     <>
       <Button
+        id={id}
         size="xs"
         icon={<Upload className="w-3.5 h-3.5" />}
         isLoading={isUploading}

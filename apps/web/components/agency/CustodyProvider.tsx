@@ -14,6 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
 import type { ManagementMandateDto } from '@/services/mandateService';
+import { describeAgencyError } from './agencyAccess';
 
 /**
  * Which client the manager is acting for.
@@ -155,7 +156,7 @@ export function CustodyProvider({ children }: { children: ReactNode }) {
     selected,
     select,
     loading: isLoading || !hydrated,
-    error: error ? (error as Error).message : null,
+    error: error ? describeAgencyError(error) : null,
     reload: () => void refetch(),
   };
 

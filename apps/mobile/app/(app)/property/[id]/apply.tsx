@@ -39,6 +39,7 @@ import {
   Chip,
   DateField,
   Divider,
+  EmptyState,
   NumberField,
   Progress,
   Text,
@@ -307,6 +308,27 @@ export default function ApplyToRent() {
         onViewApplication={() => router.replace(`/(app)/application/${submitted.id}`)}
         onKeepBrowsing={() => router.replace('/(app)/(renter)/discover')}
       />
+    );
+  }
+
+  // A unit that is already let can't take applications; say so before the form, not at submit.
+  if (property?.acceptingApplications === false) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, paddingTop: insets.top + 8 }}>
+        <View style={{ paddingHorizontal: spacing.xl }}>
+          <EmptyState
+            icon={<ShieldAlert size={32} color={colors.mutedForeground} />}
+            title="This home has been let"
+            description="The landlord is no longer accepting applications for this unit. Keep browsing to find a similar home."
+            action={
+              <Button
+                label="Keep browsing"
+                onPress={() => router.replace('/(app)/(renter)/discover')}
+              />
+            }
+          />
+        </View>
+      </View>
     );
   }
 

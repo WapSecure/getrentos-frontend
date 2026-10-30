@@ -3,6 +3,7 @@ import Constants from 'expo-constants';
 import { LogOut } from 'lucide-react-native';
 import { Avatar, Button, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 
 /**
  * The top and bottom of every portal's Account tab, so they read the same
@@ -24,6 +25,7 @@ export function AccountHeader({
   note?: string;
 }) {
   const { profile } = useAuth();
+  const { verified } = useIdentityVerification();
   const { spacing } = useTheme();
   const name = profile?.legalName ?? fallbackName;
   return (
@@ -34,7 +36,7 @@ export function AccountHeader({
         name,
         profile?.email,
         role,
-        profile?.isVerified ? 'verified' : 'not verified',
+        verified ? 'identity verified' : 'identity not verified',
         note,
       ]
         .filter(Boolean)

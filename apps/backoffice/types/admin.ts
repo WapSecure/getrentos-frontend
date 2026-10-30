@@ -53,7 +53,8 @@ export type AdminPermission =
   | 'subscriptions.view'
   | 'subscriptions.manage'
   | 'managed.view'
-  | 'managed.operate';
+  | 'managed.operate'
+  | 'ai.observe';
 
 export type AdminStaffStatus = 'active' | 'pending' | 'suspended' | 'banned';
 
@@ -392,4 +393,33 @@ export interface AdminProfile {
   email: string;
   phone?: string;
   avatarUrl?: string;
+}
+
+/** AI governance — today's spend/volume + live control state (GET /admin/ai/usage). */
+export interface AiCapabilityUsage {
+  capability: string;
+  calls: number;
+  costUsd: number;
+  succeeded: number;
+  failed: number;
+  /** Calls refused before the model (kill switch, budget, no key). */
+  blocked: number;
+}
+
+export interface AiBudgetStatus {
+  dailyBudgetUsd: number;
+  spentTodayUsd: number;
+  remainingUsd: number;
+  exceeded: boolean;
+}
+
+export interface AiUsageSummary {
+  globallyEnabled: boolean;
+  disabledCapabilities: string[];
+  budget: AiBudgetStatus;
+  totalCallsToday: number;
+  totalCostTodayUsd: number;
+  capabilities: AiCapabilityUsage[];
+  /** Whether an ANTHROPIC_API_KEY is configured (live calls possible). */
+  keyConfigured: boolean;
 }

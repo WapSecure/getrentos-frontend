@@ -18,6 +18,7 @@ import {
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { ListingCallToAction } from '@/components/market/ListingCallToAction';
 import { SaveListingButton } from '@/components/market/SaveListingButton';
 import { SimilarListings } from '@/components/market/SimilarListings';
 import { formatCurrency } from '@/lib/format';
@@ -33,12 +34,6 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   rent: 'Rentals',
   sale: 'Homes for sale',
   land: 'Land',
-};
-
-const CTA: Record<PublicDetailMarket, string> = {
-  rent: 'Sign in to enquire',
-  sale: 'Sign in to make an offer',
-  land: 'Sign in to make an offer',
 };
 
 /** Shared `generateMetadata` for the three public detail routes. */
@@ -85,7 +80,6 @@ export async function PublicListingPage({
   if (!listing) notFound();
 
   const back = MARKET_PATH[market];
-  const next = encodeURIComponent(`${back}/${id}`);
 
   return (
     <main className="min-h-screen bg-background pt-16">
@@ -257,18 +251,12 @@ export async function PublicListingPage({
                 </div>
               )}
 
-              <Link
-                href={`/login?next=${next}`}
-                className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              >
-                {CTA[market]}
-              </Link>
-              <Link
-                href={`/signup?next=${next}`}
-                className="block text-center text-sm font-medium text-primary hover:underline"
-              >
-                New here? Create a free account
-              </Link>
+              <ListingCallToAction
+                market={market}
+                id={listing.id}
+                returnPath={`${back}/${id}`}
+                underOffer={listing.underOffer}
+              />
 
               <div className="space-y-3 border-t border-border pt-5 text-xs text-muted-foreground">
                 <p className="flex items-start gap-2">

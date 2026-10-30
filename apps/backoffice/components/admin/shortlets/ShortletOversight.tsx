@@ -733,23 +733,23 @@ export const ShortletOversight = () => {
             ] as Tab[]
           ).map((t) => (
             <TabsTrigger key={t} value={t} className="text-sm">
-            {t === 'listings'
-              ? `Listings (${listingsData?.total ?? 0})`
-              : t === 'bookings'
-                ? `Bookings (${bookingsData?.total ?? 0})`
-                : t === 'payouts'
-                  ? `Payouts (${payoutsData?.total ?? 0})`
-                  : t === 'payout-accounts'
-                    ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
-                    : t === 'reviews'
-                      ? `Reviews (${reviewsData?.total ?? 0})`
-                      : t === 'disputes'
-                        ? `Disputes (${disputesData?.total ?? 0})`
-                        : t === 'claims'
-                          ? `Deposit claims (${claimsData?.total ?? 0})`
-                          : t === 'host-fees'
-                            ? 'Host cancellations'
-                            : 'Fees & taxes'}
+              {t === 'listings'
+                ? `Listings (${listingsData?.total ?? 0})`
+                : t === 'bookings'
+                  ? `Bookings (${bookingsData?.total ?? 0})`
+                  : t === 'payouts'
+                    ? `Payouts (${payoutsData?.total ?? 0})`
+                    : t === 'payout-accounts'
+                      ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
+                      : t === 'reviews'
+                        ? `Reviews (${reviewsData?.total ?? 0})`
+                        : t === 'disputes'
+                          ? `Disputes (${disputesData?.total ?? 0})`
+                          : t === 'claims'
+                            ? `Deposit claims (${claimsData?.total ?? 0})`
+                            : t === 'host-fees'
+                              ? 'Host cancellations'
+                              : 'Fees & taxes'}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -799,6 +799,7 @@ export const ShortletOversight = () => {
                   key={l.id}
                   listing={l}
                   busy={moderation.isPending}
+                  canModerate={canModerate}
                   onModerate={(action) => setPendingModeration({ listing: l, action })}
                 />
               ))}
@@ -1375,7 +1376,6 @@ export const ShortletOversight = () => {
           }
         }}
       />
-
     </div>
   );
 };
@@ -1383,10 +1383,13 @@ export const ShortletOversight = () => {
 function ListingRow({
   listing,
   busy,
+  canModerate,
   onModerate,
 }: {
   listing: AdminShortletListing;
   busy: boolean;
+  /** Read-only roles see the listing without actions the API would refuse. */
+  canModerate: boolean;
   onModerate: (action: 'pause' | 'resume' | 'close' | 'flag' | 'approve') => void;
 }) {
   return (
@@ -1407,7 +1410,7 @@ function ListingRow({
           {listing.bookingCount === 1 ? '' : 's'} · Hosted by {listing.hostName}
         </p>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={canModerate ? 'flex flex-wrap gap-2' : 'hidden'}>
         {listing.status === 'PUBLISHED' && (
           <Button variant="outline" size="sm" onClick={() => onModerate('pause')} disabled={busy}>
             <Pause className="mr-1.5 h-4 w-4" /> Pause

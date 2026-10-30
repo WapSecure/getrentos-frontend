@@ -29,6 +29,7 @@ import {
 import { useCustody } from './CustodyProvider';
 import {
   grantsNothing,
+  hasEnded,
   isLive,
   noticeSummary,
   MANDATE_STATUS_LABELS,
@@ -82,8 +83,8 @@ export function CustodyBar() {
         className="flex items-center gap-2 border-b border-warning/25 bg-warning-subtle px-4 py-2 text-sm text-foreground"
       >
         <AlertTriangle className="h-4 w-4 shrink-0 text-warning" aria-hidden />
-        We could not load your clients ({error}). Do not act on a property until this list is back.
-        you cannot tell whose it is.
+        We could not load your clients ({error}). Do not act on a property until this list is back,
+        because you cannot tell whose it is.
       </div>
     );
   }
@@ -109,8 +110,7 @@ export function CustodyBar() {
   }
 
   return (
-    <div className="relative flex flex-wrap items-center gap-3 border-b border-border bg-muted/40 px-4 py-2 text-sm"
-    >
+    <div className="relative flex flex-wrap items-center gap-3 border-b border-border bg-muted/40 px-4 py-2 text-sm">
       {selected ? (
         <>
           <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -130,10 +130,14 @@ export function CustodyBar() {
           </span>
           <span className="text-muted-foreground">{noticeSummary(selected)}</span>
 
-          {!isLive(selected) && (
-            <Badge variant="warning">{MANDATE_STATUS_LABELS[selected.status]}</Badge>
+          {hasEnded(selected) ? (
+            <Badge variant="neutral">View only</Badge>
+          ) : (
+            !isLive(selected) && (
+              <Badge variant="warning">{MANDATE_STATUS_LABELS[selected.status]}</Badge>
+            )
           )}
-          {grantsNothing(selected) && (
+          {!hasEnded(selected) && grantsNothing(selected) && (
             <Badge variant="neutral" icon={<Lock className="h-3 w-3" aria-hidden />}>
               This mandate grants no access yet
             </Badge>
@@ -155,7 +159,8 @@ export function CustodyBar() {
         href="/agency/home-management"
         variant="outline"
         size="xs"
-        rounded="sm" className="ml-auto"
+        rounded="sm"
+        className="ml-auto"
         icon={<Wrench className="h-4 w-4" aria-hidden />}
       >
         Home management
@@ -300,11 +305,14 @@ function MandateOption({
         <span className="block truncate text-xs text-muted-foreground">
           {mandate.ownerName ?? 'the owner'} · {noticeSummary(mandate)}
         </span>
-        {!live && (
-          <span className="mt-0.5 block text-xs text-warning">
-            {MANDATE_STATUS_LABELS[mandate.status]}
-            {mandate.status !== 'ACTIVE' && ' — you cannot act under this one yet'}
-          </span>
+        {hasEnded(mandate) ? (
+          <span className="mt-0.5 block text-xs text-muted-foreground">View only</span>
+        ) : (
+          !live && (
+            <span className="mt-0.5 block text-xs text-warning">
+              {MANDATE_STATUS_LABELS[mandate.status]} — you cannot act under this one yet
+            </span>
+          )
         )}
       </span>
       {chosen && <span className="sr-only">(selected)</span>}

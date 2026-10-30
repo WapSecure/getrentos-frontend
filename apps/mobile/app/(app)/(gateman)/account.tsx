@@ -15,12 +15,14 @@ import {
 } from '@getrentos/ui-native';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 
 export default function GatemanAccount() {
   const { profile, signOut } = useAuth();
+  const { verified } = useIdentityVerification();
   const { colors, spacing } = useTheme();
   const [postSheetOpen, setPostSheetOpen] = useState(false);
 
@@ -35,7 +37,7 @@ export default function GatemanAccount() {
           <Text variant="callout" color="mutedForeground">
             {profile?.email ?? profile?.phone ?? ''}
           </Text>
-          {profile?.isVerified ? (
+          {verified ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               <ShieldCheck size={14} color={colors.success} />
               <Text variant="caption" style={{ color: colors.success }}>

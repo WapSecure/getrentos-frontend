@@ -23,10 +23,17 @@ import { ApiError } from '@/lib/api/client';
 import { pickImage } from '@/lib/filePicker';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
+import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
 export default function LandlordMicrosite() {
   const { colors, spacing, radius } = useTheme();
-  const query = useQuery({ queryKey: qk.landlord.microsite, queryFn: landlordApi.microsite });
+  const query = useQuery({
+    queryKey: qk.landlord.microsite,
+    queryFn: landlordApi.microsite,
+    retry: retryUnlessPlanGate,
+  });
+  const locked = !!planRefusal(query.error);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -48,6 +55,19 @@ export default function LandlordMicrosite() {
       {query.data ? (
         /* Mounted only once settings arrive, so the form seeds from props. */
         <MicrositeForm initial={query.data} />
+      ) : locked ? (
+        <View style={{ paddingHorizontal: spacing.xl }}>
+          <ProUpsell
+            title="Your microsite is part of Pro"
+            description="A branded page that shows your available homes, under your own name."
+            perks={[
+              'Your logo, colours and contact details',
+              'Every published listing, kept up to date',
+              'A link to share anywhere',
+            ]}
+            note={null}
+          />
+        </View>
       ) : query.isError ? (
         <ErrorState onRetry={() => query.refetch()} />
       ) : (

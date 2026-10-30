@@ -33,6 +33,7 @@ import {
   Warehouse,
   CreditCard,
   Sparkles,
+  Cpu,
   ClipboardCheck,
   Navigation,
   TrendingUp,
@@ -371,6 +372,12 @@ const navItems: NavItem[] = [
     href: ROUTES.ADMIN_REPORTS,
     icon: BarChart3,
     permission: 'reports.view',
+  },
+  {
+    label: 'AI Usage',
+    href: '/admin/ai-usage',
+    icon: Cpu,
+    permission: 'ai.observe',
   },
   {
     label: 'Settings',

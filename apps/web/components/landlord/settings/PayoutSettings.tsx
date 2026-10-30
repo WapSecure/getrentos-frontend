@@ -59,7 +59,7 @@ export const PayoutSettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Payout Account</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Where escrow-released rent payments are sent: transfers run through Paystack.
+        Where rent released by GetRentos Payment Protection is sent: transfers run through Paystack.
       </p>
 
       {savedAccountNumber && (

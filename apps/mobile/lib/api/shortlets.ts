@@ -229,6 +229,8 @@ export interface ShortletBooking {
   depositRefundedAt?: string;
   platformFee?: number;
   taxAmount?: number;
+  /** Tax returned with a stay refund, at the same share as the stay. */
+  taxRefundAmount?: number;
   hostNet?: number;
   reviewed?: boolean;
   depositClaimStatus?: 'PENDING' | 'APPROVED' | 'PARTIAL' | 'REJECTED';

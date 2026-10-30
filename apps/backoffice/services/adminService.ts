@@ -25,6 +25,7 @@ import type {
   NotificationPreference,
   PlatformConfig,
   AdminProfile,
+  AiUsageSummary,
   AdminStaffMember,
   AdminStaffApproval,
   AdminStaffRole,
@@ -714,6 +715,10 @@ export const adminService = {
 
   async getPlatformConfig(): Promise<ApiResponse<PlatformConfig>> {
     return safeCall(() => authFetch('/admin/settings/platform-config'));
+  },
+
+  async getAiUsage(): Promise<ApiResponse<AiUsageSummary>> {
+    return safeCall(() => authFetch('/admin/ai/usage'));
   },
 
   async updatePlatformConfig(config: PlatformConfig): Promise<ApiResponse<PlatformConfig>> {

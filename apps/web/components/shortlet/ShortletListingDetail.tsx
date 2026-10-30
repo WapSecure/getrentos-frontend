@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -86,6 +86,10 @@ const hasRules = (l: ShortletListing) =>
   l.partiesAllowed != null ||
   Boolean(l.houseRules);
 
+const noSubscribe = () => () => undefined;
+const hasAuthToken = () => Boolean(getAuthToken());
+const signedOutOnServer = () => false;
+
 export function ShortletListingDetail({
   listingId,
   initialListing,
@@ -96,7 +100,9 @@ export function ShortletListingDetail({
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isSignedIn] = useState(() => Boolean(getAuthToken()));
+  // The server render has no token, so hydration uses the signed-out snapshot
+  // and React switches to the real one afterwards, without a mismatch.
+  const isSignedIn = useSyncExternalStore(noSubscribe, hasAuthToken, signedOutOnServer);
   const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);

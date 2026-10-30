@@ -18,6 +18,7 @@ import { Screen } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
@@ -28,7 +29,7 @@ export default function AgentAccount() {
   const { profile } = useAuth();
   // The agent profile adds what the session doesn't carry: ratings and tasks done.
   const agent = useQuery({ queryKey: qk.agent.profile, queryFn: agentApi.profile }).data;
-  const verified = !!profile?.isVerified;
+  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
 
   const work: SettingsItem[] = [
     {
@@ -96,8 +97,8 @@ export default function AgentAccount() {
       label: 'Identity verification',
       description: verified ? undefined : 'Verify your ID and licence',
       icon: ShieldCheck,
-      value: verified ? 'Verified' : 'Not verified',
-      tone: verified ? 'success' : 'warning',
+      value: identityLabel,
+      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
     {

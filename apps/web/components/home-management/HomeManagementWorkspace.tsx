@@ -5,32 +5,16 @@ import { useState } from 'react';
 import { CircleAlert } from 'lucide-react';
 import { HomeAssetRegistry } from '@/components/home-management/HomeAssetRegistry';
 import { HomeManagementDashboard } from '@/components/home-management/HomeManagementDashboard';
-import {
-  HomeManagementEscalationQueue,
-} from '@/components/home-management/HomeManagementEscalationQueue';
-import {
-  HomeManagementInspectionFeed,
-} from '@/components/home-management/HomeManagementInspectionFeed';
-import {
-  HomeManagementOperationsCommandCenter,
-} from '@/components/home-management/HomeManagementOperationsCommandCenter';
-import {
-  HomeManagementPortfolioAnalytics,
-} from '@/components/home-management/HomeManagementPortfolioAnalytics';
-import {
-  HomeManagementRecordsPanel,
-} from '@/components/home-management/HomeManagementRecordsPanel';
+import { HomeManagementEscalationQueue } from '@/components/home-management/HomeManagementEscalationQueue';
+import { HomeManagementInspectionFeed } from '@/components/home-management/HomeManagementInspectionFeed';
+import { HomeManagementOperationsCommandCenter } from '@/components/home-management/HomeManagementOperationsCommandCenter';
+import { HomeManagementPortfolioAnalytics } from '@/components/home-management/HomeManagementPortfolioAnalytics';
+import { HomeManagementRecordsPanel } from '@/components/home-management/HomeManagementRecordsPanel';
 import { HomeManagementSlaPolicies } from '@/components/home-management/HomeManagementSlaPolicies';
 import { HomeManagementTimeline } from '@/components/home-management/HomeManagementTimeline';
-import {
-  HomeManagementVendorPerformance,
-} from '@/components/home-management/HomeManagementVendorPerformance';
-import {
-  HomeManagementWorkOrderQueue,
-} from '@/components/home-management/HomeManagementWorkOrderQueue';
-import {
-  PreventiveMaintenancePlans,
-} from '@/components/home-management/PreventiveMaintenancePlans';
+import { HomeManagementVendorPerformance } from '@/components/home-management/HomeManagementVendorPerformance';
+import { HomeManagementWorkOrderQueue } from '@/components/home-management/HomeManagementWorkOrderQueue';
+import { PreventiveMaintenancePlans } from '@/components/home-management/PreventiveMaintenancePlans';
 import { EmptyState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { homeManagementKeys } from '@/lib/queryKeys';
@@ -47,6 +31,11 @@ export type HomeManagementWorkspaceRole = 'owner' | 'landlord' | 'manager';
 
 interface HomeManagementWorkspaceProps {
   role: HomeManagementWorkspaceRole;
+  /**
+   * Narrows everything to one property: the client a manager is acting for.
+   * Their pickers, lists and history then cannot reach another client's home.
+   */
+  scopePropertyId?: string;
 }
 
 const ASSET_PAGE_SIZE = 12;
@@ -62,9 +51,10 @@ const normalizeProperties = (properties: HomeManagementProperty[]): HomeManageme
     state: property.state,
   }));
 
-export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) {
+export function HomeManagementWorkspace({ role, scopePropertyId }: HomeManagementWorkspaceProps) {
   const [assetPage, setAssetPage] = useState(1);
-  const [assetPropertyId, setAssetPropertyId] = useState('');
+  const [chosenAssetPropertyId, setAssetPropertyId] = useState('');
+  const assetPropertyId = scopePropertyId ?? chosenAssetPropertyId;
   const [planPage, setPlanPage] = useState(1);
   const [workOrderPage, setWorkOrderPage] = useState(1);
 
@@ -109,29 +99,42 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
   });
 
   const plansQuery = useQuery({
-    queryKey: [...homeManagementKeys.plans, { page: planPage, pageSize: PLAN_PAGE_SIZE }],
+    queryKey: [
+      ...homeManagementKeys.plans,
+      { page: planPage, pageSize: PLAN_PAGE_SIZE, propertyId: scopePropertyId },
+    ],
     queryFn: () =>
-      unwrap(homeManagementService.listPlans({ page: planPage, pageSize: PLAN_PAGE_SIZE })),
+      unwrap(
+        homeManagementService.listPlans({
+          page: planPage,
+          pageSize: PLAN_PAGE_SIZE,
+          propertyId: scopePropertyId,
+        })
+      ),
     placeholderData: keepPreviousData,
   });
 
   const workOrdersQuery = useQuery({
     queryKey: [
       ...homeManagementKeys.workOrders,
-      { page: workOrderPage, pageSize: WORK_ORDER_PAGE_SIZE },
+      { page: workOrderPage, pageSize: WORK_ORDER_PAGE_SIZE, propertyId: scopePropertyId },
     ],
     queryFn: () =>
       unwrap(
         homeManagementService.listWorkOrders({
           page: workOrderPage,
           pageSize: WORK_ORDER_PAGE_SIZE,
+          propertyId: scopePropertyId,
         })
       ),
     placeholderData: keepPreviousData,
   });
 
+  // The health summary is counted across every property the caller holds, so it
+  // is not shown while the view is narrowed to one client's home.
   const dashboardQuery = useQuery({
     queryKey: homeManagementKeys.dashboard,
+    enabled: !scopePropertyId,
     queryFn: () => unwrap(homeManagementService.getDashboard()),
   });
 
@@ -157,7 +160,10 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
     },
   });
 
-  const properties = propertiesQuery.data ?? [];
+  const allProperties = propertiesQuery.data ?? [];
+  const properties = scopePropertyId
+    ? allProperties.filter((property) => property.id === scopePropertyId)
+    : allProperties;
   const assets = assetsQuery.data?.items ?? [];
   const plans = plansQuery.data?.items ?? [];
   const workOrders = workOrdersQuery.data?.items ?? [];
@@ -167,16 +173,20 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
     <div className="pb-10">
       <HomeManagementDashboard />
 
-      <HomeManagementOperationsCommandCenter
-        role={role}
-        summary={dashboardQuery.data}
-        isLoading={dashboardQuery.isLoading}
-      />
+      {!scopePropertyId && (
+        <>
+          <HomeManagementOperationsCommandCenter
+            role={role}
+            summary={dashboardQuery.data}
+            isLoading={dashboardQuery.isLoading}
+          />
 
-      <HomeManagementPortfolioAnalytics
-        summary={dashboardQuery.data}
-        isLoading={dashboardQuery.isLoading}
-      />
+          <HomeManagementPortfolioAnalytics
+            summary={dashboardQuery.data}
+            isLoading={dashboardQuery.isLoading}
+          />
+        </>
+      )}
 
       {role === 'landlord' && (
         <HomeManagementVendorPerformance vendors={vendors} isLoading={vendorsQuery.isLoading} />
@@ -243,9 +253,9 @@ export function HomeManagementWorkspace({ role }: HomeManagementWorkspaceProps) 
         onPageChange={setWorkOrderPage}
       />
 
-      <HomeManagementTimeline />
+      <HomeManagementTimeline propertyId={scopePropertyId} />
 
-      <HomeManagementInspectionFeed />
+      <HomeManagementInspectionFeed propertyId={scopePropertyId} />
 
       {/* The records panel links to owner/landlord document + vendor routes that
           the agency portal does not have, so it is omitted for managers. */}
