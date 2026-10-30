@@ -46,7 +46,7 @@ export function MandateActionButtons({
           Sign
         </Button>
       )}
-      {permissions.canServeNotice && (
+      {permissions.canServeNotice && !mandate.noticeServedAt && (
         <Button
           size="sm"
           variant="outline"

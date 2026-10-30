@@ -13,6 +13,7 @@ import { Logo } from '@/components/ui/Logo';
 import { Alert, Button, ThemeToggle } from '@getrentos/ui';
 import { useSignup } from '@/hooks/useSignup';
 import { SIGNUP_METHODS, SignupMethod, ROUTES } from '@/lib/constants/auth';
+import { rememberSignupNext, safeNextPath, withNext } from '@/lib/nextPath';
 
 export default function SignupPage() {
   const [method, setMethod] = useState<SignupMethod>(SIGNUP_METHODS.EMAIL);
@@ -52,6 +53,17 @@ export default function SignupPage() {
     resetSignup();
     window.location.href = ROUTES.SIGNUP;
   };
+
+  // A page that sent them here to sign up (an invitation, say) is where they
+  // land once the account exists. Kept for the tab, since sign-up spans pages.
+  const [nextPath] = useState<string | null>(() =>
+    typeof window === 'undefined'
+      ? null
+      : safeNextPath(new URLSearchParams(window.location.search).get('next'))
+  );
+  useEffect(() => {
+    if (nextPath) rememberSignupNext(nextPath);
+  }, [nextPath]);
 
   // If step is 'roles', redirect to role selection.
   useEffect(() => {
@@ -195,7 +207,7 @@ export default function SignupPage() {
             <p className="mt-7 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
               <a
-                href={ROUTES.LOGIN}
+                href={withNext(ROUTES.LOGIN, nextPath)}
                 className="font-semibold text-primary transition-colors hover:text-primary-hover focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 Sign in

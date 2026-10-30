@@ -15,11 +15,13 @@ import {
   formatDay,
   grantsNothing,
   isLive,
+  noticeEndsAt,
   noticeSummary,
 } from '@/services/mandateService';
 import { MandateActionButtons } from './MandateActionButtons';
 import { CapabilityChip, formatMoment, MandateStatusBadge } from './mandatePresentation';
 import { useMandateActions } from './useMandateActions';
+import { describeAgencyError } from './agencyAccess';
 
 /**
  * One engagement, in full.
@@ -53,7 +55,7 @@ export function MandateDetailView() {
   });
 
   if (error && !data) {
-    return <PageErrorState description={(error as Error).message} />;
+    return <PageErrorState description={describeAgencyError(error)} />;
   }
 
   if (isLoading || !data) {
@@ -196,6 +198,10 @@ export function MandateDetailView() {
             missing={mandate.status === 'REJECTED' ? 'Refused' : 'Awaiting verification'}
           />
           <Moment label="Notice served" at={mandate.noticeServedAt} missing="No notice served" />
+          <Moment
+            label={mandate.terminatedAt ? 'Notice period ended' : 'Notice period ends'}
+            at={noticeEndsAt(mandate)}
+          />
           <Moment
             label="Ended"
             at={mandate.terminatedAt}

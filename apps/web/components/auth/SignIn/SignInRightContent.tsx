@@ -13,6 +13,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useToast, type ToastVariant } from '@getrentos/ui';
 import { Button, SessionExpiredNotice } from '@getrentos/ui';
 import { AuthMethodTabs } from '../AuthMethodTabs';
+import { safeNextPath, withNext } from '@/lib/nextPath';
 
 interface SignInRightContentProps {
   method: SignInMethod;
@@ -30,8 +31,12 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   // redirected here via `?next=`. Only same-origin paths are accepted.
   const [nextPath] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
-    const next = new URLSearchParams(window.location.search).get('next');
-    return next && next.startsWith('/') ? next : null;
+    return safeNextPath(new URLSearchParams(window.location.search).get('next'));
+  });
+  // Sent here from an invitation link rather than from an expired session.
+  const [fromInvite] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('reason') === 'invite';
   });
 
   useEffect(() => {
@@ -137,6 +142,15 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
         </div>
 
         <SessionExpiredNotice />
+        {fromInvite && (
+          <div
+            role="status"
+            className="mb-4 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-sm text-foreground"
+          >
+            Sign in with the email your invitation was sent to, or create an account with it, to
+            open the invitation.
+          </div>
+        )}
 
         {/* Lockout Warning */}
         {isLocked && lockoutTimer && (
@@ -175,7 +189,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
             <a
-              href={ROUTES.SIGNUP}
+              href={withNext(ROUTES.SIGNUP, nextPath)}
               className="font-semibold text-primary transition-colors hover:text-primary-hover focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             >
               Create one now

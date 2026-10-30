@@ -421,6 +421,21 @@ export function isLive(mandate: ManagementMandateDto): boolean {
   return true;
 }
 
+/** True once an engagement is over for good (ended, expired or past its end date). */
+export function hasEnded(mandate: ManagementMandateDto): boolean {
+  if (mandate.status === 'TERMINATED' || mandate.status === 'EXPIRED') return true;
+  return (
+    mandate.status === 'ACTIVE' &&
+    !!mandate.endAt &&
+    new Date(mandate.endAt).getTime() <= Date.now()
+  );
+}
+
+/** When an engagement that is over ended, if the record says. */
+export function endedOn(mandate: ManagementMandateDto): string | null {
+  return mandate.terminatedAt ?? mandate.endAt ?? null;
+}
+
 /** A scope that grants nothing yet, so a screen can explain the empty portfolio. */
 export function grantsNothing(mandate: ManagementMandateDto): boolean {
   const { canList, canManage, canTransact } = mandate.capabilities;
@@ -434,8 +449,12 @@ export function grantsNothing(mandate: ManagementMandateDto): boolean {
  * many days, so it belongs on the screen rather than in a document nobody opens.
  */
 export function noticeSummary(mandate: ManagementMandateDto): string {
-  if (mandate.status === 'TERMINATED') return 'Ended';
-  if (mandate.status === 'EXPIRED') return 'Expired';
+  if (mandate.status === 'TERMINATED')
+    return mandate.terminatedAt ? `Ended ${formatDay(mandate.terminatedAt)}` : 'Ended';
+  if (mandate.status === 'EXPIRED')
+    return mandate.endAt ? `Expired ${formatDay(mandate.endAt)}` : 'Expired';
+  const noticeEnds = noticeEndsAt(mandate);
+  if (noticeEnds) return `Notice served, ends ${formatDay(noticeEnds)}`;
   if (!mandate.endAt) {
     return mandate.noticePeriodDays > 0
       ? `Rolling, ${mandate.noticePeriodDays} days' notice`
@@ -444,10 +463,28 @@ export function noticeSummary(mandate: ManagementMandateDto): string {
   return `Ends ${formatDay(mandate.endAt)}`;
 }
 
+/**
+ * When a served notice runs out: the notice clock plus the agreed period, as the
+ * API counts it. Null while no notice has been served.
+ */
+export function noticeEndsAt(
+  mandate: Pick<ManagementMandateDto, 'noticeServedAt' | 'noticePeriodDays'>
+): string | null {
+  if (!mandate.noticeServedAt) return null;
+  const served = new Date(mandate.noticeServedAt).getTime();
+  if (Number.isNaN(served)) return null;
+  return new Date(served + mandate.noticePeriodDays * 24 * 60 * 60 * 1000).toISOString();
+}
+
 /** A date as a person reads it, or a dash when there is nothing to read. */
 export function formatDay(value: string | null | undefined): string {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Africa/Lagos',
+  });
 }

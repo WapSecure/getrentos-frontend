@@ -1,19 +1,10 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, Building2, Clock, FileText, ShieldAlert, Upload } from 'lucide-react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardSkeleton,
-  Field,
-  Input,
-  Select,
-  useToast,
-} from '@getrentos/ui';
+import { Badge, Button, Card, CardSkeleton, Field, Input, Select, useToast } from '@getrentos/ui';
 import { NIGERIA_STATES } from '@/lib/constants/locations';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
@@ -38,6 +29,61 @@ const EMPTY: AgencyProfileInput = {
   contactPhone: '',
 };
 
+type FieldKey =
+  | 'name'
+  | 'registeredName'
+  | 'registrationNumber'
+  | 'registeredAddress'
+  | 'contactPhone'
+  | 'contactEmail';
+type FieldErrors = Partial<Record<FieldKey, string>>;
+
+/** In the order they appear on the form, so focus goes to the first one. */
+const FIELD_ORDER: FieldKey[] = [
+  'name',
+  'registeredName',
+  'registrationNumber',
+  'registeredAddress',
+  'contactPhone',
+  'contactEmail',
+];
+const fieldId = (key: FieldKey) => `agency-setup-${key}`;
+
+/** RC, BN or IT, then 4 to 9 digits, as printed on the certificate (same rule as the API). */
+const CAC_NUMBER = /^(BN|RC|IT)\s?-?\d{4,9}$/i;
+const CAC_HINT =
+  'Enter it as printed on the certificate, e.g. RC 1234567, BN 3456789 or IT 123456.';
+
+function validate(form: AgencyProfileInput): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!form.name.trim()) errors.name = 'Enter your firm’s trading name.';
+  if (!form.registeredName.trim())
+    errors.registeredName = 'Enter the registered name from the CAC certificate.';
+  if (!form.registrationNumber.trim()) errors.registrationNumber = 'Enter the CAC number.';
+  else if (!CAC_NUMBER.test(form.registrationNumber.trim()))
+    errors.registrationNumber = `That CAC number does not look right. ${CAC_HINT}`;
+  if (form.registeredAddress.trim().length < 5)
+    errors.registeredAddress = 'Enter the registered address (at least 5 characters).';
+  if (form.contactPhone.trim().length < 7) errors.contactPhone = 'Enter a business phone number.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail.trim()))
+    errors.contactEmail = 'Enter a valid business email address.';
+  return errors;
+}
+
+/** Puts a server refusal on the field it is about, when it names one. */
+function serverFieldError(message: string): FieldErrors | null {
+  if (/CAC number|registration ?number/i.test(message)) return { registrationNumber: message };
+  for (const key of FIELD_ORDER) {
+    if (new RegExp(`\\b${key}\\b`).test(message)) return { [key]: message };
+  }
+  return null;
+}
+
+function focusFirst(errors: FieldErrors) {
+  const first = FIELD_ORDER.find((key) => errors[key]);
+  if (first) document.getElementById(fieldId(first))?.focus();
+}
+
 const fromFirm = (firm: AgencyOnboarding): AgencyProfileInput => ({
   name: firm.name,
   registeredName: firm.profile?.registeredName ?? '',
@@ -59,6 +105,7 @@ export function AgencySetupView() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<AgencyProfileInput | null>(null);
+  const [errors, setErrors] = useState<FieldErrors>({});
   const toast = useToast();
 
   const firmQuery = useQuery({
@@ -72,7 +119,18 @@ export function AgencySetupView() {
   });
   const firm = firmQuery.data ?? null;
   const form = draft ?? (firm ? fromFirm(firm) : EMPTY);
-  const set = (patch: Partial<AgencyProfileInput>) => setDraft({ ...form, ...patch });
+  const set = (patch: Partial<AgencyProfileInput>) => {
+    setDraft({ ...form, ...patch });
+    // A field's message goes once the person changes that field.
+    const touched = Object.keys(patch) as FieldKey[];
+    if (touched.some((key) => errors[key])) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        for (const key of touched) delete next[key];
+        return next;
+      });
+    }
+  };
 
   const onSaved = (next: AgencyOnboarding | undefined, message: string) => {
     queryClient.setQueryData(KEY, next ?? null);
@@ -104,8 +162,28 @@ export function AgencySetupView() {
         firm ? 'Details saved.' : 'Your firm is set up. Next, upload the CAC certificate.'
       );
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      const onField = serverFieldError(e.message);
+      if (onField) {
+        setErrors(onField);
+        // Wait for the message to render before moving focus to it.
+        requestAnimationFrame(() => focusFirst(onField));
+      } else {
+        toast.error(e.message);
+      }
+    },
   });
+
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const found = validate(form);
+    setErrors(found);
+    if (Object.keys(found).length > 0) {
+      requestAnimationFrame(() => focusFirst(found));
+      return;
+    }
+    save.mutate();
+  };
 
   const upload = useMutation({
     mutationFn: async (file: File) => {
@@ -138,13 +216,7 @@ export function AgencySetupView() {
 
   const kyb = firm?.profile?.kybStatus ?? 'NOT_SUBMITTED';
   const editable = !firm || (firm.isOwner && (kyb === 'NOT_SUBMITTED' || kyb === 'REJECTED'));
-  const complete =
-    form.name.trim() &&
-    form.registeredName.trim() &&
-    form.registrationNumber.trim() &&
-    form.registeredAddress.trim().length >= 5 &&
-    form.contactEmail.includes('@') &&
-    form.contactPhone.trim().length >= 7;
+  const errorCount = Object.keys(errors).length;
 
   return (
     <div className="mx-auto max-w-3xl p-6">
@@ -164,77 +236,121 @@ export function AgencySetupView() {
 
       {editable ? (
         <Card className="mt-6 space-y-4 p-6">
-          <h2 className="text-sm font-semibold text-foreground">Firm details</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Trading name">
-              <Input
-                value={form.name}
-                onChange={(e) => set({ name: e.target.value })}
-                placeholder="e.g. Lagos Homes"
-              />
-            </Field>
-            <Field label="Registered name (as on the CAC certificate)">
-              <Input
-                value={form.registeredName}
-                onChange={(e) => set({ registeredName: e.target.value })}
-                placeholder="e.g. Lagos Homes Limited"
-              />
-            </Field>
-            <Field label="Registration type">
-              <Select
-                value={form.businessType}
-                onValueChange={(v) => set({ businessType: v as AgencyBusinessType })}
-                options={(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => ({
-                  value: t,
-                  label: BUSINESS_TYPE_LABELS[t],
-                }))}
-              />
-            </Field>
-            <Field label="CAC number">
-              <Input
-                value={form.registrationNumber}
-                onChange={(e) => set({ registrationNumber: e.target.value })}
-                placeholder="e.g. RC 1234567"
-              />
-            </Field>
-            <Field label="Registered address" className="sm:col-span-2">
-              <Input
-                value={form.registeredAddress}
-                onChange={(e) => set({ registeredAddress: e.target.value })}
-                placeholder="Street, area, city"
-              />
-            </Field>
-            <Field label="State">
-              <Select
-                value={form.state}
-                onValueChange={(v) => set({ state: v })}
-                options={NIGERIA_STATES.map((s) => ({ value: s, label: s }))}
-              />
-            </Field>
-            <Field label="Business phone">
-              <Input
-                value={form.contactPhone}
-                onChange={(e) => set({ contactPhone: e.target.value })}
-                placeholder="+234…"
-              />
-            </Field>
-            <Field label="Business email" className="sm:col-span-2">
-              <Input
-                type="email"
-                value={form.contactEmail}
-                onChange={(e) => set({ contactEmail: e.target.value })}
-                placeholder="ops@yourfirm.ng"
-              />
-            </Field>
-          </div>
-          <Button
-            onClick={() => save.mutate()}
-            disabled={!complete}
-            isLoading={save.isPending}
-            loadingText="Saving…"
+          <form
+            noValidate
+            onSubmit={onSubmit}
+            className="space-y-4"
+            aria-labelledby="agency-setup-details"
           >
-            {firm ? 'Save details' : 'Create my firm'}
-          </Button>
+            <h2 id="agency-setup-details" className="text-sm font-semibold text-foreground">
+              Firm details
+            </h2>
+            <p className="text-xs text-muted-foreground">All fields are required.</p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Trading name" htmlFor={fieldId('name')} error={errors.name} required>
+                <Input
+                  value={form.name}
+                  onChange={(e) => set({ name: e.target.value })}
+                  placeholder="e.g. Lagos Homes"
+                />
+              </Field>
+              <Field
+                label="Registered name (as on the CAC certificate)"
+                htmlFor={fieldId('registeredName')}
+                error={errors.registeredName}
+                required
+              >
+                <Input
+                  value={form.registeredName}
+                  onChange={(e) => set({ registeredName: e.target.value })}
+                  placeholder="e.g. Lagos Homes Limited"
+                />
+              </Field>
+              <Field label="Registration type">
+                <Select
+                  value={form.businessType}
+                  onValueChange={(v) => set({ businessType: v as AgencyBusinessType })}
+                  options={(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => ({
+                    value: t,
+                    label: BUSINESS_TYPE_LABELS[t],
+                  }))}
+                />
+              </Field>
+              <Field
+                label="CAC number"
+                htmlFor={fieldId('registrationNumber')}
+                hint={CAC_HINT}
+                error={errors.registrationNumber}
+                required
+              >
+                <Input
+                  value={form.registrationNumber}
+                  onChange={(e) => set({ registrationNumber: e.target.value })}
+                  placeholder="e.g. RC 1234567"
+                  autoComplete="off"
+                />
+              </Field>
+              <Field
+                label="Registered address"
+                className="sm:col-span-2"
+                htmlFor={fieldId('registeredAddress')}
+                error={errors.registeredAddress}
+                required
+              >
+                <Input
+                  value={form.registeredAddress}
+                  onChange={(e) => set({ registeredAddress: e.target.value })}
+                  placeholder="Street, area, city"
+                />
+              </Field>
+              <Field label="State">
+                <Select
+                  value={form.state}
+                  onValueChange={(v) => set({ state: v })}
+                  options={NIGERIA_STATES.map((s) => ({ value: s, label: s }))}
+                />
+              </Field>
+              <Field
+                label="Business phone"
+                htmlFor={fieldId('contactPhone')}
+                error={errors.contactPhone}
+                required
+              >
+                <Input
+                  value={form.contactPhone}
+                  onChange={(e) => set({ contactPhone: e.target.value })}
+                  placeholder="+234…"
+                  type="tel"
+                  autoComplete="tel"
+                />
+              </Field>
+              <Field
+                label="Business email"
+                className="sm:col-span-2"
+                htmlFor={fieldId('contactEmail')}
+                error={errors.contactEmail}
+                required
+              >
+                <Input
+                  type="email"
+                  autoComplete="email"
+                  value={form.contactEmail}
+                  onChange={(e) => set({ contactEmail: e.target.value })}
+                  placeholder="ops@yourfirm.ng"
+                />
+              </Field>
+            </div>
+            {errorCount > 0 && (
+              <p role="alert" className="text-sm text-destructive">
+                {errorCount === 1
+                  ? 'One field needs attention.'
+                  : `${errorCount} fields need attention.`}
+              </p>
+            )}
+            <Button type="submit" isLoading={save.isPending} loadingText="Saving…">
+              {firm ? 'Save details' : 'Create my firm'}
+            </Button>
+          </form>
 
           {firm && (
             <div className="border-t border-border pt-4">

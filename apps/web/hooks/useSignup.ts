@@ -5,6 +5,7 @@ import { useSignupStore } from '@/lib/store/signupStore';
 import { authService } from '@/services/authService';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, STORAGE_KEYS, getDashboardRoute } from '@/lib/constants/auth';
+import { takeSignupNext } from '@/lib/nextPath';
 
 export const useSignup = () => {
   const router = useRouter();
@@ -123,10 +124,11 @@ export const useSignup = () => {
       localStorage.setItem(STORAGE_KEYS.SELECTED_ROLES, JSON.stringify(data.selectedRoles));
 
       // Account is created now, with no document/facial verification required
-      // — route straight to the primary role dashboard. Identity/license/
-      // ownership checks happen later, at the point of use.
+      // — route back to the page that sent them to sign up, if any, or else
+      // straight to the primary role dashboard. Identity/license/ownership
+      // checks happen later, at the point of use.
       const primaryRole = data.selectedRoles[0];
-      router.push(getDashboardRoute(primaryRole));
+      router.push(takeSignupNext() ?? getDashboardRoute(primaryRole));
     } else {
       setError(response.message || 'Failed to create account');
     }
