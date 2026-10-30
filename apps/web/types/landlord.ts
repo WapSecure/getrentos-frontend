@@ -559,6 +559,17 @@ export interface PortfolioAnalytics {
   properties: PropertyPerformance[];
 }
 
+/** Plain-language AI briefing over the portfolio analytics (GET /ai/portfolio/briefing). */
+export interface PortfolioBriefing {
+  hasData: boolean;
+  headline: string;
+  insights: string[];
+  actions: string[];
+  source: 'ai' | 'heuristic';
+  model: string | null;
+  generatedAt: string;
+}
+
 /** A lease's recurring rent: each later period invoiced `leadDays` before it is due. */
 export interface RentScheduleItem {
   id?: string;
