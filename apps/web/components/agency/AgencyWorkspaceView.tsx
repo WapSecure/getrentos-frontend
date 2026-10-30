@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { Building2, FileSignature, KeyRound, MapPin, ShieldAlert } from 'lucide-react';
+import { Building2, CalendarX, FileSignature, KeyRound, MapPin, ShieldAlert } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -18,7 +18,14 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
 import { authorityKeys } from '@/lib/queryKeys';
 import { propertyAuthorityService } from '@/services/propertyAuthorityService';
-import { grantsNothing, noticeSummary } from '@/services/mandateService';
+import {
+  endedOn,
+  formatDay,
+  grantsNothing,
+  hasEnded,
+  noticeSummary,
+} from '@/services/mandateService';
+import { describeAgencyError } from './agencyAccess';
 
 /**
  * The workspace: one client's properties, and what this engagement lets you do
@@ -62,6 +69,21 @@ export function AgencyWorkspaceView() {
 
   if (error && live.length === 0) {
     return <PageErrorState description={error} />;
+  }
+
+  // A chosen client whose engagement is over: say so plainly, with nothing to act on.
+  if (selected && hasEnded(selected)) {
+    const on = endedOn(selected);
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-10">
+        <EmptyState
+          icon={CalendarX}
+          title={on ? `This engagement ended on ${formatDay(on)}` : 'This engagement has ended'}
+          description={`You no longer act for ${selected.ownerName ?? 'the owner'} on ${selected.propertyTitle ?? 'this property'}. Its record stays on the mandate${live.length > 0 ? '; choose another client in the bar above to keep working' : ''}.`}
+          action={<Button href={`/agency/mandates/${selected.id}`}>View the engagement</Button>}
+        />
+      </div>
+    );
   }
 
   if (live.length === 0) {
@@ -119,7 +141,7 @@ export function AgencyWorkspaceView() {
 
       {propertiesError && !managed && (
         <PageErrorState
-          description={(propertiesError as Error).message}
+          description={describeAgencyError(propertiesError)}
           onRetry={() => void refetch()}
         />
       )}
@@ -130,7 +152,7 @@ export function AgencyWorkspaceView() {
         <EmptyState
           icon={Building2}
           title="No property in this engagement yet"
-          description="The mandate names a property; if it is not showing, the engagement may not be verified yet."
+          description="The mandate names a property, but it is not in the list of properties you can act on right now. Check the engagement's status under Manage mandates."
         />
       ) : (
         <ul className="space-y-4">

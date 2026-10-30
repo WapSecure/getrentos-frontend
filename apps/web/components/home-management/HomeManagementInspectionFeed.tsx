@@ -14,12 +14,17 @@ import { homeManagementService } from '@/services/homeManagementService';
 
 const INSPECTION_PAGE_SIZE = 6;
 
-export function HomeManagementInspectionFeed() {
+export function HomeManagementInspectionFeed({ propertyId }: { propertyId?: string } = {}) {
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useQuery({
-    queryKey: [...homeManagementKeys.inspections, { page, pageSize: INSPECTION_PAGE_SIZE }],
+    queryKey: [
+      ...homeManagementKeys.inspections,
+      { page, pageSize: INSPECTION_PAGE_SIZE, propertyId },
+    ],
     queryFn: () =>
-      unwrap(homeManagementService.listInspections({ page, pageSize: INSPECTION_PAGE_SIZE })),
+      unwrap(
+        homeManagementService.listInspections({ page, pageSize: INSPECTION_PAGE_SIZE, propertyId })
+      ),
     placeholderData: keepPreviousData,
   });
   const inspections = data?.items ?? [];
