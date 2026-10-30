@@ -82,12 +82,12 @@ function FilterForm({
 
   return (
     <View style={{ gap: spacing.xl }}>
-      <Field label="Price range per month">
+      <Field label="Rent range per year">
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
             <NumberField
               placeholder="Min"
-              accessibilityLabel="Minimum price per month"
+              accessibilityLabel="Minimum rent per year"
               currency
               value={minStr}
               onValueChange={setMinStr}
@@ -96,13 +96,17 @@ function FilterForm({
           <View style={{ flex: 1 }}>
             <NumberField
               placeholder="Max"
-              accessibilityLabel="Maximum price per month"
+              accessibilityLabel="Maximum rent per year"
               currency
               value={maxStr}
               onValueChange={setMaxStr}
             />
           </View>
         </View>
+        <Text variant="caption" color="mutedForeground">
+          Homes are let by the year, so enter a yearly budget (₦50,000 a month is ₦600,000 a
+          year).
+        </Text>
       </Field>
 
       <Field label="Bedrooms">
