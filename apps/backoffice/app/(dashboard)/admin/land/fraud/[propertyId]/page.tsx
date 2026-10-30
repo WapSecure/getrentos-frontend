@@ -227,6 +227,14 @@ function SignalItem({
           </p>
         )}
         {s.code === 'REPRESENTATIVE_LINKED' && <p>{representativeLinkText(s.detail)}</p>}
+        {s.code === 'CONFLICTING_CLAIM' && (
+          <p>
+            {d.kind === 'BOUNDARY_OVERLAP'
+              ? `Boundary overlaps ${Math.round(Number(d.overlapRatio ?? 0) * 100)}% with`
+              : `Same ${d.kind === 'TITLE_NUMBER' ? 'title' : 'survey'} number as`}{' '}
+            “{String(d.otherPropertyTitle ?? 'another listing')}”.
+          </p>
+        )}
         <p className="mt-1 text-xs">
           First seen {formatDate(s.firstSeenAt)} · last seen {formatDate(s.lastSeenAt)}
           {s.fraudAlertId && ' · in Fraud & Risk'}
