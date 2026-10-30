@@ -77,6 +77,14 @@ export const DatePicker = ({
   const maxDate = toDate(max);
   const [viewMonth, setViewMonth] = useState(() => selected ?? new Date());
 
+  // With nothing chosen yet, open on the first month that can be picked (e.g.
+  // a check-out picker opens on the check-in month, not today's).
+  useEffect(() => {
+    if (!open || selected || !minDate) return;
+    if (isAfter(startOfMonth(minDate), startOfMonth(new Date()))) setViewMonth(startOfMonth(minDate));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, min]);
+
   const monthStart = startOfMonth(viewMonth);
   const monthEnd = endOfMonth(viewMonth);
   const leadingBlanks = getDay(monthStart);

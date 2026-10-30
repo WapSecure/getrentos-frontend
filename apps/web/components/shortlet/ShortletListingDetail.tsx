@@ -96,7 +96,10 @@ export function ShortletListingDetail({
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isSignedIn] = useState(() => Boolean(getAuthToken()));
+  // Read after mount: the server render has no token, so reading it during the
+  // first render would make the client tree differ from the server HTML.
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  useEffect(() => setIsSignedIn(Boolean(getAuthToken())), []);
   const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);

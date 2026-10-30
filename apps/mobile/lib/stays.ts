@@ -253,7 +253,27 @@ export const guestTotal = (b: Pick<ShortletBooking, 'total' | 'taxAmount'>) =>
  * tax and deposit all come back, though the booking records only the stay.
  */
 export const stayRefund = (b: ShortletBooking): number | undefined =>
-  b.cancelledBy === 'HOST' && b.paymentStatus === 'REFUNDED' ? guestTotal(b) : b.refundAmount;
+  b.cancelledBy === 'HOST' && b.paymentStatus === 'REFUNDED'
+    ? guestTotal(b)
+    : b.refundAmount != null
+      ? b.refundAmount + (b.taxRefundAmount ?? 0)
+      : undefined;
+
+/** Share of a paid stay the guest gets back for cancelling `daysBefore` days out (mirrors the backend). */
+function refundPercent(policy: ShortletBooking['cancellationPolicy'], daysBefore: number): number {
+  if (policy === 'FLEXIBLE') return daysBefore >= 1 ? 100 : 0;
+  if (policy === 'MODERATE') return daysBefore >= 5 ? 100 : daysBefore >= 1 ? 50 : 0;
+  return daysBefore >= 7 ? 100 : daysBefore >= 3 ? 50 : 0;
+}
+
+/** What a guest cancelling today would get back for the stay (stay + tax share), and at what percent. */
+export function cancelRefundEstimate(b: ShortletBooking, now = new Date()): { amount: number; percent: number } {
+  const today = new Date(now.toISOString().slice(0, 10)).getTime();
+  const daysBefore = Math.ceil((new Date(b.checkIn).getTime() - today) / 86_400_000);
+  const percent = refundPercent(b.cancellationPolicy, daysBefore);
+  const amount = Math.floor((b.total * percent) / 100) + Math.floor(((b.taxAmount ?? 0) * percent) / 100);
+  return { amount, percent };
+}
 
 export type StayTab = 'upcoming' | 'past' | 'cancelled';
 

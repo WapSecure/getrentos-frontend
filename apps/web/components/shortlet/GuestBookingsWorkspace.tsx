@@ -83,9 +83,12 @@ function cancelDescription(b: ShortletBooking): string {
   if (b.paymentStatus === 'PAID') {
     const pct = refundPercentFor(b, daysBefore);
     if (pct > 0) {
-      return `Under the ${label} policy you'll be refunded ${formatCurrency(
-        Math.floor((b.total * pct) / 100)
-      )} (${pct}%).`;
+      // The stay and its tax come back at the same share, as the backend refunds them.
+      const refund =
+        Math.floor((b.total * pct) / 100) + Math.floor(((b.taxAmount ?? 0) * pct) / 100);
+      return `Under the ${label} policy you'll be refunded ${formatCurrency(refund)} (${pct}%${
+        b.taxAmount ? ', incl. tax' : ''
+      }).`;
     }
     return `No refund applies under the ${label} policy this close to check-in.`;
   }
@@ -183,6 +186,7 @@ export const GuestBookingsWorkspace = () => {
       queryClient.invalidateQueries({ queryKey: shortletKeys.guestBookings });
       const totalRefund =
         (cancelled.refundAmount ?? 0) +
+        (cancelled.taxRefundAmount ?? 0) +
         (cancelled.deposit != null && cancelled.depositStatus === 'REFUNDED'
           ? cancelled.deposit
           : 0);
@@ -340,7 +344,7 @@ export const GuestBookingsWorkspace = () => {
                   )}
                   {b.refundAmount != null && b.refundAmount > 0 && (
                     <Badge variant="info" className="mt-1" icon={<RotateCcw className="h-3 w-3" />}>
-                      Refunded {formatCurrency(b.refundAmount)}
+                      Refunded {formatCurrency(b.refundAmount + (b.taxRefundAmount ?? 0))}
                     </Badge>
                   )}
                   <DepositClaimBadges b={b} />
