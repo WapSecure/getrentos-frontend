@@ -15,7 +15,10 @@ import {
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
-import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
+import {
+  VerificationRequiredNotice,
+  isVerificationGateError,
+} from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -158,7 +161,7 @@ export const AddClientModal = ({
             <p role="status" className="text-xs text-muted-foreground">
               Checking account…
             </p>
-          ) : verifiedEligible ? (
+          ) : verifiedEligible && !isVerificationGateError(submitError) ? (
             <Alert variant="success" title="Verified as an owner or landlord">
               {checkedName || email} is ready to receive an invitation.
             </Alert>

@@ -110,6 +110,7 @@ export default function GatemanVerifyPage() {
   /** A failed override attempt, kept separate so the guard's typed reason survives it. */
   const [overrideError, setOverrideError] = useState<string | null>(null);
   const scanInputRef = useRef<HTMLInputElement>(null);
+  const pinInputRef = useRef<HTMLInputElement>(null);
 
   const queue = useGateQueue();
   const replaySummary = useGateReplaySummary();
@@ -485,6 +486,7 @@ export default function GatemanVerifyPage() {
           <Button
             variant="outline"
             fullWidth
+            size="lg"
             icon={<QrCode className="w-4 h-4" />}
             disabled={verify.isPending}
             isLoading={isScanning}
@@ -500,34 +502,51 @@ export default function GatemanVerifyPage() {
             <div className="flex-1 h-px bg-border" />
           </div>
 
-          <NumberInput
-            value={pin}
-            onValueChange={(value) => setPin(value.slice(0, 6))}
-            maxLength={6}
-            placeholder="000000"
-            aria-label="Visitor PIN"
-            inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
-          />
-          <Button
-            variant="primary"
-            fullWidth
-            disabled={pin.length !== 6}
-            isLoading={verify.isPending}
-            loadingText="Verifying…"
-            onClick={() => {
+          {/* A form, so typing the six digits and pressing Enter checks the
+              visitor in: the fastest path at a busy barrier. */}
+          <form
+            className="space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (pin.length !== 6 || verify.isPending) return;
               setResult(null);
               setBlocked(null);
-              verify.mutate({ code: pin });
+              verify.mutate(
+                { code: pin },
+                // Back to the PIN box for the next visitor; the outcome is
+                // announced by the live region below.
+                { onSettled: () => pinInputRef.current?.focus() }
+              );
             }}
           >
-            Check In
-          </Button>
+            <NumberInput
+              ref={pinInputRef}
+              value={pin}
+              onValueChange={(value) => setPin(value.slice(0, 6))}
+              maxLength={6}
+              placeholder="000000"
+              aria-label="Visitor PIN"
+              inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
+            />
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              size="lg"
+              disabled={pin.length !== 6}
+              isLoading={verify.isPending}
+              loadingText="Verifying…"
+            >
+              Check In
+            </Button>
+          </form>
 
           {/* The visitor who has nothing arranged. Raising a request is not the
               same as letting them in: the household is asked first. */}
           <Button
             variant="outline"
             fullWidth
+            size="lg"
             className="gap-2"
             disabled={verify.isPending}
             onClick={() => {
@@ -555,31 +574,33 @@ export default function GatemanVerifyPage() {
             />
           )}
 
-          {result?.pass && (
-            <Alert
-              variant="success"
-              icon={CheckCircle2}
-              title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
-            >
-              <p className="text-xs">{result.pass.residentName}</p>
-              {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
-            </Alert>
-          )}
-          {result?.queued && (
-            <Alert variant="warning" icon={CloudOff} title="Saved on this device">
-              <p className="text-xs">
-                {result.queued} could not reach the estate, so it is stored here and will be sent
-                automatically once there is a connection. The visitor can go through.
-              </p>
-            </Alert>
-          )}
-          {result?.requested && (
-            <Alert variant="info" icon={UserPlus} title="Asked the household">
-              <p className="text-xs">{result.requested}</p>
-            </Alert>
-          )}
-          {result?.warning && <WatchlistWarning warning={result.warning} />}
-          {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
+          <div role="status" aria-live="polite" className="contents">
+            {result?.pass && (
+              <Alert
+                variant="success"
+                icon={CheckCircle2}
+                title={`${result.pass.visitorName} checked in for ${result.pass.unitLabel}`}
+              >
+                <p className="text-xs">{result.pass.residentName}</p>
+                {standingPassNote && <p className="text-xs mt-0.5">{standingPassNote}</p>}
+              </Alert>
+            )}
+            {result?.queued && (
+              <Alert variant="warning" icon={CloudOff} title="Saved on this device">
+                <p className="text-xs">
+                  {result.queued} could not reach the estate, so it is stored here and will be sent
+                  automatically once there is a connection. The visitor can go through.
+                </p>
+              </Alert>
+            )}
+            {result?.requested && (
+              <Alert variant="info" icon={UserPlus} title="Asked the household">
+                <p className="text-xs">{result.requested}</p>
+              </Alert>
+            )}
+            {result?.warning && <WatchlistWarning warning={result.warning} />}
+            {result?.error && <Alert variant="danger" icon={XCircle} title={result.error} />}
+          </div>
         </Card>
 
         {/* The queue is shown here, where a guard acts, rather than as a banner over
@@ -606,7 +627,7 @@ export default function GatemanVerifyPage() {
                 </ul>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   className="mt-3"
                   isLoading={isSending}
                   loadingText="Sending…"
@@ -691,6 +712,7 @@ export default function GatemanVerifyPage() {
                 <Button
                   variant="primary"
                   fullWidth
+                  size="lg"
                   disabled={admit.isPending}
                   isLoading={admit.isPending && admit.variables?.pass.id === pass.id}
                   loadingText="Admitting…"
@@ -718,7 +740,7 @@ export default function GatemanVerifyPage() {
                 </div>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   disabled={cancelWalkIn.isPending}
                   isLoading={cancelWalkIn.isPending && cancelWalkIn.variables?.id === pass.id}
                   onClick={() => cancelWalkIn.mutate(pass)}
@@ -767,7 +789,7 @@ export default function GatemanVerifyPage() {
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="lg"
                     className="shrink-0"
                     icon={<LogOut className="w-3.5 h-3.5" />}
                     disabled={checkOut.isPending}

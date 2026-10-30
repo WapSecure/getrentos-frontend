@@ -129,7 +129,7 @@ export const authApi = {
     }),
 
   verifyMagicLink: (token: string) =>
-    apiFetch<AuthSession>('/auth/magic-link/verify', {
+    apiFetch<LoginResult>('/auth/magic-link/verify', {
       method: 'POST',
       anonymous: true,
       body: { token },

@@ -72,8 +72,6 @@ export interface Property {
   amenities?: string[];
   landlordId?: string;
   landlordName?: string;
-  landlordEmail?: string;
-  landlordPhone?: string;
   availableFrom?: string;
   /** False when the unit is already let (signed lease / approved application) — not accepting new applications. */
   acceptingApplications?: boolean;

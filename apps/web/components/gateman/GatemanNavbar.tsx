@@ -34,7 +34,7 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Logo size="md" />
-          <div className="flex items-center gap-1 sm:gap-3">
+          <div className="flex min-w-0 items-center gap-1 lg:gap-3">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -43,14 +43,14 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
                   href={item.href}
                   aria-label={item.label}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-accent text-primary'
                       : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
                 >
                   <item.icon className="w-4 h-4" aria-hidden="true" />
-                  <span className="hidden sm:inline">{item.label}</span>
+                  <span className="hidden lg:inline">{item.label}</span>
                 </Link>
               );
             })}
@@ -63,9 +63,9 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
               onClick={handleSignOut}
               aria-label="Sign out"
               icon={<LogOut className="w-4 h-4" aria-hidden="true" />}
-              className="text-destructive hover:bg-destructive-subtle hover:text-destructive"
+              className="min-h-11 min-w-11 text-destructive hover:bg-destructive-subtle hover:text-destructive"
             >
-              <span className="hidden sm:inline">Sign out</span>
+              <span className="hidden lg:inline">Sign out</span>
             </Button>
           </div>
         </div>
