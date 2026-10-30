@@ -11,7 +11,7 @@ import { SecuritySettings } from '@/components/renter/settings/SecuritySettings'
 import { PaymentSettings } from '@/components/renter/settings/PaymentSettings';
 import { ThemeSettings } from '@/components/renter/settings/ThemeSettings';
 import { LanguageSettings } from '@/components/renter/settings/LanguageSettings';
-import { DataExport } from '@/components/renter/settings/DataExport';
+import { DataExport } from '@/components/shared/settings/DataExport';
 import { AccountDeletion } from '@/components/renter/settings/AccountDeletion';
 import { IdentityVerificationSettings } from '@/components/shared/verification/IdentityVerificationSettings';
 import {

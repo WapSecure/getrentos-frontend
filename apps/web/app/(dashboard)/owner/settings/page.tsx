@@ -3,19 +3,21 @@
 import { useOwnerUser } from '../layout';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { User, Bell, Landmark, SlidersHorizontal } from 'lucide-react';
+import { User, Bell, Landmark, SlidersHorizontal, Download } from 'lucide-react';
 import { ProfileSettings } from '@/components/owner/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/owner/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
+import { DataExport } from '@/components/shared/settings/DataExport';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences';
+type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout Account', icon: Landmark },
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
+  { id: 'data', label: 'Your data', icon: Download },
 ];
 
 export default function OwnerSettingsPage() {
@@ -38,6 +40,8 @@ export default function OwnerSettingsPage() {
         );
       case 'preferences':
         return <PreferencesSettings />;
+      case 'data':
+        return <DataExport />;
       default:
         return null;
     }

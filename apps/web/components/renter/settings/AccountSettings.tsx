@@ -31,7 +31,9 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState<string | null>(null);
+  // Errors sit on the field they are about, so assistive tech reads them with it.
+  const [currentPasswordError, setCurrentPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
   const [email, setEmail] = useState(initial.email);
   const [phone, setPhone] = useState(initial.phone);
 
@@ -43,16 +45,17 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
         setNewPassword('');
         setConfirmPassword('');
       } else {
-        setPasswordError(res.message || 'Failed to update password');
+        setCurrentPasswordError(res.message || 'Failed to update password');
       }
     },
   });
 
   const handlePasswordUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordError(null);
+    setCurrentPasswordError(null);
+    setConfirmPasswordError(null);
     if (newPassword !== confirmPassword) {
-      setPasswordError('New passwords do not match');
+      setConfirmPasswordError('New passwords do not match');
       return;
     }
     updatePasswordMutation.mutate();
@@ -79,7 +82,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
       <div className="mb-6">
         <h3 className="text-lg font-medium text-foreground mb-3">Change Password</h3>
         <form method="post" onSubmit={handlePasswordUpdate} className="space-y-4">
-          <Field label="Current Password">
+          <Field label="Current Password" error={currentPasswordError || undefined}>
             <Input
               leadingIcon={<Lock className="w-4 h-4" />}
               type="password"
@@ -97,7 +100,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
               placeholder="Enter new password"
             />
           </Field>
-          <Field label="Confirm New Password">
+          <Field label="Confirm New Password" error={confirmPasswordError || undefined}>
             <Input
               leadingIcon={<Lock className="w-4 h-4" />}
               type="password"
@@ -106,11 +109,6 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
               placeholder="Confirm new password"
             />
           </Field>
-          {passwordError && (
-            <p role="alert" className="text-sm text-destructive">
-              {passwordError}
-            </p>
-          )}
           <Button type="submit" variant="primary" isLoading={updatePasswordMutation.isPending}>
             Update Password
           </Button>

@@ -1434,10 +1434,6 @@ export const renterService = {
     );
   },
 
-  async exportData(): Promise<ApiResponse<Record<string, unknown>>> {
-    return safeCall(() => authFetch('/renter/settings/data-export'));
-  },
-
   async getTwoFactorStatus(): Promise<ApiResponse<{ enrolled: boolean; enabled: boolean }>> {
     return safeCall(() => authFetch('/renter/settings/2fa'));
   },
