@@ -16,6 +16,8 @@ import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { landlordApi } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
+import { readGate } from '@/lib/verificationGate';
+import { VerificationGateNotice } from '@/components/VerificationGateNotice';
 
 interface Props {
   open: boolean;
@@ -98,15 +100,11 @@ function CreateListingForm({
       );
       onClose();
     },
-    onError: (e) =>
-      toast.show(
-        e instanceof ApiError && e.code === 'IDENTITY_REQUIRED'
-          ? 'Verify your identity before listing a unit.'
-          : e instanceof ApiError
-            ? e.message
-            : 'Could not create that listing.',
-        'error'
-      ),
+    // A verification gate is shown inline with the way forward; anything else is a toast.
+    onError: (e) => {
+      if (readGate(e)) return;
+      toast.show(e instanceof ApiError ? e.message : 'Could not create that listing.', 'error');
+    },
     onSettled: () => onSubmittingChange(false),
   });
 
@@ -174,6 +172,8 @@ function CreateListingForm({
         onValueChange={setAllowPets}
         disabled={create.isPending}
       />
+
+      <VerificationGateNotice error={create.error} onNavigate={onClose} />
 
       <Button
         label="Create listing"
