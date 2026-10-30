@@ -267,11 +267,15 @@ function refundPercent(policy: ShortletBooking['cancellationPolicy'], daysBefore
 }
 
 /** What a guest cancelling today would get back for the stay (stay + tax share), and at what percent. */
-export function cancelRefundEstimate(b: ShortletBooking, now = new Date()): { amount: number; percent: number } {
+export function cancelRefundEstimate(
+  b: ShortletBooking,
+  now = new Date()
+): { amount: number; percent: number } {
   const today = new Date(now.toISOString().slice(0, 10)).getTime();
   const daysBefore = Math.ceil((new Date(b.checkIn).getTime() - today) / 86_400_000);
   const percent = refundPercent(b.cancellationPolicy, daysBefore);
-  const amount = Math.floor((b.total * percent) / 100) + Math.floor(((b.taxAmount ?? 0) * percent) / 100);
+  const amount =
+    Math.floor((b.total * percent) / 100) + Math.floor(((b.taxAmount ?? 0) * percent) / 100);
   return { amount, percent };
 }
 

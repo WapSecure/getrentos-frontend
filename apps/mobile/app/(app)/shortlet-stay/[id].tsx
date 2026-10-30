@@ -103,7 +103,8 @@ export default function StayDetail() {
   const confirmCancel = (s: ShortletBooking) => {
     const policy = s.cancellationPolicy.toLowerCase();
     const estimate = cancelRefundEstimate(s);
-    const deposit = s.depositStatus === 'HELD' && s.deposit ? ' Your deposit is returned in full.' : '';
+    const deposit =
+      s.depositStatus === 'HELD' && s.deposit ? ' Your deposit is returned in full.' : '';
     return Alert.alert(
       'Cancel this stay?',
       s.paymentStatus !== 'PAID'

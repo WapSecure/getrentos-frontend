@@ -81,7 +81,8 @@ export const DatePicker = ({
   // a check-out picker opens on the check-in month, not today's).
   useEffect(() => {
     if (!open || selected || !minDate) return;
-    if (isAfter(startOfMonth(minDate), startOfMonth(new Date()))) setViewMonth(startOfMonth(minDate));
+    if (isAfter(startOfMonth(minDate), startOfMonth(new Date())))
+      setViewMonth(startOfMonth(minDate));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, min]);
 

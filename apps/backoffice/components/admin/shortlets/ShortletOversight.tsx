@@ -733,23 +733,23 @@ export const ShortletOversight = () => {
             ] as Tab[]
           ).map((t) => (
             <TabsTrigger key={t} value={t} className="text-sm">
-            {t === 'listings'
-              ? `Listings (${listingsData?.total ?? 0})`
-              : t === 'bookings'
-                ? `Bookings (${bookingsData?.total ?? 0})`
-                : t === 'payouts'
-                  ? `Payouts (${payoutsData?.total ?? 0})`
-                  : t === 'payout-accounts'
-                    ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
-                    : t === 'reviews'
-                      ? `Reviews (${reviewsData?.total ?? 0})`
-                      : t === 'disputes'
-                        ? `Disputes (${disputesData?.total ?? 0})`
-                        : t === 'claims'
-                          ? `Deposit claims (${claimsData?.total ?? 0})`
-                          : t === 'host-fees'
-                            ? 'Host cancellations'
-                            : 'Fees & taxes'}
+              {t === 'listings'
+                ? `Listings (${listingsData?.total ?? 0})`
+                : t === 'bookings'
+                  ? `Bookings (${bookingsData?.total ?? 0})`
+                  : t === 'payouts'
+                    ? `Payouts (${payoutsData?.total ?? 0})`
+                    : t === 'payout-accounts'
+                      ? `Payout accounts (${payoutAccountsData?.total ?? 0})`
+                      : t === 'reviews'
+                        ? `Reviews (${reviewsData?.total ?? 0})`
+                        : t === 'disputes'
+                          ? `Disputes (${disputesData?.total ?? 0})`
+                          : t === 'claims'
+                            ? `Deposit claims (${claimsData?.total ?? 0})`
+                            : t === 'host-fees'
+                              ? 'Host cancellations'
+                              : 'Fees & taxes'}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -1376,7 +1376,6 @@ export const ShortletOversight = () => {
           }
         }}
       />
-
     </div>
   );
 };

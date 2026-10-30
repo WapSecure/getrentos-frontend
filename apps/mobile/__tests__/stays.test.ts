@@ -11,6 +11,7 @@ import {
   ruleAnswer,
   stayHeadline,
   stayRefund,
+  cancelRefundEstimate,
   stayTab,
 } from '@/lib/stays';
 import { telUrl, whatsappUrl } from '@/lib/support';
@@ -261,5 +262,31 @@ describe('support links', () => {
     expect(whatsappUrl('+234 800-000-0000', 'Hi there')).toBe(
       'https://wa.me/2348000000000?text=Hi%20there'
     );
+  });
+});
+
+describe('cancelRefundEstimate', () => {
+  const base = {
+    checkIn: '2026-12-20T00:00:00.000Z',
+    total: 100_000,
+    taxAmount: 7_500,
+    cancellationPolicy: 'MODERATE',
+  } as unknown as ShortletBooking;
+
+  it('returns the stay and its tax at the policy share', () => {
+    expect(cancelRefundEstimate(base, new Date('2026-12-01T10:00:00.000Z'))).toEqual({
+      amount: 107_500,
+      percent: 100,
+    });
+    expect(cancelRefundEstimate(base, new Date('2026-12-18T10:00:00.000Z'))).toEqual({
+      amount: 53_750,
+      percent: 50,
+    });
+  });
+
+  it('counts the tax refunded with the stay', () => {
+    expect(
+      stayRefund({ ...base, refundAmount: 165_000, taxRefundAmount: 12_375 } as ShortletBooking)
+    ).toBe(177_375);
   });
 });

@@ -37,8 +37,9 @@ const DISCOUNT_LABEL: Record<ShortletDiscountType, string> = {
 /** The `YYYY-MM-DD` day after `date`, in the UTC keys the API's calendar uses. */
 /** True when a booking attempt was refused only for an unverified identity. */
 const isIdentityGate = (error: unknown) =>
-  (error instanceof VerificationRequiredError ? error.reason : (error as { reason?: string } | null)?.reason) ===
-  'IDENTITY_REQUIRED';
+  (error instanceof VerificationRequiredError
+    ? error.reason
+    : (error as { reason?: string } | null)?.reason) === 'IDENTITY_REQUIRED';
 
 const nextDay = (date: string) => {
   const day = new Date(`${date}T00:00:00.000Z`);
@@ -225,8 +226,8 @@ export function ShortletBookingDialog({
               )}
               {availability.available && listing.deposit ? (
                 <p className="mt-1 text-muted-foreground">
-                  Plus a {formatCurrency(listing.deposit)} refundable security deposit, charged
-                  with your payment:{' '}
+                  Plus a {formatCurrency(listing.deposit)} refundable security deposit, charged with
+                  your payment:{' '}
                   <span className="font-medium text-foreground">
                     {formatCurrency((availability.estimatedTotal ?? 0) + listing.deposit)}
                   </span>{' '}
