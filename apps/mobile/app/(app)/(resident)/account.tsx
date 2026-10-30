@@ -1,7 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { CircleHelp, KeyRound, ShieldCheck } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
-import { useAuth } from '@/lib/auth/AuthProvider';
+import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
@@ -9,16 +9,15 @@ import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/acc
 const go = (href: Href) => () => router.push(href);
 
 export default function ResidentAccount() {
-  const { profile } = useAuth();
-  const verified = !!profile?.isVerified;
+  const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
 
   const settings: SettingsItem[] = [
     {
       key: 'identity',
       label: 'Identity verification',
       icon: ShieldCheck,
-      value: verified ? 'Verified' : 'Not verified',
-      tone: verified ? 'success' : 'warning',
+      value: identityLabel,
+      tone: verified ? 'success' : identityKnown ? 'warning' : undefined,
       onPress: go('/(app)/verify-identity'),
     },
     {

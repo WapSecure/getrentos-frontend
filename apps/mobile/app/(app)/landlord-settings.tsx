@@ -3,7 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Banknote, Camera } from 'lucide-react-native';
+import { Banknote, Camera, ChevronRight } from 'lucide-react-native';
 import {
   Avatar,
   Badge,
@@ -34,6 +34,7 @@ import { Image } from 'expo-image';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
 import { goBack } from '@/lib/goBack';
+import { PayoutAccountSheet } from '@/components/landlord/PayoutAccountSheet';
 
 export default function LandlordSettings() {
   const { colors, spacing, radius } = useTheme();
@@ -41,6 +42,7 @@ export default function LandlordSettings() {
 
   const profile = useQuery({ queryKey: qk.landlord.profile, queryFn: landlordApi.profile });
   const payout = useQuery({ queryKey: qk.landlord.payout, queryFn: landlordApi.payoutAccount });
+  const [editingPayout, setEditingPayout] = useState(false);
   const automation = useQuery({
     queryKey: qk.landlord.automation,
     queryFn: landlordApi.automation,
@@ -80,38 +82,67 @@ export default function LandlordSettings() {
           <Section title="Payout account">
             {payout.isLoading ? (
               <Skeleton height={96} radius={radius.lg} />
-            ) : payout.data ? (
-              <Card padding={spacing.lg}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                  <View
-                    style={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: radius.md,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: colors.secondary,
-                    }}
-                  >
-                    <Banknote size={17} color={colors.foreground} />
-                  </View>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <Text variant="bodyStrong">{payout.data.bankName || 'No bank set'}</Text>
-                      {payout.data.verified ? (
-                        <Badge label="Verified" tone="success" />
+            ) : (
+              <Pressable
+                onPress={() => setEditingPayout(true)}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  payout.data?.accountNumber
+                    ? `Payout account ${payout.data.bankName}, ${payout.data.accountNumber}, ${payout.data.verified ? 'verified' : 'not verified'}. Change it.`
+                    : 'Add a payout account to receive rent'
+                }
+              >
+                <Card padding={spacing.lg}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                    <View
+                      style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: radius.md,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: colors.secondary,
+                      }}
+                    >
+                      <Banknote size={17} color={colors.foreground} />
+                    </View>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      {payout.data?.accountNumber ? (
+                        <>
+                          <View
+                            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                          >
+                            <Text variant="bodyStrong">{payout.data.bankName}</Text>
+                            {payout.data.verified ? (
+                              <Badge label="Verified" tone="success" />
+                            ) : (
+                              <Badge label="Unverified" tone="warning" />
+                            )}
+                          </View>
+                          <Text variant="caption" color="mutedForeground">
+                            {payout.data.accountNumber}
+                            {payout.data.accountName ? ` · ${payout.data.accountName}` : ''}
+                          </Text>
+                        </>
                       ) : (
-                        <Badge label="Unverified" tone="warning" />
+                        <>
+                          <Text variant="bodyStrong">Add a payout account</Text>
+                          <Text variant="caption" color="mutedForeground">
+                            Where your rent is paid out
+                          </Text>
+                        </>
                       )}
                     </View>
-                    <Text variant="caption" color="mutedForeground">
-                      {payout.data.accountNumber || 'Add an account to receive payouts'}
-                      {payout.data.accountName ? ` · ${payout.data.accountName}` : ''}
-                    </Text>
+                    <ChevronRight size={18} color={colors.mutedForeground} />
                   </View>
-                </View>
-              </Card>
-            ) : null}
+                </Card>
+              </Pressable>
+            )}
+            <PayoutAccountSheet
+              open={editingPayout}
+              onClose={() => setEditingPayout(false)}
+              account={payout.data ?? undefined}
+            />
           </Section>
 
           <Section title="Automation">

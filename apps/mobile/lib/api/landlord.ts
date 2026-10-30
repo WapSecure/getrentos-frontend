@@ -196,7 +196,19 @@ export const APPLICATION_STATUS_TONE: Record<
 
 /* -------------------------------- leases ------------------------------- */
 
-export type LeaseStatus = 'draft' | 'sent' | 'signed' | 'active' | 'expired' | 'terminated';
+export type LeaseStatus =
+  | 'draft'
+  | 'sent'
+  /** Tenant has signed; the lease waits on their first payment. */
+  | 'awaiting_payment'
+  /** The rent is held and the landlord countersigns to confirm handover. */
+  | 'awaiting_landlord'
+  | 'signed'
+  /** First payment missed: the unit went back on the market. */
+  | 'lapsed'
+  | 'active'
+  | 'expired'
+  | 'terminated';
 
 export interface LandlordLease {
   id: string;
@@ -212,6 +224,8 @@ export interface LandlordLease {
   rentAmount: number;
   securityDeposit: number;
   status: LeaseStatus;
+  /** When the tenant's first payment is due, while awaiting payment. */
+  paymentDueAt?: string;
   tenantSigned: boolean;
   landlordSigned: boolean;
   createdAt: string;
@@ -223,10 +237,25 @@ export const LEASE_STATUS_TONE: Record<
 > = {
   draft: 'neutral',
   sent: 'info',
+  awaiting_payment: 'warning',
+  awaiting_landlord: 'info',
   signed: 'success',
+  lapsed: 'neutral',
   active: 'success',
   expired: 'warning',
   terminated: 'danger',
+};
+
+export const LEASE_STATUS_LABEL: Record<LeaseStatus, string> = {
+  draft: 'Draft',
+  sent: 'Sent to tenant',
+  awaiting_payment: 'Awaiting payment',
+  awaiting_landlord: 'Ready to countersign',
+  signed: 'Signed',
+  lapsed: 'Lapsed',
+  active: 'Active',
+  expired: 'Expired',
+  terminated: 'Terminated',
 };
 
 /* ----------------------------- maintenance ----------------------------- */

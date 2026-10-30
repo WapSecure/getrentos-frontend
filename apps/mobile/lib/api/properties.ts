@@ -19,8 +19,9 @@ export interface RenterProperty {
   longitude?: number;
   /** `approximate` until the property is verified, and always for a stay: draw an area. */
   locationPrecision?: 'exact' | 'approximate';
+  /** In the listing's own rent period (most homes are let yearly). */
   price: number;
-  period: 'month';
+  period: 'month' | 'year';
   bedrooms: number;
   bathrooms: number;
   size: number;
@@ -48,6 +49,8 @@ export interface RenterProperty {
   landlordReviews?: number;
   landlordVerified?: boolean;
   availableFrom?: string;
+  /** False once the unit is let or has an approved applicant; Apply is closed. */
+  acceptingApplications?: boolean;
   reviews?: {
     id: string;
     author: string;
