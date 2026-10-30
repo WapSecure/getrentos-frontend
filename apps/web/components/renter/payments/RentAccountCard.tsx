@@ -6,6 +6,7 @@ import { Wallet } from 'lucide-react';
 import { Alert, Button, Card, ConfirmDialog } from '@getrentos/ui';
 import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { chargeLabel } from '@/lib/chargeCategory';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 
@@ -87,7 +88,8 @@ export const RentAccountCard = () => {
                   <p className="text-muted-foreground">
                     {[
                       ...r.allocations.map(
-                        (al) => `${formatCurrency(al.amount)} to rent due ${formatDate(al.dueDate)}`
+                        (al) =>
+                          `${formatCurrency(al.amount)} to ${chargeLabel(al.category)} due ${formatDate(al.dueDate)}`
                       ),
                       ...(r.toCredit > 0 ? [`${formatCurrency(r.toCredit)} to credit`] : []),
                     ].join(' · ')}
@@ -103,7 +105,7 @@ export const RentAccountCard = () => {
                     className="flex justify-between gap-2 text-xs"
                   >
                     <span className="text-muted-foreground">
-                      Credit used on rent due {formatDate(c.dueDate)}
+                      Credit used on {chargeLabel(c.category)} due {formatDate(c.dueDate)}
                     </span>
                     <span className="text-success tabular-nums">{formatCurrency(c.amount)}</span>
                   </li>

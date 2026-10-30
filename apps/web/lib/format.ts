@@ -1,5 +1,8 @@
 export const formatCurrency = (amount: number, options?: { compact?: boolean }): string => {
   if (options?.compact) {
+    if (Math.abs(amount) >= 1_000_000_000) {
+      return `₦${(amount / 1_000_000_000).toFixed(1)}B`;
+    }
     if (Math.abs(amount) >= 1_000_000) {
       return `₦${(amount / 1_000_000).toFixed(1)}M`;
     }

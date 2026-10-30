@@ -24,6 +24,7 @@ import { isLandPropertyType } from '@/lib/propertyTypes';
 import { landKeys } from '@/lib/queryKeys';
 import { landService } from '@/services/landService';
 import { TrustLabelsList } from '@/components/land/market/TrustLabelsList';
+import { formatCurrency } from '@/lib/format';
 
 interface MakeOfferModalProps {
   isOpen: boolean;
@@ -38,6 +39,8 @@ const financingOptions: { value: FinancingType; label: string }[] = [
   { value: 'installment', label: 'Installment' },
 ];
 const LISTING_PAGE_SIZE = 10;
+/** Matches the backend default when the buyer leaves the deposit blank. */
+const DEFAULT_DEPOSIT_RATE = 0.1;
 
 export const MakeOfferModal = ({
   isOpen,
@@ -97,6 +100,29 @@ export const MakeOfferModal = ({
   const notVerified = isLand ? (landListing.data?.diligence?.notVerified ?? []) : [];
   const needsAcceptance =
     isLand && (landListing.isLoading || (notVerified.length > 0 && !acceptedRisks));
+
+  const amount = Number(offerAmount) || 0;
+  const deposit = depositAmount ? Number(depositAmount) : Math.round(amount * DEFAULT_DEPOSIT_RATE);
+  const asking = selectedListing?.askingPrice ?? 0;
+  const depositError =
+    amount > 0 && depositAmount && Number(depositAmount) > amount
+      ? 'The deposit cannot be more than your offer.'
+      : undefined;
+  const amountHint =
+    amount > 0 && asking > 0
+      ? amount > asking * 1.5
+        ? `That is well above the ${formatCurrency(asking)} asking price. Check the amount before you send it.`
+        : amount < asking * 0.5
+          ? `That is less than half the ${formatCurrency(asking)} asking price, so the seller may decline it.`
+          : undefined
+      : undefined;
+  const missing = !propertyId
+    ? 'Choose a property to make an offer on.'
+    : !offerAmount
+      ? 'Enter your offer amount.'
+      : needsAcceptance && !landListing.isLoading
+        ? 'Accept what was not verified on this land to continue.'
+        : undefined;
 
   const handleClose = () => {
     setAcceptedRisks(false);
@@ -181,7 +207,7 @@ export const MakeOfferModal = ({
             />
           </Field>
 
-          <Field label="Offer Amount" required>
+          <Field label="Offer Amount" required hint={amountHint}>
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -199,7 +225,18 @@ export const MakeOfferModal = ({
             />
           </Field>
 
-          <Field label="Deposit Amount" optionalLabel="(optional)">
+          <Field
+            label="Deposit Amount"
+            optionalLabel="(optional)"
+            error={depositError}
+            hint={
+              amount > 0
+                ? depositAmount
+                  ? `You pay ${formatCurrency(deposit)} into GetRentos Payment Protection once the seller accepts.`
+                  : `Left blank, the deposit is 10% of your offer: ${formatCurrency(deposit)}, held by GetRentos once the seller accepts.`
+                : 'Left blank, the deposit is 10% of your offer.'
+            }
+          >
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -219,11 +256,7 @@ export const MakeOfferModal = ({
         </div>
 
         {isLand && notVerified.length > 0 && (
-          <Alert
-            variant="warning"
-            title="What was not verified on this land"
-            className="mx-4 mb-3"
-          >
+          <Alert variant="warning" title="What was not verified on this land" className="mx-4 mb-3">
             <div className="mt-2">
               <TrustLabelsList notVerified={notVerified} />
             </div>
@@ -242,17 +275,15 @@ export const MakeOfferModal = ({
               This property is already under offer and is no longer accepting new offers.
             </p>
           )}
+          {missing && !submitError && (
+            <p className="w-full text-xs text-muted-foreground">{missing}</p>
+          )}
           {submitError && (
             <p role="alert" className="w-full text-sm text-destructive">
               {submitError}
             </p>
           )}
-          <Button
-            variant="ghost"
-            onClick={handleClose}
-            className="flex-1"
-            disabled={isSubmitting}
-          >
+          <Button variant="ghost" onClick={handleClose} className="flex-1" disabled={isSubmitting}>
             Cancel
           </Button>
           <Button
@@ -263,6 +294,7 @@ export const MakeOfferModal = ({
             disabled={
               !propertyId ||
               !offerAmount ||
+              !!depositError ||
               needsAcceptance ||
               isSubmitting ||
               selectedListing?.acceptingOffers === false

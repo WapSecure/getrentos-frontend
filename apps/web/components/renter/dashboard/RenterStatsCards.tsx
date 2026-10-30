@@ -7,6 +7,7 @@ import { StatGridSkeleton } from '@getrentos/ui';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
+import { formatCurrency } from '@/lib/format';
 import { renterKeys } from '@/lib/queryKeys';
 
 interface StatCardProps {
@@ -30,22 +31,7 @@ const StatCard = ({
 }: StatCardProps) => {
   const formatValue = () => {
     if (isCurrency && typeof value === 'number') {
-      const formatted = new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(value);
-
-      if (value >= 1000000) {
-        const millions = value / 1000000;
-        return `₦${millions.toFixed(1)}M`;
-      }
-      if (value >= 1000) {
-        const thousands = value / 1000;
-        return `₦${thousands.toFixed(0)}K`;
-      }
-      return formatted;
+      return formatCurrency(value, { compact: true });
     }
     return value;
   };
@@ -195,7 +181,9 @@ export const RenterStatsCards = () => {
   ];
 
   if (statsLoading) {
-    return <StatGridSkeleton count={6} className="gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" />;
+    return (
+      <StatGridSkeleton count={6} className="gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" />
+    );
   }
 
   return (

@@ -44,10 +44,10 @@ export const LandConveyanceEntry = ({ transaction }: LandConveyanceEntryProps) =
         <span className="block font-medium text-foreground">Land conveyance</span>
         <span className="block text-xs text-muted-foreground">
           {!data
-            ? 'Escrow releases only after the deed and possession are confirmed.'
+            ? 'GetRentos releases your payment only after the deed and possession are confirmed.'
             : outstanding === 0
               ? 'All required steps confirmed.'
-              : `Escrow releases only after the deed and possession are confirmed. ${outstanding} required step${outstanding === 1 ? '' : 's'} left${awaiting ? `, ${awaiting} awaiting you` : ''}.`}
+              : `GetRentos releases your payment only after the deed and possession are confirmed. ${outstanding} required step${outstanding === 1 ? '' : 's'} left${awaiting ? `, ${awaiting} awaiting you` : ''}.`}
         </span>
       </span>
       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />

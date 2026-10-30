@@ -21,6 +21,7 @@ import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
+// Only the states the backend drives a sale through: deposit → held → released.
 const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
   {
     key: 'deposit_pending',
@@ -28,16 +29,6 @@ const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
     now: 'Waiting for the buyer to pay their deposit to GetRentos.',
   },
   { key: 'funds_held', label: 'Funds held', now: 'The deposit is held safely by GetRentos.' },
-  {
-    key: 'verification',
-    label: 'Verification',
-    now: 'Compliance is reviewing the transfer documents.',
-  },
-  {
-    key: 'final_payment',
-    label: 'Final payment',
-    now: 'Waiting for the buyer to release the balance.',
-  },
   { key: 'released', label: 'Completed', now: 'The sale is complete.' },
 ];
 

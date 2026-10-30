@@ -50,6 +50,7 @@ const actorConfig: Record<
   system: { label: 'System', icon: Cog },
 };
 
+// Only the states the backend drives a sale through: deposit → held → released.
 const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }[] = [
   {
     key: 'deposit_pending',
@@ -60,16 +61,6 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
     key: 'funds_held',
     label: 'Funds Held',
     description: 'Deposit received and held safely by GetRentos.',
-  },
-  {
-    key: 'verification',
-    label: 'Verification',
-    description: 'Ownership and transfer documents under compliance review.',
-  },
-  {
-    key: 'final_payment',
-    label: 'Final Payment',
-    description: 'Buyer remitting the balance of the sale price.',
   },
   {
     key: 'released',
@@ -160,8 +151,7 @@ export const EscrowTransactionDetailModal = ({
               <ol className="space-y-0">
                 {escrowSteps.map((step, index) => {
                   const isDone = index < activeIndex || transaction.escrowStatus === 'released';
-                  const isActive =
-                    index === activeIndex && transaction.escrowStatus !== 'released';
+                  const isActive = index === activeIndex && transaction.escrowStatus !== 'released';
                   const isLast = index === escrowSteps.length - 1;
                   return (
                     <li key={step.key} className="flex gap-3">
@@ -208,9 +198,8 @@ export const EscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            GetRentos holds the buyer’s money and pays it to you automatically once all
-            verification and payment conditions are met. It can’t be paid out early, which
-            protects both parties.
+            GetRentos holds the buyer’s money and pays it to you automatically once all verification
+            and payment conditions are met. It can’t be paid out early, which protects both parties.
           </Alert>
 
           {transaction.releasedAt && (

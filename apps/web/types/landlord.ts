@@ -1,3 +1,4 @@
+import type { ChargeCategory } from '@/lib/chargeCategory';
 import type { SharedCreditCheck } from '@/types/credit-check';
 import type {
   MaintenanceCategory,
@@ -596,10 +597,21 @@ export interface LeaseRentAccount {
     amount: number;
     method: string | null;
     receivedAt: string;
-    allocations: { rentPaymentId: string; dueDate: string; amount: number }[];
+    allocations: {
+      rentPaymentId: string;
+      dueDate: string;
+      category?: ChargeCategory;
+      amount: number;
+    }[];
     toCredit: number;
   }[];
-  creditApplied: { rentPaymentId: string; dueDate: string; amount: number; appliedAt: string }[];
+  creditApplied: {
+    rentPaymentId: string;
+    dueDate: string;
+    category?: ChargeCategory;
+    amount: number;
+    appliedAt: string;
+  }[];
   /** Credit paid back to the tenant, the way it was paid. */
   refunds?: {
     id: string;
