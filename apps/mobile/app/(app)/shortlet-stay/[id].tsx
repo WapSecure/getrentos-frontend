@@ -56,6 +56,7 @@ import {
   promiseState,
   stayHeadline,
   stayRefund,
+  cancelRefundEstimate,
   tripDay,
 } from '@/lib/stays';
 import { goBack } from '@/lib/goBack';
@@ -99,17 +100,24 @@ export default function StayDetail() {
     onError: (e) => toast.show(e instanceof ApiError ? e.message : 'Could not cancel.', 'error'),
   });
 
-  const confirmCancel = (s: ShortletBooking) =>
-    Alert.alert(
+  const confirmCancel = (s: ShortletBooking) => {
+    const policy = s.cancellationPolicy.toLowerCase();
+    const estimate = cancelRefundEstimate(s);
+    const deposit =
+      s.depositStatus === 'HELD' && s.deposit ? ' Your deposit is returned in full.' : '';
+    return Alert.alert(
       'Cancel this stay?',
-      s.paymentStatus === 'PAID'
-        ? `Your refund follows the ${s.cancellationPolicy.toLowerCase()} cancellation policy. Your deposit is returned in full.`
-        : 'Nothing has been charged, so there’s nothing to refund.',
+      s.paymentStatus !== 'PAID'
+        ? 'Nothing has been charged, so there’s nothing to refund.'
+        : estimate.percent > 0
+          ? `Under the ${policy} policy you’ll be refunded ₦${estimate.amount.toLocaleString('en-NG')} (${estimate.percent}%${s.taxAmount ? ', incl. tax' : ''}).${deposit}`
+          : `No refund applies under the ${policy} policy this close to check-in.${deposit}`,
       [
         { text: 'Keep my stay', style: 'cancel' },
         { text: 'Cancel stay', style: 'destructive', onPress: () => cancel.mutate() },
       ]
     );
+  };
 
   if (!b) {
     return (
