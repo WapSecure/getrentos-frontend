@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   Droplets,
   CalendarClock,
+  Sparkles,
 } from 'lucide-react';
 import { Badge, Button } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
@@ -19,7 +20,7 @@ import { formatVisit } from '@/components/landlord/vendors/VendorCard';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
 import type { MaintenanceCategory } from '@/types/maintenance';
 
-const categoryIcons: Record<MaintenanceCategory, React.ElementType> = {
+export const categoryIcons: Record<MaintenanceCategory, React.ElementType> = {
   plumbing: Droplets,
   electrical: Zap,
   internet: Wifi,
@@ -36,8 +37,10 @@ interface MaintenanceRequestCardProps {
   isRatingVendor?: boolean;
   onMarkResolved: (id: string) => void;
   onEscalate: (id: string) => void;
+  onTriage: (request: LandlordMaintenanceRequest) => void;
   isMarkingResolved?: boolean;
   isEscalating?: boolean;
+  isTriaging?: boolean;
 }
 
 export const MaintenanceRequestCard = ({
@@ -48,8 +51,10 @@ export const MaintenanceRequestCard = ({
   isRatingVendor = false,
   onMarkResolved,
   onEscalate,
+  onTriage,
   isMarkingResolved = false,
   isEscalating = false,
+  isTriaging = false,
 }: MaintenanceRequestCardProps) => {
   const CategoryIcon = categoryIcons[request.category];
   const priority = maintenancePriorityBadges[request.priority];
@@ -129,6 +134,17 @@ export const MaintenanceRequestCard = ({
 
       {!isClosed && (
         <div className="flex gap-2 mt-4 pt-4 border-t border-border">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => onTriage(request)}
+            isLoading={isTriaging}
+            disabled={isBusy}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            AI Triage
+          </Button>
           <Button
             variant="outline"
             size="sm"
