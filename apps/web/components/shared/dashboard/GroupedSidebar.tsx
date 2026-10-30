@@ -40,8 +40,24 @@ interface GroupedMobileNavigationProps extends GroupedSidebarProps {
 export const isSidebarRouteActive = (pathname: string, href: string, dashboardHref: string) =>
   pathname === href || (href !== dashboardHref && pathname.startsWith(`${href}/`));
 
+/**
+ * The one sidebar link for this page: the most specific match, so a section
+ * nested under another (/buyer/land/purchases under /buyer/land) doesn't light
+ * up both.
+ */
+export const activeSidebarHref = (
+  pathname: string,
+  groups: GroupedSidebarGroup[],
+  dashboardHref: string
+): string | undefined =>
+  groups
+    .flatMap((group) => group.items.map((item) => item.href))
+    .filter((href) => isSidebarRouteActive(pathname, href, dashboardHref))
+    .sort((a, b) => b.length - a.length)[0];
+
 export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSidebarProps) {
   const pathname = usePathname();
+  const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
 
   return (
     <aside className="fixed bottom-0 left-0 top-16 z-30 hidden w-64 overflow-y-auto border-r border-border bg-background lg:block">
@@ -59,7 +75,7 @@ export function GroupedSidebar({ ariaLabel, dashboardHref, groups }: GroupedSide
             </h2>
             <div className="space-y-1">
               {group.items.map((item) => {
-                const isActive = isSidebarRouteActive(pathname, item.href, dashboardHref);
+                const isActive = item.href === activeHref;
                 const Icon = item.icon;
                 return (
                   <Link
@@ -98,6 +114,7 @@ export function GroupedMobileNavigation({
   onNavigate,
 }: GroupedMobileNavigationProps) {
   const pathname = usePathname();
+  const activeHref = activeSidebarHref(pathname, groups, dashboardHref);
   return (
     <nav className="space-y-5 p-4" aria-label={`${ariaLabel} mobile`}>
       {groups.map((group) => (
@@ -107,7 +124,7 @@ export function GroupedMobileNavigation({
           </h2>
           <div className="space-y-1">
             {group.items.map((item) => {
-              const isActive = isSidebarRouteActive(pathname, item.href, dashboardHref);
+              const isActive = item.href === activeHref;
               const Icon = item.icon;
               return (
                 <Link
