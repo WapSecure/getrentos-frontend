@@ -3,19 +3,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { Card } from '@getrentos/ui';
-import { renterService } from '@/services/renterService';
+import { trustService } from '@/services/trustService';
 import { unwrap } from '@/lib/apiHelpers';
-import { renterKeys } from '@/lib/queryKeys';
 
 /**
- * Plain-language narrative of the renter's trust score (GET /trust-score/
- * explanation). It is a complement to the factor breakdown, not a replacement —
- * so it fetches on its own and hides itself on error, never blocking the page.
+ * Plain-language narrative of the caller's own trust score (GET /trust-score/
+ * explanation). Role-agnostic and self-only, so every role reuses it. It fetches
+ * on its own and hides itself on error, never blocking the page it sits on.
  */
-export const TrustScoreExplanationCard = () => {
+export const TrustExplanationCard = () => {
   const query = useQuery({
-    queryKey: renterKeys.trustExplanation,
-    queryFn: () => unwrap(renterService.getTrustExplanation()),
+    queryKey: ['trust', 'explanation'] as const,
+    queryFn: () => unwrap(trustService.getExplanation()),
     staleTime: 5 * 60 * 1000,
     retry: false,
   });
@@ -77,7 +76,10 @@ export const TrustScoreExplanationCard = () => {
             <ul className="space-y-1.5">
               {data.improvements.map((s, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <ArrowUpRight aria-hidden="true" className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className="w-4 h-4 mt-0.5 shrink-0 text-primary"
+                  />
                   <span>{s}</span>
                 </li>
               ))}

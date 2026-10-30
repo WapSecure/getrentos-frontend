@@ -2,15 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
-import {
-  Card,
-  CardSkeleton,
-  PageErrorState,
-  Skeleton,
-  StatGridSkeleton,
-} from '@getrentos/ui';
+import { Card, CardSkeleton, PageErrorState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
 import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
 import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
+import { TrustExplanationCard } from '@/components/shared/trust/TrustExplanationCard';
 import { VerificationList } from '@/components/shared/trust/VerificationList';
 import { TrustBadges } from '@/components/shared/trust/TrustBadges';
 import { unwrap, type ApiResponse } from '@/lib/apiHelpers';
@@ -80,6 +75,10 @@ export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustPr
             );
           })}
         </div>
+      </div>
+
+      <div className="mb-6">
+        <TrustExplanationCard />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

@@ -13,7 +13,7 @@ import { VerificationTimeline } from '@/components/renter/trust-score/Verificati
 import { TrustScoreBenefits } from '@/components/renter/trust-score/TrustScoreBenefits';
 import { TrustScoreComparison } from '@/components/renter/trust-score/TrustScoreComparison';
 import { ScoreFactors } from '@/components/renter/trust-score/ScoreFactors';
-import { TrustScoreExplanationCard } from '@/components/renter/trust-score/TrustScoreExplanationCard';
+import { TrustExplanationCard } from '@/components/shared/trust/TrustExplanationCard';
 import { TrustScoreTips } from '@/components/renter/trust-score/TrustScoreTips';
 import { ScoreForecast } from '@/components/renter/trust-score/ScoreForecast';
 import { ScoreNotifications } from '@/components/renter/trust-score/ScoreNotifications';
@@ -67,7 +67,7 @@ export const TrustScoreView = () => {
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <TrustScoreExplanationCard />
+          <TrustExplanationCard />
           <VerificationList verifications={verifications} />
           <TrustScoreHistory history={history} />
           <VerificationTimeline verifications={verifications} />

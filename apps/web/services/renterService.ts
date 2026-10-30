@@ -16,7 +16,6 @@ import type {
   TrustScoreHistoryItem,
   Badge,
   TrustScoreBreakdown,
-  TrustExplanation,
 } from '@/types/trust-score';
 import type { Conversation, Reminder } from '@/types/messages';
 import type { SupportMessage, SupportThread } from '@/types/support';
@@ -817,10 +816,6 @@ export const renterService = {
     return safeCall(() => authFetch('/renter/trust-score'));
   },
 
-  async getTrustExplanation(): Promise<ApiResponse<TrustExplanation>> {
-    return safeCall(() => authFetch('/trust-score/explanation'));
-  },
-
   // ---- Flex financing ----
   async getFinancing(): Promise<ApiResponse<FinancingOverview>> {
     return safeCall(() => authFetch('/renter/financing'));
@@ -1498,7 +1493,12 @@ export const renterService = {
   async listPasskeys(): Promise<
     ApiResponse<{
       hasPasskey: boolean;
-      passkeys: { id: string; deviceName: string | null; createdAt: string; lastUsedAt: string | null }[];
+      passkeys: {
+        id: string;
+        deviceName: string | null;
+        createdAt: string;
+        lastUsedAt: string | null;
+      }[];
     }>
   > {
     return safeCall(() => authFetch('/users/me/security/passkey'));

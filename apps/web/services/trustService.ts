@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import type { TrustExplanation } from '@/types/trust-score';
 
 /** Client types mirroring the backend trust API. */
 export type TrustSubjectType =
@@ -114,6 +115,11 @@ export const trustService = {
 
   async getVerification(id: string): Promise<ApiResponse<TrustVerificationDetailDto>> {
     return safeCall(() => authFetch<TrustVerificationDetailDto>(`/trust/verifications/${id}`));
+  },
+
+  /** Plain-language explanation of the caller's own trust score (self-only). */
+  async getExplanation(): Promise<ApiResponse<TrustExplanation>> {
+    return safeCall(() => authFetch<TrustExplanation>('/trust-score/explanation'));
   },
 
   async submitIdentity(
