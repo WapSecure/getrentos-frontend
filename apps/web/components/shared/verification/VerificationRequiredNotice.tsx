@@ -133,6 +133,15 @@ interface VerificationRequiredNoticeProps {
   scoreHref?: string;
 }
 
+/**
+ * True when `error` is a verification/trust-tier gate that this notice renders.
+ * Callers use it to keep the gate to the notice alone, instead of repeating it
+ * as a toast or a field error.
+ */
+export function isVerificationGateError(error: unknown): boolean {
+  return Boolean(readMeta(error)?.reason);
+}
+
 /** Inline callout shown near a gated action's submit button when it 403s for lack of verification or trust tier. */
 export const VerificationRequiredNotice = ({
   error,
