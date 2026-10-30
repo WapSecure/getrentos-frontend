@@ -1,5 +1,6 @@
 'use client';
 
+import { isVerificationGateError } from '@/components/shared/verification/VerificationRequiredNotice';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -76,6 +77,9 @@ export default function RealtorClientsPage() {
         setIsAddModalOpen(false);
         return;
       }
+      // The modal's verification notice already explains this one and links to
+      // the fix; a toast would say it a second time.
+      if (isVerificationGateError(error)) return;
       toast.error(error.message || 'Unable to add this client. Please try again.');
     },
   });
@@ -201,7 +205,11 @@ export default function RealtorClientsPage() {
         submitError={inviteClient.error}
         onSubmit={handleAddClient}
         isSubmitting={inviteClient.isPending}
-        error={inviteClient.isError ? inviteClient.error.message : null}
+        error={
+          inviteClient.isError && !isVerificationGateError(inviteClient.error)
+            ? inviteClient.error.message
+            : null
+        }
       />
 
       <UpgradeToProModal

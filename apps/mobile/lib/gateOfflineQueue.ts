@@ -260,6 +260,10 @@ function classify(item: GateWrite, error: unknown): Outcome {
   // Server-side fault: the payload is fine, the estate just couldn't take it.
   if (error.status >= 500) return 'retry';
 
+  // Rate limited (including the estate's pause on PIN check-ins after many wrong
+  // codes): the write itself is fine and will land once the pause lifts.
+  if (error.status === 429) return 'retry';
+
   if (item.type === 'check-out' && error.status === 409) {
     // The pass is already closed. Either our own earlier attempt landed and only
     // its reply was lost, or someone else closed it. Both mean the estate's
