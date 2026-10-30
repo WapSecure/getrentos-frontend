@@ -25,11 +25,11 @@ import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 
 import {
   adminManagedIntakeService,
+  adminManagedService,
   type IntakeStatus,
   type ManagedIntake,
   type ManagedServicingTier,
 } from '@/services/adminManagedService';
-import { adminService } from '@/services/adminService';
 import { useAdminUser } from '../layout';
 import { FieldAssigneeSelect } from '@/components/admin/managed/FieldAssigneeSelect';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -494,14 +494,14 @@ export default function AdminManagedIntakesPage() {
     placeholderData: keepPreviousData,
   });
   const staff = useQuery({
-    queryKey: ['admin', 'staff', 'for-managed'],
-    queryFn: () => unwrap(adminService.listStaff({ pageSize: 100 })),
+    queryKey: ['admin', 'managed-portfolio-managers'],
+    queryFn: () => unwrap(adminManagedService.listPortfolioManagers()),
   });
   const staffOptions = useMemo(
     () =>
-      (staff.data?.items ?? []).map((member) => ({
+      (staff.data ?? []).map((member) => ({
         value: member.id,
-        label: member.email ? `${member.legalName} · ${member.email}` : member.legalName,
+        label: member.email ? `${member.name} · ${member.email}` : member.name,
       })),
     [staff.data]
   );
@@ -529,6 +529,12 @@ export default function AdminManagedIntakesPage() {
           <TabsTrigger value="DECLINED">Declined</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {staff.isError && (
+        <p role="alert" className="mb-4 text-sm text-destructive">
+          Could not load the staff list for the portfolio manager picker. Refresh to try again.
+        </p>
+      )}
 
       {intakes.isLoading ? (
         <ListSkeleton variant="cards" />

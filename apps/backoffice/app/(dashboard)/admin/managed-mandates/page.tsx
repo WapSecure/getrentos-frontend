@@ -25,7 +25,6 @@ import {
 import { formatDate, unwrap } from '@getrentos/shared';
 
 import { adminManagedService, type ManagedMandate } from '@/services/adminManagedService';
-import { adminService } from '@/services/adminService';
 import { useAdminUser } from '../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
 
@@ -698,8 +697,8 @@ export default function AdminManagedMandatesPage() {
     queryFn: () => unwrap(adminManagedService.listPending()),
   });
   const staff = useQuery({
-    queryKey: ['admin', 'staff', 'for-managed'],
-    queryFn: () => unwrap(adminService.listStaff({ pageSize: 100 })),
+    queryKey: ['admin', 'managed-portfolio-managers'],
+    queryFn: () => unwrap(adminManagedService.listPortfolioManagers()),
   });
   const partners = useQuery({
     queryKey: ['admin', 'managed-partner-firms'],
@@ -719,9 +718,9 @@ export default function AdminManagedMandatesPage() {
 
   const staffOptions = useMemo(
     () =>
-      (staff.data?.items ?? []).map((member) => ({
+      (staff.data ?? []).map((member) => ({
         value: member.id,
-        label: member.email ? `${member.legalName} · ${member.email}` : member.legalName,
+        label: member.email ? `${member.name} · ${member.email}` : member.name,
       })),
     [staff.data]
   );
@@ -830,6 +829,12 @@ export default function AdminManagedMandatesPage() {
           <TabsTrigger value="requests">Termination requests</TabsTrigger>
         </TabsList>
       </Tabs>
+
+      {staff.isError && (
+        <p role="alert" className="mb-4 text-sm text-destructive">
+          Could not load the staff list for the portfolio manager picker. Refresh to try again.
+        </p>
+      )}
 
       {mode === 'requests' ? (
         <TerminationRequests />
