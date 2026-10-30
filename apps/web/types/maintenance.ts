@@ -13,6 +13,37 @@ export type MaintenanceRequestStatus =
   | 'resolved'
   | 'cancelled';
 
+/**
+ * AI triage result for a maintenance request.
+ *
+ * The backend speaks UPPERCASE `MaintenanceCategory` / `MaintenancePriority`
+ * (its Prisma enums), whereas the rest of the web app uses the lowercase
+ * variants above. Keep the raw shape here and lowercase-map at the point of use
+ * for badge/icon lookups.
+ */
+export type MaintenanceTriageCategory =
+  | 'PLUMBING'
+  | 'ELECTRICAL'
+  | 'INTERNET'
+  | 'SECURITY'
+  | 'APPLIANCES'
+  | 'OTHER';
+
+export type MaintenanceTriageUrgency = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+
+export interface MaintenanceTriage {
+  category: MaintenanceTriageCategory;
+  urgency: MaintenanceTriageUrgency;
+  needsVendor: boolean;
+  rationale: string;
+  draftWorkOrder: string;
+  suggestedVendor: { id: string; name: string } | null;
+  source: 'ai' | 'heuristic';
+  model: string | null;
+  triagedAt: string;
+  requestId: string;
+}
+
 export interface CreateMaintenanceRequestInput {
   title: string;
   category: MaintenanceCategory;
