@@ -1,3 +1,4 @@
+import type { ChargeCategory } from '@/lib/chargeCategory';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { VideoCallJoin } from '@getrentos/shared';
@@ -215,10 +216,21 @@ export interface RentAccount {
     amount: number;
     method: string | null;
     receivedAt: string;
-    allocations: { rentPaymentId: string; dueDate: string; amount: number }[];
+    allocations: {
+      rentPaymentId: string;
+      dueDate: string;
+      category?: ChargeCategory;
+      amount: number;
+    }[];
     toCredit: number;
   }[];
-  creditApplied: { rentPaymentId: string; dueDate: string; amount: number; appliedAt: string }[];
+  creditApplied: {
+    rentPaymentId: string;
+    dueDate: string;
+    category?: ChargeCategory;
+    amount: number;
+    appliedAt: string;
+  }[];
   /** Credit paid back to the tenant, the way it was paid. */
   refunds?: {
     id: string;

@@ -20,6 +20,9 @@ const formatDeadline = (value: string) =>
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    // The lease lapses on Lagos time, wherever the renter is reading from.
+    timeZone: 'Africa/Lagos',
+    timeZoneName: 'short',
   });
 
 /**

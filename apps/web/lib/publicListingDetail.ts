@@ -31,6 +31,8 @@ export interface PublicListingDetail {
   amenities: string[];
   facts: PublicListingFact[];
   host?: { label: string; name: string; verified?: boolean; rating?: number; reviews?: number };
+  /** Sale only: an offer is accepted or a sale is in progress. */
+  underOffer?: boolean;
 }
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -104,6 +106,7 @@ interface SaleDto {
   images?: string[];
   amenities?: string[];
   isVerified?: boolean;
+  underOffer?: boolean;
 }
 
 interface LandDto {
@@ -191,6 +194,7 @@ export async function fetchPublicListing(
       bedrooms: positive(s.bedrooms),
       bathrooms: positive(s.bathrooms),
       verified: !!s.isVerified,
+      underOffer: !!s.underOffer,
       images: gallery(s.coverImageUrl, s.images),
       amenities: s.amenities ?? [],
       facts: [

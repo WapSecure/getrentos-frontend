@@ -66,8 +66,6 @@ export default function OwnerTransactionsPage() {
     { value: 'all', label: 'All' },
     { value: 'deposit_pending', label: 'Deposit Pending' },
     { value: 'funds_held', label: 'Funds Held' },
-    { value: 'verification', label: 'Verification' },
-    { value: 'final_payment', label: 'Final Payment' },
     { value: 'released', label: 'Released' },
     { value: 'frozen', label: 'Frozen' },
     { value: 'disputed', label: 'Disputed' },

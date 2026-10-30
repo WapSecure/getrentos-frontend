@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MapPin, Bed, Bath, Square, Heart, Star, GitCompare, Calendar, Home } from 'lucide-react';
 import { Button, IconButton } from '@getrentos/ui';
 import { Property } from '@/types/renter';
+import { formatCurrency } from '@/lib/format';
 import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
@@ -118,6 +119,11 @@ export const DiscoverPropertyCard = ({
 
         <div className="absolute bottom-3 left-3 z-10 rounded-md bg-card/95 px-2.5 py-1.5 text-sm font-semibold text-foreground shadow-sm backdrop-blur-sm">
           {formatPrice()}
+          {property.period === 'year' && property.price > 0 && (
+            <span className="block text-xs font-normal text-muted-foreground">
+              ≈ {formatCurrency(Math.round(property.price / 12))}/mo
+            </span>
+          )}
         </div>
 
         {/* No reviews yet reads as "New", not as a zero-star home. */}
@@ -209,7 +215,9 @@ export const DiscoverPropertyCard = ({
           fullWidth
           className="mt-3"
         >
-          {property.acceptingApplications === false ? 'Let — not accepting applications' : 'Apply for this property'}
+          {property.acceptingApplications === false
+            ? 'Let — not accepting applications'
+            : 'Apply for this property'}
         </Button>
       </div>
     </article>

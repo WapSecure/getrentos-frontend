@@ -22,6 +22,8 @@ import { ApiError } from '@/lib/api/client';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
+import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
 export default function LandlordFinancials() {
   const { colors, spacing } = useTheme();
@@ -44,13 +46,17 @@ export default function LandlordFinancials() {
   const stats = useQuery({
     queryKey: qk.landlord.financialsStats,
     queryFn: landlordApi.financialsStats,
+    retry: retryUnlessPlanGate,
   });
   const chart = useQuery({
     queryKey: qk.landlord.financialsChart,
     queryFn: landlordApi.financialsChart,
+    retry: retryUnlessPlanGate,
   });
 
   const s = stats.data;
+  // Financials are Pro: a Free landlord gets the upgrade, not a retry that can't work.
+  const locked = !!planRefusal(stats.error) || !!planRefusal(chart.error);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -60,18 +66,41 @@ export default function LandlordFinancials() {
         subtitle="Income, expenses and net returns"
         onBack={() => goBack()}
         accessory={
-          <IconButton
-            onPress={exportCsv}
-            disabled={exporting}
-            accessibilityLabel="Export as CSV"
-            icon={
-              <Download size={20} color={exporting ? colors.mutedForeground : colors.foreground} />
-            }
-          />
+          locked ? null : (
+            <IconButton
+              onPress={exportCsv}
+              disabled={exporting}
+              accessibilityLabel="Export as CSV"
+              icon={
+                <Download
+                  size={20}
+                  color={exporting ? colors.mutedForeground : colors.foreground}
+                />
+              }
+            />
+          )
         }
       />
 
-      {(stats.isError && !stats.data) || (chart.isError && !chart.data) ? (
+      {locked ? (
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: spacing.xl,
+            paddingBottom: insets.bottom + spacing['3xl'],
+          }}
+        >
+          <ProUpsell
+            title="Financials are part of Pro"
+            description="See what your portfolio earns and spends, and what you keep."
+            perks={[
+              'Income, expenses and net profit across every property',
+              'Twelve months of income against expenses',
+              'Everything exported as a spreadsheet',
+            ]}
+            note={null}
+          />
+        </ScrollView>
+      ) : (stats.isError && !stats.data) || (chart.isError && !chart.data) ? (
         <ErrorState
           onRetry={() => {
             stats.refetch();

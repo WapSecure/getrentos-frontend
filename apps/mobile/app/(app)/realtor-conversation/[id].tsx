@@ -18,6 +18,7 @@ import {
   Paperclip,
   Send,
   ShieldCheck,
+  UserX,
   X,
 } from 'lucide-react-native';
 import {
@@ -39,6 +40,9 @@ import { pickDocument } from '@/lib/filePicker';
 import { relativeTime } from '@/lib/format';
 
 const POLL_MS = 8000;
+
+/** The API refuses a thread (403) once the client relationship has ended. */
+const isEndedRelationship = (err: unknown) => err instanceof ApiError && err.status === 403;
 const MAX_FILES = 5;
 
 type Pending = { key: string; text: string; files: PickedFile[]; error?: string };
@@ -52,21 +56,26 @@ export default function RealtorConversation() {
   const [text, setText] = useState('');
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [pending, setPending] = useState<Pending[]>([]);
+  const [ended, setEnded] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   const conversations = useQuery({
     queryKey: qk.realtor.conversations,
     queryFn: realtorApi.conversations,
   });
   const conversation = conversations.data?.items.find((c) => c.id === id);
-  const name = conversation?.client.legalName ?? 'Client';
 
   // Reading the thread marks it read on the server; refresh the inbox badge after.
   const messages = useQuery({
     queryKey: qk.realtor.messages(id),
     queryFn: () => realtorApi.messages(id),
     enabled: !!id,
-    refetchInterval: POLL_MS,
+    refetchInterval: (q) => (isEndedRelationship(q.state.error) ? false : POLL_MS),
+    retry: (n, err) => !isEndedRelationship(err) && n < 2,
   });
+  const noLongerClient = ended || isEndedRelationship(messages.error);
+  // An ended relationship drops out of the active-client inbox, so there may be no name.
+  const name = conversation?.client.legalName ?? (noLongerClient ? 'Former client' : 'Client');
   const count = messages.data?.items.length ?? 0;
   useEffect(() => {
     if (count) qc.invalidateQueries({ queryKey: qk.realtor.conversations });
@@ -86,13 +95,24 @@ export default function RealtorConversation() {
             ? 'Not sent. You’re offline.'
             : err.message
           : 'Not sent.';
+      const threadHidden = messages.isError && !messages.data;
+      if (isEndedRelationship(err) || threadHidden) {
+        // No visible bubble to carry the error: put the draft back in the composer.
+        setPending((list) => list.filter((x) => x.key !== p.key));
+        setText((t) => t || p.text);
+        setFiles((f) => (f.length ? f : p.files));
+        if (isEndedRelationship(err)) setEnded(true);
+        else setSendError(error);
+        return;
+      }
       setPending((list) => list.map((x) => (x.key === p.key ? { ...x, error } : x)));
     },
   });
 
-  const canSend = !!text.trim() || files.length > 0;
+  const canSend = !noLongerClient && (!!text.trim() || files.length > 0);
   const submit = () => {
     if (!canSend) return;
+    setSendError(null);
     const p: Pending = { key: `${Date.now()}`, text: text.trim(), files };
     setPending((list) => [...list, p]);
     setText('');
@@ -144,12 +164,19 @@ export default function RealtorConversation() {
             {name}
           </Text>
           <Text variant="caption" color="mutedForeground">
-            Your client
+            {noLongerClient ? 'No longer your client' : 'Your client'}
           </Text>
         </View>
       </View>
 
-      {messages.isError && !messages.data ? (
+      {noLongerClient ? (
+        <EmptyState
+          icon={<UserX size={34} color={colors.mutedForeground} />}
+          title="This person is no longer your client"
+          description="The client relationship has ended, so you can’t send new messages here."
+          action={<LinkButton label="Back to messages" onPress={() => router.back()} />}
+        />
+      ) : messages.isError && !messages.data ? (
         <ErrorState onRetry={() => messages.refetch()} />
       ) : messages.isPending ? (
         <View style={{ padding: spacing.xl, gap: spacing.md }}>
@@ -169,11 +196,15 @@ export default function RealtorConversation() {
           windowSize={9}
           removeClippedSubviews={Platform.OS === 'android'}
           ListEmptyComponent={
-            <EmptyState
-              icon={<MessageCircle size={34} color={colors.mutedForeground} />}
-              title="Start the conversation"
-              description="Talk through a listing, an offer or a viewing."
-            />
+            // The inverted list un-flips its empty component through `style`, which
+            // EmptyState doesn't take; a plain View carries it.
+            <View>
+              <EmptyState
+                icon={<MessageCircle size={34} color={colors.mutedForeground} />}
+                title="Start the conversation"
+                description="Talk through a listing, an offer or a viewing."
+              />
+            </View>
           }
           renderItem={({ item }) => {
             const mine = item.kind === 'pending' || item.m.senderType === 'realtor';
@@ -307,6 +338,18 @@ export default function RealtorConversation() {
           gap: spacing.sm,
         }}
       >
+        {sendError && !noLongerClient ? (
+          <View
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+          >
+            <AlertCircle size={13} color={colors.destructive} />
+            <Text variant="caption" style={{ color: colors.destructive, flex: 1 }}>
+              {sendError}
+            </Text>
+          </View>
+        ) : null}
         {files.length ? (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
             {files.map((f, i) => (
@@ -336,7 +379,7 @@ export default function RealtorConversation() {
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.xs }}>
           <IconButton
             onPress={attach}
-            disabled={files.length >= MAX_FILES}
+            disabled={noLongerClient || files.length >= MAX_FILES}
             accessibilityLabel="Attach a file"
             icon={<Paperclip size={18} color={colors.mutedForeground} />}
             style={{ marginBottom: 5, borderWidth: 0, backgroundColor: 'transparent' }}
@@ -347,6 +390,7 @@ export default function RealtorConversation() {
               accessibilityLabel="Message"
               value={text}
               onChangeText={setText}
+              editable={!noLongerClient}
               multiline
               containerStyle={{ maxHeight: 120 }}
             />

@@ -19,6 +19,7 @@ import {
   NumberInput,
   Select,
 } from '@getrentos/ui';
+import { chargeLabel } from '@/lib/chargeCategory';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
 import { CreditRefundHistory } from '@/components/shared/CreditRefundHistory';
@@ -304,7 +305,7 @@ export const RentScheduleModal = ({ lease, onClose }: RentScheduleModalProps) =>
                             className="flex justify-between gap-2 text-xs"
                           >
                             <span className="text-muted-foreground">
-                              Credit used on rent due {formatDate(c.dueDate)}
+                              Credit used on {chargeLabel(c.category)} due {formatDate(c.dueDate)}
                             </span>
                             <span className="text-success tabular-nums">
                               {formatCurrency(c.amount)}

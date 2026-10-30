@@ -227,15 +227,21 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
 
 /** Fetches with the Bearer token attached, silently refreshing on 401 once. */
 export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  // The refresh-and-replay on 401 happens here, once; apiFetch's own retry is
+  // switched off so a single request can't fan out into several attempts.
   const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) =>
-    apiFetch<T>(path, {
-      ...options,
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
-        ...options.headers,
+    apiFetch<T>(
+      path,
+      {
+        ...options,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(stepUp ? { [STEP_UP_HEADER]: stepUp } : {}),
+          ...options.headers,
+        },
       },
-    });
+      false
+    );
 
   try {
     return await doFetch(getAuthToken());

@@ -39,7 +39,23 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
 
   const owed = payment?.owed ?? 0;
   const part = Number(amount);
-  const partValid = part >= Math.min(MIN_PART_PAYMENT, owed) && part < owed;
+  const minPart = Math.min(MIN_PART_PAYMENT, owed);
+  const partValid = part >= minPart && part < owed;
+  // Only once something is typed: an empty box is not yet a mistake.
+  const partError =
+    mode !== 'part' || !amount
+      ? undefined
+      : part < minPart
+        ? `Enter at least ${formatCurrency(minPart)}.`
+        : part >= owed
+          ? `You owe ${formatCurrency(owed)} on this charge. To pay all of it, choose Pay in full.`
+          : undefined;
+  const buttonLabel =
+    mode === 'full'
+      ? `Pay ${formatCurrency(owed)}`
+      : amount
+        ? `Pay ${formatCurrency(part)}`
+        : 'Enter an amount to pay';
 
   return (
     <Dialog open={!!payment} onOpenChange={(open) => !open && close()}>
@@ -67,7 +83,8 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
           {mode === 'part' && (
             <Field
               label="Amount"
-              hint={`At least ${formatCurrency(Math.min(MIN_PART_PAYMENT, owed))}. The rest stays owed on this charge. The first rent on a new lease has to be paid in full.`}
+              hint={`At least ${formatCurrency(minPart)}. The rest stays owed on this charge. The first rent on a new lease has to be paid in full.`}
+              error={partError}
             >
               <CurrencyInput
                 prefix="₦"
@@ -86,7 +103,7 @@ export const PayAmountDialog = ({ payment, onClose, onPay }: PayAmountDialogProp
               close();
             }}
           >
-            Pay {formatCurrency(mode === 'part' && partValid ? part : owed)}
+            {buttonLabel}
           </Button>
         </div>
       </DialogContent>

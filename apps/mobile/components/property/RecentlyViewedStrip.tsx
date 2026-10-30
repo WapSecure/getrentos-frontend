@@ -26,7 +26,7 @@ export function RecentlyViewedStrip() {
             key={p.id}
             onPress={() => router.push(`/(app)/property/${p.id}`)}
             accessibilityRole="button"
-            accessibilityLabel={`${p.title}, ${formatNaira(p.price, { compact: true })} per month`}
+            accessibilityLabel={`${p.title}, ${formatNaira(p.price, { compact: true })} per ${p.period === 'year' ? 'year' : 'month'}`}
             style={{ width: 120 }}
           >
             <View
@@ -52,7 +52,8 @@ export function RecentlyViewedStrip() {
               {p.title}
             </Text>
             <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-              {formatNaira(p.price, { compact: true })}/mo
+              {formatNaira(p.price, { compact: true })}
+              {p.period === 'year' ? '/yr' : '/mo'}
             </Text>
           </Pressable>
         ))}

@@ -17,7 +17,12 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import { landlordApi, LANDLORD_PAYMENT_TONE, type LandlordPayment } from '@/lib/api/landlord';
+import {
+  landlordApi,
+  LANDLORD_PAYMENT_LABEL,
+  LANDLORD_PAYMENT_TONE,
+  type LandlordPayment,
+} from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
 import { ChargeRentSheet } from '@/components/landlord/ChargeRentSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -42,7 +47,10 @@ export default function LandlordPayments() {
     queryFn: landlordApi.arrearsSummary,
   });
 
-  const items = query.data?.items ?? [];
+  // Disputed payments are frozen until resolved, so they lead the list.
+  const items = [...(query.data?.items ?? [])].sort(
+    (a, b) => Number(!!b.disputeReason) - Number(!!a.disputeReason)
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -183,7 +191,10 @@ function PaymentRow({ payment: p }: { payment: LandlordPayment }) {
             {p.tenantName}
           </Text>
           <Price amount={p.amount} variant="callout" />
-          <Badge label={p.status} tone={LANDLORD_PAYMENT_TONE[p.status]} />
+          <Badge
+            label={LANDLORD_PAYMENT_LABEL[p.status] ?? p.status}
+            tone={LANDLORD_PAYMENT_TONE[p.status]}
+          />
         </View>
 
         <Text variant="caption" color="mutedForeground" numberOfLines={1}>
@@ -200,7 +211,11 @@ function PaymentRow({ payment: p }: { payment: LandlordPayment }) {
         {p.disputeReason ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 }}>
             <MessageSquareWarning size={13} color={colors.destructive} />
-            <Text variant="caption" style={{ flex: 1, color: colors.destructive }}>
+            <Text
+              variant="caption"
+              numberOfLines={2}
+              style={{ flex: 1, color: colors.destructive }}
+            >
               Disputed: {p.disputeReason}
             </Text>
           </View>
