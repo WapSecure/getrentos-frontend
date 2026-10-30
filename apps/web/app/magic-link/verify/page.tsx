@@ -26,16 +26,17 @@ function MagicLinkVerifyContent() {
 
     const verify = async () => {
       const response = await authService.verifyMagicLink(token);
-      if (response.success && response.data && 'requiresTwoFactor' in response.data) {
+      const data = response.success ? response.data : undefined;
+      if (data && 'requiresTwoFactor' in data) {
         // The link stands in for the password; the authenticator code is
         // still owed. The OAuth callback page already finishes that step.
-        router.replace(
-          `/oauth/callback#${new URLSearchParams({ challenge_token: response.data.challengeToken })}`
+        window.location.replace(
+          `/oauth/callback#${new URLSearchParams({ challenge_token: data.challengeToken })}`
         );
         return;
       }
-      if (response.success && response.data) {
-        const { accessToken, ...user } = response.data;
+      if (data) {
+        const { accessToken, ...user } = data;
         const primaryRoleId = resolvePrimaryRoleId(user.roles);
 
         // Magic-link sign-in is session-only by default (the refresh token is
