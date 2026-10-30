@@ -22,7 +22,23 @@ interface MeResponse {
 
 function OAuthCallbackContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const query = useSearchParams();
+  // The result arrives in the URL fragment (older links used the query).
+  // Read it once, then drop it from the address bar and history.
+  const [searchParams] = useState(() => {
+    const merged = new URLSearchParams(query.toString());
+    if (typeof window !== 'undefined' && window.location.hash.length > 1) {
+      new URLSearchParams(window.location.hash.slice(1)).forEach((value, key) =>
+        merged.set(key, value)
+      );
+    }
+    return merged;
+  });
+  useEffect(() => {
+    if (window.location.hash || window.location.search) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
   const [error, setError] = useState<string | null>(null);
   // Google proved who you are, but your account also has an authenticator app:
   // the backend sent a short-lived challenge instead of a session.

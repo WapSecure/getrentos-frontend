@@ -134,7 +134,7 @@ export const authService = {
     );
   },
 
-  async verifyMagicLink(token: string): Promise<ApiResponse<AuthResult>> {
+  async verifyMagicLink(token: string): Promise<ApiResponse<LoginResult>> {
     return safeCall(() =>
       apiFetch('/auth/magic-link/verify', {
         method: 'POST',
