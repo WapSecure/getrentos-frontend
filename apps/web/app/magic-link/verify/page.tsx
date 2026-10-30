@@ -6,6 +6,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { saveAuthSession } from '@/lib/authStorage';
 import { ROUTES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { authService } from '@/services/authService';
+import { isSafeInternalPath } from '@getrentos/shared';
 import { Logo } from '@/components/ui/Logo';
 
 function MagicLinkVerifyContent() {
@@ -25,6 +26,14 @@ function MagicLinkVerifyContent() {
 
     const verify = async () => {
       const response = await authService.verifyMagicLink(token);
+      if (response.success && response.data && 'requiresTwoFactor' in response.data) {
+        // The link stands in for the password; the authenticator code is
+        // still owed. The OAuth callback page already finishes that step.
+        router.replace(
+          `/oauth/callback#${new URLSearchParams({ challenge_token: response.data.challengeToken })}`
+        );
+        return;
+      }
       if (response.success && response.data) {
         const { accessToken, ...user } = response.data;
         const primaryRoleId = resolvePrimaryRoleId(user.roles);
@@ -41,7 +50,7 @@ function MagicLinkVerifyContent() {
         );
 
         router.replace(
-          redirectTo && redirectTo.startsWith('/') ? redirectTo : getDashboardRoute(primaryRoleId)
+          isSafeInternalPath(redirectTo) ? redirectTo : getDashboardRoute(primaryRoleId)
         );
       } else {
         setError(response.message || 'This sign-in link is invalid or has expired.');

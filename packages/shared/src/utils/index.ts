@@ -11,3 +11,4 @@ export * from './landAuthority';
 export * from './landWatch';
 export * from './months';
 export * from './coordinateSystems';
+export * from './safePath';

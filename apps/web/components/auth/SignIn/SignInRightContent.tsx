@@ -10,6 +10,7 @@ import { MagicLinkSignIn } from './methods/MagicLinkSignIn';
 import { OAuthSignIn } from './methods/OAuthSignIn';
 import { SignInMethod } from '@/app/(auth)/login/page';
 import { ROUTES } from '@/lib/constants/auth';
+import { isSafeInternalPath } from '@getrentos/shared';
 import { useToast, type ToastVariant } from '@getrentos/ui';
 import { Button, SessionExpiredNotice } from '@getrentos/ui';
 import { AuthMethodTabs } from '../AuthMethodTabs';
@@ -31,7 +32,7 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   const [nextPath] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
     const next = new URLSearchParams(window.location.search).get('next');
-    return next && next.startsWith('/') ? next : null;
+    return isSafeInternalPath(next) ? next : null;
   });
 
   useEffect(() => {
