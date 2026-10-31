@@ -143,7 +143,7 @@ export const MaintenanceRequestCard = ({
             disabled={isBusy}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            AI Triage
+            Auto-triage
           </Button>
           <Button
             variant="outline"

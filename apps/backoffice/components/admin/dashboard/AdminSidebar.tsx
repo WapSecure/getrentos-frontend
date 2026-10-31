@@ -374,7 +374,7 @@ const navItems: NavItem[] = [
     permission: 'reports.view',
   },
   {
-    label: 'AI Usage',
+    label: 'Automation Usage',
     href: '/admin/ai-usage',
     icon: Cpu,
     permission: 'ai.observe',

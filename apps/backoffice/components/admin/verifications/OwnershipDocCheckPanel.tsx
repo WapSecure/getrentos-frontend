@@ -36,7 +36,7 @@ export const OwnershipDocCheckPanel = ({ proofs }: { proofs: OwnershipProofRef[]
     <div>
       <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <Sparkles className="h-3.5 w-3.5 text-primary" />
-        AI document cross-check
+        Document cross-check
       </p>
       <div className="space-y-2">
         {proofs.map((proof) => {
@@ -56,7 +56,7 @@ export const OwnershipDocCheckPanel = ({ proofs }: { proofs: OwnershipProofRef[]
                   onClick={() => mutation.mutate(proof.id)}
                   isLoading={running}
                 >
-                  {result ? 'Re-run check' : 'Run AI cross-check'}
+                  {result ? 'Re-run check' : 'Run check'}
                 </Button>
               </div>
 

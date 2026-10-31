@@ -61,10 +61,10 @@ export default function AdminAiUsagePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">AI usage &amp; governance</h1>
+        <h1 className="text-2xl font-bold text-foreground">Automation usage &amp; controls</h1>
         <p className="mt-1 text-muted-foreground">
-          Today&apos;s AI spend, volume and per-capability breakdown, with the live kill-switch and
-          budget controls. All figures reset at 00:00 UTC.
+          Today&apos;s automated-check spend, volume and per-capability breakdown, with the live
+          kill-switch and budget controls. All figures reset at 00:00 UTC.
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export default function AdminAiUsagePage() {
         <ControlPill
           icon={data.globallyEnabled ? Power : ShieldAlert}
           label="Global switch"
-          value={data.globallyEnabled ? 'AI enabled' : 'AI turned off'}
+          value={data.globallyEnabled ? 'Automation enabled' : 'Automation paused'}
           tone={data.globallyEnabled ? 'ok' : 'alert'}
         />
         <ControlPill
@@ -139,7 +139,7 @@ export default function AdminAiUsagePage() {
         </div>
         {data.capabilities.length === 0 ? (
           <p className="px-5 py-8 text-center text-sm text-muted-foreground">
-            No AI calls recorded today.
+            No automated checks recorded today.
           </p>
         ) : (
           <div className="overflow-x-auto">

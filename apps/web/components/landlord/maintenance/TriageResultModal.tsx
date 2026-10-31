@@ -41,7 +41,7 @@ export const TriageResultModal = ({
       <div className="p-4 border-b border-border">
         <DialogTitle className="flex items-center gap-2 text-xl font-semibold tracking-[-0.02em] text-foreground">
           <Sparkles className="w-4.5 h-4.5 text-primary" />
-          AI triage
+          Automated triage
         </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           A suggested category, urgency and work order for this request. Review before you act.
@@ -84,9 +84,7 @@ const TriageBody = ({
       </div>
 
       <section className="space-y-1">
-        <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Why
-        </h4>
+        <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Why</h4>
         <p className="text-sm text-foreground whitespace-pre-line">{triage.rationale}</p>
       </section>
 
@@ -104,9 +102,7 @@ const TriageBody = ({
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Suggested vendor</p>
-              <p className="font-medium text-foreground truncate">
-                {triage.suggestedVendor.name}
-              </p>
+              <p className="font-medium text-foreground truncate">{triage.suggestedVendor.name}</p>
             </div>
             <Button
               variant="primary"
@@ -123,10 +119,8 @@ const TriageBody = ({
       )}
 
       <p className="text-xs text-muted-foreground">
-        {triage.source === 'ai'
-          ? `Suggested by AI (${triage.model}).`
-          : 'Suggested by rules, not AI.'}{' '}
-        Always your call.
+        {triage.source === 'ai' ? 'Automated suggestion.' : 'Suggested from your rules.'} Always
+        your call.
       </p>
     </div>
   );

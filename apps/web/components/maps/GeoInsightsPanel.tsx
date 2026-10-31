@@ -194,7 +194,7 @@ export const GeoInsightsPanel = ({
             <div className="rounded-2xl border border-primary/20 bg-accent/40 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-primary">
                 <BadgeCheck className="h-4 w-4" />
-                AI property insight
+                Property insight
               </div>
               <p className="mt-2 text-sm leading-relaxed text-foreground">{insights.aiSummary}</p>
             </div>

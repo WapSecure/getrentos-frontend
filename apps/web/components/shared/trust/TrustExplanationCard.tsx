@@ -93,9 +93,7 @@ export const TrustExplanationCard = () => {
           </section>
         )}
 
-        <p className="text-xs text-muted-foreground">
-          {data.source === 'ai' ? 'Explained by AI.' : 'Explained from your verification record.'}
-        </p>
+        <p className="text-xs text-muted-foreground">Based on your verification record.</p>
       </div>
     </Card>
   );
