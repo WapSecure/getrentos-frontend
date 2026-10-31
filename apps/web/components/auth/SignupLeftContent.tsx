@@ -22,7 +22,7 @@ const trustFeatures = [
   {
     icon: Lock,
     title: 'Payment Protection',
-    description: 'Your funds are held securely until conditions are met',
+    description: 'Rent is released on schedule; sale deposits only once you confirm receipt',
   },
   {
     icon: Fingerprint,

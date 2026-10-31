@@ -43,7 +43,7 @@ const STAGES: { key: BuyerEscrowStatus; label: string; description: string }[] =
   {
     key: 'deposit_pending',
     label: 'Deposit',
-    description: 'Pay your deposit to GetRentos, which holds it safely until the sale completes.',
+    description: 'Pay your deposit to GetRentos, which holds it safely until you confirm receipt.',
   },
   {
     key: 'funds_held',

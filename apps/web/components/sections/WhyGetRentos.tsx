@@ -21,8 +21,9 @@ const reasons = [
   },
   {
     icon: Lock,
-    title: 'We hold the money until the deal is done',
-    description: 'Rent and sale payments are held until the agreed conditions are met.',
+    title: 'GetRentos holds the money',
+    description:
+      'Rent is released to the landlord on schedule. A sale deposit only reaches the seller once the buyer confirms receipt. A dispute keeps either one held.',
   },
   {
     icon: BadgeCheck,

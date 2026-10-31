@@ -14,7 +14,14 @@ import {
   Cog,
   Wallet,
 } from 'lucide-react';
-import { Alert, Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type {
   BuyerEscrowTransaction,
@@ -46,7 +53,7 @@ const escrowSteps: { key: BuyerEscrowStatus; label: string; description: string 
   {
     key: 'deposit_pending',
     label: 'Deposit Pending',
-    description: 'Pay your deposit to GetRentos, which holds it safely until the sale completes.',
+    description: 'Pay your deposit to GetRentos, which holds it safely until you confirm receipt.',
   },
   {
     key: 'funds_held',
@@ -119,8 +126,7 @@ export const BuyerEscrowTransactionDetailModal = ({
               <div className="space-y-0">
                 {escrowSteps.map((step, index) => {
                   const isDone = index < activeIndex || transaction.escrowStatus === 'released';
-                  const isActive =
-                    index === activeIndex && transaction.escrowStatus !== 'released';
+                  const isActive = index === activeIndex && transaction.escrowStatus !== 'released';
                   const isLast = index === escrowSteps.length - 1;
                   return (
                     <div key={step.key} className="flex gap-3">
@@ -154,9 +160,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                         >
                           {step.label}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {step.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
                         {isActive && step.key === 'deposit_pending' && canDeposit && (
                           <Button
                             variant="primary"
@@ -223,8 +227,9 @@ export const BuyerEscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            The money you pay is held safely by GetRentos and only released to the owner once the
-            sale completes: protecting both you and the seller.
+            The money you pay is held safely by GetRentos and only released to the seller once you
+            confirm receipt (for land, once the conveyance steps are confirmed). It is never
+            released on a timer, and a dispute keeps it held until it is resolved.
           </Alert>
 
           {transaction.releasedAt && (

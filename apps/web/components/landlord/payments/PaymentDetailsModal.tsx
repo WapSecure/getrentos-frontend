@@ -98,8 +98,9 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
           )}
 
           <Alert variant="neutral">
-            GetRentos holds the tenant’s payment and pays it to you automatically once the lease
-            conditions are verified. Landlords cannot pay it out early or skip this step.
+            GetRentos holds the tenant’s rent and releases it to you on its scheduled release date,
+            or sooner once the tenant confirms move-in. A dispute keeps it held until it is
+            resolved. Landlords cannot pay it out early or skip this step.
           </Alert>
 
           {payment.releaseDate && (

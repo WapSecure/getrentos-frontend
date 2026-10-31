@@ -9,17 +9,16 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { SUPPORT, telUrl } from '@/lib/support';
 
-
 const FAQS: { question: string; answer: string }[] = [
   {
     question: 'How does GetRentos verify identities and properties?',
     answer:
-      'Every user completes BVN/NIN identity verification, and every listed property is checked against title deeds or certificates of occupancy before it can go live. Look for the green "Verified" badge.',
+      'Signing up is quick: you don\'t need to verify anything to start. Identity, licence and ownership checks are only asked for when something you do needs them, such as listing a property or collecting rent. Listings are reviewed before they go live; look for the green "Verified" badge.',
   },
   {
     question: 'How are payments protected?',
     answer:
-      'GetRentos Payment Protection holds your payment for a short period before it is released to the other side. If something is wrong, raise a dispute and the money stays held until it is resolved, so money never changes hands without a paper trail.',
+      "It depends on the payment. Rent is held by GetRentos and released to your landlord on schedule. A deposit on a home or land you're buying is held by GetRentos and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
   },
   {
     question: 'How do I contact someone about my account?',

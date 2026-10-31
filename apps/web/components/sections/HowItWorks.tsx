@@ -45,7 +45,7 @@ const steps = [
     number: '06',
     title: 'Protected payment',
     icon: Coins,
-    description: 'Funds held securely until conditions met.',
+    description: 'Rent released on schedule; sale deposits once the buyer confirms receipt.',
   },
   {
     number: '07',
@@ -69,9 +69,7 @@ export const HowItWorks = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {steps.map((step) => (
           <MarketingCard key={step.number} className="p-6">
-            <div className="mb-3 text-4xl font-bold text-border">
-              {step.number}
-            </div>
+            <div className="mb-3 text-4xl font-bold text-border">{step.number}</div>
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
               <step.icon className="h-5 w-5 text-primary" />
             </div>

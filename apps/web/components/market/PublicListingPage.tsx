@@ -37,6 +37,13 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   land: 'Land',
 };
 
+/** When money paid through GetRentos reaches the other side, per market. */
+const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
+  rent: 'Pay through GetRentos: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  sale: 'Pay through GetRentos: we hold your deposit and only release it to the seller once you confirm receipt.',
+  land: 'Pay through GetRentos: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
+};
+
 /** Shared `generateMetadata` for the three public detail routes. */
 export async function publicListingMetadata(
   market: PublicDetailMarket,
@@ -264,7 +271,7 @@ export async function PublicListingPage({
               <div className="space-y-3 border-t border-border pt-5 text-xs text-muted-foreground">
                 <p className="flex items-start gap-2">
                   <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                  Pay through GetRentos: we hold your money until both sides confirm.
+                  {PROTECTION_LINE[market]}
                 </p>
                 <p className="flex items-start gap-2">
                   <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
