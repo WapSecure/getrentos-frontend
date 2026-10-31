@@ -110,7 +110,7 @@ export const EscrowTransactionDetailModal = ({
 
   if (!transaction) return null;
 
-  const isFrozen = transaction.escrowStatus === 'frozen' || transaction.escrowStatus === 'disputed';
+  const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
   const activeIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
   const payout = transaction.sellerPayoutStatus

@@ -18,14 +18,15 @@ export type OfferStatus =
   | 'expired'
   | 'closed';
 export type FinancingType = 'cash' | 'mortgage' | 'installment';
+// deposit → held → released, with frozen (a dispute is open) and refunded as
+// terminal branches. VERIFICATION_PENDING / SETTLEMENT_PENDING / DISPUTED exist
+// in the enum but no service writes them (a dispute sets FROZEN), so they are
+// not surfaced (DEF-240).
 export type SaleEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
-  | 'verification'
-  | 'final_payment'
   | 'released'
   | 'frozen'
-  | 'disputed'
   | 'refunded';
 export type BuyerLeadStage =
   | 'new'

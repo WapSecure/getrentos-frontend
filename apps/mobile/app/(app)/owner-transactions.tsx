@@ -114,7 +114,7 @@ export default function OwnerTransactions() {
 
 function SaleCard({ t }: { t: OwnerTransaction }) {
   const { colors, spacing, radius } = useTheme();
-  const frozen = t.escrowStatus === 'frozen' || t.escrowStatus === 'disputed';
+  const frozen = t.escrowStatus === 'frozen';
   const current = STAGES.findIndex((s) => s.key === t.escrowStatus);
   const payout = t.sellerPayoutStatus ? PAYOUT[t.sellerPayoutStatus] : null;
 

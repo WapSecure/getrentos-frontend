@@ -13,14 +13,15 @@ export type SaleOfferStatus =
   | 'EXPIRED'
   | 'CLOSED';
 
+// deposit → held → released, with FROZEN (a dispute is open) and REFUNDED as
+// terminal branches. The Prisma enum also has VERIFICATION_PENDING /
+// SETTLEMENT_PENDING / DISPUTED, but no service writes them (a dispute sets
+// FROZEN), so the admin UI does not surface them (DEF-240).
 export type EscrowState =
   | 'DEPOSIT_PENDING'
   | 'FUNDS_HELD'
-  | 'VERIFICATION_PENDING'
-  | 'SETTLEMENT_PENDING'
   | 'RELEASED'
   | 'FROZEN'
-  | 'DISPUTED'
   | 'REFUNDED';
 
 export interface AdminMarketplaceOverview {

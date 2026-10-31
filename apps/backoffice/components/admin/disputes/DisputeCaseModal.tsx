@@ -31,12 +31,9 @@ const STATUS_VARIANT: Record<Dispute['status'], BadgeVariant> = {
 const ESCROW_LABEL: Record<string, string> = {
   DEPOSIT_PENDING: 'Deposit pending',
   FUNDS_HELD: 'Funds held',
-  VERIFICATION_PENDING: 'Verification pending',
-  SETTLEMENT_PENDING: 'Settlement pending',
   RELEASED: 'Released',
   REFUNDED: 'Refunded',
   FROZEN: 'Frozen',
-  DISPUTED: 'Disputed',
 };
 
 interface DisputeCaseModalProps {

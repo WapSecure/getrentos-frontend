@@ -162,11 +162,8 @@ export interface BuyerConversationsFilters extends BuyerListOptions {
 const ESCROW_STATUS_QUERY: Record<BuyerEscrowTransaction['escrowStatus'], string> = {
   deposit_pending: 'DEPOSIT_PENDING',
   funds_held: 'FUNDS_HELD',
-  verification: 'VERIFICATION_PENDING',
-  final_payment: 'SETTLEMENT_PENDING',
   released: 'RELEASED',
   frozen: 'FROZEN',
-  disputed: 'DISPUTED',
   refunded: 'REFUNDED',
 };
 
