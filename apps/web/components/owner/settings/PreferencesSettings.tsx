@@ -24,6 +24,8 @@ export const PreferencesSettings = () => {
   } = useQuery({
     queryKey: ownerKeys.preferences,
     queryFn: () => unwrap(ownerService.getPreferences()),
+    // Shown in place with a retry, so the other settings sections stay usable.
+    throwOnError: false,
   });
 
   useEffect(() => {

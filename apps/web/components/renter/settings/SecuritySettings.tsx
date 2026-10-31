@@ -40,6 +40,7 @@ export const SecuritySettings = () => {
   } = useQuery({
     queryKey: renterKeys.twoFactor,
     queryFn: () => unwrap(renterService.getTwoFactorStatus()),
+    throwOnError: false,
   });
 
   const {
@@ -50,6 +51,7 @@ export const SecuritySettings = () => {
   } = useQuery({
     queryKey: renterKeys.securityOverview,
     queryFn: () => unwrap(renterService.getSecurityOverview()),
+    throwOnError: false,
   });
 
   const [pinOpen, setPinOpen] = useState(false);
