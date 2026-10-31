@@ -63,6 +63,8 @@ export const DiscoverPropertyCard = ({
     onSave();
   };
 
+  const letOut = property.acceptingApplications === false;
+
   const handleScheduleViewingClick = () => {
     onScheduleViewing();
   };
@@ -173,18 +175,22 @@ export const DiscoverPropertyCard = ({
           verifiedBadge={property.landlordVerified || false}
         />
 
-        <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto_auto] gap-2 border-t border-border pt-4">
+        <div
+          className={`mt-4 grid ${letOut ? 'grid-cols-[minmax(0,1fr)_auto]' : 'grid-cols-[minmax(0,1fr)_auto_auto]'} gap-2 border-t border-border pt-4`}
+        >
           <Button size="sm" variant="primary" onClick={onViewDetails}>
             View property
           </Button>
-          <IconButton
-            size="sm"
-            variant="outline"
-            onClick={handleScheduleViewingClick}
-            label={`Schedule a viewing for ${property.title}`}
-            title="Schedule a viewing"
-            icon={<Calendar />}
-          />
+          {letOut ? null : (
+            <IconButton
+              size="sm"
+              variant="outline"
+              onClick={handleScheduleViewingClick}
+              label={`Schedule a viewing for ${property.title}`}
+              title="Schedule a viewing"
+              icon={<Calendar />}
+            />
+          )}
           <IconButton
             size="sm"
             variant="outline"
