@@ -116,6 +116,16 @@ const quickActions = [
   },
 ];
 
+// The "next payment" shown on the overview can come from the active lease's
+// reminder schedule or from a signed lease still awaiting its first payment.
+type NextPaymentCandidate = {
+  dueDate: string;
+  amount: number;
+  daysRemaining: number;
+  isFirstPayment?: boolean;
+};
+type FirstPaymentReminder = NextPaymentCandidate & { id: string; isFirstPayment: true };
+
 export function HomeOverviewView() {
   // A renter with no active lease yet (e.g. one still awaiting signature) gets a
   // 404 here. That's "no active lease", not an outage, so tolerate it and fall
@@ -151,6 +161,24 @@ export function HomeOverviewView() {
   );
   const documents = documentsQuery.data?.items ?? [];
   const paymentReminders = useMemo(() => remindersQuery.data ?? [], [remindersQuery.data]);
+  // A signed lease still awaiting its first payment is real money due now, but it
+  // lives on the pending lease, not in the reminder schedule — so without this the
+  // "Next rent" tile and the "Upcoming" panel claimed "no upcoming payment" while
+  // the banner above told the tenant to pay the first rent by a deadline (DEF-236).
+  const firstPaymentDue = useMemo<FirstPaymentReminder | null>(() => {
+    if (pendingLease?.status !== 'awaiting_payment') return null;
+    if (pendingLease.amountDue == null || !pendingLease.paymentDueAt) return null;
+    const due = new Date(pendingLease.paymentDueAt);
+    if (Number.isNaN(due.getTime())) return null;
+    const daysRemaining = Math.ceil((due.getTime() - Date.now()) / 86_400_000);
+    return {
+      id: `pending-first-payment-${pendingLease.id}`,
+      amount: pendingLease.amountDue,
+      dueDate: pendingLease.paymentDueAt,
+      daysRemaining,
+      isFirstPayment: true,
+    };
+  }, [pendingLease]);
 
   const openRequests = useMemo(
     () =>
@@ -164,13 +192,13 @@ export function HomeOverviewView() {
   );
   const emergencyRequests = openRequests.filter((request) => request.isEmergency);
   const expiringDocuments = documents.filter((document) => document.status === 'expiring');
-  const nextPayment = useMemo(
-    () =>
-      [...paymentReminders].sort(
-        (a, b) => a.daysRemaining - b.daysRemaining || a.dueDate.localeCompare(b.dueDate)
-      )[0],
-    [paymentReminders]
-  );
+  const nextPayment = useMemo<NextPaymentCandidate | undefined>(() => {
+    const candidates: NextPaymentCandidate[] = [...paymentReminders];
+    if (firstPaymentDue) candidates.push(firstPaymentDue);
+    return candidates.sort(
+      (a, b) => a.daysRemaining - b.daysRemaining || a.dueDate.localeCompare(b.dueDate)
+    )[0];
+  }, [paymentReminders, firstPaymentDue]);
   const isLoading =
     leaseQuery.isLoading ||
     maintenanceQuery.isLoading ||
@@ -590,18 +618,22 @@ export function HomeOverviewView() {
                   {formatter.format(nextPayment.amount)} due {formatDate(nextPayment.dueDate)}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {nextPayment.daysRemaining <= 0
-                    ? 'This payment is now due.'
-                    : `${nextPayment.daysRemaining} day${nextPayment.daysRemaining === 1 ? '' : 's'} remaining.`}
+                  {nextPayment.isFirstPayment
+                    ? nextPayment.daysRemaining <= 0
+                      ? 'Your first rent is due now to activate the lease.'
+                      : `First rent to activate your lease · ${nextPayment.daysRemaining} day${nextPayment.daysRemaining === 1 ? '' : 's'} remaining.`
+                    : nextPayment.daysRemaining <= 0
+                      ? 'This payment is now due.'
+                      : `${nextPayment.daysRemaining} day${nextPayment.daysRemaining === 1 ? '' : 's'} remaining.`}
                 </p>
                 <Button
-                  href={ROUTES.RENTER_PAYMENTS}
+                  href={nextPayment.isFirstPayment ? `${ROUTES.RENTER_HOME}?tab=lease` : ROUTES.RENTER_PAYMENTS}
                   variant="outline"
                   size="sm"
                   rounded="lg"
                   className="mt-4"
                 >
-                  Review payment
+                  {nextPayment.isFirstPayment ? 'See what to pay' : 'Review payment'}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </>
