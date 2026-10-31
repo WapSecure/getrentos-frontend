@@ -17,6 +17,7 @@ import {
 } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
+import { formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { SUPPORT, hasSupportLine } from '@/lib/support';
 import {
@@ -24,6 +25,7 @@ import {
   homeTeam,
   reportImpersonation,
   type CheckKind,
+  type HomeTeam,
   type CheckResult,
   type ImpersonationChannel,
 } from '@/services/homeTeamService';
@@ -64,6 +66,24 @@ const Verdict = ({ result }: { result: CheckResult }) => {
       it below.
     </Alert>
   );
+};
+
+/** Which tenancy a home's team belongs to, so several homes are told apart. */
+const tenancyLabel = (home: HomeTeam): string | null => {
+  switch (home.leaseStatus) {
+    case 'SIGNED':
+      return home.leaseStart && new Date(home.leaseStart) > new Date()
+        ? `Tenancy starts ${formatDate(home.leaseStart)}`
+        : home.leaseEnd
+          ? `Current tenancy, until ${formatDate(home.leaseEnd)}`
+          : 'Current tenancy';
+    case 'AWAITING_LANDLORD':
+      return 'Rent paid: awaiting the landlord’s handover';
+    case 'AWAITING_PAYMENT':
+      return 'Awaiting your first rent payment';
+    default:
+      return null;
+  }
 };
 
 /**
@@ -130,6 +150,7 @@ export const HomeTeamCard = () => {
                 <span className="text-muted-foreground"> · managed by {h.managedBy}</span>
               )}
             </p>
+            {tenancyLabel(h) && <p className="text-xs text-muted-foreground">{tenancyLabel(h)}</p>}
             <ul className="mt-2 grid gap-2 sm:grid-cols-2">
               {h.people.map((p) => (
                 <li key={`${p.name}-${p.role}`} className="rounded-xl border border-border p-3">

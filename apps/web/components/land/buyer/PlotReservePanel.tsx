@@ -19,7 +19,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES, signInThen } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
-import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
+import { useBuyerViewer } from '@/lib/viewer';
 import { useAddRole } from '@/hooks/useAddRole';
 import { landBuyerService } from '@/services/landBuyerService';
 import {
@@ -62,9 +62,7 @@ export const PlotReservePanel = ({
 }) => {
   const queryClient = useQueryClient();
   const addRole = useAddRole();
-  const [viewer] = useState<Viewer>(() =>
-    viewerHasRole('buyer') ? 'buyer' : viewerIsSignedIn() ? 'member' : 'anonymous'
-  );
+  const viewer: Viewer = useBuyerViewer();
   const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState<LandReservation | null>(null);
   const [touring, setTouring] = useState(false);

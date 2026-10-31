@@ -589,6 +589,11 @@ export function HomeOverviewView() {
                 <p className="text-sm font-medium text-foreground">
                   {formatter.format(nextPayment.amount)} due {formatDate(nextPayment.dueDate)}
                 </p>
+                {nextPayment.propertyName && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    For {nextPayment.propertyName}
+                  </p>
+                )}
                 <p className="mt-1 text-sm text-muted-foreground">
                   {nextPayment.daysRemaining <= 0
                     ? 'This payment is now due.'

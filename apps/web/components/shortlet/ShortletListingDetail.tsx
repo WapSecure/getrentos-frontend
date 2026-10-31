@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   EmptyState,
+  PageErrorState,
   Skeleton,
   Tabs,
   TabsList,
@@ -119,7 +120,13 @@ export function ShortletListingDetail({
     shortletService.recordView(listingId).catch(() => undefined);
   }, [listingId]);
 
-  const { data: listing, isLoading } = useQuery({
+  const {
+    data: listing,
+    isLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useQuery({
     queryKey: shortletKeys.listing(listingId),
     queryFn: () => unwrap(shortletService.getListing(listingId)),
     // Hydrate from the ISR-rendered payload; avoid an immediate refetch.
@@ -194,6 +201,19 @@ export function ShortletListingDetail({
           <Skeleton className="h-64 rounded-xl md:col-span-2" />
           <Skeleton className="h-64 rounded-xl" />
         </div>
+      </div>
+    );
+  }
+
+  if (!listing && isError) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <PageErrorState
+          title="This listing is temporarily unavailable"
+          description="We could not load it just now. This is usually brief: please try again in a moment."
+          onRetry={() => refetch()}
+          isRetrying={isRefetching}
+        />
       </div>
     );
   }

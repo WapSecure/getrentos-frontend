@@ -40,13 +40,33 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 /** Cached for a minute: fresh enough for price changes, cheap for crawlers. */
 export const PUBLIC_DETAIL_REVALIDATE = 60;
 
-async function get<T>(path: string): Promise<T | null> {
-  try {
-    const res = await fetch(`${API}${path}`, { next: { revalidate: PUBLIC_DETAIL_REVALIDATE } });
-    return res.ok ? ((await res.json()) as T) : null;
-  } catch {
-    return null;
+/**
+ * The API could not be reached or failed (network error, 5xx, timeout). Thrown
+ * rather than read as "not found", so an outage renders the error boundary
+ * (500, and ISR keeps serving the last good page) instead of a cached 404.
+ */
+export class PublicListingUnavailableError extends Error {
+  constructor(path: string, status?: number) {
+    super(`Public listing ${path} unavailable${status ? ` (HTTP ${status})` : ''}`);
+    this.name = 'PublicListingUnavailableError';
   }
+}
+
+/** Statuses that mean "try again later", not "this listing does not exist". */
+export const isTransientStatus = (status: number) =>
+  status >= 500 || status === 408 || status === 429;
+
+/** The DTO, `null` when the API says the listing does not exist, or throws when it is unreachable. */
+async function get<T>(path: string): Promise<T | null> {
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, { next: { revalidate: PUBLIC_DETAIL_REVALIDATE } });
+  } catch {
+    throw new PublicListingUnavailableError(path);
+  }
+  if (res.ok) return (await res.json()) as T;
+  if (isTransientStatus(res.status)) throw new PublicListingUnavailableError(path, res.status);
+  return null;
 }
 
 const money = (v: unknown) => {

@@ -39,7 +39,7 @@ import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
-import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
+import { useBuyerViewer } from '@/lib/viewer';
 import {
   NIGERIA_STATES,
   NIGERIA_STATE_CITIES,
@@ -231,9 +231,7 @@ export const LandMarketplaceBrowser = ({ mode }: LandMarketplaceBrowserProps) =>
    * marketplace, so on the public page the CTAs used to tell a signed-in visitor
    * to "sign in": and sent them to a sign-in form they had already passed.
    */
-  const [viewer] = useState<LandViewer>(() =>
-    viewerHasRole('buyer') ? 'buyer' : viewerIsSignedIn() ? 'member' : 'anonymous'
-  );
+  const viewer: LandViewer = useBuyerViewer();
   const canOffer = mode === 'buyer' || viewer === 'buyer';
   const addRole = useAddRole();
   const needsSignIn = viewer === 'anonymous';

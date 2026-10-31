@@ -2,6 +2,10 @@ import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
 
 export interface HomeTeam {
   leaseId: string;
+  /** The tenancy shown for this home (one per property, the one furthest along). */
+  leaseStatus?: 'AWAITING_PAYMENT' | 'AWAITING_LANDLORD' | 'SIGNED';
+  leaseStart?: string;
+  leaseEnd?: string;
   propertyId: string;
   propertyTitle: string;
   managedBy: string | null;

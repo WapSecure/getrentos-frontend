@@ -31,7 +31,10 @@ export interface AdminMarketplaceOverview {
   openOffers: number;
   activeEscrows: number;
   closedDeals: number;
+  /** Agreed sale price of the closed deals. */
   totalDealValue: number;
+  /** What GetRentos released to sellers on them (the held deposits). Absent from older APIs. */
+  releasedToSellers?: number;
 }
 
 export interface AdminMarketplaceListing {

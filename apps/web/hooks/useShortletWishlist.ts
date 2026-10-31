@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@/lib/apiHelpers';
-import { viewerHasRole } from '@/lib/viewer';
+import { useViewerHasRole, viewerHasRole } from '@/lib/viewer';
 import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { SHORTLET_GUEST_ROLE_IDS } from '@/lib/shortlet/guestRoutes';
@@ -24,9 +23,9 @@ export const isGuestShortletViewer = (): boolean => viewerHasRole(...SHORTLET_GU
  */
 export const useShortletWishlist = () => {
   const queryClient = useQueryClient();
-  // Resolved once per mount: the role cannot change without a page load, and
-  // reading storage during render would break SSR/hydration parity.
-  const [canUseWishlist] = useState(isGuestShortletViewer);
+  // False during the server render and hydration, so the server HTML matches;
+  // the stored role takes over straight afterwards.
+  const canUseWishlist = useViewerHasRole(...SHORTLET_GUEST_ROLE_IDS);
 
   const { data: ids = [] } = useQuery({
     queryKey: shortletKeys.wishlistIds,

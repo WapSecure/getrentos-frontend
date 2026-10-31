@@ -731,7 +731,8 @@ export default function EstateMarketplacePage() {
                           <Clock className="w-4 h-4" />
                           Pause
                         </Button>
-                      ) : (
+                      ) : listing.status === 'CLOSED' ? null : (
+                        // A closed listing (sold, or its marketing ended) stays off the market.
                         <Button
                           variant="outline"
                           onClick={() => setStatus.mutate({ id: listing.id, status: 'PUBLISHED' })}

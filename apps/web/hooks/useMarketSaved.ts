@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@/lib/apiHelpers';
-import { viewerIsSignedIn } from '@/lib/viewer';
+import { useViewerSignedIn } from '@/lib/viewer';
 import { publicMarketService } from '@/services/publicMarketService';
 import { buyerKeys, renterKeys, shortletKeys } from '@/lib/queryKeys';
 
@@ -12,7 +12,7 @@ export const marketSavedKey = ['public-market', 'saved-listing-ids'] as const;
 /** Account-wide saved state shared with renter, buyer and shortlet dashboards. */
 export function useMarketSaved() {
   const queryClient = useQueryClient();
-  const [signedIn] = useState(viewerIsSignedIn);
+  const signedIn = useViewerSignedIn();
   const query = useQuery({
     queryKey: marketSavedKey,
     queryFn: () => unwrap(publicMarketService.savedListingIds()),

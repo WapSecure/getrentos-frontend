@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { ShortletListingDetail } from '@/components/shortlet/ShortletListingDetail';
 import { SITE_URL } from '@/lib/site';
+import { isTransientStatus, PublicListingUnavailableError } from '@/lib/publicListingDetail';
 import type { ShortletListing } from '@/types/shortlet';
 
 /**
@@ -12,16 +14,21 @@ export const revalidate = 3600;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+/**
+ * The listing, or `null` when it does not exist. An unreachable or failing API
+ * throws instead, so an outage shows the error boundary rather than a 404.
+ */
 async function fetchListing(id: string): Promise<ShortletListing | null> {
+  const path = `/shortlets/${encodeURIComponent(id)}`;
+  let res: Response;
   try {
-    const res = await fetch(`${API_BASE_URL}/shortlets/${id}`, {
-      next: { revalidate },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as ShortletListing;
+    res = await fetch(`${API_BASE_URL}${path}`, { next: { revalidate } });
   } catch {
-    return null;
+    throw new PublicListingUnavailableError(path);
   }
+  if (res.ok) return (await res.json()) as ShortletListing;
+  if (isTransientStatus(res.status)) throw new PublicListingUnavailableError(path, res.status);
+  return null;
 }
 
 interface ShortletDetailPageProps {
@@ -33,7 +40,7 @@ export async function generateMetadata({ params }: ShortletDetailPageProps): Pro
   const listing = await fetchListing(id);
 
   if (!listing) {
-    return { title: 'Shortlet not found' };
+    return { title: 'Shortlet not found', robots: { index: false } };
   }
 
   const description =
@@ -59,5 +66,6 @@ export default async function ShortletDetailPage({ params }: ShortletDetailPageP
   // Pre-fetch the listing server-side so the page renders with real content
   // (better SEO + LCP) and the client query hydrates instantly.
   const listing = await fetchListing(id);
-  return <ShortletListingDetail listingId={id} initialListing={listing ?? undefined} />;
+  if (!listing) notFound();
+  return <ShortletListingDetail listingId={id} initialListing={listing} />;
 }

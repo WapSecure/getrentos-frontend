@@ -237,7 +237,11 @@ function MarketplaceOverviewView({
               label="Closed deals"
               value={data.closedDeals}
               accent="red"
-              subtitle={`${formatCurrency(data.totalDealValue, { compact: true })} released`}
+              subtitle={
+                data.releasedToSellers !== undefined
+                  ? `${formatCurrency(data.releasedToSellers, { compact: true })} released to sellers`
+                  : `${formatCurrency(data.totalDealValue, { compact: true })} sale value`
+              }
             />
           </div>
 
