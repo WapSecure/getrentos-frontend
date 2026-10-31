@@ -9,6 +9,7 @@ import { Button, IconLink } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
+import { OwnershipDocCheckPanel } from '@/components/admin/verifications/OwnershipDocCheckPanel';
 import type { VerificationRequest } from '@/types/admin';
 
 interface ReviewVerificationModalProps {
@@ -201,6 +202,9 @@ export const ReviewVerificationModal = ({
                     )}
                   </div>
                 )}
+                {request.type === 'property' && detail?.ownershipProofs?.length ? (
+                  <OwnershipDocCheckPanel proofs={detail.ownershipProofs} />
+                ) : null}
               </>
             ) : (
               <Field

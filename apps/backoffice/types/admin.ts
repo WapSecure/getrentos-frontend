@@ -161,6 +161,35 @@ export interface VerificationRequest {
   documents?: VerificationDocument[];
   /** Property cover, gallery, and video-tour previews on property requests. */
   media?: VerificationDocument[];
+  /** Ownership proofs on a property request — each can be AI cross-checked. */
+  ownershipProofs?: OwnershipProofRef[];
+}
+
+export interface OwnershipProofRef {
+  id: string;
+  documentType: string;
+  status: string;
+}
+
+/** Result of the AI ownership-document cross-check (POST /ai/ownership-proofs/:id/doc-check). */
+export interface OwnershipDocCheck {
+  proofId: string;
+  claimedOwnerName: string;
+  propertyAddressOnFile: string | null;
+  nameMatch: 'MATCH' | 'PARTIAL' | 'MISMATCH' | 'UNREADABLE';
+  addressConsistent: boolean | null;
+  extraction: {
+    ownerName: string | null;
+    propertyReference: string | null;
+    documentKind: string | null;
+    legible: boolean;
+    concerns: string[];
+  } | null;
+  reasons: Array<{ code: string; severity: 'info' | 'warn' | 'critical'; detail: string }>;
+  recommendation: string;
+  coverage: { documentRead: boolean };
+  model: string | null;
+  checkedAt: string;
 }
 
 export interface Dispute {

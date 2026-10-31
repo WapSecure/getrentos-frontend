@@ -5,6 +5,7 @@ import type {
   PlanTier,
   UserAccountStatus,
   VerificationRequest,
+  OwnershipDocCheck,
   Dispute,
   DisputeDetail,
   DisputeMessage,
@@ -341,6 +342,13 @@ export const adminService = {
   /** Full detail incl. the real submitted documents (signed preview URLs) for a verification request. */
   async getVerificationDetail(id: string): Promise<ApiResponse<VerificationRequest>> {
     return safeCall(() => authFetch(`/admin/verifications/${id}`));
+  },
+
+  /** Run the AI cross-check on one ownership proof (reads the document, compares owner + address). */
+  async crossCheckOwnershipDoc(proofId: string): Promise<ApiResponse<OwnershipDocCheck>> {
+    return safeCall(() =>
+      authFetch(`/ai/ownership-proofs/${proofId}/doc-check`, { method: 'POST' })
+    );
   },
 
   async rejectVerification(id: string, reason: string): Promise<ApiResponse<void>> {
