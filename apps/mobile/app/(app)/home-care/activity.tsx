@@ -9,6 +9,7 @@ import { qk } from '@/lib/query/keys';
 import { homeCareApi, type TimelineEvent } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { formatTime } from '@/lib/format';
 
 const dayKey = (iso: string) => iso.slice(0, 10);
 const dayLabel = (key: string) => {
@@ -110,10 +111,7 @@ export default function Activity() {
                   </Text>
                 ) : null}
                 <Text variant="caption" color="mutedForeground">
-                  {new Date(item.occurredAt).toLocaleTimeString('en-NG', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
+                  {formatTime(item.occurredAt)}
                   {item.property?.title || item.property?.name
                     ? ` · ${item.property?.title ?? item.property?.name}`
                     : ''}

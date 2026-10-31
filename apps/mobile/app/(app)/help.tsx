@@ -7,10 +7,8 @@ import { Card, Divider, Text, useTheme } from '@getrentos/ui-native';
 import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { SUPPORT, telUrl } from '@/lib/support';
 
-const SUPPORT_EMAIL = 'support@getrentos.test';
-const SUPPORT_PHONE = '+2348000000000';
-const SUPPORT_PHONE_LABEL = '+234 800 000 0000';
 
 const FAQS: { question: string; answer: string }[] = [
   {
@@ -21,7 +19,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: 'How are payments protected?',
     answer:
-      'GetRentos holds the money until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
+      'GetRentos Payment Protection holds your payment for a short period before it is released to the other side. If something is wrong, raise a dispute and the money stays held until it is resolved, so money never changes hands without a paper trail.',
   },
   {
     question: 'How do I contact someone about my account?',
@@ -100,16 +98,20 @@ export default function HelpCenter() {
             <ContactRow
               icon={<Mail size={18} color={colors.primary} />}
               label="Email"
-              value={SUPPORT_EMAIL}
-              onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
+              value={SUPPORT.email}
+              onPress={() => Linking.openURL(`mailto:${SUPPORT.email}`)}
             />
-            <Divider />
-            <ContactRow
-              icon={<Phone size={18} color={colors.primary} />}
-              label="Phone"
-              value={SUPPORT_PHONE_LABEL}
-              onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)}
-            />
+            {SUPPORT.phone ? (
+              <>
+                <Divider />
+                <ContactRow
+                  icon={<Phone size={18} color={colors.primary} />}
+                  label="Phone"
+                  value={SUPPORT.phone}
+                  onPress={() => Linking.openURL(telUrl(SUPPORT.phone))}
+                />
+              </>
+            ) : null}
             {messages ? (
               <>
                 <Divider />
@@ -121,23 +123,27 @@ export default function HelpCenter() {
                 />
               </>
             ) : null}
-            <Divider />
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.md,
-                padding: spacing.lg,
-              }}
-            >
-              <Clock size={18} color={colors.mutedForeground} />
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyStrong">Hours</Text>
-                <Text variant="caption" color="mutedForeground">
-                  Mon–Sat, 8am–8pm WAT
-                </Text>
-              </View>
-            </View>
+            {SUPPORT.hours ? (
+              <>
+                <Divider />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.md,
+                    padding: spacing.lg,
+                  }}
+                >
+                  <Clock size={18} color={colors.mutedForeground} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyStrong">Hours</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      {SUPPORT.hours}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
           </Card>
         </View>
 

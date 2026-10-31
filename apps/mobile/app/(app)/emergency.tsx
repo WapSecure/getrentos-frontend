@@ -25,6 +25,7 @@ import {
   notePlaceholder,
   residentLines,
 } from '@/lib/emergency/answerOptions';
+import { formatTime } from '@/lib/format';
 
 /**
  * The roll call, from a household's point of view.
@@ -147,8 +148,7 @@ export default function ResidentEmergency() {
                     </Text>
                   ) : null}
                   <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-                    {data.muster.statusLabel} · raised{' '}
-                    {new Date(data.muster.declaredAt).toLocaleTimeString()}
+                    {data.muster.statusLabel} · raised {formatTime(data.muster.declaredAt)}
                   </Text>
                 </View>
               </View>

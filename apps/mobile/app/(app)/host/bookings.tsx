@@ -28,7 +28,7 @@ export default function HostBookings() {
   const [view, setView] = useState<BookingView>(isView(params.view) ? params.view : 'requests');
 
   const query = useInfiniteQuery({
-    queryKey: qk.host.bookings(view),
+    queryKey: qk.host.bookingsList(view),
     queryFn: ({ pageParam }) => hostShortletsApi.bookings(view, pageParam),
     initialPageParam: 1,
     getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
