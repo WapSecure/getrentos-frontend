@@ -6,6 +6,7 @@ import { CalendarDays, FileText, ArrowRight, BadgeCheck } from 'lucide-react';
 import { Alert } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { DescriptionList } from '@getrentos/ui';
+import { formatPercent } from '@getrentos/shared';
 import { ROUTES } from '@/lib/constants/auth';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -99,7 +100,7 @@ export const RenterLeaseRenewal = () => {
                       label: 'Expected Increase',
                       value: (
                         <span className="text-warning">
-                          {renewalOffer.increasePercentage}% (
+                          {formatPercent(renewalOffer.increasePercentage)}% (
                           {new Intl.NumberFormat('en-NG', {
                             style: 'currency',
                             currency: 'NGN',

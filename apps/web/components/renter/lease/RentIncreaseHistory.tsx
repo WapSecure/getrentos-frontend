@@ -4,6 +4,7 @@ import { Badge, Card } from '@getrentos/ui';
 import { motion } from 'framer-motion';
 import { TrendingUp, Calendar } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
+import { formatPercent } from '@getrentos/shared';
 
 interface RentIncrease {
   date: string;
@@ -78,7 +79,7 @@ export const RentIncreaseHistory = ({ increases }: RentIncreaseHistoryProps) => 
                   </div>
                   <div className="text-right">
                     <Badge variant="warning" icon={<NairaSign className="w-3 h-3" />}>
-                      +{item.percentageChange}%
+                      +{formatPercent(item.percentageChange)}%
                     </Badge>
                     <p className="text-xs text-muted-foreground mt-1">{item.reason}</p>
                   </div>

@@ -237,7 +237,10 @@ function MarketplaceOverviewView({
               label="Closed deals"
               value={data.closedDeals}
               accent="red"
-              subtitle={`${formatCurrency(data.totalDealValue, { compact: true })} released`}
+              // The figure is the gross value of the closed deals, not money
+              // released to sellers — only the held deposit is ever released
+              // (DEF-002), so "released" overstated it (DEF-238).
+              subtitle={`${formatCurrency(data.totalDealValue, { compact: true })} total value`}
             />
           </div>
 
