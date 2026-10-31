@@ -68,8 +68,8 @@ const FILTERS: { value: Filter; label: string; match: (s: BuyerEscrowStatus) => 
   },
   {
     value: 'attention',
-    label: 'Frozen or disputed',
-    match: (s) => s === 'frozen' || s === 'disputed',
+    label: 'Frozen (dispute)',
+    match: (s) => s === 'frozen',
   },
   { value: 'released', label: 'Completed', match: (s) => s === 'released' || s === 'refunded' },
 ];
@@ -270,7 +270,7 @@ function TransactionCard({
 }) {
   const { colors, spacing, radius } = useTheme();
   const [showLog, setShowLog] = useState(false);
-  const frozen = tx.escrowStatus === 'frozen' || tx.escrowStatus === 'disputed';
+  const frozen = tx.escrowStatus === 'frozen';
   const log = tx.activityLog ?? [];
 
   return (

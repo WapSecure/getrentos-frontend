@@ -199,14 +199,15 @@ export function offerGap(offer: number, asking: number): string {
 
 /* ------------------------------ transactions ------------------------------ */
 
+// deposit → held → released, with frozen (a dispute is open) and refunded as
+// terminal branches. VERIFICATION_PENDING / SETTLEMENT_PENDING / DISPUTED are in
+// the enum but never written (a dispute sets FROZEN), so they aren't surfaced
+// (DEF-240).
 export type OwnerEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
-  | 'verification'
-  | 'final_payment'
   | 'released'
   | 'frozen'
-  | 'disputed'
   | 'refunded';
 
 export interface OwnerTransaction {

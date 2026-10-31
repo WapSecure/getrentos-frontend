@@ -65,7 +65,6 @@ export default function BuyerTransactionsPage() {
     { value: 'funds_held', label: 'Funds Held' },
     { value: 'released', label: 'Completed' },
     { value: 'frozen', label: 'Frozen' },
-    { value: 'disputed', label: 'Disputed' },
     { value: 'refunded', label: 'Refunded' },
   ];
 

@@ -16,11 +16,8 @@ const escrowSteps: { key: SaleEscrowStatus; label: string }[] = [
 const statusLabels: Record<SaleEscrowStatus, string> = {
   deposit_pending: 'Deposit Pending',
   funds_held: 'Funds Held',
-  verification: 'Verification',
-  final_payment: 'Final Payment',
   released: 'Released',
   frozen: 'Frozen: Dispute',
-  disputed: 'Dispute Open',
   refunded: 'Refunded',
 };
 
@@ -36,7 +33,7 @@ export const EscrowTransactionCard = ({
   delay = 0,
 }: EscrowTransactionCardProps) => {
   const stepIndex = escrowSteps.findIndex((s) => s.key === transaction.escrowStatus);
-  const isFrozen = transaction.escrowStatus === 'frozen' || transaction.escrowStatus === 'disputed';
+  const isFrozen = transaction.escrowStatus === 'frozen';
   const isRefunded = transaction.escrowStatus === 'refunded';
   const progressPct = isFrozen || isRefunded ? 0 : ((stepIndex + 1) / escrowSteps.length) * 100;
 

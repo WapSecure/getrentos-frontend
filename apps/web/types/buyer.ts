@@ -11,14 +11,15 @@ export type BuyerOfferStatus =
   | 'expired'
   | 'closed';
 export type FinancingType = 'cash' | 'mortgage' | 'installment';
+// The escrow lifecycle the backend actually drives: deposit → held → released,
+// with frozen (a dispute is open) and refunded as terminal branches. The enum
+// also has VERIFICATION_PENDING / SETTLEMENT_PENDING / DISPUTED, but no service
+// ever writes them (a dispute sets FROZEN), so they are not surfaced (DEF-240).
 export type BuyerEscrowStatus =
   | 'deposit_pending'
   | 'funds_held'
-  | 'verification'
-  | 'final_payment'
   | 'released'
   | 'frozen'
-  | 'disputed'
   | 'refunded';
 
 export interface BuyerPropertyListing {

@@ -68,7 +68,6 @@ export default function OwnerTransactionsPage() {
     { value: 'funds_held', label: 'Funds Held' },
     { value: 'released', label: 'Released' },
     { value: 'frozen', label: 'Frozen' },
-    { value: 'disputed', label: 'Disputed' },
     { value: 'refunded', label: 'Refunded' },
   ];
 
