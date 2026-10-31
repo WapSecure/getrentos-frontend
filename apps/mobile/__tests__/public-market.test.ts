@@ -3,7 +3,13 @@ import { activeFilterCount, marketWebPath, publicMarketApi } from '@/lib/api/pub
 import { landApi } from '@/lib/api/land';
 import { shouldPersistQuery } from '@/lib/query/persistencePolicy';
 import { qk } from '@/lib/query/keys';
-import { forgetListing, rememberListing, takeListingHref } from '@/lib/pendingListing';
+import {
+  forgetListing,
+  portalForPendingListing,
+  rememberListing,
+  takeListingHref,
+  takeListingIntent,
+} from '@/lib/pendingListing';
 
 jest.mock('@/lib/api/client', () => ({ apiFetch: jest.fn() }));
 
@@ -159,6 +165,19 @@ describe('returning to a listing after sign-in', () => {
       pathname: '/(app)/shortlet/[id]',
       params: { id: 'x' },
     });
+  });
+
+  it('picks another workspace of theirs that can open the listing', () => {
+    rememberListing('rent', 'r2');
+    expect(portalForPendingListing('realtor', ['realtor', 'renter'])).toBe('renter');
+    expect(portalForPendingListing('renter', ['realtor', 'renter'])).toBe('renter');
+    expect(portalForPendingListing('realtor', ['realtor'])).toBeNull();
+  });
+
+  it('says which market was blocked when no workspace can open it', () => {
+    rememberListing('rent', 'r3');
+    expect(takeListingIntent('realtor')).toEqual({ href: null, blockedKind: 'rent' });
+    expect(takeListingIntent('realtor')).toEqual({ href: null, blockedKind: null });
   });
 
   it('ignores an intent from an abandoned sign-in', () => {

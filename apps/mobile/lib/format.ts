@@ -16,6 +16,12 @@ export function formatNaira(amount: number, opts: { compact?: boolean } = {}): s
   }).format(amount);
 }
 
+/**
+ * Every date and time is shown in Lagos time, whatever zone the phone is on, so a
+ * buyer abroad sees the same viewing time as the owner and the web app.
+ */
+export const APP_TIME_ZONE = 'Africa/Lagos';
+
 export function formatDate(value: string | Date, style: 'short' | 'medium' = 'medium'): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return '—';
@@ -23,6 +29,7 @@ export function formatDate(value: string | Date, style: 'short' | 'medium' = 'me
     month: style === 'short' ? 'short' : 'long',
     day: 'numeric',
     year: 'numeric',
+    timeZone: APP_TIME_ZONE,
   });
 }
 
@@ -30,7 +37,11 @@ export function formatDate(value: string | Date, style: 'short' | 'medium' = 'me
 export function formatTime(value: string | Date): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: APP_TIME_ZONE,
+  });
 }
 
 export function relativeTime(value: string | Date): string {

@@ -4,7 +4,10 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Megaphone } from 'lucide-react';
 import { ListingCard } from '@/components/landlord/listings/ListingCard';
-import { CreateListingModal } from '@/components/landlord/listings/CreateListingModal';
+import {
+  CREATE_LISTING_DRAFT_KEY,
+  CreateListingModal,
+} from '@/components/landlord/listings/CreateListingModal';
 import { ListingPreviewModal } from '@/components/landlord/listings/ListingPreviewModal';
 import {
   Button,
@@ -14,6 +17,8 @@ import {
   ToggleChip,
   useOptimisticMutation,
   useToast,
+  clearSessionDraft,
+  hasSessionDraft,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -30,7 +35,10 @@ const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
 export default function LandlordListingsPage() {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | ListingStatus>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Reopen the listing form when the landlord comes back from signing in with a draft.
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(() =>
+    hasSessionDraft(CREATE_LISTING_DRAFT_KEY)
+  );
   const [previewListing, setPreviewListing] = useState<Listing | null>(null);
   const toast = useToast();
 
@@ -83,6 +91,7 @@ export default function LandlordListingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: landlordKeys.listings() });
       queryClient.invalidateQueries({ queryKey: landlordKeys.vacantUnits });
+      clearSessionDraft(CREATE_LISTING_DRAFT_KEY);
       setIsCreateModalOpen(false);
     },
   });
@@ -143,7 +152,11 @@ export default function LandlordListingsPage() {
         </Button>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto" role="group" aria-label="Filter listings by status">
+      <div
+        className="mb-6 flex gap-2 overflow-x-auto"
+        role="group"
+        aria-label="Filter listings by status"
+      >
         {statusFilters.map((option) => (
           <ToggleChip
             key={option.value}

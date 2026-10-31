@@ -60,7 +60,8 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
   {
     key: 'funds_held',
     label: 'Funds Held',
-    description: 'Deposit received and held safely by GetRentos.',
+    description:
+      'Deposit received and held safely by GetRentos. It is released to you when the buyer confirms receipt.',
   },
   {
     key: 'released',

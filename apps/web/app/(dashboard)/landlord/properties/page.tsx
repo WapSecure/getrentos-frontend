@@ -10,6 +10,7 @@ import {
   Skeleton,
   ToggleChip,
   useToast,
+  hasSessionDraft,
 } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -17,6 +18,7 @@ import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tansta
 import { Plus, Building2 } from 'lucide-react';
 import { PropertyCard } from '@/components/landlord/properties/PropertyCard';
 import {
+  ADD_PROPERTY_DRAFT_KEY,
   AddPropertyModal,
   type LandlordPropertySubmission,
 } from '@/components/landlord/properties/AddPropertyModal';
@@ -62,7 +64,10 @@ export default function LandlordPropertiesPage() {
   }, [searchQuery]);
 
   const [filter, setFilter] = useState<VerificationFilter>('all');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // Reopen the form when the landlord comes back from signing in with a draft.
+  const [isAddModalOpen, setIsAddModalOpen] = useState(() =>
+    hasSessionDraft(ADD_PROPERTY_DRAFT_KEY)
+  );
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
   const [verifyingProperty, setVerifyingProperty] = useState<Property | null>(null);

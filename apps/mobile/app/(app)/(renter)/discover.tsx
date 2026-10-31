@@ -42,6 +42,7 @@ import {
 import { formatNaira } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import { withTrustLabel } from '@/lib/trustLabel';
+import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 
 const MAP_PAGE_SIZE = 100;
 
@@ -349,17 +350,27 @@ export default function Discover() {
           keyboardDismissMode="on-drag"
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
-            <Text
-              variant="caption"
-              color="mutedForeground"
-              style={{
-                paddingHorizontal: spacing.xl,
-                paddingTop: spacing.sm,
-                paddingBottom: spacing.md,
-              }}
-            >
-              {total} {total === 1 ? 'home' : 'homes'} found
-            </Text>
+            <>
+              {query.isRefetchError ? (
+                <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.sm }}>
+                  <RefreshFailedNotice
+                    onRetry={() => query.refetch()}
+                    retrying={query.isFetching}
+                  />
+                </View>
+              ) : null}
+              <Text
+                variant="caption"
+                color="mutedForeground"
+                style={{
+                  paddingHorizontal: spacing.xl,
+                  paddingTop: spacing.sm,
+                  paddingBottom: spacing.md,
+                }}
+              >
+                {total} {total === 1 ? 'home' : 'homes'} found
+              </Text>
+            </>
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (

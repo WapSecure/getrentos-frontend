@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -71,6 +71,7 @@ export const DatePicker = ({
   const field = useFieldControl({ id, invalid, required });
   const [open, setOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
+  const valueId = `${useId()}-value`;
   const [focusDay, setFocusDay] = useState<Date | null>(null);
   const selected = toDate(value);
   const minDate = toDate(min);
@@ -104,11 +105,27 @@ export const DatePicker = ({
     setOpen(false);
   };
 
+  // The day that takes focus on open: the chosen one, else today, else the
+  // first pickable day when today is out of range.
+  const initialDay = () => {
+    if (selected) return selected;
+    const now = new Date();
+    if (minDate && isBefore(now, minDate)) return minDate;
+    if (maxDate && isAfter(now, maxDate)) return maxDate;
+    return now;
+  };
+
+  const focusDayButton = (day: Date) =>
+    gridRef.current
+      ?.querySelector<HTMLButtonElement>(`[data-day="${format(day, 'yyyy-MM-dd')}"]`)
+      ?.focus();
+
   // Keyboard: arrows move a day/week (crossing months), Home/End go to the week's ends.
+  // The first focus on open happens in onOpenAutoFocus, once the portaled grid exists.
   useEffect(() => {
     if (!open || !focusDay) return;
-    const key = format(focusDay, 'yyyy-MM-dd');
-    gridRef.current?.querySelector<HTMLButtonElement>(`[data-day="${key}"]`)?.focus();
+    focusDayButton(focusDay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, focusDay, viewMonth]);
 
   const onGridKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -133,11 +150,16 @@ export const DatePicker = ({
   return (
     <RadixPopover.Root
       open={open}
+      // Modal, so Tab stays inside the calendar (it is portaled, and would
+      // otherwise jump to the next field and close it) and Escape or a pick
+      // returns focus to the trigger.
+      modal
       onOpenChange={(next) => {
         setOpen(next);
         if (next) {
-          setViewMonth(selected ?? new Date());
-          setFocusDay(selected ?? new Date());
+          const start = initialDay();
+          setViewMonth(start);
+          setFocusDay(start);
         }
       }}
     >
@@ -146,21 +168,36 @@ export const DatePicker = ({
           type="button"
           id={field.id}
           disabled={disabled}
+          // A combobox, so the required/invalid state from a Field is valid ARIA.
+          role="combobox"
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-label={
-            ariaLabel
+            ariaLabel && !field.labelId
               ? `${ariaLabel}: ${selected ? format(selected, 'MMMM d, yyyy') : placeholder}`
               : undefined
           }
+          aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}
           {...field.ariaProps}
+          onKeyDown={(event) => {
+            if (!open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+              event.preventDefault();
+              setOpen(true);
+              const start = initialDay();
+              setViewMonth(start);
+              setFocusDay(start);
+            }
+          }}
           className={cn(
             'flex items-center justify-between gap-2 text-left',
             controlShell({ size: controlSize, invalid: field.invalid, disabled }),
             className
           )}
         >
-          <span className={cn('truncate', selected ? 'text-foreground' : 'text-muted-foreground')}>
+          <span
+            id={valueId}
+            className={cn('truncate', selected ? 'text-foreground' : 'text-muted-foreground')}
+          >
             {selected ? format(selected, 'MMM d, yyyy') : placeholder}
           </span>
           <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -174,7 +211,10 @@ export const DatePicker = ({
               asChild
               sideOffset={8}
               align="start"
-              onOpenAutoFocus={(e) => e.preventDefault()}
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+                focusDayButton(focusDay ?? initialDay());
+              }}
             >
               <motion.div
                 initial={{ opacity: 0, y: -4, scale: 0.97 }}

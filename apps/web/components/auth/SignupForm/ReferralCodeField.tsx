@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Gift } from 'lucide-react';
 import { Input } from '@getrentos/ui';
@@ -10,6 +10,7 @@ import { useSignupStore } from '@/lib/store/signupStore';
 export const ReferralCodeField = () => {
   const searchParams = useSearchParams();
   const { data, setData } = useSignupStore();
+  const inputId = useId();
 
   useEffect(() => {
     const ref = searchParams.get('ref');
@@ -22,12 +23,16 @@ export const ReferralCodeField = () => {
 
   return (
     <div className="relative">
-      <label className="block text-sm font-medium text-foreground mb-1.5">
+      <label htmlFor={inputId} className="block text-sm font-medium text-foreground mb-1.5">
         Referral code <span className="text-muted-foreground font-normal">(optional)</span>
       </label>
       <div className="relative">
-        <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Gift
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+          aria-hidden="true"
+        />
         <Input
+          id={inputId}
           type="text"
           value={data.referralCode || ''}
           onChange={(e) => setData({ referralCode: e.target.value.toUpperCase() })}

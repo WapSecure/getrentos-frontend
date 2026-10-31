@@ -108,7 +108,16 @@ export default function AdminEscrowPage() {
     {
       key: 'property',
       header: 'Property',
-      render: (t) => t.propertyTitle,
+      render: (t) => (
+        <div>
+          <div>{t.propertyTitle}</div>
+          {t.flagged && t.flaggedReason && (
+            <div className="text-xs font-normal text-destructive whitespace-normal max-w-xs">
+              {t.flaggedReason}
+            </div>
+          )}
+        </div>
+      ),
       className: 'font-medium text-foreground whitespace-nowrap',
     },
     {

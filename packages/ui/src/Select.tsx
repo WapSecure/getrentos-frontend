@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 import { cn } from '@getrentos/shared';
@@ -55,6 +55,9 @@ export function Select({
 }: SelectProps) {
   const field = useFieldControl({ id, invalid, required });
   const listRef = useRef<HTMLDivElement>(null);
+  const baseId = useId();
+  const listboxId = `${baseId}-listbox`;
+  const valueId = `${baseId}-value`;
   const selected = useMemo(
     () => options.find((option) => option.value === value),
     [options, value]
@@ -127,9 +130,18 @@ export function Select({
         <button
           type="button"
           id={field.id}
-          aria-label={ariaLabel ? `${visibleLabel} ${ariaLabel}` : undefined}
+          // A combobox (not a plain button) so the required/invalid state the
+          // Field passes down is valid ARIA. Inside a Field the visible label
+          // names it; a bare Select is named by its ariaLabel, or failing that
+          // by the value it shows (as it was when it was a plain button).
+          role="combobox"
+          aria-label={
+            ariaLabel && !field.labelId ? `${visibleLabel} ${ariaLabel}` : undefined
+          }
+          aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-controls={open ? listboxId : undefined}
           {...field.ariaProps}
           disabled={disabled}
           onKeyDown={(event) => {
@@ -144,7 +156,10 @@ export function Select({
             className
           )}
         >
-          <span className={cn('min-w-0 truncate', !selected && 'text-muted-foreground')}>
+          <span
+            id={valueId}
+            className={cn('min-w-0 truncate', !selected && 'text-muted-foreground')}
+          >
             {selected?.label ?? placeholder}
           </span>
           <span className="flex shrink-0 items-center gap-1">
@@ -212,8 +227,10 @@ export function Select({
           )}
           <div
             ref={listRef}
+            id={listboxId}
             role="listbox"
-            aria-label={ariaLabel}
+            aria-label={field.labelId ? undefined : ariaLabel}
+            aria-labelledby={field.labelId}
             onKeyDown={onListKeyDown}
             className="max-h-64 overflow-y-auto overscroll-contain"
           >

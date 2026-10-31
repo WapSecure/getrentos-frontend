@@ -28,6 +28,7 @@ import {
 } from '@/lib/api/applications';
 import { ApplicationAssistantCard } from '@/components/applications/ApplicationAssistantCard';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 
 type Filter = 'all' | ApplicationStatus;
 
@@ -103,7 +104,13 @@ export default function Applications() {
         ) : null}
       </View>
 
-      {query.isError && !query.data ? (
+      {query.isRefetchError && all.length > 0 ? (
+        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.sm }}>
+          <RefreshFailedNotice onRetry={() => query.refetch()} retrying={query.isFetching} />
+        </View>
+      ) : null}
+
+      {query.isError && all.length === 0 ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
           <ErrorState onRetry={() => query.refetch()} />
         </ScrollView>

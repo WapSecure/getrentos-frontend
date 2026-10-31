@@ -12,6 +12,7 @@ import {
   Field,
   Input,
   RadioGroup,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 import type { ListingCategory } from '@/types/realtor';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
@@ -24,6 +25,19 @@ import {
   type RealtorAssignedPropertyApi,
   type RealtorClientApi,
 } from '@/services/realtorService';
+
+/** sessionStorage key for a listing being written when the session ran out. */
+export const REALTOR_CREATE_LISTING_DRAFT_KEY = 'realtor-create-listing';
+
+interface RealtorListingDraft {
+  clientId: string;
+  propertyId: string;
+  client: RealtorClientApi | null;
+  property: RealtorAssignedPropertyApi | null;
+  title: string;
+  category: ListingCategory;
+  price: string;
+}
 
 export interface CreateRealtorListingInput {
   propertyId: string;
@@ -115,6 +129,34 @@ export const CreateListingModal = ({
     (selectedPropertyState?.id === propertyId ? selectedPropertyState : null) ??
     properties.find((property) => property.id === propertyId) ??
     null;
+
+  // If the session ends while the realtor is writing, keep the listing so it is
+  // waiting after they sign back in.
+  const draftRestored = useSessionExpiryDraft<RealtorListingDraft>(
+    REALTOR_CREATE_LISTING_DRAFT_KEY,
+    () =>
+      clientId || title || price
+        ? {
+            clientId,
+            propertyId,
+            client: selectedClient,
+            property: selectedProperty,
+            title,
+            category,
+            price,
+          }
+        : null,
+    (draft) => {
+      setClientId(draft.clientId);
+      setPropertyId(draft.propertyId);
+      setSelectedClientState(draft.client);
+      setSelectedPropertyState(draft.property);
+      setTitle(draft.title);
+      setCategory(draft.category);
+      setPrice(draft.price);
+    },
+    isOpen
+  );
 
   const clientLabel = (client: RealtorClientApi) => {
     const role = client.client.roles.some(({ role: userRole }) => userRole === 'LANDLORD')
@@ -255,6 +297,12 @@ export const CreateListingModal = ({
 
         {((clientsPage?.total ?? 0) > 0 || isClientsLoading || !!error) && (
           <div className="p-4 border-t border-border space-y-3 shrink-0">
+            {draftRestored && !error && (
+              <p role="status" className="text-xs text-muted-foreground">
+                We kept the listing you were writing when your session ended. Check it and submit it
+                again.
+              </p>
+            )}
             {error ? (
               <VerificationRequiredNotice
                 error={error}

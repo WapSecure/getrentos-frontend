@@ -138,8 +138,14 @@ export const MakeOfferModal = ({
     amount > 0 && depositAmount && Number(depositAmount) > amount
       ? 'The deposit cannot be more than your offer.'
       : undefined;
+  // The server refuses offers below 10% of the asking price; say so here first.
+  const minimumOffer = asking > 0 ? Math.ceil(asking * 0.1) : 0;
+  const amountError =
+    amount > 0 && amount < minimumOffer
+      ? `Offers must be at least 10% of the asking price (${formatCurrency(minimumOffer)}).`
+      : undefined;
   const amountHint =
-    amount > 0 && asking > 0
+    amount > 0 && asking > 0 && !amountError
       ? amount > asking * 1.5
         ? `That is well above the ${formatCurrency(asking)} asking price. Check the amount before you send it.`
         : amount < asking * 0.5
@@ -238,7 +244,7 @@ export const MakeOfferModal = ({
             />
           </Field>
 
-          <Field label="Offer Amount" required hint={amountHint}>
+          <Field label="Offer Amount" required hint={amountHint} error={amountError}>
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -331,6 +337,7 @@ export const MakeOfferModal = ({
             disabled={
               !propertyId ||
               !offerAmount ||
+              !!amountError ||
               !!depositError ||
               needsAcceptance ||
               isSubmitting ||

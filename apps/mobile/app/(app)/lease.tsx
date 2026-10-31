@@ -149,7 +149,7 @@ export default function LeaseScreen() {
               <Text variant="caption" color="mutedForeground">
                 Rent
               </Text>
-              <Price amount={lease.rentAmount} period="month" variant="bodyStrong" />
+              <Price amount={lease.rentAmount} period={lease.rentPeriod ?? 'year'} variant="bodyStrong" />
             </View>
             <View>
               <Text variant="caption" color="mutedForeground">
@@ -169,7 +169,7 @@ export default function LeaseScreen() {
         </Card>
 
         {renewalQuery.data && renewalQuery.data.status === 'pending' ? (
-          <RenewalOfferCard offer={renewalQuery.data} />
+          <RenewalOfferCard offer={renewalQuery.data} period={lease.rentPeriod ?? 'year'} />
         ) : null}
 
         <Card elevated>
@@ -365,8 +365,10 @@ export default function LeaseScreen() {
 
 function RenewalOfferCard({
   offer,
+  period,
 }: {
   offer: NonNullable<Awaited<ReturnType<typeof leaseApi.getRenewalOffer>>>;
+  period: 'month' | 'year';
 }) {
   const { colors, spacing } = useTheme();
   const qc = useQueryClient();
@@ -390,7 +392,7 @@ function RenewalOfferCard({
     <Card elevated style={{ backgroundColor: colors.accent }}>
       <Text variant="bodyStrong">Renewal offer</Text>
       <Text variant="callout" color="mutedForeground" style={{ marginTop: 2 }}>
-        New rent <Price amount={offer.newRentAmount} period="month" variant="callout" /> (
+        New rent <Price amount={offer.newRentAmount} period={period} variant="callout" /> (
         {offer.increasePercentage > 0 ? '+' : ''}
         {offer.increasePercentage}%) · ends {formatDate(offer.newEndDate, 'short')}
       </Text>
@@ -481,7 +483,11 @@ function PendingLeaseView({ pending }: { pending: import('@/lib/api/lease').Pend
             <Text variant="caption" color="mutedForeground">
               Rent
             </Text>
-            <Price amount={pending.rentAmount} period="month" variant="bodyStrong" />
+            <Price
+              amount={pending.rentAmount}
+              period={pending.rentPeriod ?? 'year'}
+              variant="bodyStrong"
+            />
           </View>
           {pending.securityDeposit ? (
             <View>

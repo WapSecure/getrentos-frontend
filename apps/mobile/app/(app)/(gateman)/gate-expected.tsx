@@ -17,6 +17,7 @@ import { gatemanApi } from '@/lib/api/gateman';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { qk } from '@/lib/query/keys';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { formatTime } from '@/lib/format';
 
 /**
  * Who the estate expects today, at the barrier.
@@ -94,12 +95,7 @@ export default function GatemanExpected() {
               <View style={{ gap: 4 }}>
                 <Text variant="bodyStrong">{board.tally.label}</Text>
                 <Text variant="caption" color="mutedForeground">
-                  Counted at{' '}
-                  {new Date(board.asOf).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  .
+                  Counted at {formatTime(board.asOf)}.
                 </Text>
               </View>
             </Card>

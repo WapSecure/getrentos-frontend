@@ -314,6 +314,8 @@ export interface PlatformEscrowTransaction {
   status: PlatformEscrowStatus;
   createdAt: string;
   flagged: boolean;
+  /** Why it is flagged, e.g. a sale the buyer has not confirmed past the hold period. */
+  flaggedReason?: string;
 }
 
 export interface AuditLogEntry {

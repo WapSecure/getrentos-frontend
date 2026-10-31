@@ -34,6 +34,8 @@ export interface Lease {
   startDate: string;
   endDate: string;
   rentAmount: number;
+  /** Cadence of `rentAmount`; absent on older leases, which are yearly. */
+  rentPeriod?: 'month' | 'year' | null;
   securityDeposit: number;
   renewalTerms: string;
   status: 'active' | 'expiring' | 'expired';
@@ -51,6 +53,8 @@ export interface PendingLease {
   startDate: string;
   endDate: string;
   rentAmount: number;
+  /** Cadence of `rentAmount`; absent on older leases, which are yearly. */
+  rentPeriod?: 'month' | 'year' | null;
   securityDeposit?: number;
   landlord: LeaseLandlord;
   tenantSigned: boolean;
