@@ -28,7 +28,11 @@ const STAGES: { key: OwnerEscrowStatus; label: string; now: string }[] = [
     label: 'Buyer’s deposit',
     now: 'Waiting for the buyer to pay their deposit to GetRentos.',
   },
-  { key: 'funds_held', label: 'Funds held', now: 'The deposit is held safely by GetRentos.' },
+  {
+    key: 'funds_held',
+    label: 'Funds held',
+    now: 'The deposit is held safely by GetRentos. It is released to you when the buyer confirms receipt.',
+  },
   { key: 'released', label: 'Completed', now: 'The sale is complete.' },
 ];
 
