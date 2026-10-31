@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, ToggleChip, useToast } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  ToggleChip,
+  useToast,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -106,7 +113,14 @@ export default function EstateGovernancePage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Governance</h1>
           <p className="text-muted-foreground mt-1">
-            {records.length} record{records.length === 1 ? '' : 's'} in {estate.name}
+            {isRecordsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {records.length} record{records.length === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <Button

@@ -39,12 +39,12 @@ interface DueRowProps {
 
 export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
   return (
-    <div className="p-4 flex items-center justify-between gap-4">
+    <div className="p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div className="min-w-0">
         <p className="text-sm font-medium text-foreground truncate">
           {due.unitLabel}: {due.residentName}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+        <p className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1">
           {categoryLabels[due.category]} · Due {formatDate(due.dueDate)}
           {due.description ? ` · ${due.description}` : ''}
           {due.isRecurring && (
@@ -55,8 +55,8 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
           )}
         </p>
       </div>
-      <div className="flex items-center gap-3 shrink-0">
-        <div className="text-right">
+      <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="sm:text-right">
           <span className="text-sm font-semibold text-foreground">
             {formatCurrency(due.amount)}
           </span>
@@ -69,7 +69,7 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
         <Badge variant={statusVariant[due.status]}>
           {due.status.charAt(0).toUpperCase() + due.status.slice(1)}
         </Badge>
-        {due.status !== 'paid' && (
+        {due.status !== 'paid' && due.status !== 'waived' && (
           <Button variant="outline" size="sm" disabled={isMarkingPaid} onClick={onMarkPaid}>
             Mark Paid
           </Button>

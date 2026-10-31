@@ -36,14 +36,19 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
         }`}
       >
         <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
-              <Logo size="md" />
+          <div className="flex justify-between items-center gap-2 h-16">
+            {/* Phone widths: the wordmark collapses to the mark (still named for
+                screen readers), the switcher truncates, and the theme toggle
+                moves into the menu, so the bar never scrolls sideways. */}
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+              <Logo size="md" className="[&>span]:sr-only sm:[&>span]:not-sr-only" />
               <EstateSwitcher />
             </div>
 
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
+            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+              <div className="hidden sm:flex">
+                <ThemeToggle />
+              </div>
               <NotificationBell portal="estate" basePath="/estate/notifications" />
               <EstateProfileDropdown user={user} />
 
@@ -67,6 +72,10 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
             exit={{ opacity: 0, y: -20 }}
             className="fixed top-16 left-0 right-0 z-[60] bg-background border-b border-border lg:hidden max-h-[calc(100vh-4rem)] overflow-y-auto"
           >
+            <div className="flex items-center justify-between border-b border-border px-4 py-2 sm:hidden">
+              <span className="text-sm text-muted-foreground">Theme</span>
+              <ThemeToggle />
+            </div>
             <GroupedMobileNavigation
               ariaLabel="Estate administration navigation"
               dashboardHref={ROUTES.ESTATE_DASHBOARD}

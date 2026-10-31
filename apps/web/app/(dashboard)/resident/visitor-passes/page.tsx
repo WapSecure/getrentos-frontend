@@ -132,7 +132,11 @@ export default function ResidentVisitorPassesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Visitor Passes</h1>
-          <p className="text-muted-foreground mt-1">{data?.total ?? 0} passes for your household</p>
+          <p className="text-muted-foreground mt-1">
+            {data
+              ? `${data.total} pass${data.total === 1 ? '' : 'es'} for your household`
+              : 'Loading…'}
+          </p>
         </div>
         <Button
           variant="primary"

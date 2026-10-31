@@ -24,6 +24,11 @@ export interface Estate {
    * worse than showing one that refuses with an upsell on submit.
    */
   planTier?: PlanTier;
+  /**
+   * What the viewer is at this estate: its MANAGER, or GATE staff posted there.
+   * Only the viewer's own estate list carries it.
+   */
+  capacity?: 'MANAGER' | 'GATE';
 }
 
 export type HouseholdStatus = 'active' | 'inactive';

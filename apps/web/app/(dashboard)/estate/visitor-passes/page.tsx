@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination, ToggleChip } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  ToggleChip,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -128,7 +135,14 @@ export default function EstateVisitorPassesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Visitor Passes</h1>
           <p className="text-muted-foreground mt-1">
-            {total} pass{total === 1 ? '' : 'es'} in {estate.name}
+            {isPassesLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {total} pass{total === 1 ? '' : 'es'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <Button
