@@ -161,6 +161,7 @@ export const TimePicker = ({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.12 }}
+                aria-label={ariaLabel ?? 'Choose a time'}
                 className="z-[70] w-52 overflow-hidden rounded-2xl border border-border bg-card shadow-lg focus:outline-none"
               >
                 <div className="border-b border-border bg-secondary/55 px-3 py-2.5">

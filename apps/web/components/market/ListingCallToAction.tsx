@@ -38,11 +38,14 @@ export function ListingCallToAction({
   id,
   returnPath,
   underOffer,
+  compact = false,
 }: {
   market: PublicDetailMarket;
   id: string;
   returnPath: string;
   underOffer?: boolean;
+  /** Just the main button, for the bar that follows the visitor on small screens. */
+  compact?: boolean;
 }) {
   // False on the server and during hydration, then the stored session.
   const signedIn = useSyncExternalStore(subscribeToNothing, viewerIsSignedIn, () => false);
@@ -73,12 +76,14 @@ export function ListingCallToAction({
       <Link href={`/login?next=${next}`} className={PRIMARY}>
         {SIGNED_OUT[market]}
       </Link>
-      <Link
-        href={`/signup?next=${next}`}
-        className="block text-center text-sm font-medium text-primary hover:underline"
-      >
-        New here? Create a free account
-      </Link>
+      {!compact && (
+        <Link
+          href={`/signup?next=${next}`}
+          className="block text-center text-sm font-medium text-primary hover:underline"
+        >
+          New here? Create a free account
+        </Link>
+      )}
     </>
   );
 }
