@@ -41,12 +41,22 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 export const PUBLIC_DETAIL_REVALIDATE = 60;
 
 async function get<T>(path: string): Promise<T | null> {
+  let res: Response;
   try {
-    const res = await fetch(`${API}${path}`, { next: { revalidate: PUBLIC_DETAIL_REVALIDATE } });
-    return res.ok ? ((await res.json()) as T) : null;
-  } catch {
-    return null;
+    res = await fetch(`${API}${path}`, { next: { revalidate: PUBLIC_DETAIL_REVALIDATE } });
+  } catch (cause) {
+    // The API was unreachable: a transport failure, not a missing listing. Surface
+    // it (the route's error boundary shows a retry) rather than returning null and
+    // rendering a 404 that tells visitors and search engines the listing is gone
+    // during a temporary outage (DEF-237).
+    throw new Error(`Public listing request failed: ${path}`, { cause });
   }
+  // A client-status response (404, or an unpublished / forbidden listing) is a real
+  // "not available" → the caller renders notFound().
+  if (res.status >= 400 && res.status < 500) return null;
+  // A server error (5xx) is an outage, not a missing listing — surface it too.
+  if (!res.ok) throw new Error(`Public listing request failed (${res.status}): ${path}`);
+  return (await res.json()) as T;
 }
 
 const money = (v: unknown) => {
