@@ -265,13 +265,15 @@ export default function PropertyDetailPage() {
                   ? 'Not accepting applications'
                   : 'Apply Now'}
               </Button>
-              <Button
-                variant="outline"
-                icon={<Calendar className="w-4 h-4" />}
-                onClick={() => openTour('booking')}
-              >
-                Schedule Viewing
-              </Button>
+              {property.acceptingApplications === false ? null : (
+                <Button
+                  variant="outline"
+                  icon={<Calendar className="w-4 h-4" />}
+                  onClick={() => openTour('booking')}
+                >
+                  Schedule Viewing
+                </Button>
+              )}
               <IconButton
                 variant="outline"
                 label={isSaved ? 'Remove from saved' : 'Save property'}
