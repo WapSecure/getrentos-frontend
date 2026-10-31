@@ -105,9 +105,11 @@ export interface TierGrant {
   state: TierGrantState;
   reason?: string | null;
   grantedById?: string | null;
+  grantedByName?: string | null;
   grantedAt: string;
   expiresAt?: string | null;
   revokedById?: string | null;
+  revokedByName?: string | null;
   revokedAt?: string | null;
   revocationReason?: string | null;
   /** Whether this grant is the one the tier resolver currently counts. */

@@ -18,7 +18,7 @@ import {
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
+import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';
 import type { RentFinanceQuery } from '@/services/adminRentFinanceService';
 
@@ -62,7 +62,7 @@ export function downloadBlob(blob: Blob, filename: string) {
 }
 
 export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueConfig<T> }) {
-  const [search, setSearch] = useState(() => readAdminSearchParam());
+  const [search, setSearch] = useAdminSearchParam();
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [exporting, setExporting] = useState(false);

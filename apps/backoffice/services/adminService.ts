@@ -244,8 +244,9 @@ export const adminService = {
     return safeCall(() => authFetch('/admin/dashboard/stats'));
   },
 
-  async getDashboardActivity(): Promise<ApiResponse<AdminActivityItem[]>> {
-    return safeCall(() => authFetch('/admin/dashboard/activity'));
+  async getDashboardActivity(limit?: number): Promise<ApiResponse<AdminActivityItem[]>> {
+    const query = toQuery({ limit: limit?.toString() });
+    return safeCall(() => authFetch(`/admin/dashboard/activity${query}`));
   },
 
   async getUserGrowth(): Promise<ApiResponse<{ label: string; value: number }[]>> {
@@ -562,11 +563,20 @@ export const adminService = {
 
   // ---- Audit logs ----
   async listAuditLogs(
-    params: { search?: string; severity?: string; page?: number; pageSize?: number } = {}
+    params: {
+      search?: string;
+      severity?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      pageSize?: number;
+    } = {}
   ): Promise<ApiResponse<Paginated<AuditLogEntry>>> {
     const query = toQuery({
       search: params.search,
       severity: params.severity,
+      dateFrom: params.dateFrom,
+      dateTo: params.dateTo,
       page: params.page?.toString(),
       pageSize: params.pageSize?.toString(),
     });

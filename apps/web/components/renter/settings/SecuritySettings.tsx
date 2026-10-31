@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Fingerprint, KeyRound, Shield, Trash2, X } from 'lucide-react';
 import { startRegistration } from '@simplewebauthn/browser';
-import { Button, Field, IconButton, Input, NumberInput, Switch, useToast } from '@getrentos/ui';
+import {
+  Button,
+  Field,
+  IconButton,
+  Input,
+  NumberInput,
+  Skeleton,
+  Switch,
+  useToast,
+} from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -23,12 +32,22 @@ export const SecuritySettings = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const { data: twoFactor } = useQuery({
+  const {
+    data: twoFactor,
+    isError: twoFactorFailed,
+    isFetching: twoFactorFetching,
+    refetch: refetchTwoFactor,
+  } = useQuery({
     queryKey: renterKeys.twoFactor,
     queryFn: () => unwrap(renterService.getTwoFactorStatus()),
   });
 
-  const { data: security } = useQuery({
+  const {
+    data: security,
+    isError: securityFailed,
+    isFetching: securityFetching,
+    refetch: refetchSecurity,
+  } = useQuery({
     queryKey: renterKeys.securityOverview,
     queryFn: () => unwrap(renterService.getSecurityOverview()),
   });
@@ -156,6 +175,10 @@ export const SecuritySettings = () => {
   });
 
   const enabled = !!twoFactor?.enabled;
+  // Until the real status is known the switch must not read as "off": a user
+  // who has 2FA would see it disabled, and flipping it would start enrolment.
+  const twoFactorKnown = twoFactor !== undefined;
+  const pinKnown = security !== undefined;
 
   return (
     <div>
@@ -228,20 +251,40 @@ export const SecuritySettings = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-medium text-foreground">Two-Factor Authentication</h3>
-                <p className="text-sm text-muted-foreground">
-                  {enabled
-                    ? 'Your account is protected by an authenticator app'
-                    : 'Add an extra layer of security to your account'}
+                <p
+                  className="text-sm text-muted-foreground"
+                  role={twoFactorFailed && !twoFactorKnown ? 'alert' : undefined}
+                >
+                  {!twoFactorKnown
+                    ? twoFactorFailed
+                      ? 'We could not check your two-factor status.'
+                      : 'Checking your two-factor status…'
+                    : enabled
+                      ? 'Your account is protected by an authenticator app'
+                      : 'Add an extra layer of security to your account'}
                 </p>
               </div>
             </div>
-            <Switch
-              id={TWO_FACTOR_SWITCH_ID}
-              checked={enabled}
-              onCheckedChange={() => (enabled ? setStep('disable') : enrollMutation.mutate())}
-              disabled={enrollMutation.isPending}
-              aria-label="Toggle two-factor authentication"
-            />
+            {twoFactorKnown ? (
+              <Switch
+                id={TWO_FACTOR_SWITCH_ID}
+                checked={enabled}
+                onCheckedChange={() => (enabled ? setStep('disable') : enrollMutation.mutate())}
+                disabled={enrollMutation.isPending}
+                aria-label="Toggle two-factor authentication"
+              />
+            ) : twoFactorFailed ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void refetchTwoFactor()}
+                isLoading={twoFactorFetching}
+              >
+                Retry
+              </Button>
+            ) : (
+              <Skeleton className="h-6 w-11 rounded-full" />
+            )}
           </div>
 
           {step === 'setup' && (
@@ -358,18 +401,37 @@ export const SecuritySettings = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-medium text-foreground">Transaction PIN</h3>
-                <p className="text-sm text-muted-foreground">
-                  {hasPin
-                    ? 'Required to release or refund money — a separate secret from your password'
-                    : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough'}
+                <p
+                  className="text-sm text-muted-foreground"
+                  role={securityFailed && !pinKnown ? 'alert' : undefined}
+                >
+                  {!pinKnown
+                    ? securityFailed
+                      ? 'We could not check whether you have a PIN.'
+                      : 'Checking your PIN…'
+                    : hasPin
+                      ? 'Required to release or refund money — a separate secret from your password'
+                      : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough'}
                 </p>
               </div>
             </div>
-            {!pinOpen && (
-              <Button variant={hasPin ? 'outline' : 'primary'} onClick={() => setPinOpen(true)}>
-                {hasPin ? 'Change PIN' : 'Set PIN'}
-              </Button>
-            )}
+            {!pinOpen &&
+              (pinKnown ? (
+                <Button variant={hasPin ? 'outline' : 'primary'} onClick={() => setPinOpen(true)}>
+                  {hasPin ? 'Change PIN' : 'Set PIN'}
+                </Button>
+              ) : securityFailed ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void refetchSecurity()}
+                  isLoading={securityFetching}
+                >
+                  Retry
+                </Button>
+              ) : (
+                <Skeleton className="h-9 w-24 rounded-lg" />
+              ))}
           </div>
 
           {pinOpen && (

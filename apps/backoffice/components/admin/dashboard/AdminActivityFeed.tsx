@@ -1,12 +1,13 @@
 'use client';
 
 import { ShieldCheck, Gavel, AlertTriangle, UserPlus, Bell } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { formatRelativeTime } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
+import { Button, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
 
 type ActivityType = 'verification' | 'dispute' | 'fraud' | 'signup';
 
@@ -32,7 +33,12 @@ const typeFor = (type: string): ActivityType => {
   }
 };
 
+const PAGE = 12;
+/** The API returns at most this many events. */
+const MAX = 48;
+
 export const AdminActivityFeed = () => {
+  const [limit, setLimit] = useState(PAGE);
   const {
     data: activity,
     isLoading,
@@ -40,9 +46,12 @@ export const AdminActivityFeed = () => {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: adminKeys.dashboardActivity,
-    queryFn: () => unwrap(adminService.getDashboardActivity()),
+    queryKey: [...adminKeys.dashboardActivity, limit],
+    queryFn: () => unwrap(adminService.getDashboardActivity(limit)),
+    placeholderData: keepPreviousData,
   });
+  // A full page back means there may be older events to show.
+  const canShowMore = (activity?.length ?? 0) >= limit && limit < MAX;
 
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -90,6 +99,18 @@ export const AdminActivityFeed = () => {
           })
         )}
       </div>
+      {canShowMore && (
+        <div className="border-t border-border p-3 text-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            isLoading={isFetching}
+            onClick={() => setLimit((current) => Math.min(current + PAGE, MAX))}
+          >
+            Show older activity
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

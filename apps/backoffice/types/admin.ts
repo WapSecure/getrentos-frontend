@@ -324,7 +324,13 @@ export interface AuditLogEntry {
   target: string;
   severity: AuditSeverity;
   timestamp: string;
-  ipAddress: string;
+  ipAddress?: string;
+  entityType?: string;
+  entityId?: string;
+  /** What the audited record held before the action, as recorded. */
+  oldValues?: unknown;
+  /** What it held afterwards. */
+  newValues?: unknown;
 }
 
 export interface AdminDocument {

@@ -37,7 +37,7 @@ import { cn, unwrap } from '@getrentos/shared';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { adminKeys } from '@/lib/queryKeys';
-import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
+import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import { useEstateActions } from './queues';
 import type { AdminEstate, AdminEstateDetail, HouseholdStatus, DueStatus } from '@/types/estate';
 
@@ -57,7 +57,7 @@ const dueStatusVariant = (status: DueStatus): BadgeVariant => {
 };
 
 export const EstateRegister = () => {
-  const [search, setSearch] = useState(() => readAdminSearchParam());
+  const [search, setSearch] = useAdminSearchParam();
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [page, setPage] = useState(1);
