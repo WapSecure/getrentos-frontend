@@ -20,7 +20,6 @@ import {
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
-import { qk } from '@/lib/query/keys';
 import {
   landlordApi,
   DOCUMENT_CATEGORIES,
