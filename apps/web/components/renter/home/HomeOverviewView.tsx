@@ -121,7 +121,9 @@ const quickActions = [
 type NextPaymentCandidate = {
   dueDate: string;
   amount: number;
-  daysRemaining: number;
+  // Server-provided for reminders; absent for a first payment (we show the due
+  // date rather than a countdown, so render never needs the current time).
+  daysRemaining?: number;
   isFirstPayment?: boolean;
 };
 type FirstPaymentReminder = NextPaymentCandidate & { id: string; isFirstPayment: true };
@@ -170,12 +172,10 @@ export function HomeOverviewView() {
     if (pendingLease.amountDue == null || !pendingLease.paymentDueAt) return null;
     const due = new Date(pendingLease.paymentDueAt);
     if (Number.isNaN(due.getTime())) return null;
-    const daysRemaining = Math.ceil((due.getTime() - Date.now()) / 86_400_000);
     return {
       id: `pending-first-payment-${pendingLease.id}`,
       amount: pendingLease.amountDue,
       dueDate: pendingLease.paymentDueAt,
-      daysRemaining,
       isFirstPayment: true,
     };
   }, [pendingLease]);
@@ -195,9 +195,9 @@ export function HomeOverviewView() {
   const nextPayment = useMemo<NextPaymentCandidate | undefined>(() => {
     const candidates: NextPaymentCandidate[] = [...paymentReminders];
     if (firstPaymentDue) candidates.push(firstPaymentDue);
-    return candidates.sort(
-      (a, b) => a.daysRemaining - b.daysRemaining || a.dueDate.localeCompare(b.dueDate)
-    )[0];
+    // Soonest due first. dueDate is an ISO string, so it sorts chronologically
+    // and agrees with the reminders' own daysRemaining order.
+    return candidates.sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0];
   }, [paymentReminders, firstPaymentDue]);
   const isLoading =
     leaseQuery.isLoading ||
@@ -619,10 +619,8 @@ export function HomeOverviewView() {
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {nextPayment.isFirstPayment
-                    ? nextPayment.daysRemaining <= 0
-                      ? 'Your first rent is due now to activate the lease.'
-                      : `First rent to activate your lease · ${nextPayment.daysRemaining} day${nextPayment.daysRemaining === 1 ? '' : 's'} remaining.`
-                    : nextPayment.daysRemaining <= 0
+                    ? 'First rent to activate your lease.'
+                    : (nextPayment.daysRemaining ?? 0) <= 0
                       ? 'This payment is now due.'
                       : `${nextPayment.daysRemaining} day${nextPayment.daysRemaining === 1 ? '' : 's'} remaining.`}
                 </p>
