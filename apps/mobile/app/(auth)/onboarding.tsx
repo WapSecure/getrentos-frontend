@@ -44,7 +44,7 @@ const SLIDES = [
     key: 'escrow',
     eyebrow: 'Protection',
     title: 'GetRentos holds your money safely',
-    body: 'Rent and deposits are held securely and only released when both sides confirm. No transfers into thin air.',
+    body: 'Rent and deposits are held by GetRentos for a short period before release, and a dispute keeps them held until it’s resolved. No transfers into thin air.',
     Scene: EscrowScene,
   },
   {
