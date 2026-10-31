@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -86,6 +86,7 @@ const hasRules = (l: ShortletListing) =>
   l.partiesAllowed != null ||
   Boolean(l.houseRules);
 
+const subscribeToNothing = () => () => {};
 const hasAuthToken = () => Boolean(getAuthToken());
 
 export function ShortletListingDetail({
@@ -98,14 +99,12 @@ export function ShortletListingDetail({
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  // A token is only readable on the client, so start signed-out to match the
-  // server HTML, then read it after mount. Reading it during the first client
-  // render (as useSyncExternalStore's client snapshot did) flips the booking
-  // card on hydration and makes React throw a hydration mismatch (DEF-216).
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  useEffect(() => {
-    setIsSignedIn(hasAuthToken());
-  }, []);
+  // A token is only readable on the client. useSyncExternalStore serves the
+  // server snapshot (signed-out) during SSR and the hydration render, then
+  // switches to the real token value after hydration commits — so the first
+  // client render matches the server HTML and there is no mismatch (DEF-216).
+  // Mirrors ListingCallToAction on the same pages; avoids setState-in-effect.
+  const isSignedIn = useSyncExternalStore(subscribeToNothing, hasAuthToken, () => false);
   const wishlist = useShortletWishlist();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<ShortletBooking | null>(null);
