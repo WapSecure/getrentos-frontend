@@ -23,7 +23,7 @@ const helpFAQs: FAQ[] = [
     id: '2',
     question: 'How does payment protection work?',
     answer:
-      'With payment protection, GetRentos holds your money until all transaction conditions are met: such as lease signing or move-in confirmation. Funds are only released once both parties confirm satisfaction, protecting you from fraud and disputes.',
+      'Your rent goes to GetRentos, not straight to the landlord. It is released to your landlord when you confirm move-in, or automatically on its scheduled release date. If something is wrong, raise a dispute before then and the money stays held until it is resolved.',
     category: 'payments',
   },
   {
@@ -86,9 +86,7 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
   };
 
   if (filteredFAQs.length === 0) {
-    return (
-      <EmptyState icon={HelpCircle} title="No FAQs found for this category" size="compact" />
-    );
+    return <EmptyState icon={HelpCircle} title="No FAQs found for this category" size="compact" />;
   }
 
   return (

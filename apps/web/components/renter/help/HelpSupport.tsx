@@ -4,6 +4,7 @@ import { MessageCircle, Mail, Clock, ArrowRight, LifeBuoy } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
+import { SUPPORT } from '@/lib/support';
 
 export const HelpSupport = () => {
   const router = useRouter();
@@ -64,8 +65,8 @@ export const HelpSupport = () => {
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">Email Support</p>
-            <a href="mailto:support@getrentos.com" className="text-xs text-primary">
-              support@getrentos.com
+            <a href={`mailto:${SUPPORT.email}`} className="text-xs text-primary">
+              {SUPPORT.email}
             </a>
             <p className="text-xs text-muted-foreground">We reply to every message</p>
           </div>

@@ -444,8 +444,8 @@ function Body({ listing: p }: { listing: MarketDetail }) {
           </View>
         </View>
         <Text variant="callout" color="mutedForeground">
-          Pay only through GetRentos. We hold your money until both sides confirm and never ask you
-          to send funds directly to a stranger.
+          Pay only through GetRentos. {PROTECTION_LINE[p.kind]} We never ask you to send funds
+          directly to a stranger.
         </Text>
       </Card>
 
@@ -580,6 +580,14 @@ function SimilarListings({ listing }: { listing: MarketDetail }) {
 }
 
 /* -------------------------------- footer -------------------------------- */
+
+/** When money paid through GetRentos reaches the other side, per market. */
+const PROTECTION_LINE: Record<MarketKind, string> = {
+  rent: 'We hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  sale: 'We hold your deposit and only release it to the seller once you confirm receipt.',
+  land: 'We hold your money and only release it to the seller once the conveyance steps are confirmed.',
+  shortlet: 'We hold your payment and only pay the host after you check in.',
+};
 
 function Footer({ listing, kind }: { listing: MarketDetail; kind: MarketKind }) {
   const { colors, spacing, shadows } = useTheme();

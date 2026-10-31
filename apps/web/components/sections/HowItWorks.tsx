@@ -45,7 +45,7 @@ const steps = [
     number: '06',
     title: 'Protected payment',
     icon: Coins,
-    description: 'Funds held securely until conditions met.',
+    description: 'Rent released on schedule; sale deposits once the buyer confirms receipt.',
   },
   {
     number: '07',

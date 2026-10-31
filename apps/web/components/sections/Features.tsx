@@ -26,7 +26,8 @@ const features = [
   {
     icon: Lock,
     title: 'Payment Protection',
-    description: 'GetRentos holds your payment until the agreed conditions are met.',
+    description:
+      'Rent is released to the landlord on schedule; a sale deposit only once the buyer confirms receipt. Disputes keep money held.',
   },
   {
     icon: Eye,

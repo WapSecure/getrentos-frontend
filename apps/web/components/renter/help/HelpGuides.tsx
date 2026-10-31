@@ -51,8 +51,8 @@ const helpGuides: Guide[] = [
     steps: [
       'Select your payment method on the Payments tab',
       'Your money goes to GetRentos to hold, not straight to the landlord',
-      'GetRentos verifies lease conditions are met',
-      'Funds are automatically released to your landlord',
+      'Confirm move-in and it is released to your landlord, otherwise it is released on its scheduled date',
+      'Raise a dispute before then and the money stays held until it is resolved',
       'A receipt and transaction record is generated for your records',
     ],
   },
@@ -102,9 +102,7 @@ export const HelpGuides = ({ selectedCategory = 'all' }: HelpGuidesProps) => {
   };
 
   if (filteredGuides.length === 0) {
-    return (
-      <EmptyState icon={BookOpen} title="No guides found for this category" size="compact" />
-    );
+    return <EmptyState icon={BookOpen} title="No guides found for this category" size="compact" />;
   }
 
   return (
