@@ -553,35 +553,6 @@ export interface MicrositeSettings {
   enabled: boolean;
 }
 
-/* ------------------------------ evictions ------------------------------ */
-
-export type EvictionStatus = 'draft' | 'issued' | 'filed' | 'resolved' | 'withdrawn';
-
-export interface EvictionCase {
-  id: string;
-  leaseId: string;
-  propertyId: string;
-  propertyName: string;
-  unitName: string;
-  tenantName: string;
-  reason: string;
-  status: string;
-  noticeIssuedAt?: string;
-  cureDeadline?: string;
-  filedAt?: string;
-  resolvedAt?: string;
-  resolutionNotes?: string;
-  createdAt: string;
-}
-
-export const EVICTION_TONE: Record<EvictionStatus, 'neutral' | 'warning' | 'danger' | 'success'> = {
-  draft: 'neutral',
-  issued: 'warning',
-  filed: 'danger',
-  resolved: 'success',
-  withdrawn: 'neutral',
-};
-
 /* ------------------------------- reviews ------------------------------- */
 
 export interface LandlordReviewSummary {
@@ -1021,27 +992,6 @@ export const landlordApi = {
   updateMicrosite: (patch: { slug?: string; bio?: string; enabled?: boolean }) =>
     apiFetch<MicrositeSettings>('/landlord/microsite', { method: 'PATCH', body: patch }),
 
-  evictions: (page = 1, pageSize = 20) =>
-    apiFetch<Paginated<EvictionCase>>(`/landlord/evictions?page=${page}&pageSize=${pageSize}`),
-
-  issueEvictionNotice: (id: string, cureDays?: number) =>
-    apiFetch<EvictionCase>(`/landlord/evictions/${id}/issue-notice`, {
-      method: 'PATCH',
-      body: { cureDays },
-    }),
-
-  fileEviction: (id: string) =>
-    apiFetch<EvictionCase>(`/landlord/evictions/${id}/file`, { method: 'PATCH' }),
-
-  resolveEviction: (id: string, resolutionNotes?: string) =>
-    apiFetch<EvictionCase>(`/landlord/evictions/${id}/resolve`, {
-      method: 'PATCH',
-      body: { resolutionNotes },
-    }),
-
-  withdrawEviction: (id: string) =>
-    apiFetch<EvictionCase>(`/landlord/evictions/${id}/withdraw`, { method: 'PATCH' }),
-
   reviewsSummary: () => apiFetch<LandlordReviewSummary>('/landlord/reviews/summary'),
 
   reviews: (page = 1, pageSize = 20) =>
@@ -1227,9 +1177,6 @@ export const landlordApi = {
   createLease: (input: CreateLeaseInput) =>
     apiFetch<LandlordLease>('/landlord/leases', { method: 'POST', body: input }),
 
-  initiateEviction: (leaseId: string, reason: string) =>
-    apiFetch<EvictionCase>('/landlord/evictions', { method: 'POST', body: { leaseId, reason } }),
-
   uploadDocument: (file: PickedFile, name: string, category: DocumentCategory) => {
     const form = new FormData();
     appendFile(form, 'file', file);
@@ -1278,8 +1225,6 @@ export const landlordApi = {
 
   /** Streams a PDF; returns the bytes to write to disk and share. */
   leasePdf: (id: string) => apiDownload(`/landlord/leases/${id}/pdf`),
-
-  evictionNoticePdf: (id: string) => apiDownload(`/landlord/evictions/${id}/notice.pdf`),
 
   /** Streams CSV, not JSON. */
   financialsExport: () => apiDownload('/landlord/financials/export'),

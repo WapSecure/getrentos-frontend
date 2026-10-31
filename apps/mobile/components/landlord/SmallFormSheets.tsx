@@ -1,6 +1,6 @@
 /**
- * The short single-purpose forms: opening an eviction case, uploading a
- * document, generating an owner statement and setting a management fee.
+ * The short single-purpose forms: uploading a document, generating an owner
+ * statement and setting a management fee.
  * Each is a few fields, so they share a module rather than one file apiece.
  */
 import { useState } from 'react';
@@ -34,97 +34,6 @@ import { pickDocument } from '@/lib/filePicker';
 
 const fail = (toast: ReturnType<typeof useToast>, e: unknown, fallback: string) =>
   toast.show(e instanceof ApiError ? e.message : fallback, 'error');
-
-/* ------------------------------ eviction ------------------------------- */
-
-export function OpenEvictionSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [submitting, setSubmitting] = useState(false);
-  return (
-    <Sheet
-      open={open}
-      onClose={submitting ? () => undefined : onClose}
-      title="Open an eviction case"
-    >
-      <OpenEvictionForm
-        key={open ? 'open' : 'closed'}
-        onClose={onClose}
-        onSubmittingChange={setSubmitting}
-      />
-    </Sheet>
-  );
-}
-
-function OpenEvictionForm({
-  onClose,
-  onSubmittingChange,
-}: {
-  onClose: () => void;
-  onSubmittingChange: (submitting: boolean) => void;
-}) {
-  const { spacing, radius } = useTheme();
-  const qc = useQueryClient();
-  const toast = useToast();
-  const leases = useQuery({ queryKey: qk.landlord.leases(), queryFn: () => landlordApi.leases() });
-  // Only a lease someone is living under can be the subject of an eviction.
-  const eligible = (leases.data?.items ?? []).filter(
-    (l) => l.status === 'active' || l.status === 'signed'
-  );
-
-  const [leaseId, setLeaseId] = useState<string | undefined>();
-  const [reason, setReason] = useState('');
-
-  const start = useMutation({
-    mutationFn: () => landlordApi.initiateEviction(leaseId!, reason.trim()),
-    onMutate: () => onSubmittingChange(true),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['landlord', 'evictions'] });
-      toast.show('Case opened. Issue a notice when you are ready.', 'success');
-      onClose();
-    },
-    onError: (e) => fail(toast, e, 'Could not open that case.'),
-    onSettled: () => onSubmittingChange(false),
-  });
-
-  return (
-    <View style={{ gap: spacing.lg }}>
-      <Text variant="body" color="mutedForeground">
-        This starts a tracked case. Nothing reaches the tenant until you issue a notice.
-      </Text>
-      {leases.isLoading ? (
-        <Skeleton height={40} radius={radius.md} />
-      ) : (
-        <ChipSelect
-          label="Tenancy"
-          options={eligible.map((l) => ({
-            value: l.id,
-            label: `${l.tenantName} · ${l.propertyName}`,
-          }))}
-          value={leaseId}
-          onChange={setLeaseId}
-          disabled={start.isPending}
-          emptyText="No active tenancies."
-        />
-      )}
-      <TextField
-        label="Reason"
-        placeholder="e.g. Rent unpaid for three months"
-        multiline
-        numberOfLines={3}
-        value={reason}
-        onChangeText={setReason}
-        editable={!start.isPending}
-        required
-      />
-      <Button
-        label="Open case"
-        variant="destructive"
-        loading={start.isPending}
-        disabled={start.isPending || !leaseId || !reason.trim()}
-        onPress={() => start.mutate()}
-      />
-    </View>
-  );
-}
 
 /* ------------------------------ document ------------------------------- */
 
