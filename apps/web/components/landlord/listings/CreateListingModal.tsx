@@ -17,6 +17,7 @@ import {
   RadioGroup,
   Select,
   ToggleChip,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
@@ -29,6 +30,23 @@ interface CreateListingModalProps {
   onPublish: (listing: Omit<Listing, 'id' | 'status' | 'createdAt'>) => void;
   submitError?: unknown;
   isSubmitting?: boolean;
+}
+
+/** sessionStorage key for a listing being written when the session ran out. */
+export const CREATE_LISTING_DRAFT_KEY = 'landlord-create-listing';
+
+interface ListingDraft {
+  unitId: string;
+  listingTitle: string;
+  askingRent: string;
+  rentPeriod: RentPeriod;
+  allowsMonthlyPayment: boolean;
+  securityDeposit: string;
+  availabilityDate: string;
+  amenities: string[];
+  allowPets: boolean;
+  furnished: boolean;
+  shortLetEnabled: boolean;
 }
 
 const amenityOptions = ['Parking', 'Swimming Pool', 'Security', '24/7 Power', 'Gym', 'Elevator'];
@@ -52,6 +70,42 @@ export const CreateListingModal = ({
   const [allowPets, setAllowPets] = useState(false);
   const [furnished, setFurnished] = useState(false);
   const [shortLetEnabled, setShortLetEnabled] = useState(false);
+
+  // If the session ends while the landlord is writing, keep the listing so it
+  // is waiting after they sign back in.
+  const draftRestored = useSessionExpiryDraft<ListingDraft>(
+    CREATE_LISTING_DRAFT_KEY,
+    () =>
+      unitId || listingTitle || askingRent || securityDeposit || availabilityDate
+        ? {
+            unitId,
+            listingTitle,
+            askingRent,
+            rentPeriod,
+            allowsMonthlyPayment,
+            securityDeposit,
+            availabilityDate,
+            amenities,
+            allowPets,
+            furnished,
+            shortLetEnabled,
+          }
+        : null,
+    (draft) => {
+      setUnitId(draft.unitId);
+      setListingTitle(draft.listingTitle);
+      setAskingRent(draft.askingRent);
+      setRentPeriod(draft.rentPeriod);
+      setAllowsMonthlyPayment(draft.allowsMonthlyPayment);
+      setSecurityDeposit(draft.securityDeposit);
+      setAvailabilityDate(draft.availabilityDate);
+      setAmenities(draft.amenities ?? []);
+      setAllowPets(draft.allowPets);
+      setFurnished(draft.furnished);
+      setShortLetEnabled(draft.shortLetEnabled);
+    },
+    isOpen
+  );
 
   const selectedUnit = useMemo(
     () => vacantUnits.find((u) => u.id === unitId),
@@ -251,6 +305,12 @@ export const CreateListingModal = ({
 
         {vacantUnits.length > 0 && (
           <div className="p-4 border-t border-border space-y-3 shrink-0">
+            {draftRestored && (
+              <p role="status" className="text-xs text-muted-foreground">
+                We kept the listing you were writing when your session ended. Check it and publish
+                it again.
+              </p>
+            )}
             <VerificationRequiredNotice
               error={submitError}
               href={ROUTES.LANDLORD_PROPERTIES}

@@ -11,6 +11,7 @@ import {
   SegmentedControl,
   Skeleton,
   useToast,
+  hasSessionDraft,
 } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -18,6 +19,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, Building2 } from 'lucide-react';
 import { OwnerPropertyCard } from '@/components/owner/properties/OwnerPropertyCard';
 import {
+  ADD_OWNER_PROPERTY_DRAFT_KEY,
   AddOwnerPropertyModal,
   type OwnerPropertySubmissionResult,
 } from '@/components/owner/properties/AddOwnerPropertyModal';
@@ -102,7 +104,10 @@ export default function OwnerPropertiesPage() {
   }, [searchQuery]);
 
   const [filter, setFilter] = useState<VerificationFilter>('all');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // Reopen the form when the owner comes back from signing in with a draft.
+  const [isAddModalOpen, setIsAddModalOpen] = useState(() =>
+    hasSessionDraft(ADD_OWNER_PROPERTY_DRAFT_KEY)
+  );
   const [statusModalProperty, setStatusModalProperty] = useState<OwnerProperty | null>(null);
   const [editingProperty, setEditingProperty] = useState<OwnerProperty | null>(null);
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null);
@@ -287,7 +292,6 @@ export default function OwnerPropertiesPage() {
         description="This will permanently remove the property and any associated sale listings. This cannot be undone."
         onConfirm={() => deletingPropertyId && handleDelete(deletingPropertyId)}
       />
-
     </>
   );
 }

@@ -4,9 +4,16 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCircle2, Search } from 'lucide-react';
-import { Button, EmptyState, PageErrorState, PageLoadingState } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  PageErrorState,
+  PageLoadingState,
+  clearSessionDraft,
+} from '@getrentos/ui';
 import {
   ApplicationWizard,
+  applicationDraftKey,
   type ApplicationFormData,
 } from '@/components/renter/property-apply/ApplicationWizard';
 import { useRenterUser } from '../../../layout';
@@ -94,6 +101,7 @@ export default function PropertyApplyPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.applications });
       queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
+      clearSessionDraft(applicationDraftKey(property?.id ?? params.id));
       setSubmitted(true);
     },
   });

@@ -108,6 +108,12 @@ export const useSignup = () => {
       setError('Your verification session expired. Please start over.');
       return false;
     }
+    // The password is only ever held in memory, so a reload part-way through
+    // loses it; ask for it again rather than sending an empty one.
+    if (!data.password) {
+      setError('For your security, please start sign-up again and re-enter your password.');
+      return false;
+    }
 
     const response = await createAccountMutation.mutateAsync();
 
@@ -129,6 +135,8 @@ export const useSignup = () => {
       // checks happen later, at the point of use.
       const primaryRole = data.selectedRoles[0];
       router.push(takeSignupNext() ?? getDashboardRoute(primaryRole));
+      // Done with the sign-up details, including the password held in memory.
+      reset();
     } else {
       setError(response.message || 'Failed to create account');
     }

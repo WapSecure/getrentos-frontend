@@ -6,7 +6,10 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, Megaphone } from 'lucide-react';
 import { RealtorListingCard } from '@/components/realtor/listings/RealtorListingCard';
 import { RealtorListingPreviewModal } from '@/components/realtor/listings/RealtorListingPreviewModal';
-import { CreateListingModal } from '@/components/realtor/listings/CreateListingModal';
+import {
+  CreateListingModal,
+  REALTOR_CREATE_LISTING_DRAFT_KEY,
+} from '@/components/realtor/listings/CreateListingModal';
 import {
   Button,
   EmptyState,
@@ -16,6 +19,8 @@ import {
   SearchInput,
   ToggleChip,
   useToast,
+  clearSessionDraft,
+  hasSessionDraft,
 } from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
@@ -33,7 +38,10 @@ export default function RealtorListingsPage() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<StatusFilter>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  // Reopen the listing form when the realtor comes back from signing in with a draft.
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(() =>
+    hasSessionDraft(REALTOR_CREATE_LISTING_DRAFT_KEY)
+  );
   const [previewListing, setPreviewListing] = useState<RealtorListing | null>(null);
   const queryClient = useQueryClient();
   const listingStatus =
@@ -77,6 +85,7 @@ export default function RealtorListingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.listings });
       setPage(1);
+      clearSessionDraft(REALTOR_CREATE_LISTING_DRAFT_KEY);
       setIsCreateModalOpen(false);
     },
     onError: (error) => {
