@@ -7,9 +7,9 @@ import { Button } from './Button';
 import { useSessionActivity } from './hooks/useSessionActivity';
 
 interface SessionTimeoutGuardProps {
-  /** Inactivity before the dialog opens. Defaults to 30 minutes. */
+  /** Total inactivity before the session ends, dialog included. Defaults to 30 minutes. */
   idleMs?: number;
-  /** Time to answer the dialog before the session ends. Defaults to 2 minutes. */
+  /** How long before that the dialog opens (time to answer it). Defaults to 2 minutes. */
   warningMs?: number;
   /** Where to send the user once the session ends. Defaults to the app login. */
   redirectTo?: string;

@@ -7,7 +7,8 @@ export type LandFraudSignalCode =
   | 'DOCUMENT_REUSED'
   | 'SHARED_PAYOUT_ACCOUNT'
   | 'PAYOUT_ACCOUNT_CHANGED'
-  | 'REPRESENTATIVE_LINKED';
+  | 'REPRESENTATIVE_LINKED'
+  | 'CONFLICTING_CLAIM';
 export type LandFraudBand = 'LOW' | 'ELEVATED' | 'HIGH';
 
 export interface LandFraudSignal {
@@ -78,6 +79,7 @@ export const LAND_FRAUD_SIGNAL_LABELS: Record<LandFraudSignalCode, string> = {
   SHARED_PAYOUT_ACCOUNT: 'Payout account shared with another seller',
   PAYOUT_ACCOUNT_CHANGED: 'Bank details changed with land payouts waiting',
   REPRESENTATIVE_LINKED: 'Buyer’s representative tied to the seller',
+  CONFLICTING_CLAIM: 'Another seller’s parcel claims the same ground',
 };
 
 /** What a REPRESENTATIVE_LINKED signal found, as one sentence. */

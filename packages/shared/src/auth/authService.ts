@@ -1,4 +1,5 @@
 import { apiFetch, CLIENT_APP } from './apiClient';
+import { getInstallId } from './installId';
 import { safeCall } from './apiHelpers';
 import type { ApiResponse } from './apiHelpers';
 
@@ -30,6 +31,11 @@ export interface TwoFactorChallenge extends AuthUser {
 export type LoginResult = AuthResult | TwoFactorChallenge;
 
 type OtpPurpose = 'signup' | 'password_reset';
+
+const installIdHeader = (): Record<string, string> => {
+  const id = getInstallId();
+  return id ? { 'x-device-id': id } : {};
+};
 
 export const authService = {
   async sendOtp(
@@ -77,6 +83,7 @@ export const authService = {
       apiFetch('/auth/signup', {
         method: 'POST',
         body: JSON.stringify(data),
+        headers: installIdHeader(),
       })
     );
   },

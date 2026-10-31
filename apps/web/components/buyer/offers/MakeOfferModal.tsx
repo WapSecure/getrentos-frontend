@@ -14,6 +14,8 @@ import {
   Field,
   RadioGroup,
   Textarea,
+  clearSessionDraft,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 import type { BuyerPropertyListing, FinancingType, BuyerOffer } from '@/types/buyer';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
@@ -41,6 +43,16 @@ const financingOptions: { value: FinancingType; label: string }[] = [
 const LISTING_PAGE_SIZE = 10;
 /** Matches the backend default when the buyer leaves the deposit blank. */
 const DEFAULT_DEPOSIT_RATE = 0.1;
+/** sessionStorage key for an offer typed when the session ran out. */
+export const MAKE_OFFER_DRAFT_KEY = 'buyer-make-offer';
+
+interface OfferDraft {
+  propertyId: string;
+  offerAmount: string;
+  financingType: FinancingType;
+  depositAmount: string;
+  message: string;
+}
 
 export const MakeOfferModal = ({
   isOpen,
@@ -61,6 +73,24 @@ export const MakeOfferModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [acceptedRisks, setAcceptedRisks] = useState(false);
+
+  // If the session ends while the buyer is typing (or as they submit), keep the
+  // offer so it is waiting for them after they sign back in.
+  const draftRestored = useSessionExpiryDraft<OfferDraft>(
+    MAKE_OFFER_DRAFT_KEY,
+    () =>
+      offerAmount || depositAmount || message
+        ? { propertyId, offerAmount, financingType, depositAmount, message }
+        : null,
+    (draft) => {
+      if (draft.propertyId) setPropertyId(draft.propertyId);
+      setOfferAmount(draft.offerAmount);
+      setFinancingType(draft.financingType);
+      setDepositAmount(draft.depositAmount);
+      setMessage(draft.message);
+    },
+    isOpen
+  );
 
   const { data: listingsPage, isLoading: isListingsLoading } = useQuery({
     queryKey: [
@@ -157,6 +187,7 @@ export const MakeOfferModal = ({
       setSubmitError('Your offer could not be submitted. Your details are unchanged.');
       return;
     }
+    clearSessionDraft(MAKE_OFFER_DRAFT_KEY);
     handleClose();
   };
 
@@ -273,6 +304,12 @@ export const MakeOfferModal = ({
           {selectedListing?.acceptingOffers === false && (
             <p role="alert" className="w-full text-sm text-destructive">
               This property is already under offer and is no longer accepting new offers.
+            </p>
+          )}
+          {draftRestored && !submitError && (
+            <p role="status" className="w-full text-xs text-muted-foreground">
+              We kept the offer you were writing when your session ended. Check it and send it
+              again.
             </p>
           )}
           {missing && !submitError && (

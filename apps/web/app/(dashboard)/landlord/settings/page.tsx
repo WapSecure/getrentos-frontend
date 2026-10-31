@@ -2,20 +2,22 @@
 
 import { useLandlordUser } from '../layout';
 import { useState } from 'react';
-import { User, Bell, Landmark, Zap } from 'lucide-react';
+import { User, Bell, Landmark, Zap, Download } from 'lucide-react';
 import { Card } from '@getrentos/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/landlord/settings/NotificationSettings';
 import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
 import { AutomationSettings } from '@/components/landlord/settings/AutomationSettings';
+import { DataExport } from '@/components/shared/settings/DataExport';
 
-type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'automation';
+type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'automation' | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout Account', icon: Landmark },
   { id: 'automation', label: 'Automation', icon: Zap },
+  { id: 'data', label: 'Your data', icon: Download },
 ];
 
 export default function LandlordSettingsPage() {
@@ -32,6 +34,8 @@ export default function LandlordSettingsPage() {
         return <PayoutSettings />;
       case 'automation':
         return <AutomationSettings />;
+      case 'data':
+        return <DataExport />;
       default:
         return null;
     }

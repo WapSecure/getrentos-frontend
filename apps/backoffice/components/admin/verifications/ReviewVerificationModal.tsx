@@ -35,6 +35,8 @@ export const ReviewVerificationModal = ({
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
+  // A decided request can still be opened to read its documents, not re-decided.
+  const decided = request?.status === 'approved' || request?.status === 'rejected';
 
   // Fetch the real submitted documents (signed preview URLs) for the request
   // being reviewed so the reviewer can inspect the actual files.
@@ -224,7 +226,18 @@ export const ReviewVerificationModal = ({
           </div>
 
           <div className="p-4 border-t border-border flex gap-2">
-            {mode === 'view' ? (
+            {decided ? (
+              <>
+                <p className="flex-1 self-center text-sm text-muted-foreground">
+                  {request.status === 'approved'
+                    ? 'This request was approved.'
+                    : 'This request was rejected.'}
+                </p>
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+              </>
+            ) : mode === 'view' ? (
               <>
                 <Button
                   variant="ghost"

@@ -19,6 +19,14 @@ import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
+const sectionLabel = (key: string) => {
+  const words = key
+    .replace(/([A-Z])/g, ' $1')
+    .toLowerCase()
+    .trim();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};
+
 export default function DataExport() {
   const { colors, spacing } = useTheme();
   const toast = useToast();
@@ -29,15 +37,11 @@ export default function DataExport() {
     enabled: false,
   });
 
+  // Every list in the export, whatever the account's roles: "leasesAsTenant" → "Leases as tenant".
   const rows = query.data
-    ? [
-        { label: 'Applications', count: query.data.applications.length },
-        { label: 'Saved listings', count: query.data.savedListings.length },
-        { label: 'Leases', count: query.data.leases.length },
-        { label: 'Payments', count: query.data.payments.length },
-        { label: 'Maintenance requests', count: query.data.maintenanceRequests.length },
-        { label: 'Documents', count: query.data.documents.length },
-      ]
+    ? Object.entries(query.data)
+        .filter((entry): entry is [string, unknown[]] => Array.isArray(entry[1]))
+        .map(([key, value]) => ({ label: sectionLabel(key), count: value.length }))
     : [];
 
   const share = async () => {
@@ -75,8 +79,8 @@ export default function DataExport() {
               <Text variant="heading">Your GetRentos data</Text>
             </View>
             <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-              Download a copy of your profile, applications, lease, payment history, maintenance
-              requests and documents.
+              Download a copy of your profile and the records GetRentos holds for you: properties,
+              leases, payments, offers, bookings, messages and documents.
             </Text>
           </Card>
 

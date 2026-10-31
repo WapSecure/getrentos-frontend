@@ -99,9 +99,8 @@ export default function SignIn() {
         setRememberMe(true);
       }
     });
-    if (consumeSessionExpired()) {
-      toast.show('Your session has expired. Please sign in again.', 'info');
-    }
+    const ended = consumeSessionExpired();
+    if (ended) toast.show(ended.message, ended.tone);
     // once, on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
