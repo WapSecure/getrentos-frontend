@@ -44,6 +44,7 @@ import { renterService, type SavedListingItem } from '@/services/renterService';
 import { unwrap, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { trustChainLabel } from '@getrentos/shared';
+import { useFlexAvailability } from '@/hooks/useFlexAvailability';
 
 const nairaFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -59,6 +60,7 @@ export default function PropertyDetailPage() {
   const [tourOpen, setTourOpen] = useState(false);
   const [tourMode, setTourMode] = useState<TourModalMode>('tour');
   const toast = useToast();
+  const { newPlansOpen: flexOpen } = useFlexAvailability();
 
   const propertyQuery = useQuery({
     queryKey: renterKeys.listing(params.id),
@@ -259,7 +261,9 @@ export default function PropertyDetailPage() {
                 disabled={property.acceptingApplications === false}
                 onClick={() => router.push(buildRoute.renterPropertyApply(property.id))}
               >
-                {property.acceptingApplications === false ? 'Not accepting applications' : 'Apply Now'}
+                {property.acceptingApplications === false
+                  ? 'Not accepting applications'
+                  : 'Apply Now'}
               </Button>
               <Button
                 variant="outline"
@@ -360,7 +364,16 @@ export default function PropertyDetailPage() {
           {property.period === 'year' && (
             <Card className="p-4">
               <h3 className="text-sm font-semibold text-foreground mb-3">Payment Options</h3>
-              {property.allowsMonthlyPayment ? (
+              {property.allowsMonthlyPayment && !flexOpen ? (
+                <div className="flex items-start gap-2 text-sm">
+                  <Zap className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-muted-foreground">
+                    This landlord accepts monthly installments via{' '}
+                    <span className="text-foreground font-medium">GetRentos Flex</span>, but Flex
+                    isn&apos;t taking new plans right now. Coming back soon.
+                  </p>
+                </div>
+              ) : property.allowsMonthlyPayment ? (
                 <div className="space-y-3">
                   <div className="flex items-start gap-2 text-sm">
                     <Zap className="w-4 h-4 text-primary shrink-0 mt-0.5" />

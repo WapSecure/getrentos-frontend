@@ -277,7 +277,7 @@ export const listingStatus = (s: string) =>
 
 export const AGREEMENT_STATUS: Record<AgreementStatus, { label: string; tone: Tone }> = {
   ACTIVE: { label: 'Can market', tone: 'success' },
-  PENDING: { label: 'Awaiting owner', tone: 'warning' },
+  PENDING: { label: 'Awaiting owner approval', tone: 'warning' },
   DECLINED: { label: 'Declined', tone: 'neutral' },
   REVOKED: { label: 'Revoked', tone: 'danger' },
 };
@@ -367,7 +367,7 @@ export function candidateState(
 export const agreementRequestedMessage = (a: Pick<MarketingAgreement, 'status'>) =>
   a.status === 'ACTIVE'
     ? 'Added. The owner is part of this estate, so you can list it straight away.'
-    : 'Added, and the owner has been asked for permission to market it.';
+    : 'Request sent. The property joins this estate once the owner approves.';
 
 /** Search needs three characters: fewer would match half the estate. */
 export const MIN_CANDIDATE_SEARCH = 3;

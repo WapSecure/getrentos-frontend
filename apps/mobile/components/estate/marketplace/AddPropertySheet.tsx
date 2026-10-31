@@ -18,8 +18,8 @@ import { haptics } from '@/lib/haptics';
 import { MarketplaceFormError } from './MarketplaceUI';
 
 /**
- * Bring a property into the estate and ask its owner for permission to market
- * it. Two steps, and the copy says so: only the owner can give the second.
+ * Ask a property's owner to bring it into the estate and let the estate market
+ * it. Nothing changes until the owner approves.
  */
 export function AddPropertySheet({
   open,
@@ -31,7 +31,7 @@ export function AddPropertySheet({
   estateId: string;
 }) {
   return (
-    <Sheet open={open} onClose={onClose} title="Add a property" snapPoints={['85%']}>
+    <Sheet open={open} onClose={onClose} title="Request a property" snapPoints={['85%']}>
       {open ? <AddPropertyForm estateId={estateId} onDone={onClose} /> : null}
     </Sheet>
   );
@@ -70,8 +70,8 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
-        The property joins the estate straight away. Its owner then decides whether this estate may
-        advertise it; they keep ownership and any money either way.
+        Its owner decides. The property joins the estate, and this estate can advertise it, only
+        once they approve; they keep ownership and any money either way.
       </Text>
       <TextField
         label="Find the property"
@@ -126,16 +126,16 @@ function AddPropertyForm({ estateId, onDone }: { estateId: string; onDone: () =>
                 {state === 'can-market' ? (
                   <StatusPill label="Can market" tone="success" />
                 ) : state === 'awaiting' ? (
-                  <StatusPill label="Awaiting owner" tone="warning" />
+                  <StatusPill label="Awaiting owner approval" tone="warning" />
                 ) : (
                   <Button
-                    label={state === 'ask' ? 'Ask owner' : 'Add & ask'}
+                    label={state === 'ask' ? 'Ask owner' : 'Request to add'}
                     size="sm"
                     variant="secondary"
                     fullWidth={false}
                     loading={request.isPending && request.variables?.id === c.id}
                     disabled={request.isPending}
-                    accessibilityLabel={`${state === 'ask' ? 'Ask the owner of' : 'Add and ask the owner of'} ${c.title}`}
+                    accessibilityLabel={`${state === 'ask' ? 'Ask the owner of' : 'Request to add'} ${c.title}`}
                     onPress={() => request.mutate(c)}
                   />
                 )}

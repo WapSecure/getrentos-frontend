@@ -22,6 +22,7 @@ import {
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
+import { useFlexAvailability } from '@/hooks/useFlexAvailability';
 
 interface CreateListingModalProps {
   isOpen: boolean;
@@ -64,6 +65,7 @@ export const CreateListingModal = ({
   const [askingRent, setAskingRent] = useState('');
   const [rentPeriod, setRentPeriod] = useState<RentPeriod>('year');
   const [allowsMonthlyPayment, setAllowsMonthlyPayment] = useState(false);
+  const { newPlansOpen: flexOpen } = useFlexAvailability();
   const [securityDeposit, setSecurityDeposit] = useState('');
   const [availabilityDate, setAvailabilityDate] = useState('');
   const [amenities, setAmenities] = useState<string[]>([]);
@@ -265,7 +267,11 @@ export const CreateListingModal = ({
                         Allow monthly installments via GetRentos Flex
                       </span>
                     }
-                    description="GetRentos pays you the full year upfront; the tenant repays us monthly. Leave unchecked to require the full year from the tenant directly."
+                    description={
+                      flexOpen
+                        ? 'GetRentos pays you the full year upfront; the tenant repays us monthly. Leave unchecked to require the full year from the tenant directly.'
+                        : "GetRentos Flex isn't taking new plans right now. You can opt in now; renters can use it for this home once Flex reopens."
+                    }
                   />
                 </div>
               )}

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FinancingEligibilityCard } from '@/components/renter/financing/FinancingEligibilityCard';
 import { ApplyFinancingModal } from '@/components/renter/financing/ApplyFinancingModal';
 import { ActiveFinancingPlanCard } from '@/components/renter/financing/ActiveFinancingPlanCard';
+import { FlexPausedCard } from '@/components/renter/financing/FlexPausedCard';
 import { CardSkeleton, PageErrorState, Skeleton, useToast } from '@getrentos/ui';
 import { useState } from 'react';
 import { renterService } from '@/services/renterService';
@@ -33,9 +34,7 @@ export const FinancingView = () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.financing });
       queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
       setIsApplyModalOpen(false);
-      toast.success(
-        `Approved! Your landlord has been paid in full: repay in interest-free installments.`
-      );
+      toast.success('Your Flex plan is set up. It shows here once your landlord has been paid.');
     },
   });
 
@@ -85,6 +84,7 @@ export const FinancingView = () => {
   const rentAmount = overview?.rentAmount ?? 0;
   const trustScore = overview?.trustScore ?? 0;
   const plan = overview?.plan ?? null;
+  const newPlansOpen = overview?.newPlansOpen === true;
 
   return (
     <>
@@ -94,6 +94,8 @@ export const FinancingView = () => {
           onPayInstallment={handlePayInstallment}
           isPaying={payInstallmentMutation.isPending}
         />
+      ) : !newPlansOpen ? (
+        <FlexPausedCard />
       ) : (
         <FinancingEligibilityCard
           rentAmount={rentAmount}
@@ -104,7 +106,7 @@ export const FinancingView = () => {
       )}
 
       <ApplyFinancingModal
-        open={isApplyModalOpen}
+        open={newPlansOpen && isApplyModalOpen}
         onOpenChange={setIsApplyModalOpen}
         rentAmount={rentAmount}
         onSubmit={handleApply}
