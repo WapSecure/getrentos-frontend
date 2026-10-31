@@ -51,6 +51,7 @@ import type {
   SaleListingStatus,
   SaleOfferStatus,
 } from '@/types/marketplace';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 const PAGE_SIZE = 10;
 
@@ -455,6 +456,7 @@ function ListingDetailDialog({
   onClose: () => void;
   actions: ReturnType<typeof useMarketplaceActions>;
 }) {
+  const canModerate = useAdminCan('sales.moderate');
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin', 'marketplace', 'listings', listingId, 'detail'],
     queryFn: () => unwrap(adminMarketplaceService.listingDetail(listingId)),
@@ -530,91 +532,93 @@ function ListingDetailDialog({
                 </div>
               )}
             </section>
-            <section>
-              <h3 className="font-medium">Moderation</h3>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {data.status === 'PUBLISHED' && (
-                  <>
+            {canModerate && (
+              <section>
+                <h3 className="font-medium">Moderation</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {data.status === 'PUBLISHED' && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          actions.request({
+                            title: 'Pause this listing?',
+                            description: 'The listing will stop showing to buyers until resumed.',
+                            label: 'Pause',
+                            run: () => unwrap(adminMarketplaceService.pauseListing(listingId)),
+                          })
+                        }
+                      >
+                        Pause
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          actions.request({
+                            title: 'Flag for verification?',
+                            description:
+                              'The listing will be hidden from public search until it is approved again.',
+                            label: 'Flag',
+                            run: () => unwrap(adminMarketplaceService.flagListing(listingId)),
+                          })
+                        }
+                      >
+                        Flag for review
+                      </Button>
+                    </>
+                  )}
+                  {data.status === 'PAUSED' && (
                     <Button
                       size="sm"
-                      variant="outline"
                       onClick={() =>
                         actions.request({
-                          title: 'Pause this listing?',
-                          description: 'The listing will stop showing to buyers until resumed.',
-                          label: 'Pause',
-                          run: () => unwrap(adminMarketplaceService.pauseListing(listingId)),
+                          title: 'Resume this listing?',
+                          description: 'The listing will become visible to buyers again.',
+                          label: 'Resume',
+                          run: () => unwrap(adminMarketplaceService.resumeListing(listingId)),
                         })
                       }
                     >
-                      Pause
+                      Resume
                     </Button>
+                  )}
+                  {data.status === 'PENDING_VERIFICATION' && (
                     <Button
                       size="sm"
-                      variant="outline"
                       onClick={() =>
                         actions.request({
-                          title: 'Flag for verification?',
+                          title: 'Approve this listing?',
+                          description: 'The listing will be published and visible to buyers again.',
+                          label: 'Approve',
+                          run: () => unwrap(adminMarketplaceService.approveListing(listingId)),
+                        })
+                      }
+                    >
+                      Approve
+                    </Button>
+                  )}
+                  {data.status !== 'CLOSED' && (
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() =>
+                        actions.request({
+                          title: 'Permanently close this listing?',
                           description:
-                            'The listing will be hidden from public search until it is approved again.',
-                          label: 'Flag',
-                          run: () => unwrap(adminMarketplaceService.flagListing(listingId)),
+                            'This cannot be undone: the seller would need to create a new listing.',
+                          label: 'Close',
+                          run: () => unwrap(adminMarketplaceService.closeListing(listingId)),
                         })
                       }
                     >
-                      Flag for review
+                      Close permanently
                     </Button>
-                  </>
-                )}
-                {data.status === 'PAUSED' && (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      actions.request({
-                        title: 'Resume this listing?',
-                        description: 'The listing will become visible to buyers again.',
-                        label: 'Resume',
-                        run: () => unwrap(adminMarketplaceService.resumeListing(listingId)),
-                      })
-                    }
-                  >
-                    Resume
-                  </Button>
-                )}
-                {data.status === 'PENDING_VERIFICATION' && (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      actions.request({
-                        title: 'Approve this listing?',
-                        description: 'The listing will be published and visible to buyers again.',
-                        label: 'Approve',
-                        run: () => unwrap(adminMarketplaceService.approveListing(listingId)),
-                      })
-                    }
-                  >
-                    Approve
-                  </Button>
-                )}
-                {data.status !== 'CLOSED' && (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() =>
-                      actions.request({
-                        title: 'Permanently close this listing?',
-                        description:
-                          'This cannot be undone: the seller would need to create a new listing.',
-                        label: 'Close',
-                        run: () => unwrap(adminMarketplaceService.closeListing(listingId)),
-                      })
-                    }
-                  >
-                    Close permanently
-                  </Button>
-                )}
-              </div>
-            </section>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         )}
       </DialogContent>
@@ -791,6 +795,7 @@ function OfferCase360({
   onClose: () => void;
   actions: ReturnType<typeof useMarketplaceActions>;
 }) {
+  const canModerate = useAdminCan('sales.moderate');
   const parties = [
     {
       label: 'Buyer',
@@ -914,7 +919,7 @@ function OfferCase360({
           View buyer <ExternalLink className="h-3 w-3" />
         </Link>
         <div className="flex items-center gap-2">
-          {(detail.status === 'SUBMITTED' || detail.status === 'COUNTERED') && (
+          {canModerate && (detail.status === 'SUBMITTED' || detail.status === 'COUNTERED') && (
             <Button
               size="sm"
               variant="danger"

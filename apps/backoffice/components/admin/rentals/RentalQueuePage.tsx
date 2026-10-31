@@ -8,7 +8,7 @@ import { EmptyState, PageErrorState, Pagination, SearchInput, Select } from '@ge
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
+import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';
 import type { RentalListParams } from '@/services/adminRentalService';
 
@@ -29,7 +29,7 @@ export interface RentalQueueConfig<T> {
 const PAGE_SIZE = 10;
 
 export function RentalQueuePage<T>({ config }: { config: RentalQueueConfig<T> }) {
-  const [search, setSearch] = useState(() => readAdminSearchParam());
+  const [search, setSearch] = useAdminSearchParam();
   const [debounced, setDebounced] = useState('');
   const [status, setStatus] = useState('all');
   const [page, setPage] = useState(1);

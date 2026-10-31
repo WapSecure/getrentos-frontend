@@ -33,6 +33,8 @@ export default function AdminDashboardPage() {
   const statsQuery = useQuery({
     queryKey: adminKeys.dashboardStats,
     queryFn: () => unwrap(adminService.getDashboardStats()),
+    // Each dashboard section fails on its own; one outage must not blank the rest.
+    throwOnError: false,
   });
 
   return (

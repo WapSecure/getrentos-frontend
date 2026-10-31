@@ -19,7 +19,8 @@
   --secondary: #f0f1f2;
   --secondary-foreground: #172033;
   --muted: #f2f3f3;
-  --muted-foreground: #667085;
+  /* AA (4.5:1+) as body text on every light surface: card, canvas, secondary. */
+  --muted-foreground: #5d6679;
   --accent: #edf3fc;
   --accent-foreground: #1849a9;
   --primary: #175cd3;
@@ -63,10 +64,13 @@
   --accent-foreground: #9ac2ff;
   --primary: #4b8ff7;
   --primary-hover: #6da4f7;
-  --primary-foreground: #ffffff;
+  /* White on these bright dark-theme fills is only ~3.2:1, so filled buttons
+     and badges carry the canvas ink instead (5.5:1+). */
+  --primary-foreground: #0d1117;
   --destructive: #f05656;
-  --destructive-foreground: #ffffff;
-  --info: #4b8ff7;
+  --destructive-foreground: #0d1117;
+  /* Lighter than primary so info text stays AA on --info-subtle. */
+  --info: #6da4f7;
   --success: #38c57a;
   --warning: #ffb454;
   --purple: #a78bfa;

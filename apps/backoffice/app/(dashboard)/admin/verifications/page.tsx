@@ -51,7 +51,7 @@ export default function AdminVerificationsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.verifications({
       search: debouncedSearch,
       status: statusFilter,
@@ -194,6 +194,7 @@ export default function AdminVerificationsPage() {
         </div>
       ) : isError && !data ? (
         <PageErrorState
+          error={error}
           title="Could not load verification requests"
           description="The verification queue is temporarily unavailable. Your filters have been preserved."
           onRetry={() => void refetch()}

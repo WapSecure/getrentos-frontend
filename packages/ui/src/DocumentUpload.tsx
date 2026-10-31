@@ -170,7 +170,7 @@ export function DocumentUpload({
           <span className="text-primary font-medium">Click to browse</span> or drag &amp; drop
           {multiple ? ' files' : ' a file'}
         </p>
-        {hint && <p className="mt-1 text-[11px] text-muted-foreground/70">{hint}</p>}
+        {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
         <input
           ref={inputRef}
           type="file"

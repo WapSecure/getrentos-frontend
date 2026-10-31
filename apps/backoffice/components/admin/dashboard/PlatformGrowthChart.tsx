@@ -36,6 +36,9 @@ export const PlatformGrowthChart = () => {
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.userGrowth,
     queryFn: () => unwrap(adminService.getUserGrowth()),
+    // This screen shows its own error and retry in place, so a failure must
+    // not escalate to the route error boundary and take the page with it.
+    throwOnError: false,
   });
 
   const growthData: GrowthPoint[] = (data ?? []).map((p) => ({ month: p.label, users: p.value }));

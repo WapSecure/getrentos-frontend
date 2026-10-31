@@ -91,12 +91,21 @@ export const adminKeys = {
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
-  auditLogs: (params?: { search?: string; severity?: string; page?: number; pageSize?: number }) =>
+  auditLogs: (params?: {
+    search?: string;
+    severity?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    page?: number;
+    pageSize?: number;
+  }) =>
     [
       'admin',
       'auditLogs',
       params?.search ?? '',
       params?.severity ?? 'all',
+      params?.dateFrom ?? '',
+      params?.dateTo ?? '',
       params?.page ?? 1,
       params?.pageSize ?? 20,
     ] as const,
