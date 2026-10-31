@@ -13,7 +13,6 @@ import {
   FileSignature,
   FileStack,
   FileText,
-  Gavel,
   Gift,
   Globe,
   Handshake,
@@ -90,13 +89,6 @@ export default function LandlordAccount() {
       description: 'Enquiries to follow up',
       icon: Users,
       onPress: go('/(app)/landlord-leads'),
-    },
-    {
-      key: 'evictions',
-      label: 'Evictions',
-      description: 'Notice, filing and resolution',
-      icon: Gavel,
-      onPress: go('/(app)/landlord-evictions'),
     },
   ];
 
