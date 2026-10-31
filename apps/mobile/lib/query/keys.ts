@@ -360,6 +360,7 @@ export const qk = {
     visitorPasses: ['resident', 'visitor-passes'] as const,
     amenities: ['resident', 'amenities'] as const,
     amenityBookings: ['resident', 'amenity-bookings'] as const,
+    amenityBusy: (amenityId: string) => ['resident', 'amenity-busy', amenityId] as const,
     maintenance: ['resident', 'maintenance'] as const,
     dues: ['resident', 'dues'] as const,
     governance: ['resident', 'governance'] as const,

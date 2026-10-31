@@ -431,6 +431,12 @@ export const residentApi = {
   bookAmenity: (data: { amenityId: string; startsAt: string; endsAt: string }) =>
     apiFetch<AmenityBooking>('/estate/resident/amenities/book', { method: 'POST', body: data }),
 
+  /** Taken time ranges on an amenity (times only), so the booking sheet can hide them. */
+  listAmenityBusy: (amenityId: string) =>
+    apiFetch<{ startsAt: string; endsAt: string }[]>(
+      `/estate/resident/amenities/${amenityId}/busy`
+    ),
+
   listAmenityBookings: () => apiFetch<AmenityBooking[]>('/estate/resident/amenity-bookings'),
 
   cancelAmenityBooking: (bookingId: string) =>

@@ -10,6 +10,7 @@ import {
   Chip,
   Divider,
   EmptyState,
+  ErrorState,
   Screen,
   Skeleton,
   Text,
@@ -19,7 +20,8 @@ import {
 import { Sheet } from '@/components/Sheet';
 import { residentApi, type Amenity } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
-import { formatDate } from '@/lib/format';
+import { APP_TIME_ZONE, formatDate, formatTime } from '@/lib/format';
+import { dayNoon, isSlotFree, lagosDays, slotStart, type LagosDay } from '@/lib/amenitySlots';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -32,20 +34,18 @@ const DURATIONS = [
   { label: '3 hr', minutes: 180 },
 ] as const;
 
-function nextDays(count: number): Date[] {
-  return Array.from({ length: count }, (_, i) => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + i);
-    return d;
+function dayLabel(d: LagosDay, i: number): string {
+  if (i === 0) return 'Today';
+  if (i === 1) return 'Tomorrow';
+  return dayNoon(d).toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: APP_TIME_ZONE,
   });
 }
 
-function dayLabel(d: Date, i: number): string {
-  if (i === 0) return 'Today';
-  if (i === 1) return 'Tomorrow';
-  return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
-}
+const SHORTEST_MINUTES = Math.min(...DURATIONS.map((d) => d.minutes));
 
 function hourLabel(h: number): string {
   const period = h >= 12 ? 'PM' : 'AM';
@@ -73,18 +73,25 @@ export default function ResidentAmenities() {
       residentApi.bookAmenity(data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.resident.amenityBookings });
+      qc.invalidateQueries({ queryKey: ['resident', 'amenity-busy'] });
       setBookingTarget(null);
     },
-    onError: (err) =>
+    onError: (err) => {
+      // Someone may have taken the slot meanwhile: refresh what the sheet hides.
+      qc.invalidateQueries({ queryKey: ['resident', 'amenity-busy'] });
       toast.show(
         err instanceof Error ? err.message : "Couldn't book that slot. Try again.",
         'error'
-      ),
+      );
+    },
   });
 
   const cancel = useMutation({
     mutationFn: (bookingId: string) => residentApi.cancelAmenityBooking(bookingId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: qk.resident.amenityBookings }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.resident.amenityBookings });
+      qc.invalidateQueries({ queryKey: ['resident', 'amenity-busy'] });
+    },
     onError: () => toast.show("Couldn't cancel that booking. Try again.", 'error'),
   });
 
@@ -161,16 +168,9 @@ export default function ResidentAmenities() {
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text variant="bodyStrong">{b.amenityName}</Text>
                     <Text variant="caption" color="mutedForeground">
-                      {formatDate(b.startsAt, 'short')} ·{' '}
-                      {new Date(b.startsAt).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
+                      {formatDate(b.startsAt, 'short')} · {formatTime(b.startsAt)}
                       {' – '}
-                      {new Date(b.endsAt).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
+                      {formatTime(b.endsAt)}
                     </Text>
                   </View>
                   <Badge label="Confirmed" tone="success" />
@@ -224,32 +224,52 @@ function BookAmenitySheet({
       title={amenity ? `Book ${amenity.name}` : ''}
     >
       {amenity ? (
-        <BookAmenityForm key={amenity.id} onSubmit={onSubmit} submitting={submitting} />
+        <BookAmenityForm
+          key={amenity.id}
+          amenityId={amenity.id}
+          onSubmit={onSubmit}
+          submitting={submitting}
+        />
       ) : null}
     </Sheet>
   );
 }
 
 function BookAmenityForm({
+  amenityId,
   onSubmit,
   submitting,
 }: {
+  amenityId: string;
   onSubmit: (startsAt: string, endsAt: string) => void;
   submitting: boolean;
 }) {
   const { spacing } = useTheme();
-  const days = useMemo(() => nextDays(14), []);
+  const days = useMemo(() => lagosDays(14), []);
   const [dayIndex, setDayIndex] = useState(0);
   const [hour, setHour] = useState<number | null>(null);
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null);
 
-  const canSubmit = hour !== null && durationMinutes !== null;
+  const busyQuery = useQuery({
+    queryKey: qk.resident.amenityBusy(amenityId),
+    queryFn: () => residentApi.listAmenityBusy(amenityId),
+  });
+  const busy = useMemo(() => busyQuery.data ?? [], [busyQuery.data]);
+
+  // Only hours that are still ahead and have at least the shortest booking free.
+  const hours = HOUR_SLOTS.filter((h) =>
+    isSlotFree(slotStart(days[dayIndex], h), SHORTEST_MINUTES, busy)
+  );
+  const start = hour !== null && hours.includes(hour) ? slotStart(days[dayIndex], hour) : null;
+  const durationFits = (minutes: number) => !!start && isSlotFree(start, minutes, busy);
+  const duration =
+    durationMinutes !== null && durationFits(durationMinutes) ? durationMinutes : null;
+
+  const canSubmit = start !== null && duration !== null && !busyQuery.isPending;
 
   const submit = () => {
-    if (hour === null || durationMinutes === null) return;
-    const start = new Date(days[dayIndex]);
-    start.setHours(hour, 0, 0, 0);
-    const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+    if (!start || duration === null) return;
+    const end = new Date(start.getTime() + duration * 60 * 1000);
     onSubmit(start.toISOString(), end.toISOString());
   };
 
@@ -270,15 +290,25 @@ function BookAmenityForm({
       </Field>
       <Field label="Start time">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {HOUR_SLOTS.map((h) => (
-            <Chip
-              key={h}
-              label={hourLabel(h)}
-              selected={hour === h}
-              onPress={() => setHour(h)}
-              disabled={submitting}
-            />
-          ))}
+          {busyQuery.isPending ? (
+            <Skeleton height={36} radius={18} />
+          ) : busyQuery.isError ? (
+            <ErrorState onRetry={() => busyQuery.refetch()} />
+          ) : hours.length === 0 ? (
+            <Text variant="caption" color="mutedForeground">
+              No free times left on this day. Try another day.
+            </Text>
+          ) : (
+            hours.map((h) => (
+              <Chip
+                key={h}
+                label={hourLabel(h)}
+                selected={hour === h}
+                onPress={() => setHour(h)}
+                disabled={submitting}
+              />
+            ))
+          )}
         </View>
       </Field>
       <Field label="Duration">
@@ -287,9 +317,9 @@ function BookAmenityForm({
             <Chip
               key={d.minutes}
               label={d.label}
-              selected={durationMinutes === d.minutes}
+              selected={duration === d.minutes}
               onPress={() => setDurationMinutes(d.minutes)}
-              disabled={submitting}
+              disabled={submitting || (start !== null && !durationFits(d.minutes))}
             />
           ))}
         </View>
