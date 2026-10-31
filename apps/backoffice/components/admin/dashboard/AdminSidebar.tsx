@@ -507,7 +507,7 @@ export const AdminMobileNavigation = ({
         if (visibleItems.length === 0) return null;
         return (
           <div key={group.label}>
-            <h2 className="mb-1.5 px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75">
+            <h2 className="mb-1.5 px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {group.label}
             </h2>
             <div className="space-y-1">

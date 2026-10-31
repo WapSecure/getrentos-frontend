@@ -175,7 +175,7 @@ export const DocumentUploadDialog = ({
                       className="hidden"
                     />
                   </label>
-                  <p className="text-xs text-muted-foreground/70 mt-2">
+                  <p className="text-xs text-muted-foreground mt-2">
                     PDF, DOC, JPG, PNG up to 10MB
                   </p>
                 </>
