@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import * as RadixPopover from '@radix-ui/react-popover';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
@@ -61,20 +61,21 @@ export const TimePicker = ({
   const [open, setOpen] = useState(false);
   const [options] = useState(() => buildTimeOptions(step, minHour, maxHour));
   const listRef = useRef<HTMLDivElement>(null);
+  const baseId = useId();
+  const valueId = `${baseId}-value`;
+  const listboxId = `${baseId}-listbox`;
+  const hasSelected = options.some((option) => option.value === value);
 
   // Open on the chosen time (or the first slot) with focus on it, so arrows work at once.
-  useEffect(() => {
-    if (!open) return;
-    const frame = requestAnimationFrame(() => {
-      const list = listRef.current;
-      const target =
-        list?.querySelector<HTMLButtonElement>('[aria-selected="true"]') ??
-        list?.querySelector<HTMLButtonElement>('[role="option"]');
-      target?.scrollIntoView({ block: 'center' });
-      target?.focus({ preventScroll: true });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [open]);
+  // Runs from onOpenAutoFocus: the list is portaled and only exists by then.
+  const focusInitialOption = () => {
+    const list = listRef.current;
+    const target =
+      list?.querySelector<HTMLButtonElement>('[aria-selected="true"]') ??
+      list?.querySelector<HTMLButtonElement>('[role="option"]');
+    target?.scrollIntoView({ block: 'center' });
+    target?.focus({ preventScroll: true });
+  };
 
   const onListKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const items = Array.from(
@@ -100,15 +101,23 @@ export const TimePicker = ({
   };
 
   return (
-    <RadixPopover.Root open={open} onOpenChange={setOpen}>
+    // Modal, so Tab stays in the list (it is portaled) and a pick or Escape
+    // returns focus to the trigger.
+    <RadixPopover.Root open={open} onOpenChange={setOpen} modal>
       <RadixPopover.Trigger asChild>
         <button
           type="button"
           id={field.id}
           disabled={disabled}
+          // A combobox, so the required/invalid state from a Field is valid ARIA.
+          role="combobox"
           aria-haspopup="listbox"
           aria-expanded={open}
-          aria-label={ariaLabel ? `${ariaLabel}: ${selectedLabel ?? placeholder}` : undefined}
+          aria-controls={open ? listboxId : undefined}
+          aria-label={
+            ariaLabel && !field.labelId ? `${ariaLabel}: ${selectedLabel ?? placeholder}` : undefined
+          }
+          aria-labelledby={field.labelId ?? (ariaLabel ? undefined : valueId)}
           onKeyDown={(event) => {
             if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
               event.preventDefault();
@@ -123,6 +132,7 @@ export const TimePicker = ({
           )}
         >
           <span
+            id={valueId}
             className={cn(
               'truncate tabular-nums',
               selectedLabel ? 'text-foreground' : 'text-muted-foreground'
@@ -141,7 +151,10 @@ export const TimePicker = ({
               asChild
               sideOffset={8}
               align="start"
-              onOpenAutoFocus={(e) => e.preventDefault()}
+              onOpenAutoFocus={(e) => {
+                e.preventDefault();
+                focusInitialOption();
+              }}
             >
               <motion.div
                 initial={{ opacity: 0, y: -4, scale: 0.97 }}
@@ -163,12 +176,13 @@ export const TimePicker = ({
                 </div>
                 <div
                   ref={listRef}
+                  id={listboxId}
                   role="listbox"
                   aria-label={ariaLabel ?? 'Times'}
                   onKeyDown={onListKeyDown}
                   className="max-h-56 overflow-y-auto overscroll-contain p-1.5"
                 >
-                  {options.map((option) => {
+                  {options.map((option, index) => {
                     const isSelected = option.value === value;
                     return (
                       <button
@@ -176,7 +190,7 @@ export const TimePicker = ({
                         type="button"
                         role="option"
                         aria-selected={isSelected}
-                        tabIndex={-1}
+                        tabIndex={isSelected || (!hasSelected && index === 0) ? 0 : -1}
                         onClick={() => handleSelect(option.value)}
                         className={cn(
                           'w-full rounded-lg px-3 py-2 text-left text-sm tabular-nums transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary',

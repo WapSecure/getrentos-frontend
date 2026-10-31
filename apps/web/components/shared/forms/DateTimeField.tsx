@@ -78,6 +78,7 @@ export const DateTimeField = ({
           value={date}
           onChange={(next) => onChange(join(next, time))}
           min={minDate === null ? undefined : (minDate ?? todayISODate())}
+          ariaLabel={`${label} date`}
         />
         <TimePicker
           value={time}
@@ -85,6 +86,7 @@ export const DateTimeField = ({
           step={timeStep}
           minHour={minHour}
           maxHour={maxHour}
+          ariaLabel={`${label} time`}
         />
       </div>
       {inPast && (

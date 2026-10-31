@@ -95,10 +95,11 @@ export const useSignupStore = create<SignupStore>()(
     }),
     {
       name: 'signup-storage',
+      // The password stays in memory only: never written to localStorage.
+      // Step and canAddMoreRoles are not persisted either.
       partialize: (state) => ({
-        data: state.data,
+        data: { ...state.data, password: '' },
         otpReference: state.otpReference,
-        // Don't persist step and canAddMoreRoles
       }),
     }
   )
