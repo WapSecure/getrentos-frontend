@@ -2,8 +2,10 @@ import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Bell,
   CalendarCheck,
   Contact,
+  DoorOpen,
   KeyRound,
   Landmark,
   Megaphone,
@@ -20,6 +22,7 @@ import {
   Divider,
   EmptyState,
   ErrorState,
+  IconButton,
   Screen,
   SectionHeader,
   Skeleton,
@@ -32,7 +35,8 @@ import { relativeTime, firstName, formatNaira } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { EmergencyBanner } from '@/components/resident/EmergencyBanner';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { dashboardGreeting } from '@/components/dashboard/DashboardParts';
+import { AttentionCard, dashboardGreeting } from '@/components/dashboard/DashboardParts';
+import { notificationsApi } from '@/lib/api/notifications';
 import { BalanceVisibilityButton } from '@/components/dashboard/BalanceVisibilityButton';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
@@ -65,11 +69,36 @@ export default function ResidentHome() {
     queryFn: () => residentApi.listDues(1, 50),
   });
 
-  const isRefreshing = household.isRefetching || announcements.isRefetching || dues.isRefetching;
+  const notifications = useQuery({
+    queryKey: qk.renter.notifications(1, 30),
+    queryFn: () => notificationsApi.list(1, 30),
+  });
+  const unreadCount = (notifications.data?.items ?? []).filter((n) => !n.read).length;
+  // A walk-in has a ten-minute window, so the home screen keeps asking while one
+  // is open: the resident must not have to think to go looking for it.
+  const passes = useQuery({
+    queryKey: qk.resident.visitorPasses,
+    queryFn: () => residentApi.listVisitorPasses(1, 50),
+    refetchInterval: 30_000,
+  });
+  const waitingAtGate = (passes.data?.items ?? []).filter(
+    (pass) =>
+      pass.status === 'awaiting_approval' &&
+      new Date(pass.expiresAt).getTime() > passes.dataUpdatedAt
+  );
+
+  const isRefreshing =
+    household.isRefetching ||
+    announcements.isRefetching ||
+    dues.isRefetching ||
+    passes.isRefetching ||
+    notifications.isRefetching;
   const onRefresh = () => {
     household.refetch();
     announcements.refetch();
     dues.refetch();
+    passes.refetch();
+    notifications.refetch();
   };
 
   const outstanding = (dues.data?.items ?? [])
@@ -93,7 +122,32 @@ export default function ResidentHome() {
             ? `${household.data.estate.name} · Unit ${household.data.unitLabel}`
             : 'Everything around your home, in one place'
         }
+        accessory={
+          <IconButton
+            onPress={() => router.push('/(app)/notifications')}
+            accessibilityLabel={
+              unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'
+            }
+            badge={unreadCount}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        }
       />
+
+      {waitingAtGate.length > 0 ? (
+        <AttentionCard
+          Icon={DoorOpen}
+          tone="danger"
+          title={
+            waitingAtGate.length === 1
+              ? `${waitingAtGate[0].visitorName} is at the gate`
+              : `${waitingAtGate.length} visitors are at the gate`
+          }
+          detail="Let them in or refuse before the request runs out"
+          accessibilityLabel="A visitor is waiting at the gate. Open visitor passes to answer."
+          onPress={() => router.push('/(app)/visitor-passes')}
+        />
+      ) : null}
 
       {dues.isError && !dues.data ? (
         <Card elevated>
