@@ -18,6 +18,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { formatPercent } from '@getrentos/shared';
 import { qk } from '@/lib/query/keys';
 import { leaseApi } from '@/lib/api/lease';
 import { ApiError } from '@/lib/api/client';
@@ -324,7 +325,7 @@ export default function LeaseScreen() {
                     >
                       <Text variant="callout">{formatDate(inc.date)}</Text>
                       <Badge
-                        label={`${inc.percentageChange > 0 ? '+' : ''}${inc.percentageChange}%`}
+                        label={`${inc.percentageChange > 0 ? '+' : ''}${formatPercent(inc.percentageChange)}%`}
                         tone={inc.percentageChange > 0 ? 'warning' : 'success'}
                       />
                     </View>
@@ -394,7 +395,7 @@ function RenewalOfferCard({
       <Text variant="callout" color="mutedForeground" style={{ marginTop: 2 }}>
         New rent <Price amount={offer.newRentAmount} period={period} variant="callout" /> (
         {offer.increasePercentage > 0 ? '+' : ''}
-        {offer.increasePercentage}%) · ends {formatDate(offer.newEndDate, 'short')}
+        {formatPercent(offer.increasePercentage)}%) · ends {formatDate(offer.newEndDate, 'short')}
       </Text>
       {offer.terms ? (
         <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.xs }}>
