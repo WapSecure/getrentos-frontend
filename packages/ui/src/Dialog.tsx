@@ -1,6 +1,14 @@
 'use client';
 
-import { useRef, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type MutableRefObject,
+  type ReactNode,
+} from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -12,11 +20,32 @@ interface DialogProps {
   children: ReactNode;
 }
 
-export const Dialog = ({ open, onOpenChange, children }: DialogProps) => (
-  <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
-    <AnimatePresence>{open && children}</AnimatePresence>
-  </RadixDialog.Root>
-);
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+/** The element focused when the dialog opened, so closing can hand focus back. */
+const ReturnFocusContext = createContext<MutableRefObject<HTMLElement | null> | null>(null);
+
+export const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
+  // These dialogs are opened from state, not through a Radix trigger, so Radix
+  // has nothing to return focus to and drops it on <body>. Remember whatever
+  // was focused as the dialog opens (this runs before the content moves focus
+  // inside) and give it back on close.
+  const returnTo = useRef<HTMLElement | null>(null);
+  useIsomorphicLayoutEffect(() => {
+    if (open) {
+      const active = document.activeElement;
+      returnTo.current = active instanceof HTMLElement && active !== document.body ? active : null;
+    }
+  }, [open]);
+
+  return (
+    <ReturnFocusContext.Provider value={returnTo}>
+      <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
+        <AnimatePresence>{open && children}</AnimatePresence>
+      </RadixDialog.Root>
+    </ReturnFocusContext.Provider>
+  );
+};
 
 interface DialogContentProps {
   children: ReactNode;
@@ -51,57 +80,68 @@ export const DialogContent = ({
   closeOnOutsideClick = 'until-edited',
 }: DialogContentProps) => {
   const edited = useRef(false);
+  const returnTo = useContext(ReturnFocusContext);
   // A caller's own `max-w-*` is the width they meant; the size default would
   // otherwise win on sm+ screens because it carries the `sm:` prefix.
   const ownWidth = /(^|\s)max-w-/.test(className ?? '');
   return (
-  <RadixDialog.Portal forceMount>
-    <RadixDialog.Overlay asChild forceMount>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-black/55"
-      />
-    </RadixDialog.Overlay>
-    <RadixDialog.Content
-      asChild
-      forceMount
-      onInteractOutside={(event) => {
-        if (closeOnOutsideClick === false || (closeOnOutsideClick === 'until-edited' && edited.current)) {
-          event.preventDefault();
-        }
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 8 }}
-        onInputCapture={() => {
-          edited.current = true;
+    <RadixDialog.Portal forceMount>
+      <RadixDialog.Overlay asChild forceMount>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/55"
+        />
+      </RadixDialog.Overlay>
+      <RadixDialog.Content
+        asChild
+        forceMount
+        onCloseAutoFocus={(event) => {
+          const target = returnTo?.current;
+          if (target && target.isConnected) {
+            event.preventDefault();
+            target.focus({ preventScroll: true });
+          }
         }}
-        className={cn(
-          // p-6 is the default so a modal is never flush to the edge; a full-bleed
-          // modal (image preview, section layout with full-width dividers) opts out
-          // with `p-0`, and tailwind-merge lets that — or any p-* — win over this.
-          'fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] w-full overflow-y-auto rounded-t-xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl',
-          !ownWidth && DIALOG_WIDTH[size],
-          padded && 'p-5 sm:p-6',
-          className
-        )}
+        onInteractOutside={(event) => {
+          if (
+            closeOnOutsideClick === false ||
+            (closeOnOutsideClick === 'until-edited' && edited.current)
+          ) {
+            event.preventDefault();
+          }
+        }}
       >
-        {children}
-        {showClose && (
-          <RadixDialog.Close
-            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </RadixDialog.Close>
-        )}
-      </motion.div>
-    </RadixDialog.Content>
-  </RadixDialog.Portal>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.96, y: 8 }}
+          onInputCapture={() => {
+            edited.current = true;
+          }}
+          className={cn(
+            // p-6 is the default so a modal is never flush to the edge; a full-bleed
+            // modal (image preview, section layout with full-width dividers) opts out
+            // with `p-0`, and tailwind-merge lets that — or any p-* — win over this.
+            'fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] w-full overflow-y-auto rounded-t-xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl',
+            !ownWidth && DIALOG_WIDTH[size],
+            padded && 'p-5 sm:p-6',
+            className
+          )}
+        >
+          {children}
+          {showClose && (
+            <RadixDialog.Close
+              className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </RadixDialog.Close>
+          )}
+        </motion.div>
+      </RadixDialog.Content>
+    </RadixDialog.Portal>
   );
 };
 

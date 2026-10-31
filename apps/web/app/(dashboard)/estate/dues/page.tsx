@@ -141,7 +141,14 @@ export default function EstateDuesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Dues</h1>
           <p className="text-muted-foreground mt-1">
-            {total} due{total === 1 ? '' : 's'} in {estate.name}
+            {isDuesLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {total} due{total === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

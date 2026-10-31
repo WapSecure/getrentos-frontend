@@ -35,10 +35,13 @@ export const ResidentNavbar = ({ user }: ResidentNavbarProps) => {
         }`}
       >
         <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Logo size="md" />
+          <div className="flex justify-between items-center gap-2 h-16">
+            <Logo
+              size="md"
+              className="shrink-0 [&>span]:sr-only min-[360px]:[&>span]:not-sr-only"
+            />
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-3">
               <ThemeToggle />
               <NotificationBell portal="resident" basePath="/estate/resident/notifications" />
               <ResidentProfileDropdown user={user} />

@@ -21,7 +21,7 @@ export const EstateSwitcher = () => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border hover:bg-secondary transition-colors max-w-[10rem] sm:max-w-[14rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <DropdownMenuTrigger className="group flex items-center gap-2 px-3 py-1.5 min-w-0 rounded-lg border border-border hover:bg-secondary transition-colors max-w-[10rem] sm:max-w-[14rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <Building2 className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
         <span className="text-sm font-medium text-foreground truncate">
           {estate?.name ?? 'Select estate'}

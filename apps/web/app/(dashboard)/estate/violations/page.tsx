@@ -112,7 +112,14 @@ export default function EstateViolationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Violations</h1>
           <p className="text-muted-foreground mt-1">
-            {violations.length} violation{violations.length === 1 ? '' : 's'} in {estate.name}
+            {isViolationsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {violations.length} violation{violations.length === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsReportOpen(true)}>
@@ -121,7 +128,11 @@ export default function EstateViolationsPage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter violations by status">
+      <div
+        className="flex flex-wrap gap-2 mb-6"
+        role="group"
+        aria-label="Filter violations by status"
+      >
         {statusFilters.map((filter) => (
           <ToggleChip
             key={filter.value}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -72,10 +72,22 @@ export default function ResidentVisitorPasses() {
   /** The walk-in the resident is refusing, so the reason can be collected. */
   const [denying, setDenying] = useState<VisitorPass | null>(null);
 
+  // A walk-in lapses ten minutes after it is raised. While one is open the list
+  // keeps refreshing and the clock keeps ticking, so a dead request stops
+  // offering buttons that could only fail.
+  const [now, setNow] = useState(() => Date.now());
   const query = useQuery({
     queryKey: qk.resident.visitorPasses,
     queryFn: () => residentApi.listVisitorPasses(1, 50),
+    refetchInterval: (q) =>
+      q.state.data?.items.some((pass) => pass.status === 'awaiting_approval') ? 15_000 : false,
   });
+  const hasAwaiting = (query.data?.items ?? []).some((pass) => pass.status === 'awaiting_approval');
+  useEffect(() => {
+    if (!hasAwaiting) return;
+    const timer = setInterval(() => setNow(Date.now()), 5_000);
+    return () => clearInterval(timer);
+  }, [hasAwaiting]);
 
   const issue = useMutation({
     mutationFn: (data: {
@@ -112,6 +124,8 @@ export default function ResidentVisitorPasses() {
     },
     onError: (error) => {
       void haptics.error();
+      // Most often the request has just lapsed: refresh so the card says so.
+      qc.invalidateQueries({ queryKey: qk.resident.visitorPasses });
       toast.show(
         error instanceof Error ? error.message : "Couldn't approve that visitor.",
         'error'
@@ -128,11 +142,19 @@ export default function ResidentVisitorPasses() {
       toast.show(`${pass.visitorName} was refused. The gate has been told.`, 'info');
     },
     onError: (error) => {
+      qc.invalidateQueries({ queryKey: qk.resident.visitorPasses });
+      setDenying(null);
       toast.show(error instanceof Error ? error.message : "Couldn't refuse that visitor.", 'error');
     },
   });
 
-  const passes = query.data?.items ?? [];
+  // A request whose window has run out is shown as expired straight away, even
+  // before the server's sweep has recorded it.
+  const passes = (query.data?.items ?? []).map((pass) =>
+    pass.status === 'awaiting_approval' && new Date(pass.expiresAt).getTime() <= now
+      ? { ...pass, status: 'expired' as const }
+      : pass
+  );
 
   // Walk-ins waiting on this household get their own section at the top and are
   // kept out of the list below: this is the one thing on the screen where a real

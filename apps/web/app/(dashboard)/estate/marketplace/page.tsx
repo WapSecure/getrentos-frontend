@@ -14,6 +14,7 @@ import {
   Send,
   ShieldCheck,
   Unlink,
+  X,
 } from 'lucide-react';
 import {
   Alert,
@@ -65,6 +66,13 @@ const listingStatusBadge = (status: EstateListing['status']) => {
     default:
       return <Badge variant="info">Draft</Badge>;
   }
+};
+
+/** Today as YYYY-MM-DD in the viewer's own calendar, not UTC's. */
+const localToday = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 };
 
 const formatNaira = (amount: number) =>
@@ -188,7 +196,7 @@ const NewListingPanel = ({
   const [propertyId, setPropertyId] = useState('');
   const [listingType, setListingType] = useState<EstateListingType>('RENT');
   const [price, setPrice] = useState<number | string>('');
-  const [availableFrom, setAvailableFrom] = useState(() => new Date().toISOString().slice(0, 10));
+  const [availableFrom, setAvailableFrom] = useState(localToday);
   // A short let needs its own terms; the API refuses one without them.
   const [maxGuests, setMaxGuests] = useState<number | string>(2);
   const [minNights, setMinNights] = useState<number | string>(1);
@@ -308,7 +316,7 @@ const NewListingPanel = ({
       ) : null}
 
       <Field label="Available from" className="max-w-56">
-        <DatePicker value={availableFrom} onChange={setAvailableFrom} />
+        <DatePicker value={availableFrom} onChange={setAvailableFrom} min={localToday()} />
       </Field>
 
       <div className="flex flex-wrap gap-3">
@@ -643,7 +651,7 @@ export default function EstateMarketplacePage() {
               )}
               <Button
                 variant="primary"
-                icon={<Plus className="w-4 h-4" />}
+                icon={showNewListing ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                 aria-expanded={showNewListing}
                 onClick={() => setShowNewListing((open) => !open)}
               >

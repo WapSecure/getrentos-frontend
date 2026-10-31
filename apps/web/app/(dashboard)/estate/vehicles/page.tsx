@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Car, Plus, Settings2 } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination, ToggleChip } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  ToggleChip,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -97,7 +104,14 @@ export default function EstateVehiclesPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Vehicles</h1>
           <p className="text-muted-foreground mt-1">
-            {total} log{total === 1 ? '' : 's'} in {estate.name}
+            {isLogsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {total} log{total === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -112,7 +126,11 @@ export default function EstateVehiclesPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter vehicles by status">
+      <div
+        className="flex flex-wrap gap-2 mb-6"
+        role="group"
+        aria-label="Filter vehicles by status"
+      >
         {statusFilters.map((filter) => (
           <ToggleChip
             key={filter.value}

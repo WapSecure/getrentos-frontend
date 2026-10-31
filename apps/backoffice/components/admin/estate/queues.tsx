@@ -403,7 +403,16 @@ export function DuesQueue() {
         render: (d) => (
           <Cell
             primary={d.residentName}
-            secondary={`${d.billingCycle ?? ''} · ${d.category ?? ''}`}
+            secondary={
+              // A billing cycle only means something for a recurring charge; on a
+              // one-off it read as a contradiction of the Recurring column.
+              [
+                d.isRecurring && d.billingCycle ? titleCase(d.billingCycle) : null,
+                d.category ? titleCase(d.category) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ') || undefined
+            }
           />
         ),
       },

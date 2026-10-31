@@ -99,7 +99,14 @@ export default function EstateIncidentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Incidents</h1>
           <p className="text-muted-foreground mt-1">
-            {incidents.length} incident{incidents.length === 1 ? '' : 's'} in {estate.name}
+            {isIncidentsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {incidents.length} incident{incidents.length === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsReportOpen(true)}>
@@ -108,7 +115,11 @@ export default function EstateIncidentsPage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter incidents by status">
+      <div
+        className="flex flex-wrap gap-2 mb-6"
+        role="group"
+        aria-label="Filter incidents by status"
+      >
         {statusFilters.map((filter) => (
           <ToggleChip
             key={filter.value}

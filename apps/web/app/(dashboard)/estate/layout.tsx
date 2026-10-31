@@ -75,12 +75,26 @@ function SelectedEstateProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const estate = estates?.find((candidate) => candidate.id === selectedId) ?? estates?.[0] ?? null;
+  // The console is for estates the caller manages. An estate they only guard
+  // belongs in the gate console, not here behind the manager's navigation.
+  const managed = (estates ?? []).filter((candidate) => candidate.capacity !== 'GATE');
+  const guardsOnly = !isLoading && (estates?.length ?? 0) > 0 && managed.length === 0;
+  const router = useRouter();
+  useEffect(() => {
+    if (!guardsOnly) return;
+    const roles = getStoredUser<EstateUser>()?.roles ?? [];
+    const canUseGateConsole = roles.some((r) => BACKEND_ROLE_TO_ID[r] === 'gateman');
+    router.replace(
+      canUseGateConsole ? ROUTES.GATEMAN_DASHBOARD : getDashboardRoute(resolvePrimaryRoleId(roles))
+    );
+  }, [guardsOnly, router]);
+
+  const estate = managed.find((candidate) => candidate.id === selectedId) ?? managed[0] ?? null;
+
+  if (guardsOnly) return <PageLoadingState />;
 
   return (
-    <SelectedEstateContext.Provider
-      value={{ estate, estates: estates ?? [], isLoading, selectEstate }}
-    >
+    <SelectedEstateContext.Provider value={{ estate, estates: managed, isLoading, selectEstate }}>
       {children}
     </SelectedEstateContext.Provider>
   );

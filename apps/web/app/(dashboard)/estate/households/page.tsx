@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Users, Plus, Upload, Lock } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  useToast,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -34,6 +41,7 @@ export default function EstateHouseholdsPage() {
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
   const planGate = usePlanGateModal();
   const { isPro } = useEstatePlan();
+  const toast = useToast();
 
   const { data, isLoading: isHouseholdsLoading } = useQuery({
     queryKey: [...estateKeys.households(estate?.id ?? ''), { page, pageSize: PAGE_SIZE }],
@@ -120,7 +128,11 @@ export default function EstateHouseholdsPage() {
       }
     },
     onError: (error: Error) => {
-      if (planGate.handleError(error)) setIsImportOpen(false);
+      if (planGate.handleError(error)) {
+        setIsImportOpen(false);
+        return;
+      }
+      toast.error(error.message || 'Unable to import this file.');
     },
   });
 
@@ -152,7 +164,14 @@ export default function EstateHouseholdsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Households</h1>
           <p className="text-muted-foreground mt-1">
-            {total} household{total === 1 ? '' : 's'} in {estate.name}
+            {isHouseholdsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {total} household{total === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -225,9 +244,14 @@ export default function EstateHouseholdsPage() {
         onClose={() => {
           setIsModalOpen(false);
           setEditingHousehold(null);
+          addHousehold.reset();
+          updateHousehold.reset();
         }}
         onSubmit={handleSubmit}
         isSubmitting={addHousehold.isPending || updateHousehold.isPending}
+        errorMessage={
+          (editingHousehold ? updateHousehold.error : addHousehold.error)?.message ?? null
+        }
       />
 
       <LinkResidentModal
