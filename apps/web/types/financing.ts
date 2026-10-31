@@ -48,5 +48,7 @@ export interface FinancingOverview {
   propertyName: string;
   landlordName: string;
   applicationStatus: FinancingApplicationStatus;
+  /** False while Flex is paused for new plans. Existing plans keep working. */
+  newPlansOpen?: boolean;
   plan?: FinancingPlan;
 }

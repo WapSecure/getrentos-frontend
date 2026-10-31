@@ -47,7 +47,7 @@ const statusBadge = (status: EstateAgreement['status']) => {
     case 'ACTIVE':
       return <Badge variant="success">Can market</Badge>;
     case 'PENDING':
-      return <Badge variant="warning">Awaiting owner</Badge>;
+      return <Badge variant="warning">Requested · awaiting owner approval</Badge>;
     case 'DECLINED':
       return <Badge variant="neutral">Declined</Badge>;
     default:
@@ -79,11 +79,10 @@ const formatNaira = (amount: number) =>
   `₦${amount.toLocaleString('en-NG', { maximumFractionDigits: 0 })}`;
 
 /**
- * Add a property to the estate.
+ * Ask to add a property to the estate.
  *
- * Two steps on purpose, and the UI says so: bringing a property in makes it
- * findable under the estate, while asking the owner for marketing rights is a
- * separate request that only they can grant.
+ * Sending the request changes nothing about the property: it joins the estate,
+ * and can be listed by it, only once the owner approves.
  */
 const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () => void }) => {
   const [search, setSearch] = useState('');
@@ -109,13 +108,13 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
       toast.success(
         agreement.status === 'ACTIVE'
           ? 'Added: this estate owns the property, so it can market it straight away.'
-          : 'Added, and the owner has been asked for marketing rights.'
+          : 'Request sent. The property joins this estate once the owner approves.'
       );
       setSearch('');
       setNote('');
       onDone();
     },
-    onError: (err: Error) => toast.error(err.message || 'That property could not be added.'),
+    onError: (err: Error) => toast.error(err.message || 'That request could not be sent.'),
   });
 
   return (
@@ -156,7 +155,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
                 {candidate.agreementStatus === 'ACTIVE' ? (
                   <Badge variant="success">Can market</Badge>
                 ) : candidate.agreementStatus === 'PENDING' ? (
-                  <Badge variant="warning">Awaiting owner</Badge>
+                  <Badge variant="warning">Requested · awaiting owner approval</Badge>
                 ) : (
                   <Button
                     variant="outline"
@@ -164,7 +163,7 @@ const AddPropertyPanel = ({ estateId, onDone }: { estateId: string; onDone: () =
                     disabled={request.isPending}
                     isLoading={request.isPending && request.variables === candidate.id}
                   >
-                    {candidate.inThisEstate ? 'Ask to market' : 'Add & ask'}
+                    {candidate.inThisEstate ? 'Ask to market' : 'Request to add'}
                   </Button>
                 )}
               </div>
@@ -532,7 +531,11 @@ export default function EstateMarketplacePage() {
             accent="orange"
             label="Awaiting owner"
             value={summary?.agreementsPending ?? 0}
-            subtitle={summary?.agreementsPending ? 'These block new listings' : undefined}
+            subtitle={
+              summary?.agreementsPending
+                ? 'Requested: they join once the owner approves'
+                : undefined
+            }
           />
           <StatCard
             icon={ShieldCheck}
@@ -558,7 +561,8 @@ export default function EstateMarketplacePage() {
                 Properties and permissions
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                An owner must agree before this estate can publish a listing for their property.
+                A property joins this estate, and can be listed, only once its owner approves your
+                request.
               </p>
             </div>
             <Button
@@ -567,7 +571,7 @@ export default function EstateMarketplacePage() {
               aria-expanded={showAdd}
               onClick={() => setShowAdd((open) => !open)}
             >
-              {showAdd ? 'Close' : 'Add a property'}
+              {showAdd ? 'Close' : 'Request a property'}
             </Button>
           </div>
 
@@ -600,19 +604,22 @@ export default function EstateMarketplacePage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {agreement.status === 'ACTIVE' ? (
-                      <Badge variant="success">Can market</Badge>
+                    {agreement.status === 'ACTIVE' && !agreement.effective ? (
+                      <Badge variant="neutral">Approval expired</Badge>
                     ) : (
                       statusBadge(agreement.status)
                     )}
-                    <IconButton
-                      label={`Remove ${agreement.propertyTitle} from this estate`}
-                      title="Remove from this estate"
-                      icon={<Unlink />}
-                      onClick={() => detach.mutate(agreement.propertyId)}
-                      disabled={detach.isPending}
-                      isLoading={detach.isPending && detach.variables === agreement.propertyId}
-                    />
+                    {/* Only an approved property is in the estate, so only it can be removed. */}
+                    {agreement.status === 'ACTIVE' && (
+                      <IconButton
+                        label={`Remove ${agreement.propertyTitle} from this estate`}
+                        title="Remove from this estate"
+                        icon={<Unlink />}
+                        onClick={() => detach.mutate(agreement.propertyId)}
+                        disabled={detach.isPending}
+                        isLoading={detach.isPending && detach.variables === agreement.propertyId}
+                      />
+                    )}
                   </div>
                 </div>
               ))

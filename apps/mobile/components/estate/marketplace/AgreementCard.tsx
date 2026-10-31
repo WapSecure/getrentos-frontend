@@ -41,17 +41,20 @@ export function AgreementCard({
             </Text>
           </View>
         </View>
-        <IconButton
-          accessibilityLabel={`Remove ${a.propertyTitle} from the estate`}
-          disabled={removing}
-          icon={<Unlink size={18} color={colors.mutedForeground} />}
-          onPress={onRemove}
-        />
+        {/* Only an approved property is in the estate, so only it can be removed. */}
+        {a.status === 'ACTIVE' ? (
+          <IconButton
+            accessibilityLabel={`Remove ${a.propertyTitle} from the estate`}
+            disabled={removing}
+            icon={<Unlink size={18} color={colors.mutedForeground} />}
+            onPress={onRemove}
+          />
+        ) : null}
       </View>
       {a.status === 'PENDING' ? (
         <Text variant="caption" color="mutedForeground">
-          Asked {formatDate(a.createdAt, 'short')}. You can list it once the owner agrees in their
-          app.
+          Requested {formatDate(a.createdAt, 'short')}. It joins the estate, and you can list it,
+          once the owner approves in their app.
         </Text>
       ) : null}
       {a.status === 'ACTIVE' && a.expiresAt ? (
