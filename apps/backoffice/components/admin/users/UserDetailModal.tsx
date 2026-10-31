@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from '@getrentos/ui';
 import { Badge, Button } from '@getrentos/ui';
 import { getInitials, formatDate, formatRelativeTime } from '@getrentos/shared';
 import type { PlanTier, PlatformUser, UserAccountStatus } from '@/types/admin';
+import { roleLabel } from '@/lib/roleLabels';
 
 interface UserDetailModalProps {
   user: PlatformUser | null;
@@ -16,15 +17,8 @@ interface UserDetailModalProps {
   isChangingSubscription?: boolean;
 }
 
-const roleLabels: Record<string, string> = {
-  renter: 'Renter',
-  landlord: 'Landlord',
-  owner: 'Property Owner',
-  buyer: 'Buyer',
-  realtor: 'Realtor',
-  agent: 'Agent',
-  admin: 'Admin',
-};
+const planLabel = (tier: PlanTier) =>
+  tier === 'ENTERPRISE' ? 'Enterprise' : tier === 'PRO' ? 'Pro' : 'Free';
 
 export const UserDetailModal = ({
   user,
@@ -55,9 +49,9 @@ export const UserDetailModal = ({
             <div>
               <p className="text-xs text-muted-foreground mb-1.5">Roles</p>
               <div className="flex flex-wrap gap-1.5">
-                {user.roles.map((role) => (
+                {[...new Set(user.roles)].map((role) => (
                   <Badge key={role} variant="neutral">
-                    {roleLabels[role] || role}
+                    {roleLabel(role)}
                   </Badge>
                 ))}
               </div>
@@ -67,8 +61,8 @@ export const UserDetailModal = ({
               <div className="flex items-center justify-between px-3 py-2 text-sm">
                 <span className="text-muted-foreground">Plan</span>
                 <div className="flex items-center gap-2">
-                  <Badge variant={user.planTier === 'PRO' ? 'info' : 'neutral'}>
-                    {user.planTier === 'PRO' ? 'Pro' : 'Free'}
+                  <Badge variant={user.planTier === 'FREE' ? 'neutral' : 'info'}>
+                    {planLabel(user.planTier)}
                   </Badge>
                   <Button
                     variant="ghost"
@@ -76,11 +70,11 @@ export const UserDetailModal = ({
                     className="gap-1 h-6 px-2 text-xs"
                     isLoading={isChangingSubscription}
                     onClick={() =>
-                      onChangeSubscription(user.id, user.planTier === 'PRO' ? 'FREE' : 'PRO')
+                      onChangeSubscription(user.id, user.planTier === 'FREE' ? 'PRO' : 'FREE')
                     }
                   >
                     <BadgeCheck className="w-3 h-3" />
-                    {user.planTier === 'PRO' ? 'Move to Free' : 'Upgrade to Pro'}
+                    {user.planTier === 'FREE' ? 'Upgrade to Pro' : 'Move to Free'}
                   </Button>
                 </div>
               </div>
@@ -102,11 +96,13 @@ export const UserDetailModal = ({
           </div>
 
           <div className="p-4 border-t border-border flex gap-2">
+            {/* Opening a profile lands on Close, not on a billing or account action. */}
             <Button
               variant="ghost"
               className="flex-1"
               onClick={onClose}
               disabled={isChangingStatus}
+              autoFocus
             >
               Close
             </Button>

@@ -35,6 +35,7 @@ import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
 import type { AdminRealtor, AdminRealtorDetail, LicenseStatus } from '@/types/marketplace';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 const PAGE_SIZE = 10;
 
@@ -271,6 +272,7 @@ function RealtorCase360({
   onClose: () => void;
   actions: ReturnType<typeof useProfessionalActions>;
 }) {
+  const canModerate = useAdminCan('professionals.moderate');
   const stats = [
     {
       icon: Building2,
@@ -312,7 +314,7 @@ function RealtorCase360({
             {detail.accountStatus}
           </Badge>
           <Badge variant="neutral">Trust {detail.trustScore}</Badge>
-          {detail.suspended ? (
+          {!canModerate ? null : detail.suspended ? (
             <Button
               size="sm"
               variant="outline"
@@ -434,7 +436,7 @@ function RealtorCase360({
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="neutral">{c.status}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
-                      {c.status === 'ACTIVE' && (
+                      {canModerate && c.status === 'ACTIVE' && (
                         <Button
                           variant="link"
                           className="text-xs font-medium text-destructive"

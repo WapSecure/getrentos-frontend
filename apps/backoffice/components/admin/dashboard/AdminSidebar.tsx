@@ -420,6 +420,23 @@ const hasAccess = (roles: string[] | undefined, item: NavItem) =>
     ? hasStaffAccess(roles)
     : hasAdminPermission(roles, item.permission);
 
+/**
+ * Whether the signed-in staff member may open `pathname`, judged by the most
+ * specific sidebar entry that covers it. Typing the URL of a screen the role
+ * cannot use should say so, rather than load the screen and present the API's
+ * 403 as an outage. Paths no entry covers are left to the page; Settings is
+ * open to everyone because it holds the person's own profile.
+ */
+export function hasRouteAccess(roles: string[] | undefined, pathname: string): boolean {
+  if (pathname === ROUTES.ADMIN_SETTINGS || pathname.startsWith(`${ROUTES.ADMIN_SETTINGS}/`)) {
+    return true;
+  }
+  const match = navItems
+    .filter((item) => pathname === item.href || pathname.startsWith(`${item.href}/`))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+  return match ? hasAccess(roles, match) : true;
+}
+
 const MANAGED_HREF = '/admin/managed-mandates';
 
 export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
@@ -507,7 +524,7 @@ export const AdminMobileNavigation = ({
         if (visibleItems.length === 0) return null;
         return (
           <div key={group.label}>
-            <h2 className="mb-1.5 px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/75">
+            <h2 className="mb-1.5 px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {group.label}
             </h2>
             <div className="space-y-1">

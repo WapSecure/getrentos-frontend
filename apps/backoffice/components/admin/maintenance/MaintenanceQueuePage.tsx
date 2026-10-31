@@ -16,7 +16,7 @@ import {
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
+import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { Paginated } from '@/services/adminService';
 import type { MaintenanceQuery } from '@/services/adminMaintenanceService';
 
@@ -44,7 +44,7 @@ export interface MaintenanceQueueConfig<T> {
 const PAGE_SIZE = 10;
 
 export function MaintenanceQueuePage<T>({ config }: { config: MaintenanceQueueConfig<T> }) {
-  const [search, setSearch] = useState(() => readAdminSearchParam());
+  const [search, setSearch] = useAdminSearchParam();
   const [debounced, setDebounced] = useState('');
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<Record<string, string>>(() =>

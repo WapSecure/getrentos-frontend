@@ -3,8 +3,9 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { AdminNavbar } from '@/components/admin/navigation/AdminNavbar';
-import { AdminSidebar } from '@/components/admin/dashboard/AdminSidebar';
-import { PageLoadingState } from '@getrentos/ui';
+import { AdminSidebar, hasRouteAccess } from '@/components/admin/dashboard/AdminSidebar';
+import { EmptyState, PageLoadingState } from '@getrentos/ui';
+import { Lock } from 'lucide-react';
 import {
   ROUTES,
   isAuthenticated,
@@ -93,7 +94,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           {/* min-w-0: without it this flex item grows to its widest child (e.g. a
               tab strip) and the whole page scrolls sideways instead of that child. */}
           <main className="min-w-0 flex-1 lg:ml-64 p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto">{children}</div>
+            <div className="max-w-7xl mx-auto">
+              {hasRouteAccess(user?.roles, pathname) ? (
+                children
+              ) : (
+                <EmptyState
+                  icon={Lock}
+                  title="You do not have access to this area"
+                  description="Your staff role does not include this part of the back office. Ask an administrator if you need it."
+                />
+              )}
+            </div>
           </main>
         </div>
       </div>
