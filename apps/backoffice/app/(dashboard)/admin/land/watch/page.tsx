@@ -219,7 +219,10 @@ function IncidentItem({
   });
   const escalate = useMutation({
     mutationFn: () => unwrap(adminLandWatchService.escalateIncident(i.id)),
-    onSuccess: () => done('Opened as a land dispute.'),
+    onSuccess: () =>
+      done(
+        'Opened as a land dispute. The land is not on hold; place a hold from the dispute if needed.'
+      ),
     onError: (e) => failed(e, 'Could not open a dispute.'),
   });
   return (

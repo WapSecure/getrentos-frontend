@@ -92,8 +92,8 @@ function EligibilityCard({ overview }: { overview: FinancingOverview }) {
           <Text variant="heading">Split your rent into monthly payments</Text>
         </View>
         <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-          We pay your landlord {overview.propertyName} in full today, and you repay us monthly:
-          building your trust score along the way.
+          GetRentos pays your landlord for {overview.propertyName} in full, and you repay us
+          monthly: building your trust score along the way.
         </Text>
 
         <View style={{ marginTop: spacing.lg, gap: spacing.sm }}>
@@ -270,7 +270,9 @@ function ActivePlanCard({ overview }: { overview: { plan: FinancingPlan } }) {
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             <Wallet size={18} color={colors.primary} />
-            <Text variant="bodyStrong">Landlord paid in full</Text>
+            <Text variant="bodyStrong">
+              {plan.landlordPaidAt ? 'Landlord paid in full' : 'Landlord payment being arranged'}
+            </Text>
           </View>
           {plan.landlordPaidAt ? (
             <Text variant="caption" color="mutedForeground">

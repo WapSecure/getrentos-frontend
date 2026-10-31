@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ApiError, configureApi } from '../api/client';
+import { ACCOUNT_SUSPENDED, ApiError, configureApi } from '../api/client';
 import { authApi, isTwoFactorChallenge, type AuthProfile, type AuthSession } from '../api/auth';
 import {
   primaryPortal,
@@ -49,7 +49,8 @@ interface AuthContextValue {
   signIn: (identifier: string, password: string) => Promise<{ requiresTwoFactor: boolean }>;
   completeTwoFactor: (code: string) => Promise<void>;
   cancelTwoFactor: () => void;
-  signInWithMagicLink: (token: string) => Promise<void>;
+  /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
+  signInWithMagicLink: (token: string) => Promise<{ requiresTwoFactor: boolean }>;
   /** Provider sign-in (system browser). Throws `OAuthCancelled` if dismissed. */
   /** Resolves `requiresTwoFactor: true` when the account needs its authenticator code next. */
   signInWithProvider: (provider: 'google') => Promise<{ requiresTwoFactor: boolean }>;
@@ -121,8 +122,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           refreshToken: refreshTokenRef.current!,
         });
         return res.accessToken;
-      } catch {
-        markSessionExpired();
+      } catch (err) {
+        markSessionExpired(
+          err instanceof ApiError && err.code === ACCOUNT_SUSPENDED
+            ? { message: err.message, tone: 'error' }
+            : undefined
+        );
         await teardown();
         return null;
       } finally {
@@ -135,8 +140,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Wire the transport once.
   useEffect(() => {
-    configureApi({ getAccessToken: () => accessTokenRef.current, refresh });
-  }, [refresh]);
+    configureApi({
+      getAccessToken: () => accessTokenRef.current,
+      refresh,
+      // Suspension is final for this session: drop it (and the cached screens)
+      // straight away and tell the person why, instead of leaving stale data up.
+      onSuspended: async (message) => {
+        if (!accessTokenRef.current) return;
+        markSessionExpired({ message, tone: 'error' });
+        await teardown();
+      },
+    });
+  }, [refresh, teardown]);
 
   // Keep the analytics identity in step with the session.
   useEffect(() => {
@@ -234,8 +249,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithMagicLink = useCallback(
     async (token: string) => {
-      const session = await authApi.verifyMagicLink(token);
-      applySession(session);
+      const result = await authApi.verifyMagicLink(token);
+      if (isTwoFactorChallenge(result)) {
+        const { requiresTwoFactor: _r, challengeToken, expiresIn: _e, ...prof } = result;
+        setPendingTwoFactor({ challengeToken, profile: prof });
+        return { requiresTwoFactor: true };
+      }
+      applySession(result);
+      return { requiresTwoFactor: false };
     },
     [applySession]
   );

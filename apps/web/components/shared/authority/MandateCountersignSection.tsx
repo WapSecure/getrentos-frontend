@@ -65,10 +65,11 @@ export function MandateCountersignSection() {
     <section className="mb-6">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <ShieldCheck className="h-4 w-4 text-primary" />
-        Mandates awaiting your approval
+        Claims awaiting your approval
       </h2>
       <p className="mt-1 mb-3 text-sm text-muted-foreground">
-        Every co-owner must approve a manager/agent mandate before it takes effect.
+        Every co-owner must approve a manager or agent mandate, or a new co-owner, before it takes
+        effect.
       </p>
 
       <div className="space-y-3">

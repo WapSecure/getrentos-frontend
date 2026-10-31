@@ -20,6 +20,7 @@ import { formatCurrency } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
+import { PortfolioBriefingCard } from '@/components/landlord/financials/PortfolioBriefingCard';
 import type { PropertyPerformance } from '@/types/landlord';
 
 type SortKey = 'netOperatingIncome' | 'capRate' | 'occupancyRate' | 'yieldOnCost';
@@ -291,6 +292,7 @@ export function PortfolioView() {
         title="Portfolio analytics is a Pro feature"
         description="Upgrade to Pro to compare your properties by net income, cap rate, yield and occupancy."
       >
+        <PortfolioBriefingCard />
         {body}
       </ProFeatureGate>
 

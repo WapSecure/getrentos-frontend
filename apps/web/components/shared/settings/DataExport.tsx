@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { Download, FileText, FileSpreadsheet, Check } from 'lucide-react';
 import { Alert, Button, RadioGroup } from '@getrentos/ui';
-import { renterService } from '@/services/renterService';
-import { unwrap } from '@/lib/apiHelpers';
+import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 import { downloadCsv, printHtml, escapeHtml } from '@/lib/export';
 
 type ExportType = 'print' | 'csv';
@@ -36,7 +35,8 @@ export const DataExport = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const exportMutation = useMutation({
-    mutationFn: () => unwrap(renterService.exportData()),
+    mutationFn: () =>
+      unwrap(safeCall(() => authFetch<Record<string, unknown>>('/users/me/data-export'))),
     onSuccess: (data) => {
       const date = new Date().toISOString().slice(0, 10);
       if (exportType === 'csv') {

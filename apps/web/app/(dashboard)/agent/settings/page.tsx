@@ -4,15 +4,22 @@ import { useState } from 'react';
 import { Card } from '@getrentos/ui';
 import { useSearchParams } from 'next/navigation';
 import { useAgentUser } from '../layout';
-import { User, Bell, Landmark, MapPin, ShieldCheck } from 'lucide-react';
+import { User, Bell, Landmark, MapPin, ShieldCheck, Download } from 'lucide-react';
 import { ProfileSettings } from '@/components/agent/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/agent/settings/NotificationSettings';
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { AgencyAgentSelfPayout } from '@/components/agency/AgencyAgentSelfPayout';
 import { FieldPreferencesSettings } from '@/components/agent/settings/FieldPreferencesSettings';
 import { LicenseVerificationSettings } from '@/components/shared/verification/LicenseVerificationSettings';
+import { DataExport } from '@/components/shared/settings/DataExport';
 
-type SettingsTab = 'profile' | 'verification' | 'notifications' | 'payouts' | 'preferences';
+type SettingsTab =
+  | 'profile'
+  | 'verification'
+  | 'notifications'
+  | 'payouts'
+  | 'preferences'
+  | 'data';
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -20,6 +27,7 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'payouts', label: 'Payout Account', icon: Landmark },
   { id: 'preferences', label: 'Field Preferences', icon: MapPin },
+  { id: 'data', label: 'Your data', icon: Download },
 ];
 
 export default function AgentSettingsPage() {
@@ -45,6 +53,8 @@ export default function AgentSettingsPage() {
         );
       case 'preferences':
         return <FieldPreferencesSettings />;
+      case 'data':
+        return <DataExport />;
       default:
         return null;
     }

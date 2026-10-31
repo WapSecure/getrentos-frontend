@@ -13,7 +13,7 @@ import { InspectionAcknowledgeModal } from './InspectionAcknowledgeModal';
 const typeLabels: Record<RenterInspection['type'], string> = {
   move_in: 'Move-in',
   move_out: 'Move-out',
-  periodic: 'Periodic',
+  periodic: 'Routine',
   other: 'Inspection',
 };
 
@@ -33,7 +33,8 @@ export function InspectionsSection() {
   const inspections = inspectionsQuery.data ?? [];
 
   const acknowledge = useMutation({
-    mutationFn: (id: string) => unwrap(renterService.acknowledgeInspection(id)),
+    mutationFn: ({ inspection, comment }: { inspection: RenterInspection; comment?: string }) =>
+      unwrap(renterService.acknowledgeInspection(inspection, comment)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.inspections });
     },
@@ -84,7 +85,7 @@ export function InspectionsSection() {
       </div>
 
       <div className="divide-y divide-border">
-        {inspections.slice(0, 4).map((inspection) => (
+        {inspections.map((inspection) => (
           <button
             key={inspection.id}
             type="button"
@@ -112,9 +113,10 @@ export function InspectionsSection() {
       </div>
 
       <InspectionAcknowledgeModal
+        key={activeInspectionId ?? 'closed'}
         inspection={activeInspection}
         onClose={() => setActiveInspectionId(null)}
-        onAcknowledge={(id) => acknowledge.mutate(id)}
+        onAcknowledge={(inspection, comment) => acknowledge.mutate({ inspection, comment })}
         isAcknowledging={acknowledge.isPending}
       />
     </Card>

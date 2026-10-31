@@ -26,6 +26,9 @@ export const useLandAvailability = (): LandAvailability & { isLoading: boolean }
     queryFn: () => unwrap(safeCall(() => authFetch<LandAvailability>('/land/availability'))),
     staleTime: 5 * 60_000,
     retry: false,
+    // A non-essential check shown in the top bar and sidebars: a failure falls
+    // back to LIVE above instead of taking the whole page to the error boundary.
+    throwOnError: false,
   });
   return { ...(query.data ?? LIVE), isLoading: query.isLoading };
 };

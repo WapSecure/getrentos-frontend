@@ -1,4 +1,5 @@
 import { apiFetch } from './client';
+import { getInstallId } from '../auth/installId';
 import { env } from '../env';
 
 export type BackendRole = string;
@@ -106,11 +107,14 @@ export const authApi = {
     reference: string;
     referralCode?: string;
   }) =>
-    apiFetch<AuthSession>('/auth/signup', {
-      method: 'POST',
-      anonymous: true,
-      body: input,
-    }),
+    getInstallId().then((deviceId) =>
+      apiFetch<AuthSession>('/auth/signup', {
+        method: 'POST',
+        anonymous: true,
+        body: input,
+        headers: deviceId ? { 'x-device-id': deviceId } : undefined,
+      })
+    ),
 
   // ---- password reset -------------------------------------------------
   resetPassword: (reference: string, newPassword: string) =>
@@ -129,7 +133,7 @@ export const authApi = {
     }),
 
   verifyMagicLink: (token: string) =>
-    apiFetch<AuthSession>('/auth/magic-link/verify', {
+    apiFetch<LoginResult>('/auth/magic-link/verify', {
       method: 'POST',
       anonymous: true,
       body: { token },

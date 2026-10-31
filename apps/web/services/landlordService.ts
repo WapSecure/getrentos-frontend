@@ -26,6 +26,7 @@ import type {
   LandlordMicrositeSettings,
   PropertyUpdatePayload,
   PortfolioAnalytics,
+  PortfolioBriefing,
   VendorDetail,
   VendorInput,
   ScreeningReport,
@@ -949,6 +950,10 @@ export const landlordService = {
   // ---- Portfolio ----
   async getPortfolioAnalytics(): Promise<ApiResponse<PortfolioAnalytics>> {
     return safeCall(() => authFetch('/landlord/portfolio/analytics'));
+  },
+
+  async getPortfolioBriefing(): Promise<ApiResponse<PortfolioBriefing>> {
+    return safeCall(() => authFetch('/ai/portfolio/briefing'));
   },
 
   // ---- Financials ----
