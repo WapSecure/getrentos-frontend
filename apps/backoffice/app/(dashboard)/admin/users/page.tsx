@@ -21,8 +21,9 @@ import { getInitials, formatDate } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { readAdminSearchParam } from '@/lib/readAdminSearchParam';
+import { useAdminSearchParam } from '@/lib/readAdminSearchParam';
 import type { PlanTier, PlatformUser, UserAccountStatus, PlatformRole } from '@/types/admin';
+import { roleLabel } from '@/lib/roleLabels';
 
 const statusConfig: Record<
   UserAccountStatus,
@@ -34,15 +35,8 @@ const statusConfig: Record<
   banned: { label: 'Banned', icon: Ban, variant: 'danger' },
 };
 
-const roleLabels: Record<PlatformRole, string> = {
-  renter: 'Renter',
-  landlord: 'Landlord',
-  owner: 'Owner',
-  buyer: 'Buyer',
-  realtor: 'Realtor',
-  agent: 'Agent',
-  admin: 'Admin',
-};
+const planLabel = (tier: PlanTier) =>
+  tier === 'ENTERPRISE' ? 'Enterprise' : tier === 'PRO' ? 'Pro' : 'Free';
 
 type StatusFilter = 'all' | UserAccountStatus;
 type RoleFilter = 'all' | PlatformRole;
@@ -51,7 +45,7 @@ const PAGE_SIZE = 10;
 
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState(() => readAdminSearchParam());
+  const [searchQuery, setSearchQuery] = useAdminSearchParam();
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
@@ -94,6 +88,9 @@ export default function AdminUsersPage() {
         })
       ),
     placeholderData: keepPreviousData,
+    // This screen shows its own error and retry in place, so a failure must
+    // not escalate to the route error boundary and take the page with it.
+    throwOnError: false,
   });
   const users = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -103,7 +100,6 @@ export default function AdminUsersPage() {
       unwrap(adminService.updateUserStatus(userId, status)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      setPendingStatus(null);
       setActiveUser(null);
     },
     onError: (error) =>
@@ -121,7 +117,6 @@ export default function AdminUsersPage() {
       unwrap(adminService.updateUserSubscription(userId, tier)),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
-      setPendingSubscription(null);
       setActiveUser(updated);
     },
     onError: (error) =>
@@ -144,6 +139,10 @@ export default function AdminUsersPage() {
     { value: 'buyer', label: 'Buyer' },
     { value: 'realtor', label: 'Realtor' },
     { value: 'agent', label: 'Agent' },
+    { value: 'estate', label: 'Estate Manager' },
+    { value: 'property_manager', label: 'Property Manager' },
+    { value: 'gateman', label: 'Gateman' },
+    { value: 'resident', label: 'Resident' },
   ];
 
   const columns: Column<PlatformUser>[] = [
@@ -155,9 +154,11 @@ export default function AdminUsersPage() {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
             {getInitials(u.fullName)}
           </div>
-          <div className="min-w-0">
-            <p className="font-medium text-foreground whitespace-nowrap">{u.fullName}</p>
-            <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+          <div className="min-w-0 max-w-xs">
+            <p className="font-medium text-foreground [overflow-wrap:anywhere]">{u.fullName}</p>
+            <p className="text-xs text-muted-foreground truncate" title={u.email}>
+              {u.email}
+            </p>
           </div>
         </div>
       ),
@@ -167,9 +168,10 @@ export default function AdminUsersPage() {
       header: 'Roles',
       render: (u) => (
         <div className="flex flex-wrap gap-1">
-          {u.roles.map((role) => (
+          {/* Several staff roles all read as one "Staff" badge. */}
+          {[...new Set(u.roles)].map((role) => (
             <Badge key={role} variant="neutral">
-              {roleLabels[role]}
+              {roleLabel(role)}
             </Badge>
           ))}
         </div>
@@ -199,9 +201,7 @@ export default function AdminUsersPage() {
       key: 'planTier',
       header: 'Plan',
       render: (u) => (
-        <Badge variant={u.planTier === 'PRO' ? 'info' : 'neutral'}>
-          {u.planTier === 'PRO' ? 'Pro' : 'Free'}
-        </Badge>
+        <Badge variant={u.planTier === 'FREE' ? 'neutral' : 'info'}>{planLabel(u.planTier)}</Badge>
       ),
       className: 'whitespace-nowrap',
     },
@@ -218,7 +218,12 @@ export default function AdminUsersPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Users</h1>
         <p className="text-muted-foreground mt-1">
-          {total} user{total === 1 ? '' : 's'} across the platform
+          {/* A count is only stated once the directory has actually loaded. */}
+          {data
+            ? `${total} user${total === 1 ? '' : 's'} across the platform`
+            : isError
+              ? 'User count unavailable'
+              : 'Loading users…'}
         </p>
       </div>
 
@@ -326,34 +331,44 @@ export default function AdminUsersPage() {
               : 'Reactivate account'
         }
         isLoading={changeStatusMutation.isPending}
-        onConfirm={() => {
-          if (pendingStatus) {
-            changeStatusMutation.mutate({
-              userId: pendingStatus.user.id,
-              status: pendingStatus.status,
-            });
-          }
-        }}
+        // Awaited, so the dialog stays open and disabled until the request
+        // settles: a second press cannot send the action twice.
+        onConfirm={() =>
+          pendingStatus && !changeStatusMutation.isPending
+            ? changeStatusMutation.mutateAsync({
+                userId: pendingStatus.user.id,
+                status: pendingStatus.status,
+              })
+            : undefined
+        }
       />
       <ConfirmDialog
         open={pendingSubscription !== null}
         onOpenChange={(open) => !open && setPendingSubscription(null)}
-        title={pendingSubscription?.tier === 'PRO' ? 'Upgrade this account?' : 'Remove Pro access?'}
+        title={
+          pendingSubscription?.tier === 'FREE'
+            ? 'Remove paid plan access?'
+            : 'Upgrade this account?'
+        }
         description={
           pendingSubscription
-            ? `${pendingSubscription.user.fullName}'s plan will change from ${pendingSubscription.user.planTier === 'PRO' ? 'Pro' : 'Free'} to ${pendingSubscription.tier === 'PRO' ? 'Pro' : 'Free'}. This changes their product entitlements immediately.`
+            ? `${pendingSubscription.user.fullName}'s plan will change from ${planLabel(pendingSubscription.user.planTier)} to ${planLabel(pendingSubscription.tier)}. This changes their product entitlements immediately.`
             : ''
         }
-        confirmLabel={pendingSubscription?.tier === 'PRO' ? 'Upgrade to Pro' : 'Move to Free'}
+        confirmLabel={
+          pendingSubscription?.tier === 'FREE'
+            ? 'Move to Free'
+            : `Upgrade to ${planLabel(pendingSubscription?.tier ?? 'PRO')}`
+        }
         isLoading={changeSubscriptionMutation.isPending}
-        onConfirm={() => {
-          if (pendingSubscription) {
-            changeSubscriptionMutation.mutate({
-              userId: pendingSubscription.user.id,
-              tier: pendingSubscription.tier,
-            });
-          }
-        }}
+        onConfirm={() =>
+          pendingSubscription && !changeSubscriptionMutation.isPending
+            ? changeSubscriptionMutation.mutateAsync({
+                userId: pendingSubscription.user.id,
+                tier: pendingSubscription.tier,
+              })
+            : undefined
+        }
       />
     </>
   );

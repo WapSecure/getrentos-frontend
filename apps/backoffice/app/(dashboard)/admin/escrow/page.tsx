@@ -64,7 +64,7 @@ export default function AdminEscrowPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.escrowTransactions({
       search: debouncedSearch,
       status: statusFilter,
@@ -282,6 +282,7 @@ export default function AdminEscrowPage() {
 
       {isError && !data ? (
         <PageErrorState
+          error={error}
           title="Could not load escrow transactions"
           description="Escrow records are temporarily unavailable. Your search and status filter have been preserved."
           onRetry={() => void refetch()}

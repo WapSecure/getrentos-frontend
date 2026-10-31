@@ -34,6 +34,7 @@ import { formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
 import type { AdminAgent, AdminAgentDetail, AdminAgentTask } from '@/types/marketplace';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 const PAGE_SIZE = 10;
 
@@ -231,6 +232,7 @@ function AgentCase360({
   onClose: () => void;
   actions: ReturnType<typeof useProfessionalActions>;
 }) {
+  const canModerate = useAdminCan('professionals.moderate');
   const [reassigning, setReassigning] = useState<AdminAgentTask | null>(null);
   const tasks = detail.tasks;
   const stats = [
@@ -276,7 +278,7 @@ function AgentCase360({
             {detail.accountStatus}
           </Badge>
           <Badge variant="neutral">Trust {detail.trustScore}</Badge>
-          {detail.suspended ? (
+          {!canModerate ? null : detail.suspended ? (
             <Button
               size="sm"
               variant="outline"
@@ -361,7 +363,7 @@ function AgentCase360({
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="neutral">{c.status}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
-                      {c.status === 'ACTIVE' && (
+                      {canModerate && c.status === 'ACTIVE' && (
                         <Button
                           variant="link"
                           className="text-xs font-medium text-destructive"
@@ -404,43 +406,45 @@ function AgentCase360({
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       Due {formatDate(t.dueAt ?? t.createdAt, 'short')}
                     </p>
-                    <div className="mt-2 flex gap-3">
-                      {(t.status === 'ASSIGNED' ||
-                        t.status === 'IN_PROGRESS' ||
-                        t.status === 'OVERDUE') && (
-                        <Button
-                          variant="link"
-                          className="text-xs font-medium"
-                          onClick={() => setReassigning(t)}
-                        >
-                          Reassign
-                        </Button>
-                      )}
-                      {t.status === 'CANCELLED' && (
-                        <Button
-                          variant="link"
-                          className="text-xs font-medium"
-                          onClick={() =>
-                            actions.request({
-                              title: 'Reopen this cancelled task?',
-                              description:
-                                'The task returns to Assigned so it can be worked or reassigned.',
-                              label: 'Reopen',
-                              run: (reason) =>
-                                unwrap(
-                                  adminMarketplaceService.setAgentTaskStatus(
-                                    t.id,
-                                    'ASSIGNED',
-                                    reason
-                                  )
-                                ),
-                            })
-                          }
-                        >
-                          Reopen
-                        </Button>
-                      )}
-                    </div>
+                    {canModerate && (
+                      <div className="mt-2 flex gap-3">
+                        {(t.status === 'ASSIGNED' ||
+                          t.status === 'IN_PROGRESS' ||
+                          t.status === 'OVERDUE') && (
+                          <Button
+                            variant="link"
+                            className="text-xs font-medium"
+                            onClick={() => setReassigning(t)}
+                          >
+                            Reassign
+                          </Button>
+                        )}
+                        {t.status === 'CANCELLED' && (
+                          <Button
+                            variant="link"
+                            className="text-xs font-medium"
+                            onClick={() =>
+                              actions.request({
+                                title: 'Reopen this cancelled task?',
+                                description:
+                                  'The task returns to Assigned so it can be worked or reassigned.',
+                                label: 'Reopen',
+                                run: (reason) =>
+                                  unwrap(
+                                    adminMarketplaceService.setAgentTaskStatus(
+                                      t.id,
+                                      'ASSIGNED',
+                                      reason
+                                    )
+                                  ),
+                              })
+                            }
+                          >
+                            Reopen
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

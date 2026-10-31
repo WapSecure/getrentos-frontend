@@ -136,7 +136,7 @@ const Row = ({
   <div className="flex items-baseline justify-between gap-4 py-1.5">
     <dt className="text-sm text-muted-foreground">
       {label}
-      {note && <span className="block text-xs text-muted-foreground/80">{note}</span>}
+      {note && <span className="block text-xs text-muted-foreground">{note}</span>}
     </dt>
     <dd
       className={cn(

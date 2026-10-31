@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, KeyRound, ShieldCheck } from 'lucide-react';
 import {
@@ -62,6 +62,10 @@ export default function TierGrantsPage() {
   const [reason, setReason] = useState('');
   const [expiresInDays, setExpiresInDays] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [userIdError, setUserIdError] = useState<string | null>(null);
+  const [reasonError, setReasonError] = useState<string | null>(null);
+  const userIdRef = useRef<HTMLInputElement>(null);
+  const reasonRef = useRef<HTMLTextAreaElement>(null);
   const [granted, setGranted] = useState<TierGrant | null>(null);
 
   const [revokeTarget, setRevokeTarget] = useState<TierGrant | null>(null);
@@ -122,13 +126,27 @@ export default function TierGrantsPage() {
       setFormError(error instanceof Error ? error.message : 'Unable to revoke the grant.'),
   });
 
-  const submitGrant = () => {
-    if (!userId.trim()) {
-      setFormError('Enter the user id of the person receiving financial capability.');
+  // Each problem is reported on its own field (announced, and linked to the
+  // control), and focus goes to the first one so it can be fixed straight away.
+  const submitGrant = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (grantMutation.isPending) return;
+    const idProblem = userId.trim()
+      ? null
+      : 'Enter the user id of the person receiving financial capability.';
+    const reasonProblem =
+      reason.trim().length < MIN_REASON_LENGTH
+        ? `Give a reason of at least ${MIN_REASON_LENGTH} characters: it is audited.`
+        : null;
+    setUserIdError(idProblem);
+    setReasonError(reasonProblem);
+    setFormError(null);
+    if (idProblem) {
+      userIdRef.current?.focus();
       return;
     }
-    if (reason.trim().length < MIN_REASON_LENGTH) {
-      setFormError(`Give a reason of at least ${MIN_REASON_LENGTH} characters: it is audited.`);
+    if (reasonProblem) {
+      reasonRef.current?.focus();
       return;
     }
     setGranted(null);
@@ -150,23 +168,31 @@ export default function TierGrantsPage() {
       </div>
 
       <Card static className="mb-6">
-        <div className="p-6">
+        <form className="p-6" onSubmit={submitGrant} noValidate>
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
             <KeyRound className="h-4 w-4 text-primary" />
             Grant financial verification
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="User id" className="sm:col-span-2">
+            <Field label="User id" className="sm:col-span-2" required error={userIdError}>
               <Input
+                ref={userIdRef}
                 value={userId}
-                onChange={(event) => setUserId(event.target.value)}
+                onChange={(event) => {
+                  setUserId(event.target.value);
+                  if (userIdError) setUserIdError(null);
+                }}
                 placeholder="e.g. 8f8d1f9e-5540-4fcb-afd1-d13c9ed93534"
               />
             </Field>
-            <Field label="Reason (audited: required)" className="sm:col-span-2">
+            <Field label="Reason (audited)" className="sm:col-span-2" required error={reasonError}>
               <Textarea
+                ref={reasonRef}
                 value={reason}
-                onChange={(event) => setReason(event.target.value)}
+                onChange={(event) => {
+                  setReason(event.target.value);
+                  if (reasonError) setReasonError(null);
+                }}
                 rows={3}
                 placeholder="Offline bank statement verified at branch, ref CB-2291"
               />
@@ -192,15 +218,11 @@ export default function TierGrantsPage() {
           )}
 
           <div className="mt-4">
-            <Button
-              onClick={submitGrant}
-              isLoading={grantMutation.isPending}
-              loadingText="Recording…"
-            >
+            <Button type="submit" isLoading={grantMutation.isPending} loadingText="Recording…">
               Grant tier 3
             </Button>
           </div>
-        </div>
+        </form>
       </Card>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -254,13 +276,17 @@ export default function TierGrantsPage() {
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
                     Granted {formatDate(grant.grantedAt)}
-                    {grant.grantedById ? ` by ${grant.grantedById}` : ''} ·{' '}
-                    {grant.expiresAt ? `expires ${formatDate(grant.expiresAt)}` : 'no expiry'}
+                    {grant.grantedByName || grant.grantedById
+                      ? ` by ${grant.grantedByName ?? 'a staff member'}`
+                      : ''}{' '}
+                    · {grant.expiresAt ? `expires ${formatDate(grant.expiresAt)}` : 'no expiry'}
                   </p>
                   {grant.state === 'REVOKED' && (
                     <p className="mt-1 text-xs text-destructive">
                       Revoked{grant.revokedAt ? ` ${formatDate(grant.revokedAt)}` : ''}
-                      {grant.revokedById ? ` by ${grant.revokedById}` : ''}
+                      {grant.revokedByName || grant.revokedById
+                        ? ` by ${grant.revokedByName ?? 'a staff member'}`
+                        : ''}
                     </p>
                   )}
                 </div>

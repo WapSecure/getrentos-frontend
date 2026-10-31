@@ -30,6 +30,8 @@ const ALL_PERMISSIONS: AdminPermission[] = [
   'maintenance.view',
   'maintenance.moderate',
   'sales.view',
+  'sales.moderate',
+  'professionals.moderate',
   'estate.view',
   'estate.moderate',
   'subscriptions.view',
@@ -79,6 +81,8 @@ export const ADMIN_ROLE_DETAILS: Record<
       'reports.view',
       'rentfinance.view',
       'sales.view',
+      'sales.moderate',
+      'professionals.moderate',
       'estate.view',
       'subscriptions.view',
     ],
@@ -158,6 +162,8 @@ export const ADMIN_ROLE_DETAILS: Record<
       'maintenance.view',
       'maintenance.moderate',
       'sales.view',
+      'sales.moderate',
+      'professionals.moderate',
       'estate.view',
       'estate.moderate',
       'subscriptions.view',
@@ -197,8 +203,16 @@ export function getAdminStaffRole(roles: string[] = []): AdminStaffRole {
   return roles.map((role) => BACKEND_STAFF_ROLE_MAP[role]).find(Boolean) ?? 'backoffice_admin';
 }
 
+/**
+ * Mirrors the backend: a staff member holding several roles has every
+ * permission any of them grants.
+ */
 export function hasAdminPermission(roles: string[] | undefined, permission: AdminPermission) {
-  return ADMIN_ROLE_DETAILS[getAdminStaffRole(roles)].permissions.includes(permission);
+  const staffRoles = (roles ?? [])
+    .map((role) => BACKEND_STAFF_ROLE_MAP[role])
+    .filter((role): role is AdminStaffRole => Boolean(role));
+  const effective = staffRoles.length > 0 ? staffRoles : [getAdminStaffRole(roles)];
+  return effective.some((role) => ADMIN_ROLE_DETAILS[role].permissions.includes(permission));
 }
 
 /**

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 import * as RadixTabs from '@radix-ui/react-tabs';
 import { cn } from '@getrentos/shared';
 
@@ -33,10 +33,39 @@ export const TabsList = ({ className, variant = 'pill', ...props }: TabsListProp
   </VariantContext.Provider>
 );
 
+/**
+ * Radix points every trigger's `aria-controls` at its panel. Many screens use
+ * tabs purely as a filter strip with no panels, and Radix only mounts the
+ * active panel anyway, so that reference is often to an id that is not in the
+ * document — an invalid ARIA value. Keep the reference only while its panel
+ * exists. Runs after every render because panels mount and unmount with the
+ * selection.
+ */
+function useValidAriaControls() {
+  const ref = useRef<HTMLButtonElement>(null);
+  const target = useRef<string | null>(null);
+  useEffect(() => {
+    const trigger = ref.current;
+    if (!trigger) return;
+    const current = trigger.getAttribute('aria-controls');
+    if (current) target.current = current;
+    const id = target.current;
+    if (!id) return;
+    if (document.getElementById(id)) {
+      if (current !== id) trigger.setAttribute('aria-controls', id);
+    } else if (current) {
+      trigger.removeAttribute('aria-controls');
+    }
+  });
+  return ref;
+}
+
 export const TabsTrigger = ({ className, ...props }: RadixTabs.TabsTriggerProps) => {
   const variant = useContext(VariantContext);
+  const ref = useValidAriaControls();
   return (
     <RadixTabs.Trigger
+      ref={ref}
       className={cn(
         variant === 'pill'
           ? cn(

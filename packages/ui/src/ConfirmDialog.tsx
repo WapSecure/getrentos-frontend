@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useRef } from 'react';
 import { AlertTriangle, CircleCheck } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from './Dialog';
 import { Button } from './Button';
@@ -44,6 +44,9 @@ export const ConfirmDialog = ({
   promptMinLength = 1,
 }: ConfirmDialogProps) => {
   const promptId = useId();
+  // Set synchronously on the first press, so a double click cannot run the
+  // action twice before `isLoading` has re-rendered the button as disabled.
+  const inFlight = useRef(false);
   const promptInvalid = promptRequired && promptValue.trim().length < promptMinLength;
 
   return (
@@ -103,11 +106,15 @@ export const ConfirmDialog = ({
               disabled={promptInvalid || isLoading}
               isLoading={isLoading}
               onClick={async () => {
+                if (inFlight.current) return;
+                inFlight.current = true;
                 // A refused action leaves the dialog open, so the person can retry or cancel.
                 try {
                   await onConfirm();
                 } catch {
                   return;
+                } finally {
+                  inFlight.current = false;
                 }
                 onOpenChange(false);
               }}

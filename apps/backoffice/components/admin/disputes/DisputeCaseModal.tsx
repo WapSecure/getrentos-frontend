@@ -278,7 +278,7 @@ export const DisputeCaseModal = ({
                       <span className="h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
                       <span className="text-foreground font-medium">{event.eventType}</span>
                       <span className="text-muted-foreground">{event.status}</span>
-                      <span className="text-muted-foreground/70 ml-auto">
+                      <span className="text-muted-foreground ml-auto">
                         {new Date(event.createdAt).toLocaleString()}
                       </span>
                     </div>
