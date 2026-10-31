@@ -92,7 +92,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
     return params;
   }, [debounced, page, filters, config.filters]);
 
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.rentFinance(config.resource, queryParams),
     queryFn: () => unwrap(config.listFn(queryParams)),
     placeholderData: keepPreviousData,
@@ -131,6 +131,7 @@ export function RentFinanceQueuePage<T>({ config }: { config: RentFinanceQueueCo
   if (isError && !data) {
     return (
       <PageErrorState
+        error={error}
         title={`Could not load ${config.eyebrow.toLowerCase()}`}
         description="The finance records are temporarily unavailable. Your filters have been preserved."
         onRetry={() => void refetch()}

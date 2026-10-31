@@ -10,6 +10,8 @@ import { DocumentPreviewButton } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import type { VerificationRequest } from '@/types/admin';
+import { useAdminCan } from '@/hooks/useAdminCan';
+import { roleLabel } from '@/lib/roleLabels';
 
 interface ReviewVerificationModalProps {
   request: VerificationRequest | null;
@@ -32,6 +34,9 @@ export const ReviewVerificationModal = ({
   isRejecting = false,
   isRequestingClarification = false,
 }: ReviewVerificationModalProps) => {
+  // Approve and reject are a separate permission from reviewing; a reviewer
+  // without it can still ask the applicant for more information.
+  const canDecide = useAdminCan('verifications.approve');
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
@@ -96,7 +101,7 @@ export const ReviewVerificationModal = ({
                   <div className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-muted-foreground">Role</span>
                     <span className="text-foreground font-medium capitalize">
-                      {request.applicantRole}
+                      {roleLabel(request.applicantRole)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between px-3 py-2 text-sm">
@@ -248,25 +253,29 @@ export const ReviewVerificationModal = ({
                   <HelpCircle className="w-3.5 h-3.5" />
                   Need Info
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-1.5 text-destructive"
-                  onClick={() => setMode('reject')}
-                  disabled={isSubmitting || detailUnavailable}
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                  Reject
-                </Button>
-                <Button
-                  variant="primary"
-                  className="flex-1 gap-1.5"
-                  onClick={handleApprove}
-                  isLoading={isApproving}
-                  disabled={isSubmitting || detailUnavailable}
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  Approve
-                </Button>
+                {canDecide && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-1.5 text-destructive"
+                      onClick={() => setMode('reject')}
+                      disabled={isSubmitting || detailUnavailable}
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      Reject
+                    </Button>
+                    <Button
+                      variant="primary"
+                      className="flex-1 gap-1.5"
+                      onClick={handleApprove}
+                      isLoading={isApproving}
+                      disabled={isSubmitting || detailUnavailable}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      Approve
+                    </Button>
+                  </>
+                )}
               </>
             ) : (
               <>

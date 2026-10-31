@@ -5,6 +5,10 @@ export type PlatformRole =
   | 'buyer'
   | 'realtor'
   | 'agent'
+  | 'estate'
+  | 'property_manager'
+  | 'gateman'
+  | 'resident'
   | 'admin';
 
 export type AdminStaffRole =
@@ -48,6 +52,8 @@ export type AdminPermission =
   | 'maintenance.view'
   | 'maintenance.moderate'
   | 'sales.view'
+  | 'sales.moderate'
+  | 'professionals.moderate'
   | 'estate.view'
   | 'estate.moderate'
   | 'subscriptions.view'
@@ -127,7 +133,7 @@ export type PlatformEscrowStatus =
 export type AuditSeverity = 'info' | 'warning' | 'critical';
 export type AdminDocumentCategory = 'policy' | 'compliance_filing' | 'legal_agreement' | 'report';
 
-export type PlanTier = 'FREE' | 'PRO';
+export type PlanTier = 'FREE' | 'PRO' | 'ENTERPRISE';
 
 export interface PlatformUser {
   id: string;

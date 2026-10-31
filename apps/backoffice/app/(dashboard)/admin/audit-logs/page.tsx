@@ -20,6 +20,7 @@ import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import type { AuditLogEntry, AuditSeverity } from '@/types/admin';
+import { roleLabel } from '@/lib/roleLabels';
 
 const severityConfig: Record<AuditSeverity, { label: string; variant: BadgeVariant }> = {
   info: { label: 'Info', variant: 'info' },
@@ -37,7 +38,7 @@ export default function AdminAuditLogsPage() {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError, isFetching, refetch } = useQuery({
+  const { data, error, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: adminKeys.auditLogs({
       search: debouncedSearch,
       severity: severityFilter,
@@ -81,7 +82,7 @@ export default function AdminAuditLogsPage() {
         render: (log) => (
           <>
             <p className="font-medium text-foreground">{log.actorName}</p>
-            <p className="text-xs text-muted-foreground capitalize">{log.actorRole}</p>
+            <p className="text-xs text-muted-foreground">{roleLabel(log.actorRole)}</p>
           </>
         ),
         className: 'whitespace-nowrap',
@@ -165,6 +166,7 @@ export default function AdminAuditLogsPage() {
 
       {isError && !data ? (
         <PageErrorState
+          error={error}
           title="Could not load audit logs"
           description="The sensitive-action record is temporarily unavailable. Your search and severity filter have been preserved."
           onRetry={() => void refetch()}

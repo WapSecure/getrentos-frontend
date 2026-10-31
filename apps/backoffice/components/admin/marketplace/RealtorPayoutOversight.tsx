@@ -18,6 +18,7 @@ import {
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import type { AdminRealtorCommissionPayout, RealtorPayoutFilterStatus } from '@/types/marketplace';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 const PAGE_SIZE = 10;
 
@@ -57,6 +58,7 @@ export const RealtorPayoutOversight = () => {
   const [status, setStatus] = useState<StatusFilter>('all');
   const [page, setPage] = useState(1);
   const [confirming, setConfirming] = useState<AdminRealtorCommissionPayout | null>(null);
+  const canRetry = useAdminCan('sales.moderate');
   const toast = useToast();
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
@@ -147,7 +149,7 @@ export const RealtorPayoutOversight = () => {
                 </div>
                 <div className="flex flex-wrap items-center gap-4">
                   <p className="font-semibold">{formatCurrency(p.amount)}</p>
-                  {p.status === 'failed' && (
+                  {canRetry && p.status === 'failed' && (
                     <Button
                       variant="outline"
                       size="sm"
