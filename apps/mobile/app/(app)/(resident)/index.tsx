@@ -125,9 +125,9 @@ export default function ResidentHome() {
         accessory={
           <IconButton
             onPress={() => router.push('/(app)/notifications')}
-            accessibilityLabel={
-              unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'
-            }
+            // IconButton already appends ", N unread" from the badge, so the
+            // label must not repeat the count (DEF-243).
+            accessibilityLabel="Notifications"
             badge={unreadCount}
             icon={<Bell size={21} color={colors.foreground} />}
           />

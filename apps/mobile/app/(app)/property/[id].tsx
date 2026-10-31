@@ -419,12 +419,16 @@ export default function PropertyDetail() {
               icon={<MessageCircle size={20} color={colors.foreground} />}
             />
           ) : null}
-          <IconButton
-            onPress={() => setViewingSheetOpen(true)}
-            accessibilityLabel="Book a viewing"
-            style={actionStyle}
-            icon={<Calendar size={20} color={colors.foreground} />}
-          />
+          {p.acceptingApplications !== false ? (
+            // A let unit is no longer available, so don't invite a viewing of it
+            // (the Apply button is already disabled for the same reason) (DEF-244).
+            <IconButton
+              onPress={() => setViewingSheetOpen(true)}
+              accessibilityLabel="Book a viewing"
+              style={actionStyle}
+              icon={<Calendar size={20} color={colors.foreground} />}
+            />
+          ) : null}
           <View style={{ flex: 1 }}>
             <Button
               label={p.acceptingApplications === false ? 'Let · not accepting applications' : 'Apply to rent'}
