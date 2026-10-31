@@ -6,6 +6,7 @@ import { Badge } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { formatPercent } from '@getrentos/shared';
 import { leaseRentLabel } from '@/lib/leaseTerm';
 import { leaseStatusBadges } from '@/lib/statusBadge';
 import { landlordService } from '@/services/landlordService';
@@ -212,7 +213,7 @@ export const LeaseCard = ({
             Renewal offer sent {formatDate(lease.pendingRenewalOffer.offeredAt)}.{' '}
             {formatCurrency(lease.pendingRenewalOffer.newRentAmount)} (
             {lease.pendingRenewalOffer.increasePercentage >= 0 ? '+' : ''}
-            {lease.pendingRenewalOffer.increasePercentage}%) until{' '}
+            {formatPercent(lease.pendingRenewalOffer.increasePercentage)}%) until{' '}
             {formatDate(lease.pendingRenewalOffer.newEndDate)}. The current terms stay in force
             until the tenant accepts.
           </p>

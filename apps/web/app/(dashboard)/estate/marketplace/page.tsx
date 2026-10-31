@@ -731,7 +731,9 @@ export default function EstateMarketplacePage() {
                           <Clock className="w-4 h-4" />
                           Pause
                         </Button>
-                      ) : (
+                      ) : listing.status !== 'CLOSED' ? (
+                        // A CLOSED listing (e.g. a sold sale) can't be republished — the
+                        // backend refuses it — so don't offer a dead Publish button (DEF-234).
                         <Button
                           variant="outline"
                           onClick={() => setStatus.mutate({ id: listing.id, status: 'PUBLISHED' })}
@@ -740,7 +742,7 @@ export default function EstateMarketplacePage() {
                         >
                           Publish
                         </Button>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                   {mediaListingId === listing.id && (

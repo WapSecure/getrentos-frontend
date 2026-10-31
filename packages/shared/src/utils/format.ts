@@ -1,5 +1,8 @@
 export const formatCurrency = (amount: number, options?: { compact?: boolean }): string => {
   if (options?.compact) {
+    if (Math.abs(amount) >= 1_000_000_000) {
+      return `₦${(amount / 1_000_000_000).toFixed(1)}B`;
+    }
     if (Math.abs(amount) >= 1_000_000) {
       return `₦${(amount / 1_000_000).toFixed(1)}M`;
     }
@@ -13,6 +16,15 @@ export const formatCurrency = (amount: number, options?: { compact?: boolean }):
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
+};
+
+/**
+ * A percentage with at most one decimal and no trailing ".0" — so a computed
+ * rent increase reads "8.3%" or "10%", never "8.333333333333332%".
+ */
+export const formatPercent = (value: number): string => {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 };
 
 export const formatDate = (
