@@ -41,10 +41,48 @@ export function inAppListingHref(kind: MarketKind, id: string, portal: Portal): 
   }
 }
 
+const freshIntent = (now: number) => (pending && now - pending.at <= TTL_MS ? pending : null);
+
+/**
+ * Which of the user's workspaces should open after sign-in so the pending
+ * listing can be shown: the current one when it can, otherwise the first one
+ * that can (a realtor who also rents lands in their renter workspace). Null
+ * when nothing is pending or no workspace of theirs can open it.
+ */
+export function portalForPendingListing(
+  current: Portal,
+  workspaces: readonly Portal[],
+  now = Date.now()
+): Portal | null {
+  const intent = freshIntent(now);
+  if (!intent) return null;
+  if (inAppListingHref(intent.kind, intent.id, current)) return current;
+  return workspaces.find((p) => inAppListingHref(intent.kind, intent.id, p)) ?? null;
+}
+
+/** Who a listing of this market is for, when only one kind of account can act on it. */
+export const LISTING_AUDIENCE: Partial<Record<MarketKind, string>> = {
+  rent: 'renter',
+  sale: 'buyer',
+};
+
 /** Takes the pending listing (once) as a route for this portal, if it is still fresh. */
 export function takeListingHref(portal: Portal, now = Date.now()): Href | null {
-  const intent = pending;
+  return takeListingIntent(portal, now).href;
+}
+
+/**
+ * Takes the pending listing (once). `href` is where to open it in this portal;
+ * when the portal can't open it, `blockedKind` says which market it was so the
+ * user can be told why they landed on their home instead.
+ */
+export function takeListingIntent(
+  portal: Portal,
+  now = Date.now()
+): { href: Href | null; blockedKind: MarketKind | null } {
+  const intent = freshIntent(now);
   pending = null;
-  if (!intent || now - intent.at > TTL_MS) return null;
-  return inAppListingHref(intent.kind, intent.id, portal);
+  if (!intent) return { href: null, blockedKind: null };
+  const href = inAppListingHref(intent.kind, intent.id, portal);
+  return { href, blockedKind: href ? null : intent.kind };
 }
