@@ -28,7 +28,10 @@ export const qk = {
   landInspection: (id: string) => ['land', 'inspections', id] as const,
   host: {
     listings: ['host', 'listings'] as const,
-    bookings: (view: string) => ['host', 'bookings', view] as const,
+    /** First page only (dashboard preview). Kept apart from the infinite list key below. */
+    bookings: (view: string) => ['host', 'bookings', view, 'preview'] as const,
+    /** Infinite list (Bookings screen); its cache holds `{ pages, pageParams }`. */
+    bookingsList: (view: string) => ['host', 'bookings', view, 'list'] as const,
     booking: (id: string) => ['host', 'booking', id] as const,
     listingBookings: (listingId: string) => ['host', 'listing', listingId, 'bookings'] as const,
     blocked: (listingId: string) => ['host', 'listing', listingId, 'blocked'] as const,

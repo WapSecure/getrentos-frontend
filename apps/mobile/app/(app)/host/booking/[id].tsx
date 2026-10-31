@@ -391,7 +391,7 @@ function MoneyCard({ b }: { b: HostBooking }) {
         <Row key={k} label={k} value={v < 0 ? `−${naira(-v)}` : naira(v)} />
       ))}
       <Divider />
-      <Row label="Guest pays" value={naira(b.total)} strong />
+      <Row label="Guest pays" value={naira(b.total + (b.taxAmount ?? 0))} strong />
       {b.platformFee ? <Row label="GetRentos fee" value={`−${naira(b.platformFee)}`} /> : null}
       {b.hostNet != null ? (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
