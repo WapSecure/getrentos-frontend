@@ -11,8 +11,11 @@ import { MaintenanceChecklist } from '@/components/renter/maintenance/Maintenanc
 import { ScheduledMaintenance } from '@/components/renter/maintenance/ScheduledMaintenance';
 import { EmergencyContact } from '@/components/renter/maintenance/EmergencyContact';
 import { MaintenanceAlerts } from '@/components/renter/maintenance/MaintenanceAlerts';
-import { ReportMaintenanceModal } from '@/components/renter/maintenance/ReportMaintenanceModal';
-import { ListSkeleton, PageErrorState, Pagination, useToast } from '@getrentos/ui';
+import {
+  REPORT_MAINTENANCE_DRAFT_KEY,
+  ReportMaintenanceModal,
+} from '@/components/renter/maintenance/ReportMaintenanceModal';
+import { ListSkeleton, PageErrorState, Pagination, hasSessionDraft, useToast } from '@getrentos/ui';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
 
@@ -26,7 +29,10 @@ export default function MaintenancePage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
-  const [showReportModal, setShowReportModal] = useState(false);
+  // Reopen the report form when the renter comes back from signing in with a draft.
+  const [showReportModal, setShowReportModal] = useState(() =>
+    hasSessionDraft(REPORT_MAINTENANCE_DRAFT_KEY)
+  );
   const toast = useToast();
   const [alerts, setAlerts] = useState<
     {

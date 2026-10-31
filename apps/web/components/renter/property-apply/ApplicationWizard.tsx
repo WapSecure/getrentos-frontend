@@ -15,6 +15,7 @@ import {
   Input,
   Select,
   Textarea,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 import type { Property, Document as ApplicationDocument } from '@/types/renter';
 import { nameOnly } from '@/lib/validations/input';
@@ -79,6 +80,14 @@ const FIELD_IDS = {
 
 const documentUploadId = (index: number) => `apply-document-${index}`;
 
+/** sessionStorage key for an application being filled in when the session ran out. */
+export const applicationDraftKey = (propertyId: string) => `renter-apply:${propertyId}`;
+
+interface ApplicationDraft {
+  data: ApplicationFormData;
+  stepIndex: number;
+}
+
 const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Student'].map(
   (value) => ({ value, label: value })
 );
@@ -100,6 +109,20 @@ export const ApplicationWizard = ({
   const [showErrors, setShowErrors] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const isFirstRender = useRef(true);
+
+  // If the session ends part-way through, keep what was filled in so it is
+  // waiting on this step after signing back in.
+  const draftRestored = useSessionExpiryDraft<ApplicationDraft>(
+    applicationDraftKey(property.id),
+    () =>
+      stepIndex > 0 || JSON.stringify(data) !== JSON.stringify(initialData)
+        ? { data, stepIndex }
+        : null,
+    (draft) => {
+      setData({ ...initialData, ...draft.data });
+      setStepIndex(Math.min(Math.max(0, draft.stepIndex), steps.length - 1));
+    }
+  );
 
   // A new step replaces the whole form, so move focus to its heading rather
   // than leaving it on a button that no longer exists.
@@ -285,6 +308,12 @@ export const ApplicationWizard = ({
       </ol>
 
       <div className="p-5 space-y-4">
+        {draftRestored && (
+          <p role="status" className="text-xs text-muted-foreground">
+            We kept the application you were filling in when your session ended. Check it and carry
+            on.
+          </p>
+        )}
         {showErrors && currentErrors.length > 0 && (
           <Alert variant="danger" title="Before you continue">
             {currentErrors.length === 1

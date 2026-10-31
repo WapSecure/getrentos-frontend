@@ -12,6 +12,8 @@ import {
   NumberInput,
   Select,
   Textarea,
+  clearSessionDraft,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 
 import { useEffect, useState } from 'react';
@@ -70,6 +72,15 @@ const propertyTypes: { value: PropertyType; label: string }[] = [
 
 const steps = ['Property Info', 'Media', 'Verification', 'Review'];
 
+/** sessionStorage key for a property being added when the session ran out. */
+export const ADD_PROPERTY_DRAFT_KEY = 'landlord-add-property';
+
+/** What survives a session ending: the typed details. Files cannot be kept. */
+type PropertyDraft = Pick<
+  FormState,
+  'name' | 'type' | 'address' | 'city' | 'state' | 'country' | 'description' | 'totalUnits' | 'pin'
+>;
+
 interface FormState {
   name: string;
   type: PropertyType;
@@ -115,6 +126,31 @@ export const AddPropertyModal = ({
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(initialFormState);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // If the session ends while the landlord is filling this in, keep the typed
+  // details so they are waiting after sign-in (photos and documents are added again).
+  const draftRestored = useSessionExpiryDraft<PropertyDraft>(
+    ADD_PROPERTY_DRAFT_KEY,
+    () =>
+      form.name || form.address || form.city || form.description
+        ? {
+            name: form.name,
+            type: form.type,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            country: form.country,
+            description: form.description,
+            totalUnits: form.totalUnits,
+            pin: form.pin,
+          }
+        : null,
+    (draft) => {
+      setForm({ ...initialFormState, ...draft });
+      setStep(0);
+    },
+    isOpen
+  );
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -165,6 +201,7 @@ export const AddPropertyModal = ({
         ownershipProofs,
         publishRequested,
       });
+      clearSessionDraft(ADD_PROPERTY_DRAFT_KEY);
       handleClose();
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Unable to create the property.');
@@ -200,6 +237,12 @@ export const AddPropertyModal = ({
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1">
+          {draftRestored && step === 0 && (
+            <p role="status" className="text-xs text-muted-foreground">
+              We kept the details you were typing when your session ended. Check them, then add the
+              photos and documents again.
+            </p>
+          )}
           {step === 0 && (
             <>
               <Field label="Property Name" required>
