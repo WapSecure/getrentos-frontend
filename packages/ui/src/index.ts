@@ -34,6 +34,7 @@ export * from './PageHeader';
 export * from './providers/ThemeProvider';
 export * from './providers/QueryProvider';
 export * from './hooks/useSessionActivity';
+export * from './hooks/useSessionExpiryDraft';
 export * from './SaveButton';
 export * from './SectionHeader';
 export * from './Select';

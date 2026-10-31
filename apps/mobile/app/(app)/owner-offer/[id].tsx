@@ -71,7 +71,7 @@ export default function OwnerOfferDetail() {
       haptics.success();
       refresh();
       toast.show(
-        'Offer accepted. The buyer can now pay the deposit to GetRentos, which holds it until the sale completes.',
+        'Offer accepted. The buyer can now pay the deposit to GetRentos, which holds it until the buyer confirms receipt.',
         'success'
       );
     },

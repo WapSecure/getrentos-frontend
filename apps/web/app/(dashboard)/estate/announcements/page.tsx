@@ -101,7 +101,14 @@ export default function EstateAnnouncementsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
           <p className="text-muted-foreground mt-1">
-            {total} announcement{total === 1 ? '' : 's'} in {estate.name}
+            {isAnnouncementsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {total} announcement{total === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <Button

@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 
 import * as WebBrowser from 'expo-web-browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Lock, BadgeCheck, Wallet } from 'lucide-react-native';
+import { Lock, BadgeCheck, Clock, Wallet } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -69,6 +69,8 @@ export default function Financing() {
             const overview = query.data;
             return overview.plan ? (
               <ActivePlanCard overview={{ plan: overview.plan }} />
+            ) : overview.newPlansOpen !== true ? (
+              <PausedCard />
             ) : (
               <EligibilityCard overview={overview} />
             );
@@ -76,6 +78,27 @@ export default function Financing() {
         </Screen>
       )}
     </View>
+  );
+}
+
+/** Shown instead of the sign-up while Flex isn't taking new plans. */
+function PausedCard() {
+  const { colors, spacing } = useTheme();
+  return (
+    <Card elevated>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+        <Clock size={20} color={colors.primary} />
+        <Text variant="heading">Not taking new plans right now</Text>
+      </View>
+      <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+        We&apos;re setting Flex up with a funding partner so landlords are paid in full from day
+        one. Until then we aren&apos;t starting new monthly plans. Your rent and payments work as
+        usual, and plans that already exist are not affected.
+      </Text>
+      <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.md }}>
+        Coming back soon. You&apos;ll be able to apply here as soon as Flex reopens.
+      </Text>
+    </Card>
   );
 }
 
@@ -168,7 +191,10 @@ function ApplyPanel({ rentAmount, onClose }: { rentAmount: number; onClose: () =
     mutationFn: () => financingApi.apply(months),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.renter.financing });
-      toast.show('Flex plan approved: your landlord has been paid.', 'success');
+      toast.show(
+        'Your Flex plan is set up. It shows here once your landlord has been paid.',
+        'success'
+      );
       onClose();
     },
     onError: (err) =>

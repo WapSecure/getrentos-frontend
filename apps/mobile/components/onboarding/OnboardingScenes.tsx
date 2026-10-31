@@ -217,7 +217,7 @@ export function FindPropertiesScene() {
             </View>
           ))}
           <Text variant="caption" style={{ color: colors.accentForeground, fontWeight: '700' }}>
-            128 verified homes nearby
+            Verified homes near you
           </Text>
         </View>
       </Layer>
@@ -339,7 +339,7 @@ export function EscrowScene() {
         <EscrowNode
           icon={<Landmark size={19} color={colors.mutedForeground} />}
           label="Landlord is paid"
-          caption="Released once you both confirm"
+          caption="Rent is released on schedule, unless a dispute is raised"
         />
       </Layer>
 
@@ -363,7 +363,7 @@ export function EscrowScene() {
             ₦2,400,000 protected end to end
           </Text>
           <Text variant="caption" color="mutedForeground">
-            Refunded in full if the deal falls through
+            Raise a dispute and it stays held until it’s resolved
           </Text>
         </View>
       </Layer>

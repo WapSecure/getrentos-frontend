@@ -479,8 +479,8 @@ function ListForm({ property, onDone }: { property: OwnerProperty; onDone: () =>
       <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
         <AlertTriangle size={16} color={colors.warning} style={{ marginTop: 2 }} />
         <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-          GetRentos holds the buyer’s payment on accepted offers. You’re paid once the sale
-          completes.
+          GetRentos holds the buyer’s payment on accepted offers. You’re paid once the buyer
+          confirms receipt.
         </Text>
       </View>
       <VerificationGateNotice error={create.error} onNavigate={onDone} />

@@ -5,6 +5,7 @@ import { AlertTriangle, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { cn, formatRelativeTime } from '@getrentos/shared';
 import type { FraudAlert, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
+import { roleLabel } from '@/lib/roleLabels';
 
 const severityConfig: Record<FraudAlertSeverity, { label: string; variant: BadgeVariant }> = {
   low: { label: 'Low', variant: 'neutral' },
@@ -81,7 +82,7 @@ export const FraudAlertCard = ({
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold text-foreground truncate">{alert.subjectName}</h3>
-            <p className="text-xs text-muted-foreground truncate capitalize">{alert.subjectRole}</p>
+            <p className="text-xs text-muted-foreground truncate">{roleLabel(alert.subjectRole)}</p>
           </div>
         </div>
         <Badge variant={severity.variant}>{severity.label}</Badge>

@@ -61,6 +61,7 @@ export default function EstateAgreements() {
         <Card style={{ flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.secondary }}>
           <ShieldCheck size={18} color={colors.primary} />
           <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+            Nothing changes until you approve: a property joins an estate only with your approval.
             You keep the property and every naira. Allowing an estate only lets it market the
             property to its residents and visitors.
           </Text>
@@ -148,7 +149,10 @@ function AgreementCard({
     mutationFn: () => estateAgreementsApi.approve(a.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: qk.estateAgreements });
-      toast.show(`${a.estateName} can now market ${a.propertyTitle}.`, 'success');
+      toast.show(
+        `${a.propertyTitle} is now part of ${a.estateName}, and they can market it.`,
+        'success'
+      );
     },
     onError: (err) =>
       toast.show(err instanceof ApiError ? err.message : 'Could not approve this.', 'error'),
@@ -217,7 +221,7 @@ function ReasonForm({ closing, onDone }: { closing: Closing; onDone: () => void 
       toast.show(
         action === 'decline'
           ? 'Request declined.'
-          : 'Withdrawn: their listings for this property are paused.',
+          : 'Withdrawn: the property has left the estate and its listings there are paused.',
         'success'
       );
       onDone();
@@ -230,7 +234,7 @@ function ReasonForm({ closing, onDone }: { closing: Closing; onDone: () => void 
         <Text variant="callout" color="mutedForeground">
           {action === 'decline'
             ? `${a.estateName} will see your reason.`
-            : `${a.estateName} will stop marketing ${a.propertyTitle}, and any listings they published for it are paused.`}
+            : `${a.propertyTitle} will leave ${a.estateName}, which will stop marketing it, and any listings they published for it are paused.`}
         </Text>
         <TextField
           label="Reason"

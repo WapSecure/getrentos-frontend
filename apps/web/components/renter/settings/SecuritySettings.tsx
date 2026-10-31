@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Fingerprint, KeyRound, Shield, Trash2, X } from 'lucide-react';
 import { startRegistration } from '@simplewebauthn/browser';
-import { Button, IconButton, Input, NumberInput, Switch, useToast } from '@getrentos/ui';
+import {
+  Button,
+  Field,
+  IconButton,
+  Input,
+  NumberInput,
+  Skeleton,
+  Switch,
+  useToast,
+} from '@getrentos/ui';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
@@ -17,18 +26,32 @@ interface TwoFactorEnroll {
 
 type TwoFactorStep = 'idle' | 'setup' | 'disable';
 
+const TWO_FACTOR_SWITCH_ID = 'two-factor-switch';
+
 export const SecuritySettings = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const { data: twoFactor } = useQuery({
+  const {
+    data: twoFactor,
+    isError: twoFactorFailed,
+    isFetching: twoFactorFetching,
+    refetch: refetchTwoFactor,
+  } = useQuery({
     queryKey: renterKeys.twoFactor,
     queryFn: () => unwrap(renterService.getTwoFactorStatus()),
+    throwOnError: false,
   });
 
-  const { data: security } = useQuery({
+  const {
+    data: security,
+    isError: securityFailed,
+    isFetching: securityFetching,
+    refetch: refetchSecurity,
+  } = useQuery({
     queryKey: renterKeys.securityOverview,
     queryFn: () => unwrap(renterService.getSecurityOverview()),
+    throwOnError: false,
   });
 
   const [pinOpen, setPinOpen] = useState(false);
@@ -100,11 +123,19 @@ export const SecuritySettings = () => {
   const [step, setStep] = useState<TwoFactorStep>('idle');
   const [enroll, setEnroll] = useState<TwoFactorEnroll | null>(null);
   const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
 
   const resetSetup = () => {
     setStep('idle');
     setEnroll(null);
     setCode('');
+    setCodeError(null);
+  };
+
+  /** Closing the panel unmounts the focused control, so hand focus back to the switch. */
+  const cancelSetup = () => {
+    resetSetup();
+    requestAnimationFrame(() => document.getElementById(TWO_FACTOR_SWITCH_ID)?.focus());
   };
 
   const enrollMutation = useMutation({
@@ -113,6 +144,7 @@ export const SecuritySettings = () => {
       setEnroll(data);
       setStep('setup');
       setCode('');
+      setCodeError(null);
     },
     onError: (err: Error) => {
       // Already enrolled (secret stored but not yet enabled): jump to the code step.
@@ -131,7 +163,7 @@ export const SecuritySettings = () => {
       resetSetup();
       toast.success('Two-factor authentication enabled');
     },
-    onError: (err: Error) => toast.error(err.message || 'The code is invalid or has expired'),
+    onError: (err: Error) => setCodeError(err.message || 'The code is invalid or has expired'),
   });
 
   const disableMutation = useMutation({
@@ -141,10 +173,14 @@ export const SecuritySettings = () => {
       resetSetup();
       toast.success('Two-factor authentication disabled');
     },
-    onError: (err: Error) => toast.error(err.message || 'The code is invalid or has expired'),
+    onError: (err: Error) => setCodeError(err.message || 'The code is invalid or has expired'),
   });
 
   const enabled = !!twoFactor?.enabled;
+  // Until the real status is known the switch must not read as "off": a user
+  // who has 2FA would see it disabled, and flipping it would start enrolment.
+  const twoFactorKnown = twoFactor !== undefined;
+  const pinKnown = security !== undefined;
 
   return (
     <div>
@@ -217,26 +253,47 @@ export const SecuritySettings = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-medium text-foreground">Two-Factor Authentication</h3>
-                <p className="text-sm text-muted-foreground">
-                  {enabled
-                    ? 'Your account is protected by an authenticator app'
-                    : 'Add an extra layer of security to your account'}
+                <p
+                  className="text-sm text-muted-foreground"
+                  role={twoFactorFailed && !twoFactorKnown ? 'alert' : undefined}
+                >
+                  {!twoFactorKnown
+                    ? twoFactorFailed
+                      ? 'We could not check your two-factor status.'
+                      : 'Checking your two-factor status…'
+                    : enabled
+                      ? 'Your account is protected by an authenticator app'
+                      : 'Add an extra layer of security to your account'}
                 </p>
               </div>
             </div>
-            <Switch
-              checked={enabled}
-              onCheckedChange={() => (enabled ? setStep('disable') : enrollMutation.mutate())}
-              disabled={enrollMutation.isPending}
-              aria-label="Toggle two-factor authentication"
-            />
+            {twoFactorKnown ? (
+              <Switch
+                id={TWO_FACTOR_SWITCH_ID}
+                checked={enabled}
+                onCheckedChange={() => (enabled ? setStep('disable') : enrollMutation.mutate())}
+                disabled={enrollMutation.isPending}
+                aria-label="Toggle two-factor authentication"
+              />
+            ) : twoFactorFailed ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void refetchTwoFactor()}
+                isLoading={twoFactorFetching}
+              >
+                Retry
+              </Button>
+            ) : (
+              <Skeleton className="h-6 w-11 rounded-full" />
+            )}
           </div>
 
           {step === 'setup' && (
             <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-foreground">Set up your authenticator app</h4>
-                <IconButton size="sm" label="Cancel setup" onClick={resetSetup} icon={<X />} />
+                <IconButton size="sm" label="Cancel setup" onClick={cancelSetup} icon={<X />} />
               </div>
 
               {enroll ? (
@@ -264,25 +321,35 @@ export const SecuritySettings = () => {
                 </p>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-2">
-                <NumberInput
-                  aria-label="Authenticator code"
-                  value={code}
-                  onValueChange={(value) => setCode(value.slice(0, 6))}
-                  placeholder="6-digit code"
-                  maxLength={6}
-                  autoComplete="one-time-code"
-                  className="flex-1"
-                />
+              <form
+                className="flex flex-col sm:flex-row sm:items-start gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (code.length === 6) enableMutation.mutate(code);
+                }}
+              >
+                <Field label="Authenticator code" error={codeError || undefined} className="flex-1">
+                  <NumberInput
+                    value={code}
+                    onValueChange={(value) => {
+                      setCode(value.slice(0, 6));
+                      setCodeError(null);
+                    }}
+                    placeholder="6-digit code"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                  />
+                </Field>
                 <Button
+                  type="submit"
                   variant="primary"
-                  onClick={() => code.length === 6 && enableMutation.mutate(code)}
+                  className="sm:mt-6"
                   isLoading={enableMutation.isPending}
                   disabled={code.length !== 6}
                 >
                   Enable 2FA
                 </Button>
-              </div>
+              </form>
             </div>
           )}
 
@@ -290,30 +357,40 @@ export const SecuritySettings = () => {
             <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
               <div className="flex items-center justify-between mb-3">
                 <h4 className="font-medium text-foreground">Disable two-factor authentication</h4>
-                <IconButton size="sm" label="Cancel disable" onClick={resetSetup} icon={<X />} />
+                <IconButton size="sm" label="Cancel disable" onClick={cancelSetup} icon={<X />} />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
                 Enter a current code from your authenticator app to confirm.
               </p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <NumberInput
-                  aria-label="Authenticator code"
-                  value={code}
-                  onValueChange={(value) => setCode(value.slice(0, 6))}
-                  placeholder="6-digit code"
-                  maxLength={6}
-                  autoComplete="one-time-code"
-                  className="flex-1"
-                />
+              <form
+                className="flex flex-col sm:flex-row sm:items-start gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (code.length === 6) disableMutation.mutate(code);
+                }}
+              >
+                <Field label="Authenticator code" error={codeError || undefined} className="flex-1">
+                  <NumberInput
+                    value={code}
+                    onValueChange={(value) => {
+                      setCode(value.slice(0, 6));
+                      setCodeError(null);
+                    }}
+                    placeholder="6-digit code"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                  />
+                </Field>
                 <Button
+                  type="submit"
                   variant="danger"
-                  onClick={() => code.length === 6 && disableMutation.mutate(code)}
+                  className="sm:mt-6"
                   isLoading={disableMutation.isPending}
                   disabled={code.length !== 6}
                 >
                   Disable 2FA
                 </Button>
-              </div>
+              </form>
             </div>
           )}
         </div>
@@ -326,18 +403,37 @@ export const SecuritySettings = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="font-medium text-foreground">Transaction PIN</h3>
-                <p className="text-sm text-muted-foreground">
-                  {hasPin
-                    ? 'Required to release or refund money — a separate secret from your password'
-                    : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough'}
+                <p
+                  className="text-sm text-muted-foreground"
+                  role={securityFailed && !pinKnown ? 'alert' : undefined}
+                >
+                  {!pinKnown
+                    ? securityFailed
+                      ? 'We could not check whether you have a PIN.'
+                      : 'Checking your PIN…'
+                    : hasPin
+                      ? 'Required to release or refund money — a separate secret from your password'
+                      : 'Set a 4-digit PIN to confirm money actions, so your password alone isn’t enough'}
                 </p>
               </div>
             </div>
-            {!pinOpen && (
-              <Button variant={hasPin ? 'outline' : 'primary'} onClick={() => setPinOpen(true)}>
-                {hasPin ? 'Change PIN' : 'Set PIN'}
-              </Button>
-            )}
+            {!pinOpen &&
+              (pinKnown ? (
+                <Button variant={hasPin ? 'outline' : 'primary'} onClick={() => setPinOpen(true)}>
+                  {hasPin ? 'Change PIN' : 'Set PIN'}
+                </Button>
+              ) : securityFailed ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void refetchSecurity()}
+                  isLoading={securityFetching}
+                >
+                  Retry
+                </Button>
+              ) : (
+                <Skeleton className="h-9 w-24 rounded-lg" />
+              ))}
           </div>
 
           {pinOpen && (

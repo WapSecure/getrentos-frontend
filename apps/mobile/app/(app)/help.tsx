@@ -7,21 +7,18 @@ import { Card, Divider, Text, useTheme } from '@getrentos/ui-native';
 import { HelpFeedbackCard } from '@/components/help/HelpFeedbackCard';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const SUPPORT_EMAIL = 'support@getrentos.test';
-const SUPPORT_PHONE = '+2348000000000';
-const SUPPORT_PHONE_LABEL = '+234 800 000 0000';
+import { SUPPORT, telUrl } from '@/lib/support';
 
 const FAQS: { question: string; answer: string }[] = [
   {
     question: 'How does GetRentos verify identities and properties?',
     answer:
-      'Every user completes BVN/NIN identity verification, and every listed property is checked against title deeds or certificates of occupancy before it can go live. Look for the green "Verified" badge.',
+      'Signing up is quick: you don\'t need to verify anything to start. Identity, licence and ownership checks are only asked for when something you do needs them, such as listing a property or collecting rent. Listings are reviewed before they go live; look for the green "Verified" badge.',
   },
   {
     question: 'How are payments protected?',
     answer:
-      'GetRentos holds the money until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
+      "It depends on the payment. Rent is held by GetRentos and released to your landlord on schedule. A deposit on a home or land you're buying is held by GetRentos and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
   },
   {
     question: 'How do I contact someone about my account?',
@@ -100,16 +97,20 @@ export default function HelpCenter() {
             <ContactRow
               icon={<Mail size={18} color={colors.primary} />}
               label="Email"
-              value={SUPPORT_EMAIL}
-              onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)}
+              value={SUPPORT.email}
+              onPress={() => Linking.openURL(`mailto:${SUPPORT.email}`)}
             />
-            <Divider />
-            <ContactRow
-              icon={<Phone size={18} color={colors.primary} />}
-              label="Phone"
-              value={SUPPORT_PHONE_LABEL}
-              onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)}
-            />
+            {SUPPORT.phone ? (
+              <>
+                <Divider />
+                <ContactRow
+                  icon={<Phone size={18} color={colors.primary} />}
+                  label="Phone"
+                  value={SUPPORT.phone}
+                  onPress={() => Linking.openURL(telUrl(SUPPORT.phone))}
+                />
+              </>
+            ) : null}
             {messages ? (
               <>
                 <Divider />
@@ -121,23 +122,27 @@ export default function HelpCenter() {
                 />
               </>
             ) : null}
-            <Divider />
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.md,
-                padding: spacing.lg,
-              }}
-            >
-              <Clock size={18} color={colors.mutedForeground} />
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyStrong">Hours</Text>
-                <Text variant="caption" color="mutedForeground">
-                  Mon–Sat, 8am–8pm WAT
-                </Text>
-              </View>
-            </View>
+            {SUPPORT.hours ? (
+              <>
+                <Divider />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.md,
+                    padding: spacing.lg,
+                  }}
+                >
+                  <Clock size={18} color={colors.mutedForeground} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyStrong">Hours</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      {SUPPORT.hours}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            ) : null}
           </Card>
         </View>
 

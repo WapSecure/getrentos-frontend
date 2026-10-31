@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Handshake } from 'lucide-react';
 import { BuyerOfferCard } from '@/components/buyer/offers/BuyerOfferCard';
-import { MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
+import { MAKE_OFFER_DRAFT_KEY, MakeOfferModal } from '@/components/buyer/offers/MakeOfferModal';
 import { BuyerOfferNegotiationModal } from '@/components/buyer/offers/BuyerOfferNegotiationModal';
 import {
   Button,
@@ -14,6 +14,7 @@ import {
   SearchInput,
   SegmentedControl,
   Skeleton,
+  hasSessionDraft,
   useToast,
 } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
@@ -89,7 +90,10 @@ function BuyerOffersPageContent() {
     onSuccess: (_result, offerId) => invalidate(offerId),
   });
 
-  const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(!!defaultPropertyId);
+  // Reopen the offer form when the buyer comes back from signing in with a draft.
+  const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(
+    () => !!defaultPropertyId || hasSessionDraft(MAKE_OFFER_DRAFT_KEY)
+  );
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
 
   // Negotiation thread for the currently-open offer.

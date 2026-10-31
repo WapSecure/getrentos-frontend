@@ -22,7 +22,7 @@ const benefits = [
   {
     icon: Lock,
     title: 'Payment Protection',
-    description: 'GetRentos holds your money on every transaction until the deal is done',
+    description: 'GetRentos holds your rent and deposits, and a dispute keeps them held',
     level: '60+',
   },
   {

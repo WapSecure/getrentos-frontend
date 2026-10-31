@@ -5,12 +5,16 @@
  *   NEXT_PUBLIC_SUPPORT_PHONE     e.g. +2348000000000 (calls)
  *   NEXT_PUBLIC_SUPPORT_WHATSAPP  e.g. +2348000000000 (WhatsApp chat)
  *   NEXT_PUBLIC_SUPPORT_HOURS     e.g. "Every day, 7am to 11pm"
+ *   NEXT_PUBLIC_SUPPORT_EMAIL     defaults to the public support inbox
  */
 export const SUPPORT = {
   phone: process.env.NEXT_PUBLIC_SUPPORT_PHONE?.trim() || '',
   whatsapp: process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP?.trim() || '',
   hours: process.env.NEXT_PUBLIC_SUPPORT_HOURS?.trim() || '',
+  email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || 'support@getrentos.com',
 };
+
+export const telLink = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
 
 export const hasSupportLine = () => Boolean(SUPPORT.phone || SUPPORT.whatsapp);
 

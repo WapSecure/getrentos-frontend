@@ -38,7 +38,7 @@ export const PostSwitcher = () => {
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isLoading}
-        className={`group flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors max-w-[10rem] sm:max-w-[14rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+        className={`group flex min-w-0 items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors max-w-[10rem] sm:max-w-[14rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
           needsGateChoice && !isLoading
             ? 'border-warning/40 bg-warning-subtle text-warning'
             : 'border-border hover:bg-secondary'
@@ -111,8 +111,8 @@ export const PostSwitcher = () => {
 
         {needsGateChoice && (
           <p className="mt-1.5 rounded-xl bg-warning-subtle px-3 py-3 text-xs text-warning">
-            This estate has more than one gate. Pick the one you&apos;re standing at so arrivals
-            are recorded against it.
+            This estate has more than one gate. Pick the one you&apos;re standing at so arrivals are
+            recorded against it.
           </p>
         )}
       </DropdownMenuContent>

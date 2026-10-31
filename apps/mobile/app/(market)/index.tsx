@@ -71,7 +71,7 @@ const INTRO: Record<Tab, { title: string; body: string; search: string }> = {
   },
   sale: {
     title: 'Homes for sale',
-    body: 'Make an offer once you sign in: GetRentos holds your payment until the sale completes.',
+    body: 'Make an offer once you sign in: GetRentos holds your deposit until you confirm receipt.',
     search: 'Search area, estate or title',
   },
   shortlet: {

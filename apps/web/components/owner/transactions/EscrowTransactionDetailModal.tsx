@@ -60,7 +60,8 @@ const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }
   {
     key: 'funds_held',
     label: 'Funds Held',
-    description: 'Deposit received and held safely by GetRentos.',
+    description:
+      'Deposit received and held safely by GetRentos. It is released to you when the buyer confirms receipt.',
   },
   {
     key: 'released',
@@ -198,8 +199,9 @@ export const EscrowTransactionDetailModal = ({
           <LandConveyanceEntry transaction={transaction} />
 
           <Alert variant="info" icon={Lock}>
-            GetRentos holds the buyer’s money and pays it to you automatically once all verification
-            and payment conditions are met. It can’t be paid out early, which protects both parties.
+            GetRentos holds the buyer’s money and releases it to you once the buyer confirms receipt
+            (for land, once the conveyance steps are confirmed). It is never released on a timer,
+            and a dispute keeps it held until it is resolved.
           </Alert>
 
           {transaction.releasedAt && (

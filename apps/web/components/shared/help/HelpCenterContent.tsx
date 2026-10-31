@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Button, Card } from '@getrentos/ui';
+import { SUPPORT, hasSupportLine, telLink, whatsappLink } from '@/lib/support';
 
 interface FAQItem {
   question: string;
@@ -22,12 +23,12 @@ const faqs: FAQItem[] = [
   {
     question: 'How does GetRentos verify identities and properties?',
     answer:
-      'Every user completes BVN/NIN identity verification, and every listed property is checked against title deeds or certificates of occupancy before it can go live. Look for the green "Verified" badge.',
+      'Signing up is quick: you don\'t need to verify anything to start. Identity, licence and ownership checks are only asked for when something you do needs them, such as listing a property or collecting rent. Listings are reviewed before they go live; look for the green "Verified" badge.',
   },
   {
     question: 'How are payments protected?',
     answer:
-      'GetRentos holds the money until both parties confirm the transaction terms are met, so money never changes hands without a paper trail.',
+      "It depends on the payment. Rent is held by GetRentos and released to your landlord on schedule. A deposit on a home or land you're buying is held by GetRentos and only released to the seller once you confirm you've received it (for land, once the conveyance steps are confirmed); it is never released on a timer. If something is wrong, raise a dispute and the money stays held until it is resolved.",
   },
   {
     question: 'How do I contact someone about my account?',
@@ -97,32 +98,50 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
             <h3 className="text-sm font-semibold text-foreground mb-3">Contact Support</h3>
             <div className="space-y-3">
               <a
-                href="mailto:support@getrentos.test"
+                href={`mailto:${SUPPORT.email}`}
                 className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
               >
                 <Mail className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <span>
                   <span className="block text-foreground font-medium">Email</span>
-                  <span className="text-muted-foreground">support@getrentos.test</span>
+                  <span className="text-muted-foreground">{SUPPORT.email}</span>
                 </span>
               </a>
-              <a
-                href="tel:+2348000000000"
-                className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
-              >
-                <Phone className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <span>
-                  <span className="block text-foreground font-medium">Phone</span>
-                  <span className="text-muted-foreground">+234 800 000 0000</span>
-                </span>
-              </a>
-              <div className="flex items-start gap-2.5 text-sm">
-                <Clock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <span>
-                  <span className="block text-foreground font-medium">Hours</span>
-                  <span className="text-muted-foreground">Mon–Sat, 8am–8pm WAT</span>
-                </span>
-              </div>
+              {SUPPORT.phone && (
+                <a
+                  href={telLink(SUPPORT.phone)}
+                  className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
+                >
+                  <Phone className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span>
+                    <span className="block text-foreground font-medium">Phone</span>
+                    <span className="text-muted-foreground">{SUPPORT.phone}</span>
+                  </span>
+                </a>
+              )}
+              {SUPPORT.whatsapp && (
+                <a
+                  href={whatsappLink(SUPPORT.whatsapp)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span>
+                    <span className="block text-foreground font-medium">WhatsApp</span>
+                    <span className="text-muted-foreground">Chat with support</span>
+                  </span>
+                </a>
+              )}
+              {SUPPORT.hours && hasSupportLine() && (
+                <div className="flex items-start gap-2.5 text-sm">
+                  <Clock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span>
+                    <span className="block text-foreground font-medium">Hours</span>
+                    <span className="text-muted-foreground">{SUPPORT.hours}</span>
+                  </span>
+                </div>
+              )}
             </div>
             <Button
               variant="outline"

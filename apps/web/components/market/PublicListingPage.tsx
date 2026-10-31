@@ -20,6 +20,7 @@ import { Navigation } from '@/components/layout/Navigation';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ListingCallToAction } from '@/components/market/ListingCallToAction';
 import { SaveListingButton } from '@/components/market/SaveListingButton';
+import { StickyListingCta } from '@/components/market/StickyListingCta';
 import { SimilarListings } from '@/components/market/SimilarListings';
 import { formatCurrency } from '@/lib/format';
 import { SITE_URL } from '@/lib/site';
@@ -34,6 +35,13 @@ const MARKET_NOUN: Record<PublicDetailMarket, string> = {
   rent: 'Rentals',
   sale: 'Homes for sale',
   land: 'Land',
+};
+
+/** When money paid through GetRentos reaches the other side, per market. */
+const PROTECTION_LINE: Record<PublicDetailMarket, string> = {
+  rent: 'Pay through GetRentos: we hold your rent and release it to the landlord on schedule, unless you raise a dispute.',
+  sale: 'Pay through GetRentos: we hold your deposit and only release it to the seller once you confirm receipt.',
+  land: 'Pay through GetRentos: we hold your money and only release it to the seller once the conveyance steps are confirmed.',
 };
 
 /** Shared `generateMetadata` for the three public detail routes. */
@@ -207,6 +215,15 @@ export async function PublicListingPage({
                 )}
               </p>
 
+              <div id="listing-cta" className="space-y-3">
+                <ListingCallToAction
+                  market={market}
+                  id={listing.id}
+                  returnPath={`${back}/${id}`}
+                  underOffer={listing.underOffer}
+                />
+              </div>
+
               <div className="space-y-2 rounded-2xl border border-border/70 bg-muted/30 p-4 text-sm">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Listed price</span>
@@ -251,17 +268,10 @@ export async function PublicListingPage({
                 </div>
               )}
 
-              <ListingCallToAction
-                market={market}
-                id={listing.id}
-                returnPath={`${back}/${id}`}
-                underOffer={listing.underOffer}
-              />
-
               <div className="space-y-3 border-t border-border pt-5 text-xs text-muted-foreground">
                 <p className="flex items-start gap-2">
                   <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                  Pay through GetRentos: we hold your money until both sides confirm.
+                  {PROTECTION_LINE[market]}
                 </p>
                 <p className="flex items-start gap-2">
                   <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
@@ -281,6 +291,20 @@ export async function PublicListingPage({
           />
         ) : null}
         {extra}
+        {!listing.underOffer && (
+          <>
+            {/* Room for the pinned bar, so it never covers the end of the page. */}
+            <div className="h-20" aria-hidden="true" />
+            <StickyListingCta
+              watchId="listing-cta"
+              price={formatCurrency(listing.price)}
+              priceUnit={listing.priceUnit}
+              market={market}
+              id={listing.id}
+              returnPath={`${back}/${id}`}
+            />
+          </>
+        )}
       </article>
       <Footer />
     </main>

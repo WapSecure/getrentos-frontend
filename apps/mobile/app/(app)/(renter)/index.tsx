@@ -36,6 +36,7 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
   AttentionCard,
@@ -137,18 +138,21 @@ export default function RenterHome() {
     },
   ];
 
+  const refreshAll = () => {
+    stats.refetch();
+    listings.refetch();
+    applications.refetch();
+    moveInChecklist.refetch();
+    notifications.refetch();
+    kyc.refetch();
+  };
+  // A refresh failed while older (or disk-cached) data is still on screen.
+  const staleQueries = [stats, listings, applications, moveInChecklist].filter(
+    (q) => q.isRefetchError
+  );
+
   return (
-    <Screen
-      refreshing={stats.isRefetching || listings.isRefetching}
-      onRefresh={() => {
-        stats.refetch();
-        listings.refetch();
-        applications.refetch();
-        moveInChecklist.refetch();
-        notifications.refetch();
-        kyc.refetch();
-      }}
-    >
+    <Screen refreshing={stats.isRefetching || listings.isRefetching} onRefresh={refreshAll}>
       <DashboardHeader
         eyebrow={dashboardGreeting()}
         title={firstName(profile?.legalName)}
@@ -165,6 +169,13 @@ export default function RenterHome() {
           />
         }
       />
+
+      {staleQueries.length > 0 ? (
+        <RefreshFailedNotice
+          onRetry={refreshAll}
+          retrying={staleQueries.some((q) => q.isFetching)}
+        />
+      ) : null}
 
       {/* What needs you first: identity, then an application in motion. */}
       {showVerifyNudge ? (
@@ -241,15 +252,33 @@ export default function RenterHome() {
         </Pressable>
       ) : null}
 
-      <MetricGrid
-        loading={stats.isPending}
-        metrics={METRICS.map(({ key, label, Icon, onPress }) => ({
-          label,
-          Icon,
-          onPress,
-          value: stats.data?.[key] ?? 0,
-        }))}
-      />
+      {/* Nothing cached and the load failed: say so instead of showing zeros. */}
+      {stats.isError && !stats.data ? (
+        <Card elevated style={{ gap: spacing.sm }}>
+          <Text variant="bodyStrong">Couldn’t load your dashboard</Text>
+          <Text variant="callout" color="mutedForeground">
+            Check your connection, then try again.
+          </Text>
+          <Button
+            label="Try again"
+            variant="secondary"
+            size="sm"
+            fullWidth={false}
+            loading={stats.isFetching}
+            onPress={() => stats.refetch()}
+          />
+        </Card>
+      ) : (
+        <MetricGrid
+          loading={stats.isPending}
+          metrics={METRICS.map(({ key, label, Icon, onPress }) => ({
+            label,
+            Icon,
+            onPress,
+            value: stats.data?.[key] ?? 0,
+          }))}
+        />
+      )}
 
       <QuickActions
         actions={[
@@ -267,23 +296,6 @@ export default function RenterHome() {
           { label: 'My lease', Icon: FileSignature, onPress: () => router.push('/(app)/lease') },
         ]}
       />
-
-      {/* Only when there is nothing cached to show; a failed refresh keeps the numbers. */}
-      {stats.isError && !stats.data ? (
-        <Card elevated style={{ gap: spacing.sm }}>
-          <Text variant="bodyStrong">Couldn’t load your dashboard</Text>
-          <Text variant="callout" color="mutedForeground">
-            Check your connection, then try again.
-          </Text>
-          <Button
-            label="Try again"
-            variant="secondary"
-            size="sm"
-            fullWidth={false}
-            onPress={() => stats.refetch()}
-          />
-        </Card>
-      ) : null}
 
       <View style={{ gap: spacing.md }}>
         <SectionHeader

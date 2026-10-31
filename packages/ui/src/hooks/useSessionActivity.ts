@@ -9,7 +9,10 @@ import {
   refreshSession,
 } from '@getrentos/shared';
 
-/** Inactivity that opens the warning dialog: 30 minutes. */
+/**
+ * Total inactivity before the session ends: 30 minutes. The warning dialog
+ * opens `DEFAULT_WARNING_MS` earlier (at 28 minutes), not after it.
+ */
 const DEFAULT_IDLE_MS = 30 * 60 * 1000;
 /** How long the user gets to answer the dialog before the session is dropped. */
 const DEFAULT_WARNING_MS = 2 * 60 * 1000;

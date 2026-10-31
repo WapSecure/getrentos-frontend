@@ -16,7 +16,7 @@ import {
   Video,
 } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
-import { formatCurrency, formatDate } from '@/lib/format';
+import { formatCurrency } from '@/lib/format';
 import { LAND_BUYER_ROUTES, signInThen } from '@/lib/constants/landBuyerRoutes';
 import { buyerLandKeys, landLayoutKeys } from '@/lib/landSalesQueryKeys';
 import { viewerHasRole, viewerIsSignedIn } from '@/lib/viewer';
@@ -38,6 +38,14 @@ import { RequestInspectionDialog } from '../inspections/RequestInspectionDialog'
 import { plotLabel } from './landSaleLogic';
 
 type Viewer = 'buyer' | 'member' | 'anonymous';
+
+/** "1 November 2026 at 12:01 am", in Lagos time: a hold ends at a set minute. */
+const formatHoldEnd = (iso: string) =>
+  new Date(iso).toLocaleString('en-NG', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone: 'Africa/Lagos',
+  });
 
 /**
  * The selected plot and the one thing a visitor can do with it: hold it.
@@ -82,6 +90,16 @@ export const PlotReservePanel = ({
       )
     : undefined;
   const holdByInspection = byInspection && Boolean(openInspection && terms?.subjectToInspection);
+  // A reserved plot may be the viewer's own hold: recognise it and take them
+  // straight on to their purchase instead of describing it as someone else's.
+  const myReservations = useQuery({
+    queryKey: buyerLandKeys.reservations,
+    queryFn: () => unwrap(landBuyerService.listReservations()),
+    enabled: viewer === 'buyer' && plot?.status === 'RESERVED',
+  });
+  const myHold = plot
+    ? myReservations.data?.find((r) => r.plotId === plot.id && r.status === 'ACTIVE')
+    : undefined;
   const reserve = useMutation({
     mutationFn: (plotId: string) =>
       unwrap(
@@ -150,10 +168,19 @@ export const PlotReservePanel = ({
         </div>
       )}
 
-      {!available ? (
+      {myHold ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            You reserved this plot. Your hold ends {formatHoldEnd(myHold.expiresAt)}.
+          </p>
+          <Button fullWidth icon={<Lock className="h-4 w-4" />} onClick={() => setHeld(myHold)}>
+            Choose a plan and start your purchase
+          </Button>
+        </div>
+      ) : !available ? (
         <p className="text-sm text-muted-foreground">
           {plot.status === 'RESERVED' && plot.heldUntil
-            ? `This plot is reserved until ${formatDate(plot.heldUntil)}. If it is your reservation, start your purchase from My land; otherwise it returns to sale if no purchase starts.`
+            ? `This plot is reserved until ${formatHoldEnd(plot.heldUntil)}. It returns to sale if no purchase starts by then.`
             : 'This plot is no longer for sale.'}
         </p>
       ) : viewer === 'anonymous' ? (

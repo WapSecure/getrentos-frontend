@@ -3,6 +3,7 @@
 import { ShieldCheck } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { ROUTES } from '@getrentos/shared';
+import { useAdminCan } from '@/hooks/useAdminCan';
 
 interface AdminDashboardHeaderProps {
   greeting: string;
@@ -10,6 +11,7 @@ interface AdminDashboardHeaderProps {
 }
 
 export const AdminDashboardHeader = ({ greeting, firstName }: AdminDashboardHeaderProps) => {
+  const canReviewVerifications = useAdminCan('verifications.review');
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div>
@@ -18,13 +20,15 @@ export const AdminDashboardHeader = ({ greeting, firstName }: AdminDashboardHead
         </h1>
         <p className="text-muted-foreground mt-1">Here&apos;s the state of the platform today.</p>
       </div>
-      <Button
-        href={ROUTES.ADMIN_VERIFICATIONS}
-        variant="primary"
-        icon={<ShieldCheck className="w-4 h-4" />}
-      >
-        Review Verifications
-      </Button>
+      {canReviewVerifications && (
+        <Button
+          href={ROUTES.ADMIN_VERIFICATIONS}
+          variant="primary"
+          icon={<ShieldCheck className="w-4 h-4" />}
+        >
+          Review Verifications
+        </Button>
+      )}
     </div>
   );
 };

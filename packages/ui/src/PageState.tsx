@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, RefreshCcw, WifiOff, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, Lock, RefreshCcw, WifiOff, type LucideIcon } from 'lucide-react';
 import { Button } from './Button';
 import { cn } from '@getrentos/shared';
 
@@ -13,7 +13,15 @@ interface PageErrorStateProps {
   className?: string;
   /** h1 for a whole page; h2 when the error sits in a section of a page. */
   headingLevel?: 'h1' | 'h2';
+  /**
+   * The failure itself. A 403 is not an outage: it is shown as "no access",
+   * without a retry that can never succeed.
+   */
+  error?: unknown;
 }
+
+const isForbidden = (error: unknown) =>
+  typeof error === 'object' && error !== null && (error as { status?: unknown }).status === 403;
 
 export function PageErrorState({
   title,
@@ -23,14 +31,20 @@ export function PageErrorState({
   isOffline = false,
   className,
   headingLevel: Heading = 'h1',
+  error,
 }: PageErrorStateProps) {
-  const Icon: LucideIcon = isOffline ? WifiOff : AlertTriangle;
-  const resolvedTitle = title ?? (isOffline ? 'You are offline' : 'We could not load this page');
-  const resolvedDescription =
-    description ??
-    (isOffline
-      ? 'Reconnect to the internet, then try again.'
-      : 'There may be a temporary problem. Please try again.');
+  const forbidden = isForbidden(error);
+  const Icon: LucideIcon = forbidden ? Lock : isOffline ? WifiOff : AlertTriangle;
+  const resolvedTitle = forbidden
+    ? 'You do not have access to this'
+    : (title ?? (isOffline ? 'You are offline' : 'We could not load this page'));
+  const resolvedDescription = forbidden
+    ? 'Your account does not include this area. Ask an administrator if you need it.'
+    : (description ??
+      (isOffline
+        ? 'Reconnect to the internet, then try again.'
+        : 'There may be a temporary problem. Please try again.'));
+  const retry = forbidden ? undefined : onRetry;
 
   return (
     <div
@@ -45,12 +59,12 @@ export function PageErrorState({
       </span>
       <Heading className="text-xl font-semibold text-foreground">{resolvedTitle}</Heading>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{resolvedDescription}</p>
-      {onRetry && (
+      {retry && (
         <Button
           type="button"
           variant="outline"
           className="mt-6"
-          onClick={onRetry}
+          onClick={retry}
           disabled={isRetrying || isOffline}
           isLoading={isRetrying}
         >

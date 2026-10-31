@@ -79,9 +79,18 @@ const Pill = ({ label, variant }: { label: string; variant: BadgeVariant }) => (
 );
 
 const Cell = ({ primary, secondary }: { primary: ReactNode; secondary?: ReactNode }) => (
-  <div className="min-w-0">
-    <p className="font-medium text-foreground">{primary}</p>
-    {secondary && <p className="truncate text-xs text-muted-foreground">{secondary}</p>}
+  // Bounded width: a long unbroken name or a long list of estates otherwise
+  // stretches the whole table (and the page) sideways.
+  <div className="min-w-0 max-w-xs">
+    <p className="font-medium text-foreground [overflow-wrap:anywhere]">{primary}</p>
+    {secondary && (
+      <p
+        className="truncate text-xs text-muted-foreground"
+        title={typeof secondary === 'string' ? secondary : undefined}
+      >
+        {secondary}
+      </p>
+    )}
   </div>
 );
 
@@ -403,7 +412,16 @@ export function DuesQueue() {
         render: (d) => (
           <Cell
             primary={d.residentName}
-            secondary={`${d.billingCycle ?? ''} · ${d.category ?? ''}`}
+            secondary={
+              // A billing cycle only means something for a recurring charge; on a
+              // one-off it read as a contradiction of the Recurring column.
+              [
+                d.isRecurring && d.billingCycle ? titleCase(d.billingCycle) : null,
+                d.category ? titleCase(d.category) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ') || undefined
+            }
           />
         ),
       },

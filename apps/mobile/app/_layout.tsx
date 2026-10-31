@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { Alert } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -12,7 +13,7 @@ import { useMagicLink } from '@/lib/auth/useMagicLink';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
 import { portalHref } from '@/lib/roles';
-import { takeListingHref } from '@/lib/pendingListing';
+import { LISTING_AUDIENCE, portalForPendingListing, takeListingIntent } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
@@ -36,7 +37,7 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
  * firing at once trips React's update counter on the native stack).
  */
 function useProtectedRoute(onboardingSeen: boolean | null) {
-  const { status, usablePortal } = useAuth();
+  const { status, usablePortal, workspaces, switchWorkspace } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const lastTarget = useRef<string | null>(null);
@@ -54,6 +55,16 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     // otherwise a role with no screens yet (realtor, owner, estate) hides a
     // portal the user does have.
     const portalReady = !!usablePortal;
+
+    // Signed in from a public listing that the current workspace can't open,
+    // but another of theirs can: open that one first, then route on the next pass.
+    if (status === 'authenticated' && !inApp && usablePortal) {
+      const wanted = portalForPendingListing(usablePortal, workspaces);
+      if (wanted && wanted !== usablePortal) {
+        switchWorkspace(wanted);
+        return;
+      }
+    }
 
     let target: string | null = null;
     if (status === 'unauthenticated') {
@@ -84,12 +95,19 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
       // Signed in from a public listing: land on it, with the portal home
       // underneath so Back goes somewhere sensible.
       if (status === 'authenticated' && portalReady && !inApp) {
-        const listing = takeListingHref(usablePortal);
-        if (listing) router.push(listing);
+        const { href, blockedKind } = takeListingIntent(usablePortal);
+        if (href) router.push(href);
+        else if (blockedKind && LISTING_AUDIENCE[blockedKind]) {
+          const who = LISTING_AUDIENCE[blockedKind];
+          Alert.alert(
+            `Open this home from a ${who} account`,
+            `You're signed in, but ${blockedKind === 'rent' ? 'rental enquiries' : 'offers'} come from a ${who} workspace. Add one from Account, then open the listing again.`
+          );
+        }
       }
     }
     if (!target) lastTarget.current = null;
-  }, [status, usablePortal, segments, router, onboardingSeen]);
+  }, [status, usablePortal, workspaces, switchWorkspace, segments, router, onboardingSeen]);
 }
 
 const STACK_SCREEN_OPTIONS = { headerShown: false, animation: 'fade' } as const;

@@ -50,7 +50,7 @@ export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenu
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="group flex min-h-11 items-center gap-3 rounded-xl p-1.5 pr-2 transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group flex min-h-11 items-center gap-2 rounded-xl p-1.5 pr-1.5 transition-colors sm:gap-3 sm:pr-2 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <span className="sr-only">Open account menu</span>
           <span
@@ -64,7 +64,7 @@ export const AccountMenu = ({ user, roleId, roleLabel, links = [] }: AccountMenu
             <span className="block text-xs text-muted-foreground">{roleLabel}</span>
           </span>
           <ChevronDown
-            className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180"
+            className="hidden h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180 sm:block"
             aria-hidden="true"
           />
         </button>

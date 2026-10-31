@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mail, Phone, Fingerprint } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
@@ -14,6 +14,8 @@ import { useToast, type ToastVariant } from '@getrentos/ui';
 import { Button, SessionExpiredNotice } from '@getrentos/ui';
 import { AuthMethodTabs } from '../AuthMethodTabs';
 import { safeNextPath, withNext } from '@/lib/nextPath';
+
+const noSubscribe = () => () => {};
 
 interface SignInRightContentProps {
   method: SignInMethod;
@@ -29,15 +31,16 @@ export const SignInRightContent = ({ method, setMethod }: SignInRightContentProp
   const [lockoutTimer, setLockoutTimer] = useState<number | null>(null);
   // Internal post-login destination, e.g. `/shortlets/abc` when the proxy
   // redirected here via `?next=`. Only same-origin paths are accepted.
-  const [nextPath] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    return safeNextPath(new URLSearchParams(window.location.search).get('next'));
-  });
+  // The server renders without the query string, so hydrate from an empty one
+  // and only then read the real URL; reading it during render made the two disagree.
+  const search = useSyncExternalStore(
+    noSubscribe,
+    () => window.location.search,
+    () => ''
+  );
+  const nextPath = useMemo(() => safeNextPath(new URLSearchParams(search).get('next')), [search]);
   // Sent here from an invitation link rather than from an expired session.
-  const [fromInvite] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return new URLSearchParams(window.location.search).get('reason') === 'invite';
-  });
+  const fromInvite = new URLSearchParams(search).get('reason') === 'invite';
 
   useEffect(() => {
     if (isLocked && lockoutTimer && lockoutTimer > 0) {

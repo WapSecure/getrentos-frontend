@@ -39,6 +39,7 @@ import {
   updateInboxConversation,
   type ConversationPages,
 } from '@/lib/conversationCache';
+import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 
 const PAGE_SIZE = 20;
 
@@ -177,6 +178,12 @@ export default function Messages() {
           />
         ) : null}
       </View>
+
+      {query.isRefetchError && all.length > 0 ? (
+        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.sm }}>
+          <RefreshFailedNotice onRetry={() => query.refetch()} retrying={query.isFetching} />
+        </View>
+      ) : null}
 
       {query.isError && all.length === 0 ? (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>

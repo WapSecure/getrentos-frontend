@@ -91,7 +91,7 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
         aria-label="Search backoffice records"
         aria-autocomplete="list"
         aria-expanded={open}
-        aria-controls={resultsId}
+        aria-controls={open ? resultsId : undefined}
         aria-activedescendant={results[active] ? `${resultsId}-${active}` : undefined}
         leadingIcon={<Search className="h-4 w-4" aria-hidden="true" />}
       />

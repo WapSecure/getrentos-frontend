@@ -60,7 +60,14 @@ export default function EstatePollsPage() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Polls</h1>
           <p className="text-muted-foreground mt-1">
-            {polls.length} poll{polls.length === 1 ? '' : 's'} in {estate.name}
+            {isPollsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {polls.length} poll{polls.length === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
           </p>
         </div>
         <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>

@@ -89,10 +89,10 @@ export const Footer = () => (
             <li className="flex items-center gap-3 text-sm text-muted-foreground">
               <Mail className="h-4 w-4 shrink-0 text-primary" />
               <a
-                href="mailto:support@getrentos.com"
+                href={`mailto:${SUPPORT.email}`}
                 className="transition-colors duration-200 hover:text-foreground"
               >
-                support@getrentos.com
+                {SUPPORT.email}
               </a>
             </li>
             {SUPPORT.phone && (
@@ -128,7 +128,7 @@ export const Footer = () => (
             </li>
             <li>
               <a
-                href="mailto:support@getrentos.com?subject=Help%20request"
+                href={`mailto:${SUPPORT.email}?subject=Help%20request`}
                 className="text-sm text-muted-foreground transition-colors duration-200 hover:text-primary"
               >
                 Get support

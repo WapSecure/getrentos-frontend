@@ -1,5 +1,6 @@
 import { Alert, Pressable, View } from 'react-native';
 import { router, type Href } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import {
   BedDouble,
@@ -34,6 +35,8 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { financingApi } from '@/lib/api/financing';
+import { qk } from '@/lib/query/keys';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -41,6 +44,12 @@ export default function Account() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
   const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const flex = useQuery({ queryKey: qk.renter.financing, queryFn: financingApi.getOverview });
+  const flexDescription = flex.data?.plan
+    ? 'Your plan and installments'
+    : flex.data?.newPlansOpen
+      ? 'Split yearly rent into monthly payments'
+      : 'Not taking new plans right now';
 
   const confirmSignOut = () =>
     Alert.alert('Sign out of GetRentos?', 'You can sign back in any time.', [
@@ -111,7 +120,7 @@ export default function Account() {
     {
       key: 'flex',
       label: 'GetRentos Flex',
-      description: 'Split yearly rent into monthly payments',
+      description: flexDescription,
       icon: Wallet,
       onPress: go('/(app)/financing'),
     },

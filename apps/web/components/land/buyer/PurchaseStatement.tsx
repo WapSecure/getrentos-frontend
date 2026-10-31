@@ -14,6 +14,17 @@ const KIND_LABELS = {
   WAIVER: 'Waiver',
 } as const;
 
+/**
+ * A running balance below zero means the buyer has paid ahead of the schedule:
+ * show it as credit, never as a minus sign that reads like debt.
+ */
+const BalanceCell = ({ balance }: { balance: number }) =>
+  balance < 0 ? (
+    <span className="text-success">{formatCurrency(-balance)} credit</span>
+  ) : (
+    <>{formatCurrency(balance)}</>
+  );
+
 /** Ledger of charges and payments with a running balance. Loaded on demand. */
 export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
   const { data, isLoading, error, refetch } = useQuery({
@@ -39,7 +50,7 @@ export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
         {[
           ['Charged to date', data.totalCharged],
           ['Paid', data.totalPaid],
-          ['Due now', data.balance],
+          data.balance < 0 ? ['Paid ahead', -data.balance] : ['Due now', data.balance],
           ['Left on contract', data.outstandingBalance],
         ].map(([label, value]) => (
           <div key={label} className="rounded-xl border border-border p-3">
@@ -94,7 +105,7 @@ export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
                     {entry.credit ? formatCurrency(entry.credit) : '–'}
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums text-foreground">
-                    {formatCurrency(entry.balance)}
+                    <BalanceCell balance={entry.balance} />
                   </td>
                 </tr>
               ))}
@@ -103,8 +114,9 @@ export const PurchaseStatement = ({ purchaseId }: { purchaseId: string }) => {
         </div>
       )}
       <p className="text-xs text-muted-foreground">
-        Generated {new Date(data.generatedAt).toLocaleString('en-NG')}. Future installments are
-        charged as they fall due.
+        Balance is what you owe on installments due so far; credit means you paid for an installment
+        before it fell due. Future installments are charged as they fall due. Generated{' '}
+        {formatDate(data.generatedAt)}.
       </p>
     </div>
   );

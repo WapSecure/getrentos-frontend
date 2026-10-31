@@ -11,6 +11,8 @@ import { formatDate, unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { OwnershipDocCheckPanel } from '@/components/admin/verifications/OwnershipDocCheckPanel';
 import type { VerificationRequest } from '@/types/admin';
+import { useAdminCan } from '@/hooks/useAdminCan';
+import { roleLabel } from '@/lib/roleLabels';
 
 interface ReviewVerificationModalProps {
   request: VerificationRequest | null;
@@ -33,9 +35,14 @@ export const ReviewVerificationModal = ({
   isRejecting = false,
   isRequestingClarification = false,
 }: ReviewVerificationModalProps) => {
+  // Approve and reject are a separate permission from reviewing; a reviewer
+  // without it can still ask the applicant for more information.
+  const canDecide = useAdminCan('verifications.approve');
   const [mode, setMode] = useState<'view' | 'reject' | 'clarify'>('view');
   const [reason, setReason] = useState('');
   const isSubmitting = isApproving || isRejecting || isRequestingClarification;
+  // A decided request can still be opened to read its documents, not re-decided.
+  const decided = request?.status === 'approved' || request?.status === 'rejected';
 
   // Fetch the real submitted documents (signed preview URLs) for the request
   // being reviewed so the reviewer can inspect the actual files.
@@ -95,7 +102,7 @@ export const ReviewVerificationModal = ({
                   <div className="flex items-center justify-between px-3 py-2 text-sm">
                     <span className="text-muted-foreground">Role</span>
                     <span className="text-foreground font-medium capitalize">
-                      {request.applicantRole}
+                      {roleLabel(request.applicantRole)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between px-3 py-2 text-sm">
@@ -228,7 +235,18 @@ export const ReviewVerificationModal = ({
           </div>
 
           <div className="p-4 border-t border-border flex gap-2">
-            {mode === 'view' ? (
+            {decided ? (
+              <>
+                <p className="flex-1 self-center text-sm text-muted-foreground">
+                  {request.status === 'approved'
+                    ? 'This request was approved.'
+                    : 'This request was rejected.'}
+                </p>
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+              </>
+            ) : mode === 'view' ? (
               <>
                 <Button
                   variant="ghost"
@@ -239,25 +257,29 @@ export const ReviewVerificationModal = ({
                   <HelpCircle className="w-3.5 h-3.5" />
                   Need Info
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-1.5 text-destructive"
-                  onClick={() => setMode('reject')}
-                  disabled={isSubmitting || detailUnavailable}
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                  Reject
-                </Button>
-                <Button
-                  variant="primary"
-                  className="flex-1 gap-1.5"
-                  onClick={handleApprove}
-                  isLoading={isApproving}
-                  disabled={isSubmitting || detailUnavailable}
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  Approve
-                </Button>
+                {canDecide && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-1.5 text-destructive"
+                      onClick={() => setMode('reject')}
+                      disabled={isSubmitting || detailUnavailable}
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      Reject
+                    </Button>
+                    <Button
+                      variant="primary"
+                      className="flex-1 gap-1.5"
+                      onClick={handleApprove}
+                      isLoading={isApproving}
+                      disabled={isSubmitting || detailUnavailable}
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      Approve
+                    </Button>
+                  </>
+                )}
               </>
             ) : (
               <>

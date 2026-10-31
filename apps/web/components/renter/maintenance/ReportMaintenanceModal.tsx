@@ -15,6 +15,8 @@ import {
   Select,
   Switch,
   Textarea,
+  clearSessionDraft,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 import type {
   CreateMaintenanceRequestInput,
@@ -55,6 +57,9 @@ const priorities: { value: MaintenancePriority; label: string; description: stri
   { value: 'urgent', label: 'Urgent', description: 'Needs prompt attention' },
 ];
 
+/** sessionStorage key for a report being written when the session ran out. */
+export const REPORT_MAINTENANCE_DRAFT_KEY = 'renter-report-maintenance';
+
 const createEmptyForm = (): ReportFormData => ({
   title: '',
   category: '',
@@ -75,6 +80,18 @@ export const ReportMaintenanceModal = ({
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // If the session ends while the renter is writing, keep the report (photos
+  // cannot be kept, only the text) so it is waiting after they sign back in.
+  const draftRestored = useSessionExpiryDraft<ReportFormData>(
+    REPORT_MAINTENANCE_DRAFT_KEY,
+    () =>
+      formData.title || formData.description || formData.category || formData.priority
+        ? formData
+        : null,
+    (draft) => setFormData({ ...createEmptyForm(), ...draft }),
+    isOpen
+  );
 
   // Object URLs are created once per photo set and revoked whenever it
   // changes (or the modal unmounts) so previews don't leak memory.
@@ -176,6 +193,7 @@ export const ReportMaintenanceModal = ({
       );
 
       if (wasSubmitted) {
+        clearSessionDraft(REPORT_MAINTENANCE_DRAFT_KEY);
         resetForm();
         onClose();
       } else {
@@ -368,6 +386,12 @@ export const ReportMaintenanceModal = ({
             )}
           </div>
 
+          {draftRestored && !submitError && (
+            <p role="status" className="text-xs text-muted-foreground">
+              We kept the report you were writing when your session ended. Add any photos again,
+              check it and submit.
+            </p>
+          )}
           {submitError && <Alert variant="danger">{submitError}</Alert>}
 
           <div className="flex gap-3 pt-2">

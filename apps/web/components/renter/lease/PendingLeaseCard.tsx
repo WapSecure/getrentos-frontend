@@ -106,7 +106,8 @@ export const PendingLeaseCard = ({ lease, onSign, isPending }: PendingLeaseCardP
               : 'The first payment must be paid to GetRentos before the lease can proceed.'}
             {lease.paymentDueAt && ` Due by ${formatDeadline(lease.paymentDueAt)}.`} If it is not
             paid by then the lease lapses on its own and the property goes back on the market.
-            GetRentos holds your money and does not pay the landlord until you have the keys.
+            GetRentos holds your money and releases it to the landlord when you confirm move-in, or
+            on its scheduled release date if you don&apos;t raise a dispute first.
           </p>
         </Alert>
       )}

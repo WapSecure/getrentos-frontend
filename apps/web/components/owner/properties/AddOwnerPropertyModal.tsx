@@ -15,6 +15,8 @@ import {
   Field,
   Input,
   Select,
+  clearSessionDraft,
+  useSessionExpiryDraft,
 } from '@getrentos/ui';
 import { LocationFields } from '@/components/shared/location/LocationFields';
 import type { OwnerProperty } from '@/types/owner';
@@ -43,6 +45,9 @@ export interface OwnerPropertySubmissionResult {
 
 const steps = ['Ownership Info', 'Documents', 'Declaration', 'Status'];
 
+/** sessionStorage key for a property being added when the session ran out. */
+export const ADD_OWNER_PROPERTY_DRAFT_KEY = 'owner-add-property';
+
 const propertyTypes = PROPERTY_TYPE_OPTIONS;
 
 interface FormState {
@@ -63,6 +68,22 @@ interface FormState {
   declared: boolean;
   pin: MapPoint | null;
 }
+
+/** What survives a session ending: the typed details. Files cannot be kept. */
+type OwnerPropertyDraft = Pick<
+  FormState,
+  | 'name'
+  | 'propertyType'
+  | 'address'
+  | 'city'
+  | 'state'
+  | 'country'
+  | 'ownerName'
+  | 'estimatedValue'
+  | 'purchasePrice'
+  | 'purchaseDate'
+  | 'pin'
+>;
 
 const initialFormState: FormState = {
   name: '',
@@ -94,6 +115,33 @@ export const AddOwnerPropertyModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadWarning, setUploadWarning] = useState<string | null>(null);
+
+  // If the session ends while the owner is filling this in, keep the typed
+  // details so they are waiting after sign-in (documents are attached again).
+  const draftRestored = useSessionExpiryDraft<OwnerPropertyDraft>(
+    ADD_OWNER_PROPERTY_DRAFT_KEY,
+    () =>
+      !submitted && (form.name || form.address || form.ownerName)
+        ? {
+            name: form.name,
+            propertyType: form.propertyType,
+            address: form.address,
+            city: form.city,
+            state: form.state,
+            country: form.country,
+            ownerName: form.ownerName,
+            estimatedValue: form.estimatedValue,
+            purchasePrice: form.purchasePrice,
+            purchaseDate: form.purchaseDate,
+            pin: form.pin,
+          }
+        : null,
+    (draft) => {
+      setForm({ ...initialFormState, ...draft });
+      setStep(0);
+    },
+    isOpen
+  );
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -164,6 +212,7 @@ export const AddOwnerPropertyModal = ({
           `${result.failedProofCount} document${result.failedProofCount === 1 ? '' : 's'} could not upload. Your property was still created. Open its verification status to retry the evidence.`
         );
       }
+      clearSessionDraft(ADD_OWNER_PROPERTY_DRAFT_KEY);
       setSubmitted(true);
       setStep(3);
     } catch (error) {
@@ -199,6 +248,12 @@ export const AddOwnerPropertyModal = ({
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          {draftRestored && step === 0 && (
+            <p role="status" className="text-xs text-muted-foreground">
+              We kept the details you were typing when your session ended. Check them, then attach
+              the documents again.
+            </p>
+          )}
           {step === 0 && (
             <>
               <Field label="Property Name" required>

@@ -45,7 +45,7 @@ const steps = [
     number: '06',
     title: 'Protected payment',
     icon: Coins,
-    description: 'Funds held securely until conditions met.',
+    description: 'Rent released on schedule; sale deposits once the buyer confirms receipt.',
   },
   {
     number: '07',
@@ -69,7 +69,9 @@ export const HowItWorks = () => (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {steps.map((step) => (
           <MarketingCard key={step.number} className="p-6">
-            <div className="mb-3 text-4xl font-bold text-border">
+            {/* Ordinal is decorative (the cards are already in order), but it
+                still meets the 3:1 large-text minimum in both themes. */}
+            <div className="mb-3 text-4xl font-bold text-muted-foreground/75" aria-hidden="true">
               {step.number}
             </div>
             <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">

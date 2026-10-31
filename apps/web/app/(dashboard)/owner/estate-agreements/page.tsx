@@ -46,7 +46,7 @@ export default function OwnerEstateAgreementsPage() {
   const approve = useMutation({
     mutationFn: (id: string) => unwrap(estateAgreementService.approve(id, {})),
     onSuccess: () => {
-      toast.success('Approved: the estate can now market your property.');
+      toast.success('Approved: your property is now part of the estate, and it can market it.');
       refresh();
     },
     onError: (err: Error) => toast.error(err.message),
@@ -65,7 +65,9 @@ export default function OwnerEstateAgreementsPage() {
     mutationFn: (id: string) =>
       unwrap(estateAgreementService.revoke(id, reason.trim() || 'Authorisation withdrawn')),
     onSuccess: () => {
-      toast.success('Withdrawn: their published listings for this property are now paused.');
+      toast.success(
+        'Withdrawn: the property has left the estate and its listings there are paused.'
+      );
       refresh();
     },
     onError: (err: Error) => toast.error(err.message),
@@ -167,7 +169,8 @@ export default function OwnerEstateAgreementsPage() {
             </div>
             {active.length > 0 && !isPending && (
               <p className="text-xs text-muted-foreground">
-                Withdrawing also pauses any listings this estate has published for the property.
+                Withdrawing removes the property from the estate and pauses any listings it
+                published for it.
               </p>
             )}
           </div>
@@ -181,8 +184,9 @@ export default function OwnerEstateAgreementsPage() {
       <header>
         <h1 className="text-2xl font-bold text-foreground">Estate requests</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Estates inside your properties&apos; communities can ask to advertise them. You keep
-          ownership and control of any money: an estate only ever gains the right to market.
+          Estates can ask to add your property and advertise it. Nothing changes until you approve:
+          a property joins an estate only with your approval. You keep ownership and control of any
+          money: an estate only ever gains the right to market.
         </p>
       </header>
 
