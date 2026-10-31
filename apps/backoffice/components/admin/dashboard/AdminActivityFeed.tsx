@@ -49,6 +49,9 @@ export const AdminActivityFeed = () => {
     queryKey: [...adminKeys.dashboardActivity, limit],
     queryFn: () => unwrap(adminService.getDashboardActivity(limit)),
     placeholderData: keepPreviousData,
+    // This screen shows its own error and retry in place, so a failure must
+    // not escalate to the route error boundary and take the page with it.
+    throwOnError: false,
   });
   // A full page back means there may be older events to show.
   const canShowMore = (activity?.length ?? 0) >= limit && limit < MAX;

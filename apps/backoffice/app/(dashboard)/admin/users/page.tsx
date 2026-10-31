@@ -88,6 +88,9 @@ export default function AdminUsersPage() {
         })
       ),
     placeholderData: keepPreviousData,
+    // This screen shows its own error and retry in place, so a failure must
+    // not escalate to the route error boundary and take the page with it.
+    throwOnError: false,
   });
   const users = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -151,9 +154,11 @@ export default function AdminUsersPage() {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
             {getInitials(u.fullName)}
           </div>
-          <div className="min-w-0">
-            <p className="font-medium text-foreground whitespace-nowrap">{u.fullName}</p>
-            <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+          <div className="min-w-0 max-w-xs">
+            <p className="font-medium text-foreground [overflow-wrap:anywhere]">{u.fullName}</p>
+            <p className="text-xs text-muted-foreground truncate" title={u.email}>
+              {u.email}
+            </p>
           </div>
         </div>
       ),
