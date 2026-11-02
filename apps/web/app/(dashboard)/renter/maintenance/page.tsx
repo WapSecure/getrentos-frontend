@@ -16,7 +16,11 @@ import {
   ReportMaintenanceModal,
 } from '@/components/renter/maintenance/ReportMaintenanceModal';
 import { ListSkeleton, PageErrorState, Pagination, hasSessionDraft, useToast } from '@getrentos/ui';
-import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
+import type {
+  CreateMaintenanceRequestInput,
+  MaintenanceRequest,
+  MaintenanceSummary,
+} from '@/types/maintenance';
 import { renterService } from '@/services/renterService';
 
 export default function MaintenancePage() {
@@ -27,6 +31,18 @@ export default function MaintenancePage() {
   const [requestsError, setRequestsError] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [total, setTotal] = useState(0);
+  const [summary, setSummary] = useState<MaintenanceSummary | null>(null);
+  const [summaryKey, setSummaryKey] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    renterService.getMaintenanceSummary().then((res) => {
+      if (!cancelled && res.success && res.data) setSummary(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [summaryKey, reloadKey]);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
   // Reopen the report form when the renter comes back from signing in with a draft.
@@ -116,6 +132,7 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const created = res.data;
       setRequests((prev) => [created, ...prev]);
+      setSummaryKey((k) => k + 1);
       toast.success(
         data.isEmergency
           ? 'Emergency maintenance request submitted at urgent priority.'
@@ -134,6 +151,7 @@ export default function MaintenancePage() {
     if (res.success && res.data) {
       const updated = res.data;
       setRequests((prev) => prev.map((req) => (req.id === id ? updated : req)));
+      setSummaryKey((k) => k + 1);
       toast.info('Maintenance request cancelled.');
     } else {
       toast.error(res.message || 'Unable to cancel this maintenance request.');
@@ -207,7 +225,7 @@ export default function MaintenancePage() {
         />
       </div>
 
-      {hasLoadedRequests && <MaintenanceStats requests={requests} />}
+      {summary && <MaintenanceStats summary={summary} />}
 
       {isLoadingRequests && !hasLoadedRequests ? (
         <ListSkeleton className="mt-6" />
@@ -229,7 +247,7 @@ export default function MaintenancePage() {
           </div>
           <div className="space-y-6">
             <QuickReport onQuickReport={handleReportIssue} />
-            <MaintenanceAnalytics requests={requests} />
+            {summary && <MaintenanceAnalytics summary={summary} />}
             <MaintenanceChecklist />
             <ScheduledMaintenance
               schedules={scheduledMaintenance}

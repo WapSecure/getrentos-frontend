@@ -78,3 +78,13 @@ export interface MaintenanceRequest {
   acknowledgedAt?: string | null;
   vendorRating?: number;
 }
+
+/** Totals across all of a renter's maintenance requests. */
+export interface MaintenanceSummary {
+  total: number;
+  open: number;
+  resolved: number;
+  urgent: number;
+  /** Hours from report to resolution, or to now while still open, averaged. */
+  avgResponseHours: number;
+}

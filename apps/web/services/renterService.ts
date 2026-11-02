@@ -21,7 +21,11 @@ import type {
 import type { Conversation, Reminder } from '@/types/messages';
 import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
-import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
+import type {
+  CreateMaintenanceRequestInput,
+  MaintenanceRequest,
+  MaintenanceSummary,
+} from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
 import type { AssistantTurn, RenterAssistantReply } from '@/types/assistant';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
@@ -1200,7 +1204,7 @@ export const renterService = {
 
   // ---- Payments ----
   async listPayments(
-    params: { page?: number; pageSize?: number } = {}
+    params: { page?: number; pageSize?: number; open?: boolean } = {}
   ): Promise<ApiResponse<Paginated<Payment>>> {
     return safeCall(() => authFetch<Paginated<Payment>>(`/renter/payments${toQuery(params)}`));
   },
@@ -1277,6 +1281,10 @@ export const renterService = {
   },
 
   // ---- Maintenance ----
+  async getMaintenanceSummary(): Promise<ApiResponse<MaintenanceSummary>> {
+    return safeCall(() => authFetch<MaintenanceSummary>('/renter/maintenance/summary'));
+  },
+
   async listMaintenanceRequests(
     params: { page?: number; pageSize?: number } = {}
   ): Promise<ApiResponse<Paginated<MaintenanceRequest>>> {

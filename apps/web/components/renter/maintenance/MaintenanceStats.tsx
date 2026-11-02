@@ -2,21 +2,15 @@
 
 import { motion } from 'framer-motion';
 import { Wrench, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import type { MaintenanceRequest } from '@/types/maintenance';
+import type { MaintenanceSummary } from '@/types/maintenance';
 
 interface MaintenanceStatsProps {
-  requests: MaintenanceRequest[];
+  summary: MaintenanceSummary;
 }
 
-export const MaintenanceStats = ({ requests }: MaintenanceStatsProps) => {
-  const total = requests.length;
-  // A closed request is closed: counting everything that is not "resolved" as
-  // open made cancelled requests inflate the Open figure (two cancelled
-  // requests read as "Open · 2" with "Resolved · 0").
-  const CLOSED = ['resolved', 'cancelled'];
-  const open = requests.filter((r) => !CLOSED.includes(r.status)).length;
-  const resolved = requests.filter((r) => r.status === 'resolved').length;
-  const urgent = requests.filter((r) => r.priority === 'urgent').length;
+/** Totals across every request, not just the page on screen. */
+export const MaintenanceStats = ({ summary }: MaintenanceStatsProps) => {
+  const { total, open, resolved, urgent } = summary;
   const stats = [
     {
       icon: Wrench,
