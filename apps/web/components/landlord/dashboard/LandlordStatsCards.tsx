@@ -105,10 +105,17 @@ export const LandlordStatsCards = ({
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-      {stats.map((stat) => (
-        <StatCard key={stat.label} {...stat} />
-      ))}
-    </div>
+    <section aria-label="Portfolio overview" className="mb-8 space-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.slice(4).map((stat) => (
+          <StatCard key={stat.label} {...stat} />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        {stats.slice(0, 4).map((stat) => (
+          <StatCard key={stat.label} {...stat} accent="blue" compact />
+        ))}
+      </div>
+    </section>
   );
 };

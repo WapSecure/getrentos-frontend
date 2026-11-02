@@ -465,10 +465,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
           const headingId = `admin-sidebar-${group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
           return (
             <section key={group.label} aria-labelledby={headingId}>
-              <h2
-                id={headingId}
-                className="mb-2 px-3 text-[11px] font-semibold tracking-[0.04em] text-muted-foreground"
-              >
+              <h2 id={headingId} className="sidebar-label">
                 {group.label}
               </h2>
               <div className="space-y-1">
@@ -481,11 +478,7 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
                       key={item.href}
                       href={item.href}
                       aria-current={isActive ? 'page' : undefined}
-                      className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? 'bg-card text-foreground shadow-xs ring-1 ring-border before:absolute before:bottom-2 before:left-0 before:top-2 before:w-0.5 before:rounded-full before:bg-primary'
-                          : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'
-                      }`}
+                      className="sidebar-item"
                     >
                       <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       <span className="min-w-0 truncate">{item.label}</span>
@@ -524,9 +517,7 @@ export const AdminMobileNavigation = ({
         if (visibleItems.length === 0) return null;
         return (
           <div key={group.label}>
-            <h2 className="mb-1.5 px-4 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {group.label}
-            </h2>
+            <h2 className="sidebar-label">{group.label}</h2>
             <div className="space-y-1">
               {visibleItems.map((item) => {
                 const isActive =
@@ -538,7 +529,7 @@ export const AdminMobileNavigation = ({
                     href={item.href}
                     aria-current={isActive ? 'page' : undefined}
                     onClick={onNavigate}
-                    className={`flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground'}`}
+                    className="sidebar-item"
                   >
                     <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span className="min-w-0 truncate">{item.label}</span>

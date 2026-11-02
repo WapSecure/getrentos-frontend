@@ -52,10 +52,7 @@ export const GatemanNavbar = ({ user }: GatemanNavbarProps) => {
     });
 
   return (
-    <nav
-      aria-label="Gate console"
-      className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl supports-backdrop-filter:bg-background/75"
-    >
+    <nav aria-label="Gate console" className="workspace-navbar sticky top-0 z-50">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center gap-2 h-16">
           <Logo size="md" className="shrink-0 [&>span]:sr-only sm:[&>span]:not-sr-only" />

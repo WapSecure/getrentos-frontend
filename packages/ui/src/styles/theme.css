@@ -1,0 +1,68 @@
+/* Generated from @getrentos/tokens. Run pnpm tokens:sync to update. */
+:root {
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --card-foreground: #1d1d1f;
+  --border: #e0e0e5;
+  --secondary: #eeeef0;
+  --secondary-foreground: #1d1d1f;
+  --muted: #f0f0f2;
+  --muted-foreground: #626268;
+  --accent: #eaf3ff;
+  --accent-foreground: #0055b3;
+  --primary: #0066cc;
+  --primary-hover: #0055b3;
+  --primary-foreground: #ffffff;
+  --destructive: #c81e1e;
+  --destructive-foreground: #ffffff;
+  --info: #0066cc;
+  --success: #0b7a3e;
+  --warning: #99500a;
+  --purple: #6840c2;
+  --info-subtle: #eaf3ff;
+  --success-subtle: #e7f7ef;
+  --warning-subtle: #fdf1e3;
+  --purple-subtle: #f3eefb;
+  --destructive-subtle: #fdecec;
+  --ring: rgba(0, 102, 204, 0.65);
+  --scrim: rgba(29, 29, 31, 0.4);
+}
+
+.dark {
+  --background: #111113;
+  --foreground: #f5f5f7;
+  --card: #1c1c1e;
+  --card-foreground: #f5f5f7;
+  --border: #343437;
+  --secondary: #262629;
+  --secondary-foreground: #f5f5f7;
+  --muted: #222225;
+  --muted-foreground: #a1a1aa;
+  --accent: #142b47;
+  --accent-foreground: #a6caff;
+  --primary: #8db9ff;
+  --primary-hover: #a6caff;
+  --primary-foreground: #111113;
+  --destructive: #f05656;
+  --destructive-foreground: #111113;
+  --info: #8db9ff;
+  --success: #38c57a;
+  --warning: #ffb454;
+  --purple: #a78bfa;
+  --info-subtle: #142b47;
+  --success-subtle: #0e2b1c;
+  --warning-subtle: #2e1f0a;
+  --purple-subtle: #251a3f;
+  --destructive-subtle: #3a1517;
+  --ring: rgba(141, 185, 255, 0.75);
+  --scrim: rgba(0, 0, 0, 0.6);
+}
+
+@theme {
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+}

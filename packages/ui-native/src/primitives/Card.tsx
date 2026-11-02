@@ -6,16 +6,16 @@ export interface CardProps extends ViewProps {
   elevated?: boolean;
 }
 
-/** Surface container. The default padding is `lg` (16); pass `"none"` for lists. */
-export function Card({ padding = 16, elevated = false, style, children, ...rest }: CardProps) {
+/** Surface container. Default padding is `xl` (20); pass `"none"` for lists. */
+export function Card({ padding = 20, elevated = false, style, children, ...rest }: CardProps) {
   const { colors, radius, shadows } = useTheme();
   return (
     <View
       style={[
         {
           backgroundColor: colors.card,
-          borderRadius: radius.md,
-          borderWidth: elevated ? 0 : 1,
+          borderRadius: radius.xl,
+          borderWidth: 1,
           borderColor: colors.border,
           padding: padding === 'none' ? 0 : padding,
           overflow: 'hidden',

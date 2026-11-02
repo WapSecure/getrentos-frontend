@@ -76,12 +76,6 @@ export const LandlordRevenueChart = () => {
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={revenueData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
               <XAxis
                 dataKey="month"
@@ -107,8 +101,8 @@ export const LandlordRevenueChart = () => {
                 dataKey="collected"
                 stroke="var(--primary)"
                 strokeWidth={2}
-                fill="url(#revenueFill)"
-                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
+                fill="var(--accent)"
+                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'var(--card)', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>

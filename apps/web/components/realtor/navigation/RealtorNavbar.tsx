@@ -6,11 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import {
-  IconButton,
-  SearchInput,
-  ThemeToggle,
-} from '@getrentos/ui';
+import { IconButton, SearchInput, ThemeToggle } from '@getrentos/ui';
 import { RealtorProfileDropdown } from './RealtorProfileDropdown';
 import { navGroups } from '../dashboard/RealtorSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -57,13 +53,7 @@ export const RealtorNavbar = ({ user }: RealtorNavbarProps) => {
 
   return (
     <>
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'border-b border-border/60 bg-background/85 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/75'
-            : 'border-b border-border/50 bg-background/75 backdrop-blur-xl supports-backdrop-filter:bg-background/60'
-        }`}
-      >
+      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Logo size="md" />

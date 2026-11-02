@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "packageManager": "pnpm@10.34.1",
   "scripts": {
+    "tokens:sync": "node --experimental-strip-types scripts/sync-design-tokens.mts",
+    "tokens:check": "node --experimental-strip-types scripts/sync-design-tokens.mts --check",
     "dev:web": "pnpm --filter web dev",
     "dev:mobile": "pnpm --filter mobile start",
     "dev:backoffice": "pnpm --filter backoffice dev",
@@ -16,6 +18,7 @@
     "build:all": "pnpm run build:shared && pnpm run build:web && pnpm run build:backoffice",
     "test:e2e": "playwright test",
     "test:e2e:agent-sync": "playwright test --config=playwright.agent-sync.config.ts",
+    "test:e2e:design": "playwright test --config=playwright.design.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "test:e2e:visual": "playwright test --config=playwright.visual.config.ts",

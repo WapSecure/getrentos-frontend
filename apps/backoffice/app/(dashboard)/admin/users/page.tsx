@@ -8,6 +8,7 @@ import {
   ConfirmDialog,
   DataTable,
   PageErrorState,
+  PageHeader,
   SearchInput,
   SegmentedControl,
   useToast,
@@ -215,17 +216,17 @@ export default function AdminUsersPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Users</h1>
-        <p className="text-muted-foreground mt-1">
-          {/* A count is only stated once the directory has actually loaded. */}
-          {data
+      <PageHeader
+        title="Users"
+        eyebrow="Administration"
+        description={
+          data
             ? `${total} user${total === 1 ? '' : 's'} across the platform`
             : isError
               ? 'User count unavailable'
-              : 'Loading users…'}
-        </p>
-      </div>
+              : 'Loading users…'
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <SearchInput

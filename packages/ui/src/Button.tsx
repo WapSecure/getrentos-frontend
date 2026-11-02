@@ -84,7 +84,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const variants = {
       primary: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary-hover',
       secondary:
-        'bg-secondary text-secondary-foreground border border-border/70 shadow-xs hover:bg-foreground/[0.05] hover:border-border',
+        'bg-secondary text-secondary-foreground border border-transparent hover:bg-foreground/[0.08]',
       outline:
         'bg-card text-foreground border border-border shadow-xs hover:border-foreground/25 hover:bg-secondary/60 hover:shadow-sm',
       ghost: 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground',
@@ -95,15 +95,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const sizes = {
       xs: 'min-h-8 px-2.5 py-1 text-xs',
       sm: 'min-h-9 px-3 py-1.5 text-sm',
-      md: 'min-h-10 px-4 py-2 text-sm',
-      lg: 'min-h-11 px-5 py-2.5 text-base',
+      md: 'min-h-11 px-4 py-2.5 text-sm',
+      lg: 'min-h-12 px-5 py-3 text-base',
       xl: 'min-h-12 px-6 py-3 text-base',
     };
 
     const roundedStyles = {
       none: 'rounded-none',
       sm: 'rounded-md',
-      md: 'rounded-lg',
+      md: 'rounded-md',
       lg: 'rounded-xl',
       full: 'rounded-full',
     };

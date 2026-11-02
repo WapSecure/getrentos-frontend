@@ -66,10 +66,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className={cn(
-        'inline-flex items-center gap-0.5 rounded-lg border border-border bg-secondary/60 p-0.5',
-        className
-      )}
+      className={cn('inline-flex items-center gap-0.5 rounded-md bg-secondary p-1', className)}
     >
       {segments.map((segment, index) => {
         const active = segment.value === value;
@@ -89,13 +86,13 @@ export function SegmentedControl<T extends string>({
             onClick={() => onValueChange(segment.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              'inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-[background-color,color,box-shadow] duration-150',
+              'inline-flex items-center justify-center gap-1.5 rounded-sm font-medium transition-[background-color,color,box-shadow] duration-150',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
-              size === 'sm' ? 'h-7 px-2.5 text-xs' : 'h-8 px-3 text-sm',
-              iconOnly && (size === 'sm' ? 'w-7 px-0' : 'w-8 px-0'),
+              size === 'sm' ? 'min-h-8 px-2.5 text-xs' : 'min-h-9 px-3 text-sm',
+              iconOnly && (size === 'sm' ? 'w-8 px-0' : 'w-9 px-0'),
               active
                 ? 'bg-card text-foreground shadow-xs'
-                : 'text-foreground/75 hover:text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {segment.icon && (

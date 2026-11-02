@@ -1,90 +1,28 @@
 @import 'tailwindcss';
+@import './theme.css';
 
 @source "../**/*.{ts,tsx}";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* -apple-system resolves to San Francisco on Apple platforms. SF Pro is not
-     bundled with the app, so other platforms fall back to their native UI face. */
+  /* Use the platform UI face without a font download or late layout shift. */
   --font-ui:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Helvetica,
-    Arial, sans-serif;
-  /* Quiet, warm-neutral canvas with a sober blue reserved for actions. */
-  --background: #f7f7f5;
-  --foreground: #172033;
-  --card: #ffffff;
-  --card-foreground: #172033;
-  --border: #e2e4e8;
-  --secondary: #f0f1f2;
-  --secondary-foreground: #172033;
-  --muted: #f2f3f3;
-  /* AA (4.5:1+) as body text on every light surface: card, canvas, secondary. */
-  --muted-foreground: #5d6679;
-  --accent: #edf3fc;
-  --accent-foreground: #1849a9;
-  --primary: #175cd3;
-  --primary-hover: #1849a9;
-  --primary-foreground: #ffffff;
-  /* Status colours match packages/tokens: each passes WCAG AA as text on
-     white and on its own -subtle background. */
-  --destructive: #c81e1e;
-  --destructive-foreground: #ffffff;
-  --info: #175cd3;
-  --success: #0b7a3e;
-  --warning: #99500a;
-  --purple: #6840c2;
-  --info-subtle: #edf3fc;
-  --success-subtle: #e7f7ef;
-  --warning-subtle: #fdf1e3;
-  --purple-subtle: #f3eefb;
-  --destructive-subtle: #fdecec;
-  --radius: 0.625rem;
-  /* Layered, soft elevation shadows — premium “hairline + float” depth. */
-  --shadow-xs: 0 1px 2px rgb(22 27 34 / 0.05);
-  --shadow-sm: 0 1px 2px rgb(22 27 34 / 0.04), 0 2px 6px -1px rgb(22 27 34 / 0.06);
-  --shadow-md: 0 2px 6px -2px rgb(22 27 34 / 0.06), 0 12px 28px -8px rgb(22 27 34 / 0.14);
-  --shadow-lg: 0 8px 16px -4px rgb(22 27 34 / 0.08), 0 28px 56px -16px rgb(22 27 34 / 0.2);
-  --shadow-xl: 0 24px 48px -12px rgb(22 27 34 / 0.14), 0 48px 96px -32px rgb(22 27 34 / 0.24);
-  --ring: rgb(23 92 211 / 0.28);
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --radius: 0.75rem;
+  --shadow-xs: 0 1px 3px rgb(29 29 31 / 0.03);
+  --shadow-sm: 0 2px 8px -2px rgb(29 29 31 / 0.06);
+  --shadow-md: 0 4px 16px -4px rgb(29 29 31 / 0.08), 0 12px 32px -12px rgb(29 29 31 / 0.08);
+  --shadow-lg: 0 12px 40px -12px rgb(29 29 31 / 0.16);
+  --shadow-xl: 0 24px 80px -20px rgb(29 29 31 / 0.24);
 }
 
 .dark {
-  /* Soft, deep canvas instead of pure black — surfaces layer gently, no crush. */
-  --background: #0d1117;
-  --foreground: #f0f2f5;
-  --card: #151a22;
-  --card-foreground: #f0f2f5;
-  --border: #2a303b;
-  --secondary: #1d232d;
-  --secondary-foreground: #f0f2f5;
-  --muted: #181e27;
-  --muted-foreground: #9ba4b4;
-  --accent: #142a4f;
-  --accent-foreground: #9ac2ff;
-  --primary: #4b8ff7;
-  --primary-hover: #6da4f7;
-  /* White on these bright dark-theme fills is only ~3.2:1, so filled buttons
-     and badges carry the canvas ink instead (5.5:1+). */
-  --primary-foreground: #0d1117;
-  --destructive: #f05656;
-  --destructive-foreground: #0d1117;
-  /* Lighter than primary so info text stays AA on --info-subtle. */
-  --info: #6da4f7;
-  --success: #38c57a;
-  --warning: #ffb454;
-  --purple: #a78bfa;
-  --info-subtle: #142a4f;
-  --success-subtle: #0e2b1c;
-  --warning-subtle: #2e1f0a;
-  --purple-subtle: #251a3f;
-  --destructive-subtle: #3a1517;
-  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.35);
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px -1px rgb(0 0 0 / 0.45);
-  --shadow-md: 0 2px 8px -2px rgb(0 0 0 / 0.4), 0 16px 32px -8px rgb(0 0 0 / 0.55);
-  --shadow-lg: 0 12px 24px -8px rgb(0 0 0 / 0.5), 0 36px 64px -20px rgb(0 0 0 / 0.6);
-  --shadow-xl: 0 32px 64px -16px rgb(0 0 0 / 0.55), 0 64px 128px -40px rgb(0 0 0 / 0.7);
-  --ring: rgb(75 143 247 / 0.4);
+  --shadow-xs: 0 1px 3px rgb(0 0 0 / 0.12);
+  --shadow-sm: 0 2px 8px -2px rgb(0 0 0 / 0.2);
+  --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 16px 48px -12px rgb(0 0 0 / 0.4);
+  --shadow-xl: 0 24px 80px -20px rgb(0 0 0 / 0.5);
 }
 
 @theme inline {
@@ -120,9 +58,6 @@
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
 }
 
 @layer base {
@@ -173,7 +108,7 @@
   select,
   textarea {
     border: 1px solid var(--color-border);
-    border-radius: 0.625rem;
+    border-radius: var(--radius-md);
     background-color: var(--color-card);
     color: var(--color-foreground);
     box-shadow: 0 1px 1px rgb(0 0 0 / 0.02);
@@ -356,7 +291,7 @@
     width: 100%;
     max-width: 90rem;
     margin-inline: auto;
-    padding: 1.5rem;
+    padding: clamp(1.25rem, 2.5vw, 2.5rem);
   }
 
   .app-page-narrow {
@@ -365,15 +300,59 @@
 
   .page-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  /* Navigation is the translucent layer; working surfaces stay opaque. */
+  .workspace-navbar {
+    border-bottom: 1px solid var(--border);
+    background-color: var(--card);
+  }
+
+  .workspace-sidebar {
+    background-color: var(--background);
+  }
+
+  .sidebar-label {
+    margin-bottom: 0.5rem;
+    padding-inline: 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .sidebar-item {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: var(--radius-md);
+    padding: 0.625rem 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .sidebar-item:hover {
+    color: var(--foreground);
+    background-color: var(--secondary);
+  }
+
+  .sidebar-item[aria-current='page'] {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
   }
 
   .page-title {
-    font-size: clamp(1.5rem, 2vw, 2rem);
-    font-weight: 650;
+    font-size: clamp(1.75rem, 2.3vw, 2.125rem);
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.035em;
   }
@@ -398,7 +377,28 @@
 
   .page-header {
     flex-direction: column;
+    align-items: stretch;
     margin-bottom: 1.25rem;
+  }
+}
+
+@supports (backdrop-filter: blur(20px)) {
+  @media (prefers-reduced-transparency: no-preference) {
+    .workspace-navbar {
+      background-color: color-mix(in srgb, var(--card) 88%, transparent);
+      backdrop-filter: saturate(140%) blur(20px);
+    }
+  }
+}
+
+@media (prefers-contrast: more) {
+  .workspace-navbar {
+    background-color: var(--card);
+    backdrop-filter: none;
+  }
+  .sidebar-item[aria-current='page'] {
+    outline: 1px solid currentColor;
+    outline-offset: -1px;
   }
 }
 

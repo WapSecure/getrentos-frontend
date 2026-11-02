@@ -11,7 +11,7 @@ interface EmptyStateProps {
   secondaryAction?: ReactNode;
   /** `compact` sits inside a card or panel; `default` fills a page section. */
   size?: 'default' | 'compact';
-  /** Drop the dashed frame when the parent already draws one. */
+  /** Drop the frame when the parent already draws one. */
   bare?: boolean;
   className?: string;
 }
@@ -32,15 +32,15 @@ export const EmptyState = ({
       role="status"
       className={cn(
         'text-center',
-        !bare && 'rounded-xl border border-dashed border-border bg-card',
-        compact ? 'px-5 py-8' : 'px-6 py-12',
+        !bare && 'rounded-xl border border-border bg-card',
+        compact ? 'px-5 py-8' : 'px-6 py-16',
         className
       )}
     >
       <div
         className={cn(
-          'mx-auto flex items-center justify-center rounded-lg border border-border bg-secondary/60',
-          compact ? 'mb-3 h-9 w-9' : 'mb-4 h-10 w-10'
+          'mx-auto flex items-center justify-center rounded-xl bg-secondary',
+          compact ? 'mb-4 h-10 w-10' : 'mb-5 h-14 w-14'
         )}
       >
         <Icon

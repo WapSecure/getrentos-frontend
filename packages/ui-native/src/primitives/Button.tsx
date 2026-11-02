@@ -60,7 +60,7 @@ export function Button({
 
   const textStyle = {
     color: palette.fg,
-    fontWeight: '700' as const,
+    fontWeight: '600' as const,
     flexShrink: 1,
     textAlign: 'center' as const,
   };

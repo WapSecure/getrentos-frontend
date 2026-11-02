@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist } from 'next/font/google';
 import { ThemeProvider } from '@getrentos/ui/providers/ThemeProvider';
 import { QueryProvider } from '@getrentos/ui/providers/QueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
@@ -12,15 +11,6 @@ import {
   SITE_TWITTER_HANDLE,
 } from '@/lib/site';
 import './globals.css';
-
-// The shared UI theme resolves typography through the `--font-ui` CSS variable
-// (see packages/ui/src/styles/index.css), so next/font is wired directly to it
-//: no duplicate font stacks, no layout shift from late-loaded fonts.
-const geist = Geist({
-  subsets: ['latin'],
-  variable: '--font-ui',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -88,7 +78,7 @@ export const viewport: Viewport = {
  */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={geist.variable}>
+    <html lang="en" suppressHydrationWarning>
       <body className="bg-background antialiased">
         <ThemeProvider>
           <QueryProvider>

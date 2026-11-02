@@ -50,12 +50,12 @@ export function DataTable<T>({
       <div className="overflow-x-auto" tabIndex={0}>
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10">
-            <tr className="border-b border-border/80 bg-muted/40 text-left">
+            <tr className="border-b border-border bg-secondary/50 text-left">
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={cn(
-                    'whitespace-nowrap px-5 py-3 text-xs font-semibold tracking-[0.02em] text-muted-foreground',
+                    'whitespace-nowrap px-5 py-3.5 text-[13px] font-medium text-muted-foreground',
                     column.align === 'center' && 'text-center',
                     column.align === 'right' && 'text-right'
                   )}
@@ -92,7 +92,7 @@ export function DataTable<T>({
                   <td
                     key={column.key}
                     className={cn(
-                      'px-5 py-3.5 align-middle',
+                      'px-5 py-4 align-middle',
                       column.align === 'center' && 'text-center',
                       column.align === 'right' && 'text-right tabular-nums',
                       column.className
