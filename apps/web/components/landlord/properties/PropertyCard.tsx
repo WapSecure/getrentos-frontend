@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   MapPin,
   DoorOpen,
@@ -18,6 +17,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  IconButton,
 } from '@getrentos/ui';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
@@ -50,7 +50,7 @@ export const PropertyCard = ({
   onToggleArchive,
   onDelete,
   onVerify,
-  delay = 0,
+  delay: _delay = 0,
 }: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
   const vacantUnits = property.totalUnits - property.occupiedUnits;
@@ -63,14 +63,8 @@ export const PropertyCard = ({
   const showCover = Boolean(property.coverImage) && !coverFailed;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      onClick={onClick}
-      className="group bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
-    >
-      <div className="relative h-40 bg-muted">
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-shadow hover:shadow-md">
+      <div className="relative aspect-[16/10] bg-muted">
         {showCover ? (
           // Signed storage URLs are not in next.config's remotePatterns, so
           // next/image cannot optimise these; the same escape hatch is used by
@@ -89,11 +83,13 @@ export const PropertyCard = ({
           </div>
         )}
         <button
+          type="button"
+          aria-label={`Verification: ${verification.label}`}
           onClick={(e) => {
             e.stopPropagation();
             onVerify?.();
           }}
-          className="absolute top-3 left-3 rounded-full hover:opacity-80 transition-opacity"
+          className="absolute top-3 left-3 z-10 rounded-full hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           title={verification.label}
         >
           <Badge
@@ -105,15 +101,14 @@ export const PropertyCard = ({
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              aria-label={`More actions for ${property.name}`}
+            <IconButton
+              label={`More actions for ${property.name}`}
               title="More actions"
+              size="sm"
+              icon={<MoreVertical />}
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
-            >
-              <MoreVertical className="w-4 h-4 text-foreground" />
-            </button>
+              className="absolute top-3 right-3 z-10 bg-card text-foreground hover:bg-secondary"
+            />
           </DropdownMenuTrigger>
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onSelect={() => onEdit?.()}>
@@ -141,29 +136,41 @@ export const PropertyCard = ({
         )}
       </div>
 
-      <div className="p-4">
+      <div className="p-5">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-foreground truncate">{property.name}</h3>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground whitespace-nowrap">
+          <h3 className="min-w-0 font-semibold text-foreground">
+            {onClick ? (
+              <button
+                type="button"
+                onClick={onClick}
+                className="text-left after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary focus-visible:after:ring-inset"
+              >
+                {property.name}
+              </button>
+            ) : (
+              property.name
+            )}
+          </h3>
+          <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-xs text-muted-foreground">
             {propertyTypeLabels[property.type]}
           </span>
         </div>
-        <p className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+        <p className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="w-3 h-3" />
           {property.city}, {property.state}
         </p>
         {property.referenceCode && (
-          <div className="mt-2">
+          <div className="relative z-10 mt-3 w-fit">
             <ReferenceCodeChip code={property.referenceCode} />
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <DoorOpen className="w-4 h-4 text-muted-foreground/60" />
             {property.occupiedUnits}/{property.totalUnits} occupied
           </div>
-          <p className="text-sm font-semibold text-primary">
+          <p className="data-value text-base font-semibold text-foreground">
             {formatCurrency(property.annualRentRoll, { compact: true })}/yr
           </p>
         </div>
@@ -175,11 +182,11 @@ export const PropertyCard = ({
           />
         </div>
         {vacantUnits > 0 && (
-          <p className="text-xs text-muted-foreground/60 mt-1.5">
+          <p className="mt-2 text-xs text-muted-foreground">
             {vacantUnits} unit{vacantUnits === 1 ? '' : 's'} vacant
           </p>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };

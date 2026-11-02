@@ -40,7 +40,7 @@ export function controlShell(opts: {
 }) {
   const states = STATE[opts.wraps ? 'wraps' : 'self'];
   return cn(
-    'w-full rounded-lg border bg-card text-foreground outline-none transition-[border-color,background-color,box-shadow] duration-150',
+    'w-full rounded-md border bg-card text-foreground outline-none transition-[border-color,background-color,box-shadow] duration-150',
     SIZE[opts.size ?? 'md'],
     opts.invalid ? states.invalid : states.normal,
     opts.readOnly && 'bg-secondary/40',

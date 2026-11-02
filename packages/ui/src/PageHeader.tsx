@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 import { cn } from '@getrentos/shared';
 
 export interface PageHeaderProps {
-  title: string;
-  description?: string;
+  title: ReactNode;
+  description?: ReactNode;
   eyebrow?: string;
   actions?: ReactNode;
   meta?: ReactNode;
@@ -27,9 +27,7 @@ export function PageHeader({
     <header className={cn('page-header', className)}>
       <div className="min-w-0">
         {eyebrow ? (
-          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-            {eyebrow}
-          </p>
+          <p className="mb-2 text-sm font-medium text-muted-foreground">{eyebrow}</p>
         ) : null}
         <h1 className="page-title">{title}</h1>
         {description ? <p className="page-description">{description}</p> : null}

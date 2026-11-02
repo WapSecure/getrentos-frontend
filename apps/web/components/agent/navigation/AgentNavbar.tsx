@@ -6,12 +6,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Wifi, WifiOff } from 'lucide-react';
 import { Logo } from '@/components/ui/Logo';
-import {
-  Badge,
-  IconButton,
-  SearchInput,
-  ThemeToggle,
-} from '@getrentos/ui';
+import { Badge, IconButton, SearchInput, ThemeToggle } from '@getrentos/ui';
 import { AgentProfileDropdown } from './AgentProfileDropdown';
 import { navGroups } from '../dashboard/AgentSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
@@ -67,13 +62,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
 
   return (
     <>
-      <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'border-b border-border/60 bg-background/85 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/75'
-            : 'border-b border-border/50 bg-background/75 backdrop-blur-xl supports-backdrop-filter:bg-background/60'
-        }`}
-      >
+      <nav className={`workspace-navbar sticky top-0 z-50 ${isScrolled ? 'shadow-xs' : ''}`}>
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Logo size="md" />

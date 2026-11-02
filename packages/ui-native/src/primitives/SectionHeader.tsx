@@ -33,7 +33,7 @@ export function SectionHeader({ title, description, actionLabel, onAction }: Sec
           hitSlop={8}
           style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: spacing.xxs }}
         >
-          <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
+          <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
             {actionLabel}
           </Text>
           <ChevronRight size={16} color={colors.primary} />

@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import * as RadixDialog from '@radix-ui/react-dialog';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@getrentos/shared';
 
@@ -80,6 +80,7 @@ export const DialogContent = ({
   closeOnOutsideClick = 'until-edited',
 }: DialogContentProps) => {
   const edited = useRef(false);
+  const reduceMotion = useReducedMotion();
   const returnTo = useContext(ReturnFocusContext);
   // A caller's own `max-w-*` is the width they meant; the size default would
   // otherwise win on sm+ screens because it carries the `sm:` prefix.
@@ -91,7 +92,7 @@ export const DialogContent = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/55"
+          className="fixed inset-0 z-50 bg-[var(--scrim)]"
         />
       </RadixDialog.Overlay>
       <RadixDialog.Content
@@ -114,9 +115,9 @@ export const DialogContent = ({
         }}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 8 }}
+          initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.98, y: reduceMotion ? 0 : 8 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 8 }}
+          exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.98, y: reduceMotion ? 0 : 8 }}
           onInputCapture={() => {
             edited.current = true;
           }}
@@ -124,9 +125,9 @@ export const DialogContent = ({
             // p-6 is the default so a modal is never flush to the edge; a full-bleed
             // modal (image preview, section layout with full-width dividers) opts out
             // with `p-0`, and tailwind-merge lets that — or any p-* — win over this.
-            'fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] w-full overflow-y-auto rounded-t-xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl',
+            'fixed bottom-0 left-0 right-0 z-50 max-h-[92dvh] w-full overflow-y-auto rounded-t-2xl border border-border bg-card shadow-xl focus:outline-none sm:bottom-auto sm:left-1/2 sm:right-auto sm:top-1/2 sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl',
             !ownWidth && DIALOG_WIDTH[size],
-            padded && 'p-5 sm:p-6',
+            padded && 'px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-7',
             className
           )}
         >
