@@ -6,7 +6,6 @@ import {
   Badge,
   Button,
   Card,
-  CardSkeleton,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -88,7 +87,7 @@ export function DisputeQueue({
     onError: (err: Error) => notify(err.message, 'error'),
   });
 
-  if (error && !data) {
+  if (error) {
     return <PageErrorState description={(error as Error).message} onRetry={() => void refetch()} />;
   }
 
@@ -110,7 +109,7 @@ export function DisputeQueue({
       {isLoading ? (
         <div className="space-y-3">
           {[0, 1].map((row) => (
-            <CardSkeleton key={row} />
+            <div key={row} className="h-28 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : rows.length === 0 ? (

@@ -35,7 +35,9 @@ export function CapabilityChip({ on, label }: { on: boolean; label: string }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        on ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground line-through'
+        on
+          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          : 'bg-muted text-muted-foreground line-through'
       }`}
     >
       {label}
@@ -58,6 +60,5 @@ export function formatMoment(value: string | null | undefined): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: 'Africa/Lagos',
   });
 }

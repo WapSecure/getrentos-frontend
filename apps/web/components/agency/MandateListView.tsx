@@ -3,21 +3,11 @@
 import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building2, FileSignature, Lock, ShieldCheck, UserRound } from 'lucide-react';
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  CardSkeleton,
-  EmptyState,
-  PageErrorState,
-  Skeleton,
-} from '@getrentos/ui';
+import { Badge, Button, Card, EmptyState, PageErrorState } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
 import {
-  MANDATE_SCOPE_CHIP,
   MANDATE_SCOPE_LABELS,
   MANDATE_STATUS_LABELS,
   formatDay,
@@ -29,7 +19,6 @@ import {
 } from '@/services/mandateService';
 import { MandateActionButtons } from './MandateActionButtons';
 import { useMandateActions, type ReasonAction, type SimpleAction } from './useMandateActions';
-import { describeAgencyError } from './agencyAccess';
 
 /**
  * The engagements a firm holds, and what can be done to each one.
@@ -79,8 +68,8 @@ export function MandateListView() {
     void queryClient.invalidateQueries({ queryKey: mandateKeys.mine });
   };
 
-  if (error && !data) {
-    return <PageErrorState description={describeAgencyError(error)} onRetry={invalidate} />;
+  if (error) {
+    return <PageErrorState description={(error as Error).message} onRetry={invalidate} />;
   }
 
   const mandates = data ?? [];
@@ -89,10 +78,10 @@ export function MandateListView() {
   if (isLoading) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
-        <Skeleton className="h-6 w-56" />
+        <div className="h-6 w-56 animate-pulse rounded bg-muted" />
         <div className="mt-4 space-y-4">
           {[0, 1].map((row) => (
-            <CardSkeleton key={row} />
+            <div key={row} className="h-32 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       </div>
@@ -115,7 +104,11 @@ export function MandateListView() {
         </Button>
       </header>
 
-      {act.isError && <Alert variant="danger">{(act.error as Error).message}</Alert>}
+      {act.isError && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {(act.error as Error).message}
+        </div>
+      )}
 
       {mandates.length === 0 ? (
         <EmptyState
@@ -200,7 +193,7 @@ function MandateCard({
             title={MANDATE_SCOPE_LABELS[scope]}
             className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground"
           >
-            {MANDATE_SCOPE_CHIP[scope]}
+            {scope}
           </span>
         ))}
         <CapabilityChip on={mandate.capabilities.canList} label="list" />
@@ -231,7 +224,9 @@ function CapabilityChip({ on, label }: { on: boolean; label: string }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        on ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground line-through'
+        on
+          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+          : 'bg-muted text-muted-foreground line-through'
       }`}
     >
       {label}

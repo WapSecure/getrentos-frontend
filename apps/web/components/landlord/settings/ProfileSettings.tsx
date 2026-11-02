@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { SafeImage } from '@/components/shared/media/SafeImage';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, SaveButton } from '@getrentos/ui';
+import { Button } from '@getrentos/ui';
+import { SaveButton } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
@@ -58,7 +59,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         Manage your personal and business information
       </p>
 
-      <div className="flex flex-wrap items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-6">
         <SafeImage
           src={avatarUrl}
           alt={fullName || 'User'}
@@ -83,6 +84,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           variant="outline"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
+          disabled={isUploadingAvatar}
           isLoading={isUploadingAvatar}
         >
           Change Photo
@@ -90,30 +92,47 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       </div>
 
       <div className="space-y-4">
-        <Field label="Full Name">
-          <Input
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Full Name</label>
+          <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(nameOnly(e.target.value))}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </Field>
+        </div>
         <div>
-          <Field label="Email Address">
-            <Input type="email" value={email} readOnly />
-          </Field>
+          <label className="block text-sm font-medium text-foreground mb-1">Email Address</label>
+          <input
+            type="email"
+            value={email}
+            readOnly
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone Number">
-          <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </Field>
-        <Field label="Company / Business Name" optionalLabel="(optional)">
-          <Input
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Phone Number</label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Company / Business Name{' '}
+            <span className="text-muted-foreground/60 font-normal">(optional)</span>
+          </label>
+          <input
             type="text"
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder="e.g. Okafor Properties Ltd"
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </Field>
+        </div>
       </div>
 
       <SaveButton label="Save Changes" className="mt-6" onClick={handleSave} />

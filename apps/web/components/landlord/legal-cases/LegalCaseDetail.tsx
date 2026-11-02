@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import {
   Button,
-  CurrencyInput,
   DatePicker,
   Dialog,
   DialogContent,
@@ -25,8 +24,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Field,
-  IconButton,
-  Input,
   Select,
   Textarea,
 } from '@getrentos/ui';
@@ -315,7 +312,12 @@ export function LegalCaseDetail({
           {!isDone && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <IconButton label="Case actions" size="sm" icon={<MoreVertical />} />
+                <button
+                  aria-label="Case actions"
+                  className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onSelect={openAdvocate}>
@@ -414,16 +416,18 @@ export function LegalCaseDetail({
             </h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <Field label="Court" required>
-                <Input
+                <input
                   value={court}
                   onChange={(event) => setCourt(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   placeholder="Lagos High Court"
                 />
               </Field>
               <Field label="Suit number" required>
-                <Input
+                <input
                   value={suitNumber}
                   onChange={(event) => setSuitNumber(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   placeholder="LD/1234/2026"
                 />
               </Field>
@@ -623,24 +627,27 @@ export function LegalCaseDetail({
             </h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <Field label="Advocate" required>
-                <Input
+                <input
                   value={advName}
                   onChange={(event) => setAdvName(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   placeholder="Adaeze Okafor"
                 />
               </Field>
               <Field label="Firm">
-                <Input
+                <input
                   value={advFirm}
                   onChange={(event) => setAdvFirm(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   placeholder="Okafor & Co."
                 />
               </Field>
             </div>
             <Field label="Contact">
-              <Input
+              <input
                 value={advContact}
                 onChange={(event) => setAdvContact(event.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                 placeholder="Phone or email, as on the brief"
               />
             </Field>
@@ -690,11 +697,13 @@ export function LegalCaseDetail({
               owner&rsquo;s account on their next statement.
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <Field label="Amount" required>
-                <CurrencyInput
-                  prefix="₦"
+              <Field label="Amount (₦)" required>
+                <input
+                  type="number"
+                  min={1}
                   value={costAmount}
-                  onValueChange={(v) => setCostAmount(v === 0 ? '' : String(v))}
+                  onChange={(event) => setCostAmount(event.target.value)}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                   placeholder="250000"
                 />
               </Field>
@@ -707,9 +716,10 @@ export function LegalCaseDetail({
               </Field>
             </div>
             <Field label="What it was for" required>
-              <Input
+              <input
                 value={costNote}
                 onChange={(event) => setCostNote(event.target.value)}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
                 placeholder="Filing fee"
               />
             </Field>

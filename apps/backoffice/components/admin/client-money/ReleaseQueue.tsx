@@ -2,15 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Badge,
-  Button,
-  Card,
-  CardSkeleton,
-  ConfirmDialog,
-  EmptyState,
-  PageErrorState,
-} from '@getrentos/ui';
+import { Badge, Button, Card, ConfirmDialog, EmptyState, PageErrorState } from '@getrentos/ui';
 import { Inbox } from 'lucide-react';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -133,7 +125,7 @@ export function ReleaseQueue({
     onError: (err: Error) => notify(err.message, 'error'),
   });
 
-  if (error && !data) {
+  if (error) {
     return <PageErrorState description={(error as Error).message} onRetry={() => void refetch()} />;
   }
 
@@ -154,7 +146,7 @@ export function ReleaseQueue({
       {isLoading ? (
         <div className="space-y-3">
           {[0, 1].map((row) => (
-            <CardSkeleton key={row} />
+            <div key={row} className="h-24 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : rows.length === 0 ? (

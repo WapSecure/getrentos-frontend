@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, Eye, Check, X, MessageSquareText } from 'lucide-react';
-import { Badge, Button, IconButton } from '@getrentos/ui';
+import { Badge, Button } from '@getrentos/ui';
 import { applicationStatusBadges } from '@/lib/statusBadge';
 import { formatCurrency, formatDate, getInitials } from '@/lib/format';
 import type { RentalApplication } from '@/types/landlord';
@@ -32,7 +32,7 @@ export const ApplicationCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="min-w-0 rounded-2xl border border-border bg-card p-4"
+      className="bg-card rounded-2xl border border-border p-4"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -60,13 +60,13 @@ export const ApplicationCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-foreground/70">Monthly Income</p>
+          <p className="text-xs text-muted-foreground/60">Monthly Income</p>
           <p className="text-sm font-medium text-foreground">
             {formatCurrency(application.monthlyIncome, { compact: true })}
           </p>
         </div>
         <div>
-          <p className="text-xs text-foreground/70">Applied</p>
+          <p className="text-xs text-muted-foreground/60">Applied</p>
           <p className="text-sm font-medium text-foreground">
             {formatDate(application.applicationDate)}
           </p>
@@ -85,19 +85,29 @@ export const ApplicationCard = ({
         </Button>
         {!isDecided && (
           <>
-            <IconButton
-              label="Request more info"
+            <Button
+              variant="ghost"
               size="sm"
-              icon={<MessageSquareText />}
+              className="px-2.5 text-muted-foreground"
+              title="Request more info"
               onClick={onRequestInfo}
-            />
-            <IconButton label="Reject" variant="danger" size="sm" icon={<X />} onClick={onReject} />
+            >
+              <MessageSquareText className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="px-2.5 text-destructive hover:text-destructive"
+              title="Reject"
+              onClick={onReject}
+            >
+              <X className="w-4 h-4" />
+            </Button>
             <Button
               variant="primary"
               size="sm"
               className="px-2.5"
               title="Approve"
-              aria-label="Approve"
               onClick={onApprove}
             >
               <Check className="w-4 h-4" />

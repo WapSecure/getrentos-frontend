@@ -79,7 +79,7 @@ export function StatementDisputeSection({
   canRaise: boolean;
   isRaising?: boolean;
   isWithdrawing?: boolean;
-  onRaise: (lineId: string, reason: string) => Promise<boolean>;
+  onRaise: (lineId: string, reason: string) => void;
   onWithdraw: (disputeId: string) => void;
 }) {
   const [lineId, setLineId] = useState('');
@@ -219,12 +219,10 @@ export function StatementDisputeSection({
                   className="gap-2"
                   isLoading={isRaising}
                   disabled={!longEnough}
-                  onClick={async () => {
-                    const raised = await onRaise(lineId, reason.trim());
-                    if (raised) {
-                      setLineId('');
-                      setReason('');
-                    }
+                  onClick={() => {
+                    onRaise(lineId, reason.trim());
+                    setLineId('');
+                    setReason('');
                   }}
                 >
                   <Gavel className="h-4 w-4" />

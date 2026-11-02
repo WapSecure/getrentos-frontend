@@ -1,18 +1,13 @@
 'use client';
 
+import { LegacyInput, NumberInput } from '@getrentos/ui';
+
+import { LegacySelect } from '@getrentos/ui';
+
 import { useState } from 'react';
-import {
-  Button,
-  CurrencyInput,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  Field,
-  Input,
-  NumberInput,
-  Select,
-} from '@getrentos/ui';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { Button, CurrencyInput } from '@getrentos/ui';
 import type { Property, Unit } from '@/types/landlord';
 
 interface AddUnitModalProps {
@@ -20,9 +15,7 @@ interface AddUnitModalProps {
   onClose: () => void;
   properties: Property[];
   defaultPropertyId?: string;
-  onSave: (
-    unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
-  ) => Promise<boolean>;
+  onSave: (unit: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>) => void;
 }
 
 export const AddUnitModal = ({
@@ -38,7 +31,6 @@ export const AddUnitModal = ({
   const [bathrooms, setBathrooms] = useState('1');
   const [askingRent, setAskingRent] = useState('');
   const [askingRentPeriod, setAskingRentPeriod] = useState<'year' | 'month'>('year');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const propertyId = properties.some((p) => p.id === selectedPropertyId)
     ? selectedPropertyId
@@ -54,11 +46,10 @@ export const AddUnitModal = ({
     onClose();
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const property = properties.find((p) => p.id === propertyId);
-    if (!property || !unitName.trim() || isSubmitting) return;
-    setIsSubmitting(true);
-    const saved = await onSave({
+    if (!property || !unitName.trim()) return;
+    onSave({
       propertyId,
       propertyName: property.name,
       unitName: unitName.trim(),
@@ -67,96 +58,126 @@ export const AddUnitModal = ({
       askingRent: askingRent ? Number(askingRent) : undefined,
       askingRentPeriod,
     });
-    setIsSubmitting(false);
-    if (saved) handleClose();
+    handleClose();
   };
 
   const isValid = propertyId && unitName.trim();
 
   return (
-    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
-      <DialogContent padded={false}>
-        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
-          <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Add Unit</DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-              Define a new unit within a property
-            </DialogDescription>
-          </div>
-        </div>
-
-        <div className="p-4 space-y-4">
-          <Field label="Property" required>
-            <Select
-              value={propertyId}
-              onValueChange={setSelectedPropertyId}
-              options={properties.map((p) => ({ value: p.id, label: p.name }))}
-            />
-          </Field>
-
-          <Field label="Unit Name" required>
-            <Input
-              type="text"
-              value={unitName}
-              onChange={(e) => setUnitName(e.target.value)}
-              placeholder="e.g. Unit 3B"
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Bedrooms">
-              <NumberInput min={0} value={bedrooms} onValueChange={setBedrooms} />
-            </Field>
-            <Field label="Bathrooms">
-              <NumberInput min={0} value={bathrooms} onValueChange={setBathrooms} />
-            </Field>
-          </div>
-
-          <Field
-            label="Rent"
-            hint="Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what the advert will ask for."
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-card rounded-xl max-w-md w-full overflow-hidden"
           >
-            <div className="flex gap-2">
-              <CurrencyInput
-                prefix="₦"
-                min={0}
-                value={askingRent}
-                onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
-                placeholder={askingRentPeriod === 'year' ? '2500000' : '250000'}
-                className="min-w-0 flex-1"
-              />
-              <div className="w-32 shrink-0">
-                <Select
-                  id="unit-rent-period"
-                  value={askingRentPeriod}
-                  onValueChange={(value) => setAskingRentPeriod(value as 'year' | 'month')}
-                  ariaLabel="Rent period"
-                  searchable={false}
-                  options={[
-                    { value: 'year', label: 'per year' },
-                    { value: 'month', label: 'per month' },
-                  ]}
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <div>
+                <h3 className="font-semibold text-foreground">Add Unit</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Define a new unit within a property
+                </p>
+              </div>
+              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Property <span className="text-destructive">*</span>
+                </label>
+                <LegacySelect
+                  value={propertyId}
+                  onChange={(e) => setSelectedPropertyId(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  {properties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </LegacySelect>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Unit Name <span className="text-destructive">*</span>
+                </label>
+                <LegacyInput
+                  type="text"
+                  value={unitName}
+                  onChange={(e) => setUnitName(e.target.value)}
+                  placeholder="e.g. Unit 3B"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
-            </div>
-          </Field>
-        </div>
 
-        <div className="p-4 border-t border-border flex gap-3">
-          <Button
-            variant="primary"
-            fullWidth
-            onClick={() => void handleSubmit()}
-            disabled={!isValid}
-            isLoading={isSubmitting}
-          >
-            Add Unit
-          </Button>
-          <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">Bedrooms</label>
+                  <NumberInput
+                    min={0}
+                    value={bedrooms}
+                    onValueChange={setBedrooms}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Bathrooms
+                  </label>
+                  <NumberInput
+                    min={0}
+                    value={bathrooms}
+                    onValueChange={setBathrooms}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Rent (₦)</label>
+                <div className="flex gap-2">
+                  <CurrencyInput
+                    prefix="₦"
+                    min={0}
+                    value={askingRent}
+                    onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
+                    placeholder={askingRentPeriod === 'year' ? '2500000' : '250000'}
+                    className="flex-1 px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <select
+                    value={askingRentPeriod}
+                    onChange={(e) => setAskingRentPeriod(e.target.value as 'year' | 'month')}
+                    className="px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    aria-label="Rent period"
+                  >
+                    <option value="year">per year</option>
+                    <option value="month">per month</option>
+                  </select>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Optional. Rent is quoted per year here, as it is paid in Nigeria. This is what the
+                  advert will ask for.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-border flex gap-3">
+              <Button variant="primary" fullWidth onClick={handleSubmit} disabled={!isValid}>
+                Add Unit
+              </Button>
+              <Button variant="ghost" fullWidth onClick={handleClose}>
+                Cancel
+              </Button>
+            </div>
+          </motion.div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </AnimatePresence>
   );
 };

@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, FileBarChart, Mail, Plus, RotateCcw, Send } from 'lucide-react';
 import {
   Badge,
   Button,
-  CardSkeleton,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -14,11 +13,12 @@ import {
   EmptyState,
   Field,
   DatePicker,
-  ListSkeleton,
   PageErrorState,
+  PageLoadingState,
   Pagination,
   Select,
-  useToast,
+  Toast,
+  type ToastVariant,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -56,7 +56,7 @@ export function OwnerStatementsView() {
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<GenerateForm>(initialForm);
-  const toast = useToast();
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
   const { isPro, isLoading: isPlanLoading } = usePlanTier();
   const planGate = usePlanGateModal();
 
@@ -64,7 +64,6 @@ export function OwnerStatementsView() {
     queryKey: [...landlordKeys.ownerStatements, { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(landlordService.listOwnerStatements({ page, pageSize: PAGE_SIZE })),
     enabled: isPro,
-    placeholderData: keepPreviousData,
   });
   const { data } = statementsQuery;
   const statements = data?.items ?? [];
@@ -77,7 +76,7 @@ export function OwnerStatementsView() {
   });
   const properties = propertiesData?.items ?? [];
 
-  const { data: detail, isLoading: isDetailLoading } = useQuery({
+  const { data: detail } = useQuery({
     queryKey: landlordKeys.ownerStatement(detailId ?? ''),
     queryFn: () => unwrap(landlordService.getOwnerStatement(detailId as string)),
     enabled: !!detailId && isPro,
@@ -93,11 +92,14 @@ export function OwnerStatementsView() {
       invalidate();
       setForm(initialForm);
       setIsGenerateOpen(false);
-      toast.success('Statement generated as a draft.');
+      setToast({ message: 'Statement generated as a draft.', variant: 'success' });
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
-      toast.error(error.message || 'Unable to generate this statement.');
+      setToast({
+        message: error.message || 'Unable to generate this statement.',
+        variant: 'error',
+      });
     },
   });
 
@@ -106,21 +108,30 @@ export function OwnerStatementsView() {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
-      if (result.payoutStatus === 'AWAITING_APPROVAL')
-        toast.success(
-          'Statement issued. The payout is held while a second GetRentos officer approves it. Your money is unaffected.'
-        );
-      else if (result.payoutStatus === 'FAILED')
-        toast.error('Statement issued, but the payout failed: retry it below.');
-      else if (result.payoutStatus === 'PENDING')
-        toast.success(
-          'Statement issued. The payout is on its way and shows as paid once your bank confirms it.'
-        );
-      else toast.success('Statement issued and paid out.');
+      setToast(
+        result.payoutStatus === 'AWAITING_APPROVAL'
+          ? {
+              message:
+                'Statement issued. The payout is held while a second GetRentos officer approves it. Your money is unaffected.',
+              variant: 'success',
+            }
+          : result.payoutStatus === 'FAILED'
+            ? {
+                message: 'Statement issued, but the payout failed: retry it below.',
+                variant: 'error',
+              }
+            : result.payoutStatus === 'PENDING'
+              ? {
+                  message:
+                    'Statement issued. The payout is on its way and shows as paid once your bank confirms it.',
+                  variant: 'success',
+                }
+              : { message: 'Statement issued and paid out.', variant: 'success' }
+      );
     },
     onError: (error: Error) => {
       if (planGate.handleError(error)) return;
-      toast.error(error.message || 'Unable to issue this statement.');
+      setToast({ message: error.message || 'Unable to issue this statement.', variant: 'error' });
     },
   });
 
@@ -129,17 +140,28 @@ export function OwnerStatementsView() {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
-      if (result.payoutStatus === 'PAID') toast.success('Payout succeeded.');
-      else if (result.payoutStatus === 'AWAITING_APPROVAL')
-        toast.success(
-          'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.'
-        );
-      else if (result.payoutStatus === 'PENDING')
-        toast.success('Payout sent again. It shows as paid once your bank confirms it.');
-      else toast.error('The payout failed again. Check the payout account and try again.');
+      setToast(
+        result.payoutStatus === 'PAID'
+          ? { message: 'Payout succeeded.', variant: 'success' }
+          : result.payoutStatus === 'AWAITING_APPROVAL'
+            ? {
+                message:
+                  'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.',
+                variant: 'success',
+              }
+            : result.payoutStatus === 'PENDING'
+              ? {
+                  message: 'Payout sent again. It shows as paid once your bank confirms it.',
+                  variant: 'success',
+                }
+              : {
+                  message: 'The payout failed again. Check the payout account and try again.',
+                  variant: 'error',
+                }
+      );
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to retry this payout.');
+      setToast({ message: error.message || 'Unable to retry this payout.', variant: 'error' });
     },
   });
 
@@ -148,16 +170,19 @@ export function OwnerStatementsView() {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: landlordKeys.ownerStatement(id) });
-      if (result.emailSentAt) toast.success('Statement emailed to you.');
-      else
-        toast.error(
-          result.emailError
-            ? `Couldn't send it: ${result.emailError}`
-            : 'The email could not be sent. Try again shortly.'
-        );
+      setToast(
+        result.emailSentAt
+          ? { message: 'Statement emailed to you.', variant: 'success' }
+          : {
+              message: result.emailError
+                ? `Couldn't send it: ${result.emailError}`
+                : 'The email could not be sent. Try again shortly.',
+              variant: 'error',
+            }
+      );
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to send this statement.');
+      setToast({ message: error.message || 'Unable to send this statement.', variant: 'error' });
     },
   });
 
@@ -177,7 +202,7 @@ export function OwnerStatementsView() {
       URL.revokeObjectURL(url);
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to download the PDF.');
+      setToast({ message: error.message || 'Unable to download the PDF.', variant: 'error' });
     },
   });
 
@@ -196,14 +221,16 @@ export function OwnerStatementsView() {
         queryKey: landlordKeys.ownerStatement(dispute.statementId),
       });
       invalidate();
-      toast.success(
-        dispute.moneyEffect === 'HELD'
-          ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
-          : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.'
-      );
+      setToast({
+        message:
+          dispute.moneyEffect === 'HELD'
+            ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
+            : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.',
+        variant: 'success',
+      });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to raise that query.');
+      setToast({ message: error.message || 'Unable to raise that query.', variant: 'error' });
     },
   });
 
@@ -215,10 +242,10 @@ export function OwnerStatementsView() {
         queryKey: landlordKeys.ownerStatement(dispute.statementId),
       });
       invalidate();
-      toast.success('Query withdrawn.');
+      setToast({ message: 'Query withdrawn.', variant: 'success' });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to withdraw that query.');
+      setToast({ message: error.message || 'Unable to withdraw that query.', variant: 'error' });
     },
   });
 
@@ -256,8 +283,8 @@ export function OwnerStatementsView() {
         description="Upgrade to Pro to generate per-period income, expense, and management-fee breakdowns to share with property owners."
       >
         {isPlanLoading || (isPro && statementsQuery.isLoading) ? (
-          <ListSkeleton rows={4} />
-        ) : isPro && statementsQuery.isError && !data ? (
+          <PageLoadingState />
+        ) : isPro && statementsQuery.isError ? (
           <PageErrorState
             title="Owner statements are unavailable"
             description="We could not load statement or payout records. No balances have been changed."
@@ -265,29 +292,30 @@ export function OwnerStatementsView() {
             isRetrying={statementsQuery.isFetching}
           />
         ) : statements.length === 0 ? (
-          <EmptyState
-            icon={FileBarChart}
-            title="No statements yet"
-            description="Generate your first statement to see a real income/expense/fee breakdown for a period."
-          />
+          <div className="rounded-xl border border-border bg-card p-12">
+            <EmptyState
+              icon={FileBarChart}
+              title="No statements yet"
+              description="Generate your first statement to see a real income/expense/fee breakdown for a period."
+            />
+          </div>
         ) : (
           <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card shadow-xs">
             {statements.map((statement: OwnerStatement) => (
               <button
                 key={statement.id}
-                type="button"
                 onClick={() => setDetailId(statement.id)}
-                className="w-full flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4 text-left hover:bg-secondary/50 transition-colors focus-visible:outline-none focus-visible:bg-secondary/50"
+                className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors"
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
-                    {formatDate(statement.periodStart)} – {formatDate(statement.periodEnd)}
+                    {formatDate(statement.periodStart)}: {formatDate(statement.periodEnd)}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Generated {formatDate(statement.generatedAt)}
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <span className="text-sm font-semibold text-foreground">
                     {formatCurrency(statement.netPayout)}
                   </span>
@@ -317,7 +345,7 @@ export function OwnerStatementsView() {
       </ProFeatureGate>
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
-        <DialogContent padded={false} className="sm:max-w-lg">
+        <DialogContent className="max-w-lg p-0">
           <form onSubmit={submit} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Generate statement
@@ -380,18 +408,12 @@ export function OwnerStatementsView() {
       </Dialog>
 
       <Dialog open={!!detailId} onOpenChange={(open) => !open && setDetailId(null)}>
-        <DialogContent padded={false} className="sm:max-w-lg">
-          {!detail && isDetailLoading && (
-            <div className="p-6">
-              <DialogTitle className="sr-only">Statement</DialogTitle>
-              <CardSkeleton lines={5} />
-            </div>
-          )}
+        <DialogContent className="max-w-lg p-0">
           {detail && (
             <div className="p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-                  {formatDate(detail.periodStart)} – {formatDate(detail.periodEnd)}
+                  {formatDate(detail.periodStart)}: {formatDate(detail.periodEnd)}
                 </DialogTitle>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant={detail.status === 'ISSUED' ? 'success' : 'neutral'}>
@@ -421,19 +443,12 @@ export function OwnerStatementsView() {
                 canRaise={detail.status === 'ISSUED'}
                 isRaising={raiseDispute.isPending}
                 isWithdrawing={withdrawDispute.isPending}
-                onRaise={async (lineId, reason) => {
-                  try {
-                    await raiseDispute.mutateAsync({ lineId, reason });
-                    return true;
-                  } catch {
-                    return false;
-                  }
-                }}
+                onRaise={(lineId, reason) => raiseDispute.mutate({ lineId, reason })}
                 onWithdraw={(disputeId) => withdrawDispute.mutate(disputeId)}
               />
 
               {detail.status === 'DRAFT' && (
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
                   <Button
                     className="gap-2"
                     variant="outline"
@@ -459,7 +474,7 @@ export function OwnerStatementsView() {
               )}
 
               {detail.status === 'ISSUED' && (
-                <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
                   <p className="text-xs text-muted-foreground">
                     {detail.emailSentAt
                       ? `Emailed to you on ${formatDate(detail.emailSentAt)}.`
@@ -467,7 +482,7 @@ export function OwnerStatementsView() {
                         ? `Not emailed yet. ${detail.emailError}.`
                         : 'Not emailed yet.'}
                   </p>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Button
                       className="gap-2"
                       variant="outline"
@@ -496,11 +511,11 @@ export function OwnerStatementsView() {
 
               {detail.status === 'ISSUED' &&
                 (detail.payoutStatus === 'FAILED' || detail.payoutStatus === 'REJECTED') && (
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
                     <p className="text-xs text-muted-foreground">
                       {detail.payoutStatus === 'REJECTED'
                         ? 'Held back by a second reviewer. Sending it again puts it back in front of them.'
-                        : 'The transfer to your payout account didn’t go through.'}
+                        : 'The transfer to your payout account didn&apos;t go through.'}
                     </p>
                     <Button
                       className="gap-2"
@@ -520,6 +535,10 @@ export function OwnerStatementsView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
       <UpgradeToProModal
         isOpen={planGate.isOpen}
         onClose={planGate.close}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck } from 'lucide-react';
 import {
   Badge,
@@ -12,10 +12,8 @@ import {
   DialogDescription,
   EmptyState,
   PageErrorState,
+  PageLoadingState,
   Pagination,
-  Alert,
-  ListSkeleton,
-  Skeleton,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
@@ -59,7 +57,6 @@ export default function LandlordViewingRequestsPage() {
           status: status === 'all' ? undefined : status,
         })
       ),
-    placeholderData: keepPreviousData,
   });
 
   const confirmMutation = useMutation({
@@ -78,19 +75,9 @@ export default function LandlordViewingRequestsPage() {
       void queryClient.invalidateQueries({ queryKey: landlordKeys.viewingRequests() }),
   });
 
-  if (query.isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-56" />
-          <Skeleton className="h-4 w-80 max-w-full" />
-        </div>
-        <ListSkeleton rows={5} label="Loading viewing requests" />
-      </div>
-    );
-  }
+  if (query.isLoading) return <PageLoadingState />;
 
-  if (query.isError && !query.data) {
+  if (query.isError) {
     return (
       <PageErrorState
         title="Viewing requests are unavailable"
@@ -181,9 +168,6 @@ export default function LandlordViewingRequestsPage() {
                       <Button
                         variant="ghost"
                         disabled={cancelMutation.isPending}
-                        isLoading={
-                          cancelMutation.isPending && cancelMutation.variables === viewing.id
-                        }
                         onClick={() => cancelMutation.mutate(viewing.id)}
                       >
                         Decline
@@ -240,7 +224,9 @@ export default function LandlordViewingRequestsPage() {
             />
 
             {confirmMutation.isError && (
-              <Alert variant="danger">Could not confirm the viewing. Please try again.</Alert>
+              <p className="text-xs text-destructive">
+                Could not confirm the viewing. Please try again.
+              </p>
             )}
           </div>
 
@@ -250,12 +236,10 @@ export default function LandlordViewingRequestsPage() {
             </Button>
             <Button
               variant="primary"
-              disabled={!isCompleteDateTime(scheduledAt)}
-              isLoading={confirmMutation.isPending}
-              loadingText="Confirming…"
+              disabled={!isCompleteDateTime(scheduledAt) || confirmMutation.isPending}
               onClick={() => confirmMutation.mutate(new Date(scheduledAt).toISOString())}
             >
-              Confirm
+              {confirmMutation.isPending ? 'Confirming…' : 'Confirm'}
             </Button>
           </div>
         </DialogContent>

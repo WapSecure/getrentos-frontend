@@ -53,7 +53,7 @@ export const ListingCard = ({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Megaphone className="w-10 h-10 text-muted-foreground/60" />
+            <Megaphone className="w-10 h-10 text-gray-400 dark:text-gray-600" />
           </div>
         )}
         {listing.videoTourUrl && (
@@ -80,31 +80,35 @@ export const ListingCard = ({
 
         <p className="text-lg font-bold text-primary mt-3">
           {formatCurrency(listing.askingRent, { compact: true })}
-          <span className="text-xs text-muted-foreground font-normal">
+          <span className="text-xs text-gray-400 font-normal">
             {listing.rentPeriod === 'month' ? '/mo' : '/yr'}
           </span>
         </p>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
           {listing.furnished && (
-            <Badge variant="neutral" icon={<Sofa className="w-3 h-3" />}>
-              Furnished
-            </Badge>
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+              <Sofa className="w-3 h-3" /> Furnished
+            </span>
           )}
           {listing.allowPets && (
-            <Badge variant="neutral" icon={<PawPrint className="w-3 h-3" />}>
-              Pets OK
-            </Badge>
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+              <PawPrint className="w-3 h-3" /> Pets OK
+            </span>
           )}
-          {listing.shortLetEnabled && <Badge variant="neutral">Short-let</Badge>}
+          {listing.shortLetEnabled && (
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+              Short-let
+            </span>
+          )}
           {listing.allowsMonthlyPayment && (
-            <Badge variant="info" icon={<Zap className="w-3 h-3" />}>
-              Flex enabled
-            </Badge>
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-accent text-primary">
+              <Zap className="w-3 h-3" /> Flex enabled
+            </span>
           )}
         </div>
 
-        <p className="flex items-center gap-1 text-xs text-muted-foreground mt-3">
+        <p className="flex items-center gap-1 text-xs text-gray-400 mt-3">
           <CalendarClock className="w-3 h-3" />
           Available {formatDate(listing.availabilityDate)}
         </p>
@@ -127,7 +131,7 @@ export const ListingCard = ({
               fullWidth
               className="gap-1.5"
               onClick={() => onTogglePause(listing.id)}
-              isLoading={isUpdating}
+              disabled={isUpdating}
             >
               {listing.status === 'paused' ? (
                 <Play className="w-3.5 h-3.5" />

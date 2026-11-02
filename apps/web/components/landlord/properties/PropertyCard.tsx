@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  IconButton,
 } from '@getrentos/ui';
 import { verificationBadges } from '@/lib/statusBadge';
 import { formatCurrency } from '@/lib/format';
@@ -90,13 +89,11 @@ export const PropertyCard = ({
           </div>
         )}
         <button
-          type="button"
-          aria-label={`Verification: ${verification.label}`}
           onClick={(e) => {
             e.stopPropagation();
             onVerify?.();
           }}
-          className="absolute top-3 left-3 rounded-full hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="absolute top-3 left-3 rounded-full hover:opacity-80 transition-opacity"
           title={verification.label}
         >
           <Badge
@@ -108,14 +105,15 @@ export const PropertyCard = ({
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <IconButton
-              label={`More actions for ${property.name}`}
+            <button
+              type="button"
+              aria-label={`More actions for ${property.name}`}
               title="More actions"
-              size="sm"
-              icon={<MoreVertical />}
               onClick={(e) => e.stopPropagation()}
-              className="absolute top-3 right-3 bg-card/90 text-foreground backdrop-blur-sm hover:bg-card"
-            />
+              className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm hover:bg-white dark:hover:bg-black/70 transition-colors"
+            >
+              <MoreVertical className="w-4 h-4 text-foreground" />
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onSelect={() => onEdit?.()}>
@@ -146,7 +144,7 @@ export const PropertyCard = ({
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-foreground truncate">{property.name}</h3>
-          <span className="whitespace-nowrap rounded-full bg-secondary px-2 py-0.5 text-xs text-foreground/75">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground whitespace-nowrap">
             {propertyTypeLabels[property.type]}
           </span>
         </div>

@@ -252,12 +252,7 @@ export const estateService = {
 
   async updatePayoutAccount(
     estateId: string,
-    data: {
-      bankCode: string;
-      accountNumber: string;
-      registrationNumber?: string;
-      businessType?: 'BUSINESS_NAME' | 'LIMITED_COMPANY' | 'INCORPORATED_TRUSTEES';
-    }
+    data: { bankCode: string; accountNumber: string }
   ): Promise<ApiResponse<EstatePayoutAccount>> {
     return safeCall(() =>
       authFetch(`/estate/${estateId}/payout-account`, {

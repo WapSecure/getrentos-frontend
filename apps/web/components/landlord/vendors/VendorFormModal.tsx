@@ -1,9 +1,14 @@
 'use client';
 
+import { LegacyInput } from '@getrentos/ui';
+
+import { LegacySelect } from '@getrentos/ui';
+
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle, Field, Input, Select } from '@getrentos/ui';
-import type { Vendor, VendorInput, BusinessRegistrationType } from '@/types/landlord';
-import { BUSINESS_TYPE_LABELS } from '@/services/agencyOnboardingService';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { Button } from '@getrentos/ui';
+import type { Vendor, VendorInput } from '@/types/landlord';
 
 interface VendorFormModalProps {
   isOpen: boolean;
@@ -24,16 +29,16 @@ const serviceTypes = [
 ];
 
 export const VendorFormModal = ({ isOpen, vendor, onClose, onSave }: VendorFormModalProps) => (
-  <Dialog open={isOpen} onOpenChange={(next) => !next && onClose()}>
-    <DialogContent size="sm" padded={false}>
+  <AnimatePresence>
+    {isOpen && (
       <VendorForm
         key={vendor?.id ?? 'new'}
         vendor={vendor ?? null}
         onClose={onClose}
         onSave={onSave}
       />
-    </DialogContent>
-  </Dialog>
+    )}
+  </AnimatePresence>
 );
 
 const VendorForm = ({
@@ -48,10 +53,6 @@ const VendorForm = ({
   const [name, setName] = useState(vendor?.name ?? '');
   const [serviceType, setServiceType] = useState(vendor?.serviceType ?? serviceTypes[0]);
   const [phone, setPhone] = useState(vendor?.phone ?? '');
-  const [registrationNumber, setRegistrationNumber] = useState(vendor?.registrationNumber ?? '');
-  const [businessType, setBusinessType] = useState<BusinessRegistrationType | ''>(
-    vendor?.businessType ?? ''
-  );
   // A vendor added before this list existed may carry a type that is not in it.
   const options = serviceTypes.includes(serviceType)
     ? serviceTypes
@@ -63,83 +64,75 @@ const VendorForm = ({
 
   const handleSubmit = () => {
     if (!isValid) return;
-    onSave({
-      name: name.trim(),
-      serviceType,
-      phone: phone.trim(),
-      registrationNumber: registrationNumber.trim() || undefined,
-      businessType: businessType || undefined,
-    });
+    onSave({ name: name.trim(), serviceType, phone: phone.trim() });
     handleClose();
   };
 
   return (
-    <>
-      <div className="p-4 pr-12 border-b border-border">
-        <DialogTitle className="font-semibold text-foreground">
-          {vendor ? 'Edit Vendor' : 'Add Vendor'}
-        </DialogTitle>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-card rounded-xl max-w-sm w-full overflow-hidden"
+      >
+        <div className="p-4 border-b border-border flex justify-between items-center">
+          <h3 className="font-semibold text-foreground">{vendor ? 'Edit Vendor' : 'Add Vendor'}</h3>
+          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-      <div className="p-4 space-y-4">
-        <Field label="Vendor Name" required>
-          <Input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. AquaFlow Plumbers"
-          />
-        </Field>
-        <Field label="Service Type">
-          <Select
-            value={serviceType}
-            onValueChange={setServiceType}
-            options={options.map((type) => ({ value: type, label: type }))}
-          />
-        </Field>
-        <Field label="Phone" required>
-          <Input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+234 803 555 1122"
-          />
-        </Field>
-        <Field
-          label="CAC number"
-          optionalLabel="(optional)"
-          hint="For a registered business, so we can verify its payout account."
-        >
-          <Input
-            type="text"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            placeholder="e.g. RC1234567"
-          />
-        </Field>
-        {registrationNumber.trim() && (
-          <Field label="Registration type">
-            <Select
-              value={businessType}
-              onValueChange={(value) => setBusinessType(value as BusinessRegistrationType | '')}
-              placeholder="Select a type…"
-              searchable={false}
-              options={(Object.keys(BUSINESS_TYPE_LABELS) as BusinessRegistrationType[]).map(
-                (t) => ({ value: t, label: BUSINESS_TYPE_LABELS[t] })
-              )}
+        <div className="p-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Vendor Name <span className="text-destructive">*</span>
+            </label>
+            <LegacyInput
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. AquaFlow Plumbers"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
-          </Field>
-        )}
-      </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Service Type</label>
+            <LegacySelect
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              {options.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </LegacySelect>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Phone <span className="text-destructive">*</span>
+            </label>
+            <LegacyInput
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+234 803 555 1122"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
 
-      <div className="p-4 border-t border-border flex gap-3">
-        <Button variant="primary" fullWidth onClick={handleSubmit} disabled={!isValid}>
-          {vendor ? 'Save Changes' : 'Add Vendor'}
-        </Button>
-        <Button variant="ghost" fullWidth onClick={handleClose}>
-          Cancel
-        </Button>
-      </div>
-    </>
+        <div className="p-4 border-t border-border flex gap-3">
+          <Button variant="primary" fullWidth onClick={handleSubmit} disabled={!isValid}>
+            {vendor ? 'Save Changes' : 'Add Vendor'}
+          </Button>
+          <Button variant="ghost" fullWidth onClick={handleClose}>
+            Cancel
+          </Button>
+        </div>
+      </motion.div>
+    </div>
   );
 };

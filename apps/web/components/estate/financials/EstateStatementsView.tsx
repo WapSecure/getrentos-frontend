@@ -1,14 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileBarChart, Landmark, Plus, RotateCcw, Send } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CheckCircle2, FileBarChart, Landmark, Plus, RotateCcw, Send } from 'lucide-react';
 import {
-  Alert,
   Badge,
   Button,
-  Card,
-  CardSkeleton,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -16,18 +13,15 @@ import {
   DatePicker,
   EmptyState,
   Field,
-  Input,
-  ListSkeleton,
-  NumberInput,
   Pagination,
-  Select,
-  useToast,
+  SaveButton,
+  Toast,
+  type ToastVariant,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { estateKeys } from '@/lib/queryKeys';
 import { estateService } from '@/services/estateService';
-import { BUSINESS_TYPE_LABELS, type AgencyBusinessType } from '@/services/agencyOnboardingService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
 import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
@@ -61,12 +55,11 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState<GenerateForm>(initialForm);
-  const toast = useToast();
+  const [toast, setToast] = useState<{ message: string; variant: ToastVariant } | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: [...estateKeys.statements(estateId), { page, pageSize: PAGE_SIZE }],
     queryFn: () => unwrap(estateService.listStatements(estateId, { page, pageSize: PAGE_SIZE })),
-    placeholderData: keepPreviousData,
   });
   const statements = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -87,10 +80,13 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       invalidate();
       setForm(initialForm);
       setIsGenerateOpen(false);
-      toast.success('Statement generated as a draft.');
+      setToast({ message: 'Statement generated as a draft.', variant: 'success' });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to generate this statement.');
+      setToast({
+        message: error.message || 'Unable to generate this statement.',
+        variant: 'error',
+      });
     },
   });
 
@@ -99,18 +95,23 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: estateKeys.statement(estateId, id) });
-      if (result.payoutStatus === 'AWAITING_APPROVAL') {
-        toast.success(
-          'Statement issued. The payout is held while a second GetRentos officer approves it. The estate\u2019s money is unaffected.'
-        );
-      } else if (result.payoutStatus === 'FAILED') {
-        toast.error('Statement issued, but the payout failed: retry it below.');
-      } else {
-        toast.success('Statement issued.');
-      }
+      setToast(
+        result.payoutStatus === 'AWAITING_APPROVAL'
+          ? {
+              message:
+                'Statement issued. The payout is held while a second GetRentos officer approves it. The estate\u2019s money is unaffected.',
+              variant: 'success',
+            }
+          : result.payoutStatus === 'FAILED'
+            ? {
+                message: 'Statement issued, but the payout failed: retry it below.',
+                variant: 'error',
+              }
+            : { message: 'Statement issued.', variant: 'success' }
+      );
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to issue this statement.');
+      setToast({ message: error.message || 'Unable to issue this statement.', variant: 'error' });
     },
   });
 
@@ -119,18 +120,23 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
     onSuccess: (result, id) => {
       invalidate();
       void queryClient.invalidateQueries({ queryKey: estateKeys.statement(estateId, id) });
-      if (result.payoutStatus === 'PAID') {
-        toast.success('Payout succeeded.');
-      } else if (result.payoutStatus === 'AWAITING_APPROVAL') {
-        toast.success(
-          'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.'
-        );
-      } else {
-        toast.error('The payout failed again. Check the payout account and try again.');
-      }
+      setToast(
+        result.payoutStatus === 'PAID'
+          ? { message: 'Payout succeeded.', variant: 'success' }
+          : result.payoutStatus === 'AWAITING_APPROVAL'
+            ? {
+                message:
+                  'Held for a second approval. Nothing has been sent yet, and nothing will be until it is checked.',
+                variant: 'success',
+              }
+            : {
+                message: 'The payout failed again. Check the payout account and try again.',
+                variant: 'error',
+              }
+      );
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to retry this payout.');
+      setToast({ message: error.message || 'Unable to retry this payout.', variant: 'error' });
     },
   });
 
@@ -148,14 +154,16 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         queryKey: estateKeys.statement(estateId, dispute.statementId),
       });
       invalidate();
-      toast.success(
-        dispute.moneyEffect === 'HELD'
-          ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
-          : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.'
-      );
+      setToast({
+        message:
+          dispute.moneyEffect === 'HELD'
+            ? 'Query raised, and the payout is paused until it is decided. If it is upheld the correction appears on your next statement.'
+            : 'Query raised. This payout has already gone, so if it is upheld the correction appears on your next statement.',
+        variant: 'success',
+      });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to raise that query.');
+      setToast({ message: error.message || 'Unable to raise that query.', variant: 'error' });
     },
   });
 
@@ -167,10 +175,10 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
         queryKey: estateKeys.statement(estateId, dispute.statementId),
       });
       invalidate();
-      toast.success('Query withdrawn.');
+      setToast({ message: 'Query withdrawn.', variant: 'success' });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Unable to withdraw that query.');
+      setToast({ message: error.message || 'Unable to withdraw that query.', variant: 'error' });
     },
   });
 
@@ -192,31 +200,27 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
             estate&apos;s account
           </p>
         </div>
-        <Button
-          variant="primary"
-          icon={<Plus className="w-4 h-4" />}
-          onClick={() => setIsGenerateOpen(true)}
-        >
+        <Button variant="primary" className="gap-2" onClick={() => setIsGenerateOpen(true)}>
+          <Plus className="w-4 h-4" />
           Generate statement
         </Button>
       </div>
 
-      {isLoading ? (
-        <ListSkeleton rows={3} />
-      ) : statements.length === 0 ? (
-        <EmptyState
-          icon={FileBarChart}
-          title="No statements yet"
-          description="Generate your first statement to see a real dues-collected breakdown for a period."
-        />
+      {statements.length === 0 ? (
+        <div className="bg-card rounded-2xl border border-border p-12">
+          <EmptyState
+            icon={FileBarChart}
+            title="No statements yet"
+            description="Generate your first statement to see a real dues-collected breakdown for a period."
+          />
+        </div>
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {statements.map((statement: EstateStatement) => (
             <button
               key={statement.id}
-              type="button"
               onClick={() => setDetailId(statement.id)}
-              className="w-full flex flex-wrap items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-secondary/50 transition-colors"
             >
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
@@ -255,8 +259,8 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       )}
 
       <Dialog open={isGenerateOpen} onOpenChange={setIsGenerateOpen}>
-        <DialogContent size="md">
-          <form onSubmit={submit}>
+        <DialogContent className="max-w-lg p-0">
+          <form onSubmit={submit} className="p-6">
             <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
               Generate statement
             </DialogTitle>
@@ -279,7 +283,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
               </Field>
             </div>
 
-            <div className="mt-6 flex flex-wrap justify-end gap-2 border-t border-border pt-5">
+            <div className="mt-6 flex justify-end gap-3 border-t border-border pt-5">
               <Button
                 type="button"
                 variant="outline"
@@ -302,15 +306,10 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
       </Dialog>
 
       <Dialog open={!!detailId} onOpenChange={(open) => !open && setDetailId(null)}>
-        <DialogContent size="lg">
-          {!detail ? (
-            <>
-              <DialogTitle className="sr-only">Statement</DialogTitle>
-              <CardSkeleton lines={5} />
-            </>
-          ) : (
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-3 pr-8">
+        <DialogContent className="max-w-lg p-0">
+          {detail && (
+            <div className="p-6">
+              <div className="flex items-center justify-between gap-3">
                 <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
                   {formatDate(detail.periodStart)}: {formatDate(detail.periodEnd)}
                 </DialogTitle>
@@ -342,25 +341,19 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
                 canRaise={detail.status === 'ISSUED'}
                 isRaising={raiseDispute.isPending}
                 isWithdrawing={withdrawDispute.isPending}
-                onRaise={async (lineId, reason) => {
-                  try {
-                    await raiseDispute.mutateAsync({ lineId, reason });
-                    return true;
-                  } catch {
-                    return false;
-                  }
-                }}
+                onRaise={(lineId, reason) => raiseDispute.mutate({ lineId, reason })}
                 onWithdraw={(disputeId) => withdrawDispute.mutate(disputeId)}
               />
 
               {detail.status === 'DRAFT' && (
                 <div className="mt-6 flex justify-end border-t border-border pt-5">
                   <Button
+                    className="gap-2"
                     rounded="md"
-                    icon={<Send className="w-4 h-4" />}
                     isLoading={issueStatement.isPending}
                     onClick={() => issueStatement.mutate(detail.id)}
                   >
+                    <Send className="w-4 h-4" />
                     Issue statement
                   </Button>
                 </div>
@@ -368,19 +361,20 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
 
               {detail.status === 'ISSUED' &&
                 (detail.payoutStatus === 'FAILED' || detail.payoutStatus === 'REJECTED') && (
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
+                  <div className="mt-6 flex items-center justify-between gap-3 border-t border-border pt-5">
                     <p className="text-xs text-muted-foreground">
                       {detail.payoutStatus === 'REJECTED'
                         ? 'Held back by a second reviewer. Sending it again puts it back in front of them.'
-                        : 'The transfer to the estate\u2019s payout account didn\u2019t go through.'}
+                        : 'The transfer to the estate&apos;s payout account didn&apos;t go through.'}
                     </p>
                     <Button
+                      className="gap-2"
                       variant="outline"
                       rounded="md"
-                      icon={<RotateCcw className="w-4 h-4" />}
                       isLoading={retryPayout.isPending}
                       onClick={() => retryPayout.mutate(detail.id)}
                     >
+                      <RotateCcw className="w-4 h-4" />
                       {detail.payoutStatus === 'REJECTED'
                         ? 'Send for approval again'
                         : 'Retry payout'}
@@ -391,6 +385,10 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
           )}
         </DialogContent>
       </Dialog>
+
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} onClose={() => setToast(null)} />
+      )}
     </>
   );
 }
@@ -398,11 +396,8 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
 /** Where estate dues are paid out to once a statement is issued. */
 export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   const queryClient = useQueryClient();
-  const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
-  const [registrationNumber, setRegistrationNumber] = useState('');
-  const [businessType, setBusinessType] = useState<AgencyBusinessType | ''>('');
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: account } = useQuery({
@@ -414,22 +409,12 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
 
   const save = useMutation({
     mutationFn: () =>
-      unwrap(
-        estateService.updatePayoutAccount(estateId, {
-          bankCode,
-          accountNumber,
-          registrationNumber: registrationNumber.trim() || undefined,
-          businessType: businessType || undefined,
-        })
-      ),
+      unwrap(estateService.updatePayoutAccount(estateId, { bankCode, accountNumber })),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: estateKeys.payoutAccount(estateId) });
       setBankCode('');
       setAccountNumber('');
-      setRegistrationNumber('');
-      setBusinessType('');
       setSubmitError(null);
-      toast.success('Payout account saved.');
     },
     onError: (error: Error) => {
       setSubmitError(error.message || "Unable to update the estate's payout account.");
@@ -437,7 +422,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   });
 
   return (
-    <Card className="p-6 mb-6">
+    <div className="bg-card rounded-2xl border border-border p-6 mb-6">
       <h3 className="text-base font-semibold text-foreground mb-1">Payout Account</h3>
       <p className="text-sm text-muted-foreground mb-4">
         Where estate dues are sent when you issue a statement.
@@ -449,9 +434,12 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
             {account.bankName} · {account.accountNumber} · {account.accountName}
           </p>
           {account.verified ? (
-            <Badge variant="success" className="mt-2">
-              Bank account verified and active for payouts
-            </Badge>
+            <div className="flex items-center gap-2 mt-2">
+              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+              <p className="text-xs text-green-700 dark:text-green-400">
+                Bank account verified and active for payouts
+              </p>
+            </div>
           ) : (
             <p className="text-xs text-muted-foreground mt-2">
               Not yet verified: save it again to resolve it against the bank.
@@ -461,62 +449,42 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Bank Code">
-          <NumberInput
-            leadingIcon={<Landmark className="w-4 h-4" />}
-            value={bankCode}
-            onValueChange={setBankCode}
-            placeholder="e.g. 058 for GTBank"
-            maxLength={6}
-          />
-        </Field>
-        <Field label="Account Number">
-          <NumberInput
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Bank Code</label>
+          <div className="relative">
+            <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={bankCode}
+              onChange={(e) => setBankCode(e.target.value)}
+              placeholder="e.g. 058 for GTBank"
+              maxLength={6}
+              className="w-full pl-10 pr-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Account Number</label>
+          <input
+            type="text"
             value={accountNumber}
-            onValueChange={setAccountNumber}
+            onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
             placeholder="0123456789"
             maxLength={10}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
-        </Field>
-        <Field
-          label="CAC number"
-          optionalLabel="(optional)"
-          hint="Lets us verify the account belongs to the registered estate."
-        >
-          <Input
-            type="text"
-            value={registrationNumber}
-            onChange={(e) => setRegistrationNumber(e.target.value)}
-            placeholder="e.g. RC1234567"
-          />
-        </Field>
-        {registrationNumber.trim() && (
-          <Field label="Registration type">
-            <Select
-              value={businessType}
-              onValueChange={(value) => setBusinessType(value as AgencyBusinessType | '')}
-              placeholder="Select a type…"
-              options={(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => ({
-                value: t,
-                label: BUSINESS_TYPE_LABELS[t],
-              }))}
-            />
-          </Field>
-        )}
+        </div>
       </div>
 
       <div className="mt-4 space-y-2">
-        {submitError && <Alert variant="danger">{submitError}</Alert>}
-        <Button
-          variant="primary"
-          disabled={!canSave}
-          isLoading={save.isPending}
-          loadingText="Saving…"
-          onClick={() => save.mutate()}
-        >
-          Update Payout Account
-        </Button>
+        {submitError && <p className="text-sm text-destructive">{submitError}</p>}
+        <SaveButton
+          label="Update Payout Account"
+          onClick={() => {
+            if (canSave) save.mutate();
+          }}
+        />
       </div>
-    </Card>
+    </div>
   );
 }
