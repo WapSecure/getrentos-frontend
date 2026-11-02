@@ -1,83 +1,71 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import {
-  RefreshCw,
-  CloudOff,
-  Cloud,
-  AlertCircle,
-  ClipboardCheck,
-  UserCheck,
-  Wifi,
-  WifiOff,
-} from 'lucide-react';
-import { Alert, Badge, Button, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { RefreshCw, Cloud, CloudOff, Wifi, WifiOff } from 'lucide-react';
+import { Alert, Badge, Button, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
 import { agentKeys } from '@/lib/queryKeys';
+import { AGENT_QUEUE_CHANGED } from '@/lib/agentQueueEvents';
+import { listAgentQueuedRecords, syncAgentQueuedRecords } from '@/lib/agentQueueSync';
+
+const deviceQueueKey = ['agent', 'device-queue'] as const;
+const recordLabels = {
+  inspection: 'Inspection report',
+  verification: 'Verification visit',
+  document: 'Document',
+  message: 'Message',
+};
 
 export default function AgentSyncPage() {
-  const { data: items = [], isLoading } = useQuery({
+  const queryClient = useQueryClient();
+  const history = useQuery({
     queryKey: agentKeys.sync,
     queryFn: () => unwrap(agentService.getSyncItems()),
   });
-  const [locallySynced, setLocallySynced] = useState<Set<string>>(new Set());
+  const queue = useQuery({ queryKey: deviceQueueKey, queryFn: listAgentQueuedRecords });
   const [isOnline, setIsOnline] = useState(true);
-  const [isSyncingAll, setIsSyncingAll] = useState(false);
+  const sync = useMutation({
+    mutationFn: (id: string | undefined) => syncAgentQueuedRecords(id),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['agent'] }),
+  });
 
   useEffect(() => {
     const updateStatus = () => setIsOnline(navigator.onLine);
+    const refreshQueue = () => void queryClient.invalidateQueries({ queryKey: deviceQueueKey });
     updateStatus();
     window.addEventListener('online', updateStatus);
     window.addEventListener('offline', updateStatus);
+    window.addEventListener(AGENT_QUEUE_CHANGED, refreshQueue);
+    window.addEventListener('storage', refreshQueue);
     return () => {
       window.removeEventListener('online', updateStatus);
       window.removeEventListener('offline', updateStatus);
+      window.removeEventListener(AGENT_QUEUE_CHANGED, refreshQueue);
+      window.removeEventListener('storage', refreshQueue);
     };
-  }, []);
+  }, [queryClient]);
 
-  const syncItem = (id: string) => {
-    setLocallySynced((prev) => new Set(prev).add(id));
-  };
-
-  const handleSyncAll = () => {
-    setIsSyncingAll(true);
-    window.setTimeout(() => {
-      setLocallySynced((prev) => {
-        const next = new Set(prev);
-        items.forEach((i) => {
-          if (i.syncStatus !== 'synced') next.add(i.id);
-        });
-        return next;
-      });
-      setIsSyncingAll(false);
-    }, 1200);
-  };
-
-  const pendingCount = items.filter(
-    (i) => !locallySynced.has(i.id) && i.syncStatus !== 'synced'
-  ).length;
-
-  if (isLoading) {
-    return <ListSkeleton rows={5} label="Loading sync records" />;
-  }
+  const records = queue.data ?? [];
+  const syncError = sync.data?.error || sync.error?.message;
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Sync Center</h1>
-          <p className="text-muted-foreground mt-1">Records captured offline, waiting to upload</p>
+          <p className="mt-1 text-muted-foreground">
+            {records.length} records waiting on this device
+          </p>
         </div>
         <Button
-          variant="primary"
-          icon={<RefreshCw className="w-4 h-4" />}
-          onClick={handleSyncAll}
-          isLoading={isSyncingAll}
+          icon={<RefreshCw className="h-4 w-4" />}
+          onClick={() => sync.mutate(undefined)}
+          isLoading={sync.isPending}
           loadingText="Syncing..."
-          disabled={pendingCount === 0 || !isOnline}
+          disabled={!records.length || !isOnline || sync.isPending || queue.isError}
         >
           Sync All
         </Button>
@@ -90,68 +78,88 @@ export default function AgentSyncPage() {
         className="mb-6"
       >
         {isOnline
-          ? 'Inspections and verifications you capture in the field are saved locally and sync automatically when possible.'
-          : 'You are working offline. Records will be saved on this device and synced once you reconnect.'}
+          ? 'Queued records are removed from this device only after GetRentos confirms they were saved.'
+          : 'Queued records remain saved on this device. Uploads will retry when you reconnect.'}
       </Alert>
+      {syncError && (
+        <Alert variant="danger" className="mb-4" title="Upload could not be completed">
+          {syncError} Unsent records remain on this device. Retry when the issue is resolved.
+        </Alert>
+      )}
+      {sync.data && !syncError && sync.data.synced > 0 && (
+        <Alert variant="success" className="mb-4">
+          {sync.data.synced} record{sync.data.synced === 1 ? '' : 's'} saved to GetRentos.
+        </Alert>
+      )}
 
-      {items.length === 0 ? (
+      <h2 className="mb-3 text-lg font-semibold">Waiting on this device</h2>
+      {queue.isPending ? (
+        <ListSkeleton rows={3} label="Loading device records" />
+      ) : queue.isError ? (
+        <PageErrorState
+          title="Device records could not be read"
+          description="We could not open this device's upload queue. Please retry."
+          onRetry={() => void queue.refetch()}
+          isRetrying={queue.isFetching}
+        />
+      ) : records.length === 0 ? (
         <EmptyState
           icon={Cloud}
-          title="All caught up"
-          description="Every record you've captured has been synced to GetRentos."
+          title="No uploads waiting"
+          description="This device has no queued records."
         />
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
-          {items.map((item) => {
-            const TypeIcon = item.recordType === 'inspection' ? ClipboardCheck : UserCheck;
-            const synced = locallySynced.has(item.id) || item.syncStatus === 'synced';
-            return (
-              <div
-                key={item.id}
-                className="flex items-center gap-3 p-4 hover:bg-secondary transition-colors"
-              >
-                <div
-                  className={`p-2 rounded-lg shrink-0 ${
-                    item.syncStatus === 'failed' ? 'bg-destructive-subtle' : 'bg-secondary'
-                  }`}
-                >
-                  {item.syncStatus === 'failed' ? (
-                    <AlertCircle className="w-4 h-4 text-destructive" />
-                  ) : (
-                    <TypeIcon className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">{item.recordLabel}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Captured {formatRelativeTime(item.capturedAt)}
-                    {item.sizeLabel ? ` · ${item.sizeLabel}` : ''}
-                  </p>
-                </div>
-                {synced ? (
-                  <Badge
-                    variant="success"
-                    icon={<Cloud className="w-3 h-3" />}
-                    className="shrink-0"
-                  >
-                    Synced
-                  </Badge>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0"
-                    icon={<CloudOff className="w-3.5 h-3.5" />}
-                    onClick={() => syncItem(item.id)}
-                    disabled={!isOnline}
-                  >
-                    {item.syncStatus === 'failed' ? 'Retry' : 'Sync'}
-                  </Button>
-                )}
+        <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+          {records.map((record) => (
+            <li key={record.id} className="flex items-center gap-3 p-4">
+              <CloudOff className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium">{recordLabels[record.type]}</p>
+                <p className="text-xs text-muted-foreground">
+                  Captured {formatRelativeTime(record.createdAt)}
+                </p>
+                <Badge variant="warning" className="mt-1">
+                  Waiting to upload
+                </Badge>
               </div>
-            );
-          })}
-        </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sync.mutate(record.id)}
+                disabled={!isOnline || sync.isPending}
+                isLoading={sync.isPending && sync.variables === record.id}
+              >
+                Retry
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mb-3 mt-8 text-lg font-semibold">Saved on GetRentos</h2>
+      {history.isPending ? (
+        <ListSkeleton rows={3} label="Loading saved records" />
+      ) : history.isError ? (
+        <PageErrorState
+          title="Saved records are unavailable"
+          description="Device uploads are shown above. Retry to load records already saved to GetRentos."
+          onRetry={() => void history.refetch()}
+          isRetrying={history.isFetching}
+        />
+      ) : history.data?.length ? (
+        <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+          {history.data.map((item) => (
+            <li key={`${item.recordType}:${item.id}`} className="flex items-center gap-3 p-4">
+              <Cloud className="h-4 w-4 shrink-0 text-success" />
+              <p className="min-w-0 flex-1 truncate text-sm font-medium">{item.recordLabel}</p>
+              <Badge variant="success" className="shrink-0">
+                Saved on server
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <EmptyState icon={Cloud} title="No saved records yet" />
       )}
     </>
   );

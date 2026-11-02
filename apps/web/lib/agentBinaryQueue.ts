@@ -1,3 +1,5 @@
+import { notifyAgentQueueChanged } from './agentQueueEvents';
+
 export type AgentBinaryOperation = {
   id: string;
   type: 'document' | 'message';
@@ -38,6 +40,7 @@ export async function enqueueAgentBinaryOperation(
     transaction.onerror = () => reject(transaction.error);
   });
   db.close();
+  notifyAgentQueueChanged();
   return operation;
 }
 
@@ -61,4 +64,5 @@ export async function removeAgentBinaryOperation(id: string) {
     transaction.onerror = () => reject(transaction.error);
   });
   db.close();
+  notifyAgentQueueChanged();
 }

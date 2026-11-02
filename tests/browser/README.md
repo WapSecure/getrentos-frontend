@@ -1,5 +1,16 @@
 # Browser and visual QA checks
 
+## Agent offline upload regression
+
+Run `pnpm test:e2e:agent-sync` to check the device queue without a backend or
+seeded accounts. The runner starts an isolated web server on port 43120 and
+intercepts API requests in the test browser. It checks that rejected inspection,
+verification, message, and document uploads survive reloads, preserve file
+contents, and leave the queue only after a successful API response. It also
+checks that reconnect and manual retry do not submit the same queued item twice.
+
+## Integrated browser checks
+
 The suite starts the web app on port 3000 and backoffice on port 3001, reusing
 either server when it is already running. The API and seeded PostgreSQL/Redis
 environment must be running separately for authenticated checks.

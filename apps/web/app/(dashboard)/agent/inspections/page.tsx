@@ -81,10 +81,6 @@ function AgentInspectionsPageContent() {
     }
   };
 
-  const handleSync = () => {
-    setActiveInspectionId(null);
-  };
-
   const activeInspection = inspections.find((i) => i.id === activeInspectionId) || null;
 
   return (
@@ -156,7 +152,6 @@ function AgentInspectionsPageContent() {
       <InspectionDetailModal
         inspection={activeInspection}
         onClose={() => setActiveInspectionId(null)}
-        onSync={handleSync}
       />
     </>
   );

@@ -1,4 +1,5 @@
-import { agentService } from '@/services/agentService';
+import type { agentService } from '@/services/agentService';
+import { notifyAgentQueueChanged } from './agentQueueEvents';
 
 export type AgentOfflineOperationType = 'inspection' | 'verification' | 'document' | 'message';
 
@@ -45,25 +46,14 @@ export const agentOfflineQueue = {
       createdAt: new Date().toISOString(),
     } as AgentOfflineOperation;
     localStorage.setItem(KEY, JSON.stringify([...agentOfflineQueue.list(), item]));
+    notifyAgentQueueChanged();
     return item;
   },
-  remove: (id: string) =>
+  remove: (id: string) => {
     localStorage.setItem(
       KEY,
       JSON.stringify(agentOfflineQueue.list().filter((item) => item.id !== id))
-    ),
+    );
+    notifyAgentQueueChanged();
+  },
 };
-
-export async function replayAgentOfflineQueue(
-  dispatch: (item: AgentOfflineOperation) => Promise<void>
-) {
-  if (typeof navigator !== 'undefined' && !navigator.onLine) return;
-  for (const item of agentOfflineQueue.list()) {
-    try {
-      await dispatch(item);
-      agentOfflineQueue.remove(item.id);
-    } catch {
-      break;
-    }
-  }
-}

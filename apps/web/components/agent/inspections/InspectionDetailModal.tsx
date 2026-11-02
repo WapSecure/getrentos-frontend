@@ -30,14 +30,9 @@ const typeConfig: Record<InspectionType, string> = {
 interface InspectionDetailModalProps {
   inspection: PropertyInspection | null;
   onClose: () => void;
-  onSync: (inspectionId: string) => void;
 }
 
-export const InspectionDetailModal = ({
-  inspection,
-  onClose,
-  onSync,
-}: InspectionDetailModalProps) => {
+export const InspectionDetailModal = ({ inspection, onClose }: InspectionDetailModalProps) => {
   return (
     <Dialog open={Boolean(inspection)} onOpenChange={(open) => !open && onClose()}>
       {inspection && (
@@ -107,9 +102,9 @@ export const InspectionDetailModal = ({
                 variant="primary"
                 className="flex-1"
                 icon={<RefreshCw className="w-3.5 h-3.5" />}
-                onClick={() => onSync(inspection.id)}
+                href="/agent/sync"
               >
-                Sync Now
+                Open Sync Center
               </Button>
             )}
           </div>
