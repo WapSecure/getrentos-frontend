@@ -13,6 +13,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  useToast,
 } from '@getrentos/ui';
 import { DocumentUploadDialog } from '@getrentos/ui';
 import { DocumentRowActions } from '@getrentos/ui';
@@ -23,6 +24,8 @@ import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { enqueueAgentBinaryOperation } from '@/lib/agentBinaryQueue';
+import { isAgentConnectionFailure, requireAgentQueueOwner } from '@/lib/agentQueueOwner';
+import { useAgentUser } from '../layout';
 
 const categoryLabels: Record<AgentDocument['category'], string> = {
   inspection_report: 'Inspection Report',
@@ -35,6 +38,8 @@ const categoryLabels: Record<AgentDocument['category'], string> = {
 type CategoryFilter = 'all' | AgentDocument['category'];
 
 export default function AgentDocumentsPage() {
+  const agent = useAgentUser();
+  const toast = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<CategoryFilter>('all');
@@ -63,20 +68,27 @@ export default function AgentDocumentsPage() {
   const documents = documentsData?.items ?? [];
   const total = documentsData?.total ?? 0;
   const upload = useMutation({
-    mutationFn: agentService.uploadDocument,
+    mutationFn: (payload: Parameters<typeof agentService.uploadDocument>[0]) =>
+      unwrap(agentService.uploadDocument(payload, requireAgentQueueOwner(agent?.id))),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: agentKeys.documents }),
-    onError: (_error, payload) =>
-      void enqueueAgentBinaryOperation(
-        'document',
-        { name: payload.name, category: payload.category },
-        [payload.file]
-      ),
   });
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [preview, setPreview] = useState<{ name: string; url: string } | null>(null);
 
   const handleUpload = async (data: { name: string; category: string; file: File }) => {
-    await unwrap(upload.mutateAsync({ file: data.file, name: data.name, category: data.category }));
+    try {
+      await upload.mutateAsync(data);
+    } catch (error) {
+      if (!isAgentConnectionFailure(error)) throw error;
+      await enqueueAgentBinaryOperation(
+        'document',
+        { name: data.name, category: data.category },
+        [data.file],
+        agent?.id
+      );
+      upload.reset();
+      toast.info('Document saved on this device. It has not been uploaded yet.');
+    }
   };
   const handleDownload = async (id: string) => {
     const file = await unwrap(agentService.getDocumentDownload(id));

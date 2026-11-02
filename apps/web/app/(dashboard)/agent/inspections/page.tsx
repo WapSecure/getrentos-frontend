@@ -7,14 +7,18 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';
 import { InspectionDetailModal } from '@/components/agent/inspections/InspectionDetailModal';
-import { Alert, Button, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import { Alert, Button, EmptyState, ListSkeleton, Pagination, useToast } from '@getrentos/ui';
 import type { PropertyInspection } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
+import { isAgentConnectionFailure, requireAgentQueueOwner } from '@/lib/agentQueueOwner';
+import { useAgentUser } from '../layout';
 
 function AgentInspectionsPageContent() {
+  const agent = useAgentUser();
+  const toast = useToast();
   const searchParams = useSearchParams();
   const defaultTaskId = searchParams.get('task') || undefined;
 
@@ -42,14 +46,17 @@ function AgentInspectionsPageContent() {
   const submitInspection = useMutation({
     mutationFn: (inspection: Omit<PropertyInspection, 'id' | 'syncStatus' | 'acknowledgedAt'>) =>
       unwrap(
-        agentService.submitInspection({
-          taskId: inspection.taskId,
-          scheduledAt: inspection.scheduledDate,
-          type: inspection.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
-          rooms: inspection.rooms,
-          clientName: inspection.clientName,
-          overallCondition: inspection.overallCondition,
-        })
+        agentService.submitInspection(
+          {
+            taskId: inspection.taskId,
+            scheduledAt: inspection.scheduledDate,
+            type: inspection.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
+            rooms: inspection.rooms,
+            clientName: inspection.clientName,
+            overallCondition: inspection.overallCondition,
+          },
+          requireAgentQueueOwner(agent?.id)
+        )
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentKeys.inspections });
@@ -64,16 +71,27 @@ function AgentInspectionsPageContent() {
     try {
       await submitInspection.mutateAsync(data);
       return true;
-    } catch {
+    } catch (error) {
+      if (!isAgentConnectionFailure(error)) {
+        toast.error(error instanceof Error ? error.message : 'The inspection could not be saved.');
+        return false;
+      }
       try {
-        agentOfflineQueue.enqueue('inspection', {
-          taskId: data.taskId,
-          scheduledAt: data.scheduledDate,
-          type: data.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
-          rooms: data.rooms,
-          clientName: data.clientName,
-          overallCondition: data.overallCondition,
-        });
+        agentOfflineQueue.enqueue(
+          'inspection',
+          {
+            taskId: data.taskId,
+            scheduledAt: data.scheduledDate,
+            type: data.type.toUpperCase() as 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER',
+            rooms: data.rooms,
+            clientName: data.clientName,
+            overallCondition: data.overallCondition,
+          },
+          agent?.id
+        );
+        toast.info(
+          'Inspection saved on this device. Upload it from the Sync Center when connected.'
+        );
         return true;
       } catch {
         return false;

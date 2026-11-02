@@ -99,11 +99,14 @@ export const NewInspectionModal = ({
   };
 
   const removePhoto = async (photoId: string) => {
-    setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    setPhotoError(null);
     try {
       await unwrap(agentService.removeInspectionPhoto(photoId));
-    } catch {
-      /* best effort — the row is already gone from view */
+      setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    } catch (error) {
+      setPhotoError(
+        error instanceof Error ? error.message : 'Could not remove that photo. Please retry.'
+      );
     }
   };
 

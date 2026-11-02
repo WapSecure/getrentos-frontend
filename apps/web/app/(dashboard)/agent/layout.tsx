@@ -74,7 +74,7 @@ export default function AgentLayout({ children }: { children: ReactNode }) {
   return (
     <AgentUserContext.Provider value={user}>
       <div className="min-h-screen bg-background">
-        <AgentOfflineQueueSync />
+        <AgentOfflineQueueSync ownerId={user?.id} />
         <AgentNavbar user={user} />
         <div className="flex">
           <AgentSidebar />

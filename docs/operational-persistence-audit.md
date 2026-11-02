@@ -14,11 +14,25 @@ records retrieved from the server. A server draft or unchecked identity is not
 an unsent device record.
 
 `pnpm test:e2e:agent-sync` exercises the browser storage and real frontend service
-calls against controlled API responses. Seven scenarios cover rejected
+calls against controlled API responses. The scenarios cover rejected
 inspection, verification and text-message uploads, rejected documents and
 messages with files, persistence after reload, manual retry, server draft
-display, and overlapping reconnect/manual retries. This does not establish
-server idempotency after an ambiguous network failure or across multiple tabs.
+display, and overlapping reconnect/manual retries.
+
+New text and file records include the capturing agent's account ID. Queue reads
+and replay are restricted to that account. An identity change before replay or
+an authentication retry stops the upload. Legacy records without an owner are
+kept on the device, excluded from replay, and flagged for account review.
+
+Capture forms queue connection failures; server rejections preserve the draft
+and show an error. Document uploads now unwrap the service response inside the
+mutation, allowing the failure path to run. A local save is identified as
+waiting for upload. Failed inspection-photo deletion leaves the photo visible.
+
+Where the browser supports Web Locks, replay is serialized across tabs as well
+as within an app instance. Without Web Locks, serialization is within one app
+instance. Neither case establishes server idempotency after an ambiguous
+network failure. A server idempotency key remains separate work.
 
 ## Source paths checked
 
@@ -40,8 +54,7 @@ each complete journey.
 ## Remaining sweep
 
 Continue tracing settings, document sharing, exports, and other operational
-actions through request failures and reloads. Review Agent capture failure
-handling separately: some forms currently queue every rejected write rather
-than only network failures. The device queue also predates per-user ownership
-tags; account switching and cross-tab replay need a separate review before
-claiming complete offline delivery guarantees.
+actions through request failures and reloads. Legacy unowned records need
+ownership review before any recovery upload. Complete offline delivery also
+needs server idempotency and a browser compatibility review for storage and
+cross-tab locking.

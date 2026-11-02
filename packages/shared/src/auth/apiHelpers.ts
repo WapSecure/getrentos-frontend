@@ -6,7 +6,7 @@ import {
   obtainStepUpToken,
   STEP_UP_HEADER,
 } from './stepUp';
-import { getAuthToken } from './authStorage';
+import { getAuthToken, getStoredUser } from './authStorage';
 
 /**
  * Machine-readable codes the backend attaches to a 403 when an action is gated
@@ -225,12 +225,25 @@ export async function safeCall<T>(fn: () => Promise<T>): Promise<ApiResponse<T>>
   }
 }
 
-/** Fetches with the Bearer token attached, silently refreshing on 401 once. */
-export async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+/**
+ * Fetch with the Bearer token, refreshing on 401 once. When supplied,
+ * expectedUserId pins a deferred write to its original account through retries.
+ */
+export async function authFetch<T>(
+  path: string,
+  options: RequestInit = {},
+  expectedUserId?: string
+): Promise<T> {
+  const assertAccount = () => {
+    if (expectedUserId && getStoredUser<{ id?: string }>()?.id !== expectedUserId) {
+      throw new ApiError(409, 'Your account changed. Sign in again before retrying this action.');
+    }
+  };
   // The refresh-and-replay on 401 happens here, once; apiFetch's own retry is
   // switched off so a single request can't fan out into several attempts.
-  const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) =>
-    apiFetch<T>(
+  const doFetch = (token: string | null, stepUp: string | null = currentStepUpToken()) => {
+    assertAccount();
+    return apiFetch<T>(
       path,
       {
         ...options,
@@ -242,10 +255,12 @@ export async function authFetch<T>(path: string, options: RequestInit = {}): Pro
       },
       false
     );
+  };
 
   try {
     return await doFetch(getAuthToken());
   } catch (err) {
+    assertAccount();
     // A sensitive change: confirm it's the account holder, then replay once.
     if (isStepUpRequired(err)) {
       clearStepUpToken();

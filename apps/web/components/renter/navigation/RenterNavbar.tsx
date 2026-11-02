@@ -16,6 +16,7 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
+import { RenterAssistant } from '../assistant/RenterAssistant';
 
 interface RenterNavbarProps {
   user: { fullName: string; email: string; role?: string; roles?: string[] } | null;
@@ -126,6 +127,8 @@ export const RenterNavbar = ({ user }: RenterNavbarProps) => {
                 <LanguageToggle />
               </div>
               <ThemeToggle />
+
+              <RenterAssistant />
 
               <NotificationBell
                 portal="renter"

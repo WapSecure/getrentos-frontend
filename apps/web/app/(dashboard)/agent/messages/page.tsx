@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Pagination, Select } from '@getrentos/ui';
+import { Button, Pagination, Select, useToast } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/agent/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/agent/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -14,9 +14,11 @@ import { useAgentUser } from '../layout';
 import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
 import { enqueueAgentBinaryOperation } from '@/lib/agentBinaryQueue';
 import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
+import { isAgentConnectionFailure, requireAgentQueueOwner } from '@/lib/agentQueueOwner';
 
 export default function AgentMessagesPage() {
   const agent = useAgentUser();
+  const toast = useToast();
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +87,7 @@ export default function AgentMessagesPage() {
   }));
   const send = useMutation({
     mutationFn: ({ text, files }: { text: string; files: File[] }) =>
-      unwrap(agentService.sendMessage(activeId!, text, files)),
+      unwrap(agentService.sendMessage(activeId!, text, files, requireAgentQueueOwner(agent?.id))),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: agentKeys.conversationMessages(activeId || 'none'),
@@ -106,13 +108,18 @@ export default function AgentMessagesPage() {
     try {
       await send.mutateAsync({ text, files });
       return true;
-    } catch {
+    } catch (error) {
+      if (!isAgentConnectionFailure(error)) {
+        toast.error(error instanceof Error ? error.message : 'The message could not be sent.');
+        return false;
+      }
       try {
         if (files.length) {
-          await enqueueAgentBinaryOperation('message', { id: activeId, text }, files);
+          await enqueueAgentBinaryOperation('message', { id: activeId, text }, files, agent?.id);
         } else {
-          agentOfflineQueue.enqueue('message', { id: activeId, text, files: [] });
+          agentOfflineQueue.enqueue('message', { id: activeId, text, files: [] }, agent?.id);
         }
+        toast.info('Message saved on this device. It has not been sent yet.');
         return true;
       } catch {
         return false;

@@ -291,7 +291,8 @@ export const agentService = {
         ratingDistribution: Array<{ rating: number; count: number }>;
       }>('/agent/reviews/summary')
     ),
-  getSyncItems: () => safeCall(() => authFetch<OfflineSyncItem[]>('/agent/sync')),
+  getSyncItems: (expectedUserId?: string) =>
+    safeCall(() => authFetch<OfflineSyncItem[]>('/agent/sync', {}, expectedUserId)),
   listTasks: async (
     options: AgentTaskListOptions = {}
   ): Promise<ApiResponse<Paginated<AgentTask>>> => {
@@ -335,15 +336,24 @@ export const agentService = {
     }
     return { success: false, error: response.error, message: response.message };
   },
-  submitInspection: (data: {
-    taskId: string;
-    scheduledAt: string;
-    type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
-    rooms: PropertyInspection['rooms'];
-    clientName?: string;
-    overallCondition?: string;
-  }) =>
-    safeCall(() => authFetch('/agent/inspections', { method: 'POST', body: JSON.stringify(data) })),
+  submitInspection: (
+    data: {
+      taskId: string;
+      scheduledAt: string;
+      type: 'MOVE_IN' | 'MOVE_OUT' | 'PERIODIC' | 'OTHER';
+      rooms: PropertyInspection['rooms'];
+      clientName?: string;
+      overallCondition?: string;
+    },
+    expectedUserId?: string
+  ) =>
+    safeCall(() =>
+      authFetch(
+        '/agent/inspections',
+        { method: 'POST', body: JSON.stringify(data) },
+        expectedUserId
+      )
+    ),
   getInspection: async (taskId: string): Promise<ApiResponse<PropertyInspection | null>> => {
     const response = await safeCall(() =>
       authFetch<AgentInspectionApi | null>(`/agent/inspections/${taskId}`)
@@ -410,16 +420,23 @@ export const agentService = {
     }
     return { success: false, error: response.error, message: response.message };
   },
-  submitVerification: (data: {
-    taskId: string;
-    subjectName: string;
-    subjectType: 'TENANT' | 'BUYER' | 'PROPERTY';
-    idVerified: boolean;
-    addressConfirmed: boolean;
-    notes?: string;
-  }) =>
+  submitVerification: (
+    data: {
+      taskId: string;
+      subjectName: string;
+      subjectType: 'TENANT' | 'BUYER' | 'PROPERTY';
+      idVerified: boolean;
+      addressConfirmed: boolean;
+      notes?: string;
+    },
+    expectedUserId?: string
+  ) =>
     safeCall(() =>
-      authFetch('/agent/verifications', { method: 'POST', body: JSON.stringify(data) })
+      authFetch(
+        '/agent/verifications',
+        { method: 'POST', body: JSON.stringify(data) },
+        expectedUserId
+      )
     ),
   listDocuments: async (
     options: AgentDocumentListOptions = {}
@@ -449,12 +466,17 @@ export const agentService = {
       },
     };
   },
-  uploadDocument: (data: { file: File; name: string; category: string }) => {
+  uploadDocument: (
+    data: { file: File; name: string; category: string },
+    expectedUserId?: string
+  ) => {
     const form = new FormData();
     form.append('file', data.file);
     form.append('name', data.name);
     form.append('category', data.category.toUpperCase());
-    return safeCall(() => authFetch('/agent/documents', { method: 'POST', body: form }));
+    return safeCall(() =>
+      authFetch('/agent/documents', { method: 'POST', body: form }, expectedUserId)
+    );
   },
   getDocumentDownload: (id: string) =>
     safeCall(() => authFetch<{ name: string; url: string }>(`/agent/documents/${id}/download`)),
@@ -481,16 +503,22 @@ export const agentService = {
         Array<{ id: string; senderId: string; text: string; createdAt: string; read: boolean }>
       >(`/agent/messages/${id}`)
     ),
-  sendMessage: (id: string, text: string, files: File[] = []) => {
+  sendMessage: (id: string, text: string, files: File[] = [], expectedUserId?: string) => {
     if (!files.length) {
       return safeCall(() =>
-        authFetch(`/agent/messages/${id}`, { method: 'POST', body: JSON.stringify({ text }) })
+        authFetch(
+          `/agent/messages/${id}`,
+          { method: 'POST', body: JSON.stringify({ text }) },
+          expectedUserId
+        )
       );
     }
     const form = new FormData();
     form.append('text', text);
     files.forEach((file) => form.append('files', file));
-    return safeCall(() => authFetch(`/agent/messages/${id}`, { method: 'POST', body: form }));
+    return safeCall(() =>
+      authFetch(`/agent/messages/${id}`, { method: 'POST', body: form }, expectedUserId)
+    );
   },
   getNotifications: () => safeCall(() => authFetch<AgentNotification[]>('/agent/notifications')),
   markNotificationRead: (id: string) =>
