@@ -23,6 +23,7 @@ import type { SupportMessage, SupportThread } from '@/types/support';
 import type { RenewalOffer } from '@/types/lease';
 import type { CreateMaintenanceRequestInput, MaintenanceRequest } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
+import type { AssistantTurn, RenterAssistantReply } from '@/types/assistant';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 
 export interface ViewingRequest {
@@ -1394,6 +1395,18 @@ export const renterService = {
 
   async markAllNotificationsAsRead(): Promise<ApiResponse<void>> {
     return safeCall(() => authFetch('/renter/notifications/read-all', { method: 'POST' }));
+  },
+
+  async askAssistant(
+    question: string,
+    history: AssistantTurn[]
+  ): Promise<ApiResponse<RenterAssistantReply>> {
+    return safeCall(() =>
+      authFetch('/renter/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    );
   },
 
   async deleteNotification(id: string): Promise<ApiResponse<void>> {
