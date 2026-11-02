@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@/lib/apiHelpers';
 import { viewerHasRole } from '@/lib/viewer';
@@ -17,6 +17,10 @@ import { SHORTLET_GUEST_ROLE_IDS } from '@/lib/shortlet/guestRoutes';
  */
 export const isGuestShortletViewer = (): boolean => viewerHasRole(...SHORTLET_GUEST_ROLE_IDS);
 
+// The viewer's role is client-only (it comes from stored auth), and it cannot
+// change without a page load, so there is nothing to subscribe to.
+const subscribeToViewer = () => () => {};
+
 /**
  * Guest shortlet wishlist: tracks which listings are saved and toggles them.
  * Only meaningful when signed in with an account that can book a stay — check
@@ -24,9 +28,17 @@ export const isGuestShortletViewer = (): boolean => viewerHasRole(...SHORTLET_GU
  */
 export const useShortletWishlist = () => {
   const queryClient = useQueryClient();
-  // Resolved once per mount: the role cannot change without a page load, and
-  // reading storage during render would break SSR/hydration parity.
-  const [canUseWishlist] = useState(isGuestShortletViewer);
+  // The role is a client-only read (stored auth). Reading it during render —
+  // even via a useState initializer — makes the first client render disagree
+  // with the server (which has no auth), so React throws a hydration mismatch
+  // and regenerates the subtree. useSyncExternalStore with a server snapshot of
+  // `false` keeps the server and the first client render in step, then updates
+  // to the real value right after hydration.
+  const canUseWishlist = useSyncExternalStore(
+    subscribeToViewer,
+    isGuestShortletViewer,
+    () => false
+  );
 
   const { data: ids = [] } = useQuery({
     queryKey: shortletKeys.wishlistIds,
