@@ -94,8 +94,12 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
   return (
     <>
+      {/* Sticky rather than fixed: a fixed bar sits outside the flow, so the
+          page underneath starts at the top of the viewport and its first
+          control is covered by the nav. Every other role navbar is sticky, and
+          the shared sidebar offsets itself with `top-16` on that assumption. */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 transition-all duration-300 ${
           isScrolled
             ? 'border-b border-border/60 bg-background/85 shadow-sm backdrop-blur-xl supports-backdrop-filter:bg-background/75'
             : 'border-b border-border/50 bg-background/75 backdrop-blur-xl supports-backdrop-filter:bg-background/60'
