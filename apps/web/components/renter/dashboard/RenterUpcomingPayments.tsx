@@ -10,10 +10,14 @@ import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
+// The year matters: a charge a year out must not read as due this week.
+const formatDate = (dateString: string) =>
+  new Date(dateString).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Africa/Lagos',
+  });
 
 const formatPrice = (amount: number) => {
   return new Intl.NumberFormat('en-NG', {
@@ -26,8 +30,8 @@ const formatPrice = (amount: number) => {
 
 export const RenterUpcomingPayments = () => {
   const { data } = useQuery({
-    queryKey: [...renterKeys.payments, { page: 1, pageSize: 10 }],
-    queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 10 })),
+    queryKey: [...renterKeys.payments, { page: 1, pageSize: 5, open: true }],
+    queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 5, open: true })),
   });
   const payments = data?.items ?? [];
   const upcomingPayments = payments

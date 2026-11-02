@@ -3,30 +3,17 @@
 import { motion } from 'framer-motion';
 import { Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react';
 import { Alert } from '@getrentos/ui';
-import type { MaintenanceRequest } from '@/types/maintenance';
+import type { MaintenanceSummary } from '@/types/maintenance';
 
 interface MaintenanceAnalyticsProps {
-  requests: MaintenanceRequest[];
+  summary: MaintenanceSummary;
 }
 
-export const MaintenanceAnalytics = ({ requests }: MaintenanceAnalyticsProps) => {
-  const total = requests.length;
-  const resolved = requests.filter((r) => r.status === 'resolved').length;
-  const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-
-  const urgentRequests = requests.filter((r) => r.priority === 'urgent').length;
-  const avgResponseTime =
-    total > 0
-      ? Math.round(
-          requests.reduce((sum, r) => {
-            const diff = r.resolvedAt
-              ? (new Date(r.resolvedAt).getTime() - new Date(r.createdAt).getTime()) /
-                (1000 * 60 * 60)
-              : (new Date().getTime() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60);
-            return sum + diff;
-          }, 0) / total
-        )
-      : 0;
+/** Figures across every request, not just the page on screen. */
+export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => {
+  const resolutionRate = summary.total > 0 ? Math.round((summary.resolved / summary.total) * 100) : 0;
+  const urgentRequests = summary.urgent;
+  const avgResponseTime = summary.avgResponseHours;
 
   return (
     <motion.div
@@ -74,7 +61,7 @@ export const MaintenanceAnalytics = ({ requests }: MaintenanceAnalyticsProps) =>
           </Alert>
         )}
 
-        {resolutionRate > 80 && total > 0 && (
+        {resolutionRate > 80 && summary.total > 0 && (
           <Alert variant="success">Great resolution rate! Keep up the good work.</Alert>
         )}
       </div>
