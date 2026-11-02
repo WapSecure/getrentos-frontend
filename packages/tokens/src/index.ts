@@ -70,12 +70,15 @@ export const lightColors: Palette = {
 };
 
 export const darkColors: Palette = {
-  background: '#111113',
+  // Apple's dark ladder: systemBackground #000, secondary #1c1c1e, raised #2c2c2e.
+  // A lifted canvas (this used to be #111113) sits between the first two rungs, so
+  // cards render only ~11 steps above the page and the whole surface reads flat.
+  background: '#000000',
   foreground: '#f5f5f7',
   card: '#1c1c1e',
   cardForeground: '#f5f5f7',
   border: '#343437',
-  secondary: '#262629',
+  secondary: '#2c2c2e',
   secondaryForeground: '#f5f5f7',
   muted: '#222225',
   mutedForeground: '#a1a1aa',
