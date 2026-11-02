@@ -1,5 +1,6 @@
 import type { agentService } from '@/services/agentService';
 import { notifyAgentQueueChanged } from './agentQueueEvents';
+import { currentAgentQueueOwner, requireAgentQueueOwner } from './agentQueueOwner';
 
 export type AgentOfflineOperationType = 'inspection' | 'verification' | 'document' | 'message';
 
@@ -24,35 +25,48 @@ export type AgentOfflineOperation = {
     type: K;
     payload: AgentOfflinePayloads[K];
     createdAt: string;
+    /** Absent only on legacy records, which must not be assigned to a new account. */
+    ownerId?: string;
   };
 }[AgentOfflineOperationType];
 const KEY = 'getrentos.agent.offline-queue';
+function readAll(): AgentOfflineOperation[] {
+  const items = JSON.parse(localStorage.getItem(KEY) || '[]');
+  if (!Array.isArray(items))
+    throw new Error('Device uploads could not be read. Existing records were kept.');
+  return items;
+}
 export const agentOfflineQueue = {
-  list: (): AgentOfflineOperation[] => {
-    try {
-      return JSON.parse(localStorage.getItem(KEY) || '[]');
-    } catch {
-      return [];
-    }
+  list: (ownerId = currentAgentQueueOwner()): AgentOfflineOperation[] => {
+    if (!ownerId) return [];
+    requireAgentQueueOwner(ownerId);
+    return readAll().filter((item) => item.ownerId === ownerId);
   },
+  unownedCount: () => readAll().filter((item) => !item.ownerId).length,
   // Generic in the type so the payload is checked against that member of the
   // union — the one place that stops a wrongly-shaped payload being queued.
-  enqueue: <K extends AgentOfflineOperationType>(type: K, payload: AgentOfflinePayloads[K]) => {
+  enqueue: <K extends AgentOfflineOperationType>(
+    type: K,
+    payload: AgentOfflinePayloads[K],
+    expectedOwner?: string
+  ) => {
     // Rebuilt rather than spread, so the mapped type is satisfied by construction.
     const item = {
       id: crypto.randomUUID(),
       type,
       payload,
       createdAt: new Date().toISOString(),
+      ownerId: requireAgentQueueOwner(expectedOwner),
     } as AgentOfflineOperation;
-    localStorage.setItem(KEY, JSON.stringify([...agentOfflineQueue.list(), item]));
+    localStorage.setItem(KEY, JSON.stringify([...readAll(), item]));
     notifyAgentQueueChanged();
     return item;
   },
-  remove: (id: string) => {
+  remove: (id: string, expectedOwner: string) => {
+    requireAgentQueueOwner(expectedOwner);
     localStorage.setItem(
       KEY,
-      JSON.stringify(agentOfflineQueue.list().filter((item) => item.id !== id))
+      JSON.stringify(readAll().filter((item) => item.id !== id || item.ownerId !== expectedOwner))
     );
     notifyAgentQueueChanged();
   },

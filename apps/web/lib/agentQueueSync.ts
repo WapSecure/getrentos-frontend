@@ -5,55 +5,79 @@ import {
   listAgentBinaryOperations,
   removeAgentBinaryOperation,
   type AgentBinaryOperation,
+  unownedAgentBinaryCount,
 } from './agentBinaryQueue';
 import { notifyAgentQueueChanged } from './agentQueueEvents';
+import { requireAgentQueueOwner } from './agentQueueOwner';
 
 export type AgentQueuedRecord =
   | (AgentOfflineOperation & { storage: 'text' })
   | (AgentBinaryOperation & { storage: 'binary' });
 
-export async function listAgentQueuedRecords(): Promise<AgentQueuedRecord[]> {
+export async function listAgentQueuedRecords(expectedOwner?: string): Promise<AgentQueuedRecord[]> {
+  const ownerId = requireAgentQueueOwner(expectedOwner);
   return [
-    ...agentOfflineQueue.list().map((item) => ({ ...item, storage: 'text' as const })),
-    ...(await listAgentBinaryOperations()).map((item) => ({ ...item, storage: 'binary' as const })),
+    ...agentOfflineQueue.list(ownerId).map((item) => ({ ...item, storage: 'text' as const })),
+    ...(await listAgentBinaryOperations(ownerId)).map((item) => ({
+      ...item,
+      storage: 'binary' as const,
+    })),
   ].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
-async function upload(item: AgentQueuedRecord) {
+export async function unownedAgentRecordCount(): Promise<number> {
+  return agentOfflineQueue.unownedCount() + (await unownedAgentBinaryCount());
+}
+
+async function upload(item: AgentQueuedRecord, ownerId: string) {
+  requireAgentQueueOwner(ownerId);
+  if (item.ownerId !== ownerId) throw new Error('This upload belongs to a different account.');
   if (item.storage === 'binary') {
     if (item.type === 'document') {
       await unwrap(
-        agentService.uploadDocument({
-          ...(item.payload as { name: string; category: string }),
-          file: item.files[0],
-        })
+        agentService.uploadDocument(
+          {
+            ...(item.payload as { name: string; category: string }),
+            file: item.files[0],
+          },
+          ownerId
+        )
       );
     } else {
       const payload = item.payload as { id: string; text: string };
-      await unwrap(agentService.sendMessage(payload.id, payload.text, item.files));
+      await unwrap(agentService.sendMessage(payload.id, payload.text, item.files, ownerId));
     }
-    await removeAgentBinaryOperation(item.id);
+    await removeAgentBinaryOperation(item.id, ownerId);
     return;
   }
   switch (item.type) {
     case 'inspection':
-      await unwrap(agentService.submitInspection(item.payload));
+      await unwrap(agentService.submitInspection(item.payload, ownerId));
       break;
     case 'verification':
-      await unwrap(agentService.submitVerification(item.payload));
+      await unwrap(agentService.submitVerification(item.payload, ownerId));
       break;
     case 'document':
-      await unwrap(agentService.uploadDocument(item.payload));
+      await unwrap(agentService.uploadDocument(item.payload, ownerId));
       break;
     case 'message':
       await unwrap(
-        agentService.sendMessage(item.payload.id, item.payload.text, item.payload.files || [])
+        agentService.sendMessage(
+          item.payload.id,
+          item.payload.text,
+          item.payload.files || [],
+          ownerId
+        )
       );
       break;
+    default:
+      throw new Error(
+        'This device record could not be read for upload. It has been kept for review.'
+      );
   }
   // safeCall returns unsuccessful responses without throwing. Only unwrap's
   // confirmed success permits deleting the device's durable copy.
-  agentOfflineQueue.remove(item.id);
+  agentOfflineQueue.remove(item.id, ownerId);
 }
 
 export interface AgentSyncResult {
@@ -64,17 +88,22 @@ export interface AgentSyncResult {
 let pending: Promise<unknown> = Promise.resolve();
 
 /** Serialize automatic and manual retries so a successful item is sent once. */
-export function syncAgentQueuedRecords(id?: string): Promise<AgentSyncResult> {
-  const run = pending.then(async (): Promise<AgentSyncResult> => {
+export function syncAgentQueuedRecords(
+  id?: string,
+  expectedOwner?: string
+): Promise<AgentSyncResult> {
+  // Bind the request before waiting for another tab or a prior upload.
+  const ownerId = expectedOwner ?? requireAgentQueueOwner();
+  const drain = async (): Promise<AgentSyncResult> => {
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       return { synced: 0, error: 'You are offline. Your records remain saved on this device.' };
     }
     let synced = 0;
     try {
-      const records = await listAgentQueuedRecords();
+      const records = await listAgentQueuedRecords(ownerId);
       for (const record of records) {
         if (id && record.id !== id) continue;
-        await upload(record);
+        await upload(record, ownerId);
         synced++;
       }
       return { synced };
@@ -89,6 +118,12 @@ export function syncAgentQueuedRecords(id?: string): Promise<AgentSyncResult> {
     } finally {
       notifyAgentQueueChanged();
     }
+  };
+  const run = pending.then(async (): Promise<AgentSyncResult> => {
+    if (typeof navigator !== 'undefined' && navigator.locks) {
+      return navigator.locks.request('getrentos-agent-upload', drain);
+    }
+    return drain();
   });
   pending = run.catch(() => undefined);
   return run;

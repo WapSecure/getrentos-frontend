@@ -9,7 +9,12 @@ import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
 import { agentKeys } from '@/lib/queryKeys';
 import { AGENT_QUEUE_CHANGED } from '@/lib/agentQueueEvents';
-import { listAgentQueuedRecords, syncAgentQueuedRecords } from '@/lib/agentQueueSync';
+import {
+  listAgentQueuedRecords,
+  syncAgentQueuedRecords,
+  unownedAgentRecordCount,
+} from '@/lib/agentQueueSync';
+import { useAgentUser } from '../layout';
 
 const deviceQueueKey = ['agent', 'device-queue'] as const;
 const recordLabels = {
@@ -20,21 +25,33 @@ const recordLabels = {
 };
 
 export default function AgentSyncPage() {
+  const ownerId = useAgentUser()?.id;
+  const ownedQueueKey = [...deviceQueueKey, ownerId];
   const queryClient = useQueryClient();
   const history = useQuery({
-    queryKey: agentKeys.sync,
-    queryFn: () => unwrap(agentService.getSyncItems()),
+    queryKey: [...agentKeys.sync, ownerId],
+    queryFn: () => unwrap(agentService.getSyncItems(ownerId)),
   });
-  const queue = useQuery({ queryKey: deviceQueueKey, queryFn: listAgentQueuedRecords });
+  const queue = useQuery({
+    queryKey: ownedQueueKey,
+    queryFn: () => listAgentQueuedRecords(ownerId),
+  });
+  const legacy = useQuery({
+    queryKey: ['agent', 'unowned-queue', ownerId],
+    queryFn: unownedAgentRecordCount,
+  });
   const [isOnline, setIsOnline] = useState(true);
   const sync = useMutation({
-    mutationFn: (id: string | undefined) => syncAgentQueuedRecords(id),
+    mutationFn: (id: string | undefined) => syncAgentQueuedRecords(id, ownerId),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['agent'] }),
   });
 
   useEffect(() => {
     const updateStatus = () => setIsOnline(navigator.onLine);
-    const refreshQueue = () => void queryClient.invalidateQueries({ queryKey: deviceQueueKey });
+    const refreshQueue = () => {
+      void queryClient.invalidateQueries({ queryKey: deviceQueueKey });
+      void queryClient.invalidateQueries({ queryKey: ['agent', 'unowned-queue'] });
+    };
     updateStatus();
     window.addEventListener('online', updateStatus);
     window.addEventListener('offline', updateStatus);
@@ -81,6 +98,12 @@ export default function AgentSyncPage() {
           ? 'Queued records are removed from this device only after GetRentos confirms they were saved.'
           : 'Queued records remain saved on this device. Uploads will retry when you reconnect.'}
       </Alert>
+      {Boolean(legacy.data) && (
+        <Alert variant="warning" className="mb-4" title="Older uploads need account review">
+          Some older records have no account owner. They remain on this device and will not be
+          uploaded automatically. Contact support before retrying them.
+        </Alert>
+      )}
       {syncError && (
         <Alert variant="danger" className="mb-4" title="Upload could not be completed">
           {syncError} Unsent records remain on this device. Retry when the issue is resolved.

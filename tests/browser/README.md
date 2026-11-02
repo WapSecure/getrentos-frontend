@@ -8,6 +8,9 @@ intercepts API requests in the test browser. It checks that rejected inspection,
 verification, message, and document uploads survive reloads, preserve file
 contents, and leave the queue only after a successful API response. It also
 checks that reconnect and manual retry do not submit the same queued item twice.
+Additional cases cover account switching, legacy records without owner IDs,
+replay across tabs, and capture forms preserving rejected drafts while queuing
+connection failures for the original agent.
 
 ## Integrated browser checks
 

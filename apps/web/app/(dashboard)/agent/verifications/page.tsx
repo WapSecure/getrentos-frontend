@@ -6,12 +6,14 @@ import { Plus, UserCheck } from 'lucide-react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { VerificationCard } from '@/components/agent/verifications/VerificationCard';
 import { NewVerificationModal } from '@/components/agent/verifications/NewVerificationModal';
-import { Alert, Button, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import { Alert, Button, EmptyState, ListSkeleton, Pagination, useToast } from '@getrentos/ui';
 import type { VerificationVisit } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentOfflineQueue } from '@/lib/agentOfflineQueue';
+import { isAgentConnectionFailure, requireAgentQueueOwner } from '@/lib/agentQueueOwner';
+import { useAgentUser } from '../layout';
 
 /**
  * A visit stores its subject in lower case; the API spells it in caps. Written
@@ -26,6 +28,8 @@ const API_SUBJECT_TYPES: Record<VerificationVisit['subjectType'], 'TENANT' | 'BU
   };
 
 function AgentVerificationsPageContent() {
+  const agent = useAgentUser();
+  const toast = useToast();
   const searchParams = useSearchParams();
   const defaultTaskId = searchParams.get('task') || undefined;
 
@@ -52,14 +56,17 @@ function AgentVerificationsPageContent() {
   const submitVerification = useMutation({
     mutationFn: (visit: Omit<VerificationVisit, 'id' | 'syncStatus'>) =>
       unwrap(
-        agentService.submitVerification({
-          taskId: visit.taskId,
-          subjectName: visit.subjectName,
-          subjectType: API_SUBJECT_TYPES[visit.subjectType],
-          idVerified: visit.idVerified,
-          addressConfirmed: visit.addressConfirmed,
-          notes: visit.notes || undefined,
-        })
+        agentService.submitVerification(
+          {
+            taskId: visit.taskId,
+            subjectName: visit.subjectName,
+            subjectType: API_SUBJECT_TYPES[visit.subjectType],
+            idVerified: visit.idVerified,
+            addressConfirmed: visit.addressConfirmed,
+            notes: visit.notes || undefined,
+          },
+          requireAgentQueueOwner(agent?.id)
+        )
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentKeys.verifications });
@@ -72,16 +79,29 @@ function AgentVerificationsPageContent() {
     try {
       await submitVerification.mutateAsync(data);
       return true;
-    } catch {
+    } catch (error) {
+      if (!isAgentConnectionFailure(error)) {
+        toast.error(
+          error instanceof Error ? error.message : 'The verification could not be saved.'
+        );
+        return false;
+      }
       try {
-        agentOfflineQueue.enqueue('verification', {
-          taskId: data.taskId,
-          subjectName: data.subjectName,
-          subjectType: API_SUBJECT_TYPES[data.subjectType],
-          idVerified: data.idVerified,
-          addressConfirmed: data.addressConfirmed,
-          notes: data.notes || undefined,
-        });
+        agentOfflineQueue.enqueue(
+          'verification',
+          {
+            taskId: data.taskId,
+            subjectName: data.subjectName,
+            subjectType: API_SUBJECT_TYPES[data.subjectType],
+            idVerified: data.idVerified,
+            addressConfirmed: data.addressConfirmed,
+            notes: data.notes || undefined,
+          },
+          agent?.id
+        );
+        toast.info(
+          'Verification saved on this device. Upload it from the Sync Center when connected.'
+        );
         return true;
       } catch {
         return false;
