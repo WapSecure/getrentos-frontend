@@ -73,6 +73,7 @@ export default function AppLayout() {
       <Stack.Screen name="roommates" options={DETAIL_OPTIONS} />
       <Stack.Screen name="support" options={DETAIL_OPTIONS} />
       <Stack.Screen name="support-thread/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="ask" options={DETAIL_OPTIONS} />
       <Stack.Screen name="calendar" options={DETAIL_OPTIONS} />
       <Stack.Screen name="move-checklist" options={DETAIL_OPTIONS} />
       <Stack.Screen name="financing" options={DETAIL_OPTIONS} />
