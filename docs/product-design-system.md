@@ -72,3 +72,34 @@ For each group check populated, loading, empty, error, menu, and dialog states a
 390px and desktop widths, in both themes. Review screenshots by eye as well as
 running automated checks. Prefer clear content and helpful next actions over
 decorative panels or invented metrics.
+
+## Cross-check log
+
+### 2026-11-03 — heading hierarchy on the landlord dashboard
+
+`0a7f4832` promoted the activity feed from `h3` to `h2` but left quick actions at
+`h3`, so three sibling cards in one grid announced two `h2`s and an `h3`.
+`LandlordQuickActions` now passes `<CardTitle as="h2">`; `CardTitle` already
+supported the `as` prop, so nothing new was needed in the primitive. Live outline:
+
+```
+h1  Good morning, <name>
+h2  Rent collection
+h2  Recent activity
+h2  Quick actions
+```
+
+Two open items this pass did not cover:
+
+- **Landlord mobile menu overlaps the navbar.** `LandlordNavbar` renders its
+  panel as a sibling with `fixed top-16`, but below `md` the bar grows to ~133px
+  for the mobile search row, so the open menu covers it by 69px. The fix is to
+  render the panel inside `<nav>` as `absolute top-full` (a sticky element is a
+  positioned ancestor) rather than hard-coding a taller `top-*`.
+- **Theme toggle is off-token.** The navbar toggle still uses
+  `bg-gray-200 dark:bg-white/10` instead of a token pair.
+
+For the record, so it is not regressed: the dark palette is `#000` / `#1c1c1e` /
+`#2c2c2e`. A revision in between used `#111113` as the canvas, which sits between
+Apple's first two rungs and leaves cards only ~11 steps above the page — the whole
+surface reads flat. Keep the canvas at system background.
