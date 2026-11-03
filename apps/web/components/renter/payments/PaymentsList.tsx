@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { PaymentCard } from './PaymentCard';
 import { PaymentDetailsModal } from './PaymentDetailsModal';
 import { CreditCard } from 'lucide-react';
@@ -123,13 +122,8 @@ export const PaymentsList = ({
               bare
             />
           ) : (
-            filteredPayments.map((payment, index) => (
-              <motion.div
-                key={payment.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
+            filteredPayments.map((payment) => (
+              <div key={payment.id}>
                 <PaymentCard
                   payment={payment}
                   onViewDetails={() => handleViewDetails(payment)}
@@ -138,7 +132,7 @@ export const PaymentsList = ({
                   onDispute={() => onDispute(payment.id)}
                   onConfirmMoveIn={() => onConfirmMoveIn(payment.id)}
                 />
-              </motion.div>
+              </div>
             ))
           )}
         </div>

@@ -7,7 +7,6 @@ export { ApplicationDetailsModal } from './ApplicationDetailsModal';
 export { ApplicationTimeline } from './ApplicationTimeline';
 export { ApplicationNotes } from './ApplicationNotes';
 export { ApplicationAnalytics } from './ApplicationAnalytics';
-export { ApplicationRecommendations } from './ApplicationRecommendations';
 export { ApplicationExport } from './ApplicationExport';
 export { ApplicationWithdrawModal } from './ApplicationWithdrawModal';
 export { ApplicationChecklist } from './ApplicationChecklist';

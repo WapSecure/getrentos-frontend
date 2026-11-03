@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   MapPin,
   Bed,
@@ -52,11 +51,7 @@ export const ApplicationCard = ({
 
   if (viewMode === 'list') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-      >
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm">
         <div className="flex flex-col sm:flex-row">
           <div className="relative flex h-32 w-full shrink-0 items-center justify-center bg-muted sm:w-40">
             <Home className="w-8 h-8 text-muted-foreground" />
@@ -145,17 +140,13 @@ export const ApplicationCard = ({
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   // Grid view
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-    >
+    <div className="group overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] hover:border-foreground/15 hover:shadow-sm">
       <div className="relative flex h-32 items-center justify-center bg-muted">
         <Home className="w-10 h-10 text-muted-foreground" />
         <Badge
@@ -225,6 +216,6 @@ export const ApplicationCard = ({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };

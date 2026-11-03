@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Download, Mail, CalendarDays, AlertCircle, CheckCircle, MapPin } from 'lucide-react';
 import { Alert, Badge, Button, type BadgeVariant } from '@getrentos/ui';
 import { useState } from 'react';
@@ -73,22 +72,16 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
   };
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-7 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-7"
-    >
+    <header className="mb-7 rounded-xl border border-border bg-card p-5 shadow-xs sm:p-7">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <div className="mb-3 flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
-              Tenancy record
-            </span>
+            <span className="text-sm font-medium text-muted-foreground">Tenancy record</span>
             <Badge variant={statusConfig.variant} icon={<StatusIcon className="h-3 w-3" />}>
               {statusConfig.label}
             </Badge>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="text-2xl font-semibold tracking-[-0.025em] text-foreground sm:text-3xl">
             {lease.propertyName}
           </h1>
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground sm:text-base">
@@ -121,7 +114,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
         </Alert>
       ) : null}
 
-      <div className="relative mt-6 rounded-2xl border border-border/70 bg-secondary/40 p-4">
+      <div className="relative mt-6 rounded-lg border border-border bg-secondary/40 p-4">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-primary" aria-hidden="true" />
@@ -143,6 +136,6 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
           )}
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 };

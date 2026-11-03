@@ -19,7 +19,7 @@ const user = {
   id: 'design-review',
   fullName: 'Joseph Orji',
   email: 'review@example.test',
-  roles: ['LANDLORD', 'SUPER_ADMIN'],
+  roles: ['LANDLORD', 'RENTER', 'SUPER_ADMIN'],
 };
 const property = {
   id: 'property-1',
@@ -98,6 +98,66 @@ test.beforeEach(async ({ page }, testInfo) => {
       ],
       '/landlord/properties': { ...empty, total: 1, totalPages: 1, items: [property] },
       '/marketplace/saved-listing-ids': [],
+      '/renter/applications/notes': [],
+      '/renter/applications': {
+        ...empty,
+        total: 2,
+        totalPages: 1,
+        items: [
+          {
+            id: 'application-1',
+            propertyId: 'rental-1',
+            title: 'Three-bedroom apartment in Ikoyi',
+            address: '12 Alexander Road, Ikoyi, Lagos',
+            status: 'under_review',
+            date: '2026-10-26',
+            price: 7200000,
+            period: 'year',
+            bedrooms: 3,
+            bathrooms: 3,
+            size: 185,
+            image: '',
+            applicationDate: '2026-10-26',
+            moveInDate: '2026-12-01',
+            leaseTerm: '12 months',
+            documents: [],
+            landlord: {
+              name: 'Ada Okafor',
+              email: 'ada@example.test',
+              phone: '+2348000000000',
+              responseRate: 94,
+              rating: 4.8,
+            },
+            timeline: [],
+          },
+          {
+            id: 'application-2',
+            propertyId: 'rental-2',
+            title: 'Quiet terrace home in Lekki',
+            address: 'Fola Osibo Street, Lekki, Lagos',
+            status: 'approved',
+            date: '2026-10-20',
+            price: 9500000,
+            period: 'year',
+            bedrooms: 4,
+            bathrooms: 4,
+            size: 240,
+            image: '',
+            applicationDate: '2026-10-20',
+            moveInDate: '2026-12-15',
+            leaseTerm: '12 months',
+            documents: [],
+            landlord: {
+              name: 'Tunde Bakare',
+              email: 'tunde@example.test',
+              phone: '+2348111111111',
+              responseRate: 88,
+              rating: 4.6,
+            },
+            timeline: [],
+          },
+        ],
+      },
       '/rentals': {
         ...empty,
         total: 3,
@@ -247,4 +307,16 @@ test('public rental search and refinements', async ({ page }, testInfo) => {
     path: testInfo.outputPath('market-filters.png'),
     animations: 'disabled',
   });
+});
+
+test('renter application status and actions', async ({ page }, testInfo) => {
+  await reviewPage(page, `${webURL}/renter/applications`, testInfo);
+  await expect(page.getByRole('heading', { name: 'My applications' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Three-bedroom apartment in Ikoyi' })
+  ).toBeVisible();
+  await expect(page.getByText('Status summary', { exact: true })).toBeVisible();
+  await expect(page.getByText('Applications shown on this page', { exact: true })).toBeVisible();
+  await expect(page.getByText(/success rate/i)).toHaveCount(0);
+  await expect(page.getByText('Recommendations', { exact: true })).toHaveCount(0);
 });

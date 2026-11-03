@@ -1,37 +1,19 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import {
-  FileText,
-  TrendingUp,
-  Clock,
-  Eye,
-  CheckCircle,
-  XCircle,
-  Download,
-  Plus,
-} from 'lucide-react';
+import { FileText, Download, Plus } from 'lucide-react';
 import { Button } from '@getrentos/ui';
-import { Application } from '@/types/renter';
 import { ROUTES } from '@/lib/constants/auth';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
 interface ApplicationsHeaderProps {
-  applications: Application[];
   onExport: () => void;
 }
 
-export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeaderProps) => {
-  const total = applications.length;
-  const pending = applications.filter((a) => a.status === 'pending').length;
-  const underReview = applications.filter((a) => a.status === 'under_review').length;
-  const approved = applications.filter((a) => a.status === 'approved').length;
-  const rejected = applications.filter((a) => a.status === 'rejected').length;
-
+export const ApplicationsHeader = ({ onExport }: ApplicationsHeaderProps) => {
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <div>
       <RenterPageHeader
-        eyebrow="Rental journey"
+        eyebrow=""
         icon={FileText}
         title="My applications"
         description="Track every application, review its progress, and keep your next steps organised."
@@ -55,54 +37,7 @@ export const ApplicationsHeader = ({ applications, onExport }: ApplicationsHeade
             </Button>
           </>
         }
-      >
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <div className="rounded-xl border border-border/70 bg-background/70 p-3">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-info" />
-              <span className="text-sm font-medium text-foreground">Total</span>
-            </div>
-            <p className="text-xl font-bold text-foreground mt-1">{total}</p>
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background/70 p-3">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-warning" />
-              <span className="text-sm font-medium text-foreground">Pending</span>
-            </div>
-            <p className="text-xl font-bold text-foreground mt-1">{pending}</p>
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background/70 p-3">
-            <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-warning" />
-              <span className="text-sm font-medium text-foreground">Under Review</span>
-            </div>
-            <p className="text-xl font-bold text-foreground mt-1">{underReview}</p>
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background/70 p-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-success" />
-              <span className="text-sm font-medium text-foreground">Approved</span>
-            </div>
-            <p className="text-xl font-bold text-foreground mt-1">{approved}</p>
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background/70 p-3">
-            <div className="flex items-center gap-2">
-              <XCircle className="w-4 h-4 text-destructive" />
-              <span className="text-sm font-medium text-foreground">Rejected</span>
-            </div>
-            <p className="text-xl font-bold text-foreground mt-1">{rejected}</p>
-          </div>
-          <div className="rounded-xl border border-border/70 bg-background/70 p-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">Success Rate</span>
-            </div>
-            <p className="text-xl font-bold text-primary mt-1">
-              {total > 0 ? `${Math.round((approved / total) * 100)}%` : '0%'}
-            </p>
-          </div>
-        </div>
-      </RenterPageHeader>
-    </motion.div>
+      />
+    </div>
   );
 };

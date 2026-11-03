@@ -6,7 +6,6 @@ import { ApplicationsHeader } from '@/components/renter/applications/Application
 import { ApplicationsFilterSort } from '@/components/renter/applications/ApplicationsFilterSort';
 import { ApplicationsList } from '@/components/renter/applications/ApplicationsList';
 import { ApplicationAnalytics } from '@/components/renter/applications/ApplicationAnalytics';
-import { ApplicationRecommendations } from '@/components/renter/applications/ApplicationRecommendations';
 import { ApplicationExport } from '@/components/renter/applications/ApplicationExport';
 import { renterService } from '@/services/renterService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -133,7 +132,7 @@ export default function ApplicationsPage() {
 
   return (
     <>
-      <ApplicationsHeader applications={applications} onExport={() => setShowExportModal(true)} />
+      <ApplicationsHeader onExport={() => setShowExportModal(true)} />
 
       <div className="mt-7 grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="min-w-0 xl:col-span-2 space-y-6">
@@ -161,7 +160,6 @@ export default function ApplicationsPage() {
 
         <div className="space-y-6">
           <ApplicationAnalytics applications={applications} />
-          <ApplicationRecommendations applications={applications} />
         </div>
       </div>
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Application } from '@/types/renter';
 import { ApplicationCard } from './ApplicationCard';
 import { ApplicationDetailsModal } from './ApplicationDetailsModal';
@@ -83,31 +82,18 @@ export const ApplicationsList = ({
 
   return (
     <>
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={viewMode}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className={viewMode === 'grid' ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'space-y-4'}
-        >
-          {sortedApplications.map((application, index) => (
-            <motion.div
-              key={application.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <ApplicationCard
-                application={application}
-                viewMode={viewMode}
-                onViewDetails={() => handleViewDetails(application)}
-                onWithdraw={() => setWithdrawApplication(application)}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+      <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'space-y-4'}>
+        {sortedApplications.map((application) => (
+          <div key={application.id}>
+            <ApplicationCard
+              application={application}
+              viewMode={viewMode}
+              onViewDetails={() => handleViewDetails(application)}
+              onWithdraw={() => setWithdrawApplication(application)}
+            />
+          </div>
+        ))}
+      </div>
 
       {/* Application Details Modal */}
       {selectedApplication && (

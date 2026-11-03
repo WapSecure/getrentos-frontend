@@ -41,7 +41,7 @@ export const ApplicationsFilterSort = ({
   setViewMode,
 }: ApplicationsFilterSortProps) => {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-border/70 bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-3 shadow-xs sm:flex-row sm:items-center sm:justify-between">
       <div
         className="flex min-w-0 gap-1 overflow-x-auto sm:flex-1"
         role="tablist"

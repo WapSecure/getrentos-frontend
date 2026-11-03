@@ -1,7 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { CreditCard, Plus, Download, Shield, Lock } from 'lucide-react';
+import { CreditCard, Plus, Download, Shield } from 'lucide-react';
 import { Button } from '@getrentos/ui';
 import { RenterPageHeader } from '../shared/RenterPageHeader';
 
@@ -12,9 +11,9 @@ interface PaymentsHeaderProps {
 
 export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderProps) => {
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <div>
       <RenterPageHeader
-        eyebrow="Rent and billing"
+        eyebrow=""
         icon={CreditCard}
         title="Payments"
         description="Manage rent, payment methods, receipts, and your complete payment history."
@@ -33,24 +32,14 @@ export const PaymentsHeader = ({ onExport, onPayOutstanding }: PaymentsHeaderPro
           </>
         }
       >
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <Shield className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                Payments use GetRentos Payment Protection
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Your rent is held until you confirm move-in — then released to your landlord, or
-                released automatically after a few days
-              </p>
-            </div>
-            <Lock className="w-4 h-4 text-primary ml-auto" />
-          </div>
+        <div className="flex max-w-3xl items-start gap-2 text-sm text-muted-foreground">
+          <Shield className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+          <p>
+            Rent paid through GetRentos is held until you confirm move-in, then released according
+            to the payment-protection terms.
+          </p>
         </div>
       </RenterPageHeader>
-    </motion.div>
+    </div>
   );
 };
