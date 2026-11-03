@@ -66,8 +66,10 @@ export const StatCard = ({
     <div className="relative overflow-hidden rounded-xl border border-border bg-card shadow-xs">
       <div className="relative p-5">
         <div className={cn('flex items-center justify-between gap-3', compact ? 'mb-3' : 'mb-5')}>
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <Icon className={cn('h-4 w-4 shrink-0', colors.icon)} aria-hidden="true" />
+          <p className="text-sm font-medium tracking-[-0.01em] text-muted-foreground">{label}</p>
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary">
+            <Icon className={cn('h-4 w-4', colors.icon)} aria-hidden="true" />
+          </span>
         </div>
 
         <div>
@@ -79,7 +81,7 @@ export const StatCard = ({
           >
             {formattedValue}
           </p>
-          {subtitle && <p className="mt-2 text-xs leading-5 text-muted-foreground">{subtitle}</p>}
+          {subtitle && <p className="mt-2 text-sm leading-5 text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
     </div>

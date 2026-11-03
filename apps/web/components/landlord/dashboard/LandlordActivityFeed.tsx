@@ -43,9 +43,11 @@ export const LandlordActivityFeed = () => {
 
   return (
     <Card>
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Recent Activity</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
+      <div className="border-b border-border px-6 py-5">
+        <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+          Recent activity
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Payments, maintenance, and lease updates
         </p>
       </div>
@@ -54,8 +56,8 @@ export const LandlordActivityFeed = () => {
         {isPending ? (
           <div role="status" aria-label="Loading">
             {[0, 1, 2].map((row) => (
-              <div key={row} className="p-4 flex items-start gap-3">
-                <Skeleton className="h-8 w-8 shrink-0" />
+              <div key={row} className="flex items-start gap-3 px-6 py-4">
+                <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
                 <div className="min-w-0 flex-1 space-y-2">
                   <Skeleton className="h-3.5 w-2/5" />
                   <Skeleton className="h-3 w-3/5" />
@@ -71,9 +73,9 @@ export const LandlordActivityFeed = () => {
             return (
               <div
                 key={item.id}
-                className="flex items-start gap-3 p-4 transition-colors hover:bg-secondary/60"
+                className="flex items-start gap-3 px-6 py-4 transition-colors hover:bg-secondary/60"
               >
-                <div className="shrink-0 rounded-md bg-secondary p-2 text-muted-foreground">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">

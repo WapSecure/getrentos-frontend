@@ -40,14 +40,16 @@ export interface Palette {
 }
 
 export const lightColors: Palette = {
-  background: '#f5f5f7',
+  // Keep the page and working surfaces close enough to feel like one product,
+  // while retaining a real elevation cue for grouped content.
+  background: '#f7f7f8',
   foreground: '#1d1d1f',
   card: '#ffffff',
   cardForeground: '#1d1d1f',
-  border: '#e0e0e5',
-  secondary: '#eeeef0',
+  border: '#e5e5e9',
+  secondary: '#f1f1f3',
   secondaryForeground: '#1d1d1f',
-  muted: '#f0f0f2',
+  muted: '#f3f3f5',
   mutedForeground: '#626268',
   accent: '#eaf3ff',
   accentForeground: '#0055b3',

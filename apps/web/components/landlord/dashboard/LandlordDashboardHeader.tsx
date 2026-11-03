@@ -12,9 +12,8 @@ interface LandlordDashboardHeaderProps {
 export const LandlordDashboardHeader = ({ greeting, firstName }: LandlordDashboardHeaderProps) => {
   return (
     <PageHeader
-      eyebrow="Your portfolio"
       title={`${greeting}, ${firstName}`}
-      description="A clear view of your properties, rent, and what needs attention."
+      description="Track your portfolio, rent collection, and the work that needs your attention."
       actions={
         <Button
           href={ROUTES.LANDLORD_PROPERTIES}

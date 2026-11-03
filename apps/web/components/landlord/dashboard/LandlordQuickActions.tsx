@@ -35,18 +35,18 @@ const actions = [
 export const LandlordQuickActions = () => {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle>Quick actions</CardTitle>
         <CardDescription>Your everyday tasks, close at hand.</CardDescription>
       </CardHeader>
-      <div className="space-y-1 p-3">
+      <div className="space-y-1 p-3 pt-2">
         {actions.map((action) => (
           <Link
             key={action.label}
             href={action.href}
-            className="group flex min-h-16 items-center gap-3 rounded-md px-2 py-3 transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary"
+            className="group flex min-h-[4.5rem] items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-secondary focus-visible:outline-2 focus-visible:outline-primary"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground group-hover:text-primary">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground group-hover:text-primary">
               <action.icon className="h-[18px] w-[18px]" aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1">

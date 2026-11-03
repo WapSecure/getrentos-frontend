@@ -49,11 +49,15 @@ export const LandlordRevenueChart = () => {
   const change = previousMonth > 0 ? ((currentMonth - previousMonth) / previousMonth) * 100 : null;
 
   return (
-    <Card className="p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+    <Card className="p-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-foreground">Rent Collection Trend</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Monthly income, last 6 months</p>
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+            Rent collection
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Collected income over the last 6 months
+          </p>
         </div>
         {change !== null && (
           <Badge
@@ -67,13 +71,13 @@ export const LandlordRevenueChart = () => {
       </div>
 
       {isPending ? (
-        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-64 w-full" />
       ) : !hasData ? (
-        <div className="h-56 flex items-center justify-center">
+        <div className="flex h-64 items-center justify-center">
           <EmptyState icon={TrendingUp} title="No rent collection data yet" size="compact" bare />
         </div>
       ) : (
-        <div className="h-56">
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={revenueData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />

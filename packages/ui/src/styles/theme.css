@@ -1,13 +1,13 @@
 /* Generated from @getrentos/tokens. Run pnpm tokens:sync to update. */
 :root {
-  --background: #f5f5f7;
+  --background: #f7f7f8;
   --foreground: #1d1d1f;
   --card: #ffffff;
   --card-foreground: #1d1d1f;
-  --border: #e0e0e5;
-  --secondary: #eeeef0;
+  --border: #e5e5e9;
+  --secondary: #f1f1f3;
   --secondary-foreground: #1d1d1f;
-  --muted: #f0f0f2;
+  --muted: #f3f3f5;
   --muted-foreground: #626268;
   --accent: #eaf3ff;
   --accent-foreground: #0055b3;
