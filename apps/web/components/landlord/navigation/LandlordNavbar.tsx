@@ -20,6 +20,7 @@ import { landlordService } from '@/services/landlordService';
 import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
+import { LandlordAssistant } from '../assistant/LandlordAssistant';
 
 interface LandlordNavbarProps {
   user: { fullName: string; email: string; roles?: string[] } | null;
@@ -85,6 +86,8 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
+
+              <LandlordAssistant />
 
               <NotificationBell
                 portal="landlord"

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -9,6 +10,7 @@ import {
   FileText,
   KeyRound,
   MessageCircle,
+  MessageCircleQuestion,
   PieChart,
   Plus,
   TriangleAlert,
@@ -78,12 +80,19 @@ export default function LandlordOverview() {
       roleBadge="LL"
       subtitle="Your rentals, tenants and rent"
       accessory={
-        <IconButton
-          onPress={() => router.push('/(app)/landlord-notifications')}
-          accessibilityLabel="Notifications"
-          badge={unread}
-          icon={<Bell size={21} color={colors.foreground} />}
-        />
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <IconButton
+            onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'landlord' } })}
+            accessibilityLabel="Ask GetRentos"
+            icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/landlord-notifications')}
+            accessibilityLabel="Notifications"
+            badge={unread}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        </View>
       }
     />
   );

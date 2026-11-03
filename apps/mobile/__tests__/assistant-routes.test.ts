@@ -17,6 +17,22 @@ const SERVER_PATHS = [
   '/renter/settings',
   '/renter/help',
   '/renter/support',
+  // RENTER_ASSISTANT_LINKS above, LANDLORD_ASSISTANT_LINKS below.
+  '/landlord/dashboard',
+  '/landlord/properties',
+  '/landlord/units',
+  '/landlord/tenants',
+  '/landlord/leases',
+  '/landlord/payments',
+  '/landlord/arrears',
+  '/landlord/financials',
+  '/landlord/maintenance',
+  '/landlord/vendors',
+  '/landlord/applications',
+  '/landlord/viewing-requests',
+  '/landlord/messages',
+  '/landlord/settings',
+  '/landlord/help',
 ];
 
 describe('assistant link routes', () => {
