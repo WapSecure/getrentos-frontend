@@ -73,7 +73,7 @@ export const MaintenanceChecklist = () => {
         <div className="flex items-center gap-3">
           <FileText className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Maintenance Checklist</h3>
+            <h2 className="font-semibold text-foreground">Maintenance Checklist</h2>
             <p className="text-xs text-muted-foreground">
               {completedCount}/{totalCount} items completed
             </p>

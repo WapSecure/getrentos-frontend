@@ -58,7 +58,7 @@ export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMainten
         <div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Scheduled Maintenance</h3>
+            <h2 className="font-semibold text-foreground">Scheduled Maintenance</h2>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">Upcoming and ongoing maintenance</p>
         </div>

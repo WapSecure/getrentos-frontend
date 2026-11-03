@@ -73,7 +73,7 @@ export const SavedSearchesList = () => {
     <div className="p-4 border-b border-border">
       <div className="flex flex-wrap justify-between items-center gap-2">
         <div className="min-w-0">
-          <h3 className="font-semibold text-foreground">Saved Searches</h3>
+          <h2 className="font-semibold text-foreground">Saved Searches</h2>
           <p className="text-xs text-muted-foreground">
             {savedSearches.length === 0
               ? 'Get notified for new matches'

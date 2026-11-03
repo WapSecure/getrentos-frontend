@@ -147,7 +147,7 @@ export const MaintenanceCard = ({
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h4 className="font-semibold text-foreground">{request.title}</h4>
+            <h3 className="font-semibold text-foreground">{request.title}</h3>
             {request.isEmergency && (
               <Badge variant="danger" icon={<AlertTriangle className="h-3 w-3" />}>
                 Emergency

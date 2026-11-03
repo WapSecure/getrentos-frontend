@@ -14,7 +14,7 @@ export const AutoPaySetup = () => (
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Repeat className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <h3 className="font-semibold text-foreground">AutoPay</h3>
+          <h2 className="font-semibold text-foreground">AutoPay</h2>
         </div>
         <Badge variant="neutral">Not available yet</Badge>
       </div>

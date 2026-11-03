@@ -70,7 +70,7 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h3 className="font-semibold text-foreground">Receipts Gallery</h3>
+              <h2 className="font-semibold text-foreground">Receipts Gallery</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {receipts.length} receipts available
               </p>

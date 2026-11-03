@@ -26,7 +26,7 @@ export const SavedRecommendations = () => {
     >
       <div className="flex items-center gap-2 border-b border-border p-3">
         <BadgeCheck className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-foreground">Recommendations</h3>
+        <h2 className="text-sm font-semibold text-foreground">Recommendations</h2>
       </div>
 
       <div className="divide-y divide-border">
@@ -35,9 +35,9 @@ export const SavedRecommendations = () => {
             <Link href={buildRoute.renterPropertyDetail(rec.id)} className="block">
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-foreground truncate hover:text-primary">
+                  <h3 className="text-sm font-medium text-foreground truncate hover:text-primary">
                     {rec.title}
-                  </h4>
+                  </h3>
                   <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
                     {rec.location}

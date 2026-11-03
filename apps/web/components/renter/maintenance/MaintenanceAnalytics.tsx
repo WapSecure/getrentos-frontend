@@ -11,7 +11,8 @@ interface MaintenanceAnalyticsProps {
 
 /** Figures across every request, not just the page on screen. */
 export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => {
-  const resolutionRate = summary.total > 0 ? Math.round((summary.resolved / summary.total) * 100) : 0;
+  const resolutionRate =
+    summary.total > 0 ? Math.round((summary.resolved / summary.total) * 100) : 0;
   const urgentRequests = summary.urgent;
   const avgResponseTime = summary.avgResponseHours;
 
@@ -24,7 +25,7 @@ export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => 
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Maintenance Analytics</h3>
+          <h2 className="font-semibold text-foreground">Maintenance Analytics</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Performance insights</p>
       </div>

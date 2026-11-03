@@ -92,7 +92,7 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Wrench className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Quick Report</h3>
+          <h2 className="font-semibold text-foreground">Quick Report</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Report common issues in one click</p>
       </div>

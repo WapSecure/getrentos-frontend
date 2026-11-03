@@ -103,3 +103,30 @@ For the record, so it is not regressed: the dark palette is `#000` / `#1c1c1e` /
 `#2c2c2e`. A revision in between used `#111113` as the canvas, which sits between
 Apple's first two rungs and leaves cards only ~11 steps above the page — the whole
 surface reads flat. Keep the canvas at system background.
+
+### 2026-11-03 — renter section headings skipped a level
+
+Four renter routes had no `h2` anywhere in the main region: their section titles
+were `CardTitle` (defaults to `h3`) or hand-rolled `<h3>` sitting directly under
+the page `h1`, so the outline went `h1 → h3` on every one of them.
+`/renter/dashboard` and the landlord pages were fine because they already had
+real `h2`s.
+
+Promoted the page-level section titles to `h2`, and demoted the item headings
+that sit inside them so nothing skips:
+
+- **applications** — Status summary
+- **payments** — Payment History, Receipts Gallery, Upcoming Payments, Payment
+  Methods, AutoPay, Payment Analytics
+- **saved** — Wishlists, Saved Searches, Recommendations (recommendation item
+  titles are `h3` now)
+- **maintenance** — Maintenance Requests, Quick Report, Maintenance Analytics,
+  Maintenance Checklist, Scheduled Maintenance, Emergency Contacts (emergency
+  contact names and maintenance card titles are `h3` now)
+
+Only the tag changed; every `className` is untouched, so there is no visual
+difference. Each of the 17 components touched is imported by exactly one of
+these four pages, so nothing else inherits the new level.
+
+When adding a section to a page, mirror the page's own level: page-level sections
+are `h2`, anything inside one is `h3`. `CardTitle` takes `as="h2"` for this.

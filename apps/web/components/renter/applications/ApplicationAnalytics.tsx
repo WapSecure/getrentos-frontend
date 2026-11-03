@@ -18,7 +18,7 @@ export const ApplicationAnalytics = ({ applications }: ApplicationAnalyticsProps
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle>Status summary</CardTitle>
+        <CardTitle as="h2">Status summary</CardTitle>
         <CardDescription>Applications shown on this page</CardDescription>
       </CardHeader>
       <dl className="divide-y divide-border px-5 pb-3">
