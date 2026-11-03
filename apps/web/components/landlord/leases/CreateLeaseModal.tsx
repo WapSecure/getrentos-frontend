@@ -1,14 +1,22 @@
 'use client';
 
-import { LegacyInput } from '@getrentos/ui';
-
-import { LegacySelect } from '@getrentos/ui';
-
 import { useState, useMemo } from 'react';
 import { addYears, subDays, format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, BadgeCheck } from 'lucide-react';
-import { Button, CurrencyInput, DatePicker } from '@getrentos/ui';
+import { BadgeCheck, DoorOpen } from 'lucide-react';
+import {
+  Alert,
+  Button,
+  CurrencyInput,
+  DatePicker,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  EmptyState,
+  Field,
+  Input,
+  Select,
+} from '@getrentos/ui';
 import type { Lease, Unit } from '@/types/landlord';
 
 interface CreateLeaseModalProps {
@@ -18,7 +26,7 @@ interface CreateLeaseModalProps {
   onSave: (
     lease: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>,
     sendImmediately: boolean
-  ) => void;
+  ) => Promise<boolean>;
 }
 
 export const CreateLeaseModal = ({
@@ -33,6 +41,9 @@ export const CreateLeaseModal = ({
   const [leaseEnd, setLeaseEnd] = useState('');
   const [rentAmount, setRentAmount] = useState('');
   const [securityDeposit, setSecurityDeposit] = useState('');
+  const [submitting, setSubmitting] = useState<'draft' | 'send' | null>(null);
+  const isSubmitting = submitting !== null;
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const selectedUnit = useMemo(
     () => vacantUnits.find((u) => u.id === unitId),
@@ -66,6 +77,7 @@ export const CreateLeaseModal = ({
     setLeaseEnd('');
     setRentAmount('');
     setSecurityDeposit('');
+    setErrorMessage(null);
   };
 
   const handleClose = () => {
@@ -100,153 +112,144 @@ export const CreateLeaseModal = ({
     };
   };
 
-  const handleSave = (sendImmediately: boolean) => {
+  const handleSave = async (sendImmediately: boolean) => {
     const lease = buildLease();
-    if (!lease) return;
-    onSave(lease, sendImmediately);
+    if (!lease || isSubmitting) return;
+    setSubmitting(sendImmediately ? 'send' : 'draft');
+    setErrorMessage(null);
+    const succeeded = await onSave(lease, sendImmediately);
+    setSubmitting(null);
+    if (!succeeded) {
+      setErrorMessage(
+        sendImmediately
+          ? 'The lease could not be created and sent. Please review the details and try again.'
+          : 'The lease draft could not be saved. Please review the details and try again.'
+      );
+      return;
+    }
     handleClose();
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-card rounded-xl max-w-md w-full overflow-hidden max-h-[90vh] flex flex-col"
-          >
-            <div className="p-4 border-b border-border flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="font-semibold text-foreground">Create Lease</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Draft a new lease agreement</p>
-              </div>
-              <button onClick={handleClose} className="p-1 rounded-lg hover:bg-secondary">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {vacantUnits.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  No vacant units available. Mark a unit vacant or add a property first.
-                </p>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Unit <span className="text-destructive">*</span>
-                    </label>
-                    <LegacySelect
-                      value={unitId}
-                      onChange={(e) => handleUnitChange(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Select a vacant unit</option>
-                      {vacantUnits.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.propertyName}: {u.unitName}
-                        </option>
-                      ))}
-                    </LegacySelect>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Tenant Name <span className="text-destructive">*</span>
-                    </label>
-                    <LegacyInput
-                      type="text"
-                      value={tenantName}
-                      onChange={(e) => setTenantName(e.target.value)}
-                      placeholder="Full legal name"
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                    {selectedUnit?.approvedApplicant ? (
-                      <p className="mt-1.5 flex items-start gap-1.5 text-xs text-success">
-                        <BadgeCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                        <span>
-                          {selectedUnit.approvedApplicant.name} was approved for this unit. This
-                          lease is linked to their account so they can review and sign it in their
-                          own portal.
-                        </span>
-                      </p>
-                    ) : (
-                      <p className="mt-1.5 text-xs text-muted-foreground">
-                        No approved applicant for this unit: the lease is recorded against this name
-                        only, and the tenant will not see it in a GetRentos account.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Lease Start <span className="text-destructive">*</span>
-                      </label>
-                      <DatePicker value={leaseStart} onChange={setLeaseStart} />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Lease End <span className="text-destructive">*</span>
-                      </label>
-                      <DatePicker value={leaseEnd} onChange={setLeaseEnd} min={leaseStart} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Rent Amount (₦) <span className="text-destructive">*</span>
-                      </label>
-                      <CurrencyInput
-                        prefix="₦"
-                        value={rentAmount}
-                        onValueChange={(v) => setRentAmount(v === 0 ? '' : String(v))}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1">
-                        Deposit (₦)
-                      </label>
-                      <CurrencyInput
-                        prefix="₦"
-                        value={securityDeposit}
-                        onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
-                        placeholder="Optional"
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {vacantUnits.length > 0 && (
-              <div className="p-4 border-t border-border flex gap-3 shrink-0">
-                <Button
-                  variant="outline"
-                  fullWidth
-                  onClick={() => handleSave(false)}
-                  disabled={!isValid}
-                >
-                  Save Draft
-                </Button>
-                <Button
-                  variant="primary"
-                  fullWidth
-                  onClick={() => handleSave(true)}
-                  disabled={!isValid}
-                >
-                  Send Lease
-                </Button>
-              </div>
-            )}
-          </motion.div>
+    <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent padded={false} className="flex flex-col">
+        <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
+          <div className="min-w-0">
+            <DialogTitle className="font-semibold text-foreground">Create Lease</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              Draft a new lease agreement
+            </DialogDescription>
+          </div>
         </div>
-      )}
-    </AnimatePresence>
+
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+          {vacantUnits.length === 0 ? (
+            <EmptyState
+              icon={DoorOpen}
+              title="No vacant units available"
+              description="Mark a unit vacant or add a property first."
+              size="compact"
+              bare
+            />
+          ) : (
+            <>
+              <Field label="Unit" required>
+                <Select
+                  value={unitId}
+                  onValueChange={handleUnitChange}
+                  placeholder="Select a vacant unit"
+                  options={vacantUnits.map((u) => ({
+                    value: u.id,
+                    label: `${u.propertyName}: ${u.unitName}`,
+                  }))}
+                />
+              </Field>
+
+              <div>
+                <Field label="Tenant Name" required>
+                  <Input
+                    type="text"
+                    value={tenantName}
+                    onChange={(e) => setTenantName(e.target.value)}
+                    placeholder="Full legal name"
+                  />
+                </Field>
+                {selectedUnit?.approvedApplicant ? (
+                  <p className="mt-1.5 flex items-start gap-1.5 text-xs text-success">
+                    <BadgeCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>
+                      {selectedUnit.approvedApplicant.name} was approved for this unit. This lease
+                      is linked to their account so they can review and sign it in their own portal.
+                    </span>
+                  </p>
+                ) : (
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    No approved applicant for this unit: the lease is recorded against this name
+                    only, and the tenant will not see it in a GetRentos account.
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Lease Start" required>
+                  <DatePicker value={leaseStart} onChange={setLeaseStart} />
+                </Field>
+                <Field label="Lease End" required>
+                  <DatePicker value={leaseEnd} onChange={setLeaseEnd} min={leaseStart} />
+                </Field>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <Field label="Rent Amount" required>
+                  <CurrencyInput
+                    prefix="₦"
+                    value={rentAmount}
+                    onValueChange={(v) => setRentAmount(v === 0 ? '' : String(v))}
+                  />
+                </Field>
+                <Field label="Deposit">
+                  <CurrencyInput
+                    prefix="₦"
+                    value={securityDeposit}
+                    onValueChange={(v) => setSecurityDeposit(v === 0 ? '' : String(v))}
+                    placeholder="Optional"
+                  />
+                </Field>
+              </div>
+            </>
+          )}
+        </div>
+
+        {vacantUnits.length > 0 && (
+          <div className="p-4 border-t border-border flex gap-3 shrink-0">
+            <Button
+              variant="outline"
+              fullWidth
+              onClick={() => void handleSave(false)}
+              disabled={!isValid || submitting === 'send'}
+              isLoading={submitting === 'draft'}
+              loadingText="Saving…"
+            >
+              Save Draft
+            </Button>
+            <Button
+              variant="primary"
+              fullWidth
+              onClick={() => void handleSave(true)}
+              disabled={!isValid || submitting === 'draft'}
+              isLoading={submitting === 'send'}
+              loadingText="Sending…"
+            >
+              Send Lease
+            </Button>
+          </div>
+        )}
+        {errorMessage && (
+          <div className="px-4 pb-4">
+            <Alert variant="danger">{errorMessage}</Alert>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
