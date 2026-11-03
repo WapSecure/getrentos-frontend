@@ -41,7 +41,11 @@ const empty = { items: [], total: 0, page: 1, pageSize: 10, totalPages: 0 };
 
 async function reviewPage(page: Page, path: string, info: TestInfo) {
   await auditVisualPage(page, path, info);
-  await page.screenshot({ path: info.outputPath('screen.png'), fullPage: true, animations: 'disabled' });
+  await page.screenshot({
+    path: info.outputPath('screen.png'),
+    fullPage: true,
+    animations: 'disabled',
+  });
 }
 
 test.beforeEach(async ({ page }, testInfo) => {
@@ -93,6 +97,56 @@ test.beforeEach(async ({ page }, testInfo) => {
         },
       ],
       '/landlord/properties': { ...empty, total: 1, totalPages: 1, items: [property] },
+      '/marketplace/saved-listing-ids': [],
+      '/rentals': {
+        ...empty,
+        total: 3,
+        totalPages: 1,
+        items: [
+          {
+            id: 'rental-1',
+            title: 'Three-bedroom apartment in Ikoyi',
+            location: 'Ikoyi, Lagos',
+            price: 7200000,
+            period: 'year',
+            bedrooms: 3,
+            bathrooms: 3,
+            size: 185,
+            rating: 4.8,
+            verified: true,
+            image: '',
+            propertyType: 'APARTMENT',
+          },
+          {
+            id: 'rental-2',
+            title: 'Quiet terrace home in Lekki',
+            location: 'Lekki Phase 1, Lagos',
+            price: 9500000,
+            period: 'year',
+            bedrooms: 4,
+            bathrooms: 4,
+            size: 240,
+            rating: 4.6,
+            verified: true,
+            image: '',
+            propertyType: 'TERRACE',
+          },
+          {
+            id: 'rental-3',
+            title: 'Compact flat near Jabi Lake',
+            location: 'Jabi, Abuja',
+            price: 3600000,
+            period: 'year',
+            bedrooms: 2,
+            bathrooms: 2,
+            size: 110,
+            rating: 4.4,
+            verified: false,
+            image: '',
+            propertyType: 'FLAT',
+          },
+        ],
+      },
       '/admin/users': {
         ...empty,
         total: 2,
@@ -175,4 +229,22 @@ test('backoffice user table and controls', async ({ page }, testInfo) => {
   await reviewPage(page, `${adminURL}/admin/users`, testInfo);
   await expect(page.getByText('Ada Okafor', { exact: true })).toBeVisible();
   await expect(page.getByRole('table')).toBeVisible();
+});
+
+test('public rental search and refinements', async ({ page }, testInfo) => {
+  await reviewPage(page, `${webURL}/rent`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Homes to rent' })).toBeVisible();
+  await expect(page.getByText('3 rentals available', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Three-bedroom apartment in Ikoyi' })
+  ).toBeVisible();
+
+  const filters = page.getByRole('button', { name: 'Filters' });
+  await filters.click();
+  await expect(filters).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByLabel('Minimum price')).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath('market-filters.png'),
+    animations: 'disabled',
+  });
 });

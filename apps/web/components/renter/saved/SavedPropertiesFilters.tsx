@@ -37,7 +37,7 @@ export const SavedPropertiesFilters = ({
   setFilterStatus,
 }: SavedPropertiesFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by status">
         {statusOptions.map((option) => (
           <ToggleChip

@@ -11,10 +11,8 @@ import {
   Home,
   ArrowUpRight,
   Columns3,
-  LockKeyhole,
   MapPin,
   Ruler,
-  ShieldCheck,
   SlidersHorizontal,
 } from 'lucide-react';
 import {
@@ -86,7 +84,7 @@ const ListingCard = ({
 }) => {
   const href = detailHref(market, listing.id);
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-border/80 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl">
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm">
       <div className="relative overflow-hidden">
         <Link href={href} tabIndex={-1} aria-hidden="true">
           {mapMedia(listing)}
@@ -109,9 +107,9 @@ const ListingCard = ({
         />
       </div>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
+      <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-foreground">
+          <h3 className="text-base font-semibold tracking-[-0.015em] text-foreground">
             <Link
               href={href}
               className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -162,7 +160,7 @@ const ListingCard = ({
         </div>
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-4">
-          <p className="text-lg font-bold text-foreground">
+          <p className="data-value text-lg font-semibold text-foreground">
             {formatCurrency(listing.price)}
             {listing.priceUnit && (
               <span className="text-sm font-normal text-muted-foreground">
@@ -182,8 +180,9 @@ const ListingCard = ({
         </div>
         <Button
           variant="outline"
-          rounded="lg"
-          className="mt-4"
+          rounded="md"
+          size="sm"
+          className="mt-4 self-start"
           disabled={compareDisabled}
           aria-pressed={compared}
           icon={<Columns3 className="h-4 w-4" aria-hidden="true" />}
@@ -362,34 +361,15 @@ export const PublicMarketBrowser = ({
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="rounded-2xl border border-border bg-card px-6 py-10 shadow-sm sm:px-10 sm:py-14 lg:px-14">
-        <div className="relative max-w-3xl">
-          <span className="inline-flex items-center rounded-full border border-primary/20 bg-card/80 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-primary backdrop-blur">
-            GetRentos trusted marketplace
-          </span>
-          <h1 className="mt-5 text-4xl font-bold tracking-[-0.035em] text-foreground sm:text-5xl lg:text-6xl">
-            {market === 'rent' ? 'Find a home that feels right.' : 'Own with greater confidence.'}
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            {market === 'rent'
-              ? 'Explore quality rentals across Nigeria, with verification signals that help you decide with confidence.'
-              : 'Discover verified homes for sale and make protected offers through a clearer, safer buying experience.'}
-          </p>
-          <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-foreground">
-            <span className="inline-flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-success" aria-hidden="true" />
-              Verified identities
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <LockKeyhole className="h-4 w-4 text-primary" aria-hidden="true" />
-              Protected transactions
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <BadgeCheck className="h-4 w-4 text-primary" aria-hidden="true" />
-              Clear trust signals
-            </span>
-          </div>
-        </div>
+      <header className="max-w-3xl py-6 sm:py-10">
+        <h1 className="text-4xl font-semibold tracking-[-0.04em] text-foreground sm:text-5xl">
+          {market === 'rent' ? 'Homes to rent' : 'Homes for sale'}
+        </h1>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+          {market === 'rent'
+            ? 'Browse available rentals across Nigeria and review verification details before you enquire.'
+            : 'Browse homes across Nigeria, review verification details, and make protected offers.'}
+        </p>
       </header>
 
       {estateFromUrl && (
@@ -407,7 +387,7 @@ export const PublicMarketBrowser = ({
         </div>
       )}
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mt-4 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-xs sm:flex-row sm:items-center">
         <div className="sm:max-w-md sm:flex-1">
           <SearchInput
             id="public-market-search"
@@ -434,7 +414,7 @@ export const PublicMarketBrowser = ({
         <Button
           variant="outline"
           size="lg"
-          rounded="lg"
+          rounded="md"
           onClick={() => setShowFilters((v) => !v)}
           aria-expanded={showFilters}
           aria-controls="public-market-filters"
@@ -452,7 +432,7 @@ export const PublicMarketBrowser = ({
       {showFilters && (
         <div
           id="public-market-filters"
-          className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 md:grid-cols-3 lg:grid-cols-6"
+          className="mt-3 grid grid-cols-2 gap-3 rounded-xl border border-border bg-card p-4 md:grid-cols-3 lg:grid-cols-6"
         >
           <div>
             <CurrencyInput
@@ -558,7 +538,7 @@ export const PublicMarketBrowser = ({
           <Skeleton className="mb-5 h-5 w-40 rounded-full" />
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-[25rem] w-full rounded-3xl" />
+              <Skeleton key={i} className="h-[25rem] w-full rounded-xl" />
             ))}
           </div>
         </div>
@@ -584,12 +564,9 @@ export const PublicMarketBrowser = ({
         </div>
       ) : (
         <>
-          <div className="mt-9 flex flex-wrap items-end justify-between gap-3 border-b border-border/70 pb-4">
+          <div className="mt-9 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
-                Explore the market
-              </p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+              <h2 className="text-2xl font-semibold tracking-[-0.025em] text-foreground">
                 {total} {total === 1 ? noun.one : noun.many} available
               </h2>
             </div>

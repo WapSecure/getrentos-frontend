@@ -1,6 +1,5 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ArrowUpDown } from 'lucide-react';
 import { SavedPropertyCard } from './SavedPropertyCard';
 import { Button, EmptyState } from '@getrentos/ui';
@@ -86,35 +85,21 @@ export const SavedPropertiesGrid = ({
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${viewMode}-${sortBy}-${filterStatus}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}
-        >
-          {properties.map((property, index) => (
-            <motion.div
-              key={property.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <SavedPropertyCard
-                property={property}
-                viewMode={viewMode}
-                onRemove={onRemove}
-                onMoveToWishlist={onMoveToWishlist}
-                wishlists={wishlists}
-                isSelected={selectedProperties.includes(property.id)}
-                onSelect={onSelectProperty ? () => onSelectProperty(property.id) : undefined}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
-      </AnimatePresence>
+      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}>
+        {properties.map((property) => (
+          <div key={property.id}>
+            <SavedPropertyCard
+              property={property}
+              viewMode={viewMode}
+              onRemove={onRemove}
+              onMoveToWishlist={onMoveToWishlist}
+              wishlists={wishlists}
+              isSelected={selectedProperties.includes(property.id)}
+              onSelect={onSelectProperty ? () => onSelectProperty(property.id) : undefined}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -115,7 +115,7 @@ export async function PublicListingPage({
                 )}
               </div>
               <div className="flex items-start justify-between gap-4">
-                <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground sm:text-4xl">
+                <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground sm:text-4xl">
                   {listing.title}
                 </h1>
                 <SaveListingButton
@@ -133,18 +133,18 @@ export async function PublicListingPage({
               {(listing.bedrooms || listing.bathrooms || listing.size) && (
                 <ul className="flex flex-wrap gap-3 pt-2 text-sm text-foreground">
                   {listing.bedrooms ? (
-                    <li className="flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 shadow-sm">
-                      <BedDouble className="h-4 w-4 text-primary" /> {listing.bedrooms} bed
+                    <li className="flex items-center gap-2 rounded-lg bg-secondary px-3.5 py-2">
+                      <BedDouble className="h-4 w-4 text-muted-foreground" /> {listing.bedrooms} bed
                     </li>
                   ) : null}
                   {listing.bathrooms ? (
-                    <li className="flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 shadow-sm">
-                      <Bath className="h-4 w-4 text-primary" /> {listing.bathrooms} bath
+                    <li className="flex items-center gap-2 rounded-lg bg-secondary px-3.5 py-2">
+                      <Bath className="h-4 w-4 text-muted-foreground" /> {listing.bathrooms} bath
                     </li>
                   ) : null}
                   {listing.size ? (
-                    <li className="flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 shadow-sm">
-                      <Ruler className="h-4 w-4 text-primary" /> {listing.size} m²
+                    <li className="flex items-center gap-2 rounded-lg bg-secondary px-3.5 py-2">
+                      <Ruler className="h-4 w-4 text-muted-foreground" /> {listing.size} m²
                     </li>
                   ) : null}
                 </ul>
@@ -167,7 +167,7 @@ export async function PublicListingPage({
                 <h2 id="details" className="text-xl font-semibold tracking-tight text-foreground">
                   Details
                 </h2>
-                <dl className="mt-4 grid overflow-hidden rounded-3xl border border-border bg-card shadow-sm sm:grid-cols-2">
+                <dl className="mt-4 grid overflow-hidden rounded-xl border border-border bg-card shadow-xs sm:grid-cols-2">
                   {listing.facts.map((f) => (
                     <div
                       key={f.label}
@@ -190,7 +190,7 @@ export async function PublicListingPage({
                   {listing.amenities.map((a) => (
                     <li
                       key={a}
-                      className="flex items-center gap-2 rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground"
+                      className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground"
                     >
                       <Check className="h-4 w-4 text-success" aria-hidden="true" />
                       {a}
@@ -202,11 +202,11 @@ export async function PublicListingPage({
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <div className="space-y-5 rounded-3xl border border-primary/15 bg-card p-6 shadow-xl shadow-primary/5">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+            <div className="space-y-5 rounded-xl border border-border bg-card p-6 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground">
                 {market === 'rent' ? 'Rental price' : 'Asking price'}
               </p>
-              <p className="text-3xl font-bold text-foreground">
+              <p className="data-value text-3xl font-semibold tracking-[-0.025em] text-foreground">
                 {formatCurrency(listing.price)}
                 {listing.priceUnit && (
                   <span className="text-base font-normal text-muted-foreground">
@@ -224,7 +224,7 @@ export async function PublicListingPage({
                 />
               </div>
 
-              <div className="space-y-2 rounded-2xl border border-border/70 bg-muted/30 p-4 text-sm">
+              <div className="space-y-2 rounded-lg border border-border bg-secondary/40 p-4 text-sm">
                 <div className="flex items-center justify-between gap-4">
                   <span className="text-muted-foreground">Listed price</span>
                   <span className="font-semibold text-foreground">
@@ -250,7 +250,7 @@ export async function PublicListingPage({
               </div>
 
               {listing.host && (
-                <div className="flex items-center gap-3 rounded-2xl border border-border/70 bg-muted/40 p-4">
+                <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary/40 p-4">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs text-muted-foreground">{listing.host.label}</p>
                     <p className="truncate font-semibold text-foreground">{listing.host.name}</p>
@@ -315,13 +315,13 @@ function Gallery({ listing }: { listing: PublicListingDetail }) {
   const [cover, ...rest] = listing.images;
   if (!cover) {
     return (
-      <div className="mt-5 flex h-72 items-center justify-center rounded-3xl border border-primary/10 bg-muted text-sm font-medium text-muted-foreground sm:h-[30rem]">
+      <div className="mt-5 flex h-72 items-center justify-center rounded-xl border border-border bg-muted text-sm font-medium text-muted-foreground sm:h-[30rem]">
         Photos are being prepared for this listing
       </div>
     );
   }
   return (
-    <div className="relative mt-5 grid h-[24rem] gap-2 overflow-hidden rounded-3xl bg-muted shadow-lg sm:h-[31rem] sm:grid-cols-4 sm:grid-rows-2">
+    <div className="relative mt-5 grid h-[24rem] gap-2 overflow-hidden rounded-xl bg-muted shadow-sm sm:h-[31rem] sm:grid-cols-4 sm:grid-rows-2">
       {/* eslint-disable-next-line @next/next/no-img-element -- signed storage URLs, not optimisable */}
       <img
         src={cover}
