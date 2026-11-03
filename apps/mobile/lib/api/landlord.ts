@@ -906,6 +906,15 @@ export const landlordApi = {
       `/landlord/applications?page=${page}&pageSize=${pageSize}`
     ),
 
+  /** Applications still waiting for a decision (pending or under review), across every page. */
+  awaitingApplicationCount: async () => {
+    const [pending, underReview] = await Promise.all([
+      apiFetch<Paginated<LandlordApplication>>('/landlord/applications?status=pending&page=1&pageSize=1'),
+      apiFetch<Paginated<LandlordApplication>>('/landlord/applications?status=under_review&page=1&pageSize=1'),
+    ]);
+    return pending.total + underReview.total;
+  },
+
   setApplicationStatus: (id: string, status: ApplicationStatus, reason?: string) =>
     apiFetch<LandlordApplication>(`/landlord/applications/${id}/status`, {
       method: 'PATCH',
