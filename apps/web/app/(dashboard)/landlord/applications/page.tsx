@@ -46,13 +46,18 @@ export default function LandlordApplicationsPage() {
   const applications = data?.items ?? [];
   const total = data?.total ?? 0;
 
-  // Header stat: total pending applications across the portfolio.
-  const { data: pendingData } = useQuery({
-    queryKey: [...landlordKeys.applications('pending'), { page: 1, pageSize: 1 }],
-    queryFn: () =>
-      unwrap(landlordService.listApplications({ status: 'pending', page: 1, pageSize: 1 })),
+  // Header stat: every application still waiting for a decision (pending or under review),
+  // across the whole portfolio rather than the page on screen.
+  const { data: awaitingCount = 0 } = useQuery({
+    queryKey: [...landlordKeys.applications('awaiting'), 'count'],
+    queryFn: async () => {
+      const [pending, underReview] = await Promise.all([
+        unwrap(landlordService.listApplications({ status: 'pending', page: 1, pageSize: 1 })),
+        unwrap(landlordService.listApplications({ status: 'under_review', page: 1, pageSize: 1 })),
+      ]);
+      return pending.total + underReview.total;
+    },
   });
-  const pendingCount = pendingData?.total ?? 0;
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: ApplicationStatus }) =>
@@ -73,7 +78,7 @@ export default function LandlordApplicationsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Applications</h1>
         <p className="text-muted-foreground mt-1">
-          {pendingCount} application{pendingCount === 1 ? '' : 's'} awaiting review
+          {awaitingCount} application{awaitingCount === 1 ? '' : 's'} awaiting a decision
         </p>
       </div>
 

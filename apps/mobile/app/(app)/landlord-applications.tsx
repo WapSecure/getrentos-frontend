@@ -46,6 +46,10 @@ export default function LandlordApplications() {
     queryKey: qk.landlord.applications(),
     queryFn: () => landlordApi.applications(),
   });
+  const awaiting = useQuery({
+    queryKey: [...qk.landlord.applications(), 'awaiting-count'],
+    queryFn: landlordApi.awaitingApplicationCount,
+  });
 
   const decide = useMutation({
     mutationFn: ({ id, status }: { id: string; status: ApplicationStatus }) =>
@@ -81,7 +85,8 @@ export default function LandlordApplications() {
     );
 
   const items = query.data?.items ?? [];
-  const open = items.filter((a) => OPEN_STATUSES.includes(a.status)).length;
+  // From the server, so applications beyond the first page still count.
+  const open = awaiting.data ?? items.filter((a) => OPEN_STATUSES.includes(a.status)).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
