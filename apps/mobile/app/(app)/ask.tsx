@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { router, type Href } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowRight, ChevronLeft, Send } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import { Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
 import {
   assistantApi,
   mobileRouteFor,
+  type AssistantPersona,
   type AssistantLink,
   type AssistantTurn,
 } from '@/lib/api/assistant';
@@ -19,15 +20,34 @@ interface ChatMessage extends AssistantTurn {
 
 const MAX_QUESTION = 500;
 const HISTORY_TURNS = 6;
-const STARTERS = [
-  'When is my next rent due?',
-  'When does my lease end?',
-  'Where is my application?',
-  'How does payment protection work?',
-];
+const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeholder: string }> = {
+  renter: {
+    starters: [
+      'When is my next rent due?',
+      'When does my lease end?',
+      'Where is my application?',
+      'How does payment protection work?',
+    ],
+    scope: 'Ask about your rent, lease, applications, viewings or repairs.',
+    placeholder: 'Ask about your rent, lease or repairs',
+  },
+  landlord: {
+    starters: [
+      'Who owes me rent?',
+      'Which leases end in the next 60 days?',
+      'Do I have urgent repairs?',
+      'How many units are vacant?',
+    ],
+    scope: 'Ask about your rent and arrears, leases, repairs, applications or occupancy.',
+    placeholder: 'Ask about rent, leases or repairs',
+  },
+};
 
-/** Ask GetRentos: read-only answers about the renter's own rental. */
+/** Ask GetRentos: read-only answers from the user's own account (renter or landlord). */
 export default function AskScreen() {
+  const params = useLocalSearchParams<{ persona?: string }>();
+  const persona: AssistantPersona = params.persona === 'landlord' ? 'landlord' : 'renter';
+  const copy = COPY[persona];
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollView>(null);
@@ -36,7 +56,7 @@ export default function AskScreen() {
 
   const ask = useMutation({
     mutationFn: ({ question, history }: { question: string; history: AssistantTurn[] }) =>
-      assistantApi.ask(question, history),
+      assistantApi.ask(question, history, persona),
     onSuccess: (reply) =>
       setMessages((prev) => [
         ...prev,
@@ -98,10 +118,10 @@ export default function AskScreen() {
         {messages.length === 0 ? (
           <View style={{ gap: spacing.sm }}>
             <Text variant="callout" color="mutedForeground">
-              Ask about your rent, lease, applications, viewings or repairs. Try one of these:
+              {copy.scope} Try one of these:
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-              {STARTERS.map((s) => (
+              {copy.starters.map((s) => (
                 <Chip key={s} label={s} onPress={() => send(s)} />
               ))}
             </View>
@@ -177,7 +197,7 @@ export default function AskScreen() {
       >
         <View style={{ flex: 1 }}>
           <TextField
-            placeholder="Ask about your rent, lease or repairs"
+            placeholder={copy.placeholder}
             accessibilityLabel="Your question"
             value={text}
             onChangeText={setText}

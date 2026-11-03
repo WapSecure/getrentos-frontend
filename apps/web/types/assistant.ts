@@ -8,10 +8,13 @@ export interface AssistantLink {
   path: string;
 }
 
-export interface RenterAssistantReply {
+export interface AssistantReply {
   answer: string;
   links: AssistantLink[];
   suggestions: string[];
   source: 'ai' | 'heuristic';
   model: string | null;
 }
+
+/** Kept for existing imports. */
+export type RenterAssistantReply = AssistantReply;

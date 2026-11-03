@@ -1,4 +1,5 @@
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { SpendApproval } from './spendApprovalService';
 import type {
@@ -950,6 +951,18 @@ export const landlordService = {
   // ---- Portfolio ----
   async getPortfolioAnalytics(): Promise<ApiResponse<PortfolioAnalytics>> {
     return safeCall(() => authFetch('/landlord/portfolio/analytics'));
+  },
+
+  async askAssistant(
+    question: string,
+    history: AssistantTurn[]
+  ): Promise<ApiResponse<AssistantReply>> {
+    return safeCall(() =>
+      authFetch('/landlord/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    );
   },
 
   async getPortfolioBriefing(): Promise<ApiResponse<PortfolioBriefing>> {
