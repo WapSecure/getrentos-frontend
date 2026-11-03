@@ -16,15 +16,18 @@ import {
   DatePicker,
   EmptyState,
   Field,
+  Input,
   ListSkeleton,
   NumberInput,
   Pagination,
+  Select,
   useToast,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { estateKeys } from '@/lib/queryKeys';
 import { estateService } from '@/services/estateService';
+import { BUSINESS_TYPE_LABELS, type AgencyBusinessType } from '@/services/agencyOnboardingService';
 import { StatementBreakdown } from '@/components/shared/financials/StatementBreakdown';
 import { PayoutHeldNotice } from '@/components/shared/financials/PayoutHeldNotice';
 import { StatementDisputeSection } from '@/components/shared/financials/StatementDisputeSection';
@@ -398,6 +401,8 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
+  const [registrationNumber, setRegistrationNumber] = useState('');
+  const [businessType, setBusinessType] = useState<AgencyBusinessType | ''>('');
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: account } = useQuery({
@@ -413,12 +418,16 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
         estateService.updatePayoutAccount(estateId, {
           bankCode,
           accountNumber,
+          registrationNumber: registrationNumber.trim() || undefined,
+          businessType: businessType || undefined,
         })
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: estateKeys.payoutAccount(estateId) });
       setBankCode('');
       setAccountNumber('');
+      setRegistrationNumber('');
+      setBusinessType('');
       setSubmitError(null);
       toast.success('Payout account saved.');
     },
@@ -469,6 +478,31 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
             maxLength={10}
           />
         </Field>
+        <Field
+          label="CAC number"
+          optionalLabel="(optional)"
+          hint="Lets us verify the account belongs to the registered estate."
+        >
+          <Input
+            type="text"
+            value={registrationNumber}
+            onChange={(e) => setRegistrationNumber(e.target.value)}
+            placeholder="e.g. RC1234567"
+          />
+        </Field>
+        {registrationNumber.trim() && (
+          <Field label="Registration type">
+            <Select
+              value={businessType}
+              onValueChange={(value) => setBusinessType(value as AgencyBusinessType | '')}
+              placeholder="Select a type…"
+              options={(Object.keys(BUSINESS_TYPE_LABELS) as AgencyBusinessType[]).map((t) => ({
+                value: t,
+                label: BUSINESS_TYPE_LABELS[t],
+              }))}
+            />
+          </Field>
+        )}
       </div>
 
       <div className="mt-4 space-y-2">
