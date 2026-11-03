@@ -113,7 +113,7 @@ export const LandlordStatsCards = ({
       </div>
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         {stats.slice(0, 4).map((stat) => (
-          <StatCard key={stat.label} {...stat} accent="blue" compact />
+          <StatCard key={stat.label} {...stat} compact />
         ))}
       </div>
     </section>

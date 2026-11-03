@@ -50,7 +50,6 @@ export const PropertyCard = ({
   onToggleArchive,
   onDelete,
   onVerify,
-  delay: _delay = 0,
 }: PropertyCardProps) => {
   const verification = verificationConfig[property.verificationStatus];
   const vacantUnits = property.totalUnits - property.occupiedUnits;

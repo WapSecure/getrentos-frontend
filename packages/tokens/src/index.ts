@@ -70,12 +70,13 @@ export const lightColors: Palette = {
 };
 
 export const darkColors: Palette = {
-  background: '#111113',
+  // A true dark canvas gives raised cards and controls a clear visual level.
+  background: '#000000',
   foreground: '#f5f5f7',
   card: '#1c1c1e',
   cardForeground: '#f5f5f7',
   border: '#343437',
-  secondary: '#262629',
+  secondary: '#2c2c2e',
   secondaryForeground: '#f5f5f7',
   muted: '#222225',
   mutedForeground: '#a1a1aa',

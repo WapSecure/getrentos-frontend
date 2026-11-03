@@ -47,17 +47,17 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
       transition={{ delay, duration: 0.4 }}
       className="bg-card rounded-2xl border border-border p-4"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shrink-0">
             {getInitials(tenant.name)}
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-foreground">{tenant.name}</h3>
+              <h3 className="truncate font-semibold text-foreground">{tenant.name}</h3>
               {tenant.verified && <ShieldCheck className="w-3.5 h-3.5 text-success" />}
             </div>
-            <p className="text-xs text-muted-foreground">{tenant.email}</p>
+            <p className="truncate text-xs text-muted-foreground">{tenant.email}</p>
           </div>
         </div>
         <Badge

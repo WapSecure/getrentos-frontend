@@ -10,32 +10,12 @@ import { landlordKeys } from '@/lib/queryKeys';
 
 type ActivityType = 'payment' | 'maintenance' | 'lease' | 'application' | 'expense';
 
-const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
-  payment: {
-    icon: CreditCard,
-    bg: 'bg-success-subtle',
-    color: 'text-success',
-  },
-  maintenance: {
-    icon: Wrench,
-    bg: 'bg-purple-subtle',
-    color: 'text-purple',
-  },
-  lease: {
-    icon: CalendarClock,
-    bg: 'bg-warning-subtle',
-    color: 'text-warning',
-  },
-  application: {
-    icon: UserPlus,
-    bg: 'bg-info-subtle',
-    color: 'text-info',
-  },
-  expense: {
-    icon: ReceiptText,
-    bg: 'bg-destructive/10',
-    color: 'text-destructive',
-  },
+const typeConfig: Record<ActivityType, React.ElementType> = {
+  payment: CreditCard,
+  maintenance: Wrench,
+  lease: CalendarClock,
+  application: UserPlus,
+  expense: ReceiptText,
 };
 
 const typeFor = (type: string): ActivityType => {
@@ -87,15 +67,14 @@ export const LandlordActivityFeed = () => {
           <EmptyState icon={CreditCard} title="No activity yet" size="compact" bare />
         ) : (
           activity.map((item) => {
-            const config = typeConfig[typeFor(item.type)];
-            const Icon = config.icon;
+            const Icon = typeConfig[typeFor(item.type)];
             return (
               <div
                 key={item.id}
-                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+                className="flex items-start gap-3 p-4 transition-colors hover:bg-secondary/60"
               >
-                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                  <Icon className={`w-4 h-4 ${config.color}`} />
+                <div className="shrink-0 rounded-md bg-secondary p-2 text-muted-foreground">
+                  <Icon className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{item.title}</p>

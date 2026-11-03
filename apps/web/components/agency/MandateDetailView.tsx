@@ -5,20 +5,23 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Building2, FileText, Lock, ShieldCheck, UserRound } from 'lucide-react';
-import { Card, PageErrorState } from '@getrentos/ui';
+import { Alert, Badge, Card, CardSkeleton, PageErrorState, Skeleton } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
 import {
+  MANDATE_SCOPE_CHIP,
   MANDATE_SCOPE_LABELS,
   formatDay,
   grantsNothing,
   isLive,
+  noticeEndsAt,
   noticeSummary,
 } from '@/services/mandateService';
 import { MandateActionButtons } from './MandateActionButtons';
 import { CapabilityChip, formatMoment, MandateStatusBadge } from './mandatePresentation';
 import { useMandateActions } from './useMandateActions';
+import { describeAgencyError } from './agencyAccess';
 
 /**
  * One engagement, in full.
@@ -51,16 +54,16 @@ export function MandateDetailView() {
     enabled: Boolean(id),
   });
 
-  if (error) {
-    return <PageErrorState description={(error as Error).message} />;
+  if (error && !data) {
+    return <PageErrorState description={describeAgencyError(error)} />;
   }
 
   if (isLoading || !data) {
     return (
       <div className="mx-auto w-full max-w-4xl space-y-4 px-4 py-6">
-        <div className="h-6 w-64 animate-pulse rounded bg-muted" />
-        <div className="h-40 animate-pulse rounded-2xl bg-muted" />
-        <div className="h-56 animate-pulse rounded-2xl bg-muted" />
+        <Skeleton className="h-6 w-64" />
+        <CardSkeleton lines={3} />
+        <CardSkeleton lines={5} />
       </div>
     );
   }
@@ -87,11 +90,7 @@ export function MandateDetailView() {
             {mandate.propertyTitle ?? 'Property'}
           </h1>
           <MandateStatusBadge status={mandate.status} />
-          {live && (
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
-              In force
-            </span>
-          )}
+          {live && <Badge variant="success">In force</Badge>}
         </div>
         <p className="text-sm text-muted-foreground">
           {mandate.ownerName ?? 'the owner'}
@@ -104,11 +103,7 @@ export function MandateDetailView() {
         </p>
       </header>
 
-      {act.isError && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          {(act.error as Error).message}
-        </div>
-      )}
+      {act.isError && <Alert variant="danger">{(act.error as Error).message}</Alert>}
 
       <Card static className="p-4">
         <h2 className="text-sm font-semibold">What was agreed</h2>
@@ -136,7 +131,7 @@ export function MandateDetailView() {
                 title={MANDATE_SCOPE_LABELS[scope]}
                 className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground"
               >
-                {scope}
+                {MANDATE_SCOPE_CHIP[scope]}
               </span>
             ))}
             <span className="sr-only">Capabilities granted by this scope:</span>
@@ -203,6 +198,10 @@ export function MandateDetailView() {
             missing={mandate.status === 'REJECTED' ? 'Refused' : 'Awaiting verification'}
           />
           <Moment label="Notice served" at={mandate.noticeServedAt} missing="No notice served" />
+          <Moment
+            label={mandate.terminatedAt ? 'Notice period ended' : 'Notice period ends'}
+            at={noticeEndsAt(mandate)}
+          />
           <Moment
             label="Ended"
             at={mandate.terminatedAt}

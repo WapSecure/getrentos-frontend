@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Dialog, DialogContent, DialogDescription, DialogTitle } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@getrentos/ui';
 import { visitToIso, VisitTimeField } from '@/components/landlord/maintenance/VisitTimeField';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
 
@@ -61,17 +68,13 @@ const ScheduleForm = ({
       </div>
       <div className="p-4 space-y-4">
         <VisitTimeField value={when} onChange={setWhen} />
-        {error && (
-          <p role="alert" className="text-xs text-red-600 dark:text-red-400">
-            {error}
-          </p>
-        )}
+        {error && <Alert variant="danger">{error}</Alert>}
         <Button
           variant="primary"
           fullWidth
           onClick={() => iso && onSchedule(request.id, iso)}
           isLoading={isSaving}
-          disabled={!iso || isSaving}
+          disabled={!iso}
         >
           {request.scheduledFor ? 'Move visit' : 'Book visit'}
         </Button>
