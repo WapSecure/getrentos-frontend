@@ -6,15 +6,12 @@ import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageSquareText, Plus } from 'lucide-react-native';
 import {
-  Badge,
   Button,
-  Card,
   EmptyState,
   ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
-  PressableScale,
   Text,
   TextField,
   useTheme,
@@ -24,15 +21,13 @@ import { qk } from '@/lib/query/keys';
 import {
   managementApi,
   QUERY_CATEGORY_LABEL,
-  queryStatusBadge,
-  querySlaText,
   type QueryCategory,
   type QuerySummary,
 } from '@/lib/api/management';
 import { ApiError } from '@/lib/api/client';
-import { formatDateTime } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
+import { QueryRow } from '@/components/management/QueryRow';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -111,38 +106,6 @@ export default function ManagerQueries() {
         />
       </Sheet>
     </View>
-  );
-}
-
-function QueryRow({ query: q }: { query: QuerySummary }) {
-  const { spacing, colors } = useTheme();
-  const badge = queryStatusBadge(q);
-  return (
-    <PressableScale
-      onPress={() => router.push(`/(app)/manager-query/${q.id}`)}
-      accessibilityRole="button"
-      accessibilityLabel={`${q.subject}, ${badge.label}`}
-      style={{ marginBottom: spacing.sm }}
-    >
-      <Card padding={spacing.lg}>
-        <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text variant="bodyStrong">{q.subject}</Text>
-            <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-              {q.propertyTitle} · {q.manager}
-              {q.lastMessage ? ` · ${q.lastMessage.preview}` : ''}
-            </Text>
-            <Text
-              variant="caption"
-              style={{ color: q.late ? colors.destructive : colors.mutedForeground }}
-            >
-              {querySlaText(q, (iso) => formatDateTime(iso))}
-            </Text>
-          </View>
-          <Badge label={badge.label} tone={badge.tone} />
-        </View>
-      </Card>
-    </PressableScale>
   );
 }
 

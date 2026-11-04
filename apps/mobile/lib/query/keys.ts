@@ -25,6 +25,19 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
+  /** The agency workspace (lib/api/agency). */
+  agency: {
+    managing: ['agency', 'managing'] as const,
+    mandate: (id: string) => ['agency', 'mandate', id] as const,
+    terminationRequests: (id: string) => ['agency', 'mandate', id, 'termination-requests'] as const,
+    dashboard: ['agency', 'dashboard'] as const,
+    attention: ['agency', 'attention'] as const,
+    managedProperties: ['agency', 'managed-properties'] as const,
+    ownerInvites: ['agency', 'owner-invites'] as const,
+    client: (ownerId: string) => ['agency', 'client', ownerId] as const,
+    clientMoney: (ownerId: string) => ['agency', 'client', ownerId, 'money'] as const,
+    transfers: ['agency', 'transfers'] as const,
+  },
   /** Getting a property managed (lib/api/managedService). */
   managed: {
     all: ['managed'] as const,

@@ -109,6 +109,17 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
     scope: 'Ask about your rent and arrears, leases, repairs, applications or occupancy.',
     placeholder: 'Ask about rent, leases or repairs',
   },
+  agency: {
+    starters: [
+      'How much rent have we collected this month?',
+      'How much is in arrears?',
+      'Which owner queries are waiting on me?',
+      'Any work orders past their deadline?',
+    ],
+    scope:
+      "Questions about your firm's owners, occupancy, rent collection, arrears, maintenance and owner queries.",
+    placeholder: 'Ask about rent, arrears or owner queries',
+  },
 };
 
 /** Ask GetRentos: read-only answers from the user's own account (renter or landlord). */
@@ -121,6 +132,7 @@ export default function AskScreen() {
     params.persona === 'buyer' ||
     params.persona === 'agent' ||
     params.persona === 'resident' ||
+    params.persona === 'agency' ||
     (params.persona === 'estate' && !!params.estateId)
       ? params.persona
       : 'renter';

@@ -18,6 +18,7 @@ import {
   type Portal,
 } from '../roles';
 import { readPreferredPortal, writePreferredPortal } from '../preferredPortal';
+import { writeSelectedClient } from '../agency/selectedClient';
 import { forgetPurchaser, identifyPurchaser } from '../purchases';
 import { unregisterPush } from '../push';
 import { requestAppleCredential } from './apple';
@@ -103,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await clearCachedProfile();
     setPreferredPortal(null);
     await writePreferredPortal(null);
+    await writeSelectedClient(null);
     queryClient.clear();
     await persister.removeClient();
   }, [queryClient]);
