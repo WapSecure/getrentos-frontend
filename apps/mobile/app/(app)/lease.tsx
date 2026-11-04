@@ -27,6 +27,7 @@ import { DownloadLeaseButton } from '@/components/lease/DownloadLeaseButton';
 import { LeaseTerminationSheet } from '@/components/lease/LeaseTerminationSheet';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { LeaseGuideCard } from '@/components/lease/LeaseGuideCard';
 import { goBack } from '@/lib/goBack';
 
 const LEASE_STATUS_TONE = { active: 'success', expiring: 'warning', expired: 'danger' } as const;
@@ -172,6 +173,8 @@ export default function LeaseScreen() {
             </Text>
           </View>
         </Card>
+
+        <LeaseGuideCard />
 
         {renewalQuery.data && renewalQuery.data.status === 'pending' ? (
           <RenewalOfferCard offer={renewalQuery.data} period={lease.rentPeriod ?? 'year'} />
