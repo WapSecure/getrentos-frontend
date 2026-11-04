@@ -25,6 +25,16 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
+  /** Getting a property managed (lib/api/managedService). */
+  managed: {
+    all: ['managed'] as const,
+    feeCard: ['managed', 'fee-card'] as const,
+    sla: ['managed', 'sla'] as const,
+    firms: ['managed', 'firms'] as const,
+    mandates: ['managed', 'mandates'] as const,
+    intakes: ['managed', 'intakes'] as const,
+    breakFee: (mandateId: string) => ['managed', 'break-fee', mandateId] as const,
+  },
   /** Broadcasts, templates and automation rules (lib/api/automations). */
   automations: {
     rules: ['automations', 'rules'] as const,

@@ -9,6 +9,7 @@ import {
   BarChart3,
   BellRing,
   Scale,
+  UserCog,
   Zap,
   BedDouble,
   CalendarCheck,
@@ -168,6 +169,13 @@ export default function LandlordAccount() {
       description: 'Your public page and its address',
       icon: Globe,
       onPress: go('/(app)/landlord-microsite'),
+    },
+    {
+      key: 'get-managed',
+      label: 'Get it managed',
+      description: 'GetRentos Managed or a vetted firm',
+      icon: UserCog,
+      onPress: go('/(app)/get-managed'),
     },
     {
       key: 'change-manager',
