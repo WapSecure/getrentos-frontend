@@ -29,6 +29,7 @@ import type {
 import type { Notification } from '@/types/notification';
 import type { AssistantTurn, RenterAssistantReply } from '@/types/assistant';
 import type { ListingCheck } from '@/types/listingCheck';
+import type { RentalSearchParse } from '@/types/searchParse';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 
 export interface ViewingRequest {
@@ -505,6 +506,16 @@ export const renterService = {
   async getGeoInsights(id: string, destination?: string): Promise<ApiResponse<GeoInsights>> {
     const query = destination ? `?destination=${encodeURIComponent(destination)}` : '';
     return safeCall(() => authFetch(`/renter/listings/${id}/geo-insights${query}`));
+  },
+
+  /** Plain-language search: turns a sentence into Discover filters (never results). */
+  parseSearch(query: string): Promise<ApiResponse<RentalSearchParse>> {
+    return safeCall(() =>
+      authFetch('/renter/listings/search/parse', {
+        method: 'POST',
+        body: JSON.stringify({ query }),
+      })
+    );
   },
 
   /** "Should I rent this?": facts, a rule-based level and plain advice for one listing. */
