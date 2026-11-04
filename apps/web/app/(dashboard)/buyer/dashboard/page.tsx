@@ -11,6 +11,7 @@ import { Button, EmptyState, ListSkeleton, StatGridSkeleton } from '@getrentos/u
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ROUTES } from '@/lib/constants/auth';
 
 export default function BuyerDashboardPage() {
@@ -41,6 +42,7 @@ export default function BuyerDashboardPage() {
   return (
     <>
       <BuyerDashboardHeader greeting={greeting} firstName={firstName} />
+      <AttentionFeed persona="buyer" />
 
       {isLoading ? (
         <div className="space-y-6">

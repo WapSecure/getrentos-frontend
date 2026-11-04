@@ -27,6 +27,7 @@ import { estateKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
 import { EstateDuesTrendChart } from '@/components/estate/dashboard/EstateDuesTrendChart';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const modules = [
@@ -127,6 +128,8 @@ export default function EstateDashboardPage() {
         description={`${estate.address}, ${estate.city}, ${estate.state}`}
         meta={`${estate.householdCount} households · ${estate.gateCount ?? 0} active gates`}
       />
+
+      <AttentionFeed persona="estate" estateId={estate.id} />
 
       <ProFeatureGate
         entitled={isPro}

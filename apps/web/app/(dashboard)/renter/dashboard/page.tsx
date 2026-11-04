@@ -10,6 +10,7 @@ import { RenterRecentActivity } from '@/components/renter/dashboard/RenterRecent
 import { RenterLeaseRenewal } from '@/components/renter/dashboard/RenterLeaseRenewal';
 import { RenterRoommates } from '@/components/renter/dashboard/RenterRoommates';
 import { RenterReviews } from '@/components/renter/dashboard/RenterReviews';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { useRenterUser } from '../layout';
 
 export default function RenterDashboardPage() {
@@ -23,6 +24,7 @@ export default function RenterDashboardPage() {
   return (
     <div className="space-y-7">
       <RenterDashboardHeader greeting={greeting} firstName={firstName} />
+      <AttentionFeed persona="renter" />
 
       <RenterStatsCards />
 
