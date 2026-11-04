@@ -1,7 +1,7 @@
 'use client';
 
-import { MessageSquare, CalendarClock, Handshake, CheckCircle2, XCircle } from 'lucide-react';
-import { Badge, Button, Card, IconButton, type BadgeVariant } from '@getrentos/ui';
+import { Mail, CalendarClock, CheckCircle2, XCircle } from 'lucide-react';
+import { Badge, Card, IconButton, type BadgeVariant } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import type { RealtorLead, LeadStage } from '@/types/realtor';
 
@@ -17,9 +17,7 @@ const stageConfig: Record<LeadStage, { label: string; variant: BadgeVariant }> =
 interface LeadCardProps {
   lead: RealtorLead;
   isUpdating?: boolean;
-  onMessage: () => void;
   onScheduleViewing: () => void;
-  onConvertToOffer: () => void;
   onCloseWon: () => void;
   onCloseLost: () => void;
 }
@@ -27,9 +25,7 @@ interface LeadCardProps {
 export const LeadCard = ({
   lead,
   isUpdating = false,
-  onMessage,
   onScheduleViewing,
-  onConvertToOffer,
   onCloseWon,
   onCloseLost,
 }: LeadCardProps) => {
@@ -69,7 +65,17 @@ export const LeadCard = ({
       </div>
 
       <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-        <IconButton label="Message" icon={<MessageSquare />} size="sm" onClick={onMessage} />
+        {/* Leads are enquirers, not clients: in-app messaging is for clients, so reach them by email. */}
+        {lead.email && (
+          <IconButton
+            label="Email"
+            icon={<Mail />}
+            size="sm"
+            onClick={() => {
+              window.location.href = `mailto:${lead.email}`;
+            }}
+          />
+        )}
         {!isClosed && (
           <>
             <IconButton
@@ -94,17 +100,6 @@ export const LeadCard = ({
               onClick={onCloseWon}
               disabled={isUpdating}
             />
-            <div className="flex-1" />
-            {lead.stage !== 'offer_made' && (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Handshake className="w-3.5 h-3.5" />}
-                onClick={onConvertToOffer}
-              >
-                Offer
-              </Button>
-            )}
           </>
         )}
       </div>

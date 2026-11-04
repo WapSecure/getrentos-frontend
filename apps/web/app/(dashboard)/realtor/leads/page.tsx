@@ -247,9 +247,7 @@ export default function RealtorLeadsPage() {
             <LeadCard
               key={lead.id}
               lead={lead}
-              onMessage={() => router.push(`${ROUTES.REALTOR_MESSAGES}?lead=${lead.id}`)}
               onScheduleViewing={() => router.push(`${ROUTES.REALTOR_VIEWINGS}?lead=${lead.id}`)}
-              onConvertToOffer={() => router.push(`${ROUTES.REALTOR_OFFERS}?lead=${lead.id}`)}
               onCloseWon={() => updateLead.mutate({ id: lead.id, status: 'CLOSED' })}
               onCloseLost={() => updateLead.mutate({ id: lead.id, status: 'LOST' })}
               isUpdating={updateLead.isPending && updateLead.variables?.id === lead.id}
