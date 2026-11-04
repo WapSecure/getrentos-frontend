@@ -9,6 +9,7 @@ import {
   KeyRound,
   Landmark,
   Megaphone,
+  MessageCircleQuestion,
   Package,
   ReceiptText,
   TriangleAlert,
@@ -123,14 +124,23 @@ export default function ResidentHome() {
             : 'Everything around your home, in one place'
         }
         accessory={
-          <IconButton
-            onPress={() => router.push('/(app)/notifications')}
-            // IconButton already appends ", N unread" from the badge, so the
-            // label must not repeat the count (DEF-243).
-            accessibilityLabel="Notifications"
-            badge={unreadCount}
-            icon={<Bell size={21} color={colors.foreground} />}
-          />
+          <View style={{ flexDirection: 'row', gap: 4 }}>
+            <IconButton
+              onPress={() =>
+                router.push({ pathname: '/(app)/ask', params: { persona: 'resident' } })
+              }
+              accessibilityLabel="Ask GetRentos"
+              icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+            />
+            <IconButton
+              onPress={() => router.push('/(app)/notifications')}
+              // IconButton already appends ", N unread" from the badge, so the
+              // label must not repeat the count (DEF-243).
+              accessibilityLabel="Notifications"
+              badge={unreadCount}
+              icon={<Bell size={21} color={colors.foreground} />}
+            />
+          </View>
         }
       />
 
