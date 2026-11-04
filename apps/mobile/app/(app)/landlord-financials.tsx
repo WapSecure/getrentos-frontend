@@ -3,7 +3,16 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, Download, ReceiptText, Wallet } from 'lucide-react-native';
+import {
+  Building2,
+  ChevronRight,
+  ClipboardList,
+  Download,
+  ReceiptText,
+  Repeat,
+  Target,
+  Wallet,
+} from 'lucide-react-native';
 import {
   Card,
   Divider,
@@ -99,6 +108,15 @@ export default function LandlordFinancials() {
             ]}
             note={null}
           />
+          {/* Automatic payouts are not Pro, so they stay reachable from here. */}
+          <Card padding="none" style={{ marginTop: spacing.lg }}>
+            <LinkRow
+              icon={<Repeat size={18} color={colors.primary} />}
+              label="Automatic payouts"
+              description="Sweep your held balance to your bank"
+              onPress={() => router.push('/(app)/landlord-auto-payouts')}
+            />
+          </Card>
         </ScrollView>
       ) : (stats.isError && !stats.data) || (chart.isError && !chart.data) ? (
         <ErrorState
@@ -175,6 +193,34 @@ export default function LandlordFinancials() {
               label="Owner statements"
               description="Payouts, fees and period summaries"
               onPress={() => router.push('/(app)/landlord-owner-statements')}
+            />
+            <Divider />
+            <LinkRow
+              icon={<Building2 size={18} color={colors.primary} />}
+              label="Portfolio"
+              description="Net income, cap rate and occupancy per property"
+              onPress={() => router.push('/(app)/landlord-portfolio')}
+            />
+            <Divider />
+            <LinkRow
+              icon={<Target size={18} color={colors.primary} />}
+              label="Budgets"
+              description="Spending targets against actuals"
+              onPress={() => router.push('/(app)/landlord-budgets')}
+            />
+            <Divider />
+            <LinkRow
+              icon={<Repeat size={18} color={colors.primary} />}
+              label="Automatic payouts"
+              description="Sweep your held balance to your bank"
+              onPress={() => router.push('/(app)/landlord-auto-payouts')}
+            />
+            <Divider />
+            <LinkRow
+              icon={<ClipboardList size={18} color={colors.primary} />}
+              label="Reports"
+              description="Rent roll, income and expenses, CSV exports"
+              onPress={() => router.push('/(app)/landlord-reports')}
             />
           </Card>
         </ScrollView>
