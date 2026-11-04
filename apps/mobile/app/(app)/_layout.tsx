@@ -118,6 +118,10 @@ export default function AppLayout() {
       <Stack.Screen name="change-manager" options={DETAIL_OPTIONS} />
       <Stack.Screen name="legal-cases" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-automations" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-budgets" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-auto-payouts" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-reports" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-portfolio" options={DETAIL_OPTIONS} />
       <Stack.Screen name="legal-case/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="handover/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="manager-queries" options={DETAIL_OPTIONS} />

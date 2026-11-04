@@ -359,6 +359,12 @@ export const qk = {
     arrearsSummary: ['landlord', 'payments', 'arrears-summary'] as const,
     financialsStats: ['landlord', 'financials', 'stats'] as const,
     financialsChart: ['landlord', 'financials', 'chart'] as const,
+    budgets: ['landlord', 'financials', 'budgets'] as const,
+    payoutSchedule: ['landlord', 'financials', 'payout-schedule'] as const,
+    rentRoll: ['landlord', 'reports', 'rent-roll'] as const,
+    pnl: (from: string, to: string) => ['landlord', 'reports', 'pnl', from, to] as const,
+    portfolio: ['landlord', 'portfolio', 'analytics'] as const,
+    portfolioBriefing: ['landlord', 'portfolio', 'briefing'] as const,
     expenses: (page = 1, pageSize = 20) => ['landlord', 'expenses', { page, pageSize }] as const,
     ownerStatements: (page = 1, pageSize = 20) =>
       ['landlord', 'owner-statements', { page, pageSize }] as const,
