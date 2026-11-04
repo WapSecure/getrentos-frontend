@@ -60,3 +60,6 @@ test-results
 *.key
 *.mobileprovision
 *.orig.*
+
+# Local test-account credentials (contains the shared fixture password)
+LOCAL-TEST-ACCOUNTS.md
