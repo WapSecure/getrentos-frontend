@@ -34,7 +34,7 @@ export function ProUpsell({
       >
         <Sparkles size={22} color={colors.primary} />
       </View>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         {title}
       </Text>
       <Text variant="callout" color="mutedForeground">

@@ -161,7 +161,7 @@ export default function EstateAmenities() {
             <>
               {buckets.upcoming.length ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading" accessibilityRole="header">
+                  <Text variant="heading" headingLevel={2}>
                     Coming up
                   </Text>
                   {buckets.upcoming.map((b) => (
@@ -193,7 +193,7 @@ export default function EstateAmenities() {
               )}
               {buckets.past.length ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading" accessibilityRole="header">
+                  <Text variant="heading" headingLevel={2}>
                     Earlier
                   </Text>
                   {buckets.past.slice(0, 20).map((b) => (

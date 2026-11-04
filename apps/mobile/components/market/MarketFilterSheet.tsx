@@ -271,7 +271,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   const { spacing } = useTheme();
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="bodyStrong" accessibilityRole="header">
+      <Text variant="bodyStrong" headingLevel={2}>
         {title}
       </Text>
       {children}

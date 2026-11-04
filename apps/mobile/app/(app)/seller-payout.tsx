@@ -116,7 +116,7 @@ export default function SellerPayout() {
         {a ? <AccountForm hasAccount={!!a.accountNumber} /> : null}
 
         <View style={{ gap: spacing.sm }}>
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="heading" headingLevel={2}>
             Sale payouts
           </Text>
           {payouts.isPending ? (
@@ -156,7 +156,7 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
 
   return (
     <Card elevated style={{ gap: spacing.md }}>
-      <Text variant="bodyStrong" accessibilityRole="header">
+      <Text variant="bodyStrong" headingLevel={2}>
         {hasAccount ? 'Change account' : 'Add an account'}
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>

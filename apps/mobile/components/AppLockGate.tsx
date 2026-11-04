@@ -98,7 +98,7 @@ export function AppLockGate() {
       <BrandLogo size={28} />
       <View style={{ alignItems: 'center', gap: spacing.sm }}>
         <Icon size={44} color={colors.primary} />
-        <Text variant="heading" accessibilityRole="header">
+        <Text variant="heading" headingLevel={2}>
           GetRentos is locked
         </Text>
         <Text variant="callout" color="mutedForeground" center>

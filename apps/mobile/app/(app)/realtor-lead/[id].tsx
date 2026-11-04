@@ -197,7 +197,7 @@ export default function RealtorLead() {
             )}
 
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" accessibilityRole="header">
+              <Text variant="heading" headingLevel={2}>
                 Viewings
               </Text>
               {viewings.isPending ? (

@@ -117,7 +117,7 @@ export function DisputeThread({
                 message="Support reads every message here. Add photos or details by replying."
               />
             )}
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Messages
             </Text>
             {messages.isPending ? (

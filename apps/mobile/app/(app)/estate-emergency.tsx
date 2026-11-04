@@ -146,7 +146,7 @@ function DeclareForm({ estateId, households }: { estateId: string; households: n
   const kindLabel = EMERGENCY_KINDS.find((k) => k.value === kind)!.label.toLowerCase();
   return (
     <Card elevated style={{ gap: spacing.md }}>
-      <Text variant="bodyStrong" accessibilityRole="header">
+      <Text variant="bodyStrong" headingLevel={2}>
         Declare an emergency
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -205,7 +205,7 @@ function History({ items, loading }: { items: MusterSummary[]; loading: boolean 
   if (!items.length) return null;
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         Past emergencies
       </Text>
       {items.map((m) => (

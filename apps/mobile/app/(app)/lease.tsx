@@ -150,7 +150,11 @@ export default function LeaseScreen() {
               <Text variant="caption" color="mutedForeground">
                 Rent
               </Text>
-              <Price amount={lease.rentAmount} period={lease.rentPeriod ?? 'year'} variant="bodyStrong" />
+              <Price
+                amount={lease.rentAmount}
+                period={lease.rentPeriod ?? 'year'}
+                variant="bodyStrong"
+              />
             </View>
             <View>
               <Text variant="caption" color="mutedForeground">
@@ -221,7 +225,7 @@ export default function LeaseScreen() {
           <View
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
           >
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Payments
             </Text>
             <Pressable

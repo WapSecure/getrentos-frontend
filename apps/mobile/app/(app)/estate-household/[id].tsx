@@ -243,7 +243,7 @@ export default function EstateHousehold() {
             </Card>
 
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" accessibilityRole="header">
+              <Text variant="heading" headingLevel={2}>
                 Dues
               </Text>
               {dues.isPending ? (

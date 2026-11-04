@@ -216,7 +216,7 @@ export default function EstateCharge() {
         </Card>
 
         <Card elevated style={{ gap: spacing.md }}>
-          <Text variant="bodyStrong" accessibilityRole="header">
+          <Text variant="bodyStrong" headingLevel={2}>
             Who pays
           </Text>
           <SegmentedControl

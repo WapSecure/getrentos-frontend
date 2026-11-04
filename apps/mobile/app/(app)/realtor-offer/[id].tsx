@@ -105,7 +105,7 @@ export default function RealtorOfferDetail() {
             </Card>
 
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" accessibilityRole="header">
+              <Text variant="heading" headingLevel={2}>
                 Negotiation
               </Text>
               {offerThread(o).map((step, i) => {
@@ -186,7 +186,7 @@ function CounterForm({
   });
   return (
     <Card elevated style={{ gap: spacing.md }}>
-      <Text variant="bodyStrong" accessibilityRole="header">
+      <Text variant="bodyStrong" headingLevel={2}>
         Counter
       </Text>
       <NumberField

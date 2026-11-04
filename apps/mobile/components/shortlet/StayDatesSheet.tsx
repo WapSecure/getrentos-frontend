@@ -217,7 +217,7 @@ const Month = memo(function Month({
 
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="subheading" accessibilityRole="header">
+      <Text variant="subheading" headingLevel={2}>
         {month.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })}
       </Text>
       <View style={{ flexDirection: 'row' }} importantForAccessibility="no-hide-descendants">

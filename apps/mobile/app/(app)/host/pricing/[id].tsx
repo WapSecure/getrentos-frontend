@@ -121,7 +121,7 @@ function Rules({ listing: l }: { listing: HostListing }) {
     <View style={{ gap: spacing.md }}>
       {perNight ? (
         <>
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="heading" headingLevel={2}>
             Discounts
           </Text>
           <Card elevated style={{ gap: spacing.xs }}>
@@ -181,7 +181,7 @@ function Rules({ listing: l }: { listing: HostListing }) {
         </>
       ) : null}
 
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         Turnover
       </Text>
       <Card elevated style={{ gap: spacing.xs }}>
@@ -246,7 +246,7 @@ function Seasons({ listing: l }: { listing: HostListing }) {
   return (
     <View style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+        <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
           Seasons
         </Text>
         <IconButton

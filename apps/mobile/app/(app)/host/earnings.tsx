@@ -107,7 +107,7 @@ export default function HostEarnings() {
           <HostFeeNote />
 
           <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Payout account
             </Text>
             <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
@@ -143,7 +143,7 @@ export default function HostEarnings() {
           <Performance />
 
           <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Payout history
             </Text>
             {payouts.isPending ? (
@@ -202,7 +202,7 @@ export default function HostEarnings() {
 
           {penalties.data?.items.length ? (
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" accessibilityRole="header">
+              <Text variant="heading" headingLevel={2}>
                 Cancellation fees
               </Text>
               <Card elevated padding="none">
@@ -390,7 +390,7 @@ function Performance() {
   ];
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         Performance
       </Text>
       <Card elevated style={{ gap: spacing.md }}>

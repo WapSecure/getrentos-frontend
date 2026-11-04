@@ -282,7 +282,7 @@ function Viewings({ onAdd }: { onAdd: () => void }) {
       ) : sections.length ? (
         sections.map((s) => (
           <View key={s.title} style={{ gap: spacing.sm }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               {s.title}
             </Text>
             {s.items.map((v) => (

@@ -137,7 +137,7 @@ export default function RealtorCommissions() {
             </Card>
 
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" accessibilityRole="header">
+              <Text variant="heading" headingLevel={2}>
                 Payout account
               </Text>
               <Pressable
@@ -178,7 +178,7 @@ export default function RealtorCommissions() {
             <Ledger />
 
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" accessibilityRole="header">
+              <Text variant="heading" headingLevel={2}>
                 Payouts
               </Text>
               {payouts.isPending ? (
@@ -314,7 +314,7 @@ function Ledger() {
   });
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         Commission
       </Text>
       <ScrollView

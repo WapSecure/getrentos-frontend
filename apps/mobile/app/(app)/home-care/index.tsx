@@ -143,7 +143,7 @@ export default function HomeCare() {
           />
 
           <View style={{ gap: spacing.md }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Needs you
             </Text>
             {open.isPending ? (

@@ -117,7 +117,7 @@ export default function Billing() {
       ) : null}
 
       <View style={{ gap: spacing.sm }}>
-        <Text variant="heading" accessibilityRole="header">
+        <Text variant="heading" headingLevel={2}>
           Receipts
         </Text>
         {invoices.isError && !invoices.data ? (
@@ -296,7 +296,7 @@ function BuyPro() {
 
   return (
     <Card elevated style={{ gap: spacing.md }}>
-      <Text variant="bodyStrong" accessibilityRole="header">
+      <Text variant="bodyStrong" headingLevel={2}>
         Upgrade to Pro
       </Text>
       {offers.data.map((o) => (

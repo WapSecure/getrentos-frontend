@@ -215,14 +215,14 @@ export default function OwnerPropertyDetail() {
               </Card>
 
               <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" accessibilityRole="header">
+                <Text variant="heading" headingLevel={2}>
                   Photos
                 </Text>
                 <OwnerPhotosField property={p} onChanged={refresh} />
               </View>
 
               <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" accessibilityRole="header">
+                <Text variant="heading" headingLevel={2}>
                   Video tour
                 </Text>
                 <VideoTourField
@@ -237,7 +237,7 @@ export default function OwnerPropertyDetail() {
               </View>
 
               <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" accessibilityRole="header">
+                <Text variant="heading" headingLevel={2}>
                   Sale listing
                 </Text>
                 {listings.isError && !listings.data ? (

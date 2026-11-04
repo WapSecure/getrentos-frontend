@@ -139,7 +139,7 @@ export function EmptyState({
       style={{ alignItems: 'center', paddingVertical: spacing['4xl'], gap: spacing.sm }}
     >
       {icon}
-      <Text variant="heading" accessibilityRole="header" center>
+      <Text variant="heading" headingLevel={2} center>
         {title}
       </Text>
       {description ? (
@@ -181,7 +181,7 @@ export function ErrorState({
       >
         <RotateCw size={20} color={colors.destructive} />
       </View>
-      <Text variant="heading" accessibilityRole="header" center>
+      <Text variant="heading" headingLevel={2} center>
         {title}
       </Text>
       <Text variant="body" color="mutedForeground" center style={{ maxWidth: 300 }}>

@@ -30,7 +30,7 @@ export function EnterpriseUpsell({
   return (
     <Card elevated style={{ gap: spacing.md }}>
       <Sparkles size={22} color={colors.primary} />
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         {feature} is part of Enterprise
       </Text>
       {current ? (

@@ -1010,7 +1010,7 @@ function ReviewSection({
           marginBottom: spacing.sm,
         }}
       >
-        <Text variant="bodyStrong" accessibilityRole="header">
+        <Text variant="bodyStrong" headingLevel={2}>
           {title}
         </Text>
         <Pressable

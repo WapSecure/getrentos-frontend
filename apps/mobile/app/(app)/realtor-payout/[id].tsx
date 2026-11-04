@@ -90,7 +90,7 @@ export default function RealtorPayoutDetail() {
               message={`${p.failureReason ?? 'The bank didn’t accept this transfer.'} This commission stays reserved for this payout, and support retries it to your account. If your bank details changed, update them first.`}
             />
           ) : null}
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="heading" headingLevel={2}>
             {p.status === 'success' ? 'What it paid' : 'What it covers'}
           </Text>
           {p.commissions.map((c) => (

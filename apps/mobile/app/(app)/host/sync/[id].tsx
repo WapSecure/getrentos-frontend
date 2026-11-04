@@ -102,7 +102,7 @@ export default function HostCalendarSync() {
       ) : (
         <>
           <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               1 · Your GetRentos calendar
             </Text>
             <Card elevated style={{ gap: spacing.md }}>
@@ -158,7 +158,7 @@ export default function HostCalendarSync() {
 
           <View style={{ gap: spacing.sm }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+              <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
                 2 · Their calendars
               </Text>
               <IconButton

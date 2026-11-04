@@ -498,7 +498,7 @@ function StatementDetail({
 
       {s.disputes?.length ? (
         <View style={{ gap: spacing.sm }}>
-          <Text variant="bodyStrong" accessibilityRole="header">
+          <Text variant="bodyStrong" headingLevel={2}>
             Queries on this statement
           </Text>
           {s.disputes.map((d) => (

@@ -221,7 +221,7 @@ export default function OwnerAddProperty() {
         </View>
 
         <View style={{ gap: spacing.sm }}>
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="heading" headingLevel={2}>
             Proof of ownership
           </Text>
           <Text variant="callout" color="mutedForeground">

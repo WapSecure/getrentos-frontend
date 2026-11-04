@@ -107,7 +107,7 @@ export default function RealtorClientDetail() {
           </Card>
 
           <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Properties you handle
             </Text>
             {properties.isError && !properties.data ? (

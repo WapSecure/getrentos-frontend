@@ -92,7 +92,7 @@ export default function RealtorClients() {
             if (!list.length) return null;
             return (
               <View key={g.status} style={{ gap: spacing.sm }}>
-                <Text variant="heading" accessibilityRole="header">
+                <Text variant="heading" headingLevel={2}>
                   {g.title}
                 </Text>
                 {list.map((c) => (

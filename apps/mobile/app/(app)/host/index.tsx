@@ -272,7 +272,7 @@ function Section({
   return (
     <View style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+        <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
           {title}
         </Text>
         {action ? (

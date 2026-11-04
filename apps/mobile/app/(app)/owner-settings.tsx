@@ -77,7 +77,7 @@ function Form({ initial }: { initial: OwnerPreferences }) {
   return (
     <>
       <Card elevated style={{ gap: spacing.md }}>
-        <Text variant="bodyStrong" accessibilityRole="header">
+        <Text variant="bodyStrong" headingLevel={2}>
           Lowest offer you want to see
         </Text>
         <Text variant="caption" color="mutedForeground">

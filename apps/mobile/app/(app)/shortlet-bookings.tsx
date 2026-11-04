@@ -164,7 +164,7 @@ function HostsOnYou() {
   return (
     <View style={{ gap: spacing.md, marginTop: spacing.lg }}>
       <View style={{ gap: 2 }}>
-        <Text variant="heading" accessibilityRole="header">
+        <Text variant="heading" headingLevel={2}>
           What hosts say about you
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>

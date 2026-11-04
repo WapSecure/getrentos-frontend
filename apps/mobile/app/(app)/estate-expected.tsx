@@ -153,7 +153,7 @@ function Group({
   if (!rows.length) return null;
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="heading" accessibilityRole="header">
+      <Text variant="heading" headingLevel={2}>
         {title} · {rows.length}
       </Text>
       {rows.map((r) => (

@@ -124,7 +124,7 @@ export default function ServiceTargets() {
           <>
             {escalations.data?.items.length ? (
               <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" accessibilityRole="header">
+                <Text variant="heading" headingLevel={2}>
                   Slipping now
                 </Text>
                 {escalations.data.items.map((e) => (

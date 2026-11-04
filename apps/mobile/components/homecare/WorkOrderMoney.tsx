@@ -88,7 +88,7 @@ export function QuotesSection({ w }: { w: WorkOrder }) {
   return (
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+        <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
           Quotes
         </Text>
         {!closed ? (
@@ -309,7 +309,7 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
   return (
     <View style={{ gap: spacing.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+        <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
           Invoices
         </Text>
         {canInvoice ? (

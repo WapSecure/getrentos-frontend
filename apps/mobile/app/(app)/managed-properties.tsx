@@ -98,7 +98,7 @@ export default function ManagedProperties() {
 
         {open.length ? (
           <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" accessibilityRole="header">
+            <Text variant="heading" headingLevel={2}>
               Claims in progress
             </Text>
             {open.map((c) => (
@@ -209,7 +209,7 @@ function ClaimForm() {
 
   return (
     <Card elevated style={{ gap: spacing.md }}>
-      <Text variant="bodyStrong" accessibilityRole="header">
+      <Text variant="bodyStrong" headingLevel={2}>
         File a claim
       </Text>
       <Text variant="caption" color="mutedForeground">
