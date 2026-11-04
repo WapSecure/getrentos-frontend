@@ -8,6 +8,7 @@ import {
   CalendarClock,
   BarChart3,
   BellRing,
+  Scale,
   BedDouble,
   CalendarCheck,
   CircleHelp,
@@ -72,6 +73,13 @@ export default function LandlordAccount() {
       description: 'Arrears ladder, service and notice periods',
       icon: BellRing,
       onPress: go('/(app)/landlord-notices'),
+    },
+    {
+      key: 'legal-cases',
+      label: 'Legal cases',
+      description: 'Evictions, recovery and disputes in court',
+      icon: Scale,
+      onPress: go('/(app)/legal-cases'),
     },
     {
       key: 'maintenance',

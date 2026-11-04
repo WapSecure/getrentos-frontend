@@ -25,6 +25,12 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
+  /** Legal cases (lib/api/legalCases). */
+  legalCases: {
+    all: ['legal-cases'] as const,
+    list: (limit: number) => ['legal-cases', 'list', limit] as const,
+    detail: (id: string) => ['legal-cases', 'detail', id] as const,
+  },
   /** Tenancy notices and arrears (lib/api/tenancyNotices). */
   notices: {
     running: ['notices', 'list', 'SERVED'] as const,
