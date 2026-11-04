@@ -44,6 +44,8 @@ export function AdminRecordSearch({ compact = false }: { compact?: boolean }) {
   }, []);
   const search = useQuery({
     queryKey: ['admin', 'global-search', debounced, type],
+    // Header/sidebar chrome: a failure here must never take down the page.
+    throwOnError: false,
     queryFn: () => unwrap(adminSearchService.search(debounced, type === 'all' ? undefined : type)),
     enabled: focused && debounced.length >= 2,
     placeholderData: keepPreviousData,
