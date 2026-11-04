@@ -18,14 +18,30 @@ export interface RenterAssistantReply {
   model: string | null;
 }
 
-export type AssistantPersona = 'renter' | 'landlord' | 'realtor' | 'owner' | 'buyer' | 'agent';
+export type AssistantPersona =
+  | 'renter'
+  | 'landlord'
+  | 'realtor'
+  | 'owner'
+  | 'buyer'
+  | 'agent'
+  | 'estate';
 
 export const assistantApi = {
-  ask: (question: string, history: AssistantTurn[], persona: AssistantPersona = 'renter') =>
-    apiFetch<RenterAssistantReply>(`/${persona}/assistant/ask`, {
-      method: 'POST',
-      body: { question, history },
-    }),
+  /** `estateId` is required for the estate persona: an estate manager asks about one estate. */
+  ask: (
+    question: string,
+    history: AssistantTurn[],
+    persona: AssistantPersona = 'renter',
+    estateId?: string
+  ) =>
+    apiFetch<RenterAssistantReply>(
+      persona === 'estate' ? `/estate/${estateId}/assistant/ask` : `/${persona}/assistant/ask`,
+      {
+        method: 'POST',
+        body: { question, history },
+      }
+    ),
 };
 
 /** The server links to web screens; these are the matching app screens. */
@@ -108,6 +124,19 @@ const MOBILE_ROUTES: Record<string, string> = {
   '/agent/verification': '/(app)/agent-trust-profile',
   '/agent/settings': '/(app)/(agent)/account',
   '/agent/help': '/(app)/help',
+  '/estate/dashboard': '/(app)/(estate)',
+  '/estate/households': '/(app)/(estate)/households',
+  '/estate/dues': '/(app)/(estate)/dues',
+  '/estate/financials': '/(app)/estate-financials',
+  '/estate/incidents': '/(app)/estate-incidents',
+  '/estate/maintenance': '/(app)/estate-maintenance',
+  '/estate/violations': '/(app)/estate-violations',
+  '/estate/visitor-passes': '/(app)/estate-visitors',
+  '/estate/deliveries': '/(app)/estate-deliveries',
+  '/estate/emergency': '/(app)/estate-emergency',
+  '/estate/announcements': '/(app)/estate-announcements',
+  '/estate/staff': '/(app)/estate-staff',
+  '/estate/billing': '/(app)/billing',
 };
 
 export function mobileRouteFor(path: string): string | null {

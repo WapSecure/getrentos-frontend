@@ -58,6 +58,17 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
     scope: 'Ask about your properties, listings, offers, sales, viewings or realtors.',
     placeholder: 'Ask about offers, sales or viewings',
   },
+  estate: {
+    starters: [
+      'How many households owe dues?',
+      'Are there any critical incidents?',
+      'Which maintenance tickets are urgent?',
+      'How many visitors are on site?',
+    ],
+    scope:
+      'Ask about this estate’s dues, incidents, maintenance, violations, visitors or deliveries.',
+    placeholder: 'Ask about dues, incidents or visitors',
+  },
   agent: {
     starters: [
       'What should I do first today?',
@@ -92,13 +103,14 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
 
 /** Ask GetRentos: read-only answers from the user's own account (renter or landlord). */
 export default function AskScreen() {
-  const params = useLocalSearchParams<{ persona?: string }>();
+  const params = useLocalSearchParams<{ persona?: string; estateId?: string }>();
   const persona: AssistantPersona =
     params.persona === 'landlord' ||
     params.persona === 'realtor' ||
     params.persona === 'owner' ||
     params.persona === 'buyer' ||
-    params.persona === 'agent'
+    params.persona === 'agent' ||
+    (params.persona === 'estate' && !!params.estateId)
       ? params.persona
       : 'renter';
   const copy = COPY[persona];
@@ -110,7 +122,7 @@ export default function AskScreen() {
 
   const ask = useMutation({
     mutationFn: ({ question, history }: { question: string; history: AssistantTurn[] }) =>
-      assistantApi.ask(question, history, persona),
+      assistantApi.ask(question, history, persona, params.estateId),
     onSuccess: (reply) =>
       setMessages((prev) => [
         ...prev,

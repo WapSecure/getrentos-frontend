@@ -85,6 +85,20 @@ const SERVER_PATHS = [
   '/agent/verification',
   '/agent/settings',
   '/agent/help',
+  // ESTATE_ASSISTANT_LINKS
+  '/estate/dashboard',
+  '/estate/households',
+  '/estate/dues',
+  '/estate/financials',
+  '/estate/incidents',
+  '/estate/maintenance',
+  '/estate/violations',
+  '/estate/visitor-passes',
+  '/estate/deliveries',
+  '/estate/emergency',
+  '/estate/announcements',
+  '/estate/staff',
+  '/estate/billing',
 ];
 
 describe('assistant link routes', () => {
