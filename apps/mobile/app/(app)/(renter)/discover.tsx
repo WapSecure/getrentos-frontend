@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { looksLikeSentence, searchParseApi, toListingFilters } from '@/lib/api/searchParse';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import {
   BookmarkPlus,
@@ -35,6 +36,7 @@ import {
   LISTING_SORTS,
   LISTING_SORT_LABEL,
   PROPERTY_TYPE_LABEL,
+  PROPERTY_TYPES,
   type ListingFilters,
   type ListingSort,
   type RenterProperty,
@@ -65,6 +67,16 @@ export default function Discover() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [saveSearchOpen, setSaveSearchOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  // A sentence typed in the search box becomes filters; this says what was understood.
+  const [understood, setUnderstood] = useState<string | null>(null);
+  const understand = useMutation({
+    mutationFn: (q: string) => searchParseApi.parse(q),
+    onSuccess: (r) => {
+      setSearchText('');
+      setFilters(toListingFilters(r, PROPERTY_TYPES));
+      setUnderstood(r.summary);
+    },
+  });
   const { savedIds, toggle } = useSavedListings();
 
   // Debounce the free-text search into the filter set.
@@ -192,7 +204,13 @@ export default function Discover() {
               autoCorrect={false}
               returnKeyType="search"
               value={searchText}
-              onChangeText={setSearchText}
+              onChangeText={(t) => {
+                setSearchText(t);
+                setUnderstood(null);
+              }}
+              onSubmitEditing={() => {
+                if (looksLikeSentence(searchText)) understand.mutate(searchText.trim());
+              }}
               rightAccessory={
                 searchText ? (
                   <Pressable
@@ -209,6 +227,11 @@ export default function Discover() {
           </View>
           <FilterButton count={chips.length} onPress={() => setSheetOpen(true)} />
         </View>
+        {understood ? (
+          <Text variant="caption" color="mutedForeground" accessibilityLiveRegion="polite">
+            Showing: {understood}
+          </Text>
+        ) : null}
 
         <ScrollView
           horizontal

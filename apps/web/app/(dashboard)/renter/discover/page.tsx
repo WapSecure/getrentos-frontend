@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { DiscoverFilters } from '@/components/renter/discover/DiscoverFilters';
 import { DiscoverSearchBar } from '@/components/renter/discover/DiscoverSearchBar';
+import { PlainLanguageSearch } from '@/components/renter/discover/PlainLanguageSearch';
 import { DiscoverPropertyGrid } from '@/components/renter/discover/DiscoverPropertyGrid';
 import { DiscoverMapView } from '@/components/renter/discover/DiscoverMapView';
 import { DiscoverCompareDrawer } from '@/components/renter/discover/DiscoverCompareDrawer';
@@ -149,6 +150,10 @@ export default function DiscoverPage() {
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <main className="min-w-0 space-y-5">
+          <PlainLanguageSearch
+            onApply={(values) => setFilterOptions((prev) => ({ ...prev, ...values }))}
+          />
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex-1">
               <DiscoverSearchBar initialQuery={queryFromUrl} onSearch={handleSearch} />
