@@ -356,6 +356,8 @@ export const qk = {
     properties: (page = 1, pageSize = 20) =>
       ['landlord', 'properties', { page, pageSize }] as const,
     units: (propertyId: string) => ['landlord', 'units', propertyId] as const,
+    unitsPortfolio: (search: string, propertyId: string) =>
+      ['landlord', 'units', 'portfolio', search, propertyId] as const,
     tenants: (page = 1, pageSize = 20) => ['landlord', 'tenants', { page, pageSize }] as const,
     applications: (page = 1, pageSize = 20) =>
       ['landlord', 'applications', { page, pageSize }] as const,

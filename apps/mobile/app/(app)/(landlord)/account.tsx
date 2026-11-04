@@ -9,6 +9,7 @@ import {
   BarChart3,
   BellRing,
   Scale,
+  DoorClosed,
   UserCog,
   Zap,
   BedDouble,
@@ -54,6 +55,13 @@ export default function LandlordAccount() {
       description: 'Review and decide on applicants',
       icon: FileText,
       onPress: go('/(app)/landlord-applications'),
+    },
+    {
+      key: 'units',
+      label: 'Units',
+      description: 'Every unit across your properties',
+      icon: DoorClosed,
+      onPress: go('/(app)/landlord-units'),
     },
     {
       key: 'leases',
