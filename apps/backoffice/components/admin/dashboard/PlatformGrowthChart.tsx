@@ -15,7 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminService } from '@/services/adminService';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
-import { Badge, Button, Skeleton } from '@getrentos/ui';
+import { Badge, Button, Card, Skeleton } from '@getrentos/ui';
 
 interface GrowthPoint {
   month: string;
@@ -49,10 +49,10 @@ export const PlatformGrowthChart = () => {
   const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : null;
 
   return (
-    <div className="bg-card border border-border rounded-lg p-5">
+    <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-foreground">Platform Growth</h3>
+          <h3 className="font-semibold text-foreground">Platform growth</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             New registered users, last 6 months
           </p>
@@ -105,12 +105,6 @@ export const PlatformGrowthChart = () => {
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={growthData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid
                 vertical={false}
                 stroke="currentColor"
@@ -140,13 +134,13 @@ export const PlatformGrowthChart = () => {
                 dataKey="users"
                 stroke="var(--primary)"
                 strokeWidth={2}
-                fill="url(#growthFill)"
+                fill="var(--accent)"
                 activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

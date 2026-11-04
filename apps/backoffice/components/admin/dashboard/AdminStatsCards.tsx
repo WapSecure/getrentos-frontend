@@ -24,48 +24,42 @@ export const AdminStatsCards = ({
     value: number;
     subtitle: string;
     accent: StatCardAccent;
-    delay: number;
     isCurrency?: boolean;
   }> = [
     {
       icon: Users,
-      label: 'Total Users',
+      label: 'Total users',
       value: totalUsers,
       subtitle: 'Across all roles',
       accent: 'blue',
-      delay: 0,
     },
     {
       icon: ShieldCheck,
-      label: 'Pending Verifications',
+      label: 'Pending verifications',
       value: pendingVerifications,
       subtitle: 'Awaiting review',
       accent: 'primary',
-      delay: 0.05,
     },
     {
       icon: Gavel,
-      label: 'Open Disputes',
+      label: 'Open disputes',
       value: openDisputes,
       subtitle: 'Needs resolution',
       accent: 'orange',
-      delay: 0.1,
     },
     {
       icon: AlertTriangle,
-      label: 'Fraud Alerts',
+      label: 'Fraud alerts',
       value: fraudAlerts,
       subtitle: 'Flagged for review',
       accent: 'red',
-      delay: 0.15,
     },
     {
       icon: Landmark,
-      label: 'Active Escrow',
+      label: 'Active escrow',
       value: activeEscrowTransactions,
       subtitle: 'In progress',
       accent: 'purple',
-      delay: 0.2,
     },
     {
       icon: TrendingUp,
@@ -73,13 +67,12 @@ export const AdminStatsCards = ({
       value: platformGmv,
       subtitle: 'Lifetime · sales, rent & stays',
       accent: 'emerald',
-      delay: 0.25,
       isCurrency: true,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
       {stats.map((stat) => (
         <StatCard key={stat.label} {...stat} />
       ))}

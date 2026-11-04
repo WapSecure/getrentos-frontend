@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from 'recharts';
-import { Badge } from '@getrentos/ui';
+import { Badge, Card } from '@getrentos/ui';
 import { TrendingUp } from 'lucide-react';
 import { formatCurrency } from '@getrentos/shared';
 
@@ -41,7 +41,7 @@ export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
   const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : null;
 
   return (
-    <div className="bg-card border border-border rounded-lg p-5">
+    <Card className="p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold text-foreground">Platform GMV</h3>
@@ -80,12 +80,6 @@ export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid
                 vertical={false}
                 stroke="currentColor"
@@ -115,13 +109,13 @@ export const PlatformRevenueChart = ({ data }: PlatformRevenueChartProps) => {
                 dataKey="gmv"
                 stroke="var(--primary)"
                 strokeWidth={2}
-                fill="url(#revenueFill)"
+                fill="var(--accent)"
                 activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

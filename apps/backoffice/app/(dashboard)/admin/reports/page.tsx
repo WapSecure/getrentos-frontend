@@ -5,7 +5,17 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Users, ShieldCheck, TrendingUp, FileSpreadsheet, Check } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
-import { Button, PageErrorState, Skeleton, StatGridSkeleton, useToast } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  PageErrorState,
+  PageHeader,
+  Skeleton,
+  StatGridSkeleton,
+  useToast,
+} from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
 import { formatCurrency } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -91,57 +101,53 @@ export default function AdminReportsPage() {
   const handleExport = () => exportMutation.mutate();
 
   return (
-    <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Reports &amp; Analytics</h1>
-          <p className="text-muted-foreground mt-1">
-            Platform-wide performance and revenue insights
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExport}
-          isLoading={exportMutation.isPending}
-          icon={
-            exported ? (
-              <Check className="w-3.5 h-3.5 text-success" />
-            ) : (
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-            )
-          }
-        >
-          {exported ? 'Exported' : 'Export CSV'}
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Reports and analytics"
+        description="Platform performance, transaction volume, and category-level reporting."
+        actions={
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            isLoading={exportMutation.isPending}
+            icon={
+              exported ? (
+                <Check className="h-4 w-4 text-success" />
+              ) : (
+                <FileSpreadsheet className="h-4 w-4" />
+              )
+            }
+          >
+            {exported ? 'Exported' : 'Export CSV'}
+          </Button>
+        }
+      />
 
       {statsQuery.isLoading ? (
-        <StatGridSkeleton className="mb-6 grid-cols-2 gap-4 lg:grid-cols-4" />
+        <StatGridSkeleton className="grid-cols-2 gap-3 lg:grid-cols-4" />
       ) : statsQuery.isError || !statsQuery.data ? (
         <PageErrorState
           title="Report totals unavailable"
           description="Current totals could not be loaded. Revenue and category reports may still be available."
           onRetry={() => statsQuery.refetch()}
           isRetrying={statsQuery.isFetching}
-          className="mb-6 min-h-52"
+          className="min-h-52"
         />
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {statCards.map((stat, index) => (
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {statCards.map((stat) => (
             <StatCard
               key={stat.label}
               icon={stat.icon}
               label={stat.label}
               value={stat.value}
               accent={stat.accent}
-              delay={index * 0.05}
             />
           ))}
         </div>
       )}
 
-      <div className="mb-6">
+      <div>
         {revenueQuery.isLoading ? (
           <Skeleton className="h-72 w-full rounded-xl" />
         ) : revenueQuery.isError && !revenueQuery.data ? (
@@ -157,13 +163,13 @@ export default function AdminReportsPage() {
         )}
       </div>
 
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
-        <div className="p-5 border-b border-border">
-          <h3 className="font-semibold text-foreground">GMV Breakdown by Category</h3>
+      <Card>
+        <CardHeader className="border-b border-border pb-4">
+          <CardTitle>GMV breakdown by category</CardTitle>
           <p className="text-xs text-muted-foreground mt-0.5">
             Year-to-date share of total platform GMV
           </p>
-        </div>
+        </CardHeader>
         <div className="divide-y divide-border">
           {breakdownQuery.isLoading ? (
             <div
@@ -211,7 +217,7 @@ export default function AdminReportsPage() {
             ))
           )}
         </div>
-      </div>
-    </>
+      </Card>
+    </div>
   );
 }

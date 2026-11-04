@@ -10,6 +10,7 @@ import {
   ConfirmDialog,
   EmptyState,
   PageErrorState,
+  PageHeader,
   SearchInput,
   Tabs,
   TabsList,
@@ -135,17 +136,17 @@ export default function AdminVerificationsPage() {
   ];
 
   return (
-    <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Verification Queue</h1>
-        <p className="text-muted-foreground mt-1">
-          {pendingCountError
+    <div className="space-y-6">
+      <PageHeader
+        title="Verification queue"
+        description={
+          pendingCountError
             ? 'Pending-review count temporarily unavailable'
-            : `${pendingReviewCount} request${pendingReviewCount === 1 ? '' : 's'} awaiting review`}
-        </p>
-      </div>
+            : `${pendingReviewCount} request${pendingReviewCount === 1 ? '' : 's'} awaiting review`
+        }
+      />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -175,7 +176,7 @@ export default function AdminVerificationsPage() {
           setStatusFilter(value as StatusFilter);
           setPage(1);
         }}
-        className="mb-6"
+        className=""
       >
         <TabsList>
           {statusOptions.map((option) => (
@@ -252,6 +253,6 @@ export default function AdminVerificationsPage() {
         isLoading={approveMutation.isPending}
         onConfirm={() => activeRequest && approveMutation.mutate(activeRequest.id)}
       />
-    </>
+    </div>
   );
 }

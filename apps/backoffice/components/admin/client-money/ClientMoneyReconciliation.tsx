@@ -18,6 +18,7 @@ import {
   Field,
   Input,
   PageErrorState,
+  PageHeader,
   Select,
   Tabs,
   TabsContent,
@@ -261,17 +262,12 @@ export function ClientMoneyReconciliation() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-[-0.01em]">Client money</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Every owner&rsquo;s balance is a claim on a pooled account. This is the daily check that
-            the pool still holds what those claims add up to.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {tab === 'pools' && (
-            <>
+      <PageHeader
+        title="Client money"
+        description="Compare owner liabilities with pooled bank balances, release approved payouts, and resolve statement queries."
+        actions={
+          tab === 'pools' ? (
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 disabled={isFetching}
@@ -297,10 +293,10 @@ export function ClientMoneyReconciliation() {
               >
                 Record bank balance
               </Button>
-            </>
-          )}
-        </div>
-      </header>
+            </div>
+          ) : undefined
+        }
+      />
 
       {/* Two jobs in one domain — checking the pool still holds what we say, and
           letting an owner's held payout out — worked by the same people at

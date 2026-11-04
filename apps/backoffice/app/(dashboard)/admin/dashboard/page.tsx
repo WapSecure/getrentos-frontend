@@ -38,35 +38,32 @@ export default function AdminDashboardPage() {
   });
 
   return (
-    <>
+    <div className="space-y-6">
       <AdminDashboardHeader greeting={greeting} firstName={firstName} />
 
       {statsQuery.isLoading ? (
-        <StatGridSkeleton
-          count={6}
-          className="mb-8 grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6"
-        />
+        <StatGridSkeleton count={6} className="grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6" />
       ) : statsQuery.isError || !statsQuery.data ? (
         <PageErrorState
           title="Platform statistics unavailable"
           description="The latest totals could not be loaded. Other dashboard sections may still be available."
           onRetry={() => statsQuery.refetch()}
           isRetrying={statsQuery.isFetching}
-          className="mb-8 min-h-52"
+          className="min-h-52"
         />
       ) : (
         <AdminStatsCards {...statsQuery.data} />
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-6 xl:grid-cols-12">
+        <div className="space-y-6 xl:col-span-8">
           <PlatformGrowthChart />
           <AdminActivityFeed />
         </div>
-        <div>
+        <aside className="xl:col-span-4">
           <AdminQuickActions />
-        </div>
+        </aside>
       </div>
-    </>
+    </div>
   );
 }

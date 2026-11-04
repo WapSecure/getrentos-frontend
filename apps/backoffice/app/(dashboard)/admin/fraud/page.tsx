@@ -10,6 +10,7 @@ import {
   CardSkeleton,
   EmptyState,
   PageErrorState,
+  PageHeader,
   SearchInput,
   Tabs,
   TabsList,
@@ -168,26 +169,22 @@ export default function AdminFraudPage() {
   ];
 
   return (
-    <>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Fraud &amp; Risk Review</h1>
-          <p className="text-muted-foreground mt-1">
-            {flaggedCountError
-              ? 'Flagged-alert count temporarily unavailable'
-              : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`}
-          </p>
-        </div>
-        <Button
-          className="shrink-0"
-          icon={<Plus className="w-4 h-4" />}
-          onClick={() => setShowCreate(true)}
-        >
-          New alert
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Fraud and risk review"
+        description={
+          flaggedCountError
+            ? 'Flagged-alert count temporarily unavailable'
+            : `${flaggedCount} alert${flaggedCount === 1 ? '' : 's'} awaiting triage`
+        }
+        actions={
+          <Button icon={<Plus />} onClick={() => setShowCreate(true)}>
+            New alert
+          </Button>
+        }
+      />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -217,7 +214,7 @@ export default function AdminFraudPage() {
           setStatusFilter(value as StatusFilter);
           setPage(1);
         }}
-        className="mb-6"
+        className=""
       >
         <TabsList className="max-w-full">
           {statusOptions.map((option) => (
@@ -300,6 +297,6 @@ export default function AdminFraudPage() {
         isAttachingEvidence={attachEvidenceMutation.isPending}
         onResolveEvidenceUrl={resolveEvidenceUrl}
       />
-    </>
+    </div>
   );
 }

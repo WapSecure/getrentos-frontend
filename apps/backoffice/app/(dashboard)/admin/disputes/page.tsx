@@ -9,6 +9,7 @@ import {
   CardSkeleton,
   EmptyState,
   PageErrorState,
+  PageHeader,
   SearchInput,
   SegmentedControl,
 } from '@getrentos/ui';
@@ -234,17 +235,17 @@ export default function AdminDisputesPage() {
   ];
 
   return (
-    <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Dispute &amp; Arbitration</h1>
-        <p className="text-muted-foreground mt-1">
-          {openCountError || reviewCountError
+    <div className="space-y-6">
+      <PageHeader
+        title="Disputes and arbitration"
+        description={
+          openCountError || reviewCountError
             ? 'Active dispute count temporarily unavailable'
-            : `${activeDisputeCount} active dispute${activeDisputeCount === 1 ? '' : 's'} requiring attention`}
-        </p>
-      </div>
+            : `${activeDisputeCount} active dispute${activeDisputeCount === 1 ? '' : 's'} requiring attention`
+        }
+      />
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <SearchInput
           value={searchQuery}
           onValueChange={(value) => {
@@ -267,7 +268,7 @@ export default function AdminDisputesPage() {
         />
       </div>
 
-      <div className="mb-6 max-w-full overflow-x-auto pb-1">
+      <div className="max-w-full overflow-x-auto pb-1">
         <SegmentedControl
           value={statusFilter}
           onValueChange={(value) => {
@@ -339,6 +340,6 @@ export default function AdminDisputesPage() {
         isSendingMessage={sendMessageMutation.isPending}
         isAttachingEvidence={attachEvidenceMutation.isPending}
       />
-    </>
+    </div>
   );
 }

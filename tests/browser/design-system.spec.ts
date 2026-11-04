@@ -409,6 +409,41 @@ test.beforeEach(async ({ page }, testInfo) => {
           },
         ],
       },
+      '/admin/dashboard/stats': {
+        totalUsers: 18420,
+        pendingVerifications: 27,
+        openDisputes: 8,
+        fraudAlerts: 5,
+        activeEscrowTransactions: 43,
+        platformGmv: 2860000000,
+      },
+      '/admin/dashboard/user-growth': ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map(
+        (label, index) => ({ label, value: [620, 710, 680, 840, 910, 1040][index] })
+      ),
+      '/admin/dashboard/activity': [],
+      '/admin/reports/stats': {
+        gmvYtd: 1760000000,
+        activeUsers: 12840,
+        avgTrustScore: 78,
+        momGrowthPct: 8.4,
+      },
+      '/admin/reports/revenue-series': ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map(
+        (month, index) => ({ month, gmv: [180, 224, 218, 265, 291, 318][index] * 1000000 })
+      ),
+      '/admin/reports/gmv-breakdown': [
+        { category: 'Property sales', amount: 910000000, share: 52 },
+        { category: 'Rent payments', amount: 560000000, share: 32 },
+        { category: 'Short stays', amount: 290000000, share: 16 },
+      ],
+      '/admin/verifications': empty,
+      '/admin/disputes': empty,
+      '/admin/fraud-alerts': empty,
+      '/admin/client-money/reconciliation': {
+        rows: [],
+        attestation: null,
+      },
+      '/admin/client-money/releases': [],
+      '/admin/client-money/disputes': [],
     };
     const response = Object.prototype.hasOwnProperty.call(data, path)
       ? data[path]
@@ -467,6 +502,51 @@ test('backoffice user table and controls', async ({ page }, testInfo) => {
   await reviewPage(page, `${adminURL}/admin/users`, testInfo);
   await expect(page.getByText('Ada Okafor', { exact: true })).toBeVisible();
   await expect(page.getByRole('table')).toBeVisible();
+});
+
+test('backoffice operations dashboard', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/dashboard`, testInfo);
+  await expect(
+    page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
+  ).toBeVisible();
+  await expect(page.getByText('Pending verifications', { exact: true })).toBeVisible();
+  await expect(page.getByText('Platform growth', { exact: true })).toBeVisible();
+  await expect(page.getByText('Quick actions', { exact: true })).toBeVisible();
+});
+
+test('backoffice verification queue', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/verifications`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Verification queue' })).toBeVisible();
+  await expect(page.getByLabel('Search verification requests')).toBeVisible();
+  await expect(page.getByText('No requests match your filters', { exact: true })).toBeVisible();
+});
+
+test('backoffice dispute queue', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/disputes`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Disputes and arbitration' })).toBeVisible();
+  await expect(page.getByLabel('Search disputes')).toBeVisible();
+  await expect(page.getByText('No disputes match your filters', { exact: true })).toBeVisible();
+});
+
+test('backoffice fraud queue', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/fraud`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Fraud and risk review' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'New alert' })).toBeVisible();
+  await expect(page.getByText('No alerts match your filters', { exact: true })).toBeVisible();
+});
+
+test('backoffice reporting workspace', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/reports`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Reports and analytics' })).toBeVisible();
+  await expect(page.getByText('Platform GMV', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('GMV breakdown by category', { exact: true })).toBeVisible();
+});
+
+test('backoffice client-money workspace', async ({ page }, testInfo) => {
+  await reviewPage(page, `${adminURL}/admin/client-money`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Client money' })).toBeVisible();
+  await expect(page.getByText('Nothing has been reconciled yet', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Record bank balance' })).toBeVisible();
 });
 
 test('public rental search and refinements', async ({ page }, testInfo) => {

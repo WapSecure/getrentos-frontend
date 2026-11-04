@@ -1,7 +1,7 @@
 'use client';
 
 import { ShieldCheck } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, PageHeader } from '@getrentos/ui';
 import { ROUTES } from '@getrentos/shared';
 import { useAdminCan } from '@/hooks/useAdminCan';
 
@@ -13,22 +13,21 @@ interface AdminDashboardHeaderProps {
 export const AdminDashboardHeader = ({ greeting, firstName }: AdminDashboardHeaderProps) => {
   const canReviewVerifications = useAdminCan('verifications.review');
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">
-          {greeting}, {firstName}!
-        </h1>
-        <p className="text-muted-foreground mt-1">Here&apos;s the state of the platform today.</p>
-      </div>
-      {canReviewVerifications && (
-        <Button
-          href={ROUTES.ADMIN_VERIFICATIONS}
-          variant="primary"
-          icon={<ShieldCheck className="w-4 h-4" />}
-        >
-          Review Verifications
-        </Button>
-      )}
-    </div>
+    <PageHeader
+      title={`${greeting}, ${firstName}`}
+      description="Review platform activity, risk queues, and client-money operations."
+      actions={
+        canReviewVerifications ? (
+          <Button
+            href={ROUTES.ADMIN_VERIFICATIONS}
+            variant="primary"
+            size="lg"
+            icon={<ShieldCheck />}
+          >
+            Review verifications
+          </Button>
+        ) : undefined
+      }
+    />
   );
 };
