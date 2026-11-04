@@ -225,6 +225,16 @@ export default function OwnerViewingsPage() {
                           Mark as done
                         </Button>
                       )}
+                      {!past && (
+                        <Button
+                          variant="ghost"
+                          disabled={decline.isPending}
+                          isLoading={decline.isPending && decline.variables === viewing.id}
+                          onClick={() => decline.mutate(viewing.id)}
+                        >
+                          Cancel viewing
+                        </Button>
+                      )}
                     </div>
                   )}
                 </li>
