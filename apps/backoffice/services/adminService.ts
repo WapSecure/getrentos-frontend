@@ -154,6 +154,28 @@ export const adminService = {
     });
   },
 
+  /** Active staff for assignment pickers; readable by any staff role. */
+  async listStaffDirectory(
+    params: { page?: number; pageSize?: number } = {}
+  ): Promise<ApiResponse<Paginated<Pick<AdminStaffMember, 'id' | 'email' | 'legalName' | 'roles'>>>> {
+    return safeCall(async () => {
+      const query = toQuery({
+        page: params.page?.toString(),
+        pageSize: params.pageSize?.toString(),
+      });
+      const response = await authFetch<
+        Paginated<{ id: string; email: string; legalName: string; roles: { role: string }[] }>
+      >(`/admin/access/staff/directory${query}`);
+      return {
+        ...response,
+        items: response.items.map((row) => ({
+          ...row,
+          roles: row.roles.map((r) => ({ role: r.role.toLowerCase() as AdminStaffRole })),
+        })),
+      };
+    });
+  },
+
   async createStaff(input: {
     email: string;
     legalName: string;

@@ -523,7 +523,7 @@ export default function FieldOperationsPage() {
 
   const staff = useQuery({
     queryKey: ['admin', 'staff', 'for-managed'],
-    queryFn: () => unwrap(adminService.listStaff({ pageSize: 100 })),
+    queryFn: () => unwrap(adminService.listStaffDirectory({ pageSize: 100 })),
   });
   const staffOptions = useMemo(
     () =>
