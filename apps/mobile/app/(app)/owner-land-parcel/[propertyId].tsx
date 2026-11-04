@@ -127,6 +127,11 @@ export default function OwnerLandParcel() {
             />
           ) : null}
           <Button
+            label="Authority to sell"
+            variant="secondary"
+            onPress={() => router.push(`/(app)/owner-land-authority/${r.propertyId}`)}
+          />
+          <Button
             label="Plot sales on this land"
             variant="secondary"
             onPress={() => router.push(`/(app)/owner-land-sales?property=${r.propertyId}`)}

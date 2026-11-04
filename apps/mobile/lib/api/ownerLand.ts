@@ -174,8 +174,25 @@ export const LAND_DOCUMENT_TYPES: { value: string; label: string }[] = [
   { value: 'OTHER', label: 'Other' },
 ];
 
+/** Labels for the types authority and conveyance use, which the add-document list doesn't offer. */
+const OTHER_DOCUMENT_LABELS: Record<string, string> = {
+  LITIGATION_SEARCH_REPORT: 'Litigation search report',
+  CONTRACT_OF_SALE: 'Contract of sale',
+  POWER_OF_ATTORNEY: 'Power of attorney',
+  LETTERS_OF_ADMINISTRATION: 'Letters of administration',
+  PROBATE: 'Grant of probate',
+  COURT_ORDER: 'Court order',
+  BOARD_RESOLUTION: 'Board resolution',
+  DEVELOPMENT_AGREEMENT: 'Development agreement',
+  FAMILY_RESOLUTION: 'Family resolution',
+  COMMUNITY_RESOLUTION: 'Community resolution',
+  CONSENT_LETTER: 'Signed consent',
+  LEGAL_INQUIRY_REPORT: 'Legal inquiry report',
+};
+
 export const documentTypeLabel = (value: string) =>
   LAND_DOCUMENT_TYPES.find((t) => t.value === value)?.label ??
+  OTHER_DOCUMENT_LABELS[value] ??
   value.charAt(0) + value.slice(1).toLowerCase().replace(/_/g, ' ');
 
 export interface LandDocument {

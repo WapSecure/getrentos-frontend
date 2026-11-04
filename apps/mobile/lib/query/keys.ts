@@ -315,6 +315,7 @@ export const qk = {
     landDocuments: (propertyId: string) => ['owner', 'land', 'documents', propertyId] as const,
     landRisk: (propertyId: string) => ['owner', 'land', 'risk', propertyId] as const,
     landTours: ['owner', 'land', 'tours'] as const,
+    landAuthority: (propertyId: string) => ['owner', 'land', 'authority', propertyId] as const,
     landLayouts: ['owner', 'land', 'layouts'] as const,
     landCollections: (layoutId: string) => ['owner', 'land', 'collections', layoutId] as const,
     landPurchases: (status: string, layoutId: string, search: string) =>
