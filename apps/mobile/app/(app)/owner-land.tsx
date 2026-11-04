@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronRight, LandPlot, Plus, Video } from 'lucide-react-native';
+import { ChevronRight, LandPlot, Plus, ReceiptText, Video } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -98,6 +98,14 @@ export default function OwnerLand() {
           />
         ) : (
           <>
+            <Button
+              label="Plot sales"
+              size="sm"
+              variant="secondary"
+              icon={<ReceiptText size={14} color={colors.foreground} />}
+              onPress={() => router.push('/(app)/owner-land-sales')}
+              style={{ alignSelf: 'flex-start' }}
+            />
             <Button
               label="Video tours buyers asked for"
               size="sm"

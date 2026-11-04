@@ -216,6 +216,8 @@ export interface OwnerTransaction {
   offerId: string;
   propertyId: string;
   propertyName: string;
+  /** What was sold; a land sale has conveyance steps. */
+  propertyType?: string;
   buyerName: string;
   salePrice: number;
   escrowStatus: OwnerEscrowStatus;

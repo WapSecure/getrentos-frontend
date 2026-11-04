@@ -315,6 +315,13 @@ export const qk = {
     landDocuments: (propertyId: string) => ['owner', 'land', 'documents', propertyId] as const,
     landRisk: (propertyId: string) => ['owner', 'land', 'risk', propertyId] as const,
     landTours: ['owner', 'land', 'tours'] as const,
+    landLayouts: ['owner', 'land', 'layouts'] as const,
+    landCollections: (layoutId: string) => ['owner', 'land', 'collections', layoutId] as const,
+    landPurchases: (status: string, layoutId: string, search: string) =>
+      ['owner', 'land', 'purchases', status, layoutId, search] as const,
+    landPurchase: (id: string) => ['owner', 'land', 'purchase', id] as const,
+    resaleMilestones: (txId: string) => ['owner', 'land', 'resale', txId, 'milestones'] as const,
+    resaleConditions: (txId: string) => ['owner', 'land', 'resale', txId, 'conditions'] as const,
     portfolioTrend: ['owner', 'analytics', 'portfolio-trend'] as const,
     marketInsights: (city: string) => ['owner', 'analytics', 'market-insights', city] as const,
     profile: ['owner', 'profile'] as const,
