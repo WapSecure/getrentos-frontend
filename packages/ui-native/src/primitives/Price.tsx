@@ -12,8 +12,12 @@ const PERIOD_LABEL: Record<Exclude<PricePeriod, null>, string> = {
 };
 
 export interface PriceProps {
-  /** Major-unit Naira. (Backend money is major-unit today — see mobile lib/format.) */
-  amount: number;
+  /**
+   * Major-unit Naira. (Backend money is major-unit today — see mobile
+   * lib/format.) Optional on purpose: a unit can exist without an asking rent
+   * yet, and the API then omits the field entirely.
+   */
+  amount?: number | null;
   /** Rate suffix, rendered muted after the figure. `total` / null = no suffix. */
   period?: PricePeriod;
   /** ₦2.4M / ₦950K instead of the full grouped figure. */
@@ -26,6 +30,14 @@ export interface PriceProps {
   periodColor?: string;
   style?: TextStyle;
 }
+
+/**
+ * A missing amount renders as an em-dash. Without this guard an unset figure
+ * (a unit with no asking rent, an empty rent roll) printed the literal text
+ * "₦NaN" to the screen.
+ */
+const isAmount = (amount: number | null | undefined): amount is number =>
+  typeof amount === 'number' && Number.isFinite(amount);
 
 function formatFigure(amount: number, compact: boolean): string {
   if (compact) {
@@ -54,7 +66,8 @@ export function Price({
 }: PriceProps) {
   const theme = useTheme();
   const t = theme.typography[variant];
-  const suffix = period ? PERIOD_LABEL[period] : '';
+  const hasAmount = isAmount(amount);
+  const suffix = hasAmount && period ? PERIOD_LABEL[period] : '';
 
   return (
     <RNText
@@ -71,7 +84,7 @@ export function Price({
         style,
       ]}
     >
-      {formatFigure(amount, compact)}
+      {hasAmount ? formatFigure(amount, compact) : '—'}
       {suffix ? (
         <RNText
           style={{

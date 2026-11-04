@@ -341,9 +341,11 @@ export default function LandlordPropertyDetail() {
                           </Text>
                         </View>
                         <View style={{ flex: 1 }} />
+                        {/* The tenancy's rent is the money actually coming in, so it
+                            wins over the asking rent once one exists. */}
                         <Price
-                          amount={u.askingRent}
-                          period={u.askingRentPeriod}
+                          amount={u.leaseRent ?? u.askingRent}
+                          period={u.leaseRentPeriod ?? u.askingRentPeriod}
                           variant="callout"
                         />
                       </View>
