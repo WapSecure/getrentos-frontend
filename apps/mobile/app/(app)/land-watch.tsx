@@ -18,6 +18,7 @@ import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { formatDate } from '@/lib/format';
 
 /** Land I watch: inspection reports, incidents and reminders. */
 export default function LandWatch() {
@@ -99,11 +100,9 @@ export default function LandWatch() {
                   </View>
                   <Text variant="caption" color="mutedForeground">
                     Last inspection{' '}
-                    {w.lastInspection
-                      ? new Date(w.lastInspection).toLocaleDateString('en-NG')
-                      : 'none yet'}
+                    {w.lastInspection ? formatDate(w.lastInspection, 'short') : 'none yet'}
                     {w.nextInspectionDue
-                      ? ` · next ${new Date(w.nextInspectionDue).toLocaleDateString('en-NG')}`
+                      ? ` · next ${formatDate(w.nextInspectionDue, 'short')}`
                       : ''}
                   </Text>
                   {w.openIncidents ? (

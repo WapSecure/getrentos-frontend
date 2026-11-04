@@ -38,12 +38,12 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landWatchApi } from '@/lib/api/landWatch';
 import { ApiError } from '@/lib/api/client';
-import { formatNaira } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { haptics } from '@/lib/haptics';
 import { goBack } from '@/lib/goBack';
 
-const date = (iso: string) => new Date(iso).toLocaleDateString('en-NG');
+const date = (iso: string) => formatDate(iso, 'short');
 const expired = (q: LandWatchJobQuote) =>
   !!q.validUntil && new Date(q.validUntil).getTime() < Date.now();
 const QUOTE_STATUS: Record<LandWatchJobQuoteStatus, { label: string; tone: BadgeTone }> = {

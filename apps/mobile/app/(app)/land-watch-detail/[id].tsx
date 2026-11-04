@@ -33,6 +33,7 @@ import { ApiError } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { formatDate } from '@/lib/format';
 import { VendorWorkSection } from '@/components/landWatch/VendorWorkSection';
 
 const KINDS: LandWatchIncidentKind[] = [
@@ -43,7 +44,7 @@ const KINDS: LandWatchIncidentKind[] = [
   'GOVERNMENT_NOTICE',
   'OTHER',
 ];
-const date = (iso: string) => new Date(iso).toLocaleDateString('en-NG');
+const date = (iso: string) => formatDate(iso, 'short');
 
 /** One watched parcel or plot: reports with evidence, incidents, reminders. */
 export default function LandWatchDetail() {

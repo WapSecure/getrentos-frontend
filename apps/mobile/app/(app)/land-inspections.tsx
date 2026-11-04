@@ -19,6 +19,7 @@ import { landWatchApi } from '@/lib/api/landWatch';
 import { useCaptureQueue } from '@/lib/inspectionCaptureQueue';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { formatDate } from '@/lib/format';
 
 const WORDS: Partial<Record<LandInspectionStatus, [string, BadgeTone]>> = {
   ASSIGNED: ['To do', 'info'],
@@ -93,7 +94,7 @@ export default function LandInspections() {
                   </View>
                   {j.dueBy ? (
                     <Text variant="caption" color="mutedForeground">
-                      Due {new Date(j.dueBy).toLocaleDateString('en-NG')}
+                      Due {formatDate(j.dueBy, 'short')}
                     </Text>
                   ) : null}
                   {waiting ? (

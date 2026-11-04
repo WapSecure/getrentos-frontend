@@ -48,6 +48,7 @@ import {
 } from '@/lib/inspectionCaptureQueue';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
+import { formatDate } from '@/lib/format';
 
 const CONDITIONS: LandBoundaryCondition[] = ['INTACT', 'DISTURBED', 'ENCROACHED', 'INCONCLUSIVE'];
 const OPEN = new Set(['ASSIGNED', 'QUERIED']);
@@ -159,7 +160,7 @@ export default function LandInspectionJob() {
               {job.instructions ? <Text variant="callout">“{job.instructions}”</Text> : null}
               {job.dueBy ? (
                 <Text variant="caption" color="mutedForeground">
-                  Due {new Date(job.dueBy).toLocaleDateString('en-NG')}
+                  Due {formatDate(job.dueBy, 'short')}
                 </Text>
               ) : null}
               {point ? (
