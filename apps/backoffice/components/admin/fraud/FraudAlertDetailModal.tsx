@@ -12,7 +12,12 @@ import {
   type BadgeVariant,
 } from '@getrentos/ui';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
-import type { FraudAlertDetail, FraudAlertSeverity, FraudAlertStatus } from '@/types/admin';
+import type {
+  FraudAlertAiSignal,
+  FraudAlertDetail,
+  FraudAlertSeverity,
+  FraudAlertStatus,
+} from '@/types/admin';
 
 const SEVERITY_OPTIONS: { value: FraudAlertSeverity; label: string }[] = [
   { value: 'low', label: 'Low' },
@@ -113,6 +118,8 @@ export const FraudAlertDetailModal = ({
                 </p>
                 <p className="text-sm text-foreground mt-0.5">{alert.reason}</p>
               </div>
+
+              {alert.aiSignal && <AiScanPanel signal={alert.aiSignal} />}
 
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-muted-foreground rounded-lg bg-secondary/40 p-3">
                 {alert.subject.phone && (
@@ -230,3 +237,93 @@ export const FraudAlertDetailModal = ({
     </Dialog>
   );
 };
+
+const COVERAGE_LABELS: Record<string, string> = {
+  textAndMetadata: 'Text and details',
+  crossListingDuplicates: 'Copies of other listings',
+  photoReuse: 'Reused photos',
+  imageAnalysis: 'Photo content',
+};
+
+/** The evidence behind an AI-opened alert, so the decision rests on it rather than on a summary. */
+function AiScanPanel({ signal }: { signal: FraudAlertAiSignal }) {
+  const missed = Object.entries(signal.coverage).filter(([, checked]) => !checked);
+  return (
+    <section className="space-y-3 rounded-lg border border-border/70 p-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+          Automated scan · {signal.source === 'ai' ? 'model' : 'rule-based check'}
+        </p>
+        <p className="text-sm font-semibold tabular-nums text-foreground">
+          {signal.riskScore}/100 · {signal.band.toLowerCase()} risk
+        </p>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        A signal, not a verdict. Check the evidence before clearing or confirming.
+      </p>
+
+      {signal.reasons.length > 0 && (
+        <ul className="space-y-1.5">
+          {signal.reasons.map((r) => (
+            <li key={r.code} className="text-sm">
+              <span className="font-medium text-foreground">
+                {r.code.replace(/_/g, ' ').toLowerCase()}
+              </span>
+              <span className="text-muted-foreground"> ({r.severity.toLowerCase()}): </span>
+              <span className="text-foreground">{r.detail}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {signal.duplicates.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-foreground">
+            Matches another owner&apos;s listing ({signal.duplicates.length})
+          </p>
+          <ul className="space-y-0.5 text-xs text-muted-foreground">
+            {signal.duplicates.map((d) => (
+              <li key={d.listingId}>
+                {d.title ?? 'Untitled listing'}
+                {d.city ? `, ${d.city}` : ''} · {Math.round(d.similarity * 100)}% similar · #
+                {d.listingId.slice(0, 8)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {signal.photoReuse.length > 0 && (
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-foreground">
+            Photos also uploaded by another owner ({signal.photoReuse.length})
+          </p>
+          <ul className="space-y-0.5 text-xs text-muted-foreground">
+            {signal.photoReuse.map((p, i) => (
+              <li key={`${p.otherListingId ?? p.otherPropertyId ?? 'x'}-${i}`}>
+                {p.matchType === 'EXACT' ? 'Identical photo' : 'Near copy'} on{' '}
+                {p.otherListingId
+                  ? `listing #${p.otherListingId.slice(0, 8)}`
+                  : `property #${(p.otherPropertyId ?? '').slice(0, 8)}`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {signal.recommendation && (
+        <p className="text-sm text-foreground">
+          <span className="font-medium">Suggested next step: </span>
+          {signal.recommendation}
+        </p>
+      )}
+
+      {missed.length > 0 && (
+        <p className="text-xs text-muted-foreground">
+          Not checked: {missed.map(([k]) => COVERAGE_LABELS[k] ?? k).join(', ')}. A low score does
+          not clear what was not looked at.
+        </p>
+      )}
+    </section>
+  );
+}

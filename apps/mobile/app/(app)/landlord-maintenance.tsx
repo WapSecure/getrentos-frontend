@@ -4,7 +4,7 @@ import { Alert, Pressable, RefreshControl, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CircleCheck, HardHat, TriangleAlert, Wrench } from 'lucide-react-native';
+import { CircleCheck, HardHat, Sparkles, TriangleAlert, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -27,6 +27,7 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
+import { TriageSheet } from '@/components/landlord/TriageSheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -40,6 +41,7 @@ export default function LandlordMaintenanceScreen() {
   const toast = useToast();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [assigning, setAssigning] = useState<LandlordMaintenance | null>(null);
+  const [triaging, setTriaging] = useState<LandlordMaintenance | null>(null);
 
   const query = useQuery({
     queryKey: qk.landlord.maintenance(),
@@ -127,6 +129,7 @@ export default function LandlordMaintenanceScreen() {
               }
               onEscalate={() => escalate.mutate(item.id)}
               onAssign={() => setAssigning(item)}
+              onTriage={() => setTriaging(item)}
             />
           )}
           contentContainerStyle={{
@@ -155,6 +158,7 @@ export default function LandlordMaintenanceScreen() {
         onClose={() => setAssigning(null)}
         request={assigning}
       />
+      <TriageSheet request={triaging} onClose={() => setTriaging(null)} onApplied={invalidate} />
     </View>
   );
 }
@@ -166,6 +170,7 @@ function RequestCard({
   onResolve,
   onEscalate,
   onAssign,
+  onTriage,
 }: {
   request: LandlordMaintenance;
   busy: boolean;
@@ -174,6 +179,7 @@ function RequestCard({
   onResolve: () => void;
   onEscalate: () => void;
   onAssign: () => void;
+  onTriage: () => void;
 }) {
   const { colors, spacing } = useTheme();
   const actionable = OPEN.includes(m.status);
@@ -227,6 +233,27 @@ function RequestCard({
           <Text variant="caption" color="mutedForeground">
             Vendor: {m.vendorName}
           </Text>
+        ) : null}
+
+        {m.workOrderScope ? (
+          <Text variant="caption">
+            <Text variant="caption" style={{ fontWeight: '600' }}>
+              Agreed scope:{' '}
+            </Text>
+            {m.workOrderScope}
+          </Text>
+        ) : null}
+
+        {actionable ? (
+          <Button
+            label="Auto-triage"
+            variant="outline"
+            size="sm"
+            onPress={onTriage}
+            disabled={busy}
+            accessibilityLabel={`Auto-triage ${m.issueTitle}`}
+            icon={<Sparkles size={14} color={colors.primary} />}
+          />
         ) : null}
 
         {actionable ? (

@@ -332,6 +332,31 @@ export interface FraudAlertDetail {
   resolvedAt?: string;
   /** Files the investigator is working from — a reason is a claim, this is not. */
   evidence?: EvidenceItem[];
+  /** The AI listing scan that opened this alert, when one did. A signal, not a verdict. */
+  aiSignal?: FraudAlertAiSignal;
+}
+
+export interface FraudAlertAiSignal {
+  riskScore: number;
+  band: 'LOW' | 'MEDIUM' | 'HIGH';
+  source: 'ai' | 'heuristic';
+  model?: string | null;
+  scannedAt: string;
+  recommendation: string;
+  reasons: { code: string; severity: string; detail: string }[];
+  duplicates: {
+    listingId: string;
+    similarity: number;
+    title: string | null;
+    city: string | null;
+  }[];
+  photoReuse: {
+    matchType: 'EXACT' | 'NEAR' | string;
+    distance: number;
+    otherListingId: string | null;
+    otherPropertyId: string | null;
+  }[];
+  coverage: Record<string, boolean>;
 }
 
 export interface PlatformEscrowTransaction {
