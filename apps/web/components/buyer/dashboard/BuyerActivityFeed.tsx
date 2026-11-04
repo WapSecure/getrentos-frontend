@@ -7,23 +7,11 @@ import type { BuyerDashboard } from '@/services/buyerService';
 
 type ActivityType = 'offer' | 'viewing' | 'escrow' | 'saved';
 
-const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
-  offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
-  viewing: {
-    icon: CalendarClock,
-    bg: 'bg-warning-subtle',
-    color: 'text-warning',
-  },
-  escrow: {
-    icon: ShieldCheck,
-    bg: 'bg-info-subtle',
-    color: 'text-info',
-  },
-  saved: {
-    icon: Heart,
-    bg: 'bg-secondary',
-    color: 'text-foreground',
-  },
+const typeConfig: Record<ActivityType, React.ElementType> = {
+  offer: Handshake,
+  viewing: CalendarClock,
+  escrow: ShieldCheck,
+  saved: Heart,
 };
 
 const titleFor = (type: string): string => {
@@ -58,7 +46,7 @@ interface BuyerActivityFeedProps {
 
 export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <CardHeader className="border-b border-border pb-4">
         <CardTitle as="h3">Recent Activity</CardTitle>
         <CardDescription>Offers, viewings, payments, and saved property updates</CardDescription>
@@ -69,15 +57,14 @@ export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
           <EmptyState icon={Heart} title="No activity yet" size="compact" bare />
         ) : (
           activity.map((item) => {
-            const config = typeConfig[typeFor(item.type)];
-            const Icon = config.icon;
+            const Icon = typeConfig[typeFor(item.type)];
             return (
               <div
                 key={item.id}
                 className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
               >
-                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                  <Icon className={`w-4 h-4 ${config.color}`} />
+                <div className="shrink-0 rounded-full bg-secondary p-2 text-muted-foreground">
+                  <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>

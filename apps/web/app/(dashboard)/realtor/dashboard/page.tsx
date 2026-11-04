@@ -60,8 +60,8 @@ export default function RealtorDashboardPage() {
         commissionYtd={isPro ? (commissionSummary?.totalEarned ?? 0) : null}
       />
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-6 xl:grid-cols-12">
+        <div className="space-y-6 xl:col-span-8">
           <ProFeatureGate
             title="Commission analytics is a Pro feature"
             description="Upgrade to Pro to track what you've earned from closed deals and see your monthly commission trend."
@@ -71,9 +71,9 @@ export default function RealtorDashboardPage() {
           </ProFeatureGate>
           <RealtorActivityFeed />
         </div>
-        <div>
+        <aside className="xl:col-span-4" aria-label="Quick actions">
           <RealtorQuickActions />
-        </div>
+        </aside>
       </div>
     </>
   );

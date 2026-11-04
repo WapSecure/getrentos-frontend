@@ -34,7 +34,13 @@ const OwnerPortfolioChart = dynamic(
 export default function OwnerDashboardPage() {
   const user = useOwnerUser();
 
-  const { data: dashboard, isLoading, isError, refetch, isFetching } = useQuery({
+  const {
+    data: dashboard,
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useQuery({
     queryKey: ownerKeys.dashboard,
     queryFn: () => unwrap(ownerService.getDashboard()),
   });
@@ -91,14 +97,14 @@ export default function OwnerDashboardPage() {
             completedSales={dashboard?.completedSales ?? 0}
           />
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid gap-6 xl:grid-cols-12">
+            <div className="space-y-6 xl:col-span-8">
               <OwnerPortfolioChart />
               <OwnerActivityFeed activity={dashboard?.recentActivity ?? []} />
             </div>
-            <div>
+            <aside className="xl:col-span-4" aria-label="Quick actions">
               <OwnerQuickActions />
-            </div>
+            </aside>
           </div>
         </>
       )}

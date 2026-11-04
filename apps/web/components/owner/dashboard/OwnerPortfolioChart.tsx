@@ -11,7 +11,7 @@ import {
   TooltipProps,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
-import { Badge, Skeleton } from '@getrentos/ui';
+import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/format';
 import { ownerService } from '@/services/ownerService';
@@ -49,11 +49,13 @@ export const OwnerPortfolioChart = () => {
   const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : null;
 
   return (
-    <div className="rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
+    <Card className="p-6">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div>
-          <h3 className="font-semibold text-foreground">Portfolio Value Trend</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h2 className="text-base font-semibold tracking-[-0.015em] text-foreground">
+            Portfolio value
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Estimated market value, last 6 months
           </p>
         </div>
@@ -69,31 +71,16 @@ export const OwnerPortfolioChart = () => {
       </div>
 
       {isLoading ? (
-        <Skeleton className="h-56 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full" />
       ) : !hasData ? (
-        <div className="h-56 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-secondary flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No portfolio value data yet</p>
-          </div>
+        <div className="flex h-64 items-center justify-center">
+          <EmptyState icon={TrendingUp} title="No portfolio value data yet" size="compact" bare />
         </div>
       ) : (
-        <div className="h-56">
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={portfolioData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="portfolioFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                vertical={false}
-                stroke="currentColor"
-                className="text-border"
-              />
+              <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
               <XAxis
                 dataKey="month"
                 axisLine={false}
@@ -119,13 +106,13 @@ export const OwnerPortfolioChart = () => {
                 dataKey="value"
                 stroke="var(--primary)"
                 strokeWidth={2}
-                fill="url(#portfolioFill)"
-                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'white', strokeWidth: 2 }}
+                fill="var(--accent)"
+                activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'var(--card)', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </Card>
   );
 };

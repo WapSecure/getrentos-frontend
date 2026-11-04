@@ -1,7 +1,7 @@
 'use client';
 
 import { Megaphone, CalendarClock, UserPlus, Users } from 'lucide-react';
-import { Button, Card } from '@getrentos/ui';
+import { Button, Card, CardHeader, CardTitle } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
@@ -13,18 +13,20 @@ const actions = [
 
 export const RealtorQuickActions = () => {
   return (
-    <Card className="p-5">
-      <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
-      <div className="grid grid-cols-2 gap-3">
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle>Quick actions</CardTitle>
+      </CardHeader>
+      <div className="grid grid-cols-2 gap-3 p-5 pt-0">
         {actions.map((action) => (
           <Button
             key={action.label}
             href={action.href}
             variant="outline"
-            rounded="lg"
+            rounded="md"
             className="flex-col h-auto py-4 gap-2"
           >
-            <action.icon className="w-5 h-5 text-primary" />
+            <action.icon className="w-5 h-5 text-muted-foreground" />
             <span className="text-xs font-medium text-center">{action.label}</span>
           </Button>
         ))}

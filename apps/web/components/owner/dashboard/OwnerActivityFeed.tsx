@@ -7,23 +7,11 @@ import type { OwnerDashboard } from '@/services/ownerService';
 
 type ActivityType = 'inquiry' | 'offer' | 'escrow' | 'document';
 
-const typeConfig: Record<ActivityType, { icon: React.ElementType; bg: string; color: string }> = {
-  inquiry: {
-    icon: Users,
-    bg: 'bg-primary/10',
-    color: 'text-primary',
-  },
-  offer: { icon: Handshake, bg: 'bg-accent', color: 'text-primary' },
-  escrow: {
-    icon: ShieldCheck,
-    bg: 'bg-info-subtle',
-    color: 'text-info',
-  },
-  document: {
-    icon: FileCheck,
-    bg: 'bg-success-subtle',
-    color: 'text-success',
-  },
+const typeConfig: Record<ActivityType, React.ElementType> = {
+  inquiry: Users,
+  offer: Handshake,
+  escrow: ShieldCheck,
+  document: FileCheck,
 };
 
 const titleFor = (type: string): string => {
@@ -62,7 +50,7 @@ interface OwnerActivityFeedProps {
 
 export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
   return (
-    <Card className="rounded-2xl">
+    <Card>
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-foreground">Recent Activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
@@ -76,15 +64,14 @@ export const OwnerActivityFeed = ({ activity }: OwnerActivityFeedProps) => {
         ) : (
           activity.map((item) => {
             const type = typeFor(item.type);
-            const config = typeConfig[type];
-            const Icon = config.icon;
+            const Icon = typeConfig[type];
             return (
               <div
                 key={item.id}
                 className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
               >
-                <div className={`p-2 rounded-lg ${config.bg} shrink-0`}>
-                  <Icon className={`w-4 h-4 ${config.color}`} />
+                <div className="shrink-0 rounded-full bg-secondary p-2 text-muted-foreground">
+                  <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{titleFor(item.type)}</p>

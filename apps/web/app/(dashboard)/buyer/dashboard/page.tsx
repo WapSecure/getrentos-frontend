@@ -69,13 +69,13 @@ export default function BuyerDashboardPage() {
             completedPurchases={dashboard?.completedPurchases ?? 0}
           />
 
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid gap-6 xl:grid-cols-12">
+            <div className="space-y-6 xl:col-span-8">
               <BuyerActivityFeed activity={dashboard?.recentActivity ?? []} />
             </div>
-            <div>
+            <aside className="xl:col-span-4" aria-label="Quick actions">
               <BuyerQuickActions />
-            </div>
+            </aside>
           </div>
         </>
       )}

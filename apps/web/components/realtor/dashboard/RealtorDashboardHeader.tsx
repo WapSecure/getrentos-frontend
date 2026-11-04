@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, PageHeader } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 interface RealtorDashboardHeaderProps {
@@ -11,26 +11,14 @@ interface RealtorDashboardHeaderProps {
 
 export const RealtorDashboardHeader = ({ greeting, firstName }: RealtorDashboardHeaderProps) => {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <span className="mb-2.5 inline-flex items-center rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          Realtor dashboard
-        </span>
-        <h1 className="text-2xl font-bold tracking-[-0.02em] text-foreground">
-          {greeting}, {firstName}!
-        </h1>
-        <p className="mt-1.5 text-muted-foreground">
-          Here&apos;s how your clients and listings are performing.
-        </p>
-      </div>
-      <Button
-        href={ROUTES.REALTOR_LISTINGS}
-        variant="primary"
-        icon={<Plus className="h-4 w-4" />}
-        className="shrink-0 shadow-sm"
-      >
-        Add Listing
-      </Button>
-    </div>
+    <PageHeader
+      title={`${greeting}, ${firstName}`}
+      description="Track clients, listings, leads, viewings, offers, and commissions."
+      actions={
+        <Button href={ROUTES.REALTOR_LISTINGS} variant="primary" icon={<Plus />}>
+          Add listing
+        </Button>
+      }
+    />
   );
 };

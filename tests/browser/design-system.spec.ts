@@ -48,6 +48,15 @@ async function reviewPage(page: Page, path: string, info: TestInfo) {
   });
 }
 
+async function usePersona(page: Page, roles: string[]) {
+  const persona = { ...user, roles };
+
+  await page.route('**/__qa_api/users/me', (route) => route.fulfill({ json: persona }));
+  await page.addInitScript((personaUser) => {
+    localStorage.setItem('getrentos_user', JSON.stringify(personaUser));
+  }, persona);
+}
+
 test.beforeEach(async ({ page }, testInfo) => {
   await page.addInitScript(
     ({ user, theme }) => {
@@ -155,6 +164,54 @@ test.beforeEach(async ({ page }, testInfo) => {
               rating: 4.6,
             },
             timeline: [],
+          },
+        ],
+      },
+      '/owner/dashboard': {
+        totalProperties: 6,
+        verifiedProperties: 5,
+        activeListings: 3,
+        pendingOffers: 2,
+        activeTransactions: 1,
+        completedSales: 4,
+        portfolioValue: 480000000,
+        recentActivity: [
+          {
+            id: 'owner-activity-1',
+            type: 'offer',
+            message: 'A buyer submitted an offer for Parkview Court.',
+            timestamp: new Date().toISOString(),
+          },
+          {
+            id: 'owner-activity-2',
+            type: 'document',
+            message: 'The title document for The Meridian was verified.',
+            timestamp: new Date(Date.now() - 3600000).toISOString(),
+          },
+        ],
+      },
+      '/owner/analytics/portfolio-trend': ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'].map(
+        (label, index) => ({ label, value: [420, 431, 438, 451, 466, 480][index] * 1000000 })
+      ),
+      '/buyer/dashboard': {
+        savedListings: 8,
+        activeOffers: 2,
+        upcomingViewings: 3,
+        activeTransactions: 1,
+        documentsUploaded: 6,
+        completedPurchases: 1,
+        recentActivity: [
+          {
+            id: 'buyer-activity-1',
+            type: 'offer',
+            message: 'Your offer for The Meridian is being reviewed.',
+            timestamp: new Date().toISOString(),
+          },
+          {
+            id: 'buyer-activity-2',
+            type: 'viewing',
+            message: 'Your Parkview Court viewing is confirmed for Friday.',
+            timestamp: new Date(Date.now() - 3600000).toISOString(),
           },
         ],
       },
@@ -319,4 +376,26 @@ test('renter application status and actions', async ({ page }, testInfo) => {
   await expect(page.getByText('Applications shown on this page', { exact: true })).toBeVisible();
   await expect(page.getByText(/success rate/i)).toHaveCount(0);
   await expect(page.getByText('Recommendations', { exact: true })).toHaveCount(0);
+});
+
+test('owner portfolio workspace', async ({ page }, testInfo) => {
+  await usePersona(page, ['PROPERTY_OWNER']);
+  await reviewPage(page, `${webURL}/owner/dashboard`, testInfo);
+  await expect(
+    page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
+  ).toBeVisible();
+  await expect(page.getByText('Portfolio value', { exact: true }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Add property', exact: true })).toBeVisible();
+  await expect(page.getByText('Owner dashboard', { exact: true })).toHaveCount(0);
+});
+
+test('buyer purchase workspace', async ({ page }, testInfo) => {
+  await usePersona(page, ['PROPERTY_BUYER']);
+  await reviewPage(page, `${webURL}/buyer/dashboard`, testInfo);
+  await expect(
+    page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
+  ).toBeVisible();
+  await expect(page.getByText('Active purchases', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Discover properties', exact: true })).toBeVisible();
+  await expect(page.getByText('Buyer dashboard', { exact: true })).toHaveCount(0);
 });

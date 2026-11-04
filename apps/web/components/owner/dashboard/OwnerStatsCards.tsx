@@ -1,105 +1,17 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   Building2,
-  Megaphone,
-  Users,
-  Handshake,
-  Wallet,
   CheckCircle2,
   Eye,
   EyeOff,
+  Handshake,
+  Megaphone,
+  Users,
+  Wallet,
 } from 'lucide-react';
-import { IconButton } from '@getrentos/ui';
-import { formatCurrency } from '@/lib/format';
+import { IconButton, StatCard, type StatCardAccent } from '@getrentos/ui';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
-
-interface StatCardProps {
-  icon: React.ElementType;
-  label: string;
-  value: number | string;
-  subtitle?: string;
-  color: string;
-  delay: number;
-  isCurrency?: boolean;
-  moneyVisible?: boolean;
-  onToggleMoney?: () => void;
-}
-
-const colorClasses = {
-  blue: { bg: 'bg-info-subtle', icon: 'text-info' },
-  orange: {
-    bg: 'bg-warning-subtle',
-    icon: 'text-warning',
-  },
-  purple: {
-    bg: 'bg-primary/10',
-    icon: 'text-primary',
-  },
-  emerald: {
-    bg: 'bg-success-subtle',
-    icon: 'text-success',
-  },
-  gold: { bg: 'bg-accent', icon: 'text-primary' },
-  green: { bg: 'bg-success-subtle', icon: 'text-success' },
-} as const;
-
-const StatCard = ({
-  icon: Icon,
-  label,
-  value,
-  subtitle,
-  color,
-  delay,
-  isCurrency,
-  moneyVisible = true,
-  onToggleMoney,
-}: StatCardProps) => {
-  const formattedValue =
-    isCurrency && !moneyVisible
-      ? '••••••'
-      : isCurrency && typeof value === 'number'
-        ? formatCurrency(value, { compact: true })
-        : value;
-  const valueStr = String(formattedValue);
-  const valueSize = valueStr.length > 10 ? 'text-lg' : valueStr.length > 8 ? 'text-xl' : 'text-2xl';
-  const colors = colorClasses[color as keyof typeof colorClasses] || colorClasses.blue;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4 }}
-      className="group relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-    >
-      <div className="relative p-4">
-        {isCurrency && onToggleMoney ? (
-          <IconButton
-            onClick={onToggleMoney}
-            label={moneyVisible ? 'Hide monetary values' : 'Show monetary values'}
-            icon={moneyVisible ? <EyeOff /> : <Eye />}
-            size="sm"
-            className="absolute right-3 top-3"
-          />
-        ) : null}
-        <div
-          className={`inline-flex p-2.5 rounded-xl ${colors.bg} transition-all duration-300 group-hover:scale-110 mb-3`}
-        >
-          <Icon className={`w-5 h-5 ${colors.icon}`} />
-        </div>
-
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">{label}</p>
-          <p className={`font-bold text-foreground tracking-tight ${valueSize}`}>
-            {formattedValue}
-          </p>
-          {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
 
 interface OwnerStatsCardsProps {
   totalProperties: number;
@@ -118,69 +30,76 @@ export const OwnerStatsCards = ({
   totalPortfolioValue,
   completedSales,
 }: OwnerStatsCardsProps) => {
-  const { visible: moneyVisible, toggle: onToggleMoney } = useMonetaryVisibility();
-  const stats = [
+  const { visible, toggle } = useMonetaryVisibility();
+  const stats: Array<{
+    icon: typeof Building2;
+    label: string;
+    value: number | string;
+    subtitle: string;
+    accent: StatCardAccent;
+    isCurrency?: boolean;
+  }> = [
     {
       icon: Building2,
-      label: 'Total Properties',
+      label: 'Properties',
       value: totalProperties,
       subtitle: 'Across your portfolio',
-      color: 'blue',
-      delay: 0,
+      accent: 'blue',
     },
     {
       icon: Megaphone,
-      label: 'Active Sale Listings',
+      label: 'Active listings',
       value: activeSaleListings,
       subtitle: 'Published for sale',
-      color: 'orange',
-      delay: 0.05,
+      accent: 'orange',
     },
     {
       icon: Users,
-      label: 'Buyer Inquiries',
+      label: 'Buyer enquiries',
       value: buyerInquiries,
-      subtitle: 'Active leads',
-      color: 'purple',
-      delay: 0.1,
+      subtitle: 'Recent buyer activity',
+      accent: 'primary',
     },
     {
       icon: Handshake,
-      label: 'Pending Offers',
+      label: 'Pending offers',
       value: pendingOffers,
-      subtitle: 'Awaiting response',
-      color: 'gold',
-      delay: 0.15,
+      subtitle: 'Awaiting a response',
+      accent: 'orange',
     },
     {
       icon: Wallet,
-      label: 'Portfolio Value',
-      value: totalPortfolioValue,
-      subtitle: 'Estimated total',
-      color: 'emerald',
-      delay: 0.2,
+      label: 'Portfolio value',
+      value: visible ? totalPortfolioValue : '••••••',
+      subtitle: 'Current estimate',
+      accent: 'green',
       isCurrency: true,
     },
     {
       icon: CheckCircle2,
-      label: 'Completed Sales',
+      label: 'Completed sales',
       value: completedSales,
       subtitle: 'Lifetime',
-      color: 'green',
-      delay: 0.25,
+      accent: 'green',
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-      {stats.map((stat) => (
-        <StatCard
-          key={stat.label}
-          {...stat}
-          moneyVisible={moneyVisible}
-          onToggleMoney={onToggleMoney}
+    <section aria-label="Portfolio overview" className="mb-8">
+      <div className="mb-3 flex justify-end">
+        <IconButton
+          label={visible ? 'Hide monetary values' : 'Show monetary values'}
+          icon={visible ? <EyeOff /> : <Eye />}
+          onClick={toggle}
+          size="sm"
+          variant="ghost"
         />
-      ))}
-    </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
+        {stats.map((stat) => (
+          <StatCard key={stat.label} {...stat} compact />
+        ))}
+      </div>
+    </section>
   );
 };
