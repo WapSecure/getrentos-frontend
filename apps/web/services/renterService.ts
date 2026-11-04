@@ -28,6 +28,7 @@ import type {
 } from '@/types/maintenance';
 import type { Notification } from '@/types/notification';
 import type { AssistantTurn, RenterAssistantReply } from '@/types/assistant';
+import type { ListingCheck } from '@/types/listingCheck';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 
 export interface ViewingRequest {
@@ -504,6 +505,11 @@ export const renterService = {
   async getGeoInsights(id: string, destination?: string): Promise<ApiResponse<GeoInsights>> {
     const query = destination ? `?destination=${encodeURIComponent(destination)}` : '';
     return safeCall(() => authFetch(`/renter/listings/${id}/geo-insights${query}`));
+  },
+
+  /** "Should I rent this?": facts, a rule-based level and plain advice for one listing. */
+  checkListing(id: string): Promise<ApiResponse<ListingCheck>> {
+    return safeCall(() => authFetch(`/renter/listings/${id}/check`));
   },
 
   // ---- Saved listings ----
@@ -1347,7 +1353,10 @@ export const renterService = {
     const fromReports: RenterInspection[] = (conditionReports.data ?? []).map((report) => ({
       id: report.id,
       source: 'condition_report',
-      type: report.type === 'ROUTINE' ? 'periodic' : (report.type.toLowerCase() as RenterInspection['type']),
+      type:
+        report.type === 'ROUTINE'
+          ? 'periodic'
+          : (report.type.toLowerCase() as RenterInspection['type']),
       scheduledDate: report.conductedAt ?? report.createdAt,
       propertyName: report.propertyTitle ?? 'Your home',
       propertyAddress: report.propertyTitle ?? 'Your home',

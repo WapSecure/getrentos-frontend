@@ -95,6 +95,7 @@ export const renterKeys = {
     ] as const,
   listing: (id: string) => ['renter', 'listing', id] as const,
   geoInsights: (id: string) => ['renter', 'listing', id, 'geo-insights'] as const,
+  listingCheck: (id: string) => ['renter', 'listing', id, 'check'] as const,
   savedListings: ['renter', 'savedListings'] as const,
   applications: ['renter', 'applications'] as const,
   viewings: ['renter', 'viewings'] as const,

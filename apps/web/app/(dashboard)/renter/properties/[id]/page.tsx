@@ -34,6 +34,7 @@ import { VirtualTourViewerModal } from '@/components/renter/discover/features/Vi
 import { PropertyGallery } from '@/components/renter/property-detail/PropertyGallery';
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';
 import { PropertyTrustChain } from '@/components/renter/property-detail/PropertyTrustChain';
+import { ListingCheckCard } from '@/components/renter/property-detail/ListingCheckCard';
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
 import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
@@ -330,6 +331,8 @@ export default function PropertyDetailPage() {
         </div>
 
         <div className="space-y-6">
+          <ListingCheckCard listingId={property.id} />
+
           <PropertyTrustChain property={property} />
 
           <PropertyLandlordCard property={property} />
