@@ -221,6 +221,13 @@ function SaleCard({ t }: { t: OwnerTransaction }) {
         </View>
       )}
 
+      {t.propertyType === 'LAND' ? (
+        <LinkButton
+          label="Land conveyance: deed, survey and possession steps"
+          onPress={() => router.push(`/(app)/owner-land-resale/${t.id}?property=${t.propertyId}`)}
+        />
+      ) : null}
+
       {t.sellerPayoutStatus === 'FAILED' ? (
         <View style={{ gap: spacing.xs }}>
           <Text variant="caption" style={{ color: colors.destructive }}>

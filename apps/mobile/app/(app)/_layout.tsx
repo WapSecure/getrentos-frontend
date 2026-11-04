@@ -120,6 +120,9 @@ export default function AppLayout() {
       <Stack.Screen name="get-managed" options={DETAIL_OPTIONS} />
       <Stack.Screen name="owner-land-parcel/[propertyId]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="owner-land-tours" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="owner-land-sales" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="owner-land-purchase/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="owner-land-resale/[txId]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="legal-cases" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-automations" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-budgets" options={DETAIL_OPTIONS} />
