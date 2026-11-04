@@ -41,8 +41,10 @@ interface TriageResultModalProps {
   onAssignVendor?: (vendorId: string) => void;
   isAssigning?: boolean;
   /** Accept (as proposed or edited) or reject the proposal. Hidden when absent. */
-  onDecide?: (decision: MaintenanceTriageDecision) => void;
+  onDecide?: (decision: MaintenanceTriageDecision, alsoAssignVendorId?: string) => void;
   isDeciding?: boolean;
+  /** Offer to assign the suggested vendor in the same step. */
+  canAssignVendor?: boolean;
 }
 
 const categoryLabel = (category: MaintenanceCategory): string =>
@@ -56,6 +58,7 @@ export const TriageResultModal = ({
   isAssigning = false,
   onDecide,
   isDeciding = false,
+  canAssignVendor = false,
 }: TriageResultModalProps) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
     <DialogContent className="p-0">
@@ -82,6 +85,7 @@ export const TriageResultModal = ({
           isAssigning={isAssigning}
           onDecide={onDecide}
           isDeciding={isDeciding}
+          canAssignVendor={canAssignVendor}
         />
       )}
     </DialogContent>
@@ -94,13 +98,18 @@ const TriageBody = ({
   isAssigning,
   onDecide,
   isDeciding,
+  canAssignVendor,
 }: {
   triage: MaintenanceTriage;
   onAssignVendor?: (vendorId: string) => void;
   isAssigning: boolean;
-  onDecide?: (decision: MaintenanceTriageDecision) => void;
+  onDecide?: (decision: MaintenanceTriageDecision, alsoAssignVendorId?: string) => void;
   isDeciding: boolean;
+  canAssignVendor: boolean;
 }) => {
+  const offerAssign = canAssignVendor && Boolean(triage.suggestedVendor);
+  const [alsoAssign, setAlsoAssign] = useState(offerAssign && triage.needsVendor);
+  const assignId = offerAssign && alsoAssign ? triage.suggestedVendor?.id : undefined;
   const [mode, setMode] = useState<'review' | 'edit' | 'reject'>('review');
   const [editCategory, setEditCategory] = useState(triage.category);
   const [editUrgency, setEditUrgency] = useState(triage.urgency);
@@ -201,6 +210,18 @@ const TriageBody = ({
         </section>
       )}
 
+      {canDecide && offerAssign && mode !== 'reject' && (
+        <label className="flex items-center gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-primary"
+            checked={alsoAssign}
+            onChange={(e) => setAlsoAssign(e.target.checked)}
+          />
+          Also assign {triage.suggestedVendor?.name}
+        </label>
+      )}
+
       {canDecide && (
         <div className="flex flex-wrap items-center justify-end gap-2">
           {mode === 'review' && (
@@ -228,7 +249,7 @@ const TriageBody = ({
                 size="sm"
                 className="gap-1.5"
                 isLoading={isDeciding}
-                onClick={() => onDecide?.({ decision: 'accept' })}
+                onClick={() => onDecide?.({ decision: 'accept' }, assignId)}
               >
                 <Check className="w-3.5 h-3.5" />
                 Apply category and urgency
@@ -247,12 +268,15 @@ const TriageBody = ({
                 isLoading={isDeciding}
                 disabled={!editDraft.trim()}
                 onClick={() =>
-                  onDecide?.({
-                    decision: 'accept',
-                    category: editCategory,
-                    urgency: editUrgency,
-                    draftWorkOrder: editDraft.trim(),
-                  })
+                  onDecide?.(
+                    {
+                      decision: 'accept',
+                      category: editCategory,
+                      urgency: editUrgency,
+                      draftWorkOrder: editDraft.trim(),
+                    },
+                    assignId
+                  )
                 }
               >
                 <Check className="w-3.5 h-3.5" />
@@ -279,7 +303,7 @@ const TriageBody = ({
         </div>
       )}
 
-      {triage.suggestedVendor && onAssignVendor && (
+      {triage.suggestedVendor && onAssignVendor && !offerAssign && (
         <section className="rounded-lg border border-border p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">

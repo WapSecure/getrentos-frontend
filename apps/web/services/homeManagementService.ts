@@ -150,6 +150,8 @@ export type HomeManagementWorkOrder = {
   issueTitle: string;
   category: string;
   description: string;
+  /** The agreed scope of work, set when a triage proposal is accepted. */
+  workOrderScope?: string | null;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   status: 'SUBMITTED' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CANCELLED';
   dueAt?: string | null;

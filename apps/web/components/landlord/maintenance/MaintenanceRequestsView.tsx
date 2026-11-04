@@ -125,7 +125,11 @@ export function MaintenanceRequestsView() {
     onError: (error: Error) => toast.error(error.message || 'Could not escalate this request.'),
   });
 
-  const triage = useMaintenanceTriage({ onApplied: invalidateRequests });
+  const triage = useMaintenanceTriage({
+    onApplied: invalidateRequests,
+    assignVendor: (requestId, vendorId) =>
+      assignVendorMutation.mutateAsync({ requestId, vendorId }),
+  });
   const handleTriage = (request: LandlordMaintenanceRequest) => triage.start(request.id);
 
   const handleAssignVendor = (requestId: string, vendorId: string, scheduledFor?: string) =>
