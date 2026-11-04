@@ -5,7 +5,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, ReceiptText, Tag, DoorClosed } from 'lucide-react';
-import { UnitsTable } from '@/components/landlord/units/UnitsTable';
+import { UnitsTable, type OccupierRecord } from '@/components/landlord/units/UnitsTable';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
 import { ChargeUnitModal, type ChargeUnitInput } from '@/components/landlord/units/ChargeUnitModal';
@@ -108,12 +108,26 @@ function LandlordUnitsPageContent() {
     onError: (error: Error) => toast.error(error.message),
   });
 
-  const assignTenantMutation = useMutation({
-    mutationFn: ({ unitId, tenantName }: { unitId: string; tenantName: string }) =>
-      unwrap(landlordService.assignUnitTenant(unitId, tenantName)),
+  const recordOccupierMutation = useMutation({
+    mutationFn: ({ unitId, record }: { unitId: string; record: OccupierRecord }) =>
+      unwrap(
+        landlordService.createLease(
+          {
+            unitId,
+            tenantName: record.tenantName,
+            leaseStart: record.leaseStart,
+            leaseEnd: record.leaseEnd,
+            rentAmount: record.rentAmount,
+            securityDeposit: 0,
+          },
+          // Recording an existing occupier, so nothing is sent for signature.
+          false
+        )
+      ),
     onSuccess: () => {
       invalidateUnits();
-      toast.success('Tenant assigned to the unit.');
+      queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      toast.success('Tenancy recorded for this unit.');
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -142,8 +156,8 @@ function LandlordUnitsPageContent() {
   const handleMarkVacant = (unitId: string) =>
     markVacantMutation.mutateAsync(unitId).then(() => undefined);
 
-  const handleAssignTenant = (unitId: string, tenantName: string) =>
-    assignTenantMutation.mutateAsync({ unitId, tenantName }).then(() => undefined);
+  const handleRecordOccupier = (unitId: string, record: OccupierRecord) =>
+    recordOccupierMutation.mutateAsync({ unitId, record }).then(() => undefined);
 
   const handleAddUnit = async (
     data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
@@ -241,13 +255,13 @@ function LandlordUnitsPageContent() {
         <UnitsTable
           units={units}
           onMarkVacant={handleMarkVacant}
-          onAssignTenant={handleAssignTenant}
+          onRecordOccupier={handleRecordOccupier}
           onChargeUnit={setChargingUnit}
           pendingUnitId={
             markVacantMutation.isPending
               ? markVacantMutation.variables
-              : assignTenantMutation.isPending
-                ? assignTenantMutation.variables?.unitId
+              : recordOccupierMutation.isPending
+                ? recordOccupierMutation.variables?.unitId
                 : undefined
           }
         />
