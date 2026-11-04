@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -68,7 +68,9 @@ export default function LandlordUnits() {
   const toast = useToast();
   const homes = useMyHomes();
   const [search, setSearch] = useState('');
-  const [propertyId, setPropertyId] = useState(ALL);
+  // Opened for one property (from a parcel, or a manager's client): start filtered to it.
+  const params = useLocalSearchParams<{ property?: string }>();
+  const [propertyId, setPropertyId] = useState(params.property ?? ALL);
   const [assigning, setAssigning] = useState<LandlordUnit | null>(null);
   const [adding, setAdding] = useState<string | null>(null);
   const [pickingProperty, setPickingProperty] = useState(false);

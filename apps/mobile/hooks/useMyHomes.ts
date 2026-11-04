@@ -19,7 +19,8 @@ export function useMyHomes() {
   return useQuery({
     queryKey: ['my-homes', usablePortal],
     queryFn: async (): Promise<MyHome[]> =>
-      usablePortal === 'landlord'
+      // A manager acts on clients' properties through the landlord routes.
+      usablePortal === 'landlord' || usablePortal === 'manager'
         ? (await landlordApi.properties(1, 100)).items.map((p) => ({
             id: p.id,
             name: p.name,

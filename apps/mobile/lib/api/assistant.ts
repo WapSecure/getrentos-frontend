@@ -26,7 +26,9 @@ export type AssistantPersona =
   | 'buyer'
   | 'agent'
   | 'estate'
-  | 'resident';
+  | 'resident'
+  /** A property-management firm's staff, about the firm's book. */
+  | 'agency';
 
 export const assistantApi = {
   /** `estateId` is required for the estate persona: an estate manager asks about one estate. */

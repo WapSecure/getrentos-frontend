@@ -9,6 +9,8 @@ export type Portal =
   | 'realtor'
   | 'agent'
   | 'estate'
+  /** Staff of a property-management firm: the agency workspace. */
+  | 'manager'
   | 'gateman'
   | 'resident'
   | 'admin';
@@ -21,6 +23,7 @@ const BACKEND_ROLE_TO_PORTAL: Record<string, Portal> = {
   REALTOR: 'realtor',
   AGENT: 'agent',
   ESTATE_MANAGER: 'estate',
+  PROPERTY_MANAGER: 'manager',
   GATEMAN: 'gateman',
   RESIDENT: 'resident',
   BACKOFFICE_ADMIN: 'admin',
@@ -39,6 +42,7 @@ const PORTAL_PRIORITY: Portal[] = [
   'estate',
   'landlord',
   'owner',
+  'manager',
   'realtor',
   'agent',
   'buyer',
@@ -70,6 +74,7 @@ export const IMPLEMENTED_PORTALS: readonly Portal[] = [
   'owner',
   'realtor',
   'estate',
+  'manager',
 ];
 
 /**
@@ -105,6 +110,7 @@ export const PORTAL_LABEL: Record<Portal, string> = {
   realtor: 'Realtor',
   agent: 'Field agent',
   estate: 'Estate manager',
+  manager: 'Agency',
   gateman: 'Gate',
   resident: 'Resident',
   admin: 'Back office',
