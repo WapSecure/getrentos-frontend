@@ -23,6 +23,7 @@ import {
 } from '@/lib/api/agent';
 import { ApiError } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
+import { goBack } from '@/lib/goBack';
 
 export default function AgentTaskDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -68,7 +69,7 @@ export default function AgentTaskDetail() {
         }}
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => goBack()}
           accessibilityRole="button"
           accessibilityLabel="Back"
           hitSlop={10}

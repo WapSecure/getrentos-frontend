@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft } from 'lucide-react-native';
@@ -17,6 +17,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentVerificationSubjectType } from '@/lib/api/agent';
 import { ApiError } from '@/lib/api/client';
+import { goBack } from '@/lib/goBack';
 
 const SUBJECT_TYPES: { value: AgentVerificationSubjectType; label: string }[] = [
   { value: 'TENANT', label: 'Tenant' },
@@ -53,7 +54,7 @@ export default function SubmitVerification() {
       qc.invalidateQueries({ queryKey: ['agent', 'verifications'] });
       qc.invalidateQueries({ queryKey: qk.agent.sync });
       toast.show('Verification submitted.', 'success');
-      router.back();
+      goBack();
     },
     onError: (err) =>
       toast.show(
@@ -75,7 +76,7 @@ export default function SubmitVerification() {
         }}
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => goBack()}
           accessibilityRole="button"
           accessibilityLabel="Back"
           hitSlop={10}

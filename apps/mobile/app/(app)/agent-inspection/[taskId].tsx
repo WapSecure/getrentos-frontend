@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocalSearchParams } from 'expo-router';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Camera, ChevronLeft, ImagePlus, Trash2, X } from 'lucide-react-native';
 import { Button, Card, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
@@ -16,6 +16,7 @@ import {
 } from '@/lib/api/agent';
 import { ApiError } from '@/lib/api/client';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
+import { goBack } from '@/lib/goBack';
 
 const TYPES: { value: AgentInspectionType; label: string }[] = [
   { value: 'MOVE_IN', label: 'Move-in' },
@@ -51,6 +52,34 @@ export default function SubmitInspection() {
   const [photos, setPhotos] = useState<AgentInspectionPhoto[]>([]);
   const [uploadingKey, setUploadingKey] = useState<number | null>(null);
   const nextRoomKey = useRef(0);
+
+  // A draft is saved server-side as soon as it exists, so reopening this screen
+  // must show what was already recorded. Starting from an empty form silently
+  // threw away every room the agent had entered. Hydrate once, then leave the
+  // local state alone so edits are not clobbered by a refetch.
+  const saved = useQuery({
+    queryKey: ['agent', 'inspection', taskId],
+    queryFn: () => agentApi.inspection(taskId),
+  });
+  const hydrated = useRef(false);
+  useEffect(() => {
+    const draft = saved.data;
+    if (!draft || hydrated.current) return;
+    hydrated.current = true;
+    setType(draft.type);
+    setClientName(draft.clientName ?? '');
+    setOverallCondition(draft.overallCondition ?? '');
+    setRooms(
+      draft.rooms.map((r) => ({
+        key: nextRoomKey.current++,
+        room: r.room ?? '',
+        condition: r.condition ?? 'good',
+        notes: r.notes ?? '',
+        photoCount: r.photoCount ?? 0,
+      }))
+    );
+    setPhotos(draft.photos ?? []);
+  }, [saved.data]);
 
   const addPhoto = async (room: RoomDraft, source: 'camera' | 'library') => {
     if (!room.room.trim()) {
@@ -113,7 +142,7 @@ export default function SubmitInspection() {
       qc.invalidateQueries({ queryKey: ['agent', 'inspections'] });
       qc.invalidateQueries({ queryKey: qk.agent.sync });
       toast.show('Inspection submitted.', 'success');
-      router.back();
+      goBack();
     },
     onError: (err) =>
       toast.show(
@@ -137,7 +166,7 @@ export default function SubmitInspection() {
         }}
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => goBack()}
           accessibilityRole="button"
           accessibilityLabel="Back"
           hitSlop={10}
