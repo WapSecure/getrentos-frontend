@@ -277,4 +277,5 @@ export const adminKeys = {
   authorityClaims: (params?: { status?: string }) =>
     ['admin', 'property-authorities', params?.status ?? 'all'] as const,
   aiUsage: ['admin', 'ai', 'usage'] as const,
+  aiReviews: ['admin', 'ai', 'reviews'] as const,
 };

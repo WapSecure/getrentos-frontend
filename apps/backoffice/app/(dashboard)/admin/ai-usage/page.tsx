@@ -1,12 +1,22 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Activity, Ban, Coins, Cpu, Power, ShieldAlert, ShieldCheck } from 'lucide-react';
+import {
+  Activity,
+  Ban,
+  Coins,
+  Cpu,
+  Power,
+  ShieldAlert,
+  ShieldCheck,
+  UserCheck,
+} from 'lucide-react';
 import { PageErrorState, StatGridSkeleton, Skeleton } from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
 import { adminKeys } from '@/lib/queryKeys';
+import type { AiReviewCapabilitySummary } from '@/types/admin';
 
 /**
  * AI governance dashboard: today's AI spend, volume and per-capability breakdown,
@@ -178,7 +188,98 @@ export default function AdminAiUsagePage() {
           </div>
         )}
       </div>
+
+      <HumanReviewSection />
     </div>
+  );
+}
+
+const pct = (value: number | null) => (value === null ? '—' : `${value}%`);
+
+/**
+ * The P1/P2 gate evidence: AI proposes, a person decides. Fraud precision comes
+ * from reviewers clearing or confirming the alerts the scan opened; triage
+ * acceptance from landlords and managers accepting, editing or rejecting.
+ */
+function HumanReviewSection() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: adminKeys.aiReviews,
+    queryFn: () => unwrap(adminService.getAiReviews()),
+  });
+  const fraud = data?.capabilities.find((c) => c.capability === 'listing-fraud');
+  const triage = data?.capabilities.find((c) => c.capability === 'maintenance-triage');
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border/70 bg-card">
+      <div className="flex items-center gap-2 border-b border-border/70 px-5 py-4">
+        <UserCheck className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h2 className="font-semibold text-foreground">Human review (all time)</h2>
+      </div>
+      {isLoading ? (
+        <div className="p-5">
+          <Skeleton className="h-16 w-full" />
+        </div>
+      ) : isError || !data ? (
+        <p className="px-5 py-8 text-center text-sm text-muted-foreground">
+          Review figures are unavailable right now.
+        </p>
+      ) : (
+        <div className="grid gap-4 p-5 md:grid-cols-2">
+          {fraud && <FraudReviewCard summary={fraud} />}
+          {triage && <TriageReviewCard summary={triage} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FraudReviewCard({ summary }: { summary: AiReviewCapabilitySummary }) {
+  return (
+    <section className="space-y-2 rounded-lg border border-border/70 p-4">
+      <h3 className="font-medium text-foreground">{labelFor(summary.capability)}</h3>
+      <p className="text-3xl font-semibold tabular-nums text-foreground">
+        {pct(summary.precision)}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        Precision: of the alerts a reviewer has decided, how many were confirmed fraud.
+      </p>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 text-sm">
+        <dt className="text-muted-foreground">Listings scanned</dt>
+        <dd className="text-right tabular-nums">{summary.total}</dd>
+        <dt className="text-muted-foreground">Alerts opened</dt>
+        <dd className="text-right tabular-nums">{summary.alertsOpened}</dd>
+        <dt className="text-muted-foreground">Confirmed / cleared</dt>
+        <dd className="text-right tabular-nums">
+          {summary.byOutcome.CONFIRMED} / {summary.byOutcome.CLEARED}
+        </dd>
+        <dt className="text-muted-foreground">Alerts awaiting a decision</dt>
+        <dd className="text-right tabular-nums">{summary.alertsOpened - summary.alertsDecided}</dd>
+      </dl>
+    </section>
+  );
+}
+
+function TriageReviewCard({ summary }: { summary: AiReviewCapabilitySummary }) {
+  return (
+    <section className="space-y-2 rounded-lg border border-border/70 p-4">
+      <h3 className="font-medium text-foreground">{labelFor(summary.capability)}</h3>
+      <p className="text-3xl font-semibold tabular-nums text-foreground">
+        {pct(summary.acceptanceRate)}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        Acceptance: of the proposals a person decided, how many were applied (as is or edited).
+      </p>
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 pt-2 text-sm">
+        <dt className="text-muted-foreground">Proposals made</dt>
+        <dd className="text-right tabular-nums">{summary.total}</dd>
+        <dt className="text-muted-foreground">Accepted / edited / rejected</dt>
+        <dd className="text-right tabular-nums">
+          {summary.byOutcome.ACCEPTED} / {summary.byOutcome.EDITED} / {summary.byOutcome.REJECTED}
+        </dd>
+        <dt className="text-muted-foreground">Not yet decided</dt>
+        <dd className="text-right tabular-nums">{summary.pending}</dd>
+      </dl>
+    </section>
   );
 }
 

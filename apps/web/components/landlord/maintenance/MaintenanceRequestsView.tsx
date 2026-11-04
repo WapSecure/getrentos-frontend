@@ -18,11 +18,12 @@ import { MaintenanceRequestCard } from '@/components/landlord/maintenance/Mainte
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
 import { ScheduleVisitModal } from '@/components/landlord/maintenance/ScheduleVisitModal';
 import { TriageResultModal } from '@/components/landlord/maintenance/TriageResultModal';
+import { useMaintenanceTriage } from '@/components/shared/maintenance/useMaintenanceTriage';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { LandlordMaintenanceRequest } from '@/types/landlord';
-import type { MaintenanceRequestStatus, MaintenanceTriage } from '@/types/maintenance';
+import type { MaintenanceRequestStatus } from '@/types/maintenance';
 
 const statusFilters: { value: 'all' | MaintenanceRequestStatus; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -42,8 +43,6 @@ export function MaintenanceRequestsView() {
   const [schedulingRequest, setSchedulingRequest] = useState<LandlordMaintenanceRequest | null>(
     null
   );
-  const [triagingRequest, setTriagingRequest] = useState<LandlordMaintenanceRequest | null>(null);
-  const [triageResult, setTriageResult] = useState<MaintenanceTriage | null>(null);
   const toast = useToast();
 
   const requestsQuery = useQuery({
@@ -126,26 +125,8 @@ export function MaintenanceRequestsView() {
     onError: (error: Error) => toast.error(error.message || 'Could not escalate this request.'),
   });
 
-  const triageMutation = useMutation({
-    mutationFn: (requestId: string) => unwrap(landlordService.triageMaintenance(requestId)),
-    onSuccess: (result) => setTriageResult(result),
-    onError: (error: Error) => {
-      setTriagingRequest(null);
-      toast.error(error.message || 'Could not triage this request.');
-    },
-  });
-
-  const closeTriage = () => {
-    setTriagingRequest(null);
-    setTriageResult(null);
-  };
-
-  const handleTriage = (request: LandlordMaintenanceRequest) => {
-    triageMutation.reset();
-    setTriageResult(null);
-    setTriagingRequest(request);
-    triageMutation.mutate(request.id);
-  };
+  const triage = useMaintenanceTriage({ onApplied: invalidateRequests });
+  const handleTriage = (request: LandlordMaintenanceRequest) => triage.start(request.id);
 
   const handleAssignVendor = (requestId: string, vendorId: string, scheduledFor?: string) =>
     assignVendorMutation.mutate({ requestId, vendorId, scheduledFor });
@@ -237,7 +218,7 @@ export function MaintenanceRequestsView() {
                 markResolvedMutation.isPending && markResolvedMutation.variables === request.id
               }
               isEscalating={escalateMutation.isPending && escalateMutation.variables === request.id}
-              isTriaging={triageMutation.isPending && triageMutation.variables === request.id}
+              isTriaging={triage.isTriaging(request.id)}
             />
           ))}
         </div>
@@ -278,19 +259,17 @@ export function MaintenanceRequestsView() {
       />
 
       <TriageResultModal
-        open={!!triagingRequest}
-        triage={triageResult}
-        onClose={closeTriage}
+        {...triage.modal}
         onAssignVendor={(vendorId) => {
-          if (!triagingRequest) return;
+          if (!triage.requestId) return;
           assignVendorMutation.mutate(
-            { requestId: triagingRequest.id, vendorId },
-            { onSuccess: closeTriage }
+            { requestId: triage.requestId, vendorId },
+            { onSuccess: triage.close }
           );
         }}
         isAssigning={
           assignVendorMutation.isPending &&
-          assignVendorMutation.variables?.requestId === triagingRequest?.id
+          assignVendorMutation.variables?.requestId === triage.requestId
         }
       />
     </>

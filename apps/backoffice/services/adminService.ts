@@ -27,6 +27,7 @@ import type {
   PlatformConfig,
   AdminProfile,
   AiUsageSummary,
+  AiReviewsSummary,
   AdminStaffMember,
   AdminStaffApproval,
   AdminStaffRole,
@@ -157,7 +158,9 @@ export const adminService = {
   /** Active staff for assignment pickers; readable by any staff role. */
   async listStaffDirectory(
     params: { page?: number; pageSize?: number } = {}
-  ): Promise<ApiResponse<Paginated<Pick<AdminStaffMember, 'id' | 'email' | 'legalName' | 'roles'>>>> {
+  ): Promise<
+    ApiResponse<Paginated<Pick<AdminStaffMember, 'id' | 'email' | 'legalName' | 'roles'>>>
+  > {
     return safeCall(async () => {
       const query = toQuery({
         page: params.page?.toString(),
@@ -759,6 +762,11 @@ export const adminService = {
 
   async getAiUsage(): Promise<ApiResponse<AiUsageSummary>> {
     return safeCall(() => authFetch('/admin/ai/usage'));
+  },
+
+  /** Gate evidence: how reviewers decided on AI fraud signals and triage proposals. */
+  async getAiReviews(days?: number): Promise<ApiResponse<AiReviewsSummary>> {
+    return safeCall(() => authFetch(`/admin/ai/reviews${days ? `?days=${days}` : ''}`));
   },
 
   async updatePlatformConfig(config: PlatformConfig): Promise<ApiResponse<PlatformConfig>> {

@@ -1,6 +1,7 @@
 'use client';
 
-import { Sparkles, UserCog } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Pencil, Sparkles, UserCog, X } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -8,6 +9,8 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Select,
+  Textarea,
 } from '@getrentos/ui';
 import { categoryIcons } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { maintenancePriorityBadges } from '@/lib/statusBadge';
@@ -15,15 +18,31 @@ import type {
   MaintenanceCategory,
   MaintenancePriority,
   MaintenanceTriage,
+  MaintenanceTriageCategory,
+  MaintenanceTriageDecision,
+  MaintenanceTriageUrgency,
 } from '@/types/maintenance';
+
+const CATEGORIES: MaintenanceTriageCategory[] = [
+  'PLUMBING',
+  'ELECTRICAL',
+  'INTERNET',
+  'SECURITY',
+  'APPLIANCES',
+  'OTHER',
+];
+const URGENCIES: MaintenanceTriageUrgency[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
 interface TriageResultModalProps {
   /** The triage result to show, or null while it is still loading. */
   triage: MaintenanceTriage | null;
   open: boolean;
   onClose: () => void;
-  onAssignVendor: (vendorId: string) => void;
+  onAssignVendor?: (vendorId: string) => void;
   isAssigning?: boolean;
+  /** Accept (as proposed or edited) or reject the proposal. Hidden when absent. */
+  onDecide?: (decision: MaintenanceTriageDecision) => void;
+  isDeciding?: boolean;
 }
 
 const categoryLabel = (category: MaintenanceCategory): string =>
@@ -35,6 +54,8 @@ export const TriageResultModal = ({
   onClose,
   onAssignVendor,
   isAssigning = false,
+  onDecide,
+  isDeciding = false,
 }: TriageResultModalProps) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
     <DialogContent className="p-0">
@@ -53,7 +74,15 @@ export const TriageResultModal = ({
           <p className="text-sm text-muted-foreground">Reading the request…</p>
         </div>
       ) : (
-        <TriageBody triage={triage} onAssignVendor={onAssignVendor} isAssigning={isAssigning} />
+        <TriageBody
+          // A new proposal starts fresh: no edits or rejection carried over.
+          key={triage.reviewId ?? triage.triagedAt}
+          triage={triage}
+          onAssignVendor={onAssignVendor}
+          isAssigning={isAssigning}
+          onDecide={onDecide}
+          isDeciding={isDeciding}
+        />
       )}
     </DialogContent>
   </Dialog>
@@ -63,11 +92,22 @@ const TriageBody = ({
   triage,
   onAssignVendor,
   isAssigning,
+  onDecide,
+  isDeciding,
 }: {
   triage: MaintenanceTriage;
-  onAssignVendor: (vendorId: string) => void;
+  onAssignVendor?: (vendorId: string) => void;
   isAssigning: boolean;
+  onDecide?: (decision: MaintenanceTriageDecision) => void;
+  isDeciding: boolean;
 }) => {
+  const [mode, setMode] = useState<'review' | 'edit' | 'reject'>('review');
+  const [editCategory, setEditCategory] = useState(triage.category);
+  const [editUrgency, setEditUrgency] = useState(triage.urgency);
+  const [editDraft, setEditDraft] = useState(triage.draftWorkOrder);
+  const [reason, setReason] = useState('');
+  const canDecide = Boolean(onDecide && triage.reviewId);
+
   const category = triage.category.toLowerCase() as MaintenanceCategory;
   const urgency = triage.urgency.toLowerCase() as MaintenancePriority;
   const CategoryIcon = categoryIcons[category] ?? categoryIcons.other;
@@ -97,7 +137,149 @@ const TriageBody = ({
         </p>
       </section>
 
-      {triage.suggestedVendor && (
+      {mode === 'edit' && (
+        <section className="space-y-3 rounded-lg border border-border p-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground" htmlFor="triage-category">
+                Category
+              </label>
+              <Select
+                id="triage-category"
+                value={editCategory}
+                onValueChange={(v) => setEditCategory(v as MaintenanceTriageCategory)}
+                options={CATEGORIES.map((c) => ({
+                  value: c,
+                  label: categoryLabel(c.toLowerCase() as MaintenanceCategory),
+                }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground" htmlFor="triage-urgency">
+                Urgency
+              </label>
+              <Select
+                id="triage-urgency"
+                value={editUrgency}
+                onValueChange={(v) => setEditUrgency(v as MaintenanceTriageUrgency)}
+                options={URGENCIES.map((u) => ({
+                  value: u,
+                  label:
+                    maintenancePriorityBadges[u.toLowerCase() as MaintenancePriority]?.label ?? u,
+                }))}
+              />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground" htmlFor="triage-draft">
+              Work order
+            </label>
+            <Textarea
+              id="triage-draft"
+              rows={4}
+              maxLength={2000}
+              value={editDraft}
+              onChange={(e) => setEditDraft(e.target.value)}
+            />
+          </div>
+        </section>
+      )}
+
+      {mode === 'reject' && (
+        <section className="space-y-1 rounded-lg border border-border p-3">
+          <label className="text-xs text-muted-foreground" htmlFor="triage-reason">
+            What did it get wrong?
+          </label>
+          <Textarea
+            id="triage-reason"
+            rows={3}
+            maxLength={500}
+            value={reason}
+            placeholder="For example: it is a plumbing leak, not electrical"
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </section>
+      )}
+
+      {canDecide && (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {mode === 'review' && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setMode('reject')}
+              >
+                <X className="w-3.5 h-3.5" />
+                Not right
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setMode('edit')}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                Edit
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="gap-1.5"
+                isLoading={isDeciding}
+                onClick={() => onDecide?.({ decision: 'accept' })}
+              >
+                <Check className="w-3.5 h-3.5" />
+                Apply category and urgency
+              </Button>
+            </>
+          )}
+          {mode === 'edit' && (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setMode('review')}>
+                Back
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="gap-1.5"
+                isLoading={isDeciding}
+                disabled={!editDraft.trim()}
+                onClick={() =>
+                  onDecide?.({
+                    decision: 'accept',
+                    category: editCategory,
+                    urgency: editUrgency,
+                    draftWorkOrder: editDraft.trim(),
+                  })
+                }
+              >
+                <Check className="w-3.5 h-3.5" />
+                Apply my version
+              </Button>
+            </>
+          )}
+          {mode === 'reject' && (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => setMode('review')}>
+                Back
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                isLoading={isDeciding}
+                disabled={reason.trim().length < 3}
+                onClick={() => onDecide?.({ decision: 'reject', reason: reason.trim() })}
+              >
+                Reject suggestion
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+
+      {triage.suggestedVendor && onAssignVendor && (
         <section className="rounded-lg border border-border p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
@@ -108,7 +290,7 @@ const TriageBody = ({
               variant="primary"
               size="sm"
               className="gap-1.5 shrink-0"
-              onClick={() => triage.suggestedVendor && onAssignVendor(triage.suggestedVendor.id)}
+              onClick={() => triage.suggestedVendor && onAssignVendor?.(triage.suggestedVendor.id)}
               isLoading={isAssigning}
             >
               <UserCog className="w-3.5 h-3.5" />
