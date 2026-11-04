@@ -24,26 +24,24 @@ export default function AgentDashboardPage() {
   if (currentHour >= 18) greeting = 'Good evening';
 
   return (
-    <>
+    <div className="space-y-6">
       <AgentDashboardHeader greeting={greeting} firstName={firstName} />
 
       <AgentStatsCards
         todaysTasks={dashboard?.assignedTasks ?? 0}
         completedThisWeek={dashboard?.completedTasks ?? 0}
-        pendingSync={dashboard?.inProgressTasks ?? 0}
+        inProgress={dashboard?.inProgressTasks ?? 0}
         overdueTasks={dashboard?.overdueTasks ?? 0}
-        avgRating={0}
-        avgResponseTime="—"
       />
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-6 xl:grid-cols-12">
+        <div className="space-y-6 xl:col-span-8">
           <AgentTaskList tasks={(dashboard?.upcomingTasks ?? []).map(mapAgentTask)} />
         </div>
-        <div>
+        <aside className="xl:col-span-4">
           <AgentQuickActions />
-        </div>
+        </aside>
       </div>
-    </>
+    </div>
   );
 }

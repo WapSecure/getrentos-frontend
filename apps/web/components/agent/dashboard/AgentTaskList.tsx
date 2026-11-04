@@ -1,7 +1,7 @@
 'use client';
 
 import { ClipboardCheck, UserCheck, Home, FileText, Clock, AlertTriangle } from 'lucide-react';
-import { Card, EmptyState } from '@getrentos/ui';
+import { Card, CardDescription, CardHeader, CardTitle, EmptyState } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { AgentTask, TaskType } from '@/types/agent';
 
@@ -19,12 +19,10 @@ interface AgentTaskListProps {
 export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
   return (
     <Card>
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Today&apos;s Tasks</h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Your assigned inspections and verification visits
-        </p>
-      </div>
+      <CardHeader className="border-b border-border pb-4">
+        <CardTitle>Today&apos;s tasks</CardTitle>
+        <CardDescription>Your assigned inspections and verification visits</CardDescription>
+      </CardHeader>
 
       <div className="divide-y divide-border">
         {tasks.length === 0 ? (
@@ -42,10 +40,10 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
             return (
               <div
                 key={task.id}
-                className="p-4 flex items-start gap-3 hover:bg-secondary transition-colors"
+                className="flex items-start gap-3 p-4 transition-colors hover:bg-secondary/60"
               >
                 <div
-                  className={`p-2 rounded-lg shrink-0 ${isOverdue ? 'bg-destructive-subtle' : 'bg-accent'}`}
+                  className={`shrink-0 rounded-full p-2 ${isOverdue ? 'bg-destructive-subtle' : 'bg-secondary'}`}
                 >
                   {isOverdue ? (
                     <AlertTriangle className="w-4 h-4 text-destructive" />

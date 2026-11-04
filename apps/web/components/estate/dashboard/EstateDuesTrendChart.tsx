@@ -55,9 +55,9 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
 
   return (
     <Card className="p-5">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="font-semibold text-foreground">Dues Collection Trend</h3>
+          <h3 className="font-semibold text-foreground">Dues collection trend</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             Monthly dues collected, last 6 months
           </p>
@@ -83,12 +83,6 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={duesData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="duesFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid vertical={false} stroke="currentColor" className="text-border" />
               <XAxis
                 dataKey="month"
@@ -114,7 +108,7 @@ export const EstateDuesTrendChart = ({ estateId }: EstateDuesTrendChartProps) =>
                 dataKey="collected"
                 stroke="var(--primary)"
                 strokeWidth={2}
-                fill="url(#duesFill)"
+                fill="var(--accent)"
                 activeDot={{ r: 4, fill: 'var(--primary)', stroke: 'var(--card)', strokeWidth: 2 }}
               />
             </AreaChart>

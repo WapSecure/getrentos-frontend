@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Home, KeyRound, Megaphone, Package, ReceiptText, TriangleAlert } from 'lucide-react';
+import { KeyRound, Megaphone, Package, ReceiptText, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -9,7 +9,16 @@ import { estateResidentKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { EmergencyBanner } from '@/components/estate/resident/EmergencyBanner';
-import { EmptyState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  EmptyState,
+  PageHeader,
+  Skeleton,
+  StatCard,
+  StatGridSkeleton,
+} from '@getrentos/ui';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-NG', {
@@ -81,48 +90,39 @@ export default function ResidentDashboardPage() {
           there is no emergency, which is almost always. */}
       <EmergencyBanner />
 
-      <div className="rounded-2xl border border-border/90 bg-card p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-accent text-primary flex items-center justify-center shrink-0">
-            <Home className="w-6 h-6" />
-          </div>
-          <div className="min-w-0">
-            <span className="mb-2 inline-flex items-center rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-              Resident dashboard
-            </span>
-            <h1 className="text-xl font-bold tracking-[-0.01em] text-foreground">
-              {household?.unitLabel}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {household?.estate.name} · {household?.estate.address}, {household?.estate.city}
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={household?.unitLabel ?? 'My household'}
+        description={
+          household
+            ? `${household.estate.name} · ${household.estate.address}, ${household.estate.city}`
+            : 'Your household and estate services'
+        }
+      />
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid gap-3 sm:grid-cols-2">
         <Link
           href={ROUTES.RESIDENT_DUES}
-          className="group rounded-2xl border border-border/90 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/12"
         >
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-            <ReceiptText className="w-4 h-4" />
-            Outstanding dues
-          </div>
-          <p className="text-2xl font-bold text-foreground">
-            {moneyVisible ? formatCurrency(pendingTotal) : '••••••'}
-          </p>
+          <StatCard
+            icon={ReceiptText}
+            label="Outstanding dues"
+            value={moneyVisible ? formatCurrency(pendingTotal) : '••••••'}
+            accent={pendingTotal > 0 ? 'orange' : 'emerald'}
+            compact
+          />
         </Link>
-
         <Link
           href={ROUTES.RESIDENT_ANNOUNCEMENTS}
-          className="group rounded-2xl border border-border/90 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+          className="rounded-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/12"
         >
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-            <Megaphone className="w-4 h-4" />
-            Announcements
-          </div>
-          <p className="text-2xl font-bold text-foreground">{announcementsData?.total ?? 0}</p>
+          <StatCard
+            icon={Megaphone}
+            label="Announcements"
+            value={announcementsData?.total ?? 0}
+            subtitle="Available to read"
+            compact
+          />
         </Link>
       </div>
 
@@ -131,9 +131,9 @@ export default function ResidentDashboardPage() {
           <Link
             key={link.href}
             href={link.href}
-            className="group flex items-center gap-3 rounded-xl border border-border/90 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+            className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-xs transition-[border-color,box-shadow] duration-150 hover:border-foreground/15 hover:shadow-sm"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary transition-transform duration-300 group-hover:scale-105">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
               <link.icon className="h-4 w-4" />
             </span>
             <span className="min-w-0 flex-1">
@@ -148,10 +148,10 @@ export default function ResidentDashboardPage() {
         ))}
       </div>
 
-      <div className="rounded-2xl border border-border/90 bg-card shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border">
-          <h2 className="text-sm font-semibold text-foreground">Recent announcements</h2>
-        </div>
+      <Card>
+        <CardHeader className="border-b border-border pb-4">
+          <CardTitle as="h2">Recent announcements</CardTitle>
+        </CardHeader>
         {announcements.length === 0 ? (
           <EmptyState icon={Megaphone} title="No announcements yet." size="compact" bare />
         ) : (
@@ -166,7 +166,7 @@ export default function ResidentDashboardPage() {
             ))}
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

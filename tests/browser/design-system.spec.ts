@@ -37,6 +37,20 @@ const property = {
   referenceCode: 'PR-AB7K-9Q',
   createdAt: '2026-08-01',
 };
+const estate = {
+  id: 'estate-1',
+  name: 'Parkview Estate',
+  address: '18 Admiralty Way',
+  city: 'Lekki',
+  state: 'Lagos',
+  gateCount: 2,
+  lateFeeAmount: 25000,
+  graceDays: 5,
+  householdCount: 84,
+  createdAt: '2026-08-01',
+  planTier: 'PRO',
+  capacity: 'MANAGER',
+};
 const empty = { items: [], total: 0, page: 1, pageSize: 10, totalPages: 0 };
 
 async function reviewPage(page: Page, path: string, info: TestInfo) {
@@ -215,6 +229,108 @@ test.beforeEach(async ({ page }, testInfo) => {
           },
         ],
       },
+      '/agent/dashboard': {
+        assignedProperties: 6,
+        assignedTasks: 4,
+        inProgressTasks: 2,
+        completedTasks: 11,
+        overdueTasks: 1,
+        upcomingTasks: [
+          {
+            id: 'task-1',
+            type: 'INSPECTION',
+            title: 'Move-in inspection',
+            notes: null,
+            priority: 'HIGH',
+            status: 'ASSIGNED',
+            dueAt: '2026-11-05T10:00:00.000Z',
+            property: {
+              title: 'The Meridian',
+              address: '12 Alexander Road',
+              city: 'Ikoyi',
+              state: 'Lagos',
+            },
+            assignedBy: { legalName: 'Joseph Orji', roles: [{ role: 'LANDLORD' }] },
+          },
+        ],
+      },
+      '/estate/mine': [estate],
+      '/estate/estate-1/dashboard/stats': {
+        totalHouseholds: 84,
+        duesCollectedThisMonth: 12600000,
+        duesOutstanding: 1850000,
+        openIncidents: 2,
+        openMaintenanceTickets: 5,
+        pendingViolations: 3,
+      },
+      '/estate/estate-1/dashboard/dues-trend': [
+        { label: 'May', value: 8100000 },
+        { label: 'Jun', value: 9200000 },
+        { label: 'Jul', value: 8800000 },
+        { label: 'Aug', value: 10400000 },
+        { label: 'Sep', value: 11700000 },
+        { label: 'Oct', value: 12600000 },
+      ],
+      '/estate/estate-1/gates': [
+        { id: 'gate-1', name: 'Main gate', location: 'Admiralty Way entrance' },
+        { id: 'gate-2', name: 'Service gate', location: 'Northern entrance' },
+      ],
+      '/estate/estate-1/visitor-passes': empty,
+      '/estate/resident/household': {
+        id: 'household-1',
+        unitLabel: 'Maple Close · House 12',
+        residentName: 'Joseph Orji',
+        status: 'active',
+        directoryOptIn: true,
+        estate: {
+          id: estate.id,
+          name: estate.name,
+          address: estate.address,
+          city: estate.city,
+          state: estate.state,
+        },
+      },
+      '/estate/resident/dues': {
+        ...empty,
+        total: 1,
+        totalPages: 1,
+        items: [
+          {
+            id: 'due-1',
+            householdId: 'household-1',
+            unitLabel: 'Maple Close · House 12',
+            residentName: 'Joseph Orji',
+            amount: 185000,
+            dueDate: '2026-11-01',
+            status: 'overdue',
+            lateFeeApplied: 0,
+            category: 'service_charge',
+            billingCycle: 'monthly',
+            isRecurring: true,
+            createdAt: '2026-10-01',
+          },
+        ],
+      },
+      '/estate/resident/announcements': {
+        ...empty,
+        total: 2,
+        totalPages: 1,
+        items: [
+          {
+            id: 'announcement-1',
+            title: 'Water maintenance on Saturday',
+            body: 'Supply will pause between 9:00 and 11:00 while the main pump is serviced.',
+            createdAt: '2026-11-03',
+          },
+          {
+            id: 'announcement-2',
+            title: 'November community meeting',
+            body: 'The monthly meeting starts at 6:00 PM in the residents hall.',
+            createdAt: '2026-11-02',
+          },
+        ],
+      },
+      '/estate/resident/emergency': null,
       '/rentals': {
         ...empty,
         total: 3,
@@ -294,7 +410,12 @@ test.beforeEach(async ({ page }, testInfo) => {
         ],
       },
     };
-    return route.fulfill({ json: data[path] ?? (path.includes('notifications') ? [] : empty) });
+    const response = Object.prototype.hasOwnProperty.call(data, path)
+      ? data[path]
+      : path.includes('notifications')
+        ? []
+        : empty;
+    return route.fulfill({ json: response });
   });
 });
 
@@ -398,4 +519,41 @@ test('buyer purchase workspace', async ({ page }, testInfo) => {
   await expect(page.getByText('Active purchases', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Discover properties', exact: true })).toBeVisible();
   await expect(page.getByText('Buyer dashboard', { exact: true })).toHaveCount(0);
+});
+
+test('field agent operations workspace', async ({ page }, testInfo) => {
+  await usePersona(page, ['AGENT']);
+  await reviewPage(page, `${webURL}/agent/dashboard`, testInfo);
+  await expect(
+    page.getByRole('heading', { name: /Good (morning|afternoon|evening), Joseph/ })
+  ).toBeVisible();
+  await expect(page.getByText('In progress', { exact: true })).toBeVisible();
+  await expect(page.getByText('Pending Sync', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Avg. Rating', { exact: true })).toHaveCount(0);
+});
+
+test('estate manager operations workspace', async ({ page }, testInfo) => {
+  await usePersona(page, ['ESTATE_MANAGER']);
+  await reviewPage(page, `${webURL}/estate/dashboard`, testInfo);
+  await expect(page.getByRole('heading', { name: estate.name })).toBeVisible();
+  await expect(page.getByText('84 households · 2 active gates', { exact: true })).toBeVisible();
+  await expect(page.getByText('Dues collection trend', { exact: true })).toBeVisible();
+  await expect(page.getByText('Estate dashboard', { exact: true })).toHaveCount(0);
+});
+
+test('resident household workspace', async ({ page }, testInfo) => {
+  await usePersona(page, ['RESIDENT']);
+  await reviewPage(page, `${webURL}/resident/dashboard`, testInfo);
+  await expect(page.getByRole('heading', { name: 'Maple Close · House 12' })).toBeVisible();
+  await expect(page.getByText('Outstanding dues', { exact: true })).toBeVisible();
+  await expect(page.getByText('Water maintenance on Saturday', { exact: true })).toBeVisible();
+  await expect(page.getByText('Resident dashboard', { exact: true })).toHaveCount(0);
+});
+
+test('gateman check-in workspace', async ({ page }, testInfo) => {
+  await usePersona(page, ['GATEMAN']);
+  await reviewPage(page, `${webURL}/gateman/verify`, testInfo);
+  await expect(page.getByRole('heading', { name: estate.name })).toBeVisible();
+  await expect(page.getByLabel('Visitor PIN')).toBeVisible();
+  await expect(page.getByText('No gate selected', { exact: true })).toBeVisible();
 });

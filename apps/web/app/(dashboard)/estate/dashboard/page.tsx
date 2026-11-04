@@ -7,10 +7,8 @@ import {
   BookOpen,
   Building2,
   Car,
-  DoorOpen,
   Hammer,
   KeyRound,
-  MapPin,
   Megaphone,
   Package,
   ReceiptText,
@@ -20,7 +18,7 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { Button, CardSkeleton, StatCard, StatGridSkeleton } from '@getrentos/ui';
+import { Button, Card, CardSkeleton, PageHeader, StatCard, StatGridSkeleton } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateService } from '@/services/estateService';
@@ -124,18 +122,11 @@ export default function EstateDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-3xl border border-border/90 bg-card px-6 py-7 shadow-sm sm:px-8">
-        <span className="mb-3 inline-flex items-center rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          Estate dashboard
-        </span>
-        <h1 className="text-3xl font-semibold tracking-[-0.035em] text-foreground sm:text-4xl">
-          {estate.name}
-        </h1>
-        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground sm:text-base">
-          <MapPin className="h-4 w-4 shrink-0" />
-          {estate.address}, {estate.city}, {estate.state}
-        </p>
-      </section>
+      <PageHeader
+        title={estate.name}
+        description={`${estate.address}, ${estate.city}, ${estate.state}`}
+        meta={`${estate.householdCount} households · ${estate.gateCount ?? 0} active gates`}
+      />
 
       <ProFeatureGate
         entitled={isPro}
@@ -182,34 +173,6 @@ export default function EstateDashboardPage() {
         <EstateDuesTrendChart estateId={estate.id} />
       </ProFeatureGate>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <Link
-          href={ROUTES.ESTATE_HOUSEHOLDS}
-          className="group flex items-center gap-4 rounded-2xl border border-border/90 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-        >
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary transition-transform duration-300 group-hover:scale-105">
-            <Users className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Households</p>
-            <p className="text-2xl font-semibold tracking-tight text-foreground">
-              {estate.householdCount}
-            </p>
-          </div>
-        </Link>
-        <div className="flex items-center gap-4 rounded-2xl border border-border/90 bg-card p-5 shadow-sm">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
-            <DoorOpen className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm text-muted-foreground">Active gates</p>
-            <p className="text-2xl font-semibold tracking-tight text-foreground">
-              {estate.gateCount ?? '—'}
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section className="space-y-4">
         <div>
           <h2 className="type-heading">Manage your estate</h2>
@@ -219,24 +182,22 @@ export default function EstateDashboardPage() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {modules.map((module) => (
-            <Link
-              key={module.href}
-              href={module.href}
-              className="group flex items-center gap-3 rounded-xl border border-border/90 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary transition-transform duration-300 group-hover:scale-105">
-                <module.icon className="h-4 w-4" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-foreground">
-                  {module.label}
+            <Card key={module.href} interactive>
+              <Link href={module.href} className="group flex items-center gap-3 p-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-muted-foreground">
+                  <module.icon className="h-4 w-4" />
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">
-                  {module.description}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-medium text-foreground">
+                    {module.label}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {module.description}
+                  </span>
                 </span>
-              </span>
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5" />
-            </Link>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
+              </Link>
+            </Card>
           ))}
         </div>
       </section>

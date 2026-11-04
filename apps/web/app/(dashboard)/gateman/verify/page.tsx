@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
-import { CheckCircle2, CloudOff, KeyRound, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
+import { CheckCircle2, CloudOff, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -11,6 +11,7 @@ import {
   CardSkeleton,
   ListSkeleton,
   NumberInput,
+  PageHeader,
   Pagination,
   SearchInput,
 } from '@getrentos/ui';
@@ -446,18 +447,11 @@ export default function GatemanVerifyPage() {
       {/* On a gatehouse screen the check-in card stays in view on the left while
           the queue at the barrier and the people inside fill the right. */}
       <div className="space-y-6 lg:sticky lg:top-24">
-        <div className="text-center lg:flex lg:items-center lg:gap-4 lg:text-left">
-          <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3 shrink-0 lg:mx-0 lg:mb-0">
-            <KeyRound className="w-7 h-7" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">{estate.name}</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              {gate ? `${gate.name} · ` : ''}
-              Scan the visitor&apos;s QR code, or enter their 6-digit PIN to check them in.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title={estate.name}
+          description="Scan a visitor QR code or enter their six-digit PIN."
+          meta={gate ? `Current post · ${gate.name}` : 'No gate selected'}
+        />
 
         {/* The barrier is part of the record, so a guard who has not said which one
             they are at is told plainly: but is never blocked from recording an
