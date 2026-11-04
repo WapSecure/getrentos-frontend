@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BedDouble,
   Bell,
+  MessageCircleQuestion,
   CalendarClock,
   FileSignature,
   FileText,
@@ -72,12 +73,19 @@ export default function BuyerHome() {
       roleBadge="BY"
       subtitle="Your offers, viewings and purchases"
       accessory={
-        <IconButton
-          onPress={() => router.push('/(app)/buyer-notification-inbox')}
-          accessibilityLabel="Notifications"
-          badge={unread}
-          icon={<Bell size={21} color={colors.foreground} />}
-        />
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <IconButton
+            onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'buyer' } })}
+            accessibilityLabel="Ask GetRentos"
+            icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/buyer-notification-inbox')}
+            accessibilityLabel="Notifications"
+            badge={unread}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        </View>
       }
     />
   );

@@ -7,6 +7,7 @@ import type {
   BuyerDocument,
 } from '@/types/buyer';
 import type { TrustProfile } from '@/types/trust-score';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import { toDisplayPropertyType } from '@/lib/propertyTypes';
 import type { VideoCallJoin } from '@getrentos/shared';
 
@@ -175,6 +176,13 @@ const VIEWING_STATUS_QUERY: Record<ViewingRequest['status'], string> = {
 };
 
 export const buyerService = {
+  askAssistant: (question: string, history: AssistantTurn[]) =>
+    safeCall<AssistantReply>(() =>
+      authFetch('/buyer/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    ),
   // Dashboard
   getDashboard: () => safeCall(() => authFetch<BuyerDashboard>('/buyer/dashboard')),
 
