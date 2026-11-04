@@ -7,6 +7,7 @@ import { Logo } from '@/components/ui/Logo';
 import { AccountMenu } from '@/components/shared/navigation/AccountMenu';
 import { ROLES, getDashboardRoute, resolvePrimaryRoleId } from '@/lib/constants/auth';
 import { agencyTeamService } from '@/services/agencyTeamService';
+import { ManagerAssistant } from './assistant/ManagerAssistant';
 import { useCustody } from './CustodyProvider';
 
 export type AgencyMembership = 'loading' | 'member' | 'not-member' | 'unknown';
@@ -78,8 +79,11 @@ export function AgencyLoadingState() {
  */
 export function AgencyPlainHeader({
   user,
+  showAssistant = false,
 }: {
   user: { fullName: string; email: string; roles?: string[] } | null;
+  /** Only firm members can ask about the firm's book. */
+  showAssistant?: boolean;
 }) {
   const roleId = resolvePrimaryRoleId(user?.roles);
   const roleLabel = Object.values(ROLES).find((role) => role.id === roleId)?.name ?? 'Account';
@@ -89,6 +93,7 @@ export function AgencyPlainHeader({
         <Logo size="md" />
         <div className="flex items-center gap-3">
           <ThemeToggle />
+          {showAssistant && <ManagerAssistant />}
           <AccountMenu user={user} roleId={roleId} roleLabel={roleLabel} />
         </div>
       </div>
