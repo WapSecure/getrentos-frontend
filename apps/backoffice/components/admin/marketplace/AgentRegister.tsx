@@ -27,6 +27,7 @@ import {
   PageErrorState,
   Pagination,
   SearchInput,
+  Select,
   useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
@@ -459,26 +460,54 @@ function AgentCase360({
         </Button>
       </div>
       {reassigning && (
-        <TaskReassignDialog task={reassigning} onClose={() => setReassigning(null)} />
+        <TaskReassignDialog
+          task={reassigning}
+          currentAgentId={detail.id}
+          onClose={() => setReassigning(null)}
+        />
       )}
     </div>
   );
 }
 
-function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: () => void }) {
+function TaskReassignDialog({
+  task,
+  currentAgentId,
+  onClose,
+}: {
+  task: AdminAgentTask;
+  currentAgentId: string;
+  onClose: () => void;
+}) {
   const client = useQueryClient();
+  const [search, setSearch] = useState('');
   const [newAgentId, setNewAgentId] = useState('');
   const [reason, setReason] = useState('');
   const toast = useToast();
 
+  // Staff pick the new agent by name or email; nobody should have to dig a user ID out of a URL.
+  const { data: candidates, isFetching: searching } = useQuery({
+    queryKey: ['admin', 'agents', 'reassign-picker', search.trim()],
+    queryFn: () =>
+      unwrap(
+        adminMarketplaceService.listAgents({ search: search.trim() || undefined, pageSize: 20 })
+      ),
+    placeholderData: keepPreviousData,
+  });
+  const agentOptions = (candidates?.items ?? [])
+    .filter((agent) => agent.id !== currentAgentId)
+    .map((agent) => ({
+      value: agent.id,
+      label: agent.email ? `${agent.legalName} · ${agent.email}` : agent.legalName,
+      disabled: agent.suspended,
+    }));
+
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!newAgentId.trim()) throw new Error('Enter the target agent’s user ID.');
+      if (!newAgentId) throw new Error('Choose the agent to take over this task.');
       if (reason.trim().length < 10)
         throw new Error('Provide an administrative reason of at least 10 characters.');
-      return unwrap(
-        adminMarketplaceService.reassignAgentTask(task.id, newAgentId.trim(), reason.trim())
-      );
+      return unwrap(adminMarketplaceService.reassignAgentTask(task.id, newAgentId, reason.trim()));
     },
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ['admin', 'agents'] });
@@ -492,12 +521,33 @@ function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: 
       <DialogContent className="p-6">
         <DialogTitle className="font-semibold">Reassign task</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
-          {task.title}: find the target agent&apos;s user ID from their own case-360 URL or the
-          users register.
+          Move &ldquo;{task.title}&rdquo; to another agent. Suspended agents can&apos;t take new
+          work.
         </DialogDescription>
         <div className="mt-5 space-y-4">
-          <Field label="Target agent user ID">
-            <Input value={newAgentId} onChange={(e) => setNewAgentId(e.target.value)} />
+          <SearchInput
+            value={search}
+            onValueChange={(value) => {
+              setSearch(value);
+              setNewAgentId('');
+            }}
+            label="Find an agent"
+            placeholder="Search name or email..."
+          />
+          <Field label="New agent">
+            <Select
+              ariaLabel="New agent"
+              value={newAgentId || undefined}
+              onValueChange={setNewAgentId}
+              options={agentOptions}
+              placeholder={
+                searching
+                  ? 'Searching…'
+                  : agentOptions.length
+                    ? 'Choose an agent'
+                    : 'No other agents match'
+              }
+            />
           </Field>
           <Field label="Administrative reason">
             <Input
@@ -512,6 +562,7 @@ function TaskReassignDialog({ task, onClose }: { task: AdminAgentTask; onClose: 
             </Button>
             <Button
               onClick={() => mutation.mutate()}
+              disabled={!newAgentId}
               isLoading={mutation.isPending}
               loadingText="Reassigning…"
             >

@@ -129,6 +129,9 @@ const ProfileSettingsForm = ({
             height={64}
             className="w-16 h-16 rounded-full object-cover"
             loading="lazy"
+            // A short-lived signed storage URL: the optimiser can't cache it and its
+            // host need not be on the allowlist, which otherwise crashes the page.
+            unoptimized
           />
         ) : (
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
