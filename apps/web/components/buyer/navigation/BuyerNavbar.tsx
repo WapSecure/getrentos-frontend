@@ -16,6 +16,7 @@ import { buyerService } from '@/services/buyerService';
 import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
+import { BuyerAssistant } from '../assistant/BuyerAssistant';
 
 interface BuyerNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -84,6 +85,8 @@ export const BuyerNavbar = ({ user }: BuyerNavbarProps) => {
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
+
+              <BuyerAssistant />
 
               <NotificationBell
                 portal="buyer"

@@ -60,6 +60,18 @@ const SERVER_PATHS = [
   '/owner/verification',
   '/owner/settings',
   '/owner/help',
+  // BUYER_ASSISTANT_LINKS
+  '/buyer/dashboard',
+  '/buyer/discover',
+  '/buyer/saved',
+  '/buyer/offers',
+  '/buyer/transactions',
+  '/buyer/viewings',
+  '/buyer/messages',
+  '/buyer/documents',
+  '/buyer/verification',
+  '/buyer/settings',
+  '/buyer/help',
 ];
 
 describe('assistant link routes', () => {
