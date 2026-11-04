@@ -37,6 +37,16 @@ export const qk = {
     client: (ownerId: string) => ['agency', 'client', ownerId] as const,
     clientMoney: (ownerId: string) => ['agency', 'client', ownerId, 'money'] as const,
     transfers: ['agency', 'transfers'] as const,
+    members: ['agency', 'team', 'members'] as const,
+    invitations: ['agency', 'team', 'invitations'] as const,
+    commissions: ['agency', 'commissions'] as const,
+    commissionTeam: ['agency', 'commissions', 'team'] as const,
+    firmPayout: ['agency', 'payouts', 'firm'] as const,
+    agentPayouts: ['agency', 'payouts', 'agents'] as const,
+    myPayout: ['agency', 'payouts', 'mine'] as const,
+    protection: ['agency', 'protection'] as const,
+    kpis: (from: string, to: string) => ['agency', 'kpis', from, to] as const,
+    onboarding: ['agency', 'onboarding'] as const,
   },
   /** Getting a property managed (lib/api/managedService). */
   managed: {
