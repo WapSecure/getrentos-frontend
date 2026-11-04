@@ -16,7 +16,7 @@ export function SectionHeader({ title, description, actionLabel, onAction }: Sec
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.md }}>
       <View style={{ flex: 1, gap: spacing.xxs }}>
-        <Text accessibilityRole="header" variant="heading">
+        <Text headingLevel={2} variant="heading">
           {title}
         </Text>
         {description ? (

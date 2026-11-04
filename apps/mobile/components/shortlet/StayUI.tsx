@@ -116,7 +116,7 @@ export function Section({
     <View style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm }}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="heading" accessibilityRole="header">
+          <Text variant="heading" headingLevel={2}>
             {title}
           </Text>
           {caption ? (

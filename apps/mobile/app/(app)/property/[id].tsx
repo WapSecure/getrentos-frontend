@@ -129,7 +129,7 @@ export default function PropertyDetail() {
                     <Badge label="Verified" tone="success" />
                   ) : null}
                 </View>
-                <Text variant="heading" accessibilityRole="header">
+                <Text variant="heading" headingLevel={1}>
                   {p.title}
                 </Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -169,7 +169,7 @@ export default function PropertyDetail() {
 
               {p.description ? (
                 <View style={{ gap: spacing.xs }}>
-                  <Text variant="bodyStrong" accessibilityRole="header">
+                  <Text variant="bodyStrong" headingLevel={2}>
                     About this home
                   </Text>
                   <Text
@@ -190,7 +190,7 @@ export default function PropertyDetail() {
 
               {p.amenities?.length ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong" accessibilityRole="header">
+                  <Text variant="bodyStrong" headingLevel={2}>
                     Amenities
                   </Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
@@ -203,7 +203,7 @@ export default function PropertyDetail() {
 
               {p.landlordName ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong" accessibilityRole="header">
+                  <Text variant="bodyStrong" headingLevel={2}>
                     Listed by
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -220,7 +220,7 @@ export default function PropertyDetail() {
 
               {p.reviews && p.reviews.length > 0 ? (
                 <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong" accessibilityRole="header">
+                  <Text variant="bodyStrong" headingLevel={2}>
                     Reviews
                   </Text>
                   <Card elevated padding="none">
@@ -304,7 +304,7 @@ export default function PropertyDetail() {
                       justifyContent: 'space-between',
                     }}
                   >
-                    <Text variant="bodyStrong" accessibilityRole="header">
+                    <Text variant="bodyStrong" headingLevel={2}>
                       Location
                     </Text>
                     {/* Directions to an approximate point would lead to the wrong street. */}
@@ -431,7 +431,11 @@ export default function PropertyDetail() {
           ) : null}
           <View style={{ flex: 1 }}>
             <Button
-              label={p.acceptingApplications === false ? 'Let · not accepting applications' : 'Apply to rent'}
+              label={
+                p.acceptingApplications === false
+                  ? 'Let · not accepting applications'
+                  : 'Apply to rent'
+              }
               disabled={p.acceptingApplications === false}
               onPress={() => router.push(`/(app)/property/${id}/apply`)}
             />

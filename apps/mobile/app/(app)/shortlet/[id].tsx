@@ -188,7 +188,7 @@ export default function ShortletDetail() {
             >
               {/* Title and trust */}
               <View style={{ gap: spacing.sm }}>
-                <Text variant="title" accessibilityRole="header">
+                <Text variant="title" headingLevel={1}>
                   {listing.title}
                 </Text>
                 <Text variant="body" color="mutedForeground">

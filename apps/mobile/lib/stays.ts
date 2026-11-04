@@ -51,7 +51,12 @@ export const OUTCOME_LABEL: Record<GuestPromiseOutcome, string> = {
   NOT_UPHELD: 'Not upheld',
 };
 
-/** "27 Sept 2026, 11:00 pm" in Lagos time: report deadlines are to the hour. */
+/**
+ * "27 Sept 2026, 11:00 pm" in Lagos time: report deadlines are to the hour.
+ *
+ * `hour12` is explicit because `en-NG` otherwise formats 24-hour and prints
+ * midnight as an unpadded "0:00", which is what the Guest Promise window showed.
+ */
 export const formatDeadline = (iso: string) =>
   new Date(iso).toLocaleString('en-NG', {
     day: 'numeric',
@@ -59,6 +64,7 @@ export const formatDeadline = (iso: string) =>
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    hour12: true,
     timeZone: 'Africa/Lagos',
   });
 
