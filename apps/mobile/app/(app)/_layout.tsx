@@ -116,6 +116,7 @@ export default function AppLayout() {
       <Stack.Screen name="landlord-arrears" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-offers" options={DETAIL_OPTIONS} />
       <Stack.Screen name="change-manager" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="get-managed" options={DETAIL_OPTIONS} />
       <Stack.Screen name="legal-cases" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-automations" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-budgets" options={DETAIL_OPTIONS} />
