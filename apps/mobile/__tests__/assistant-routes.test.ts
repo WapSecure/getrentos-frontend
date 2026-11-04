@@ -72,6 +72,19 @@ const SERVER_PATHS = [
   '/buyer/verification',
   '/buyer/settings',
   '/buyer/help',
+  // AGENT_ASSISTANT_LINKS
+  '/agent/dashboard',
+  '/agent/tasks',
+  '/agent/inspections',
+  '/agent/verifications',
+  '/agent/work-orders',
+  '/agent/sync',
+  '/agent/documents',
+  '/agent/messages',
+  '/agent/trust-profile',
+  '/agent/verification',
+  '/agent/settings',
+  '/agent/help',
 ];
 
 describe('assistant link routes', () => {

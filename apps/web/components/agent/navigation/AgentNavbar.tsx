@@ -16,6 +16,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
+import { AgentAssistant } from '../assistant/AgentAssistant';
 
 interface AgentNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -103,6 +104,8 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
               </Badge>
 
               <ThemeToggle />
+
+              <AgentAssistant />
 
               <NotificationBell
                 portal="agent"

@@ -58,6 +58,16 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
     scope: 'Ask about your properties, listings, offers, sales, viewings or realtors.',
     placeholder: 'Ask about offers, sales or viewings',
   },
+  agent: {
+    starters: [
+      'What should I do first today?',
+      'Which inspections are still drafts?',
+      'Do I have work orders to start?',
+      'Has a client approved my invitation?',
+    ],
+    scope: 'Ask about your tasks, inspections, verifications, work orders or clients.',
+    placeholder: 'Ask about tasks, inspections or work orders',
+  },
   buyer: {
     starters: [
       'Which offers need my answer?',
@@ -87,7 +97,8 @@ export default function AskScreen() {
     params.persona === 'landlord' ||
     params.persona === 'realtor' ||
     params.persona === 'owner' ||
-    params.persona === 'buyer'
+    params.persona === 'buyer' ||
+    params.persona === 'agent'
       ? params.persona
       : 'renter';
   const copy = COPY[persona];
