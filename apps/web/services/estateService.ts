@@ -1,5 +1,6 @@
 import { authDownload, authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type {
   Estate,
   Household,
@@ -93,6 +94,15 @@ function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unkn
 }
 
 export const estateService = {
+  /** Read-only answers about one estate, for its managers. */
+  askAssistant: (estateId: string, question: string, history: AssistantTurn[]) =>
+    safeCall<AssistantReply>(() =>
+      authFetch(`/estate/${estateId}/assistant/ask`, {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    ),
+
   async createEstate(data: {
     name: string;
     address: string;

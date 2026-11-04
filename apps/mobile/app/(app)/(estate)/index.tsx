@@ -8,6 +8,7 @@ import {
   ChevronRight,
   CircleAlert,
   Megaphone,
+  MessageCircleQuestion,
   SlidersHorizontal,
   Sparkles,
   UserPlus,
@@ -19,6 +20,7 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   LinkButton,
   Price,
   PressableScale,
@@ -113,7 +115,18 @@ export default function EstateHome() {
             : 'Community operations'
         }
         accessory={
-          estates.length > 1 ? <ChevronDown size={20} color={colors.mutedForeground} /> : null
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            {estateId ? (
+              <IconButton
+                onPress={() =>
+                  router.push({ pathname: '/(app)/ask', params: { persona: 'estate', estateId } })
+                }
+                accessibilityLabel="Ask GetRentos"
+                icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+              />
+            ) : null}
+            {estates.length > 1 ? <ChevronDown size={20} color={colors.mutedForeground} /> : null}
+          </View>
         }
       />
     </Pressable>

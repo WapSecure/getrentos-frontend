@@ -8,6 +8,7 @@ import { IconButton, ThemeToggle } from '@getrentos/ui';
 import { EstateProfileDropdown } from './EstateProfileDropdown';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { EstateSwitcher } from './EstateSwitcher';
+import { EstateAssistant } from '../assistant/EstateAssistant';
 import { navGroups } from '../dashboard/EstateSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { ROUTES } from '@/lib/constants/auth';
@@ -43,6 +44,7 @@ export const EstateNavbar = ({ user }: EstateNavbarProps) => {
               <div className="hidden sm:flex">
                 <ThemeToggle />
               </div>
+              <EstateAssistant />
               <NotificationBell portal="estate" basePath="/estate/notifications" />
               <EstateProfileDropdown user={user} />
 
