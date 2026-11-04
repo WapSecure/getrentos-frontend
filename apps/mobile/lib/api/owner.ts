@@ -58,7 +58,8 @@ export interface OwnerProperty {
   ownerName: string;
   verificationStatus: OwnerVerificationStatus;
   rejectionReason?: string;
-  estimatedValue: number;
+  /** Absent when the owner has never entered a valuation. */
+  estimatedValue?: number;
   purchasePrice?: number;
   purchaseDate?: string;
   coverImageUrl?: string;

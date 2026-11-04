@@ -69,8 +69,12 @@ export const OwnerPropertyCard = ({
   const verification = verificationConfig[property.verificationStatus];
   const VerificationIcon = verification.icon;
   const purchasePrice = property.purchasePrice ?? 0;
+  // A property the owner has not valued has no appreciation to show. Computing it
+  // anyway produced NaN%, and the card printed a confident ₦0.
   const appreciation =
-    purchasePrice > 0 ? ((property.estimatedValue - purchasePrice) / purchasePrice) * 100 : 0;
+    property.estimatedValue != null && purchasePrice > 0
+      ? ((property.estimatedValue - purchasePrice) / purchasePrice) * 100
+      : null;
 
   return (
     <motion.div
@@ -147,16 +151,22 @@ export const OwnerPropertyCard = ({
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
           <div>
             <p className="text-xs text-muted-foreground">Estimated value</p>
-            <p className="text-sm font-semibold text-foreground">
-              {formatCurrency(property.estimatedValue, { compact: true })}
-            </p>
+            {property.estimatedValue == null ? (
+              <p className="text-sm font-semibold text-muted-foreground">Not set</p>
+            ) : (
+              <p className="text-sm font-semibold text-foreground">
+                {formatCurrency(property.estimatedValue, { compact: true })}
+              </p>
+            )}
           </div>
-          <p
-            className={`text-sm font-semibold ${appreciation >= 0 ? 'text-success' : 'text-destructive'}`}
-          >
-            {appreciation >= 0 ? '+' : ''}
-            {appreciation.toFixed(1)}%
-          </p>
+          {appreciation != null ? (
+            <p
+              className={`text-sm font-semibold ${appreciation >= 0 ? 'text-success' : 'text-destructive'}`}
+            >
+              {appreciation >= 0 ? '+' : ''}
+              {appreciation.toFixed(1)}%
+            </p>
+          ) : null}
         </div>
       </div>
     </motion.div>
