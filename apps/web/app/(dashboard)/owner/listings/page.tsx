@@ -9,6 +9,7 @@ import {
   SearchInput,
   SegmentedControl,
   Skeleton,
+  useToast,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -70,6 +71,7 @@ export default function OwnerListingsPage() {
   const total = data?.total ?? 0;
   const hasActiveFilters = Boolean(debouncedSearch || filter !== 'all');
 
+  const toast = useToast();
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ownerKeys.listings });
 
   const createMutation = useMutation({
@@ -87,8 +89,15 @@ export default function OwnerListingsPage() {
     mutationFn: ({ id, status }: { id: string; status: SaleListingStatus }) =>
       unwrap(
         ownerService.setListingStatus(id, status.toUpperCase() as 'PUBLISHED' | 'PAUSED' | 'CLOSED')
-      ),
-    onSuccess: invalidate,
+      ) as Promise<{ status?: SaleListingStatus }>,
+    onSuccess: (listing, { status }) => {
+      invalidate();
+      if (status === 'published' && listing?.status === 'pending_verification') {
+        toast.success('Sent for review. GetRentos checks it before it goes live.');
+      }
+    },
+    // A refusal used to vanish: the modal closes before the request answers.
+    onError: (error) => toast.error(error.message || 'Could not update this listing.'),
   });
 
   // Awaited by the form, which then saves the photos and closes; a refusal
@@ -188,21 +197,21 @@ export default function OwnerListingsPage() {
           }
           action={
             !hasActiveFilters ? (
-            <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
-              Create your first listing
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearchQuery('');
-                setDebouncedSearch('');
-                setFilter('all');
-                setPage(1);
-              }}
-            >
-              Clear filters
-            </Button>
+              <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
+                Create your first listing
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery('');
+                  setDebouncedSearch('');
+                  setFilter('all');
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
             )
           }
         />
