@@ -8,6 +8,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Clock,
+  MessageCircleQuestion,
   Users,
 } from 'lucide-react-native';
 import {
@@ -15,6 +16,7 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  IconButton,
   Screen,
   SectionHeader,
   Skeleton,
@@ -53,6 +55,13 @@ export default function AgentHome() {
       title={firstName(profile?.legalName)}
       roleBadge="AG"
       subtitle="Your tasks, clients and field work"
+      accessory={
+        <IconButton
+          onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'agent' } })}
+          accessibilityLabel="Ask GetRentos"
+          icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+        />
+      }
     />
   );
 

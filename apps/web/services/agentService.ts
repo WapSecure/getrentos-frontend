@@ -11,6 +11,7 @@ import type {
 } from '@/types/agent';
 import type { AgentDocument, InspectionPhoto } from '@/types/agent';
 import type { TrustProfile } from '@/types/trust-score';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 
 export interface AgentDashboard {
   assignedProperties: number;
@@ -209,6 +210,13 @@ export interface AgentWorkOrder {
 }
 
 export const agentService = {
+  askAssistant: (question: string, history: AssistantTurn[]) =>
+    safeCall<AssistantReply>(() =>
+      authFetch('/agent/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    ),
   listClientAssignments: (options: AgentClientListOptions = {}) =>
     safeCall(() =>
       authFetch<Paginated<AgentClientAssignment>>(
