@@ -18,7 +18,7 @@ export interface RenterAssistantReply {
   model: string | null;
 }
 
-export type AssistantPersona = 'renter' | 'landlord' | 'realtor';
+export type AssistantPersona = 'renter' | 'landlord' | 'realtor' | 'owner';
 
 export const assistantApi = {
   ask: (question: string, history: AssistantTurn[], persona: AssistantPersona = 'renter') =>
@@ -73,6 +73,18 @@ const MOBILE_ROUTES: Record<string, string> = {
   '/realtor/verification': '/(app)/realtor-trust-profile',
   '/realtor/settings': '/(app)/(realtor)/account',
   '/realtor/help': '/(app)/help',
+  '/owner/dashboard': '/(app)/(owner)',
+  '/owner/properties': '/(app)/(owner)/properties',
+  '/owner/listings': '/(app)/(owner)/properties',
+  '/owner/offers': '/(app)/(owner)/offers',
+  '/owner/transactions': '/(app)/owner-transactions',
+  '/owner/viewings': '/(app)/owner-viewings',
+  '/owner/realtors': '/(app)/representatives',
+  '/owner/messages': '/(app)/(owner)/messages',
+  '/owner/documents': '/(app)/owner-documents',
+  '/owner/verification': '/(app)/owner-trust-profile',
+  '/owner/settings': '/(app)/owner-settings',
+  '/owner/help': '/(app)/help',
 };
 
 export function mobileRouteFor(path: string): string | null {

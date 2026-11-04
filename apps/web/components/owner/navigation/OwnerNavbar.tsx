@@ -16,6 +16,7 @@ import { ownerService } from '@/services/ownerService';
 import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
+import { OwnerAssistant } from '../assistant/OwnerAssistant';
 
 interface OwnerNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -83,6 +84,8 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
 
             <div className="flex items-center gap-3">
               <ThemeToggle />
+
+              <OwnerAssistant />
 
               <NotificationBell
                 portal="owner"

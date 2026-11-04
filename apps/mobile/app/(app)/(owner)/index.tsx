@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import {
   BadgeCheck,
@@ -8,6 +9,7 @@ import {
   DoorOpen,
   FileSignature,
   Handshake,
+  MessageCircleQuestion,
   Plus,
   Users,
   Wallet,
@@ -58,12 +60,19 @@ export default function OwnerHome() {
       roleBadge="PO"
       subtitle="Your properties, offers and sales"
       accessory={
-        <IconButton
-          onPress={() => router.push('/(app)/owner-notifications')}
-          accessibilityLabel="Notifications"
-          badge={unread}
-          icon={<Bell size={21} color={colors.foreground} />}
-        />
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <IconButton
+            onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'owner' } })}
+            accessibilityLabel="Ask GetRentos"
+            icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/owner-notifications')}
+            accessibilityLabel="Notifications"
+            badge={unread}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        </View>
       }
     />
   );

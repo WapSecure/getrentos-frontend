@@ -9,6 +9,7 @@ import type {
   OwnershipTransferDocument,
 } from '@/types/owner';
 import type { TrustProfile } from '@/types/trust-score';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type { VideoCallJoin } from '@getrentos/shared';
 import { toApiPropertyType, toDisplayPropertyType } from '@/lib/propertyTypes';
 
@@ -161,6 +162,13 @@ export interface OwnerViewing {
 }
 
 export const ownerService = {
+  askAssistant: (question: string, history: AssistantTurn[]) =>
+    safeCall<AssistantReply>(() =>
+      authFetch('/owner/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    ),
   // Dashboard
   getDashboard: () => safeCall(() => authFetch<OwnerDashboard>('/owner/dashboard')),
 
