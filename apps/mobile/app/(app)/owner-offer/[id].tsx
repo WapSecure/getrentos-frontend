@@ -19,13 +19,8 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
-import {
-  offerGap,
-  ownerApi,
-  OWNER_OFFER_LABEL,
-  OWNER_OFFER_TONE,
-  type OwnerOffer,
-} from '@/lib/api/owner';
+import { offerGap, OWNER_OFFER_LABEL, OWNER_OFFER_TONE, type OwnerOffer } from '@/lib/api/owner';
+import { asOfferSide, sellerOffers, type OfferSide } from '@/lib/api/sellerOffers';
 import { formatDate } from '@/lib/format';
 import { ApiError } from '@/lib/api/client';
 import { readGate } from '@/lib/verificationGate';
@@ -42,7 +37,11 @@ const FINANCING: Record<string, string> = {
 };
 
 export default function OwnerOfferDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id: string; side?: string }>();
+  const id = params.id;
+  // The same screen serves an owner's and a landlord's offers.
+  const side = asOfferSide(params.side);
+  const api = sellerOffers(side);
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const { width, fontScale } = useWindowDimensions();
@@ -51,22 +50,22 @@ export default function OwnerOfferDetail() {
   const toast = useToast();
   const [counterOpen, setCounterOpen] = useState(false);
 
-  const offers = useQuery({ queryKey: qk.owner.offers, queryFn: () => ownerApi.offers() });
+  const offers = useQuery({ queryKey: api.keys.list, queryFn: () => api.list() });
   const offer = offers.data?.items.find((o) => o.id === id);
   const thread = useQuery({
-    queryKey: qk.owner.offerThread(id),
-    queryFn: () => ownerApi.offerThread(id),
+    queryKey: api.keys.thread(id),
+    queryFn: () => api.thread(id),
     enabled: !!id,
   });
 
   const refresh = () => {
-    qc.invalidateQueries({ queryKey: qk.owner.offers });
+    qc.invalidateQueries({ queryKey: api.keys.list });
     qc.invalidateQueries({ queryKey: qk.owner.dashboard });
     qc.invalidateQueries({ queryKey: qk.owner.transactions });
   };
 
   const accept = useMutation({
-    mutationFn: () => ownerApi.acceptOffer(id),
+    mutationFn: () => api.accept(id),
     onSuccess: () => {
       haptics.success();
       refresh();
@@ -85,7 +84,7 @@ export default function OwnerOfferDetail() {
   });
 
   const reject = useMutation({
-    mutationFn: () => ownerApi.rejectOffer(id),
+    mutationFn: () => api.reject(id),
     onSuccess: () => {
       refresh();
       toast.show('Offer declined.', 'success');
@@ -232,7 +231,7 @@ export default function OwnerOfferDetail() {
                   />
                 </View>
               </View>
-            ) : offer.status === 'accepted' ? (
+            ) : offer.status === 'accepted' && side === 'owner' ? (
               <Button
                 label="Follow the sale"
                 variant="outline"
@@ -296,9 +295,10 @@ export default function OwnerOfferDetail() {
           <CounterForm
             key={counterOpen ? 'open' : 'closed'}
             offer={offer}
+            side={side}
             onDone={() => {
               setCounterOpen(false);
-              qc.invalidateQueries({ queryKey: qk.owner.offerThread(id) });
+              qc.invalidateQueries({ queryKey: api.keys.thread(id) });
               refresh();
             }}
           />
@@ -325,7 +325,15 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CounterForm({ offer, onDone }: { offer: OwnerOffer; onDone: () => void }) {
+function CounterForm({
+  offer,
+  side,
+  onDone,
+}: {
+  offer: OwnerOffer;
+  side: OfferSide;
+  onDone: () => void;
+}) {
   const { spacing } = useTheme();
   const toast = useToast();
   const [amount, setAmount] = useState(String(offer.askingPrice));
@@ -333,7 +341,7 @@ function CounterForm({ offer, onDone }: { offer: OwnerOffer; onDone: () => void 
   const value = Number(amount.replace(/\D/g, ''));
 
   const counter = useMutation({
-    mutationFn: () => ownerApi.counterOffer(offer.id, value, message.trim() || undefined),
+    mutationFn: () => sellerOffers(side).counter(offer.id, value, message.trim() || undefined),
     onSuccess: () => {
       toast.show('Counter-offer sent.', 'success');
       onDone();

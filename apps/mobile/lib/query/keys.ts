@@ -18,6 +18,27 @@ export const qk = {
     mine: ['property-authorities', 'mine'] as const,
   },
   estateAgreements: ['estate-agreements', 'mine'] as const,
+  /** Tenancy notices and arrears (lib/api/tenancyNotices). */
+  notices: {
+    running: ['notices', 'list', 'SERVED'] as const,
+    periods: ['notices', 'periods'] as const,
+    ladder: (leaseId: string) => ['notices', 'ladder', leaseId] as const,
+    overdue: ['landlord', 'payments', 'overdue'] as const,
+  },
+  /** Landlord + owner property control (lib/api/management). */
+  management: {
+    activity: (propertyId: string, who: string) =>
+      ['management', 'activity', propertyId, who] as const,
+    queries: (as: 'owner' | 'manager') => ['management', 'queries', 'list', as] as const,
+    query: (id: string) => ['management', 'queries', 'thread', id] as const,
+    mandates: ['management', 'mandates', 'mine'] as const,
+    spendApprovals: (role: string) => ['management', 'spend-approvals', role] as const,
+    countersign: ['management', 'awaiting-countersign'] as const,
+    deposits: (status: string) => ['management', 'deposits', 'list', status] as const,
+    deposit: (id: string) => ['management', 'deposits', 'one', id] as const,
+    inspections: (status: string) => ['management', 'inspections', 'list', status] as const,
+    inspection: (id: string) => ['management', 'inspections', 'one', id] as const,
+  },
   landConsents: ['land', 'consent-requests'] as const,
   landWatches: ['land', 'watch'] as const,
   landWatchOptions: ['land', 'watch-options'] as const,

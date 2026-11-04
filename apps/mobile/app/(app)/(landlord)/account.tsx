@@ -6,6 +6,7 @@ import {
   Banknote,
   CalendarClock,
   BarChart3,
+  BellRing,
   BedDouble,
   CalendarCheck,
   CircleHelp,
@@ -15,6 +16,7 @@ import {
   FileText,
   Gift,
   Globe,
+  HandCoins,
   Handshake,
   HardHat,
   KeyRound,
@@ -32,6 +34,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { managementItems } from '@/components/account/managementItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -63,6 +66,13 @@ export default function LandlordAccount() {
       onPress: go('/(app)/landlord-payments'),
     },
     {
+      key: 'notices',
+      label: 'Notices',
+      description: 'Arrears ladder, service and notice periods',
+      icon: BellRing,
+      onPress: go('/(app)/landlord-notices'),
+    },
+    {
       key: 'maintenance',
       label: 'Maintenance',
       description: 'Open issues across your properties',
@@ -82,6 +92,13 @@ export default function LandlordAccount() {
       description: 'Confirm visits and host video viewings',
       icon: CalendarClock,
       onPress: go('/(app)/landlord-viewings'),
+    },
+    {
+      key: 'offers',
+      label: 'Offers',
+      description: 'Buyers bidding on property you sell',
+      icon: HandCoins,
+      onPress: go('/(app)/landlord-offers'),
     },
     {
       key: 'leads',
@@ -249,6 +266,7 @@ export default function LandlordAccount() {
 
       <SettingsGroup title="Renting" items={renting} />
       <SettingsGroup title="Portfolio & growth" items={business} />
+      <SettingsGroup title="Tenancy & oversight" items={managementItems()} />
       <SettingsGroup title="Trust & reputation" items={trust} />
       <SettingsGroup
         title="Settings"

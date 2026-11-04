@@ -34,6 +34,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
+import { managementItems } from '@/components/account/managementItems';
 
 const go = (href: Href) => () => router.push(href);
 
@@ -268,6 +269,7 @@ export default function OwnerAccount() {
       <WorkspaceSwitcher />
 
       <SettingsGroup title="Selling" items={selling} />
+      <SettingsGroup title="Tenancy & oversight" items={managementItems()} />
       <SettingsGroup title="Trust & reputation" items={trust} />
       <SettingsGroup
         title="Settings"

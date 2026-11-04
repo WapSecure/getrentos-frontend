@@ -110,6 +110,18 @@ export default function AppLayout() {
       <Stack.Screen name="landlord-financials" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-expenses" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-owner-statements" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="property-activity" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-notices" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="notice-ladder/[leaseId]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-arrears" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="landlord-offers" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="manager-queries" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="manager-query/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="spend-approvals" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="deposits" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="deposit/[id]" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="property-inspections" options={DETAIL_OPTIONS} />
+      <Stack.Screen name="property-inspection/[id]" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-listings" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-leads" options={DETAIL_OPTIONS} />
       <Stack.Screen name="landlord-microsite" options={DETAIL_OPTIONS} />

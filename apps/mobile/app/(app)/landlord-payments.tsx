@@ -4,7 +4,8 @@ import { RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MessageSquareWarning, Plus, Wallet } from 'lucide-react-native';
+import { ChevronRight, MessageSquareWarning, Plus, Wallet } from 'lucide-react-native';
+import { router } from 'expo-router';
 import {
   Badge,
   Card,
@@ -12,6 +13,7 @@ import {
   ErrorState,
   IconButton,
   Price,
+  PressableScale,
   Skeleton,
   Text,
   useTheme,
@@ -106,7 +108,10 @@ export default function LandlordPayments() {
               </Card>
 
               {(arrears.data?.overdueCount ?? 0) > 0 ? (
-                <View
+                <PressableScale
+                  onPress={() => router.push('/(app)/landlord-arrears')}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${arrears.data?.overdueCount} in arrears. Open the arrears list`}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -127,7 +132,8 @@ export default function LandlordPayments() {
                     color="destructive"
                     compact
                   />
-                </View>
+                  <ChevronRight size={16} color={colors.destructive} />
+                </PressableScale>
               ) : null}
             </View>
           }
