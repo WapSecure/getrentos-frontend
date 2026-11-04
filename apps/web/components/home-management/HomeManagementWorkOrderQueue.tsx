@@ -276,7 +276,10 @@ export function HomeManagementWorkOrderQueue({
     Boolean(form.propertyId) && Boolean(unitForm.unitName.trim()) && hasValidUnitDetails;
 
   // Property managers triage here (the agency workspace mounts this queue).
-  const triage = useMaintenanceTriage({ onApplied: () => invalidateWorkOrderViews() });
+  const triage = useMaintenanceTriage({
+    onApplied: () => invalidateWorkOrderViews(),
+    assignVendor: (id, vendorId) => assignVendor.mutateAsync({ id, assignedVendorId: vendorId }),
+  });
 
   const invalidateWorkOrderViews = async () => {
     await Promise.all([
@@ -656,6 +659,12 @@ export function HomeManagementWorkOrderQueue({
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                           {workOrder.description}
                         </p>
+                        {workOrder.workOrderScope && (
+                          <p className="mt-2 max-w-3xl rounded-md bg-secondary/40 px-3 py-2 text-sm text-foreground">
+                            <span className="font-medium">Agreed scope: </span>
+                            {workOrder.workOrderScope}
+                          </p>
+                        )}
                         {workOrder.images?.length ? (
                           <div className="mt-3 flex flex-wrap gap-2">
                             {workOrder.images.map((image, index) => (

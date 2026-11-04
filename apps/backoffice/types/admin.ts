@@ -471,6 +471,10 @@ export interface AiReviewCapabilitySummary {
   alertsDecided: number;
   /** Triage: accepted or edited / decided, as a percentage. */
   acceptanceRate: number | null;
+  /** Median minutes from the AI output to a person's decision. */
+  medianMinutesToDecision: number | null;
+  /** Triage: median minutes from the request being reported to the triage decision. */
+  medianMinutesReportedToDecision: number | null;
 }
 
 export interface AiReviewsSummary {

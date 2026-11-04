@@ -195,6 +195,12 @@ export default function AdminAiUsagePage() {
 }
 
 const pct = (value: number | null) => (value === null ? '—' : `${value}%`);
+const duration = (minutes: number | null) => {
+  if (minutes === null) return '—';
+  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 48 * 60) return `${Math.round(minutes / 60)} h`;
+  return `${Math.round(minutes / 1440)} days`;
+};
 
 /**
  * The P1/P2 gate evidence: AI proposes, a person decides. Fraud precision comes
@@ -254,6 +260,8 @@ function FraudReviewCard({ summary }: { summary: AiReviewCapabilitySummary }) {
         </dd>
         <dt className="text-muted-foreground">Alerts awaiting a decision</dt>
         <dd className="text-right tabular-nums">{summary.alertsOpened - summary.alertsDecided}</dd>
+        <dt className="text-muted-foreground">Typical time to a decision</dt>
+        <dd className="text-right tabular-nums">{duration(summary.medianMinutesToDecision)}</dd>
       </dl>
     </section>
   );
@@ -278,6 +286,12 @@ function TriageReviewCard({ summary }: { summary: AiReviewCapabilitySummary }) {
         </dd>
         <dt className="text-muted-foreground">Not yet decided</dt>
         <dd className="text-right tabular-nums">{summary.pending}</dd>
+        <dt className="text-muted-foreground">Typical suggestion → decision</dt>
+        <dd className="text-right tabular-nums">{duration(summary.medianMinutesToDecision)}</dd>
+        <dt className="text-muted-foreground">Typical report → triaged</dt>
+        <dd className="text-right tabular-nums">
+          {duration(summary.medianMinutesReportedToDecision)}
+        </dd>
       </dl>
     </section>
   );

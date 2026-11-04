@@ -90,6 +90,12 @@ export const MaintenanceRequestCard = ({
       </div>
 
       <p className="text-sm text-muted-foreground mt-3 line-clamp-2">{request.description}</p>
+      {request.workOrderScope && (
+        <p className="mt-2 rounded-md bg-secondary/40 px-3 py-2 text-sm text-foreground line-clamp-3">
+          <span className="font-medium">Agreed scope: </span>
+          {request.workOrderScope}
+        </p>
+      )}
 
       <div className="flex items-center justify-between mt-3">
         <p className="text-xs text-muted-foreground">
