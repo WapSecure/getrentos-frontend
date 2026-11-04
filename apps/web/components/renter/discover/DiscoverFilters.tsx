@@ -20,7 +20,15 @@ interface DiscoverFiltersProps {
   onApplyFilters: (filters: Filters) => void;
 }
 
-const propertyTypes = ['Apartment', 'House', 'Studio', 'Duplex', 'Townhouse', 'Condo'];
+// The backend's own property types: anything else ("House", "Townhouse") is not a
+// type a listing can have, so the search would fail. Studio flats are apartments.
+const propertyTypes = [
+  { value: 'APARTMENT', label: 'Apartment' },
+  { value: 'DUPLEX', label: 'Duplex' },
+  { value: 'CONDO', label: 'Condo' },
+  { value: 'SHARED_APARTMENT', label: 'Shared apartment' },
+  { value: 'COMMERCIAL', label: 'Commercial' },
+];
 const bedroomOptions = ['Any', '1', '2', '3', '4', '5+'];
 const bathroomOptions = ['Any', '1', '2', '3', '4+'];
 
@@ -32,10 +40,7 @@ const bathroomSelectOptions = bathroomOptions.map((option) => ({
   value: option === 'Any' ? '' : option,
   label: option !== 'Any' && option !== '4+' ? `${option} bath` : option,
 }));
-const propertyTypeOptions = [
-  { value: '', label: 'Any' },
-  ...propertyTypes.map((type) => ({ value: type, label: type })),
-];
+const propertyTypeOptions = [{ value: '', label: 'Any' }, ...propertyTypes];
 
 export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
