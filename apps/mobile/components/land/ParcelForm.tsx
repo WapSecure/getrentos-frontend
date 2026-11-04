@@ -52,6 +52,7 @@ export function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => vo
   const [surveyNumber, setSurveyNumber] = useState(p?.surveyNumber ?? '');
   const [zoning, setZoning] = useState(p?.zoning ?? '');
   const [roadAccess, setRoadAccess] = useState(p?.roadAccess ?? false);
+  const [subdivisionAllowed, setSubdivisionAllowed] = useState(p?.subdivisionAllowed ?? false);
   const [notes, setNotes] = useState(p?.boundaryNotes ?? '');
   const [savedCorners] = useState(() => boundaryCorners(p?.boundaryGeometry));
   const [corners, setCorners] = useState<BoundaryCorner[]>(savedCorners ?? []);
@@ -72,6 +73,7 @@ export function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => vo
         surveyNumber: orUndefined(surveyNumber),
         zoning: orUndefined(zoning),
         roadAccess,
+        subdivisionAllowed,
         boundaryNotes: orUndefined(notes),
         // Fewer than 3 corners is no outline: clear a saved one, otherwise send nothing.
         boundaryGeometry: boundaryGeometry(corners) ?? (savedCorners ? null : undefined),
@@ -146,6 +148,12 @@ export function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => vo
       <TextField label="Survey plan number" value={surveyNumber} onChangeText={setSurveyNumber} />
       <TextField label="Zoning (e.g. residential)" value={zoning} onChangeText={setZoning} />
       <SwitchRow label="Has road access" value={roadAccess} onValueChange={setRoadAccess} />
+      <SwitchRow
+        label="Can subdivide"
+        description="The title permits carving plots out of it. Needed to sell it as an estate."
+        value={subdivisionAllowed}
+        onValueChange={setSubdivisionAllowed}
+      />
       <View style={{ gap: spacing.sm }}>
         <Text variant="bodyStrong">Plot outline</Text>
         <Text variant="caption" color="mutedForeground">

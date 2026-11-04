@@ -56,6 +56,8 @@ export interface LandParcelInput {
   zoning?: string;
   permittedUse?: string;
   roadAccess?: boolean;
+  /** The title permits carving plots out of it; needed for an estate layout. */
+  subdivisionAllowed?: boolean;
   titleType?: LandTitleType;
   titleNumber?: string;
   surveyNumber?: string;
