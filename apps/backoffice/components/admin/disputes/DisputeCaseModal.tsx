@@ -396,6 +396,21 @@ export const DisputeCaseModal = ({
               </div>
             </div>
           )}
+          {!canDecide && canReopen && (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => onReopen(dispute.id)}
+                isLoading={isReopening}
+                disabled={isReopening}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reopen
+              </Button>
+            </div>
+          )}
           <div>
             {messageError && (
               <Alert variant="danger" className="mb-2">
