@@ -81,6 +81,13 @@ export interface ApplicationReferenceInput {
   relationship: string;
 }
 
+/**
+ * A document as it goes over the wire. The signed `url` is a display convenience
+ * for the wizard's review step — the API whitelist rejects unknown properties, so
+ * sending it back failed every application that had an upload attached.
+ */
+export type ApplicationDocumentInput = Omit<ApplicationDocument, 'url'>;
+
 export interface SubmitApplicationInput {
   listingId: string;
   fullName: string;
@@ -97,7 +104,7 @@ export interface SubmitApplicationInput {
   nextOfKinPhone?: string;
   nextOfKinRelationship?: string;
   references?: ApplicationReferenceInput[];
-  documents: ApplicationDocument[];
+  documents: ApplicationDocumentInput[];
 }
 
 export interface ApplicationNote {

@@ -18,6 +18,7 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { formatDate } from '@/lib/format';
 import {
   applicationsApi,
   APPLICATION_STATUSES,
@@ -231,7 +232,7 @@ function ApplicationRow({ application: a }: { application: RenterApplication }) 
         >
           <Price amount={a.price} period={a.period} variant="callout" />
           <Text variant="caption" color="mutedForeground">
-            Applied {a.applicationDate}
+            Applied {formatDate(a.applicationDate)}
           </Text>
         </View>
       </View>

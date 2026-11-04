@@ -32,6 +32,7 @@ import {
 } from '@/lib/api/applications';
 import { ApiError } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
+import { formatDate } from '@/lib/format';
 import { ApplicationNotesSection } from '@/components/applications/ApplicationNotesSection';
 
 export default function ApplicationDetail() {
@@ -177,7 +178,9 @@ export default function ApplicationDetail() {
                           {step.stage}
                         </Text>
                         <Text variant="caption" color="mutedForeground">
-                          {step.date}
+                          {/* The API sends an ISO date once a stage happens, and
+                              the literal word "Pending" before it does. */}
+                          {/^\d{4}-\d{2}-\d{2}/.test(step.date) ? formatDate(step.date) : step.date}
                         </Text>
                       </View>
                     </View>
@@ -190,7 +193,7 @@ export default function ApplicationDetail() {
                   <Detail
                     icon={<CalendarClock size={15} color={colors.foreground} />}
                     label="Move-in"
-                    value={app.moveInDate}
+                    value={formatDate(app.moveInDate)}
                   />
                 ) : null}
                 {app.leaseTerm ? (

@@ -62,6 +62,7 @@ import {
 } from '@/lib/api/applications';
 import { ApiError } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
+import { formatDate } from '@/lib/format';
 
 interface FormState {
   fullName: string;
@@ -246,7 +247,14 @@ export default function ApplyToRent() {
               },
             ]
           : undefined,
-        documents: data.documents,
+        // Drop `url`: it is a signed link for showing the file back to the
+        // applicant, and the API rejects any property it does not declare.
+        documents: data.documents.map(({ name, uploaded, required, documentId }) => ({
+          name,
+          uploaded,
+          required,
+          ...(documentId ? { documentId } : {}),
+        })),
       }),
     onSuccess: (app) => {
       track('application_submitted', { id: app.id, listingId: id });
@@ -883,7 +891,7 @@ function ReviewStep({
 
       <ReviewSection title="Your move" onEdit={() => onEditStep(1)}>
         <SummaryRow label="Current address" value={data.currentAddress || '—'} />
-        <SummaryRow label="Move-in date" value={moveInDate || '—'} />
+        <SummaryRow label="Move-in date" value={moveInDate ? formatDate(moveInDate) : '—'} />
         <SummaryRow label="Lease term" value={data.leaseTerm} />
       </ReviewSection>
 
