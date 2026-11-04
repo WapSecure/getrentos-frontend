@@ -99,6 +99,19 @@ const SERVER_PATHS = [
   '/estate/announcements',
   '/estate/staff',
   '/estate/billing',
+  // RESIDENT_ASSISTANT_LINKS
+  '/resident/dashboard',
+  '/resident/dues',
+  '/resident/visitor-passes',
+  '/resident/deliveries',
+  '/resident/maintenance',
+  '/resident/violations',
+  '/resident/announcements',
+  '/resident/polls',
+  '/resident/amenities',
+  '/resident/emergency',
+  '/resident/committee',
+  '/resident/directory',
 ];
 
 describe('assistant link routes', () => {

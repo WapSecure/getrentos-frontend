@@ -58,6 +58,16 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
     scope: 'Ask about your properties, listings, offers, sales, viewings or realtors.',
     placeholder: 'Ask about offers, sales or viewings',
   },
+  resident: {
+    starters: [
+      'Do I owe any dues?',
+      'Is anyone waiting at the gate for me?',
+      'Any parcels for me?',
+      'Any new announcements?',
+    ],
+    scope: 'Ask about your dues, visitors, deliveries, repairs, announcements, polls or bookings.',
+    placeholder: 'Ask about dues, visitors or deliveries',
+  },
   estate: {
     starters: [
       'How many households owe dues?',
@@ -110,6 +120,7 @@ export default function AskScreen() {
     params.persona === 'owner' ||
     params.persona === 'buyer' ||
     params.persona === 'agent' ||
+    params.persona === 'resident' ||
     (params.persona === 'estate' && !!params.estateId)
       ? params.persona
       : 'renter';

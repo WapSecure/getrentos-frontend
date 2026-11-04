@@ -25,7 +25,8 @@ export type AssistantPersona =
   | 'owner'
   | 'buyer'
   | 'agent'
-  | 'estate';
+  | 'estate'
+  | 'resident';
 
 export const assistantApi = {
   /** `estateId` is required for the estate persona: an estate manager asks about one estate. */
@@ -137,6 +138,18 @@ const MOBILE_ROUTES: Record<string, string> = {
   '/estate/announcements': '/(app)/estate-announcements',
   '/estate/staff': '/(app)/estate-staff',
   '/estate/billing': '/(app)/billing',
+  '/resident/dashboard': '/(app)/(resident)',
+  '/resident/dues': '/(app)/dues',
+  '/resident/visitor-passes': '/(app)/visitor-passes',
+  '/resident/deliveries': '/(app)/deliveries',
+  '/resident/maintenance': '/(app)/maintenance',
+  '/resident/violations': '/(app)/violations',
+  '/resident/announcements': '/(app)/(resident)/announcements',
+  '/resident/polls': '/(app)/polls',
+  '/resident/amenities': '/(app)/amenities',
+  '/resident/emergency': '/(app)/emergency',
+  '/resident/committee': '/(app)/committee',
+  '/resident/directory': '/(app)/directory',
 };
 
 export function mobileRouteFor(path: string): string | null {

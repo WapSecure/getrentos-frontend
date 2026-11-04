@@ -10,6 +10,7 @@ import { NotificationBell } from '@/components/shared/notifications/Notification
 import { residentNavGroups } from './ResidentSidebar';
 import { GroupedMobileNavigation } from '@/components/shared/dashboard/GroupedSidebar';
 import { ROUTES } from '@/lib/constants/auth';
+import { ResidentAssistant } from './ResidentAssistant';
 
 interface ResidentNavbarProps {
   user: { fullName: string; email: string } | null;
@@ -37,6 +38,7 @@ export const ResidentNavbar = ({ user }: ResidentNavbarProps) => {
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-3">
               <ThemeToggle />
+              <ResidentAssistant />
               <NotificationBell portal="resident" basePath="/estate/resident/notifications" />
               <ResidentProfileDropdown user={user} />
 

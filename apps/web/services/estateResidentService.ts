@@ -1,5 +1,6 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type {
   Announcement,
   DeliveryLog,
@@ -24,6 +25,15 @@ import type {
 type PageQuery = { page?: number; pageSize?: number };
 
 export const estateResidentService = {
+  /** Read-only answers about the resident's own household. */
+  askAssistant: (question: string, history: AssistantTurn[]) =>
+    safeCall<AssistantReply>(() =>
+      authFetch('/resident/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    ),
+
   async getMyHousehold(): Promise<ApiResponse<ResidentHousehold>> {
     return safeCall(() => authFetch('/estate/resident/household'));
   },
