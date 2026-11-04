@@ -280,6 +280,15 @@ export const homeCareApi = {
   // ---- vendors (scoped to the signed-in user) ----
   vendors: () =>
     apiFetch<Paginated<Vendor>>('/landlord/vendors?page=1&pageSize=100&activeOnly=true'),
+  /**
+   * A manager assigns from the vendors the API allows for clients' properties,
+   * not from a vendor list of their own. Wrapped as a page so the picker reads
+   * both the same way.
+   */
+  managerVendors: async (): Promise<Paginated<Vendor>> => {
+    const items = await apiFetch<Vendor[]>('/home-management/vendors');
+    return { items, total: items.length, page: 1, pageSize: items.length, totalPages: 1 };
+  },
   addVendor: (input: { name: string; serviceType: string; phone: string }) =>
     apiFetch<Vendor>('/landlord/vendors', { method: 'POST', body: input }),
 

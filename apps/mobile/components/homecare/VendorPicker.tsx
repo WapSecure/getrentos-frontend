@@ -12,6 +12,7 @@ import {
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi } from '@/lib/api/homeCare';
 import { ApiError } from '@/lib/api/client';
@@ -31,7 +32,12 @@ export function VendorPicker({
 }) {
   const { colors, spacing, radius } = useTheme();
   const [adding, setAdding] = useState(false);
-  const vendors = useQuery({ queryKey: qk.homeCare.vendors, queryFn: homeCareApi.vendors });
+  const { usablePortal } = useAuth();
+  const manager = usablePortal === 'manager';
+  const vendors = useQuery({
+    queryKey: [...qk.homeCare.vendors, manager ? 'manager' : 'own'],
+    queryFn: manager ? homeCareApi.managerVendors : homeCareApi.vendors,
+  });
   return (
     <View style={{ gap: spacing.xs }}>
       <Text variant="callout" color="mutedForeground">
@@ -51,12 +57,14 @@ export function VendorPicker({
               onPress={() => onChange(value === v.id && optional ? undefined : v.id)}
             />
           ))}
-          <Chip
-            label="Add vendor"
-            size="sm"
-            leadingIcon={<Plus size={14} color={colors.primary} />}
-            onPress={() => setAdding(true)}
-          />
+          {manager ? null : (
+            <Chip
+              label="Add vendor"
+              size="sm"
+              leadingIcon={<Plus size={14} color={colors.primary} />}
+              onPress={() => setAdding(true)}
+            />
+          )}
         </View>
       )}
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add a vendor">

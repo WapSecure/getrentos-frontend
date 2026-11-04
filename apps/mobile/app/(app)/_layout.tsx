@@ -26,6 +26,13 @@ export default function AppLayout() {
         <Stack.Screen name="(manager)" />
         <Stack.Screen name="agency-client/[ownerId]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="agency-mandate/[id]" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-team" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-commissions" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-payouts" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-protection" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-performance" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-setup" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-join" options={DETAIL_OPTIONS} />
         <Stack.Screen name="agent-task/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="agent-inspection/[taskId]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="agent-verification/[taskId]" options={DETAIL_OPTIONS} />

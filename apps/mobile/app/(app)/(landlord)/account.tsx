@@ -9,6 +9,7 @@ import {
   BarChart3,
   BellRing,
   Scale,
+  Building,
   DoorClosed,
   UserCog,
   Zap,
@@ -191,6 +192,13 @@ export default function LandlordAccount() {
       description: 'Hand a property to a firm, GetRentos or yourself',
       icon: ArrowRightLeft,
       onPress: go('/(app)/change-manager'),
+    },
+    {
+      key: 'agency',
+      label: 'Run a management firm',
+      description: 'Start a firm, or join one you were invited to',
+      icon: Building,
+      onPress: go('/(app)/agency-setup'),
     },
     {
       key: 'team',

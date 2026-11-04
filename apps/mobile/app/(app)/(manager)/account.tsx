@@ -1,12 +1,20 @@
 import { router, type Href } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
+  BarChart3,
+  Building,
   CircleHelp,
+  ClipboardCheck,
   FileSignature,
+  Handshake,
+  HandCoins,
   KeyRound,
+  Landmark,
   MessageCircleQuestion,
   ShieldCheck,
+  UserCog,
   Users,
+  Wallet,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
@@ -46,6 +54,65 @@ export default function AgencyAccount() {
     },
   ];
 
+  const firm: SettingsItem[] = [
+    {
+      key: 'team',
+      label: 'Team',
+      description: 'Who works here and what they can do',
+      icon: UserCog,
+      onPress: go('/(app)/agency-team'),
+    },
+    {
+      key: 'commissions',
+      label: 'Commissions',
+      description: 'Rate card, ledger and agent splits',
+      icon: HandCoins,
+      onPress: go('/(app)/agency-commissions'),
+    },
+    {
+      key: 'payouts',
+      label: 'Payouts',
+      description: 'To the firm, your agents and you',
+      icon: Wallet,
+      onPress: go('/(app)/agency-payouts'),
+    },
+    {
+      key: 'performance',
+      label: 'Performance',
+      description: 'Collection, repairs, payouts and retention',
+      icon: BarChart3,
+      onPress: go('/(app)/agency-performance'),
+    },
+    {
+      key: 'home-care',
+      label: 'Home management',
+      description: 'Work orders on clients’ properties',
+      icon: ClipboardCheck,
+      onPress: go('/(app)/home-care'),
+    },
+    {
+      key: 'realtors',
+      label: 'Realtor access',
+      description: 'Approve realtors for clients’ properties',
+      icon: Handshake,
+      onPress: go('/(app)/representatives'),
+    },
+    {
+      key: 'protection',
+      label: 'Client-money protection',
+      description: 'Your scheme and cover',
+      icon: Landmark,
+      onPress: go('/(app)/agency-protection'),
+    },
+    {
+      key: 'setup',
+      label: 'Firm details',
+      description: 'Registration and verification',
+      icon: Building,
+      onPress: go('/(app)/agency-setup'),
+    },
+  ];
+
   const settings: SettingsItem[] = [
     {
       key: 'identity',
@@ -80,7 +147,8 @@ export default function AgencyAccount() {
         note={dashboard.data?.firmName}
       />
       <WorkspaceSwitcher />
-      <SettingsGroup title="Your firm" items={work} />
+      <SettingsGroup title="Your work" items={work} />
+      <SettingsGroup title="The firm" items={firm} />
       <SettingsGroup title="Settings" items={settings} footer={<AppearanceFooter />} />
       <AccountFooter />
     </Screen>

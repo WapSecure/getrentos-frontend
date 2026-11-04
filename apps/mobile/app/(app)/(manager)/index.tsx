@@ -30,6 +30,7 @@ import { firstName, formatNaira } from '@/lib/format';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { CustodyBar } from '@/components/agency/CustodyBar';
+import { VerificationBanner } from '@/components/agency/VerificationBanner';
 
 /**
  * The agency home: whose property is in hand and what that engagement allows,
@@ -64,6 +65,7 @@ export default function AgencyHome() {
         }
       />
       <View style={{ gap: spacing.lg }}>
+        <VerificationBanner />
         <CustodyBar />
         <Workspace />
         <Attention items={attention.data?.items ?? []} />
