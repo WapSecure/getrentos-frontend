@@ -267,9 +267,9 @@ export const DisputeCaseModal = ({
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                     Timeline
                   </p>
-                  {tx.events.map((event) => (
+                  {tx.events.map((event, i) => (
                     <div
-                      key={event.createdAt + event.eventType}
+                      key={`${event.createdAt}-${event.eventType}-${i}`}
                       className="flex items-center gap-2 text-xs"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
