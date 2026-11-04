@@ -146,7 +146,7 @@ export const ReviewCaseModal = ({ caseItem, onClose }: ReviewCaseModalProps) => 
 
   const { data: staffData } = useQuery({
     queryKey: ['admin', 'trust', 'staff-options'],
-    queryFn: () => unwrap(adminService.listStaff({ page: 1, pageSize: 100 })),
+    queryFn: () => unwrap(adminService.listStaffDirectory({ page: 1, pageSize: 100 })),
     enabled: Boolean(id),
   });
   const officers = staffData?.items ?? [];
