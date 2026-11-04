@@ -581,7 +581,7 @@ export const landlordService = {
     data: Pick<
       Lease,
       'unitId' | 'tenantName' | 'leaseStart' | 'leaseEnd' | 'rentAmount' | 'securityDeposit'
-    > & { tenantId?: string; rentPeriod?: 'month' | 'year' },
+    > & { tenantId?: string; rentPeriod?: 'month' | 'year'; recordExisting?: boolean },
     sendImmediately: boolean
   ): Promise<ApiResponse<Lease>> {
     return safeCall(() =>
@@ -598,6 +598,7 @@ export const landlordService = {
           securityDeposit: data.securityDeposit,
           ...(data.tenantId ? { tenantId: data.tenantId } : {}),
           ...(data.rentPeriod ? { rentPeriod: data.rentPeriod } : {}),
+          ...(data.recordExisting ? { recordExisting: data.recordExisting } : {}),
           sendImmediately,
         }),
       })

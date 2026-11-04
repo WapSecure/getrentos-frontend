@@ -5,7 +5,11 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, ReceiptText, Tag, DoorClosed } from 'lucide-react';
-import { UnitsTable, type OccupierRecord } from '@/components/landlord/units/UnitsTable';
+import { UnitsTable } from '@/components/landlord/units/UnitsTable';
+import {
+  RecordOccupierModal,
+  type OccupierRecord,
+} from '@/components/landlord/units/RecordOccupierModal';
 import { AddUnitModal } from '@/components/landlord/units/AddUnitModal';
 import { BulkChargeModal } from '@/components/landlord/units/BulkChargeModal';
 import { ChargeUnitModal, type ChargeUnitInput } from '@/components/landlord/units/ChargeUnitModal';
@@ -39,6 +43,8 @@ function LandlordUnitsPageContent() {
   const [isBulkChargeOpen, setIsBulkChargeOpen] = useState(false);
   const [isBulkPricingOpen, setIsBulkPricingOpen] = useState(false);
   const [chargingUnit, setChargingUnit] = useState<Unit | null>(null);
+  const [recordingUnit, setRecordingUnit] = useState<Unit | null>(null);
+  const [recordError, setRecordError] = useState<string | null>(null);
   const [chargeError, setChargeError] = useState<string | null>(null);
   const toast = useToast();
 
@@ -120,17 +126,25 @@ function LandlordUnitsPageContent() {
             rentAmount: record.rentAmount,
             rentPeriod: record.rentPeriod,
             securityDeposit: 0,
+            // The tenancy is already running, so record it as in force rather
+            // than as a draft that could never be sent or signed.
+            recordExisting: true,
           },
-          // Recording an existing occupier, so nothing is sent for signature.
+          // The tenancy already exists, so there is nobody to send it to.
           false
         )
       ),
     onSuccess: () => {
       invalidateUnits();
       queryClient.invalidateQueries({ queryKey: landlordKeys.leases() });
+      setRecordingUnit(null);
+      setRecordError(null);
       toast.success('Tenancy recorded for this unit.');
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => {
+      setRecordError(error.message);
+      toast.error(error.message);
+    },
   });
 
   const addUnitMutation = useMutation({
@@ -159,7 +173,6 @@ function LandlordUnitsPageContent() {
 
   const handleRecordOccupier = (unitId: string, record: OccupierRecord) =>
     recordOccupierMutation.mutateAsync({ unitId, record }).then(() => undefined);
-
   const handleAddUnit = async (
     data: Omit<Unit, 'id' | 'occupancyStatus' | 'tenantId' | 'tenantName'>
   ) => {
@@ -256,15 +269,9 @@ function LandlordUnitsPageContent() {
         <UnitsTable
           units={units}
           onMarkVacant={handleMarkVacant}
-          onRecordOccupier={handleRecordOccupier}
+          onRecordOccupier={setRecordingUnit}
           onChargeUnit={setChargingUnit}
-          pendingUnitId={
-            markVacantMutation.isPending
-              ? markVacantMutation.variables
-              : recordOccupierMutation.isPending
-                ? recordOccupierMutation.variables?.unitId
-                : undefined
-          }
+          pendingUnitId={markVacantMutation.isPending ? markVacantMutation.variables : undefined}
         />
       </ListState>
 
@@ -295,6 +302,17 @@ function LandlordUnitsPageContent() {
         onCharge={(input) => chargeUnitMutation.mutate(input)}
         isPending={chargeUnitMutation.isPending}
         errorMessage={chargeError}
+      />
+
+      <RecordOccupierModal
+        unit={recordingUnit}
+        onClose={() => {
+          setRecordingUnit(null);
+          setRecordError(null);
+        }}
+        onRecord={handleRecordOccupier}
+        isPending={recordOccupierMutation.isPending}
+        errorMessage={recordError}
       />
 
       <BulkChargeModal

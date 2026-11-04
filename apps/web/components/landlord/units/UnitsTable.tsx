@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import {
   Badge,
-  Button,
   ConfirmDialog,
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +10,6 @@ import {
   DropdownMenuTrigger,
   EmptyState,
   IconButton,
-  Input,
   type BadgeVariant,
 } from '@getrentos/ui';
 import { Bed, Bath, UserPlus, DoorClosed, MoreVertical, ReceiptText } from 'lucide-react';
@@ -25,27 +23,11 @@ const statusConfig: Record<UnitOccupancyStatus, { label: string; variant: BadgeV
   notice_given: { label: 'Notice Given', variant: 'info' },
 };
 
-/** What a landlord knows about an occupier who will not use GetRentos themselves. */
-export interface OccupierRecord {
-  tenantName: string;
-  rentAmount: number;
-  rentPeriod: 'month' | 'year';
-  leaseStart: string;
-  leaseEnd: string;
-}
-
-const isoDate = (date: Date) => date.toISOString().slice(0, 10);
-const todayIso = () => isoDate(new Date());
-const oneYearAfter = (iso: string) => {
-  const date = new Date(iso);
-  date.setFullYear(date.getFullYear() + 1);
-  return isoDate(date);
-};
-
 interface UnitsTableProps {
   units: Unit[];
   onMarkVacant: (unitId: string) => Promise<void>;
-  onRecordOccupier: (unitId: string, record: OccupierRecord) => Promise<void>;
+  /** Opens the record-occupier dialog; the form itself lives in the modal. */
+  onRecordOccupier: (unit: Unit) => void;
   onChargeUnit: (unit: Unit) => void;
   pendingUnitId?: string;
 }
@@ -57,55 +39,7 @@ export const UnitsTable = ({
   onChargeUnit,
   pendingUnitId,
 }: UnitsTableProps) => {
-  const [recordingUnit, setRecordingUnit] = useState<Unit | null>(null);
-  const [occupierName, setOccupierName] = useState('');
-  const [occupierRent, setOccupierRent] = useState('');
-  const [occupierStart, setOccupierStart] = useState(todayIso());
-  const [occupierEnd, setOccupierEnd] = useState(oneYearAfter(todayIso()));
   const [vacatingUnit, setVacatingUnit] = useState<Unit | null>(null);
-  const [recordError, setRecordError] = useState<string | null>(null);
-
-  const openRecorder = (unit: Unit) => {
-    const start = todayIso();
-    // The agreed rent if the unit was let before, otherwise the asking rent.
-    const suggestedRent = unit.leaseRent ?? unit.askingRent;
-    setRecordingUnit(unit);
-    setOccupierName('');
-    setOccupierRent(suggestedRent !== undefined ? String(suggestedRent) : '');
-    setOccupierStart(start);
-    setOccupierEnd(oneYearAfter(start));
-    setRecordError(null);
-  };
-
-  const closeRecorder = () => {
-    setRecordingUnit(null);
-    setRecordError(null);
-  };
-
-  const handleRecordSubmit = async () => {
-    if (!recordingUnit) return;
-    const tenantName = occupierName.trim();
-    const rentAmount = Number(occupierRent);
-    if (!tenantName) return setRecordError('Enter the occupier’s name.');
-    if (!Number.isFinite(rentAmount) || rentAmount <= 0)
-      return setRecordError('Enter the rent you collect for this tenancy.');
-    if (!occupierStart || !occupierEnd || occupierEnd <= occupierStart)
-      return setRecordError('The tenancy has to end after it starts.');
-
-    setRecordError(null);
-    try {
-      await onRecordOccupier(recordingUnit.id, {
-        tenantName,
-        rentAmount,
-        rentPeriod: recordingUnit.leaseRentPeriod ?? recordingUnit.askingRentPeriod ?? 'year',
-        leaseStart: occupierStart,
-        leaseEnd: occupierEnd,
-      });
-      setRecordingUnit(null);
-    } catch (error) {
-      setRecordError(error instanceof Error ? error.message : 'Unable to record the occupier.');
-    }
-  };
 
   if (units.length === 0) {
     return <EmptyState icon={DoorClosed} title="No units found" />;
@@ -181,7 +115,7 @@ export const UnitsTable = ({
                           </DropdownMenuItem>
                         )}
                         {unit.occupancyStatus === 'vacant' ? (
-                          <DropdownMenuItem onSelect={() => openRecorder(unit)}>
+                          <DropdownMenuItem onSelect={() => onRecordOccupier(unit)}>
                             <UserPlus className="w-3.5 h-3.5" />
                             Record occupier
                           </DropdownMenuItem>
@@ -193,104 +127,6 @@ export const UnitsTable = ({
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
-
-                    {recordingUnit?.id === unit.id && (
-                      <div className="absolute right-4 top-10 z-30 w-80 bg-card rounded-lg shadow-lg border border-border p-3">
-                        <p className="mb-3 text-xs text-muted-foreground">
-                          Records who lives here and what they pay. It creates a tenancy you track
-                          in GetRentos — the occupier will not be able to sign in, pay in-app, or
-                          use their trust score.
-                        </p>
-                        <label
-                          htmlFor={`occupier-name-${unit.id}`}
-                          className="block text-xs font-medium text-foreground mb-1.5"
-                        >
-                          Occupier name
-                        </label>
-                        <Input
-                          id={`occupier-name-${unit.id}`}
-                          type="text"
-                          autoFocus
-                          controlSize="sm"
-                          value={occupierName}
-                          onChange={(e) => setOccupierName(e.target.value)}
-                          placeholder="e.g. Adaeze Okafor"
-                        />
-
-                        <label
-                          htmlFor={`occupier-rent-${unit.id}`}
-                          className="mt-2 block text-xs font-medium text-foreground mb-1.5"
-                        >
-                          Rent per period
-                        </label>
-                        <Input
-                          id={`occupier-rent-${unit.id}`}
-                          type="number"
-                          controlSize="sm"
-                          value={occupierRent}
-                          onChange={(e) => setOccupierRent(e.target.value)}
-                          placeholder="0"
-                        />
-
-                        <div className="mt-2 flex gap-2">
-                          <div className="flex-1">
-                            <label
-                              htmlFor={`occupier-start-${unit.id}`}
-                              className="block text-xs font-medium text-foreground mb-1.5"
-                            >
-                              Starts
-                            </label>
-                            <Input
-                              id={`occupier-start-${unit.id}`}
-                              type="date"
-                              controlSize="sm"
-                              value={occupierStart}
-                              onChange={(e) => setOccupierStart(e.target.value)}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <label
-                              htmlFor={`occupier-end-${unit.id}`}
-                              className="block text-xs font-medium text-foreground mb-1.5"
-                            >
-                              Ends
-                            </label>
-                            <Input
-                              id={`occupier-end-${unit.id}`}
-                              type="date"
-                              controlSize="sm"
-                              value={occupierEnd}
-                              onChange={(e) => setOccupierEnd(e.target.value)}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 mt-3">
-                          <Button
-                            size="xs"
-                            className="flex-1"
-                            onClick={handleRecordSubmit}
-                            disabled={!occupierName.trim()}
-                            isLoading={pendingUnitId === unit.id}
-                          >
-                            Save tenancy
-                          </Button>
-                          <Button
-                            size="xs"
-                            variant="secondary"
-                            className="flex-1"
-                            onClick={closeRecorder}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                        {recordError && (
-                          <p className="mt-2 text-xs text-destructive" role="alert">
-                            {recordError}
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </td>
                 </tr>
               );
