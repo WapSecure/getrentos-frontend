@@ -23,6 +23,8 @@ export function AdminNotificationMenu() {
   const [open, setOpen] = useState(false);
   const query = useQuery({
     queryKey: adminKeys.notifications,
+    // Header/sidebar chrome: a failure here must never take down the page.
+    throwOnError: false,
     queryFn: () => unwrap(adminService.getNotificationPage(1, 10)),
   });
   const markReadIn = (old: unknown, id?: string) => {

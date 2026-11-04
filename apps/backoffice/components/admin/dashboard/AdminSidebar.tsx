@@ -448,6 +448,8 @@ export const AdminSidebar = ({ roles }: { roles?: string[] }) => {
   const canSeeManaged = hasAdminPermission(roles, 'managed.view');
   const queueCounts = useQuery({
     queryKey: ['admin', 'managed-queue-counts'],
+    // Header/sidebar chrome: a failure here must never take down the page.
+    throwOnError: false,
     queryFn: () => unwrap(adminManagedService.queueCounts()),
     enabled: canSeeManaged,
     staleTime: 30_000,
