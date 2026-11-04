@@ -118,6 +118,7 @@ function LandlordUnitsPageContent() {
             leaseStart: record.leaseStart,
             leaseEnd: record.leaseEnd,
             rentAmount: record.rentAmount,
+            rentPeriod: record.rentPeriod,
             securityDeposit: 0,
           },
           // Recording an existing occupier, so nothing is sent for signature.

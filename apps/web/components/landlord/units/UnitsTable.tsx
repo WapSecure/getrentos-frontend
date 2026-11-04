@@ -29,6 +29,7 @@ const statusConfig: Record<UnitOccupancyStatus, { label: string; variant: BadgeV
 export interface OccupierRecord {
   tenantName: string;
   rentAmount: number;
+  rentPeriod: 'month' | 'year';
   leaseStart: string;
   leaseEnd: string;
 }
@@ -66,9 +67,11 @@ export const UnitsTable = ({
 
   const openRecorder = (unit: Unit) => {
     const start = todayIso();
+    // The agreed rent if the unit was let before, otherwise the asking rent.
+    const suggestedRent = unit.leaseRent ?? unit.askingRent;
     setRecordingUnit(unit);
     setOccupierName('');
-    setOccupierRent(unit.askingRent !== undefined ? String(unit.askingRent) : '');
+    setOccupierRent(suggestedRent !== undefined ? String(suggestedRent) : '');
     setOccupierStart(start);
     setOccupierEnd(oneYearAfter(start));
     setRecordError(null);
@@ -94,6 +97,7 @@ export const UnitsTable = ({
       await onRecordOccupier(recordingUnit.id, {
         tenantName,
         rentAmount,
+        rentPeriod: recordingUnit.leaseRentPeriod ?? recordingUnit.askingRentPeriod ?? 'year',
         leaseStart: occupierStart,
         leaseEnd: occupierEnd,
       });
