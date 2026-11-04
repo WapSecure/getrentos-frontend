@@ -43,7 +43,7 @@ import {
 } from '@/lib/api/landlord';
 import { ApiError } from '@/lib/api/client';
 import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
-import { AssignTenantSheet } from '@/components/landlord/AssignTenantSheet';
+import { RecordOccupierSheet } from '@/components/landlord/RecordOccupierSheet';
 import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
 import { ManagementFeeSheet } from '@/components/landlord/SmallFormSheets';
 import { pickImage, type PickedVideo } from '@/lib/filePicker';
@@ -365,12 +365,12 @@ export default function LandlordPropertyDetail() {
                           <Pressable
                             onPress={() => setAssigning(u)}
                             accessibilityRole="button"
-                            accessibilityLabel={`Assign a tenant to ${u.unitName}`}
+                            accessibilityLabel={`Record an occupier for ${u.unitName}`}
                             style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                           >
                             <UserPlus size={13} color={colors.primary} />
                             <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-                              Assign a tenant
+                              Record occupier
                             </Text>
                           </Pressable>
                         )}
@@ -495,7 +495,7 @@ export default function LandlordPropertyDetail() {
       )}
 
       <EditPropertySheet open={editing} onClose={() => setEditing(false)} property={p ?? null} />
-      <AssignTenantSheet open={!!assigning} onClose={() => setAssigning(null)} unit={assigning} />
+      <RecordOccupierSheet open={!!assigning} onClose={() => setAssigning(null)} unit={assigning} />
       <AddUnitSheet open={addingUnit} onClose={() => setAddingUnit(false)} propertyId={id} />
       <ManagementFeeSheet open={editingFee} onClose={() => setEditingFee(false)} propertyId={id} />
       <BulkPriceSheet open={bulkPricing} onClose={() => setBulkPricing(false)} units={unitItems} />

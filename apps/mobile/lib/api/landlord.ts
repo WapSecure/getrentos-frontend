@@ -137,6 +137,9 @@ export interface LandlordUnit {
   bathrooms: number;
   askingRent: number;
   askingRentPeriod: 'year' | 'month';
+  /** The agreed rent of the current tenancy, once one exists. */
+  leaseRent?: number;
+  leaseRentPeriod?: 'year' | 'month';
   occupancyStatus: OccupancyStatus;
 }
 
@@ -851,6 +854,11 @@ export interface CreateLeaseInput {
   securityDeposit?: number;
   /** Send to the tenant straight away rather than saving a draft. */
   sendImmediately: boolean;
+  /**
+   * The tenancy already exists (a sitting tenant being onboarded). The lease is
+   * created SIGNED rather than DRAFT — there is nobody to send it to.
+   */
+  recordExisting?: boolean;
 }
 
 /* ------------------------------- messages ------------------------------ */
@@ -909,8 +917,12 @@ export const landlordApi = {
   /** Applications still waiting for a decision (pending or under review), across every page. */
   awaitingApplicationCount: async () => {
     const [pending, underReview] = await Promise.all([
-      apiFetch<Paginated<LandlordApplication>>('/landlord/applications?status=pending&page=1&pageSize=1'),
-      apiFetch<Paginated<LandlordApplication>>('/landlord/applications?status=under_review&page=1&pageSize=1'),
+      apiFetch<Paginated<LandlordApplication>>(
+        '/landlord/applications?status=pending&page=1&pageSize=1'
+      ),
+      apiFetch<Paginated<LandlordApplication>>(
+        '/landlord/applications?status=under_review&page=1&pageSize=1'
+      ),
     ]);
     return pending.total + underReview.total;
   },
@@ -1137,6 +1149,10 @@ export const landlordApi = {
   markUnitVacant: (id: string) =>
     apiFetch<LandlordUnit>(`/landlord/units/${id}/vacant`, { method: 'PATCH' }),
 
+  /**
+   * @deprecated Records occupancy only — it creates no lease, so no rent is
+   * tracked. Use `createLease` with `recordExisting` instead.
+   */
   assignTenant: (id: string, tenantName: string) =>
     apiFetch<LandlordUnit>(`/landlord/units/${id}/assign-tenant`, {
       method: 'PATCH',
