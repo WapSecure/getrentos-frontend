@@ -19,6 +19,7 @@ import {
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ROUTES } from '@/lib/constants/auth';
 
 // recharts is heavy: load it only when this dashboard mounts.
@@ -56,6 +57,7 @@ export default function OwnerDashboardPage() {
   return (
     <>
       <OwnerDashboardHeader greeting={greeting} firstName={firstName} />
+      <AttentionFeed persona="owner" />
 
       {isLoading ? (
         <div className="space-y-6">

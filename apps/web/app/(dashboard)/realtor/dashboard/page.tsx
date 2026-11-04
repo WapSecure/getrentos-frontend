@@ -12,6 +12,7 @@ import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
 import { usePlanTier } from '@/hooks/usePlanTier';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 // recharts is heavy: load it only when this dashboard mounts.
@@ -50,6 +51,7 @@ export default function RealtorDashboardPage() {
   return (
     <>
       <RealtorDashboardHeader greeting={greeting} firstName={firstName} />
+      <AttentionFeed persona="realtor" />
 
       <RealtorStatsCards
         activeClients={stats?.activeClients ?? 0}

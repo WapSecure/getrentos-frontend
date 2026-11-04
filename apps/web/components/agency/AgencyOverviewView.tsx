@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Building2, Coins, Gauge, Users, Wallet, Wrench } from 'lucide-react';
 import { Card, CardSkeleton, PageErrorState, StatGridSkeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { agencyDashboardService, type AgencyDashboard } from '@/services/agencyDashboardService';
 
 const rate = (value: number | null) => (value === null ? '—' : `${value}%`);
@@ -53,6 +54,10 @@ export function AgencyOverviewView() {
             Import units from a CSV
           </Link>
         </p>
+      </div>
+
+      <div className="mb-6">
+        <AttentionFeed persona="manager" />
       </div>
 
       {!d ? (

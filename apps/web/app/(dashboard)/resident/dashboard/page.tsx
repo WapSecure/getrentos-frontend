@@ -9,6 +9,7 @@ import { estateResidentKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 import { EmergencyBanner } from '@/components/estate/resident/EmergencyBanner';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import {
   Card,
   CardHeader,
@@ -98,6 +99,8 @@ export default function ResidentDashboardPage() {
             : 'Your household and estate services'
         }
       />
+
+      <AttentionFeed persona="resident" />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Link

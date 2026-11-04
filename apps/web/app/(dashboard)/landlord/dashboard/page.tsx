@@ -19,6 +19,7 @@ import {
 import { landlordService, type LandlordDashboardStats } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ROUTES } from '@/lib/constants/auth';
 
 // recharts is heavy (~400 KB): load it only when this dashboard mounts.
@@ -72,6 +73,7 @@ export default function LandlordDashboardPage() {
   return (
     <>
       <LandlordDashboardHeader greeting={greeting} firstName={firstName} />
+      <AttentionFeed persona="landlord" />
 
       {/* Defaulting the stats to zeros made this render "Add your first
           property" while the request was still in flight, so an established

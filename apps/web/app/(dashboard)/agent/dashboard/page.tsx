@@ -8,6 +8,7 @@ import { AgentQuickActions } from '@/components/agent/dashboard/AgentQuickAction
 import { useQuery } from '@tanstack/react-query';
 import { agentService, mapAgentTask } from '@/services/agentService';
 import { agentKeys } from '@/lib/queryKeys';
+import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { unwrap } from '@/lib/apiHelpers';
 
 export default function AgentDashboardPage() {
@@ -26,6 +27,7 @@ export default function AgentDashboardPage() {
   return (
     <div className="space-y-6">
       <AgentDashboardHeader greeting={greeting} firstName={firstName} />
+      <AttentionFeed persona="agent" />
 
       <AgentStatsCards
         todaysTasks={dashboard?.assignedTasks ?? 0}
