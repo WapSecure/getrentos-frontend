@@ -141,6 +141,8 @@ export interface LandlordUnit {
   leaseRent?: number;
   leaseRentPeriod?: 'year' | 'month';
   occupancyStatus: OccupancyStatus;
+  /** Who lives there, when the portfolio list knows. */
+  tenantName?: string;
 }
 
 export const OCCUPANCY_LABEL: Record<OccupancyStatus, string> = {
@@ -907,6 +909,14 @@ export const landlordApi = {
 
   units: (propertyId: string) =>
     apiFetch<Paginated<LandlordUnit>>(`/landlord/units?propertyId=${propertyId}`),
+
+  /** Every unit across the portfolio, searchable by unit or tenant, a page at a time. */
+  unitsPage: (params: { search?: string; propertyId?: string; page: number; pageSize: number }) => {
+    const q = new URLSearchParams({ page: String(params.page), pageSize: String(params.pageSize) });
+    if (params.search) q.set('search', params.search);
+    if (params.propertyId) q.set('propertyId', params.propertyId);
+    return apiFetch<Paginated<LandlordUnit>>(`/landlord/units?${q.toString()}`);
+  },
 
   tenants: (page = 1, pageSize = 20) =>
     apiFetch<Paginated<LandlordTenant>>(`/landlord/tenants?page=${page}&pageSize=${pageSize}`),
