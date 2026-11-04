@@ -48,6 +48,16 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
     scope: 'Ask about your listings, offers, leads, viewings, clients or commissions.',
     placeholder: 'Ask about offers, leads or commissions',
   },
+  owner: {
+    starters: [
+      'Which offers need an answer?',
+      'Where are my sales up to?',
+      'Do I have viewings to confirm?',
+      'Has a realtor asked to work with me?',
+    ],
+    scope: 'Ask about your properties, listings, offers, sales, viewings or realtors.',
+    placeholder: 'Ask about offers, sales or viewings',
+  },
   landlord: {
     starters: [
       'Who owes me rent?',
@@ -64,7 +74,9 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
 export default function AskScreen() {
   const params = useLocalSearchParams<{ persona?: string }>();
   const persona: AssistantPersona =
-    params.persona === 'landlord' || params.persona === 'realtor' ? params.persona : 'renter';
+    params.persona === 'landlord' || params.persona === 'realtor' || params.persona === 'owner'
+      ? params.persona
+      : 'renter';
   const copy = COPY[persona];
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();

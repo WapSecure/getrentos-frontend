@@ -47,6 +47,19 @@ const SERVER_PATHS = [
   '/realtor/verification',
   '/realtor/settings',
   '/realtor/help',
+  // OWNER_ASSISTANT_LINKS
+  '/owner/dashboard',
+  '/owner/properties',
+  '/owner/listings',
+  '/owner/offers',
+  '/owner/transactions',
+  '/owner/viewings',
+  '/owner/realtors',
+  '/owner/messages',
+  '/owner/documents',
+  '/owner/verification',
+  '/owner/settings',
+  '/owner/help',
 ];
 
 describe('assistant link routes', () => {
