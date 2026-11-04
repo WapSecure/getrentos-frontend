@@ -18,6 +18,13 @@ export const qk = {
     mine: ['property-authorities', 'mine'] as const,
   },
   estateAgreements: ['estate-agreements', 'mine'] as const,
+  /** Change of manager and the handover pack (lib/api/managementTransfers). */
+  transfers: {
+    mine: ['management-transfers', 'mine'] as const,
+    preview: (propertyId: string) => ['management-transfers', 'preview', propertyId] as const,
+    firms: ['management-transfers', 'firms'] as const,
+    handover: (id: string) => ['management-transfers', 'handover', id] as const,
+  },
   /** Tenancy notices and arrears (lib/api/tenancyNotices). */
   notices: {
     running: ['notices', 'list', 'SERVED'] as const,

@@ -2,6 +2,7 @@ import { Alert, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 import Constants from 'expo-constants';
 import {
+  ArrowRightLeft,
   BadgeCheck,
   Banknote,
   CalendarClock,
@@ -151,6 +152,13 @@ export default function LandlordAccount() {
       description: 'Your public page and its address',
       icon: Globe,
       onPress: go('/(app)/landlord-microsite'),
+    },
+    {
+      key: 'change-manager',
+      label: 'Change manager',
+      description: 'Hand a property to a firm, GetRentos or yourself',
+      icon: ArrowRightLeft,
+      onPress: go('/(app)/change-manager'),
     },
     {
       key: 'team',
