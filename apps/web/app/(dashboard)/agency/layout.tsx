@@ -108,7 +108,11 @@ function AgencyShell({
 
   return (
     <>
-      {ownerWorkspace ? <LandlordNavbar user={user} /> : <AgencyPlainHeader user={user} />}
+      {ownerWorkspace ? (
+        <LandlordNavbar user={user} />
+      ) : (
+        <AgencyPlainHeader user={user} showAssistant={membership === 'member'} />
+      )}
       <div className="flex min-h-screen flex-col">
         {!blocked && <AgencyVerificationBanner />}
         {!outsideCustody && membership !== 'loading' && !blocked && <CustodyBar />}

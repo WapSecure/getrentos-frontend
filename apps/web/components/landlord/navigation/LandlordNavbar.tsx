@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
@@ -17,6 +17,7 @@ import { ROUTES } from '@/lib/constants/auth';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { NotificationBell } from '@/components/shared/notifications/NotificationBell';
 import { LandlordAssistant } from '../assistant/LandlordAssistant';
+import { ManagerAssistant } from '@/components/agency/assistant/ManagerAssistant';
 
 interface LandlordNavbarProps {
   user: { fullName: string; email: string; roles?: string[] } | null;
@@ -24,6 +25,13 @@ interface LandlordNavbarProps {
 
 export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  // The agency workspace borrows this navbar: there, and for a manager without
+  // a landlord role, questions are about the firm's book, not a landlord's own.
+  const roles = user?.roles ?? [];
+  const asManager =
+    pathname?.startsWith('/agency') ||
+    (roles.includes('PROPERTY_MANAGER') && !roles.includes('LANDLORD'));
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -77,7 +85,7 @@ export const LandlordNavbar = ({ user }: LandlordNavbarProps) => {
             <div className="flex items-center gap-3">
               <ThemeToggle />
 
-              <LandlordAssistant />
+              {asManager ? <ManagerAssistant /> : <LandlordAssistant />}
 
               <NotificationBell
                 portal="landlord"
