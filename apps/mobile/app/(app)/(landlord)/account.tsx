@@ -9,6 +9,7 @@ import {
   BarChart3,
   BellRing,
   Scale,
+  Zap,
   BedDouble,
   CalendarCheck,
   CircleHelp,
@@ -80,6 +81,13 @@ export default function LandlordAccount() {
       description: 'Evictions, recovery and disputes in court',
       icon: Scale,
       onPress: go('/(app)/legal-cases'),
+    },
+    {
+      key: 'automations',
+      label: 'Automations',
+      description: 'Announcements, reminder rules and templates',
+      icon: Zap,
+      onPress: go('/(app)/landlord-automations'),
     },
     {
       key: 'maintenance',
