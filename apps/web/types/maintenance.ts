@@ -42,6 +42,24 @@ export interface MaintenanceTriage {
   model: string | null;
   triagedAt: string;
   requestId: string;
+  /** The stored proposal; send it back with the decision. */
+  reviewId?: string;
+}
+
+/** A person's decision on a triage proposal. Accepting applies category and urgency to the request. */
+export type MaintenanceTriageDecision =
+  | {
+      decision: 'accept';
+      category?: MaintenanceTriageCategory;
+      urgency?: MaintenanceTriageUrgency;
+      draftWorkOrder?: string;
+    }
+  | { decision: 'reject'; reason: string };
+
+export interface MaintenanceTriageDecisionResult {
+  reviewId: string;
+  outcome: 'ACCEPTED' | 'EDITED' | 'REJECTED';
+  applied: { category: string; urgency: string; draftWorkOrder: string } | null;
 }
 
 export interface CreateMaintenanceRequestInput {

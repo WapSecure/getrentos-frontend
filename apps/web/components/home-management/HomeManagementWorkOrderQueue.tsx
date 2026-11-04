@@ -8,6 +8,7 @@ import {
   ClipboardCheck,
   ClipboardPlus,
   Clock3,
+  Sparkles,
   UserRound,
   Wrench,
 } from 'lucide-react';
@@ -25,15 +26,13 @@ import { Select } from '@getrentos/ui';
 import { Switch } from '@getrentos/ui';
 import { Textarea } from '@getrentos/ui';
 import { useToast } from '@getrentos/ui';
-import {
-  HomeManagementWorkOrderInvoices,
-} from '@/components/home-management/HomeManagementWorkOrderInvoices';
-import {
-  HomeManagementWorkOrderQuotes,
-} from '@/components/home-management/HomeManagementWorkOrderQuotes';
+import { HomeManagementWorkOrderInvoices } from '@/components/home-management/HomeManagementWorkOrderInvoices';
+import { HomeManagementWorkOrderQuotes } from '@/components/home-management/HomeManagementWorkOrderQuotes';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
+import { TriageResultModal } from '@/components/landlord/maintenance/TriageResultModal';
+import { useMaintenanceTriage } from '@/components/shared/maintenance/useMaintenanceTriage';
 import {
   homeManagementService,
   type CreateHomeManagementUnitInput,
@@ -275,6 +274,9 @@ export function HomeManagementWorkOrderQueue({
     isOptionalWholeNumber(unitForm.askingRent);
   const canCreateUnit =
     Boolean(form.propertyId) && Boolean(unitForm.unitName.trim()) && hasValidUnitDetails;
+
+  // Property managers triage here (the agency workspace mounts this queue).
+  const triage = useMaintenanceTriage({ onApplied: () => invalidateWorkOrderViews() });
 
   const invalidateWorkOrderViews = async () => {
     await Promise.all([
@@ -904,6 +906,18 @@ export function HomeManagementWorkOrderQueue({
                                 )}
                                 <Button
                                   size="sm"
+                                  variant="outline"
+                                  rounded="md"
+                                  className="gap-1.5"
+                                  isLoading={triage.isTriaging(workOrder.id)}
+                                  disabled={isThisWorkOrderMutationPending}
+                                  onClick={() => triage.start(workOrder.id)}
+                                >
+                                  <Sparkles className="h-3.5 w-3.5" />
+                                  Suggest triage
+                                </Button>
+                                <Button
+                                  size="sm"
                                   variant="ghost"
                                   rounded="md"
                                   disabled={isThisWorkOrderMutationPending}
@@ -1472,6 +1486,19 @@ export function HomeManagementWorkOrderQueue({
           </form>
         </DialogContent>
       </Dialog>
+      <TriageResultModal
+        {...triage.modal}
+        onAssignVendor={
+          triage.requestId
+            ? (vendorId) =>
+                assignVendor.mutate(
+                  { id: triage.requestId!, assignedVendorId: vendorId },
+                  { onSuccess: triage.close }
+                )
+            : undefined
+        }
+        isAssigning={assignVendor.isPending && assignVendor.variables?.id === triage.requestId}
+      />
     </section>
   );
 }

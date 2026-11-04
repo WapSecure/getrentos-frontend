@@ -456,6 +456,28 @@ export interface AiBudgetStatus {
   exceeded: boolean;
 }
 
+/** One capability's human-review record: what the AI proposed and what people decided. */
+export interface AiReviewCapabilitySummary {
+  capability: string;
+  total: number;
+  pending: number;
+  byOutcome: Record<
+    'PENDING' | 'CONFIRMED' | 'CLEARED' | 'ACCEPTED' | 'EDITED' | 'REJECTED',
+    number
+  >;
+  /** Fraud: confirmed / (confirmed + cleared), as a percentage. Null until a reviewer decides one. */
+  precision: number | null;
+  alertsOpened: number;
+  alertsDecided: number;
+  /** Triage: accepted or edited / decided, as a percentage. */
+  acceptanceRate: number | null;
+}
+
+export interface AiReviewsSummary {
+  since: string | null;
+  capabilities: AiReviewCapabilitySummary[];
+}
+
 export interface AiUsageSummary {
   globallyEnabled: boolean;
   disabledCapabilities: string[];

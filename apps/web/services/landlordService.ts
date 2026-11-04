@@ -54,7 +54,6 @@ import type {
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
 import type { VideoCallJoin } from '@getrentos/shared';
-import type { MaintenanceTriage } from '@/types/maintenance';
 
 export interface RentCollectionStats {
   totalCollected: number;
@@ -1208,10 +1207,6 @@ export const landlordService = {
     return safeCall(() =>
       authFetch(`/landlord/maintenance/${requestId}/escalate`, { method: 'PATCH' })
     );
-  },
-
-  async triageMaintenance(requestId: string): Promise<ApiResponse<MaintenanceTriage>> {
-    return safeCall(() => authFetch(`/ai/maintenance/${requestId}/triage`, { method: 'POST' }));
   },
 
   // ---- Documents ----
