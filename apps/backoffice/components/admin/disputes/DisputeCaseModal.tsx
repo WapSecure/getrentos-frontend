@@ -267,9 +267,9 @@ export const DisputeCaseModal = ({
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                     Timeline
                   </p>
-                  {tx.events.map((event) => (
+                  {tx.events.map((event, i) => (
                     <div
-                      key={event.createdAt + event.eventType}
+                      key={`${event.createdAt}-${event.eventType}-${i}`}
                       className="flex items-center gap-2 text-xs"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
@@ -394,6 +394,21 @@ export const DisputeCaseModal = ({
                   </Button>
                 )}
               </div>
+            </div>
+          )}
+          {!canDecide && canReopen && (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => onReopen(dispute.id)}
+                isLoading={isReopening}
+                disabled={isReopening}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reopen
+              </Button>
             </div>
           )}
           <div>
