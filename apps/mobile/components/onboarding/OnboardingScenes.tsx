@@ -455,7 +455,7 @@ export function VerifiedPeopleScene() {
         >
           <ShieldCheck size={18} color={colors.success} />
           <Text variant="caption" style={{ color: colors.success, fontWeight: '700' }}>
-            All three checks cleared before listing
+            Checked before a listing goes live
           </Text>
           <Text variant="caption" color="mutedForeground" center>
             Anyone who fails a check never reaches the marketplace
