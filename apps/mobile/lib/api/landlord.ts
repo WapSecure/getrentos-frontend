@@ -276,6 +276,8 @@ export interface LandlordMaintenance {
   issueTitle: string;
   category: string;
   description: string;
+  /** The agreed scope of work, set when a triage proposal is accepted. */
+  workOrderScope?: string | null;
   priority: MaintenancePriority;
   status: MaintenanceStatus;
   tenantId: string;
