@@ -44,6 +44,19 @@ export function formatTime(value: string | Date): string {
   });
 }
 
+/**
+ * Date and time together, in Lagos time: "Nov 4, 2026, 4:46 PM".
+ *
+ * For anything that lapses within a day the date alone is misleading — a
+ * four-hour visitor pass showed "Expires Nov 4, 2026", which reads as end of
+ * day when it actually dies that afternoon.
+ */
+export function formatDateTime(value: string | Date, style: 'short' | 'medium' = 'short'): string {
+  const d = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(d.getTime())) return '—';
+  return `${formatDate(d, style)}, ${formatTime(d)}`;
+}
+
 export function relativeTime(value: string | Date): string {
   const d = typeof value === 'string' ? new Date(value) : value;
   const diff = Date.now() - d.getTime();

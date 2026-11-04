@@ -26,7 +26,7 @@ import {
   type VisitorPassStatus,
 } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
-import { formatDate, formatTime } from '@/lib/format';
+import { formatDateTime, formatTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -242,7 +242,7 @@ export default function ResidentVisitorPasses() {
                   <Text variant="bodyStrong">{pass.visitorName}</Text>
                   <Text variant="caption" color="mutedForeground">
                     {pass.purpose ? `${pass.purpose} · ` : ''}Expires{' '}
-                    {formatDate(pass.expiresAt, 'short')}
+                    {formatDateTime(pass.expiresAt)}
                   </Text>
                 </View>
                 <Badge label={STATUS_LABEL[pass.status]} tone={STATUS_TONE[pass.status]} />
@@ -499,7 +499,7 @@ function PassIssuedSheet({
           </Text>
           <Text variant="caption" color="mutedForeground" center>
             Show this QR code at the gate, or share the PIN. It expires{' '}
-            {formatDate(pass.expiresAt, 'medium')} and won&apos;t be shown again.
+            {formatDateTime(pass.expiresAt, 'medium')} and won&apos;t be shown again.
           </Text>
           <Button label="Done" fullWidth onPress={onClose} />
         </View>
