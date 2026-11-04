@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +38,16 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
     scope: 'Ask about your rent, lease, applications, viewings or repairs.',
     placeholder: 'Ask about your rent, lease or repairs',
   },
+  realtor: {
+    starters: [
+      'Which offers need an answer?',
+      'What commission can I withdraw?',
+      'Do I have viewings coming up?',
+      'How many open leads do I have?',
+    ],
+    scope: 'Ask about your listings, offers, leads, viewings, clients or commissions.',
+    placeholder: 'Ask about offers, leads or commissions',
+  },
   landlord: {
     starters: [
       'Who owes me rent?',
@@ -46,7 +63,8 @@ const COPY: Record<AssistantPersona, { starters: string[]; scope: string; placeh
 /** Ask GetRentos: read-only answers from the user's own account (renter or landlord). */
 export default function AskScreen() {
   const params = useLocalSearchParams<{ persona?: string }>();
-  const persona: AssistantPersona = params.persona === 'landlord' ? 'landlord' : 'renter';
+  const persona: AssistantPersona =
+    params.persona === 'landlord' || params.persona === 'realtor' ? params.persona : 'renter';
   const copy = COPY[persona];
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -60,7 +78,12 @@ export default function AskScreen() {
     onSuccess: (reply) =>
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: reply.answer, links: reply.links, suggestions: reply.suggestions },
+        {
+          role: 'assistant',
+          content: reply.answer,
+          links: reply.links,
+          suggestions: reply.suggestions,
+        },
       ]),
   });
 
@@ -98,7 +121,12 @@ export default function AskScreen() {
           borderBottomColor: colors.border,
         }}
       >
-        <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Back" hitSlop={10}>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          hitSlop={10}
+        >
           <ChevronLeft size={24} color={colors.foreground} />
         </Pressable>
         <View style={{ flex: 1 }}>
@@ -131,7 +159,14 @@ export default function AskScreen() {
         {messages.map((m, i) => {
           const mine = m.role === 'user';
           return (
-            <View key={i} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '86%', gap: spacing.sm }}>
+            <View
+              key={i}
+              style={{
+                alignSelf: mine ? 'flex-end' : 'flex-start',
+                maxWidth: '86%',
+                gap: spacing.sm,
+              }}
+            >
               <View
                 style={{
                   borderRadius: radius.lg,
@@ -142,7 +177,10 @@ export default function AskScreen() {
                   backgroundColor: mine ? colors.primary : colors.secondary,
                 }}
               >
-                <Text variant="callout" style={{ color: mine ? colors.primaryForeground : colors.foreground }}>
+                <Text
+                  variant="callout"
+                  style={{ color: mine ? colors.primaryForeground : colors.foreground }}
+                >
                   {m.content}
                 </Text>
               </View>

@@ -33,6 +33,20 @@ const SERVER_PATHS = [
   '/landlord/messages',
   '/landlord/settings',
   '/landlord/help',
+  // REALTOR_ASSISTANT_LINKS
+  '/realtor/dashboard',
+  '/realtor/listings',
+  '/realtor/offers',
+  '/realtor/leads',
+  '/realtor/viewings',
+  '/realtor/clients',
+  '/realtor/commissions',
+  '/realtor/messages',
+  '/realtor/documents',
+  '/realtor/reviews',
+  '/realtor/verification',
+  '/realtor/settings',
+  '/realtor/help',
 ];
 
 describe('assistant link routes', () => {

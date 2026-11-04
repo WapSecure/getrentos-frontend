@@ -1,5 +1,6 @@
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
+import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type {
   RealtorClient,
   RealtorListing,
@@ -354,6 +355,16 @@ export function mapRealtorOffer(offer: RealtorOfferApi): RealtorOffer {
 }
 
 export const realtorService = {
+  askAssistant: (
+    question: string,
+    history: AssistantTurn[]
+  ): Promise<ApiResponse<AssistantReply>> =>
+    safeCall(() =>
+      authFetch('/realtor/assistant/ask', {
+        method: 'POST',
+        body: JSON.stringify({ question, history }),
+      })
+    ),
   getDashboard: (): Promise<ApiResponse<RealtorDashboardStats>> =>
     safeCall(() => authFetch('/realtor/dashboard')),
   listClients: (params: RealtorClientsParams = {}) =>

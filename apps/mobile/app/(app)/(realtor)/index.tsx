@@ -9,6 +9,7 @@ import {
   FileSignature,
   Handshake,
   Megaphone,
+  MessageCircleQuestion,
   Plus,
   UserPlus,
   Users,
@@ -120,12 +121,19 @@ export default function RealtorHome() {
           : 'Your clients, listings and deals'
       }
       accessory={
-        <IconButton
-          onPress={() => router.push('/(app)/realtor-notifications')}
-          accessibilityLabel="Notifications"
-          badge={unread}
-          icon={<Bell size={21} color={colors.foreground} />}
-        />
+        <View style={{ flexDirection: 'row', gap: 4 }}>
+          <IconButton
+            onPress={() => router.push({ pathname: '/(app)/ask', params: { persona: 'realtor' } })}
+            accessibilityLabel="Ask GetRentos"
+            icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+          />
+          <IconButton
+            onPress={() => router.push('/(app)/realtor-notifications')}
+            accessibilityLabel="Notifications"
+            badge={unread}
+            icon={<Bell size={21} color={colors.foreground} />}
+          />
+        </View>
       }
     />
   );
