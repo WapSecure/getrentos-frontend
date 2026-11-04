@@ -132,6 +132,16 @@ export default function OwnerLandParcel() {
             onPress={() => router.push(`/(app)/owner-land-authority/${r.propertyId}`)}
           />
           <Button
+            label="Estate layout and plots"
+            variant="secondary"
+            onPress={() => router.push(`/(app)/owner-land-layout/${r.propertyId}`)}
+          />
+          <Button
+            label="Seller analytics"
+            variant="secondary"
+            onPress={() => router.push(`/(app)/owner-land-analytics/${r.propertyId}`)}
+          />
+          <Button
             label="Plot sales on this land"
             variant="secondary"
             onPress={() => router.push(`/(app)/owner-land-sales?property=${r.propertyId}`)}
