@@ -361,6 +361,75 @@ const RENT_SORT: Record<MarketSort, string> = {
 
 const anon = { anonymous: true } as const;
 
+/** A landlord's or agency's public page (website: /l/<slug>). */
+export interface LandlordMicrosite {
+  slug: string;
+  landlordId: string;
+  displayName: string;
+  avatarUrl?: string;
+  bannerUrl?: string;
+  bio?: string;
+  verified: boolean;
+  rating: number;
+  reviewCount: number;
+  listingCount: number;
+}
+
+/** An estate's public page (website: /e/<slug>). */
+export interface EstateStorefront {
+  slug: string;
+  estateId: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  bannerUrl?: string;
+  bio?: string;
+  listingCount: number;
+  rentCount: number;
+  saleCount: number;
+  shortletCount: number;
+}
+
+export type StorefrontListingType = 'RENT' | 'SALE' | 'SHORTLET';
+
+interface StorefrontListingDto {
+  listingId: string;
+  title: string;
+  address?: string;
+  city: string;
+  state: string;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  listingType: StorefrontListingType;
+  price: number;
+  coverImageUrl?: string;
+  /** True when the estate itself markets the property, not its owner. */
+  listedByEstate: boolean;
+  ownerName: string;
+}
+
+export const STOREFRONT_KIND: Record<StorefrontListingType, MarketKind> = {
+  RENT: 'rent',
+  SALE: 'sale',
+  SHORTLET: 'shortlet',
+};
+
+const storefrontToCard = (l: StorefrontListingDto): MarketCard => ({
+  id: l.listingId,
+  kind: STOREFRONT_KIND[l.listingType],
+  title: l.title,
+  location: l.address ? `${l.address}, ${l.city}` : place(l.city, l.state),
+  price: money(l.price),
+  period: l.listingType === 'SHORTLET' ? 'night' : undefined,
+  bedrooms: positive(l.bedrooms ?? undefined),
+  bathrooms: positive(l.bathrooms ?? undefined),
+  image: l.coverImageUrl || undefined,
+  verified: false,
+  // Attribution matters here: the estate, or the property's owner.
+  highlight: l.listedByEstate ? 'Marketed by the estate' : `Listed by ${l.ownerName}`,
+});
+
 async function mapPage<T>(
   promise: Promise<Paginated<T>>,
   map: (item: T) => MarketCard
@@ -370,6 +439,37 @@ async function mapPage<T>(
 }
 
 export const publicMarketApi = {
+  microsite(slug: string) {
+    return apiFetch<LandlordMicrosite>(`/microsites/${encodeURIComponent(slug)}`, anon);
+  },
+  /** A microsite's listings are rentals, the same shape as the rent market. */
+  micrositeListings(slug: string, page = 1, pageSize = 20) {
+    return mapPage(
+      apiFetch<Paginated<RentalDto>>(
+        `/microsites/${encodeURIComponent(slug)}/listings${toQuery({ page, pageSize })}`,
+        anon
+      ),
+      rentToCard
+    );
+  },
+  storefront(slug: string) {
+    return apiFetch<EstateStorefront>(`/estate-storefronts/${encodeURIComponent(slug)}`, anon);
+  },
+  storefrontListings(
+    slug: string,
+    listingType: StorefrontListingType | undefined,
+    page = 1,
+    pageSize = 20
+  ) {
+    return mapPage(
+      apiFetch<Paginated<StorefrontListingDto>>(
+        `/estate-storefronts/${encodeURIComponent(slug)}/listings${toQuery({ listingType, page, pageSize })}`,
+        anon
+      ),
+      storefrontToCard
+    );
+  },
+
   list(kind: MarketKind, f: MarketFilters, page = 1, pageSize = 20) {
     // Only the parameters each route declares: the API rejects anything else (400).
     const common = {

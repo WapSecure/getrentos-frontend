@@ -96,7 +96,13 @@ export function resolveIncomingLink(url: string, webUrl: string): LinkTarget | n
   }
   if (section === 'estates' && !first) return { route: '/(market)?kind=estates' };
 
+  // A landlord's or an estate's public page.
+  if ((section === 'l' || section === 'e') && first && !second) {
+    return { route: `/(public)/${section === 'l' ? 'landlord' : 'estate'}/${id(first)}` };
+  }
+
   // A claimed page the app has no screen for. A public page is better shown on
   // the website; a dashboard page opens the person's home in the app.
-  return kind || section === 'estates' ? { web: `${webUrl}${path}` } : { route: '/' };
+  const publicPage = kind || ['estates', 'l', 'e'].includes(section);
+  return publicPage ? { web: `${webUrl}${path}` } : { route: '/' };
 }
