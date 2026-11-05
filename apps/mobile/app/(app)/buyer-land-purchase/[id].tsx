@@ -1,0 +1,643 @@
+import { useState } from 'react';
+import { Alert, RefreshControl, ScrollView, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AlertTriangle, CheckCircle2, CircleDashed, FileDown } from 'lucide-react-native';
+import {
+  Badge,
+  Button,
+  Card,
+  DetailSkeleton,
+  Divider,
+  ErrorState,
+  FormAlert,
+  Price,
+  SegmentedControl,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
+import { qk } from '@/lib/query/keys';
+import {
+  ALLOCATION_ISSUED,
+  BUYER_INSTALLMENT_STATUS,
+  BUYER_PURCHASE_STATUS,
+  buyerRefundPreview,
+  CANCELLABLE,
+  cancelDescription,
+  CONFIRMABLE,
+  landBuyerApi,
+  PAYABLE,
+  plotLabel,
+  refundSentence,
+  summariseSchedule,
+  type BuyerPurchaseDetail,
+  type SaleDocument,
+} from '@/lib/api/landBuyer';
+import { formatBps, PERFECTION_OWNER, PERFECTION_STEP, type Perfection } from '@/lib/api/landSales';
+import { ApiError } from '@/lib/api/client';
+import { formatDate, formatNaira } from '@/lib/format';
+import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { Sheet } from '@/components/Sheet';
+import { BuyerConditions, BuyerMilestones, HeldNote } from '@/components/land/BuyerConveyance';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
+
+const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
+
+type Tab = 'schedule' | 'conditions' | 'conveyance' | 'title' | 'statement';
+
+/** One plot purchase from the buyer's side: what is owed, what is held, what to confirm. */
+export default function BuyerLandPurchase() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [tab, setTab] = useState<Tab>('schedule');
+  const [cancelling, setCancelling] = useState(false);
+  const q = useQuery({
+    queryKey: qk.buyerLand.purchase(id),
+    queryFn: () => landBuyerApi.purchase(id),
+    enabled: !!id,
+  });
+  const p = q.data;
+
+  const apply = (message: string) => (detail: BuyerPurchaseDetail) => {
+    qc.setQueryData(qk.buyerLand.purchase(id), detail);
+    qc.invalidateQueries({ queryKey: qk.buyerLand.all });
+    toast.show(message, 'success');
+  };
+  const fail = (fallback: string) => (e: unknown) => toast.show(errorText(e, fallback), 'error');
+
+  const confirm = useMutation({
+    mutationFn: (key: string) => landBuyerApi.confirmMilestone(id, key),
+    onSuccess: (detail, key) => {
+      const still = detail.milestones.find((m) => m.key === key)?.status === 'DELIVERED';
+      // Still delivered means two-person approval is holding it for the representative.
+      apply(
+        still ? 'Your approval is recorded. Waiting for your representative.' : 'Step confirmed.'
+      )(detail);
+    },
+    onError: fail('Could not confirm that step.'),
+  });
+  const dispute = useMutation({
+    mutationFn: ({ key, reason }: { key: string; reason: string }) =>
+      landBuyerApi.disputeMilestone(id, key, reason),
+    onSuccess: apply('Dispute sent to the developer.'),
+    onError: fail('Could not send the dispute.'),
+  });
+  const settle = useMutation({
+    mutationFn: ({ key, how }: { key: string; how: 'confirm' | 'waive' }) =>
+      landBuyerApi.settleCondition(id, key, how),
+    onSuccess: (detail, { how }) =>
+      apply(how === 'confirm' ? 'Condition confirmed.' : 'Condition waived.')(detail),
+    onError: fail('Could not update the condition.'),
+  });
+
+  const tabs: { value: Tab; label: string }[] = p
+    ? [
+        { value: 'schedule', label: 'Pay' },
+        ...((p.conditions?.length ?? 0) > 0
+          ? [{ value: 'conditions' as const, label: 'Conditions' }]
+          : []),
+        { value: 'conveyance', label: 'Steps' },
+        ...(p.perfection ? [{ value: 'title' as const, label: 'Title' }] : []),
+        { value: 'statement', label: 'Statement' },
+      ]
+    : [];
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <DetailScreenHeader
+        eyebrow="My land"
+        title={p ? `${plotLabel(p)} · ${p.layoutName}` : 'Purchase'}
+        subtitle={
+          p
+            ? `${p.reference} · ${p.planName} · started ${formatDate(p.startedAt ?? p.createdAt, 'short')}`
+            : undefined
+        }
+        onBack={() => goBack()}
+      />
+      {!p ? (
+        q.isError ? (
+          <ErrorState
+            title="This purchase did not load"
+            description={errorText(q.error, '')}
+            onRetry={() => q.refetch()}
+          />
+        ) : (
+          <View style={{ paddingHorizontal: spacing.xl }}>
+            <DetailSkeleton />
+          </View>
+        )
+      ) : (
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: spacing.xl,
+            paddingBottom: insets.bottom + spacing['3xl'],
+            gap: spacing.lg,
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={q.isRefetching}
+              onRefresh={() => q.refetch()}
+              tintColor={colors.mutedForeground}
+            />
+          }
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: spacing.sm,
+              alignItems: 'center',
+            }}
+          >
+            <Badge
+              label={BUYER_PURCHASE_STATUS[p.status].label}
+              tone={BUYER_PURCHASE_STATUS[p.status].tone}
+            />
+            {['ACTIVE', 'PAID_IN_FULL', 'COMPLETED'].includes(p.status) ? (
+              <Button
+                label="Watch this plot"
+                size="sm"
+                variant="ghost"
+                onPress={() => router.push('/(app)/land-watch')}
+              />
+            ) : null}
+          </View>
+          <Banners p={p} />
+          <PayNext p={p} onPaid={() => qc.invalidateQueries({ queryKey: qk.buyerLand.all })} />
+          <PriceCard p={p} />
+          <SegmentedControl
+            options={tabs}
+            value={tab}
+            onChange={setTab}
+            accessibilityLabel="Purchase section"
+          />
+          {tab === 'schedule' ? (
+            <Schedule p={p} />
+          ) : tab === 'conditions' ? (
+            <Card>
+              <BuyerConditions
+                conditions={p.conditions ?? []}
+                checklist={p.closingChecklist}
+                busyKey={settle.isPending ? (settle.variables?.key ?? null) : null}
+                onSettle={(key, how) => settle.mutate({ key, how })}
+              />
+            </Card>
+          ) : tab === 'conveyance' ? (
+            <View style={{ gap: spacing.md }}>
+              <HeldNote text="GetRentos holds your payments. Each step you confirm releases its share to the developer, never more than you have paid. Confirm in order, and only once you hold the document or have been shown the plot. Allocation, the deed and the survey in your name come after full payment." />
+              <Card>
+                <BuyerMilestones
+                  milestones={p.milestones}
+                  contractOpen={CONFIRMABLE.has(p.status)}
+                  showRelease
+                  busyKey={
+                    confirm.isPending
+                      ? (confirm.variables ?? null)
+                      : dispute.isPending
+                        ? (dispute.variables?.key ?? null)
+                        : null
+                  }
+                  onConfirm={(m) => confirm.mutate(m.key)}
+                  onDispute={(m, reason) => dispute.mutate({ key: m.key, reason })}
+                />
+              </Card>
+            </View>
+          ) : tab === 'title' && p.perfection ? (
+            <TitlePerfection perfection={p.perfection} />
+          ) : (
+            <StatementView id={id} />
+          )}
+          <Documents p={p} />
+          {CANCELLABLE.has(p.status) ? (
+            <Card style={{ gap: spacing.sm }}>
+              <Text variant="bodyStrong">Cancel this purchase</Text>
+              <Text variant="callout" color="mutedForeground">
+                {p.canCancelInFull
+                  ? `Refund if you cancel now: ${formatNaira(p.amountPaid)}, everything you paid, because a condition was not met.`
+                  : (() => {
+                      const r = buyerRefundPreview(p);
+                      return `Refund if you cancel now: ${formatNaira(r.refund)} after a ${formatNaira(r.charge)} forfeiture. Late fees are not refunded.`;
+                    })()}
+              </Text>
+              <Button
+                label="Cancel this purchase"
+                size="sm"
+                variant="destructive"
+                onPress={() => setCancelling(true)}
+                style={{ alignSelf: 'flex-start' }}
+              />
+            </Card>
+          ) : null}
+        </ScrollView>
+      )}
+      <Sheet open={cancelling} onClose={() => setCancelling(false)} title="Cancel this purchase?">
+        {p ? <CancelForm p={p} onDone={() => setCancelling(false)} /> : null}
+      </Sheet>
+    </View>
+  );
+}
+
+function Banners({ p }: { p: BuyerPurchaseDetail }) {
+  if (p.status === 'DEFAULTED') {
+    return (
+      <FormAlert
+        tone="error"
+        message={`This purchase is in default because a payment is more than ${p.terms.defaultAfterDays} days late. Pay what is overdue now; the developer may otherwise revoke the contract, refunding what you paid less ${formatBps(p.terms.revocationChargeBps)}.`}
+      />
+    );
+  }
+  if (p.canCancelInFull) {
+    return (
+      <FormAlert
+        tone="warning"
+        message="A condition of this purchase was not met. You may cancel and receive everything you have paid, with no cancellation charge, or keep the purchase. See Conditions."
+      />
+    );
+  }
+  if (p.status === 'CANCELLED' || p.status === 'REVOKED') {
+    const why =
+      p.status === 'REVOKED'
+        ? `The developer revoked this purchase${p.revocationReason ? `: ${p.revocationReason}` : ''}.`
+        : 'You cancelled this purchase.';
+    return <FormAlert tone="info" message={`${why} ${refundSentence(p, formatNaira)}`} />;
+  }
+  return null;
+}
+
+function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) {
+  const { spacing } = useTheme();
+  const toast = useToast();
+  const pay = useMutation({
+    mutationFn: () => landBuyerApi.pay(p.id),
+    onSuccess: async (init) => {
+      if (init.authorizationUrl) {
+        // The gateway confirms by webhook; refetch once the browser closes.
+        await WebBrowser.openBrowserAsync(init.authorizationUrl);
+      } else {
+        toast.show(`Payment of ${formatNaira(init.amount)} confirmed.`, 'success');
+      }
+      onPaid();
+    },
+    onError: (e) => toast.show(errorText(e, 'Could not start the payment.'), 'error'),
+  });
+  const payable = PAYABLE.has(p.status) && !!p.nextDue;
+  return (
+    <Card style={{ gap: spacing.sm }}>
+      <Text variant="bodyStrong">
+        {p.status === 'PENDING_DEPOSIT' ? 'Pay your deposit' : 'Next payment'}
+      </Text>
+      {payable && p.nextDue ? (
+        <>
+          <Price amount={p.nextDue.amount} variant="display" />
+          <Text variant="caption" color="mutedForeground">
+            {p.nextDue.label} · {p.nextDue.overdue ? 'was due' : 'due'}{' '}
+            {formatDate(p.nextDue.dueDate)}
+            {p.nextDue.overdue ? ' (late fee included)' : ''}
+          </Text>
+          <Button
+            label={`Pay ${formatNaira(p.nextDue.amount)}`}
+            loading={pay.isPending}
+            disabled={pay.isPending}
+            onPress={() => pay.mutate()}
+          />
+          <Text variant="caption" color="mutedForeground">
+            You will be taken to our payment partner to pay securely. GetRentos holds it until you
+            confirm each conveyance step.
+          </Text>
+        </>
+      ) : (
+        <Text variant="callout" color="mutedForeground">
+          {p.status === 'PAID_IN_FULL' || p.status === 'COMPLETED'
+            ? 'Paid in full. Nothing more is due.'
+            : 'Nothing is payable on this purchase.'}
+        </Text>
+      )}
+    </Card>
+  );
+}
+
+function PriceCard({ p }: { p: BuyerPurchaseDetail }) {
+  const { spacing } = useTheme();
+  const rows: [string, number, ('success' | 'destructive')?][] = [
+    ['Plot price', p.plotPrice],
+    ...(p.priceUplift > 0 ? [['Installment uplift', p.priceUplift] as [string, number]] : []),
+    ['Documentation fee', p.feeBreakdown.documentationFee],
+    ['Survey fee', p.feeBreakdown.surveyFee],
+    ['Development levy', p.feeBreakdown.developmentLevy],
+    ['Total price', p.totalPrice],
+    ['Paid so far', p.amountPaid, 'success'],
+    ...(p.lateFeesAccrued > 0
+      ? [['Late fees charged', p.lateFeesAccrued, 'destructive'] as [string, number, 'destructive']]
+      : []),
+    ['Outstanding', p.outstandingBalance],
+    ['Released to the developer', p.releasedToSeller],
+  ];
+  return (
+    <Card style={{ gap: spacing.sm }}>
+      {rows.map(([label, amount, color]) => (
+        <View key={label} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text variant="callout" color="mutedForeground">
+            {label}
+          </Text>
+          <Price amount={amount} variant="callout" color={color} />
+        </View>
+      ))}
+    </Card>
+  );
+}
+
+function Schedule({ p }: { p: BuyerPurchaseDetail }) {
+  const { colors, spacing, radius } = useTheme();
+  const s = summariseSchedule(p.installments, p.nextDue);
+  const onlyDeposit = s.rows.length === 1 && s.rows[0].sequence === 0;
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <Text variant="callout" style={{ fontWeight: '600' }}>
+        {s.paidCount} of {s.total} paid · {s.percentPaid}% of the schedule
+      </Text>
+      <View
+        style={{
+          height: 6,
+          borderRadius: radius.full,
+          backgroundColor: colors.secondary,
+          overflow: 'hidden',
+        }}
+      >
+        <View
+          style={{ width: `${s.percentPaid}%`, height: '100%', backgroundColor: colors.success }}
+        />
+      </View>
+      {s.overdueCount > 0 ? (
+        <FormAlert
+          tone="error"
+          message={`${s.overdueCount} installment${s.overdueCount === 1 ? ' is' : 's are'} overdue: ${formatNaira(s.overdueAmount)} including late fees. Pay now to avoid default.`}
+        />
+      ) : null}
+      {s.rows.map((i, n) => {
+        const st = BUYER_INSTALLMENT_STATUS[i.status] ?? BUYER_INSTALLMENT_STATUS.PENDING;
+        return (
+          <View key={i.id} style={{ gap: 2 }}>
+            {n > 0 ? <Divider style={{ marginBottom: spacing.sm }} /> : null}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
+                {i.label}
+              </Text>
+              {i.id === s.nextInstallmentId ? <Badge label="Next" tone="info" /> : null}
+              <Badge label={st.label} tone={st.tone} />
+            </View>
+            <Text variant="caption" color="mutedForeground">
+              Due {formatDate(i.dueDate, 'short')} · {formatNaira(i.amount)}
+              {i.lateFee > 0 ? ` + ${formatNaira(i.lateFee)} late fee` : ''}
+              {i.outstanding > 0 ? ` · owed ${formatNaira(i.outstanding)}` : ''}
+              {i.paidAt ? ` · paid ${formatDate(i.paidAt, 'short')}` : ''}
+            </Text>
+          </View>
+        );
+      })}
+      {onlyDeposit ? (
+        <Text variant="caption" color="mutedForeground">
+          The monthly schedule is built when the deposit is paid; the first installment falls a
+          month later.
+        </Text>
+      ) : null}
+      <Text variant="caption" color="mutedForeground">
+        {p.terms.gracePeriodDays} days’ grace on each installment, then a{' '}
+        {formatBps(p.terms.lateFeeBps)} late fee. Default after {p.terms.defaultAfterDays} days
+        overdue.
+      </Text>
+    </Card>
+  );
+}
+
+function TitlePerfection({ perfection: t }: { perfection: Perfection }) {
+  const { colors, spacing } = useTheme();
+  const overall =
+    t.status === 'PERFECTED'
+      ? { label: 'Title perfected', tone: 'success' as const }
+      : t.status === 'EXCEPTION'
+        ? { label: 'Needs attention', tone: 'danger' as const }
+        : { label: 'In progress', tone: 'info' as const };
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <Badge label={overall.label} tone={overall.tone} />
+      <Text variant="caption" color="mutedForeground">
+        {t.professionalName
+          ? `Accountable professional: ${t.professionalName}${t.professionalFirm ? `, ${t.professionalFirm}` : ''}`
+          : 'Accountable professional not yet named'}
+      </Text>
+      {t.status === 'PERFECTED' ? (
+        <FormAlert
+          tone="success"
+          message={`Registered in your name${t.perfectedAt ? ` on ${formatDate(t.perfectedAt)}` : ''}: ${t.finalInstrumentReference ?? ''}`}
+        />
+      ) : null}
+      {t.steps.map((step) => {
+        const done = step.status === 'APPROVED' || step.status === 'NOT_APPLICABLE';
+        const Icon = done ? CheckCircle2 : step.escalationLevel > 0 ? AlertTriangle : CircleDashed;
+        return (
+          <View key={step.key} style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <Icon
+              size={16}
+              color={
+                done
+                  ? colors.success
+                  : step.escalationLevel > 0
+                    ? colors.warning
+                    : colors.mutedForeground
+              }
+              style={{ marginTop: 3 }}
+            />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text variant="callout" style={{ fontWeight: '600' }}>
+                {step.label}
+              </Text>
+              <Badge
+                label={PERFECTION_STEP[step.status].label}
+                tone={PERFECTION_STEP[step.status].tone}
+              />
+              <Text variant="caption" color="mutedForeground">
+                {[
+                  PERFECTION_OWNER[step.owner] ?? step.owner,
+                  !done && step.dueDate ? `due ${formatDate(step.dueDate, 'short')}` : null,
+                  step.escalationLevel > 0 && !done ? 'late' : null,
+                  step.submittedAt ? `submitted ${formatDate(step.submittedAt, 'short')}` : null,
+                  step.approvedAt ? `approved ${formatDate(step.approvedAt, 'short')}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+            </View>
+          </View>
+        );
+      })}
+      {t.status !== 'PERFECTED' && (t.blockers?.length ?? 0) > 0 ? (
+        <Text variant="caption" color="mutedForeground">
+          Still to do: {t.blockers!.join('; ')}
+        </Text>
+      ) : null}
+      <Text variant="caption" color="mutedForeground">
+        A step submitted to a government office is not approved until the approval is recorded. Your
+        title is perfected only when every step is approved and the final registered instrument is
+        on file.
+      </Text>
+    </Card>
+  );
+}
+
+function StatementView({ id }: { id: string }) {
+  const { spacing } = useTheme();
+  const q = useQuery({
+    queryKey: qk.buyerLand.statement(id),
+    queryFn: () => landBuyerApi.statement(id),
+  });
+  const s = q.data;
+  if (!s) return q.isError ? <ErrorState onRetry={() => q.refetch()} /> : <DetailSkeleton />;
+  const signed = (n: number) => (n < 0 ? `${formatNaira(-n)} credit` : formatNaira(n));
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
+        {(
+          [
+            ['Charged to date', formatNaira(s.totalCharged)],
+            ['Paid', formatNaira(s.totalPaid)],
+            [s.balance < 0 ? 'Paid ahead' : 'Due now', formatNaira(Math.abs(s.balance))],
+            ['Left on contract', formatNaira(s.outstandingBalance)],
+          ] as const
+        ).map(([label, value]) => (
+          <View key={label} style={{ width: '50%', gap: 2 }}>
+            <Text variant="caption" color="mutedForeground">
+              {label}
+            </Text>
+            <Text variant="bodyStrong">{value}</Text>
+          </View>
+        ))}
+      </View>
+      {s.entries.length === 0 ? (
+        <Text variant="callout" color="mutedForeground">
+          Nothing has been charged or paid yet.
+        </Text>
+      ) : (
+        s.entries.map((e, i) => (
+          <View key={`${e.date}-${i}`} style={{ gap: 2 }}>
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <Text variant="callout" style={{ flex: 1 }}>
+                {e.description}
+              </Text>
+              <Text variant="callout" style={{ fontWeight: '600' }}>
+                {e.debit ? formatNaira(e.debit) : `− ${formatNaira(e.credit)}`}
+              </Text>
+            </View>
+            <Text variant="caption" color="mutedForeground">
+              {formatDate(e.date, 'short')} · balance {signed(e.balance)}
+            </Text>
+          </View>
+        ))
+      )}
+    </Card>
+  );
+}
+
+function Documents({ p }: { p: BuyerPurchaseDetail }) {
+  const { colors, spacing } = useTheme();
+  const toast = useToast();
+  const [busy, setBusy] = useState<SaleDocument | null>(null);
+  const allocation = ALLOCATION_ISSUED.has(p.status);
+  const download = async (kind: SaleDocument) => {
+    setBusy(kind);
+    try {
+      const { bytes } = await landBuyerApi.document(p.id, kind);
+      await shareDownloadedFile(
+        bytes,
+        `${p.reference}-${kind}.pdf`,
+        PDF_MIME,
+        kind === 'contract-of-sale' ? 'Contract of sale' : 'Allocation letter'
+      );
+    } catch {
+      toast.show('Could not download the document.', 'error');
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <Card style={{ gap: spacing.sm }}>
+      <Text variant="bodyStrong">Documents</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+        <Button
+          label="Contract of sale"
+          size="sm"
+          variant="secondary"
+          icon={<FileDown size={14} color={colors.foreground} />}
+          loading={busy === 'contract-of-sale'}
+          disabled={!!busy}
+          onPress={() => download('contract-of-sale')}
+        />
+        <Button
+          label="Allocation letter"
+          size="sm"
+          variant="secondary"
+          icon={<FileDown size={14} color={colors.foreground} />}
+          loading={busy === 'allocation-letter'}
+          disabled={!!busy || !allocation}
+          onPress={() => download('allocation-letter')}
+        />
+      </View>
+      {!allocation ? (
+        <Text variant="caption" color="mutedForeground">
+          {p.status === 'CANCELLED' || p.status === 'REVOKED'
+            ? 'Allocation letter not issued: this purchase has ended.'
+            : 'The allocation letter is issued once the deposit is paid.'}
+        </Text>
+      ) : null}
+    </Card>
+  );
+}
+
+function CancelForm({ p, onDone }: { p: BuyerPurchaseDetail; onDone: () => void }) {
+  const { spacing } = useTheme();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [reason, setReason] = useState('');
+  const cancel = useMutation({
+    mutationFn: () => landBuyerApi.cancel(p.id, reason.trim() || undefined),
+    onSuccess: (detail) => {
+      qc.setQueryData(qk.buyerLand.purchase(p.id), detail);
+      qc.invalidateQueries({ queryKey: qk.buyerLand.all });
+      toast.show(`Purchase cancelled. ${refundSentence(detail, formatNaira)}`, 'success');
+      onDone();
+    },
+    onError: (e) => toast.show(errorText(e, 'Could not cancel the purchase.'), 'error'),
+  });
+  return (
+    <View style={{ gap: spacing.lg }}>
+      <Text variant="callout" color="mutedForeground">
+        {cancelDescription(p, formatNaira)}
+      </Text>
+      <TextField
+        label="Why are you cancelling? (optional)"
+        value={reason}
+        onChangeText={setReason}
+        multiline
+      />
+      <Button
+        label="Cancel purchase"
+        variant="destructive"
+        loading={cancel.isPending}
+        disabled={cancel.isPending}
+        onPress={() =>
+          Alert.alert('Cancel this purchase?', 'This cannot be undone.', [
+            { text: 'Keep it', style: 'cancel' },
+            { text: 'Cancel purchase', style: 'destructive', onPress: () => cancel.mutate() },
+          ])
+        }
+      />
+    </View>
+  );
+}

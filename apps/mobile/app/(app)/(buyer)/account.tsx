@@ -73,6 +73,13 @@ export default function BuyerAccount() {
       onPress: go('/(app)/land'),
     },
     {
+      key: 'my-land',
+      label: 'My land',
+      description: 'Plots you hold and are paying for',
+      icon: LandPlot,
+      onPress: go('/(app)/buyer-land'),
+    },
+    {
       key: 'land-watch',
       label: 'Land Watch',
       description: 'Inspections, alerts and reminders for land you own',

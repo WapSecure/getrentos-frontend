@@ -25,6 +25,16 @@ export const qk = {
     firms: ['management-transfers', 'firms'] as const,
     handover: (id: string) => ['management-transfers', 'handover', id] as const,
   },
+  /** The buyer's land deals (lib/api/landBuyer). */
+  buyerLand: {
+    all: ['buyer-land'] as const,
+    purchases: (status: string) => ['buyer-land', 'purchases', status] as const,
+    purchase: (id: string) => ['buyer-land', 'purchase', id] as const,
+    statement: (id: string) => ['buyer-land', 'purchase', id, 'statement'] as const,
+    reservations: ['buyer-land', 'reservations'] as const,
+    resaleMilestones: (txId: string) => ['buyer-land', 'resale', txId, 'milestones'] as const,
+    resaleConditions: (txId: string) => ['buyer-land', 'resale', txId, 'conditions'] as const,
+  },
   /** The agency workspace (lib/api/agency). */
   agency: {
     managing: ['agency', 'managing'] as const,
