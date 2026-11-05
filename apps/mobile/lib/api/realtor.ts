@@ -584,6 +584,23 @@ export function offerThread(o: RealtorOffer): OfferStep[] {
 /** The amount currently on the table: the latest step of the thread. */
 export const currentAmount = (o: RealtorOffer) => offerThread(o).at(-1)!.amount;
 
+/** The buyer's own latest figure (their offer, or their latest counter). */
+export const buyerAmount = (o: RealtorOffer) =>
+  offerThread(o)
+    .filter((step) => step.who === 'buyer')
+    .at(-1)!.amount;
+
+/**
+ * Your counter still waiting on the buyer, if the latest move was yours on an
+ * open offer: the card then shows the buyer's figure with this beside it,
+ * instead of presenting your number as the buyer's.
+ */
+export function pendingCounter(o: RealtorOffer): number | null {
+  if (o.status !== 'COUNTERED') return null;
+  const last = offerThread(o).at(-1)!;
+  return last.who === 'you' ? last.amount : null;
+}
+
 /** How far an amount sits from the asking price, e.g. "8% under asking". */
 export function vsAsking(amount: number, asking?: number): string | null {
   if (!asking) return null;
