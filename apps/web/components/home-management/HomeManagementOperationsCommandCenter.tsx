@@ -232,7 +232,7 @@ export function HomeManagementOperationsCommandCenter({
               <div>
                 <div className="flex items-center gap-2">
                   <ClipboardList className="h-4 w-4 text-primary" aria-hidden="true" />
-                  <h3 className="font-semibold text-foreground">Prioritized action queue</h3>
+                  <h3 className="font-semibold text-foreground">Prioritised action queue</h3>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Portfolio-wide totals remain accurate while each operational table is paginated.

@@ -27,7 +27,7 @@ const steps = [
     number: '03',
     title: 'Dashboard',
     icon: LayoutDashboard,
-    description: 'Personalized workspace for your role.',
+    description: 'Personalised workspace for your role.',
   },
   {
     number: '04',

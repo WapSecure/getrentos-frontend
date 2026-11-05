@@ -156,7 +156,7 @@ export default function AgentHome() {
         <View style={{ gap: spacing.md }}>
           <SectionHeader
             title="Upcoming tasks"
-            description="Prioritized by deadline and status"
+            description="Prioritised by deadline and status"
             actionLabel="See all"
             onAction={() => router.push('/(app)/(agent)/tasks')}
           />

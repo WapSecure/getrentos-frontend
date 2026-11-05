@@ -65,7 +65,7 @@ export const SearchPreferencesSettings = () => {
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Search preferences</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Used to personalize recommendations and match alerts
+        Used to personalise recommendations and match alerts
       </p>
 
       <div className="space-y-4">
