@@ -289,7 +289,40 @@ function q(params: Record<string, string | number | boolean | undefined | null>)
   return out ? `?${out}` : '';
 }
 
+/** Defaults used across a realtor's listings and deals. */
+export interface RealtorBusinessPreferences {
+  commissionRate: number;
+  serviceAreas: string[];
+  propertyTypes: string[];
+}
+
+export const SERVICE_AREA_OPTIONS = [
+  'Victoria Island',
+  'Lekki',
+  'Ikoyi',
+  'Ikeja',
+  'Surulere',
+  'Yaba',
+];
+export const PREFERRED_PROPERTY_TYPES = [
+  { value: 'APARTMENT', label: 'Apartments' },
+  { value: 'DUPLEX', label: 'Duplexes' },
+  { value: 'CONDO', label: 'Condos' },
+  { value: 'COMMERCIAL', label: 'Commercial' },
+  { value: 'LAND', label: 'Land' },
+];
+
+/** Commission is a whole percentage between 1 and 100 (the API takes integers only). */
+export const commissionRateOk = (rate: number | null | undefined) =>
+  typeof rate === 'number' && Number.isInteger(rate) && rate >= 1 && rate <= 100;
+
 export const realtorApi = {
+  businessPreferences: () => apiFetch<RealtorBusinessPreferences>('/realtor/settings/preferences'),
+  updateBusinessPreferences: (body: RealtorBusinessPreferences) =>
+    apiFetch<RealtorBusinessPreferences>('/realtor/settings/preferences', {
+      method: 'PUT',
+      body,
+    }),
   dashboard: () => apiFetch<RealtorDashboard>('/realtor/dashboard'),
   activity: () => apiFetch<RealtorActivity[]>('/realtor/dashboard/activity'),
 

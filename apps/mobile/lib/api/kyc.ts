@@ -31,6 +31,15 @@ export interface IdentityKyc {
   rejectionReason?: string;
 }
 
+/** A realtor/agent licence sent for human review. */
+export interface LicenseKyc {
+  id: string;
+  licenseNumber: string;
+  status: KycStatus;
+  submittedAt: string;
+  rejectionReason?: string;
+}
+
 export interface KycStatusResponse {
   isVerified: boolean;
   verificationStatus: string;
@@ -43,6 +52,7 @@ export interface KycStatusResponse {
    */
   identityVerified?: boolean;
   identity?: IdentityKyc;
+  license?: LicenseKyc;
 }
 
 export const kycApi = {
@@ -60,5 +70,13 @@ export const kycApi = {
     form.append('documentType', params.documentType);
     if (params.note) form.append('note', params.note);
     return apiUpload<IdentityKyc>('/users/me/kyc/identity', form);
+  },
+
+  /** Realtor/agent licence: number required, document optional. */
+  submitLicense: (params: { licenseNumber: string; document?: PickedFile }) => {
+    const form = new FormData();
+    form.append('licenseNumber', params.licenseNumber);
+    if (params.document) appendFile(form, 'document', params.document);
+    return apiUpload<LicenseKyc>('/users/me/kyc/license', form);
   },
 };

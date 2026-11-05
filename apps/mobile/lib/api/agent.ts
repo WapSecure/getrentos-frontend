@@ -254,7 +254,21 @@ function toQuery(params: Record<string, string | number | undefined>): string {
   return s ? `?${s}` : '';
 }
 
+export interface AgentNotificationPreference {
+  /** Category: verification or system. */
+  id: string;
+  email: boolean;
+  push: boolean;
+}
+
 export const agentApi = {
+  notificationPreferences: () =>
+    apiFetch<AgentNotificationPreference[]>('/agent/settings/notifications'),
+  updateNotificationPreferences: (preferences: AgentNotificationPreference[]) =>
+    apiFetch<AgentNotificationPreference[]>('/agent/settings/notifications', {
+      method: 'PUT',
+      body: { preferences },
+    }),
   dashboard: () => apiFetch<AgentDashboard>('/agent/dashboard'),
 
   profile: () => apiFetch<AgentProfile>('/agent/profile'),
