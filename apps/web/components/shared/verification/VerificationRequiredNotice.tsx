@@ -8,6 +8,7 @@ import {
   type TrustWithheldReason,
   type VerificationReason,
 } from '@/lib/apiHelpers';
+import { TIER_LABELS } from './trustTiers';
 
 /** Static copy for the per-action verification guards. */
 const BASE_COPY: Record<
@@ -26,15 +27,6 @@ const BASE_COPY: Record<
     message: 'This property needs an approved ownership document before it can be listed.',
     cta: 'Submit ownership proof',
   },
-};
-
-const TIER_LABELS: Record<number, string> = {
-  0: 'Unverified',
-  1: 'Contact verified',
-  2: 'Identity verified',
-  3: 'Financially verified',
-  4: 'Role verified',
-  5: 'Trusted actor',
 };
 
 /** Builds the copy for the trust-tier guard, tuned to whether tier 2 (identity) or 3+ (financial) is required. */
