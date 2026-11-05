@@ -1,28 +1,34 @@
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Bell, Clock } from 'lucide-react-native';
-import { Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import type { StatementExplanation } from '@/lib/api/landlord';
 import { landlordApi } from '@/lib/api/landlord';
 import { qk } from '@/lib/query/keys';
 
 /** A statement in plain words, shown inside its card when the landlord asks for it. */
 export function StatementExplainer({ statementId }: { statementId: string }) {
-  const { colors, spacing, radius } = useTheme();
+  const { radius } = useTheme();
   const q = useQuery({
     queryKey: qk.landlord.statementExplanation(statementId),
     queryFn: () => landlordApi.explainOwnerStatement(statementId),
     staleTime: 10 * 60_000,
     retry: false,
   });
-  if (q.isLoading) return <Skeleton height={90} radius={radius.md} />;
-  if (q.isError || !q.data) {
-    return (
-      <Text variant="caption" color="mutedForeground">
-        Could not explain this statement right now.
-      </Text>
-    );
-  }
-  const d = q.data;
+  // The landlord asked for this, so a failure shows with a retry rather than vanishing.
+  return (
+    <QueryState
+      query={q}
+      skeleton={<Skeleton height={90} radius={radius.md} />}
+      errorTitle="Could not explain this statement"
+    >
+      {q.data ? <Explanation d={q.data} /> : null}
+    </QueryState>
+  );
+}
+
+function Explanation({ d }: { d: StatementExplanation }) {
+  const { colors, spacing } = useTheme();
   const tone = {
     urgent: { Icon: AlertCircle, color: colors.destructive },
     soon: { Icon: Clock, color: colors.warning },
