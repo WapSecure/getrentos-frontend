@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { depositHolderText, noDeductionsText } from '@getrentos/shared';
 import { PiggyBank, ShieldCheck } from 'lucide-react-native';
 import {
   Badge,
@@ -139,9 +140,7 @@ function DepositCard({ deposit: d }: { deposit: TenantDeposit }) {
           <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             <ShieldCheck size={14} color={colors.success} style={{ marginTop: 2 }} />
             <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-              {hold.heldByGetRentos
-                ? 'Held by GetRentos under Payment Protection, not by your landlord. It is only paid out as recorded here.'
-                : `Held by ${hold.heldBy ?? 'your landlord'}. GetRentos keeps the record, and every deduction shows here.`}
+              {depositHolderText(hold)}
             </Text>
           </View>
           <Text variant="caption" color="mutedForeground">
@@ -154,7 +153,7 @@ function DepositCard({ deposit: d }: { deposit: TenantDeposit }) {
           </Text>
           {hold.deductions.length === 0 ? (
             <Text variant="callout" color="mutedForeground">
-              None. Your full deposit is due back to you.
+              {noDeductionsText(hold.status === 'RETURNED')}
             </Text>
           ) : (
             hold.deductions.map((x) => <Deduction key={x.id} d={x} />)

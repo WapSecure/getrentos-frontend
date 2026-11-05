@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { File } from 'expo-file-system';
 import { apiFetch } from './client';
 import type { PickedFile } from './documents';
@@ -76,8 +77,13 @@ export function canImport(r: { fileError: string | null; errors: RowErrors[] }, 
   return !r.fileError && r.errors.length === 0 && rows > 0;
 }
 
-/** Reads a picked CSV as text (the import API takes the file's text, not an upload). */
+/**
+ * Reads a picked CSV as text (the import API takes the file's text, not an
+ * upload). On the web build the picker hands back a blob: URL, which only
+ * fetch can read; on a phone it is a file in the app's cache.
+ */
 export async function readCsv(file: PickedFile): Promise<string> {
+  if (Platform.OS === 'web') return (await fetch(file.uri)).text();
   return new File(file.uri).text();
 }
 

@@ -12,3 +12,4 @@ export * from './landWatch';
 export * from './months';
 export * from './coordinateSystems';
 export * from './landTrust';
+export * from './deposit';

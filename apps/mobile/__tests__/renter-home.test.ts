@@ -6,6 +6,7 @@ import {
   type DepositHold,
   type TenantDeposit,
 } from '@/lib/api/renterHome';
+import { depositHolderText, noDeductionsText } from '@getrentos/shared';
 
 const hold = (over: Partial<DepositHold>): DepositHold => ({
   id: 'h',
@@ -52,5 +53,20 @@ describe('renter home helpers', () => {
   it('accepts the delete phrase regardless of case and spacing', () => {
     expect(deletePhraseOk(' Delete My Account ')).toBe(true);
     expect(deletePhraseOk('delete account')).toBe(false);
+  });
+
+  it('names who holds the deposit without a capitalised "Your"', () => {
+    expect(depositHolderText({ heldByGetRentos: false, heldBy: 'Your landlord' })).toMatch(
+      /^Held by your landlord\./
+    );
+    expect(depositHolderText({ heldByGetRentos: false, heldBy: 'Ada Homes Ltd' })).toMatch(
+      /^Held by Ada Homes Ltd\./
+    );
+    expect(depositHolderText({ heldByGetRentos: true })).toMatch(/^Held by GetRentos/);
+  });
+
+  it('speaks of a returned deposit in the past tense', () => {
+    expect(noDeductionsText(true)).toBe('None. Your full deposit was returned.');
+    expect(noDeductionsText(false)).toBe('None. Your full deposit is due back to you.');
   });
 });
