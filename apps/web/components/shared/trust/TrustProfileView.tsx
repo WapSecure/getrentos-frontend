@@ -2,7 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Clock, ShieldCheck, Star } from 'lucide-react';
-import { Card, CardSkeleton, PageErrorState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Card,
+  CardSkeleton,
+  PageErrorState,
+  Skeleton,
+  StatGridSkeleton,
+  PageHeader,
+} from '@getrentos/ui';
 import { TrustScoreRing } from '@/components/shared/trust/TrustScoreRing';
 import { TrustScoreBreakdownCard } from '@/components/shared/trust/TrustScoreBreakdownCard';
 import { TrustExplanationCard } from '@/components/shared/trust/TrustExplanationCard';
@@ -52,10 +59,7 @@ export const TrustProfileView = ({ queryKey, queryFn, title, subtitle }: TrustPr
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-        <p className="text-muted-foreground mt-1">{subtitle}</p>
-      </div>
+      <PageHeader title={title} description={subtitle} />
 
       {breakdown?.stage && (
         <div className="mb-6">

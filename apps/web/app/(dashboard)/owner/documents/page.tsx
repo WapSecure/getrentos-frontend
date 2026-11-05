@@ -12,6 +12,7 @@ import {
   SearchInput,
   SegmentedControl,
   type UploadedDocumentData,
+  PageHeader,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -122,21 +123,23 @@ export default function OwnerDocumentsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Documents</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Documents"
+        description={
+          <>
             {total} document{total === 1 ? '' : 's'} across your portfolio
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsUploadOpen(true)}
-          icon={<Upload className="w-4 h-4" />}
-        >
-          Upload document
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsUploadOpen(true)}
+            icon={<Upload className="w-4 h-4" />}
+          >
+            Upload document
+          </Button>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

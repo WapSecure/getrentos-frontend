@@ -28,6 +28,7 @@ import {
   ToggleChip,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   BarChart3,
@@ -177,55 +178,53 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Shortlet management</h1>
-          <p className="mt-1 text-muted-foreground">
-            Publish short-stay listings and manage bookings.
-          </p>
-          <HostFeeNote />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setMessagesOpen(true)}
-            icon={<MessageSquare className="h-4 w-4" />}
-          >
-            Messages
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setDisputesOpen(true)}
-            icon={<Gavel className="h-4 w-4" />}
-          >
-            Disputes
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setClaimsOpen(true)}
-            icon={<ShieldAlert className="h-4 w-4" />}
-          >
-            Deposit claims
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setAnalyticsOpen(true)}
-            icon={<BarChart3 className="h-4 w-4" />}
-          >
-            Analytics
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setPayoutsOpen(true)}
-            icon={<Banknote className="h-4 w-4" />}
-          >
-            Payouts
-          </Button>
-          <Button onClick={() => setCreateOpen(true)} icon={<Plus className="h-4 w-4" />}>
-            New listing
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Shortlet management"
+        description="Publish short-stay listings and manage bookings."
+        meta={<HostFeeNote />}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setMessagesOpen(true)}
+              icon={<MessageSquare className="h-4 w-4" />}
+            >
+              Messages
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setDisputesOpen(true)}
+              icon={<Gavel className="h-4 w-4" />}
+            >
+              Disputes
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setClaimsOpen(true)}
+              icon={<ShieldAlert className="h-4 w-4" />}
+            >
+              Deposit claims
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setAnalyticsOpen(true)}
+              icon={<BarChart3 className="h-4 w-4" />}
+            >
+              Analytics
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setPayoutsOpen(true)}
+              icon={<Banknote className="h-4 w-4" />}
+            >
+              Payouts
+            </Button>
+            <Button onClick={() => setCreateOpen(true)} icon={<Plus className="h-4 w-4" />}>
+              New listing
+            </Button>
+          </>
+        }
+      />
 
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="mb-6">
         <TabsList className="max-w-full">

@@ -8,6 +8,7 @@ import {
   Pagination,
   SearchInput,
   SegmentedControl,
+  PageHeader,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -82,12 +83,14 @@ export default function OwnerLeadsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Buyer leads</h1>
-        <p className="text-muted-foreground mt-1">
-          {total} inquir{total === 1 ? 'y' : 'ies'} across your sale listings
-        </p>
-      </div>
+      <PageHeader
+        title="Buyer leads"
+        description={
+          <>
+            {total} inquir{total === 1 ? 'y' : 'ies'} across your sale listings
+          </>
+        }
+      />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput

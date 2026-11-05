@@ -19,6 +19,7 @@ import {
   useToast,
   clearSessionDraft,
   hasSessionDraft,
+  PageHeader,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -131,10 +132,10 @@ export default function LandlordListingsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Listings</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Listings"
+        description={
+          <>
             {isLoadingListings || (listingsFailed && listings.length === 0) ? (
               <Skeleton className="inline-block h-4 w-64 max-w-full align-middle" />
             ) : (
@@ -143,16 +144,18 @@ export default function LandlordListingsPage() {
                 {vacantUnits.length} vacant unit{vacantUnits.length === 1 ? '' : 's'} unlisted
               </>
             )}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-          icon={<Plus className="w-4 h-4" />}
-        >
-          Publish listing
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            icon={<Plus className="w-4 h-4" />}
+          >
+            Publish listing
+          </Button>
+        }
+      />
 
       <IdentityNudge
         verificationHref={ROUTES.LANDLORD_VERIFICATION}

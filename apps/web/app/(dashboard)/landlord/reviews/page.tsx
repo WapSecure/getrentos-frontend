@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Star, MessageCircle, Home, Clock } from 'lucide-react';
-import { Pagination, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
+import { Pagination, EmptyState, ListSkeleton, PageErrorState, PageHeader } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
@@ -50,10 +50,10 @@ export default function LandlordReviewsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reviews & reputation</h1>
-        <p className="text-muted-foreground mt-1">See how tenants rate their experience with you</p>
-      </div>
+      <PageHeader
+        title="Reviews & reputation"
+        description="See how tenants rate their experience with you"
+      />
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">

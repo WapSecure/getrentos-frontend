@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
-import { Pagination, Button, EmptyState } from '@getrentos/ui';
+import { Pagination, Button, EmptyState, PageHeader } from '@getrentos/ui';
 import {
   ConversationList,
   type Conversation,
@@ -100,15 +100,13 @@ export default function LandlordMessagesPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-1">
-          Communicate with tenants, vendors, and applicants
-        </p>
-      </div>
+    <div className="flex h-[calc(100vh-8rem)] flex-col">
+      <PageHeader
+        title="Messages"
+        description="Communicate with tenants, vendors, and applicants"
+      />
 
-      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
+      <div className="flex min-h-0 flex-1 gap-4">
         <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-80 flex-col gap-2')}>
           <ConversationList
             conversations={conversations as Conversation[]}

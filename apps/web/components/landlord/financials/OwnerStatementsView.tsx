@@ -19,6 +19,7 @@ import {
   Pagination,
   Select,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -237,20 +238,18 @@ export function OwnerStatementsView() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Owner statements</h1>
-          <p className="text-muted-foreground mt-1">
-            Generate a per-period statement from real rent income, expenses, and management fees
-          </p>
-        </div>
-        {isPro && (
-          <Button variant="primary" className="gap-2" onClick={() => setIsGenerateOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Generate statement
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Owner statements"
+        description="Generate a per-period statement from real rent income, expenses, and management fees"
+        actions={
+          isPro && (
+            <Button variant="primary" className="gap-2" onClick={() => setIsGenerateOpen(true)}>
+              <Plus className="w-4 h-4" />
+              Generate statement
+            </Button>
+          )
+        }
+      />
 
       <ProFeatureGate
         title="Owner statements is a Pro feature"

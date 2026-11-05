@@ -18,6 +18,7 @@ import {
   Select,
   Skeleton,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -131,16 +132,17 @@ export function ChangeManagerView() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <ArrowRightLeft className="h-6 w-6 text-primary" aria-hidden /> Change manager
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Move a property to a verified firm, to GetRentos Managed, or back to yourself. The current
-          manager runs it until the date you choose; then their access ends, the new manager&apos;s
-          begins, and every tenant is told. Rent keeps going through GetRentos throughout.
-        </p>
-      </div>
+      <PageHeader
+        title="Change manager"
+        description={
+          <>
+            Move a property to a verified firm, to GetRentos Managed, or back to yourself. The
+            current manager runs it until the date you choose; then their access ends, the new
+            manager&apos;s begins, and every tenant is told. Rent keeps going through GetRentos
+            throughout.
+          </>
+        }
+      />
 
       <Card className="space-y-5 p-5">
         <Field label="Property">

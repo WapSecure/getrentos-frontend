@@ -17,6 +17,7 @@ import {
   Select,
   SuggestedDraft,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
@@ -332,28 +333,26 @@ export const QueryThreads = ({ as }: { as: 'owner' | 'manager' }) => {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-            <MessageSquareText className="h-6 w-6 text-primary" aria-hidden />
-            {as === 'owner' ? 'Questions to your manager' : 'Owner questions'}
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            {as === 'owner'
-              ? 'Ask whoever manages your property. They owe you a first reply within 24 hours, and the conversation stays on record.'
-              : 'Questions from the owners whose properties you manage. Reply within 24 hours; late replies are flagged to the owner and your firm.'}
-          </p>
-        </div>
-        {as === 'owner' && !openId && (
-          <Button
-            className="shrink-0"
-            icon={<Plus className="h-4 w-4" aria-hidden />}
-            onClick={() => setAsking((v) => !v)}
-          >
-            Ask a question
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title={as === 'owner' ? 'Questions to your manager' : 'Owner questions'}
+        description={
+          as === 'owner'
+            ? 'Ask whoever manages your property. They owe you a first reply within 24 hours, and the conversation stays on record.'
+            : 'Questions from the owners whose properties you manage. Reply within 24 hours; late replies are flagged to the owner and your firm.'
+        }
+        actions={
+          as === 'owner' &&
+          !openId && (
+            <Button
+              className="shrink-0"
+              icon={<Plus className="h-4 w-4" aria-hidden />}
+              onClick={() => setAsking((v) => !v)}
+            >
+              Ask a question
+            </Button>
+          )
+        }
+      />
 
       {openId ? (
         <ThreadView id={openId} onBack={() => setOpenId(null)} />

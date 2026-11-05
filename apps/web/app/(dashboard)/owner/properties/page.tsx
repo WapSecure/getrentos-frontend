@@ -12,6 +12,7 @@ import {
   Skeleton,
   useToast,
   hasSessionDraft,
+  PageHeader,
 } from '@getrentos/ui';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -176,25 +177,27 @@ export default function OwnerPropertiesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Properties</h1>
-          <div className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Properties"
+        description={
+          <>
             {isLoading || (isError && !data) ? (
               <Skeleton className="h-5 w-48" />
             ) : (
               `${total} propert${total === 1 ? 'y' : 'ies'} in your portfolio`
             )}
-          </div>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsAddModalOpen(true)}
-          icon={<Plus className="w-4 h-4" />}
-        >
-          Add property
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsAddModalOpen(true)}
+            icon={<Plus className="w-4 h-4" />}
+          >
+            Add property
+          </Button>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

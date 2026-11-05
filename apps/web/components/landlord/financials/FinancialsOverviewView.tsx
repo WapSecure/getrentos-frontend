@@ -6,7 +6,15 @@ import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
 import { FinancialStats } from '@/components/landlord/financials/FinancialStats';
 import { ExpensesPanel } from '@/components/landlord/financials/ExpensesPanel';
-import { Button, Skeleton, StatGridSkeleton, Tabs, TabsList, TabsTrigger } from '@getrentos/ui';
+import {
+  Button,
+  Skeleton,
+  StatGridSkeleton,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  PageHeader,
+} from '@getrentos/ui';
 import {
   landlordService,
   type FinancialStats as FinancialStatsData,
@@ -78,13 +86,11 @@ export function FinancialsOverviewView() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Financials</h1>
-          <p className="text-muted-foreground mt-1">Track income, expenses, and profitability</p>
-        </div>
-        {isPro && (
-          <div className="flex gap-2">
+      <PageHeader
+        title="Financials"
+        description="Track income, expenses, and profitability"
+        actions={
+          isPro && (
             <Button
               variant="primary"
               size="sm"
@@ -99,9 +105,9 @@ export function FinancialsOverviewView() {
               )}
               {exported ? 'Exported' : 'Export CSV'}
             </Button>
-          </div>
-        )}
-      </div>
+          )
+        }
+      />
 
       <ProFeatureGate
         title="Financial analytics is a Pro feature"

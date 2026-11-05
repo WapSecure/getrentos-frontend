@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
-import { Button, Pagination, useToast } from '@getrentos/ui';
+import { Button, Pagination, useToast, PageHeader } from '@getrentos/ui';
 import { useOpenConversationFromUrl } from '@/hooks/useOpenConversationFromUrl';
 
 const PAGE_SIZE = 10;
@@ -135,12 +135,9 @@ function RealtorMessagesPageContent() {
   const activeConversation = conversations.find((conversation) => conversation.id === activeId);
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-1">Communicate securely with active clients</p>
-      </div>
-      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
+    <div className="flex h-[calc(100vh-8rem)] flex-col">
+      <PageHeader title="Messages" description="Communicate securely with active clients" />
+      <div className="flex min-h-0 flex-1 gap-4">
         <div
           className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto flex-col gap-2')}
         >

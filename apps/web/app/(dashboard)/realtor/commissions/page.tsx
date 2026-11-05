@@ -13,6 +13,7 @@ import {
   StatGridSkeleton,
   TableSkeleton,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -152,30 +153,28 @@ export default function RealtorCommissionsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Commissions</h1>
-          <p className="text-muted-foreground mt-1">
-            Earned when a sale settles, not when an offer is accepted
-          </p>
-        </div>
-        {isPro && (
-          <Button
-            variant="outline"
-            size="sm"
-            icon={
-              exported ? (
-                <Check className="w-3.5 h-3.5 text-success" />
-              ) : (
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-              )
-            }
-            onClick={handleExport}
-          >
-            {exported ? 'Exported' : 'Export current page'}
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Commissions"
+        description="Earned when a sale settles, not when an offer is accepted"
+        actions={
+          isPro ? (
+            <Button
+              variant="outline"
+              size="sm"
+              icon={
+                exported ? (
+                  <Check className="w-3.5 h-3.5 text-success" />
+                ) : (
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                )
+              }
+              onClick={handleExport}
+            >
+              {exported ? 'Exported' : 'Export current page'}
+            </Button>
+          ) : undefined
+        }
+      />
 
       <ProFeatureGate
         title="Commission tracking is a Pro feature"

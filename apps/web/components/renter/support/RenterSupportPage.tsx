@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, LifeBuoy, MessageCircle, Send } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Send } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -17,6 +17,7 @@ import {
   Select,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { renterService } from '@/services/renterService';
@@ -124,19 +125,11 @@ export const RenterSupportPage = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          <LifeBuoy className="h-3 w-3" aria-hidden="true" />
-          Support
-        </span>
-        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          Contact support
-        </h1>
-        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          Chat with the GetRentOS team. You get one active thread: resolving it closes it, and a new
-          message opens it again.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Support"
+        title="Contact support"
+        description="Chat with the GetRentOS team. You get one active thread: resolving it closes it, and a new message opens it again."
+      />
 
       <div className="grid gap-4 lg:grid-cols-5">
         {/* Thread list */}

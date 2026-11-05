@@ -14,6 +14,7 @@ import {
   SearchInput,
   Skeleton,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -108,27 +109,29 @@ export default function LandlordDocumentsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Documents</h1>
-          {/* Zero is a claim about the portfolio, so wait until it has been read
-              before making it. */}
-          <p className="text-muted-foreground mt-1">
+      {/* Zero is a claim about the portfolio, so wait until it has been read
+          before making it. */}
+      <PageHeader
+        title="Documents"
+        description={
+          <>
             {isPending ? (
               <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
             ) : (
               `${total} document${total === 1 ? '' : 's'} across your portfolio`
             )}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsUploadOpen(true)}
-          icon={<Upload className="w-4 h-4" />}
-        >
-          Upload document
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsUploadOpen(true)}
+            icon={<Upload className="w-4 h-4" />}
+          >
+            Upload document
+          </Button>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput
@@ -137,7 +140,11 @@ export default function LandlordDocumentsPage() {
           placeholder="Search documents..."
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter documents by category">
+        <div
+          className="flex gap-2 overflow-x-auto"
+          role="group"
+          aria-label="Filter documents by category"
+        >
           {categoryFilters.map((option) => (
             <ToggleChip
               key={option.value}

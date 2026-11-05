@@ -15,6 +15,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -92,12 +93,14 @@ export default function RealtorOffersPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Offers</h1>
-        <p className="text-muted-foreground mt-1">
-          {total} offer{total === 1 ? '' : 's'} on behalf of your clients
-        </p>
-      </div>
+      <PageHeader
+        title="Offers"
+        description={
+          <>
+            {total} offer{total === 1 ? '' : 's'} on behalf of your clients
+          </>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

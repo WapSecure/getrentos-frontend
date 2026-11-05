@@ -7,6 +7,7 @@ import { ROUTES } from '@getrentos/shared';
 import { BroadcastComposer } from '@/components/landlord/automations/BroadcastComposer';
 import { TemplatesManager } from '@/components/landlord/automations/TemplatesManager';
 import { AutomationRulesManager } from '@/components/landlord/automations/AutomationRulesManager';
+import { PageHeader } from '@getrentos/ui';
 
 const TABS: HubTab[] = [
   { id: 'broadcast', label: 'Send', icon: Send },
@@ -26,12 +27,10 @@ export default function LandlordAutomationsPage() {
       description="Upgrade to Pro to broadcast announcements to your tenants, save templates, and schedule recurring messages."
       upgradeHref={ROUTES.LANDLORD_BILLING}
     >
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">Automations</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Reach your tenants with a one-off broadcast, saved templates or a recurring schedule.
-        </p>
-      </div>
+      <PageHeader
+        title="Automations"
+        description="Reach your tenants with a one-off broadcast, saved templates or a recurring schedule."
+      />
       <HubTabs tabs={TABS} activeTab={activeTab} onChange={setTab} />
       {activeTab === 'templates' ? (
         <TemplatesManager />

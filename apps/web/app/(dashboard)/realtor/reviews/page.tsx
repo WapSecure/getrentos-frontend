@@ -7,7 +7,14 @@ import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
-import { Card, EmptyState, ListSkeleton, Pagination, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Card,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  StatGridSkeleton,
+  PageHeader,
+} from '@getrentos/ui';
 
 const PAGE_SIZE = 10;
 
@@ -55,12 +62,10 @@ export default function RealtorReviewsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reviews & Reputation</h1>
-        <p className="text-muted-foreground mt-1">
-          See how clients and leads rate their experience with you
-        </p>
-      </div>
+      <PageHeader
+        title="Reviews & Reputation"
+        description="See how clients and leads rate their experience with you"
+      />
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <Card className="p-6 flex flex-col items-center justify-center text-center">

@@ -18,6 +18,7 @@ import {
   Skeleton,
   useToast,
   type Column,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   NoticeLadderTimeline,
@@ -237,16 +238,16 @@ export default function LandlordNoticesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Notices</h1>
-        <p className="mt-1 text-muted-foreground">
-          {notices.length === 0
+      <PageHeader
+        title="Notices"
+        description={
+          notices.length === 0
             ? 'Nothing is running'
             : soon.length > 0
               ? `${notices.length} running · ${soon.length} running out within a fortnight`
-              : `${notices.length} running`}
-        </p>
-      </div>
+              : `${notices.length} running`
+        }
+      />
 
       <SegmentedControl
         aria-label="Notices view"

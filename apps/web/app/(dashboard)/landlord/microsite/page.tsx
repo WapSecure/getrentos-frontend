@@ -13,6 +13,7 @@ import {
   Switch,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { usePlanTier } from '@/hooks/usePlanTier';
@@ -99,12 +100,10 @@ export default function LandlordMicrositePage() {
 
   return (
     <div className="max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Microsite</h1>
-        <p className="text-muted-foreground mt-1">
-          A public page showcasing your listings: share one link instead of the whole app.
-        </p>
-      </div>
+      <PageHeader
+        title="Microsite"
+        description="A public page showcasing your listings: share one link instead of the whole app."
+      />
 
       <ProFeatureGate
         title="Microsite is a Pro feature"

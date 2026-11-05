@@ -12,6 +12,7 @@ import {
   useToast,
   ListSkeleton,
   PageErrorState,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateAgreementService } from '@/services/estateMarketplaceService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -181,14 +182,10 @@ export default function OwnerEstateAgreementsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Estate requests</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Estates can ask to add your property and advertise it. Nothing changes until you approve:
-          a property joins an estate only with your approval. You keep ownership and control of any
-          money: an estate only ever gains the right to market.
-        </p>
-      </header>
+      <PageHeader
+        title="Estate requests"
+        description="Estates can ask to add your property and advertise it. Nothing changes until you approve: a property joins an estate only with your approval. You keep ownership and control of any money: an estate only ever gains the right to market."
+      />
 
       <Card static>
         <div className="p-6">

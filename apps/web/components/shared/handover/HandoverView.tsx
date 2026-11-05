@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Circle, Download, FileCheck2, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, Circle, Download, TriangleAlert } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -14,6 +14,7 @@ import {
   PageErrorState,
   Select,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -152,18 +153,15 @@ export function HandoverView({ transferId }: { transferId: string }) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-            <FileCheck2 className="h-6 w-6 text-primary" aria-hidden /> Handover:{' '}
-            {snap.property.name}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={<>Handover: {snap.property.name}</>}
+        description={
+          <>
             {snap.outgoing ?? 'The owner'} → {snap.incoming}, as at {formatDate(snap.asOf)}. Pack{' '}
             <span className="font-mono">{pack.hash.slice(0, 12)}</span>.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+          </>
+        }
+        meta={
           <Badge
             variant={
               h.status === 'COMPLETED' ? 'success' : h.status === 'DISPUTED' ? 'danger' : 'info'
@@ -175,6 +173,8 @@ export function HandoverView({ transferId }: { transferId: string }) {
                 ? 'Disputed'
                 : 'Signing'}
           </Badge>
+        }
+        actions={
           <Button
             size="sm"
             variant="outline"
@@ -184,8 +184,8 @@ export function HandoverView({ transferId }: { transferId: string }) {
           >
             Export
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <Card className="p-5">
         <h2 className="font-semibold text-foreground">Sign-off</h2>

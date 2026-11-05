@@ -14,6 +14,7 @@ import {
   PageErrorState,
   Pagination,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import type { ViewingAppointment } from '@/types/realtor';
 import { unwrap } from '@/lib/apiHelpers';
@@ -82,21 +83,23 @@ function RealtorViewingsPageContent() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Viewings</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Viewings"
+        description={
+          <>
             {total} scheduled tour{total === 1 ? '' : 's'}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Plus className="w-4 h-4" />}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Schedule viewing
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Plus className="w-4 h-4" />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Schedule viewing
+          </Button>
+        }
+      />
 
       {isLoading ? (
         <ListSkeleton variant="cards" rows={3} label="Loading viewings" />

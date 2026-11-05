@@ -1,6 +1,13 @@
 'use client';
 
-import { Pagination, EmptyState, SearchInput, Skeleton, ToggleChip } from '@getrentos/ui';
+import {
+  Pagination,
+  EmptyState,
+  SearchInput,
+  Skeleton,
+  ToggleChip,
+  PageHeader,
+} from '@getrentos/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Users } from 'lucide-react';
@@ -49,18 +56,20 @@ export default function LandlordTenantsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Tenants</h1>
-        {/* Zero is a claim about the portfolio, so wait until it has been read
-            before making it. */}
-        <p className="text-muted-foreground mt-1">
-          {isPending ? (
-            <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
-          ) : (
-            `${total} tenant${total === 1 ? '' : 's'} across your portfolio`
-          )}
-        </p>
-      </div>
+      {/* Zero is a claim about the portfolio, so wait until it has been read
+          before making it. */}
+      <PageHeader
+        title="Tenants"
+        description={
+          <>
+            {isPending ? (
+              <Skeleton className="inline-block h-4 w-56 max-w-full align-middle" />
+            ) : (
+              `${total} tenant${total === 1 ? '' : 's'} across your portfolio`
+            )}
+          </>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput
@@ -69,7 +78,11 @@ export default function LandlordTenantsPage() {
           placeholder="Search tenants or properties..."
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter tenants by rent status">
+        <div
+          className="flex gap-2 overflow-x-auto"
+          role="group"
+          aria-label="Filter tenants by rent status"
+        >
           {rentStatusFilters.map((option) => (
             <ToggleChip
               key={option.value}

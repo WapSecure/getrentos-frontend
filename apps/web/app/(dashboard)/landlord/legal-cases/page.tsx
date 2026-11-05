@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Scale } from 'lucide-react';
-import { Button, DataTable, EmptyState, ToggleChip, useToast, type Column } from '@getrentos/ui';
+import {
+  Button,
+  DataTable,
+  EmptyState,
+  ToggleChip,
+  useToast,
+  type Column,
+  PageHeader,
+} from '@getrentos/ui';
 import { LegalCaseDetail } from '@/components/landlord/legal-cases/LegalCaseDetail';
 import { LegalCaseStage } from '@/components/landlord/legal-cases/LegalCaseStage';
 import { OpenLegalCaseModal } from '@/components/landlord/legal-cases/OpenLegalCaseModal';
@@ -284,19 +292,21 @@ export default function LandlordLegalCasesPage() {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Legal cases</h1>
-          <p className="mt-1 text-muted-foreground">
+      <PageHeader
+        title="Legal cases"
+        description={
+          <>
             {attentionCount > 0
               ? `${attentionCount} of ${cases.length} need${attentionCount === 1 ? 's' : ''} attention`
               : `${cases.length} case${cases.length === 1 ? '' : 's'}, none needing attention`}
-          </p>
-        </div>
-        <Button onClick={() => setOpening(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>
-          Open a case
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button onClick={() => setOpening(true)} icon={<Plus className="h-4 w-4" aria-hidden />}>
+            Open a case
+          </Button>
+        }
+      />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div

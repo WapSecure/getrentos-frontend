@@ -17,6 +17,7 @@ import {
   Skeleton,
   ToggleChip,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -205,27 +206,29 @@ export default function LandlordLeasesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Leases</h1>
-          {/* A count of zero is a claim about the portfolio, so do not make it
-              until the portfolio has actually been read. */}
-          <p className="text-muted-foreground mt-1">
+      {/* A count of zero is a claim about the portfolio, so do not make it
+          until the portfolio has actually been read. */}
+      <PageHeader
+        title="Leases"
+        description={
+          <>
             {isLoadingActive ? (
               <Skeleton className="inline-block h-4 w-40 max-w-full align-middle" />
             ) : (
               `${activeLeaseCount} active lease${activeLeaseCount === 1 ? '' : 's'}`
             )}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-          icon={<Plus className="w-4 h-4" />}
-        >
-          Create lease
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            icon={<Plus className="w-4 h-4" />}
+          >
+            Create lease
+          </Button>
+        }
+      />
 
       <div
         className="mb-6 flex gap-2 overflow-x-auto"

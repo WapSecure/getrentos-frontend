@@ -16,6 +16,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate } from '@/lib/format';
 import type { RealtorDocument } from '@/types/realtor';
@@ -111,21 +112,23 @@ export default function RealtorDocumentsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Documents</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Documents"
+        description={
+          <>
             Agency agreements, contracts, and license, {total} file{total === 1 ? '' : 's'}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Upload className="w-4 h-4" />}
-          onClick={() => setIsUploadOpen(true)}
-        >
-          Upload document
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Upload className="w-4 h-4" />}
+            onClick={() => setIsUploadOpen(true)}
+          >
+            Upload document
+          </Button>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

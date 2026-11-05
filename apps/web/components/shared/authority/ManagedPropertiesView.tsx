@@ -27,6 +27,7 @@ import {
   Select,
   Textarea,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { ReferenceCodeChip } from '@/components/shared/property/ReferenceCodeChip';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
@@ -81,9 +82,7 @@ const CapabilityChips = ({
   <div className="flex flex-wrap gap-2">
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-        canList
-          ? 'bg-success-subtle text-success'
-          : 'bg-muted text-muted-foreground'
+        canList ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
       }`}
       title="May create, publish and pause listings for this property"
     >
@@ -92,9 +91,7 @@ const CapabilityChips = ({
     </span>
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-        canManage
-          ? 'bg-success-subtle text-success'
-          : 'bg-muted text-muted-foreground'
+        canManage ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
       }`}
       title="May run the tenancy: units, tenants, applications, leases and maintenance"
     >
@@ -103,9 +100,7 @@ const CapabilityChips = ({
     </span>
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-        canTransact
-          ? 'bg-success-subtle text-success'
-          : 'bg-muted text-muted-foreground'
+        canTransact ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground'
       }`}
       title="May accept offers, release held payments and act on money for this property"
     >
@@ -381,13 +376,10 @@ export const ManagedPropertiesView = ({ managePath }: { managePath?: string } = 
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Managed properties</h1>
-        <p className="text-muted-foreground mt-1">
-          Properties you can act for because the owner gave you authority: with exactly what that
-          authority lets you do.
-        </p>
-      </div>
+      <PageHeader
+        title="Managed properties"
+        description="Properties you can act for because the owner gave you authority: with exactly what that authority lets you do."
+      />
 
       {managed.isLoading ? (
         <ListSkeleton variant="cards" rows={2} className="mb-6" />
