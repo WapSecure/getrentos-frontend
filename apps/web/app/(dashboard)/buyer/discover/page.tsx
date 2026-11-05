@@ -75,6 +75,18 @@ export default function BuyerDiscoverPage() {
   const data = listingsQuery.data;
   const listings = data?.items ?? [];
   const total = data?.total ?? 0;
+  // Offers still in play, so a listing the buyer already offered on leads back
+  // to that offer instead of starting a second one.
+  const { data: myOffers } = useQuery({
+    queryKey: [...buyerKeys.offers, { page: 1, pageSize: 100, open: true }],
+    queryFn: () => unwrap(buyerService.listOffers({ page: 1, pageSize: 100 })),
+  });
+  const openOfferFor = (listingId?: string) =>
+    myOffers?.items.find(
+      (o) =>
+        (o.listingId ?? o.propertyId) === listingId &&
+        (o.status === 'submitted' || o.status === 'countered')
+    ) ?? null;
   const savedKey = [...buyerKeys.saved, { page: 1, pageSize: 100 }];
   const savedQuery = useQuery({
     queryKey: savedKey,
@@ -246,9 +258,11 @@ export default function BuyerDiscoverPage() {
         onRequestViewing={() =>
           activeListing && router.push(`${ROUTES.BUYER_VIEWINGS}?property=${activeListing.id}`)
         }
+        openOffer={openOfferFor(activeListing?.id)}
         onMakeOffer={() =>
           activeListing && router.push(`${ROUTES.BUYER_OFFERS}?property=${activeListing.id}`)
         }
+        onViewOffer={(offerId) => router.push(`${ROUTES.BUYER_OFFERS}?offer=${offerId}`)}
         onMessageOwner={() =>
           activeListing && router.push(`${ROUTES.BUYER_MESSAGES}?property=${activeListing.id}`)
         }

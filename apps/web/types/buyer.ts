@@ -66,6 +66,8 @@ export interface ViewingRequest {
 
 export interface BuyerOffer {
   id: string;
+  /** The sale listing the offer is on (the id discover shows as the listing). */
+  listingId?: string;
   propertyId: string;
   propertyTitle: string;
   ownerName: string;

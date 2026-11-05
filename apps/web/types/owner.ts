@@ -112,6 +112,8 @@ export interface SaleOffer {
   depositAmount?: number;
   message?: string;
   status: OfferStatus;
+  /** Whose answer it waits on; absent from older APIs (then: open means the owner). */
+  awaiting?: 'owner' | 'buyer' | null;
   submittedAt: string;
 }
 
