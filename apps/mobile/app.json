@@ -29,6 +29,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "GetRentos uses the microphone when you speak a question to Ask GetRentos.",
+          "speechRecognitionPermission": "GetRentos turns what you say into text so you can check it before sending.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
       "expo-secure-store",
       "expo-web-browser",
       "expo-document-picker",

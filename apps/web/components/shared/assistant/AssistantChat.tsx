@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
-import { ArrowRight, MessageCircleQuestion, SendHorizontal } from 'lucide-react';
+import {
+  ArrowRight,
+  MessageCircleQuestion,
+  Mic,
+  SendHorizontal,
+  Square,
+  Volume2,
+} from 'lucide-react';
 import {
   Button,
   Dialog,
@@ -21,10 +28,13 @@ import {
   savedReplyLanguage,
   type ReplyLanguage,
 } from '@/lib/replyLanguage';
+import { useReadAloud, useVoiceInput } from '@/lib/voice';
 
 interface ChatMessage extends AssistantTurn {
   links?: AssistantLink[];
   suggestions?: string[];
+  /** The language an answer is in, for reading it aloud. */
+  language?: ReplyLanguage;
   /** Set when the answer could not be given in the language asked for. */
   fellBackFrom?: ReplyLanguage;
 }
@@ -64,6 +74,7 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
           content: reply.answer,
           links: reply.links,
           suggestions: reply.suggestions,
+          language: reply.language ?? 'en',
           fellBackFrom:
             reply.requestedLanguage && reply.language !== reply.requestedLanguage
               ? reply.requestedLanguage
@@ -96,6 +107,10 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
       send(draft);
     }
   };
+
+  // Spoken words land in the box, so the person can check them before sending.
+  const voice = useVoiceInput(language, setDraft);
+  const readAloud = useReadAloud();
 
   const lastIndex = messages.length - 1;
 
@@ -174,6 +189,21 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
                   <p className="whitespace-pre-wrap rounded-2xl rounded-bl-sm bg-secondary px-3.5 py-2 text-sm text-foreground">
                     {m.content}
                   </p>
+                  {readAloud.canRead(m.language ?? 'en') && (
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      className="gap-1"
+                      onClick={() => readAloud.toggle(i, m.content, m.language ?? 'en')}
+                    >
+                      {readAloud.speaking === i ? (
+                        <Square className="h-3 w-3" aria-hidden="true" />
+                      ) : (
+                        <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                      {readAloud.speaking === i ? 'Stop reading' : 'Read aloud'}
+                    </Button>
+                  )}
                   {m.fellBackFrom && (
                     <p className="text-xs text-muted-foreground">
                       Answered in English: replies in {languageLabel(m.fellBackFrom)} are not
@@ -220,7 +250,26 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
             )}
           </div>
 
+          {(voice.error || voice.listening) && (
+            <p
+              role="status"
+              className={`border-t border-border px-4 pt-3 text-xs ${voice.error ? 'text-destructive' : 'text-muted-foreground'}`}
+            >
+              {voice.error ??
+                `Listening in ${languageLabel(language)}… press the square when you finish.`}
+            </p>
+          )}
           <form onSubmit={onSubmit} className="flex items-end gap-2 border-t border-border p-4">
+            {voice.available && (
+              <IconButton
+                type="button"
+                variant={voice.listening ? 'primary' : 'ghost'}
+                label={voice.listening ? 'Stop listening' : 'Speak your question'}
+                icon={voice.listening ? <Square /> : <Mic />}
+                onClick={() => (voice.listening ? voice.stop() : voice.start())}
+                disabled={ask.isPending}
+              />
+            )}
             <Textarea
               aria-label="Your question"
               placeholder={placeholder}
