@@ -1,4 +1,5 @@
-import { apiFetch, apiUpload, toQuery } from './client';
+import { apiFetch, apiUpload } from './client';
+import { toQuery } from './query';
 import type { Paginated } from './buyer';
 import { appendFile, type PickedFile } from './documents';
 import type {

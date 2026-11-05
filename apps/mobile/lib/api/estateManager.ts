@@ -1,4 +1,5 @@
-import { apiFetch, apiFetchOrNull, apiUpload, toQuery } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { VisitorPass } from './visitor-pass';
 import type { Paginated } from './properties';
