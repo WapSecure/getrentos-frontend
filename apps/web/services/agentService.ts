@@ -1,3 +1,4 @@
+import type { AgentRoute } from '@/types/agentRoute';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
@@ -230,6 +231,13 @@ export interface AgentWorkOrder {
 }
 
 export const agentService = {
+  /** The day's visits in a drivable order; optionally from where the agent is now. */
+  getRoute: (start?: { latitude: number; longitude: number }) =>
+    safeCall(() =>
+      authFetch<AgentRoute>(
+        `/agent/route${start ? `?latitude=${start.latitude}&longitude=${start.longitude}` : ''}`
+      )
+    ),
   /** Suggest each room's condition and notes from the inspection photos. Saves nothing. */
   draftInspectionReport: (taskId: string, body: InspectionDraftRequest) =>
     safeCall<InspectionDraft>(() =>

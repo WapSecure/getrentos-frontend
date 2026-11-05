@@ -315,6 +315,7 @@ export const qk = {
   },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,
+    route: (start: string) => ['agent', 'route', start] as const,
     notificationPreferences: ['agent', 'settings', 'notifications'] as const,
     profile: ['agent', 'profile'] as const,
     workOrders: ['agent', 'work-orders'] as const,

@@ -41,6 +41,7 @@ import {
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate, firstName } from '@/lib/format';
 import { IdentityNudge } from '@/components/trust/IdentityNudge';
+import { RouteCard } from '@/components/agent/RouteCard';
 
 export default function AgentHome() {
   const { profile } = useAuth();
@@ -147,6 +148,8 @@ export default function AgentHome() {
         ) : null}
 
         <MetricGrid metrics={metrics} loading={false} />
+
+        <RouteCard />
 
         {quickActions}
 

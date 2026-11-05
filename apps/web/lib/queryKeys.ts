@@ -200,6 +200,7 @@ export const agentKeys = {
   dashboard: ['agent', 'dashboard'] as const,
   profile: ['agent', 'profile'] as const,
   tasks: ['agent', 'tasks'] as const,
+  route: (start: string) => ['agent', 'route', start] as const,
   properties: ['agent', 'properties'] as const,
   inspections: ['agent', 'inspections'] as const,
   verifications: ['agent', 'verifications'] as const,

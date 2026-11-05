@@ -252,7 +252,35 @@ export interface AgentNotificationPreference {
   push: boolean;
 }
 
+/** The day's visits in a drivable order (web: types/agentRoute.ts). */
+export interface AgentRoute {
+  date: string;
+  stops: {
+    taskId: string;
+    title: string;
+    type: 'INSPECTION' | 'VERIFICATION' | 'VALUATION' | 'DOCUMENT_PICKUP';
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+    overdue: boolean;
+    address: string;
+    arrive: string;
+    driveMinutes: number;
+    distanceKm: number;
+    fixedAt: string | null;
+    late: boolean;
+  }[];
+  unplaced: { taskId: string; title: string; address: string }[];
+  totalKm: number;
+  totalDriveMinutes: number;
+  finish: string | null;
+  directionsUrl: string | null;
+  note: string;
+}
+
 export const agentApi = {
+  route: (start?: { latitude: number; longitude: number }) =>
+    apiFetch<AgentRoute>(
+      `/agent/route${start ? `?latitude=${start.latitude}&longitude=${start.longitude}` : ''}`
+    ),
   notificationPreferences: () =>
     apiFetch<AgentNotificationPreference[]>('/agent/settings/notifications'),
   updateNotificationPreferences: (preferences: AgentNotificationPreference[]) =>
