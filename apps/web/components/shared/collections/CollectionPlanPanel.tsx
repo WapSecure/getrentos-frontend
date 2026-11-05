@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Copy, ListChecks } from 'lucide-react';
-import { Button, Card, Skeleton } from '@getrentos/ui';
+import { Button, Card, Select, Skeleton } from '@getrentos/ui';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
 import { REPLY_LANGUAGES, languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
@@ -97,20 +97,18 @@ export function CollectionPlanPanel({
         <h2 id="collection-plan-title" className="text-sm font-semibold text-foreground">
           Collection plan
         </h2>
-        <label className="ml-auto inline-flex items-center gap-2 text-xs text-muted-foreground">
-          Messages in
-          <select
+        <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+          <span aria-hidden="true">Messages in</span>
+          <Select
             value={language}
-            onChange={(e) => setLanguage(e.target.value as ReplyLanguage)}
-            className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {REPLY_LANGUAGES.map((l) => (
-              <option key={l.value} value={l.value}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            onValueChange={(value) => setLanguage(value as ReplyLanguage)}
+            options={REPLY_LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
+            ariaLabel="Message language"
+            controlSize="sm"
+            searchable={false}
+            className="w-32"
+          />
+        </div>
         {isFetching && (
           <span role="status" className="text-xs text-muted-foreground">
             Writing messages…

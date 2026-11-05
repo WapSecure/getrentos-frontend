@@ -18,6 +18,7 @@ import {
   DialogDescription,
   DialogTitle,
   IconButton,
+  Select,
   Textarea,
 } from '@getrentos/ui';
 import type { AssistantLink, AssistantReply, AssistantTurn } from '@/types/assistant';
@@ -136,24 +137,22 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
               {scope} Answers come from your account, and nothing is changed for you.
             </DialogDescription>
-            <label className="mt-3 inline-flex items-center gap-2 text-xs text-muted-foreground">
-              Reply in
-              <select
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <span aria-hidden="true">Reply in</span>
+              <Select
                 value={language}
-                onChange={(e) => {
-                  const next = e.target.value as ReplyLanguage;
+                onValueChange={(value) => {
+                  const next = value as ReplyLanguage;
                   setLanguage(next);
                   saveReplyLanguage(next);
                 }}
-                className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {REPLY_LANGUAGES.map((l) => (
-                  <option key={l.value} value={l.value}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                options={REPLY_LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
+                ariaLabel="Reply language"
+                controlSize="sm"
+                searchable={false}
+                className="w-32"
+              />
+            </div>
           </div>
 
           <div
