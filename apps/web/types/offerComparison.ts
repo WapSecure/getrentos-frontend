@@ -31,6 +31,8 @@ export interface ListingOfferComparison {
   asking: string;
   daysListed: number | null;
   market: string | null;
+  /** Another offer was already accepted: these cannot be taken while that sale stands. */
+  saleInProgress?: string | null;
   overview: string;
   offers: ComparedOffer[];
 }

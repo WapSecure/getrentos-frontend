@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Scale } from 'lucide-react';
-import { Badge, Card, Skeleton, type BadgeVariant } from '@getrentos/ui';
+import { Alert, Badge, Card, Skeleton, type BadgeVariant } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { sellerOfferKeys } from '@/lib/queryKeys';
 import { offerComparisonService } from '@/services/offerComparisonService';
@@ -58,7 +58,11 @@ export function OfferComparisonPanel() {
               {l.market && ` · ${l.market}`}
             </p>
           </div>
-          <p className="text-sm text-foreground">{l.overview}</p>
+          {l.saleInProgress ? (
+            <Alert variant="warning">{l.saleInProgress}</Alert>
+          ) : (
+            <p className="text-sm text-foreground">{l.overview}</p>
+          )}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {l.offers.map((o) => (
@@ -70,7 +74,9 @@ export function OfferComparisonPanel() {
                   <p className="text-sm font-medium text-foreground">
                     {o.label} <span className="text-muted-foreground">· {o.buyerName}</span>
                   </p>
-                  <Badge variant={TURN[o.turn].variant}>{TURN[o.turn].label}</Badge>
+                  {!l.saleInProgress && (
+                    <Badge variant={TURN[o.turn].variant}>{TURN[o.turn].label}</Badge>
+                  )}
                 </div>
                 <p className="text-sm font-semibold text-foreground">{o.amount}</p>
                 <p className="text-muted-foreground">
