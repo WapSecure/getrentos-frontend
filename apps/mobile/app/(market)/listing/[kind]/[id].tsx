@@ -45,6 +45,7 @@ import {
 import { env } from '@/lib/env';
 import { track } from '@/lib/analytics';
 import { rememberListing } from '@/lib/pendingListing';
+import { PriceComparison } from '@/components/land/PriceComparison';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { useMarketSaved } from '@/hooks/useMarketSaved';
@@ -451,6 +452,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
         </Text>
       </Card>
 
+      {p.kind === 'land' ? <PriceComparison listingId={p.id} /> : null}
       <SimilarListings listing={p} />
     </>
   );

@@ -335,6 +335,9 @@ export const qk = {
   land: {
     list: (filters: Record<string, unknown>) => ['land', 'list', filters] as const,
     detail: (id: string) => ['land', 'detail', id] as const,
+    comparables: (id: string) => ['land', 'detail', id, 'comparables'] as const,
+    /** One dossier per listing, or per estate plot and plan. */
+    dossier: (target: string) => ['land', 'dossier', target] as const,
   },
   shortlets: {
     list: (filters: Record<string, unknown>) => ['shortlets', 'list', filters] as const,

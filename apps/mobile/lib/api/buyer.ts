@@ -1,4 +1,5 @@
-import { apiFetch, toQuery } from './client';
+import { apiFetch } from './client';
+import { toQuery } from './query';
 import type { VideoStream } from '@getrentos/shared';
 
 export interface BuyerDashboard {

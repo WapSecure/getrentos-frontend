@@ -1,4 +1,5 @@
-import { apiFetch, toQuery } from './client';
+import { apiFetch } from './client';
+import { toQuery } from './query';
 import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';

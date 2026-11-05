@@ -1,3 +1,4 @@
+import { percentileWords } from '@getrentos/shared';
 import { formatCurrency } from '@/lib/format';
 
 /** 1 → "1st", 22 → "22nd", 13 → "13th". */
@@ -6,18 +7,6 @@ export const ordinal = (n: number) => {
   if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
   return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
 };
-
-/** "cheaper than most", "around the middle" … for a 0-100 percentile. */
-export const percentileWords = (percentile: number) =>
-  percentile <= 20
-    ? 'cheaper per m² than most comparable land'
-    : percentile < 40
-      ? 'below the middle of comparable land per m²'
-      : percentile <= 60
-        ? 'around the middle of comparable land per m²'
-        : percentile < 80
-          ? 'above the middle of comparable land per m²'
-          : 'dearer per m² than most comparable land';
 
 /**
  * Where a price per m² sits on a 0-100 strip, with the comparables' median

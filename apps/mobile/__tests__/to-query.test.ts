@@ -1,4 +1,4 @@
-import { toQuery } from '@/lib/api/client';
+import { toQuery } from '@/lib/api/query';
 
 describe('toQuery', () => {
   it('builds a query string and leaves out empty values', () => {

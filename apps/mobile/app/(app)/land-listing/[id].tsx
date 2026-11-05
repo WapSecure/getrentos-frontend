@@ -7,6 +7,7 @@ import {
   Calendar,
   ChevronLeft,
   FileSignature,
+  FileText,
   MessageCircle,
   ShieldCheck,
 } from 'lucide-react-native';
@@ -39,6 +40,8 @@ import { formatDate } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { accountRolesApi } from '@/lib/api/accountRoles';
 import { RequestInspection, RequestTour } from '@/components/land/LandRequests';
+import { TrustChecks } from '@/components/land/TrustChecks';
+import { PriceComparison } from '@/components/land/PriceComparison';
 import { Sheet } from '@/components/Sheet';
 import { errorMessage } from '@/lib/api/client';
 import { useAskSeller } from '@/hooks/useAskSeller';
@@ -253,6 +256,34 @@ export default function LandListingDetail() {
                     published publicly.
                   </Text>
                 </View>
+
+                {listing.diligence.assuranceTier ||
+                listing.diligence.labels?.length ||
+                listing.diligence.notVerified?.length ? (
+                  <Card elevated style={{ gap: spacing.md }}>
+                    <Text variant="heading">What was checked</Text>
+                    <TrustChecks
+                      tier={listing.diligence.assuranceTier}
+                      labels={listing.diligence.labels}
+                      notVerified={listing.diligence.notVerified}
+                      compact
+                    />
+                  </Card>
+                ) : null}
+
+                <PriceComparison listingId={listing.id} />
+
+                <Button
+                  label="Decision dossier and all-in cost"
+                  variant="secondary"
+                  icon={<FileText size={16} color={colors.foreground} />}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(app)/land-dossier',
+                      params: { listingId: listing.id },
+                    })
+                  }
+                />
 
                 {listing.parcel.utilities?.length ? (
                   <View style={{ gap: spacing.sm }}>

@@ -1,4 +1,5 @@
-import { apiFetch, apiUpload, toQuery } from './client';
+import { apiFetch, apiUpload } from './client';
+import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { IssuedVisitorPass, VisitorPass } from './visitor-pass';
 

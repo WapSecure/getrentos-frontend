@@ -77,8 +77,4 @@ export interface LandComparables {
 /** Assurance tiers from weakest to strongest, for "at least this tier" filters. */
 export const LAND_ASSURANCE_TIER_ORDER: LandAssuranceTier[] = ['BASIC', 'STANDARD', 'PREMIUM'];
 
-export const LAND_ASSURANCE_TIER_DESCRIPTIONS: Record<LandAssuranceTier, string> = {
-  BASIC: 'GetRentos reviewed the ownership documents and the diligence checklist.',
-  STANDARD: 'Includes an official registry search on the title.',
-  PREMIUM: 'Registry-searched, with checks by an independent professional.',
-};
+export { LAND_ASSURANCE_TIER_DESCRIPTIONS } from '@getrentos/shared';

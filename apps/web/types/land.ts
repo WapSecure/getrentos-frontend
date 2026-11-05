@@ -1,3 +1,4 @@
+import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@getrentos/shared';
 import type { CrsCode, LandBoundaryStatus } from '@getrentos/shared';
 export type LandAreaUnit = 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
 
@@ -72,7 +73,7 @@ export type LandOwnershipDocumentType =
 
 export type LandDiligenceCheckStatus = 'PENDING' | 'PASSED' | 'FLAGGED' | 'NOT_APPLICABLE';
 
-export type LandAssuranceTier = 'BASIC' | 'STANDARD' | 'PREMIUM';
+export type { LandAssuranceTier } from '@getrentos/shared';
 
 /** One item of the diligence checklist seeded for the parcel's title type. */
 export interface LandDiligenceCheck {
@@ -300,45 +301,13 @@ export const LAND_TITLE_TYPE_LABELS: Record<LandTitleType, string> = {
   OTHER: 'Other title record',
 };
 
-export const LAND_ASSURANCE_TIER_LABELS: Record<LandAssuranceTier, string> = {
-  BASIC: 'Basic review',
-  STANDARD: 'Registry-searched',
-  PREMIUM: 'Independently reviewed',
-};
-
-/** One scoped public claim about a parcel: what was checked, by whom, when. */
-export interface LandTrustLabel {
-  kind:
-    | 'OWNERSHIP_DOCUMENTS'
-    | 'SELLER_AUTHORITY'
-    | 'TITLE_REVIEW'
-    | 'OFFICIAL_SEARCH'
-    | 'PARCEL_SURVEYED'
-    | 'SITE_INSPECTED'
-    | 'PLANNING'
-    | 'COMMUNITY';
-  title: string;
-  /** The checklist items the label rests on. */
-  scope: string[];
-  checkedAt: string;
-  /** GETRENTOS, or the outside professional's role (SURVEYOR, LAWYER, …). */
-  checkedBy: string[];
-}
-
-/** A check that was not passed: PENDING (not checked) or FLAGGED (issue found). */
-export interface LandNotVerifiedItem {
-  key: string;
-  label: string;
-  status: 'PENDING' | 'FLAGGED';
-}
-
-export const LAND_TRUST_SOURCE_LABELS: Record<string, string> = {
-  GETRENTOS: 'GetRentos',
-  SURVEYOR: 'an independent surveyor',
-  LAWYER: 'an independent lawyer',
-  VALUER: 'an independent valuer',
-  INSPECTOR: 'an independent inspector',
-};
+// What was checked, by whom, and the review level: shared with mobile.
+export {
+  LAND_ASSURANCE_TIER_LABELS,
+  LAND_TRUST_SOURCE_LABELS,
+  type LandNotVerifiedItem,
+  type LandTrustLabel,
+} from '@getrentos/shared';
 
 type PublicLandDiligence = Pick<
   LandDiligence,

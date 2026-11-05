@@ -35,9 +35,12 @@ import { formatNaira } from '@/lib/format';
 export function StartPurchase({
   reservation: r,
   onDone,
+  onLeave,
 }: {
   reservation: Reservation;
   onDone: () => void;
+  /** Closes the sheet this sits in, so a pushed screen is not hidden under it. */
+  onLeave: () => void;
 }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
@@ -97,6 +100,19 @@ export function StartPurchase({
           />
         ))
       )}
+      <Button
+        label="Read the decision dossier and all-in cost"
+        variant="ghost"
+        size="sm"
+        onPress={() => {
+          onLeave();
+          router.push({
+            pathname: '/(app)/land-dossier',
+            params: { layoutId: r.layoutId, plotId: r.plotId, ...(planId ? { planId } : {}) },
+          });
+        }}
+        style={{ alignSelf: 'flex-start' }}
+      />
       {notVerified.length > 0 ? (
         <View style={{ gap: spacing.sm }}>
           <FormAlert

@@ -1,4 +1,5 @@
-import { apiFetch, apiUpload, ApiError, toQuery } from './client';
+import { apiFetch, apiUpload, ApiError } from './client';
+import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
 import type { Tone } from './estateManager';
 import type { Paginated } from './properties';
