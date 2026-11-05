@@ -35,6 +35,13 @@ export const qk = {
     estates: (search: string) => ['buyer-land', 'estates', search] as const,
     estate: (id: string) => ['buyer-land', 'estate', id] as const,
     inspections: ['buyer-land', 'inspections'] as const,
+    tours: ['buyer-land', 'tours'] as const,
+    representatives: ['buyer-land', 'representatives'] as const,
+    coApproval: (kind: string, id: string) => ['buyer-land', 'co-approval', kind, id] as const,
+    representing: ['buyer-land', 'representing'] as const,
+    principalDeals: (principalId: string) =>
+      ['buyer-land', 'representing', 'deals', principalId] as const,
+    represented: (kind: string, id: string) => ['buyer-land', 'represented', kind, id] as const,
     resaleMilestones: (txId: string) => ['buyer-land', 'resale', txId, 'milestones'] as const,
     resaleConditions: (txId: string) => ['buyer-land', 'resale', txId, 'conditions'] as const,
   },

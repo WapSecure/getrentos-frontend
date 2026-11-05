@@ -11,6 +11,7 @@ import {
   Heart,
   KeyRound,
   LandPlot,
+  Users,
   Search,
   ShieldCheck,
   Star,
@@ -78,6 +79,13 @@ export default function BuyerAccount() {
       description: 'Plots you hold and are paying for',
       icon: LandPlot,
       onPress: go('/(app)/buyer-land'),
+    },
+    {
+      key: 'representing',
+      label: 'Buyers you represent',
+      description: 'Land deals you follow or co-approve',
+      icon: Users,
+      onPress: go('/(app)/land-representing'),
     },
     {
       key: 'land-watch',

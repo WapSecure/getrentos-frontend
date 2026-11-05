@@ -18,6 +18,7 @@ import { landBuyerApi } from '@/lib/api/landBuyer';
 import { conditionOpen, confirmedProgress, type Milestone } from '@/lib/api/landSales';
 import { ApiError } from '@/lib/api/client';
 import { BuyerConditions, BuyerMilestones } from '@/components/land/BuyerConveyance';
+import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -144,6 +145,7 @@ export default function BuyerLandResale() {
               />
             </Card>
           ) : null}
+          <CoApprovalCard deal={{ kind: 'transaction', id: txId }} />
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Lock size={16} color={colors.primary} style={{ marginTop: 2 }} />
             <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>

@@ -37,6 +37,7 @@ import { formatDate, formatDateTime, formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { PlanCard, StartPurchase } from '@/components/land/StartPurchase';
+import { RequestInspection, RequestTour } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -52,6 +53,7 @@ export default function LandEstate() {
   const [block, setBlock] = useState(ALL);
   const [cornerOnly, setCornerOnly] = useState(false);
   const [starting, setStarting] = useState<Reservation | null>(null);
+  const [request, setRequest] = useState<'tour' | 'inspection' | null>(null);
   const q = useQuery({
     queryKey: qk.buyerLand.estate(id),
     queryFn: () => landBuyerApi.estate(id),
@@ -183,6 +185,28 @@ export default function LandEstate() {
             estate={e}
             plot={selected}
             onReserved={(r) => setStarting(r)}
+            onRequest={setRequest}
+          />
+        ) : null}
+      </Sheet>
+      <Sheet
+        open={!!request && !!selected}
+        onClose={() => setRequest(null)}
+        title={
+          request === 'tour' ? 'Ask for a live video tour' : 'Commission an independent inspection'
+        }
+      >
+        {selected && e && request === 'tour' ? (
+          <RequestTour
+            target={{ plotId: selected.id }}
+            landName={`${plotLabel(selected)}, ${e.name}`}
+            onDone={() => setRequest(null)}
+          />
+        ) : selected && e && request === 'inspection' ? (
+          <RequestInspection
+            target={{ plotId: selected.id }}
+            landName={`${plotLabel(selected)}, ${e.name}`}
+            onDone={() => setRequest(null)}
           />
         ) : null}
       </Sheet>
@@ -294,10 +318,12 @@ function ReservePanel({
   estate: e,
   plot: p,
   onReserved,
+  onRequest,
 }: {
   estate: EstateDetail;
   plot: EstatePlot;
   onReserved: (r: Reservation) => void;
+  onRequest: (kind: 'tour' | 'inspection') => void;
 }) {
   const { spacing } = useTheme();
   const qc = useQueryClient();
@@ -442,6 +468,20 @@ function ReservePanel({
             choose a plan. You can hold up to 3 plots at a time. GetRentos holds your payments and
             releases them to the developer only as you confirm each conveyance step.
           </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            <Button
+              label="Ask for a live video tour"
+              size="sm"
+              variant="secondary"
+              onPress={() => onRequest('tour')}
+            />
+            <Button
+              label="Commission an inspection"
+              size="sm"
+              variant="secondary"
+              onPress={() => onRequest('inspection')}
+            />
+          </View>
           <Button
             label="See my reservations"
             size="sm"
