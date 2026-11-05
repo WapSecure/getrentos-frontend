@@ -142,7 +142,7 @@ export default function BuyerMessagesPage() {
   const threadMessages: ThreadMessage[] = activeMessages.map(toThreadMessage);
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
+    <div className="flex h-[calc(100vh-8rem)] flex-col">
       <PageHeader
         title="Messages"
         description="Communicate with owners, realtors, and support"
@@ -155,7 +155,7 @@ export default function BuyerMessagesPage() {
         }
       />
 
-      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
+      <div className="flex min-h-0 flex-1 gap-4">
         <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
           <ConversationList
             conversations={filteredConversations}
