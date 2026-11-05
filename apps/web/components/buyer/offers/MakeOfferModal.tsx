@@ -61,6 +61,9 @@ export const MakeOfferModal = ({
   onSubmit,
 }: MakeOfferModalProps) => {
   const [propertyId, setPropertyId] = useState(defaultPropertyId || '');
+  // Opened from a listing, the property is settled: show it as a line with a
+  // way to change it, not a search box and a page of 64 others.
+  const [choosingProperty, setChoosingProperty] = useState(!defaultPropertyId);
   const [listingSearch, setListingSearch] = useState('');
   const [listingPage, setListingPage] = useState(1);
   const [selectedListingState, setSelectedListingState] = useState<BuyerPropertyListing | null>(
@@ -214,34 +217,45 @@ export const MakeOfferModal = ({
                 : undefined
             }
           >
-            <PaginatedSelect
-              value={propertyId}
-              onValueChange={(value) => {
-                setPropertyId(value);
-                setSelectedListingState(
-                  listings.find((listing) => listing.id === value) ??
-                    (defaultListing?.id === value ? defaultListing : null)
-                );
-              }}
-              items={listings}
-              selectedItem={selectedListing}
-              getItemValue={(listing) => listing.id}
-              getItemLabel={(listing) => listing.title}
-              search={listingSearch}
-              onSearchChange={(value) => {
-                setListingSearch(value);
-                setListingPage(1);
-              }}
-              searchPlaceholder="Search available properties"
-              page={listingPage}
-              pageSize={LISTING_PAGE_SIZE}
-              total={listingsPage?.total ?? 0}
-              onPageChange={setListingPage}
-              placeholder="Select a property"
-              emptyMessage="No available properties match this search."
-              isLoading={isListingsLoading}
-              ariaLabel="property"
-            />
+            {!choosingProperty && selectedListing ? (
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2">
+                <p className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                  {selectedListing.title}
+                </p>
+                <Button variant="ghost" size="sm" onClick={() => setChoosingProperty(true)}>
+                  Change
+                </Button>
+              </div>
+            ) : (
+              <PaginatedSelect
+                value={propertyId}
+                onValueChange={(value) => {
+                  setPropertyId(value);
+                  setSelectedListingState(
+                    listings.find((listing) => listing.id === value) ??
+                      (defaultListing?.id === value ? defaultListing : null)
+                  );
+                }}
+                items={listings}
+                selectedItem={selectedListing}
+                getItemValue={(listing) => listing.id}
+                getItemLabel={(listing) => listing.title}
+                search={listingSearch}
+                onSearchChange={(value) => {
+                  setListingSearch(value);
+                  setListingPage(1);
+                }}
+                searchPlaceholder="Search available properties"
+                page={listingPage}
+                pageSize={LISTING_PAGE_SIZE}
+                total={listingsPage?.total ?? 0}
+                onPageChange={setListingPage}
+                placeholder="Select a property"
+                emptyMessage="No available properties match this search."
+                isLoading={isListingsLoading}
+                ariaLabel="property"
+              />
+            )}
           </Field>
 
           <Field label="Offer amount" required hint={amountHint} error={amountError}>

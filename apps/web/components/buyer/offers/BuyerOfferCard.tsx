@@ -113,8 +113,9 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
           <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {diffPct >= 0 ? '+' : ''}
-            {diffPct.toFixed(1)}% vs asking
+            {diffPct === 0
+              ? 'At the asking price'
+              : `${Math.abs(diffPct).toFixed(Number.isInteger(diffPct) ? 0 : 1)}% ${diffPct > 0 ? 'above' : 'below'} asking`}
           </p>
         </div>
         <div>

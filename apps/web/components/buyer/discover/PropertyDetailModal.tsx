@@ -180,9 +180,7 @@ export const PropertyDetailModal = ({
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Listed {formatDate(listing.listedDate)}
-          </p>
+          <p className="text-xs text-muted-foreground">Listed {formatDate(listing.listedDate)}</p>
         </div>
 
         <div className="p-4 border-t border-border grid grid-cols-3 gap-2 shrink-0">
@@ -200,7 +198,7 @@ export const PropertyDetailModal = ({
             icon={<CalendarClock className="w-3.5 h-3.5" />}
             onClick={onRequestViewing}
           >
-            View
+            Request viewing
           </Button>
           <Button
             variant="primary"
@@ -209,7 +207,7 @@ export const PropertyDetailModal = ({
             onClick={onMakeOffer}
             disabled={listing?.acceptingOffers === false}
           >
-            {listing?.acceptingOffers === false ? 'Under offer' : 'Offer'}
+            {listing?.acceptingOffers === false ? 'Under offer' : 'Make an offer'}
           </Button>
         </div>
       </DialogContent>
