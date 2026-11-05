@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert, ShieldCheck, ShieldQuestion } from 'lucide-react-native';
 import { Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { qk } from '@/lib/query/keys';
 import { listingCheckApi, type ListingCheckLevel } from '@/lib/api/listingCheck';
 
 const ICON = {
@@ -14,7 +15,7 @@ const ICON = {
 export function ListingCheckCard({ listingId }: { listingId: string }) {
   const { colors, spacing, radius } = useTheme();
   const query = useQuery({
-    queryKey: ['renter', 'listing', listingId, 'check'],
+    queryKey: qk.renter.listingCheck(listingId),
     queryFn: () => listingCheckApi.check(listingId),
     staleTime: 10 * 60_000,
   });
@@ -53,9 +54,7 @@ export function ListingCheckCard({ listingId }: { listingId: string }) {
         </Text>
         {d.facts.warnings.length ? (
           <View style={{ gap: 2 }}>
-            <Text variant="caption" style={{ fontWeight: '600' }}>
-              Worth asking about
-            </Text>
+            <Text variant="label">Worth asking about</Text>
             {d.facts.warnings.map((w) => (
               <Text key={w} variant="caption" color="mutedForeground">
                 • {w}
@@ -64,9 +63,7 @@ export function ListingCheckCard({ listingId }: { listingId: string }) {
           </View>
         ) : null}
         <View style={{ gap: 2 }}>
-          <Text variant="caption" style={{ fontWeight: '600' }}>
-            Before you pay
-          </Text>
+          <Text variant="label">Before you pay</Text>
           {d.checklist.map((item, i) => (
             <Text key={item} variant="caption">
               {i + 1}. {item}

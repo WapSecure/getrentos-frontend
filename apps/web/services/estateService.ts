@@ -59,6 +59,7 @@ import type {
   VisitorIdCheck,
   EstateStatementLineDispute,
 } from '@/types/estate';
+import type { CollectionPlan } from '@/types/collectionPlan';
 
 type EstatePageQuery = {
   page?: number;
@@ -96,6 +97,14 @@ function buildGateWriteBody(extra: Record<string, unknown>): Record<string, unkn
 
 export const estateService = {
   /** Read-only answers about one estate, for its managers. */
+  /** A step and a message per household behind on dues; messages in `language` when given. */
+  getCollectionPlan: (estateId: string, language: ReplyLanguage = 'en') =>
+    safeCall<CollectionPlan>(() =>
+      authFetch(
+        `/estate/${estateId}/collections/plan${language === 'en' ? '' : `?language=${language}`}`
+      )
+    ),
+
   askAssistant: (
     estateId: string,
     question: string,

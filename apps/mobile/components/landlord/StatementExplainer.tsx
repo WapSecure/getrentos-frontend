@@ -2,24 +2,15 @@ import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Bell, Clock } from 'lucide-react-native';
 import { Skeleton, Text, useTheme } from '@getrentos/ui-native';
-import { apiFetch } from '@/lib/api/client';
-
-interface StatementExplanation {
-  headline: string;
-  points: string[];
-  questions: string[];
-  flags: { code: string; severity: 'urgent' | 'soon' | 'info'; detail: string }[];
-  source: 'ai' | 'heuristic';
-  disclaimer: string;
-}
+import { landlordApi } from '@/lib/api/landlord';
+import { qk } from '@/lib/query/keys';
 
 /** A statement in plain words, shown inside its card when the landlord asks for it. */
 export function StatementExplainer({ statementId }: { statementId: string }) {
   const { colors, spacing, radius } = useTheme();
   const q = useQuery({
-    queryKey: ['landlord', 'owner-statements', statementId, 'explain'],
-    queryFn: () =>
-      apiFetch<StatementExplanation>(`/landlord/owner-statements/${statementId}/explain`),
+    queryKey: qk.landlord.statementExplanation(statementId),
+    queryFn: () => landlordApi.explainOwnerStatement(statementId),
     staleTime: 10 * 60_000,
     retry: false,
   });
@@ -59,9 +50,7 @@ export function StatementExplainer({ statementId }: { statementId: string }) {
       ))}
       {d.questions.length ? (
         <View style={{ gap: 2 }}>
-          <Text variant="caption" style={{ fontWeight: '600' }}>
-            Worth asking your manager
-          </Text>
+          <Text variant="label">Worth asking your manager</Text>
           {d.questions.map((x) => (
             <Text key={x} variant="caption" color="mutedForeground">
               • {x}
@@ -69,7 +58,7 @@ export function StatementExplainer({ statementId }: { statementId: string }) {
           ))}
         </View>
       ) : null}
-      <Text variant="caption" color="mutedForeground" style={{ fontSize: 11 }}>
+      <Text variant="caption" color="mutedForeground">
         {d.disclaimer}
       </Text>
     </View>

@@ -2,24 +2,15 @@ import { Share, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { BookOpen, TriangleAlert } from 'lucide-react-native';
 import { Button, Card, Skeleton, Text, useTheme } from '@getrentos/ui-native';
-import { apiFetch } from '@/lib/api/client';
-
-interface LeaseGuide {
-  summary: string[];
-  renewalAdvice: string | null;
-  termsToAsk: string[];
-  counterOfferDraft: string | null;
-  facts: { notices: { kind: string; served: string | null; expires: string | null }[] };
-  source: 'ai' | 'heuristic';
-  disclaimer: string;
-}
+import { leaseGuideApi } from '@/lib/api/leaseGuide';
+import { qk } from '@/lib/query/keys';
 
 /** "Your lease, explained" on the phone; the counter-offer opens the share sheet. */
 export function LeaseGuideCard() {
   const { colors, spacing, radius } = useTheme();
   const q = useQuery({
-    queryKey: ['renter', 'lease', 'guide'],
-    queryFn: () => apiFetch<LeaseGuide>('/renter/lease/guide'),
+    queryKey: qk.renter.leaseGuide,
+    queryFn: leaseGuideApi.get,
     staleTime: 10 * 60_000,
   });
   if (q.isLoading) return <Skeleton height={140} radius={radius.md} />;
@@ -54,9 +45,7 @@ export function LeaseGuideCard() {
         ))}
         {g.renewalAdvice ? (
           <View style={{ gap: 4, marginTop: spacing.xs }}>
-            <Text variant="caption" style={{ fontWeight: '600' }}>
-              About your renewal offer
-            </Text>
+            <Text variant="label">About your renewal offer</Text>
             <Text variant="callout">{g.renewalAdvice}</Text>
             {g.termsToAsk.map((t) => (
               <Text key={t} variant="caption" color="mutedForeground">

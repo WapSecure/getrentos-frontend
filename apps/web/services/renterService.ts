@@ -32,6 +32,7 @@ import type { AssistantTurn, RenterAssistantReply } from '@/types/assistant';
 import type { ListingCheck } from '@/types/listingCheck';
 import type { RentalSearchParse } from '@/types/searchParse';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
+import type { LeaseGuide } from '@/types/leaseGuide';
 
 export interface ViewingRequest {
   id: string;
@@ -1424,6 +1425,11 @@ export const renterService = {
 
   async markAllNotificationsAsRead(): Promise<ApiResponse<void>> {
     return safeCall(() => authFetch('/renter/notifications/read-all', { method: 'POST' }));
+  },
+
+  /** The renter's lease explained, with renewal advice when an offer is open. */
+  async getLeaseGuide(): Promise<ApiResponse<LeaseGuide>> {
+    return safeCall(() => authFetch('/renter/lease/guide'));
   },
 
   async askAssistant(

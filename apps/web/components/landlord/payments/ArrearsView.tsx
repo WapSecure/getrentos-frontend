@@ -89,7 +89,7 @@ export function ArrearsView() {
         )
       )}
 
-      <CollectionPlanPanel path="/landlord/collections/plan" noticesHref="/landlord/notices" />
+      <CollectionPlanPanel source={{ kind: 'rent' }} noticesHref="/landlord/notices" />
 
       {arrearsQuery.isLoading ? (
         <ListSkeleton rows={4} />

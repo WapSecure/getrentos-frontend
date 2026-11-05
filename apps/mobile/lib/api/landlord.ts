@@ -437,6 +437,16 @@ export interface CreateExpenseInput {
 export type OwnerStatementStatus = 'draft' | 'issued' | 'paid';
 export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
 
+/** An owner statement in plain words, as the API returns it. */
+export interface StatementExplanation {
+  headline: string;
+  points: string[];
+  questions: string[];
+  flags: { code: string; severity: 'urgent' | 'soon' | 'info'; detail: string }[];
+  source: 'ai' | 'heuristic';
+  disclaimer: string;
+}
+
 export interface OwnerStatementLineItem {
   id: string;
   label: string;
@@ -998,6 +1008,10 @@ export const landlordApi = {
     ),
 
   ownerStatement: (id: string) => apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}`),
+
+  /** The statement in plain words: where the money went, what changed, what to ask. */
+  explainOwnerStatement: (id: string) =>
+    apiFetch<StatementExplanation>(`/landlord/owner-statements/${id}/explain`),
 
   issueOwnerStatement: (id: string) =>
     apiFetch<OwnerStatement>(`/landlord/owner-statements/${id}/issue`, { method: 'POST' }),

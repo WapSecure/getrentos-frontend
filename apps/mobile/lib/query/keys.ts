@@ -160,6 +160,8 @@ export const qk = {
     invoices: ['billing', 'invoices'] as const,
   },
   estateManager: {
+    collectionPlan: (estateId: string, language: string) =>
+      ['estate-manager', estateId, 'collection-plan', language] as const,
     estates: ['estate-manager', 'estates'] as const,
     selected: ['estate-manager', 'selected'] as const,
     /** Everything cached for one estate; invalidate this after a write. */
@@ -194,6 +196,8 @@ export const qk = {
       ['estate-manager', estateId, 'watchlist', status] as const,
   },
   renter: {
+    leaseGuide: ['renter', 'lease', 'guide'] as const,
+    listingCheck: (listingId: string) => ['renter', 'listing', listingId, 'check'] as const,
     deposits: ['renter', 'deposits'] as const,
     homeTeam: ['renter', 'home-team'] as const,
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
@@ -410,6 +414,8 @@ export const qk = {
     trustProfile: ['buyer', 'trust-profile'] as const,
   },
   landlord: {
+    statementExplanation: (id: string) => ['landlord', 'owner-statements', id, 'explain'] as const,
+    collectionPlan: (language: string) => ['landlord', 'collection-plan', language] as const,
     dashboardStats: ['landlord', 'dashboard', 'stats'] as const,
     activity: ['landlord', 'dashboard', 'activity'] as const,
     revenueTrend: ['landlord', 'dashboard', 'revenue-trend'] as const,

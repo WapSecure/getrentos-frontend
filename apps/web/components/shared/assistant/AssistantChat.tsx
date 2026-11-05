@@ -30,6 +30,7 @@ import {
   type ReplyLanguage,
 } from '@/lib/replyLanguage';
 import { useReadAloud, useVoiceInput } from '@/lib/voice';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 interface ChatMessage extends AssistantTurn {
   links?: AssistantLink[];
@@ -61,7 +62,10 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [language, setLanguage] = useState<ReplyLanguage>(savedReplyLanguage);
+  // Answers follow the app's language unless the person picked another one here.
+  const { language: appLanguage } = useLanguage();
+  const [override, setOverride] = useState<ReplyLanguage | null>(savedReplyLanguage);
+  const language = override ?? appLanguage;
   const logRef = useRef<HTMLDivElement>(null);
 
   const ask = useMutation({
@@ -143,7 +147,7 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
                 value={language}
                 onValueChange={(value) => {
                   const next = value as ReplyLanguage;
-                  setLanguage(next);
+                  setOverride(next);
                   saveReplyLanguage(next);
                 }}
                 options={REPLY_LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}

@@ -4,37 +4,12 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, ArrowRight, Bell, Clock } from 'lucide-react';
 import { Card, Skeleton } from '@getrentos/ui';
-import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
+import { unwrap } from '@/lib/apiHelpers';
+import { attentionKeys } from '@/lib/queryKeys';
+import { attentionService } from '@/services/attentionService';
+import type { AttentionPersona } from '@/types/attention';
 
-export type AttentionPersona =
-  | 'renter'
-  | 'landlord'
-  | 'owner'
-  | 'buyer'
-  | 'realtor'
-  | 'agent'
-  | 'manager'
-  | 'resident'
-  | 'estate';
-
-interface AttentionItem {
-  key: string;
-  severity: 'urgent' | 'soon' | 'info';
-  title: string;
-  detail?: string;
-  link: { path: string; label: string };
-}
-
-const PATH: Record<Exclude<AttentionPersona, 'estate'>, string> = {
-  renter: '/renter/assistant/attention',
-  landlord: '/landlord/assistant/attention',
-  owner: '/owner/assistant/attention',
-  buyer: '/buyer/assistant/attention',
-  realtor: '/realtor/assistant/attention',
-  agent: '/agent/assistant/attention',
-  manager: '/agency/assistant/attention',
-  resident: '/resident/assistant/attention',
-};
+export type { AttentionPersona };
 
 const TONE = {
   urgent: { icon: AlertCircle, cls: 'text-destructive' },
@@ -53,12 +28,11 @@ export function AttentionFeed({
   persona: AttentionPersona;
   estateId?: string;
 }) {
-  const path =
-    persona === 'estate' ? (estateId ? `/estate/${estateId}/attention` : null) : PATH[persona];
   const { data, isLoading } = useQuery({
-    queryKey: ['attention', persona, estateId ?? ''],
-    queryFn: () => unwrap(safeCall(() => authFetch<{ items: AttentionItem[] }>(path!))),
-    enabled: Boolean(path),
+    queryKey: attentionKeys.feed(persona, estateId),
+    queryFn: () => unwrap(attentionService.get(persona, estateId)),
+    // An estate feed needs the estate it is for.
+    enabled: persona !== 'estate' || Boolean(estateId),
     staleTime: 60_000,
   });
 
