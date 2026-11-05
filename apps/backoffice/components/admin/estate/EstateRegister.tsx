@@ -425,7 +425,8 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                   <div key={i.id} className="rounded-lg border border-border p-2.5 text-sm">
                     <p className="truncate font-medium">{i.description}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {i.category} · {i.priority} · {formatDate(i.createdAt)}
+                      {humaniseEnum(i.category)} · {humaniseEnum(i.priority)} ·{' '}
+                      {formatDate(i.createdAt)}
                     </p>
                   </div>
                 ))}
@@ -441,7 +442,7 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                   <div key={m.id} className="rounded-lg border border-border p-2.5 text-sm">
                     <p className="truncate font-medium">{m.description}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {m.unitLabel ?? '—'} · {m.category} · {formatDate(m.createdAt)}
+                      {m.unitLabel ?? '—'} · {humaniseEnum(m.category)} · {formatDate(m.createdAt)}
                     </p>
                   </div>
                 ))}

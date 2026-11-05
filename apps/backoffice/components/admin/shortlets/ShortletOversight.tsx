@@ -1474,7 +1474,7 @@ function BookingRow({
             {humaniseEnum(booking.status)}
           </Badge>
           <Badge variant={PAYMENT_STATUS_VARIANT[booking.paymentStatus]}>
-            {booking.paymentStatus}
+            {humaniseEnum(booking.paymentStatus)}
           </Badge>
           {booking.paidOut && <Badge variant="neutral">Paid out</Badge>}
         </div>
@@ -1835,7 +1835,7 @@ function DisputeRow({ dispute, onOpen }: { dispute: AdminShortletDispute; onOpen
           <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>
             {humaniseEnum(dispute.status)}
           </Badge>
-          <Badge variant="neutral">{dispute.category}</Badge>
+          <Badge variant="neutral">{humaniseEnum(dispute.category)}</Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {dispute.raisedBy} ↔ {dispute.against} · {dispute.listingTitle ?? 'Shortlet'}
@@ -1900,7 +1900,7 @@ function DisputeThreadModal({
               {dispute.guestPromise ? (
                 <Badge variant="warning">Guest Promise</Badge>
               ) : (
-                <Badge variant="neutral">{dispute.category}</Badge>
+                <Badge variant="neutral">{humaniseEnum(dispute.category)}</Badge>
               )}
               <span className="text-sm text-muted-foreground">
                 {dispute.raisedBy} ↔ {dispute.against} · {dispute.listingTitle ?? 'Shortlet'} ·{' '}
