@@ -1,4 +1,5 @@
 import { authFetch, safeCall, type ApiResponse } from '@/lib/apiHelpers';
+import type { OwnerQueryDraft } from '@/types/ownerQueryDraft';
 
 export type QueryCategory = 'STATEMENT' | 'RENT' | 'MAINTENANCE' | 'TENANT' | 'LEGAL' | 'GENERAL';
 export type QueryStatus = 'OPEN' | 'ANSWERED' | 'RESOLVED';
@@ -61,6 +62,10 @@ export const ownerQueryService = {
   },
   reply(id: string, body: string) {
     return post<QueryThread>(`/owner-queries/${id}/messages`, { body });
+  },
+  /** A drafted reply from the property's records, for the manager side. Nothing is sent. */
+  draftReply(id: string) {
+    return post<OwnerQueryDraft>(`/owner-queries/${id}/draft-reply`);
   },
   resolve(id: string) {
     return post<QueryThread>(`/owner-queries/${id}/resolve`);

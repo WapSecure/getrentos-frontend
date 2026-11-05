@@ -36,6 +36,7 @@ export * from './providers/QueryProvider';
 export * from './hooks/useSessionActivity';
 export * from './hooks/useSessionExpiryDraft';
 export * from './SaveButton';
+export * from './SuggestedDraft';
 export * from './SectionHeader';
 export * from './Select';
 export * from './SessionExpiredNotice';

@@ -34,6 +34,8 @@ export type {
 } from './primitives/FormControls';
 export type { AuthScaffoldProps } from './primitives/AuthScaffold';
 export { Card } from './primitives/Card';
+export { SuggestedDraft } from './primitives/SuggestedDraft';
+export type { SuggestedDraftProps } from './primitives/SuggestedDraft';
 export type { CardProps } from './primitives/Card';
 export { Screen } from './primitives/Screen';
 export type { ScreenProps } from './primitives/Screen';
