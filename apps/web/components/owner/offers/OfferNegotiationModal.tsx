@@ -116,10 +116,24 @@ export const OfferNegotiationModal = ({
               const isOwner = msg.senderId === 'owner';
               const isSystem = msg.type !== 'message';
               if (isSystem) {
+                // The thread's events come with no sentence of their own: a
+                // counter arrived as a bare "₦19.8M" pill.
+                const who = isOwner ? 'You' : msg.senderName || 'The buyer';
+                const label =
+                  msg.text ||
+                  (msg.type === 'offer'
+                    ? `${who} offered`
+                    : msg.type === 'counter'
+                      ? `${who} countered at`
+                      : msg.type === 'accepted'
+                        ? 'Offer accepted'
+                        : msg.type === 'rejected'
+                          ? 'Offer declined'
+                          : '');
                 return (
                   <div key={msg.id} className="flex justify-center">
                     <span className="rounded-full bg-secondary px-3 py-1.5 text-xs text-muted-foreground">
-                      {msg.text}
+                      {label}
                       {msg.amount !== undefined && (
                         <strong className="text-foreground">
                           {' '}
@@ -183,6 +197,12 @@ export const OfferNegotiationModal = ({
             </div>
           ) : (
             <div className="shrink-0 space-y-3 border-t border-border p-4">
+              {!isDecided && offer.status === 'countered' && (
+                <p className="text-xs text-muted-foreground" role="status">
+                  Your counter is with the buyer. You can still accept their offer or decline it
+                  while you wait.
+                </p>
+              )}
               {!isDecided && (
                 <div className="flex flex-wrap gap-2">
                   <Button
