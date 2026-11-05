@@ -8,11 +8,10 @@ import {
   Button,
   Card,
   DateField,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
+  QueryState,
   SegmentedControl,
   SwitchRow,
   Text,
@@ -42,9 +41,10 @@ import {
   type BroadcastAudience,
   type RuleForm,
 } from '@/lib/api/automations';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { formatDate } from '@/lib/format';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
@@ -59,7 +59,6 @@ const TABS: { value: Tab; label: string }[] = [
   { value: 'templates', label: 'Templates' },
 ];
 
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 const mergeHint = `Merge fields: ${MERGE_FIELDS.join(', ')}`;
 
 /**
@@ -226,7 +225,7 @@ function Broadcast({ templates }: { templates: AnnouncementTemplate[] }) {
       setBody('');
       setTemplateId(undefined);
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send.'), 'error'),
   });
 
   const confirm = () => {
@@ -306,7 +305,6 @@ function Broadcast({ templates }: { templates: AnnouncementTemplate[] }) {
 
 type ListQuery<T> = {
   data: T[] | undefined;
-  isLoading: boolean;
   isError: boolean;
   refetch: () => unknown;
 };
@@ -321,24 +319,28 @@ function Rules({
   onNew: () => void;
 }) {
   const { colors, spacing } = useTheme();
-  if (query.isLoading) return <ListSkeleton rows={2} variant="card" height={120} />;
-  if (query.isError && !query.data) return <ErrorState onRetry={() => query.refetch()} />;
   const rules = query.data ?? [];
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
         Send automatically, on a schedule or when rent is due, overdue or a lease is ending.
       </Text>
-      {rules.length === 0 ? (
-        <EmptyState
-          icon={<CalendarClock size={32} color={colors.mutedForeground} />}
-          title="No automation rules yet"
-          description="Message all tenants monthly, or chase a tenant automatically when their rent goes overdue."
-          action={<Button label="New rule" onPress={onNew} />}
-        />
-      ) : (
-        rules.map((r) => <RuleCard key={r.id} rule={r} onEdit={() => onEdit(r)} />)
-      )}
+      <QueryState
+        query={query}
+        skeleton={<ListSkeleton rows={2} variant="card" height={120} />}
+        isEmpty={rules.length === 0}
+        empty={{
+          icon: <CalendarClock size={32} color={colors.mutedForeground} />,
+          title: 'No automation rules yet',
+          description:
+            'Message all tenants monthly, or chase a tenant automatically when their rent goes overdue.',
+          action: <Button label="New rule" onPress={onNew} />,
+        }}
+      >
+        {rules.map((r) => (
+          <RuleCard key={r.id} rule={r} onEdit={() => onEdit(r)} />
+        ))}
+      </QueryState>
     </View>
   );
 }
@@ -349,15 +351,16 @@ function RuleCard({ rule: r, onEdit }: { rule: AutomationRule; onEdit: () => voi
   const toast = useToast();
   const invalidate = () => qc.invalidateQueries({ queryKey: qk.automations.rules });
 
-  const toggle = useMutation({
+  const toggle = useOptimisticMutation({
     mutationFn: (enabled: boolean) => automationsApi.updateRule(r.id, { enabled }),
-    onMutate: (enabled) => {
-      qc.setQueryData<AutomationRule[]>(qk.automations.rules, (old) =>
-        old?.map((x) => (x.id === r.id ? { ...x, enabled } : x))
-      );
-    },
-    onError: (e) => toast.show(errorText(e, 'Could not update the rule.'), 'error'),
-    onSettled: invalidate,
+    patches: () => [
+      {
+        queryKey: qk.automations.rules,
+        update: (old, enabled) =>
+          (old as AutomationRule[]).map((x) => (x.id === r.id ? { ...x, enabled } : x)),
+      },
+    ],
+    errorMessage: 'Could not update the rule.',
   });
   const run = useMutation({
     mutationFn: () => automationsApi.runRule(r.id),
@@ -365,7 +368,7 @@ function RuleCard({ rule: r, onEdit }: { rule: AutomationRule; onEdit: () => voi
       invalidate();
       toast.show(`Sent to ${recipients(recipientCount)}.`, 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not run the rule.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not run the rule.'), 'error'),
   });
   const remove = useMutation({
     mutationFn: () => automationsApi.deleteRule(r.id),
@@ -373,7 +376,7 @@ function RuleCard({ rule: r, onEdit }: { rule: AutomationRule; onEdit: () => voi
       invalidate();
       toast.show('Rule removed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not remove the rule.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove the rule.'), 'error'),
   });
 
   const scheduled = r.trigger === 'SCHEDULE';
@@ -459,7 +462,7 @@ function RuleEditor({ rule, onDone }: { rule: AutomationRule | null; onDone: () 
       toast.show(rule ? 'Rule updated.' : 'Rule created.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the rule.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the rule.'), 'error'),
   });
 
   return (
@@ -569,26 +572,27 @@ function Templates({
       qc.invalidateQueries({ queryKey: qk.automations.templates });
       toast.show('Template deleted.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not delete the template.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not delete the template.'), 'error'),
   });
 
-  if (query.isLoading) return <ListSkeleton rows={2} variant="card" height={100} />;
-  if (query.isError && !query.data) return <ErrorState onRetry={() => query.refetch()} />;
   const templates = query.data ?? [];
   return (
     <View style={{ gap: spacing.md }}>
       <Text variant="callout" color="mutedForeground">
         Reusable messages to start a broadcast from.
       </Text>
-      {templates.length === 0 ? (
-        <EmptyState
-          icon={<FileText size={32} color={colors.mutedForeground} />}
-          title="No templates yet"
-          description="Save a message once and reuse it for reminders, notices and announcements."
-          action={<Button label="New template" onPress={onNew} />}
-        />
-      ) : (
-        templates.map((t) => (
+      <QueryState
+        query={query}
+        skeleton={<ListSkeleton rows={2} variant="card" height={100} />}
+        isEmpty={templates.length === 0}
+        empty={{
+          icon: <FileText size={32} color={colors.mutedForeground} />,
+          title: 'No templates yet',
+          description: 'Save a message once and reuse it for reminders, notices and announcements.',
+          action: <Button label="New template" onPress={onNew} />,
+        }}
+      >
+        {templates.map((t) => (
           <Card key={t.id} padding={spacing.lg} style={{ gap: spacing.sm }}>
             <Text variant="bodyStrong">{t.title}</Text>
             <Text variant="callout" color="mutedForeground" numberOfLines={6}>
@@ -610,8 +614,8 @@ function Templates({
               />
             </View>
           </Card>
-        ))
-      )}
+        ))}
+      </QueryState>
     </View>
   );
 }
@@ -640,7 +644,7 @@ function TemplateEditor({
       toast.show(template ? 'Template updated.' : 'Template saved.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the template.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the template.'), 'error'),
   });
 
   return (

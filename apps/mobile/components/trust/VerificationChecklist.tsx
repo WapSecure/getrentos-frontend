@@ -6,6 +6,8 @@ import {
   Badge,
   Button,
   Card,
+  NumberField,
+  OtpInput,
   Skeleton,
   Text,
   TextField,
@@ -18,7 +20,6 @@ import {
   APPEAL_STATUS,
   CONSENT_COPY,
   CONSENT_FOR,
-  digitsOnly,
   idNumberOk,
   pendingChecks,
   PROFESSIONAL_DOCUMENT_TYPES,
@@ -33,12 +34,12 @@ import {
   type TrustPurpose,
 } from '@/lib/api/trust';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { captureSelfie } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
+import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
 
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * The instant identity checks (phone code, NIN/BVN, selfie, bank account,
@@ -82,7 +83,7 @@ export function VerificationChecklist({
   if (start.isError) {
     return (
       <Card style={{ gap: spacing.sm }}>
-        <Text variant="callout">{errorText(start.error, 'Could not load your checks.')}</Text>
+        <Text variant="callout">{errorMessage(start.error, 'Could not load your checks.')}</Text>
         <Button
           label="Try again"
           size="sm"
@@ -186,7 +187,7 @@ function CheckRunner({
   const grant = useMutation({
     mutationFn: (type: ConsentType) => trustApi.grantConsent(type),
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.trust.consents }),
-    onError: (e) => toast.show(errorText(e, 'Could not record your consent.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record your consent.'), 'error'),
   });
   return (
     <Card style={{ gap: spacing.md }}>
@@ -250,7 +251,7 @@ function IdentityForm({ verificationId, onDone }: FormProps) {
       if (r.status === 'PASSED') setIdNumber('');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not run that check.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not run that check.'), 'error'),
   });
   const numeric = idType === 'NIN' || idType === 'BVN';
   return (
@@ -264,13 +265,22 @@ function IdentityForm({ verificationId, onDone }: FormProps) {
           setIdNumber('');
         }}
       />
-      <TextField
-        label={numeric ? `${idType} (11 digits)` : 'ID number'}
-        value={idNumber}
-        onChangeText={(t) => setIdNumber(numeric ? digitsOnly(t, 11) : t)}
-        keyboardType={numeric ? 'number-pad' : 'default'}
-        autoCapitalize="characters"
-      />
+      {numeric ? (
+        <NumberField
+          label={`${idType} (11 digits)`}
+          value={idNumber}
+          onValueChange={setIdNumber}
+          code
+          maxLength={11}
+        />
+      ) : (
+        <TextField
+          label="ID number"
+          value={idNumber}
+          onChangeText={setIdNumber}
+          autoCapitalize="characters"
+        />
+      )}
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <TextField
           label="First name"
@@ -308,7 +318,7 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
       setReference(r.reference);
       toast.show('Code sent by SMS.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send the code.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send the code.'), 'error'),
   });
   const verify = useMutation({
     mutationFn: () => trustApi.verifyPhoneCode(verificationId, reference!, code),
@@ -318,7 +328,7 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
       setCode('');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'That code did not work.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'That code did not work.'), 'error'),
   });
   if (!reference) {
     return (
@@ -333,14 +343,10 @@ function PhoneForm({ verificationId, onDone }: FormProps) {
   }
   return (
     <View style={{ gap: spacing.sm }}>
-      <TextField
-        label="6-digit code"
-        value={code}
-        onChangeText={(t) => setCode(digitsOnly(t, 6))}
-        keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        autoComplete="sms-otp"
-      />
+      <Text variant="callout" color="mutedForeground">
+        Enter the 6-digit code we texted you.
+      </Text>
+      <OtpInput value={code} onChange={setCode} length={6} autoFocus />
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
         <Button
           label="Confirm"
@@ -372,7 +378,7 @@ function SelfieForm({ verificationId, onDone }: FormProps) {
       setSelfie(null);
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not check your selfie.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not check your selfie.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.sm }}>
@@ -422,23 +428,15 @@ function BankForm({ verificationId, onDone }: FormProps) {
       toast.show(o.text, o.tone);
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not run the bank check.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not run the bank check.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.md }}>
-      <TextField
-        label="Account number (10 digits)"
-        value={accountNumber}
-        onChangeText={(t) => setAccountNumber(digitsOnly(t, 10))}
-        keyboardType="number-pad"
-      />
-      <TextField
-        label="Bank code"
-        optional
-        hint="For example 058"
-        value={bankCode}
-        onChangeText={(t) => setBankCode(digitsOnly(t, 6))}
-        keyboardType="number-pad"
+      <BankAccountFields
+        bankCode={bankCode}
+        onBankCode={setBankCode}
+        accountNumber={accountNumber}
+        onAccountNumber={setAccountNumber}
       />
       <TextField
         label="Account name"
@@ -450,7 +448,7 @@ function BankForm({ verificationId, onDone }: FormProps) {
       <Button
         label="Run the check"
         loading={run.isPending}
-        disabled={accountNumber.length !== 10 || run.isPending}
+        disabled={!accountNumberOk(accountNumber) || run.isPending}
         onPress={() => run.mutate()}
       />
     </View>
@@ -475,7 +473,7 @@ function DocumentForm({ verificationId, onDone }: FormProps) {
       toast.show(o.text, o.tone);
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not run the document check.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not run the document check.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.md }}>
@@ -522,7 +520,7 @@ function AppealCard({ verificationId }: { verificationId: string }) {
       setReason('');
       toast.show('Appeal sent. An officer will review it.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send your appeal.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send your appeal.'), 'error'),
   });
   const existing = appeals.data?.find(
     (a) => a.targetType === 'TRUST_VERIFICATION' && a.targetId === verificationId
@@ -591,7 +589,7 @@ function ConsentList({ consents }: { consents: TrustConsent[] | undefined }) {
       qc.invalidateQueries({ queryKey: qk.trust.consents });
       toast.show('Consent withdrawn.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not withdraw your consent.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw your consent.'), 'error'),
   });
   const active = (Object.keys(CONSENT_COPY) as ConsentType[])
     .map((t) => activeConsent(consents, t, now))

@@ -7,7 +7,7 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -16,7 +16,7 @@ import { qk } from '@/lib/query/keys';
 import { landBuyerExtrasApi, type Deal } from '@/lib/api/landBuyerExtras';
 import { BUYER_MILESTONE_STATUS } from '@/lib/api/landBuyer';
 import type { Milestone } from '@/lib/api/landSales';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -59,8 +59,7 @@ export default function LandRepresented() {
       qc.invalidateQueries({ queryKey: qk.buyerLand.represented(deal.kind, id) });
       toast.show('Your approval is recorded.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not record your approval.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record your approval.'), 'error'),
   });
   const pending = new Map((rule.data?.pending ?? []).map((p) => [p.milestoneKey, p]));
   const iApprove = rule.data?.binding === true;
@@ -73,17 +72,13 @@ export default function LandRepresented() {
         subtitle={iApprove ? 'You give the second approval on each step' : 'You follow this deal'}
         onBack={() => goBack()}
       />
-      {detail.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl }}>
-          <DetailSkeleton />
-        </View>
-      ) : !detail.data ? (
-        <ErrorState
-          title="This deal is not available to you"
-          description={detail.error instanceof ApiError ? detail.error.message : undefined}
-          onRetry={() => detail.refetch()}
-        />
-      ) : (
+      <QueryState
+        query={detail}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This deal is not available to you"
+        errorDescription="You may no longer represent the buyer, or the deal has closed."
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: spacing.xl,
@@ -101,7 +96,7 @@ export default function LandRepresented() {
             />
           }
         >
-          {[...detail.data.milestones]
+          {[...(detail.data?.milestones ?? [])]
             .sort((a, b) => a.sequence - b.sequence)
             .map((m) => {
               const awaiting = pending.get(m.key);
@@ -160,7 +155,7 @@ export default function LandRepresented() {
               );
             })}
         </ScrollView>
-      )}
+      </QueryState>
     </View>
   );
 }

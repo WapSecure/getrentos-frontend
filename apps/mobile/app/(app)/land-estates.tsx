@@ -8,10 +8,9 @@ import { LayoutGrid, Search } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -48,25 +47,32 @@ export default function LandEstates() {
         subtitle="Reserve a plot and pay on a plan"
         onBack={() => goBack()}
       />
-      {list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
-      ) : (
+      <View style={{ paddingHorizontal: spacing.xl, marginBottom: spacing.lg }}>
+        <TextField
+          placeholder="Search estates, cities or states"
+          value={search}
+          onChangeText={setSearch}
+          leftIcon={<Search size={16} color={colors.mutedForeground} />}
+          accessibilityLabel="Search estates"
+          autoCorrect={false}
+        />
+      </View>
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={3} variant="card" height={120} />}
+        isEmpty={estates.length === 0}
+        empty={{
+          icon: <LayoutGrid size={32} color={colors.mutedForeground} />,
+          title: 'No estates match',
+          description:
+            'Only estates on a verified, in-date master parcel are listed. Try another area.',
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={estates}
           keyExtractor={(e) => e.id}
           keyboardShouldPersistTaps="handled"
-          ListHeaderComponent={
-            <View style={{ marginBottom: spacing.lg }}>
-              <TextField
-                placeholder="Search estates, cities or states"
-                value={search}
-                onChangeText={setSearch}
-                leftIcon={<Search size={16} color={colors.mutedForeground} />}
-                accessibilityLabel="Search estates"
-                autoCorrect={false}
-              />
-            </View>
-          }
           renderItem={({ item }: { item: EstateSummary }) => <EstateCard estate={item} />}
           onEndReached={() => {
             if (list.hasNextPage && !list.isFetchingNextPage) list.fetchNextPage();
@@ -83,19 +89,8 @@ export default function LandEstates() {
               tintColor={colors.mutedForeground}
             />
           }
-          ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={120} />
-            ) : (
-              <EmptyState
-                icon={<LayoutGrid size={32} color={colors.mutedForeground} />}
-                title="No estates match"
-                description="Only estates on a verified, in-date master parcel are listed. Try another area."
-              />
-            )
-          }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   FormAlert,
-  NumberField,
   Price,
   Text,
   useTheme,
@@ -23,10 +22,10 @@ import {
   type PayoutRecord,
 } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
 import { formatNaira } from '@/lib/format';
 
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** Recent payouts, newest first. */
 export function History({ items }: { items: PayoutRecord[] }) {
@@ -98,13 +97,12 @@ export function AccountForm({
   }
   return (
     <View style={{ gap: spacing.md }}>
-      <NumberField
-        label="Bank code"
-        value={bankCode}
-        onValueChange={setBankCode}
-        hint="e.g. 058 for GTBank"
+      <BankAccountFields
+        bankCode={bankCode}
+        onBankCode={setBankCode}
+        accountNumber={accountNumber}
+        onAccountNumber={setAccountNumber}
       />
-      <NumberField label="Account number" value={accountNumber} onValueChange={setAccountNumber} />
       <Text variant="caption" color="mutedForeground">
         Changing your bank details pauses payouts to the new account for 24 hours, and we’ll email
         you about it.
@@ -150,7 +148,7 @@ export function MyPayout({
       onChanged();
       toast.show('Your payout account is saved.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the account.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the account.'), 'error'),
   });
   return (
     <Card style={{ gap: spacing.md }}>

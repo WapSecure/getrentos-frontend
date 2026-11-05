@@ -7,10 +7,9 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   NumberField,
+  QueryState,
   SegmentedControl,
   Text,
   TextField,
@@ -28,7 +27,7 @@ import {
   type SpendApprovalRole,
 } from '@/lib/api/management';
 import { relationshipLabel } from '@/lib/api/propertyAuthority';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -43,8 +42,6 @@ const titleCase = (s: string) =>
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/^\w/, (c) => c.toUpperCase());
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Spend a manager wants to make above the owner's approval limit, the limits
@@ -94,23 +91,23 @@ export default function SpendApprovals() {
           accessibilityLabel="Whose requests"
         />
 
-        {list.isLoading ? (
-          <ListSkeleton rows={3} variant="card" height={120} />
-        ) : list.isError && !list.data ? (
-          <ErrorState onRetry={() => list.refetch()} />
-        ) : items.length === 0 ? (
-          <EmptyState
-            icon={<ShieldCheck size={32} color={colors.mutedForeground} />}
-            title={role === 'owner' ? 'Nothing to review' : 'No requests'}
-            description={
+        <QueryState
+          query={list}
+          skeleton={<ListSkeleton rows={3} variant="card" height={120} />}
+          isEmpty={items.length === 0}
+          empty={{
+            icon: <ShieldCheck size={32} color={colors.mutedForeground} />,
+            title: role === 'owner' ? 'Nothing to review' : 'No requests',
+            description:
               role === 'owner'
                 ? 'Spend requests from your managers will appear here for you to approve.'
-                : 'Spend you raise above the owner’s limit will appear here.'
-            }
-          />
-        ) : (
-          items.map((a) => <ApprovalCard key={a.id} approval={a} role={role} />)
-        )}
+                : 'Spend you raise above the owner’s limit will appear here.',
+          }}
+        >
+          {items.map((a) => (
+            <ApprovalCard key={a.id} approval={a} role={role} />
+          ))}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -131,7 +128,7 @@ function ApprovalCard({ approval: a, role }: { approval: SpendApproval; role: Sp
       invalidate();
       toast.show('Approved. The expense has been recorded.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not approve.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not approve.'), 'error'),
   });
   const reject = useMutation({
     mutationFn: () => managementApi.rejectSpend(a.id, reason.trim()),
@@ -139,7 +136,7 @@ function ApprovalCard({ approval: a, role }: { approval: SpendApproval; role: Sp
       invalidate();
       toast.show('Request declined.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not decline.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not decline.'), 'error'),
   });
   const busy = approve.isPending || reject.isPending;
 
@@ -267,7 +264,7 @@ function CapRow({ mandate }: { mandate: OwnerMandate }) {
       qc.invalidateQueries({ queryKey: qk.management.mandates });
       toast.show('Approval limit saved.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the limit.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the limit.'), 'error'),
   });
 
   return (
@@ -343,7 +340,7 @@ function CountersignCard({ claim: m }: { claim: AwaitingCountersign }) {
         'success'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Could not countersign.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not countersign.'), 'error'),
   });
   const decline = useMutation({
     mutationFn: () => managementApi.declineCountersign(m.id, reason.trim() || undefined),
@@ -351,7 +348,7 @@ function CountersignCard({ claim: m }: { claim: AwaitingCountersign }) {
       invalidate();
       toast.show('Mandate declined.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not decline.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not decline.'), 'error'),
   });
   const busy = sign.isPending || decline.isPending;
 

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Trash2 } from 'lucide-react-native';
 import { Button, FormAlert, Text, TextField, useTheme } from '@getrentos/ui-native';
 import { DELETE_PHRASE, deletePhraseOk, renterHomeApi } from '@/lib/api/renterHome';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -25,8 +25,7 @@ export default function DeleteAccount() {
         { text: 'OK', onPress: () => signOut() },
       ]);
     },
-    onError: (e) =>
-      setError(e instanceof ApiError ? e.message : 'Could not delete your account. Try again.'),
+    onError: (e) => setError(errorMessage(e, 'Could not delete your account. Try again.')),
   });
   const ready = deletePhraseOk(phrase) && password.length > 0;
   const confirm = () =>

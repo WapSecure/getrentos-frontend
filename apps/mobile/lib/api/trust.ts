@@ -194,8 +194,6 @@ export function activeConsent(
   );
 }
 
-export const digitsOnly = (v: string, max: number) => v.replace(/\D/g, '').slice(0, max);
-
 /** NIN and BVN are 11 digits; other IDs only need something entered. */
 export function idNumberOk(type: TrustIdType, value: string): boolean {
   const v = value.trim();

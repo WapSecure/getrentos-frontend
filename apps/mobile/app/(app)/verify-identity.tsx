@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Camera,
-  Check,
   ChevronLeft,
   FileText,
   HelpCircle,
@@ -36,6 +35,7 @@ import { ApiError } from '@/lib/api/client';
 import { purposeFor } from '@/lib/api/trust';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { VerificationChecklist } from '@/components/trust/VerificationChecklist';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 
 type ColorKey = keyof ReturnType<typeof useTheme>['colors'];
 
@@ -195,7 +195,7 @@ export default function VerifyIdentity() {
               </View>
             </View>
 
-            <PickerRow
+            <FilePickRow
               label="Document photo"
               file={document}
               icon={FileText}
@@ -203,7 +203,7 @@ export default function VerifyIdentity() {
               onClear={() => setDocument(null)}
             />
 
-            <PickerRow
+            <FilePickRow
               label="Selfie (speeds up automatic approval)"
               file={selfie}
               icon={Camera}
@@ -221,66 +221,6 @@ export default function VerifyIdentity() {
           </View>
         ) : null}
       </ScrollView>
-    </View>
-  );
-}
-
-function PickerRow({
-  label,
-  file,
-  icon: Icon,
-  onPick,
-  onClear,
-}: {
-  label: string;
-  file: PickedFile | null;
-  icon: typeof FileText;
-  onPick: () => void;
-  onClear: () => void;
-}) {
-  const { colors, spacing, radius } = useTheme();
-  return (
-    <View style={{ gap: spacing.sm }}>
-      <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
-        {label}
-      </Text>
-      <Pressable
-        onPress={file ? undefined : onPick}
-        accessibilityRole={file ? undefined : 'button'}
-        accessibilityLabel={file ? `${label}: ${file.name}` : `${label}: tap to add`}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.md,
-          borderRadius: radius.md,
-          borderWidth: 1,
-          borderStyle: file ? 'solid' : 'dashed',
-          borderColor: file ? colors.success : colors.border,
-          backgroundColor: file ? colors.successSubtle : colors.card,
-        }}
-      >
-        {file ? (
-          <Check size={18} color={colors.success} />
-        ) : (
-          <Icon size={18} color={colors.mutedForeground} />
-        )}
-        <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
-          {file ? file.name : `Tap to add`}
-        </Text>
-        {file ? (
-          <Pressable
-            onPress={onClear}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel={`Remove ${label.toLowerCase()}`}
-          >
-            <Text variant="caption" color="primary" style={{ fontWeight: '600' }}>
-              Remove
-            </Text>
-          </Pressable>
-        ) : null}
-      </Pressable>
     </View>
   );
 }

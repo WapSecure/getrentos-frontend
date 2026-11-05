@@ -6,12 +6,11 @@ import { ArrowUpRight, Building2, Sparkles, TrendingUp } from 'lucide-react-nati
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   ListSkeleton,
   NumberField,
   Price,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -27,7 +26,7 @@ import {
   type PortfolioSort,
   type PropertyPerformance,
 } from '@/lib/api/landlordFinance';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
@@ -93,51 +92,57 @@ export default function LandlordPortfolio() {
             ]}
             note={null}
           />
-        ) : query.isLoading ? (
-          <ListSkeleton rows={4} variant="card" height={110} />
-        ) : !data ? (
-          <ErrorState
-            title="Portfolio figures are unavailable"
-            description="We could not load how your properties are performing. Nothing has changed."
-            onRetry={() => query.refetch()}
-          />
-        ) : data.properties.length === 0 ? (
-          <EmptyState
-            icon={<Building2 size={32} color={colors.mutedForeground} />}
-            title="No properties to compare yet"
-            description="Add a property and let a unit, and its performance will show up here."
-          />
         ) : (
-          <>
-            <Briefing />
-            <Summary data={data} />
-            <Unvalued data={data} />
-            <ChipSelect label="Sort by" options={PORTFOLIO_SORTS} value={sort} onChange={setSort} />
-            {sortPerformance(data.properties, sort).map((p) => (
-              <PropertyCard
-                key={p.propertyId}
-                row={p}
-                standing={
-                  p.propertyId === data.summary.bestCapRatePropertyId
-                    ? 'Highest cap rate'
-                    : p.propertyId === data.summary.weakestCapRatePropertyId
-                      ? 'Lowest cap rate'
-                      : null
-                }
-                onAddFigures={() => setEditing(p)}
-              />
-            ))}
-            <View style={{ gap: spacing.xs }}>
-              {DEFINITIONS.map(([term, meaning]) => (
-                <Text key={term} variant="caption" color="mutedForeground">
-                  <Text variant="caption" style={{ fontWeight: '600' }}>
-                    {term}:{' '}
-                  </Text>
-                  {meaning}
-                </Text>
-              ))}
-            </View>
-          </>
+          <QueryState
+            query={query}
+            skeleton={<ListSkeleton rows={4} variant="card" height={110} />}
+            errorTitle="Portfolio figures are unavailable"
+            errorDescription="We could not load how your properties are performing. Nothing has changed."
+            isEmpty={(data?.properties ?? []).length === 0}
+            empty={{
+              icon: <Building2 size={32} color={colors.mutedForeground} />,
+              title: 'No properties to compare yet',
+              description: 'Add a property and let a unit, and its performance will show up here.',
+            }}
+          >
+            {data ? (
+              <>
+                <Briefing />
+                <Summary data={data} />
+                <Unvalued data={data} />
+                <ChipSelect
+                  label="Sort by"
+                  options={PORTFOLIO_SORTS}
+                  value={sort}
+                  onChange={setSort}
+                />
+                {sortPerformance(data.properties, sort).map((p) => (
+                  <PropertyCard
+                    key={p.propertyId}
+                    row={p}
+                    standing={
+                      p.propertyId === data.summary.bestCapRatePropertyId
+                        ? 'Highest cap rate'
+                        : p.propertyId === data.summary.weakestCapRatePropertyId
+                          ? 'Lowest cap rate'
+                          : null
+                    }
+                    onAddFigures={() => setEditing(p)}
+                  />
+                ))}
+                <View style={{ gap: spacing.xs }}>
+                  {DEFINITIONS.map(([term, meaning]) => (
+                    <Text key={term} variant="caption" color="mutedForeground">
+                      <Text variant="caption" style={{ fontWeight: '600' }}>
+                        {term}:{' '}
+                      </Text>
+                      {meaning}
+                    </Text>
+                  ))}
+                </View>
+              </>
+            ) : null}
+          </QueryState>
         )}
       </ScrollView>
 
@@ -352,8 +357,7 @@ function ValueForm({ row, onDone }: { row: PropertyPerformance; onDone: () => vo
       toast.show('Figures saved.', 'success');
       onDone();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save these figures.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save these figures.'), 'error'),
   });
 
   return (

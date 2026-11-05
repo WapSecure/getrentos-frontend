@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckCircle2, Circle } from 'lucide-react-native';
-import { Badge, Card, DetailSkeleton, ErrorState, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, Card, DetailSkeleton, QueryState, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   agencyApi,
@@ -17,7 +17,6 @@ import {
   TERMINATION_REQUEST_LABEL,
   type Mandate,
 } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
 import { formatDateTime } from '@/lib/format';
 import { MandateActions } from '@/components/agency/MandateActions';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -48,101 +47,96 @@ export default function AgencyMandate() {
         subtitle={m ? `For ${m.ownerName ?? 'the owner'}` : undefined}
         onBack={() => goBack()}
       />
-      {!m ? (
-        q.isError ? (
-          <ErrorState
-            title="This engagement did not load"
-            description={q.error instanceof ApiError ? q.error.message : undefined}
-            onRetry={() => q.refetch()}
-          />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={q.isRefetching}
-              onRefresh={() => {
-                q.refetch();
-                requests.refetch();
-              }}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-            <Badge label={MANDATE_STATUS[m.status].label} tone={MANDATE_STATUS[m.status].tone} />
-            {isLive(m) ? <Badge label="In force" tone="success" /> : null}
-          </View>
-          <MandateActions mandate={m} />
-          <Card style={{ gap: spacing.sm }}>
-            <Fact label="Owner" value={m.ownerName ?? '—'} />
-            <Fact label="Manager" value={managerLabel(m)} />
-            <Fact label="Notice period" value={`${m.noticePeriodDays} days`} />
-            <Fact label="Term" value={term(m)} />
-            <Fact label="How it ends" value={noticeSummary(m)} />
-          </Card>
-          <Card style={{ gap: spacing.sm }}>
-            <Text variant="heading">What it covers</Text>
-            {m.scope.length === 0 ? (
-              <Text variant="callout" color="mutedForeground">
-                No scope agreed.
-              </Text>
-            ) : (
-              m.scope.map((s) => (
-                <Text key={s} variant="callout">
-                  • {SCOPE_LABEL[s]}
-                </Text>
-              ))
-            )}
-            <Text variant="caption" color="mutedForeground">
-              Today it lets you {m.capabilities.canList ? '' : 'not '}list,{' '}
-              {m.capabilities.canManage ? '' : 'not '}manage, and{' '}
-              {m.capabilities.canTransact ? '' : 'not '}handle money.
-            </Text>
-            <Text variant="caption" color="mutedForeground">
-              Agreement {m.agreementDocumentId ? 'attached' : 'not attached'} · power of attorney{' '}
-              {m.poaDocumentId ? 'attached' : 'not attached'}
-            </Text>
-          </Card>
-          <Timeline m={m} />
-          {(requests.data ?? []).length ? (
+      <QueryState
+        query={q}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This engagement did not load"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {m ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={q.isRefetching}
+                onRefresh={() => {
+                  q.refetch();
+                  requests.refetch();
+                }}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+              <Badge label={MANDATE_STATUS[m.status].label} tone={MANDATE_STATUS[m.status].tone} />
+              {isLive(m) ? <Badge label="In force" tone="success" /> : null}
+            </View>
+            <MandateActions mandate={m} />
             <Card style={{ gap: spacing.sm }}>
-              <Text variant="heading">Requests to end it</Text>
-              {requests.data!.map((r) => (
-                <View key={r.id} style={{ gap: 2 }}>
-                  <Badge
-                    label={TERMINATION_REQUEST_LABEL[r.status]}
-                    tone={
-                      r.status === 'APPROVED'
-                        ? 'success'
-                        : r.status === 'PENDING'
-                          ? 'warning'
-                          : 'neutral'
-                    }
-                  />
-                  <Text variant="callout">“{r.reason}”</Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {r.requestedByName ?? 'Someone'} · {formatDay(r.createdAt)}
-                    {r.decidedAt
-                      ? ` · decided by ${r.decidedByName ?? 'GetRentos'} ${formatDay(r.decidedAt)}`
-                      : ''}
-                    {r.decisionNote ? ` · ${r.decisionNote}` : ''}
-                  </Text>
-                </View>
-              ))}
+              <Fact label="Owner" value={m.ownerName ?? '—'} />
+              <Fact label="Manager" value={managerLabel(m)} />
+              <Fact label="Notice period" value={`${m.noticePeriodDays} days`} />
+              <Fact label="Term" value={term(m)} />
+              <Fact label="How it ends" value={noticeSummary(m)} />
             </Card>
-          ) : null}
-        </ScrollView>
-      )}
+            <Card style={{ gap: spacing.sm }}>
+              <Text variant="heading">What it covers</Text>
+              {m.scope.length === 0 ? (
+                <Text variant="callout" color="mutedForeground">
+                  No scope agreed.
+                </Text>
+              ) : (
+                m.scope.map((s) => (
+                  <Text key={s} variant="callout">
+                    • {SCOPE_LABEL[s]}
+                  </Text>
+                ))
+              )}
+              <Text variant="caption" color="mutedForeground">
+                Today it lets you {m.capabilities.canList ? '' : 'not '}list,{' '}
+                {m.capabilities.canManage ? '' : 'not '}manage, and{' '}
+                {m.capabilities.canTransact ? '' : 'not '}handle money.
+              </Text>
+              <Text variant="caption" color="mutedForeground">
+                Agreement {m.agreementDocumentId ? 'attached' : 'not attached'} · power of attorney{' '}
+                {m.poaDocumentId ? 'attached' : 'not attached'}
+              </Text>
+            </Card>
+            <Timeline m={m} />
+            {(requests.data ?? []).length ? (
+              <Card style={{ gap: spacing.sm }}>
+                <Text variant="heading">Requests to end it</Text>
+                {(requests.data ?? []).map((r) => (
+                  <View key={r.id} style={{ gap: 2 }}>
+                    <Badge
+                      label={TERMINATION_REQUEST_LABEL[r.status]}
+                      tone={
+                        r.status === 'APPROVED'
+                          ? 'success'
+                          : r.status === 'PENDING'
+                            ? 'warning'
+                            : 'neutral'
+                      }
+                    />
+                    <Text variant="callout">“{r.reason}”</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      {r.requestedByName ?? 'Someone'} · {formatDay(r.createdAt)}
+                      {r.decidedAt
+                        ? ` · decided by ${r.decidedByName ?? 'GetRentos'} ${formatDay(r.decidedAt)}`
+                        : ''}
+                      {r.decisionNote ? ` · ${r.decisionNote}` : ''}
+                    </Text>
+                  </View>
+                ))}
+              </Card>
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

@@ -3,15 +3,15 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, BadgeCheck, CheckCircle2, ShieldAlert, Users } from 'lucide-react-native';
+import { BadgeCheck, Users } from 'lucide-react-native';
 import {
   Button,
   Card,
   Checkbox,
   CurrencyField,
-  EmptyState,
-  ErrorState,
+  FormAlert,
   ListSkeleton,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -23,12 +23,12 @@ import {
   IMPERSONATION_CHANNELS,
   renterHomeApi,
   reportReady,
+  verdictAlert,
   type ContactKind,
-  type ContactVerdict,
   type HomeTeam,
   type ImpersonationChannel,
 } from '@/lib/api/renterHome';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { SUPPORT, hasSupportLine } from '@/lib/support';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -67,17 +67,16 @@ export default function RenterHomeTeam() {
           />
         }
       >
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={120} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : homes.length === 0 ? (
-          <EmptyState
-            icon={<Users size={32} color={colors.mutedForeground} />}
-            title="No home yet"
-            description="Once you have a lease, the people verified to manage it show here."
-          />
-        ) : (
+        <QueryState
+          query={q}
+          skeleton={<ListSkeleton rows={2} variant="card" height={120} />}
+          isEmpty={homes.length === 0}
+          empty={{
+            icon: <Users size={32} color={colors.mutedForeground} />,
+            title: 'No home yet',
+            description: 'Once you have a lease, the people verified to manage it show here.',
+          }}
+        >
           <>
             <Text variant="callout" color="mutedForeground">
               These are the only people verified to act for your home. Anyone else claiming to be
@@ -90,7 +89,7 @@ export default function RenterHomeTeam() {
             <ContactCheck />
             <ImpostorReport homes={homes} />
           </>
-        )}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -202,53 +201,18 @@ function ContactCheck() {
         disabled={value.trim().length < 3 || check.isPending}
         onPress={() => check.mutate()}
       />
-      {check.data ? <Verdict result={check.data} /> : null}
+      {check.data ? <FormAlert {...verdictAlert(check.data)} /> : null}
       {check.error ? (
         <Text variant="callout" color="destructive">
-          {check.error instanceof ApiError ? check.error.message : 'Could not run the check.'}
+          {errorMessage(check.error, 'Could not run the check.')}
         </Text>
       ) : null}
     </Card>
   );
 }
 
-function Verdict({ result }: { result: ContactVerdict }) {
-  const { colors, spacing, radius } = useTheme();
-  if (result.verdict === 'INVALID') {
-    return (
-      <Text variant="callout" color="destructive">
-        {result.message}
-      </Text>
-    );
-  }
-  const good = result.verdict === 'VERIFIED';
-  const Icon = good ? CheckCircle2 : result.verdict === 'UNKNOWN' ? AlertTriangle : ShieldAlert;
-  const text =
-    result.verdict === 'VERIFIED'
-      ? `This is ${result.name}, ${result.role.toLowerCase()} for ${result.propertyTitle}. Even so, only pay rent in GetRentos.`
-      : result.verdict === 'NEVER_PAY_OUTSIDE'
-        ? 'Do not pay into any bank account, whoever asks. Your landlord and manager are paid by GetRentos; you pay only in GetRentos. If someone asked you to pay this account, report it below.'
-        : 'This is not anyone who manages your home. Do not pay them or share codes or documents. Report it below.';
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        gap: spacing.sm,
-        padding: spacing.md,
-        borderRadius: radius.md,
-        backgroundColor: good ? colors.successSubtle : colors.destructiveSubtle,
-      }}
-    >
-      <Icon size={18} color={good ? colors.success : colors.destructive} />
-      <Text variant="callout" style={{ flex: 1 }}>
-        {text}
-      </Text>
-    </View>
-  );
-}
-
 function ImpostorReport({ homes }: { homes: HomeTeam[] }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
@@ -274,19 +238,15 @@ function ImpostorReport({ homes }: { homes: HomeTeam[] }) {
       setSent(true);
       setOpen(false);
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send your report.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send your report.'), 'error'),
   });
 
   if (sent) {
     return (
-      <Card style={{ flexDirection: 'row', gap: spacing.sm }}>
-        <CheckCircle2 size={18} color={colors.success} />
-        <Text variant="callout" style={{ flex: 1 }}>
-          Thank you. GetRentos will look into it, and your landlord and manager have been warned
-          (without your name). If you already paid, report it to your bank now too.
-        </Text>
-      </Card>
+      <FormAlert
+        tone="success"
+        message="Thank you. GetRentos will look into it, and your landlord and manager have been warned (without your name). If you already paid, report it to your bank now too."
+      />
     );
   }
   if (!open) {

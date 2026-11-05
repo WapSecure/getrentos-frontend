@@ -9,13 +9,12 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
   ListSkeleton,
   NumberField,
   PressableScale,
   Price,
+  QueryState,
   SegmentedControl,
   Text,
   useTheme,
@@ -30,7 +29,7 @@ import {
   type DepositStatus,
 } from '@/lib/api/management';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
@@ -76,22 +75,28 @@ export default function Deposits() {
         }
       />
 
-      {list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
-      ) : (
+      <View style={{ paddingHorizontal: spacing.xl, marginBottom: spacing.lg }}>
+        <SegmentedControl
+          options={FILTERS}
+          value={filter}
+          onChange={setFilter}
+          accessibilityLabel="Filter by status"
+        />
+      </View>
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={3} variant="card" height={96} />}
+        isEmpty={(list.data?.items ?? []).length === 0}
+        empty={{
+          icon: <PiggyBank size={32} color={colors.mutedForeground} />,
+          title: 'No deposits',
+          description: "Record a tenant's security deposit against their signed lease.",
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={list.data?.items ?? []}
           keyExtractor={(d) => d.id}
-          ListHeaderComponent={
-            <View style={{ marginBottom: spacing.lg }}>
-              <SegmentedControl
-                options={FILTERS}
-                value={filter}
-                onChange={setFilter}
-                accessibilityLabel="Filter by status"
-              />
-            </View>
-          }
           renderItem={({ item }: { item: DepositListItem }) => <DepositRow deposit={item} />}
           contentContainerStyle={{
             paddingHorizontal: spacing.xl,
@@ -104,19 +109,8 @@ export default function Deposits() {
               tintColor={colors.mutedForeground}
             />
           }
-          ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={96} />
-            ) : (
-              <EmptyState
-                icon={<PiggyBank size={32} color={colors.mutedForeground} />}
-                title="No deposits"
-                description="Record a tenant's security deposit against their signed lease."
-              />
-            )
-          }
         />
-      )}
+      </QueryState>
 
       <Sheet open={recording} onClose={() => setRecording(false)} title="Record a deposit">
         <RecordDepositForm
@@ -196,8 +190,7 @@ function RecordDepositForm({ onDone }: { onDone: (id: string) => void }) {
       toast.show('Deposit recorded.', 'success');
       onDone(d.id);
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not record the deposit.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record the deposit.'), 'error'),
   });
 
   if (leases.isLoading) return <ListSkeleton rows={3} />;

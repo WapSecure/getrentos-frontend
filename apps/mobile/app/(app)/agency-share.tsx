@@ -2,7 +2,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Wallet } from 'lucide-react-native';
-import { EmptyState, ErrorState, Skeleton, useTheme } from '@getrentos/ui-native';
+import { QueryState, Skeleton, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyFirmApi } from '@/lib/api/agencyFirm';
 import { MyPayout } from '@/components/agency/AgentSelfPayout';
@@ -55,24 +55,26 @@ export default function AgencyShare() {
           />
         }
       >
-        {summary.isLoading ? (
-          <Skeleton height={220} />
-        ) : summary.isError || !s ? (
-          <ErrorState onRetry={() => summary.refetch()} />
-        ) : !s.agencyName && s.earned === 0 ? (
-          <EmptyState
-            icon={<Wallet size={32} color={colors.mutedForeground} />}
-            title="You’re not part of a firm"
-            description="When a management firm adds you as an agent, your share of its commissions shows here."
-          />
-        ) : (
-          <MyPayout
-            account={account.data ?? null}
-            summary={s}
-            history={history.data ?? []}
-            onChanged={refresh}
-          />
-        )}
+        <QueryState
+          query={summary}
+          skeleton={<Skeleton height={220} />}
+          isEmpty={!!s && !s.agencyName && s.earned === 0}
+          empty={{
+            icon: <Wallet size={32} color={colors.mutedForeground} />,
+            title: 'You’re not part of a firm',
+            description:
+              'When a management firm adds you as an agent, your share of its commissions shows here.',
+          }}
+        >
+          {s ? (
+            <MyPayout
+              account={account.data ?? null}
+              summary={s}
+              history={history.data ?? []}
+              onChanged={refresh}
+            />
+          ) : null}
+        </QueryState>
       </ScrollView>
     </View>
   );

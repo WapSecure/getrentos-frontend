@@ -10,9 +10,9 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   Price,
   PressableScale,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -99,72 +99,75 @@ export function SellerOffers({
         </ScrollView>
       </View>
 
-      {query.isError && all.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={96} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <EmptyState
-            icon={<FileSignature size={34} color={colors.mutedForeground} />}
-            title={filter === 'open' ? 'Nothing waiting on you' : 'No offers here'}
-            description={
-              all.length
-                ? 'Try another filter.'
-                : 'When buyers make offers on your listings, they appear here.'
-            }
-          />
-        </ScrollView>
-      ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(o) => o.id}
-          contentContainerStyle={{
-            padding: spacing.xl,
-            paddingTop: spacing.md,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          refreshControl={refresh}
-          renderItem={({ item: o }: { item: OwnerOffer }) => (
-            <PressableScale
-              onPress={() => router.push(`/(app)/owner-offer/${o.id}?side=${side}`)}
-              haptic={false}
-              accessibilityRole="button"
-              accessibilityLabel={`${o.buyerName} offered ${Math.round(o.offerAmount).toLocaleString('en-NG')} naira for ${o.propertyName}, ${offerGap(o.offerAmount, o.askingPrice)}, ${OWNER_OFFER_LABEL[o.status]}`}
-            >
-              <Card elevated style={{ gap: spacing.xs }}>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text variant="bodyStrong" numberOfLines={1}>
-                      {o.propertyName}
-                    </Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {o.buyerName} · {formatDate(o.submittedAt, 'short')}
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={96} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg }}
+      >
+        {items.length === 0 ? (
+          // Kept in a scroll view so pull-to-refresh still works with nothing to show.
+          <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
+            <EmptyState
+              icon={<FileSignature size={34} color={colors.mutedForeground} />}
+              title={filter === 'open' ? 'Nothing waiting on you' : 'No offers here'}
+              description={
+                all.length
+                  ? 'Try another filter.'
+                  : 'When buyers make offers on your listings, they appear here.'
+              }
+            />
+          </ScrollView>
+        ) : (
+          <FlashList
+            data={items}
+            keyExtractor={(o) => o.id}
+            contentContainerStyle={{
+              padding: spacing.xl,
+              paddingTop: spacing.md,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+            refreshControl={refresh}
+            renderItem={({ item: o }: { item: OwnerOffer }) => (
+              <PressableScale
+                onPress={() => router.push(`/(app)/owner-offer/${o.id}?side=${side}`)}
+                haptic={false}
+                accessibilityRole="button"
+                accessibilityLabel={`${o.buyerName} offered ${Math.round(o.offerAmount).toLocaleString('en-NG')} naira for ${o.propertyName}, ${offerGap(o.offerAmount, o.askingPrice)}, ${OWNER_OFFER_LABEL[o.status]}`}
+              >
+                <Card elevated style={{ gap: spacing.xs }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {o.propertyName}
+                      </Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {o.buyerName} · {formatDate(o.submittedAt, 'short')}
+                      </Text>
+                    </View>
+                    <Badge label={OWNER_OFFER_LABEL[o.status]} tone={OWNER_OFFER_TONE[o.status]} />
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
+                    <Price amount={o.offerAmount} variant="subheading" />
+                    <Text
+                      variant="caption"
+                      color={o.offerAmount < o.askingPrice ? 'warning' : 'success'}
+                    >
+                      {offerGap(o.offerAmount, o.askingPrice)}
                     </Text>
                   </View>
-                  <Badge label={OWNER_OFFER_LABEL[o.status]} tone={OWNER_OFFER_TONE[o.status]} />
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
-                  <Price amount={o.offerAmount} variant="subheading" />
-                  <Text
-                    variant="caption"
-                    color={o.offerAmount < o.askingPrice ? 'warning' : 'success'}
-                  >
-                    {offerGap(o.offerAmount, o.askingPrice)}
-                  </Text>
-                </View>
-              </Card>
-            </PressableScale>
-          )}
-        />
-      )}
+                </Card>
+              </PressableScale>
+            )}
+          />
+        )}
+      </QueryState>
     </View>
   );
 }

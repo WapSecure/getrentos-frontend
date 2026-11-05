@@ -9,10 +9,10 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
   ListSkeleton,
   PressableScale,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -85,9 +85,12 @@ export default function OwnerLandSales() {
         subtitle="What buyers have paid, what is owed, what waits on you"
         onBack={() => goBack()}
       />
-      {list.isError && !list.data ? (
-        <ErrorState title="Purchases could not be loaded" onRetry={() => list.refetch()} />
-      ) : (
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={3} variant="card" height={110} />}
+        errorTitle="Purchases could not be loaded"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={purchases}
           keyExtractor={(p) => p.id}
@@ -167,23 +170,20 @@ export default function OwnerLandSales() {
               tintColor={colors.mutedForeground}
             />
           }
+          // The filters live in the header, so an empty result stays inside the list.
           ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={110} />
-            ) : (
-              <EmptyState
-                icon={<ReceiptText size={32} color={colors.mutedForeground} />}
-                title={filtered ? 'No purchases match' : 'No plot purchases yet'}
-                description={
-                  filtered
-                    ? 'Try another status, estate or search.'
-                    : 'When a buyer reserves a plot on one of your estates, it shows here.'
-                }
-              />
-            )
+            <EmptyState
+              icon={<ReceiptText size={32} color={colors.mutedForeground} />}
+              title={filtered ? 'No purchases match' : 'No plot purchases yet'}
+              description={
+                filtered
+                  ? 'Try another status, estate or search.'
+                  : 'When a buyer reserves a plot on one of your estates, it shows here.'
+              }
+            />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

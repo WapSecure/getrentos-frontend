@@ -7,13 +7,12 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
+  QueryState,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landLayoutApi, type SellerAnalytics } from '@/lib/api/landLayout';
-import { ApiError } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -38,53 +37,51 @@ export default function OwnerLandAnalytics() {
         subtitle="Listing interest and market position"
         onBack={() => goBack()}
       />
-      {!d ? (
-        q.isError ? (
-          <ErrorState
-            title="Analytics are unavailable"
-            description={q.error instanceof ApiError ? q.error.message : undefined}
-            onRetry={() => q.refetch()}
-          />
-        ) : (
+      <QueryState
+        query={q}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl }}>
             <DetailSkeleton />
           </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={q.isRefetching}
-              onRefresh={() => q.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          {d.listings.length === 0 ? (
-            <Card style={{ gap: spacing.sm }}>
-              <Text variant="bodyStrong">No sale listing yet</Text>
-              <Text variant="callout" color="mutedForeground">
-                Once this land is listed for sale, views, saves, viewings and offers show here.
-              </Text>
-              <Button
-                label="Open the parcel"
-                size="sm"
-                variant="secondary"
-                onPress={() => router.push(`/(app)/owner-land-parcel/${propertyId}`)}
-                style={{ alignSelf: 'flex-start' }}
+        }
+        errorTitle="Analytics are unavailable"
+      >
+        {d ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={q.isRefetching}
+                onRefresh={() => q.refetch()}
+                tintColor={colors.mutedForeground}
               />
-            </Card>
-          ) : (
-            d.listings.map((l) => <ListingCard key={l.listingId} listing={l} />)
-          )}
-          {d.market ? <MarketPosition market={d.market} /> : null}
-        </ScrollView>
-      )}
+            }
+          >
+            {d.listings.length === 0 ? (
+              <Card style={{ gap: spacing.sm }}>
+                <Text variant="bodyStrong">No sale listing yet</Text>
+                <Text variant="callout" color="mutedForeground">
+                  Once this land is listed for sale, views, saves, viewings and offers show here.
+                </Text>
+                <Button
+                  label="Open the parcel"
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => router.push(`/(app)/owner-land-parcel/${propertyId}`)}
+                  style={{ alignSelf: 'flex-start' }}
+                />
+              </Card>
+            ) : (
+              d.listings.map((l) => <ListingCard key={l.listingId} listing={l} />)
+            )}
+            {d.market ? <MarketPosition market={d.market} /> : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

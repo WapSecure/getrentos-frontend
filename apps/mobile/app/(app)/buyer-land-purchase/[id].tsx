@@ -11,9 +11,9 @@ import {
   Card,
   DetailSkeleton,
   Divider,
-  ErrorState,
   FormAlert,
   Price,
+  QueryState,
   SegmentedControl,
   Text,
   TextField,
@@ -38,7 +38,7 @@ import {
   type SaleDocument,
 } from '@/lib/api/landBuyer';
 import { formatBps, PERFECTION_OWNER, PERFECTION_STEP, type Perfection } from '@/lib/api/landSales';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { Sheet } from '@/components/Sheet';
@@ -46,8 +46,6 @@ import { BuyerConditions, BuyerMilestones, HeldNote } from '@/components/land/Bu
 import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 type Tab = 'schedule' | 'conditions' | 'conveyance' | 'title' | 'statement';
 
@@ -72,7 +70,7 @@ export default function BuyerLandPurchase() {
     qc.invalidateQueries({ queryKey: qk.buyerLand.all });
     toast.show(message, 'success');
   };
-  const fail = (fallback: string) => (e: unknown) => toast.show(errorText(e, fallback), 'error');
+  const fail = (fallback: string) => (e: unknown) => toast.show(errorMessage(e, fallback), 'error');
 
   const confirm = useMutation({
     mutationFn: (key: string) => landBuyerApi.confirmMilestone(id, key),
@@ -123,123 +121,118 @@ export default function BuyerLandPurchase() {
         }
         onBack={() => goBack()}
       />
-      {!p ? (
-        q.isError ? (
-          <ErrorState
-            title="This purchase did not load"
-            description={errorText(q.error, '')}
-            onRetry={() => q.refetch()}
-          />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={q.isRefetching}
-              onRefresh={() => q.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              gap: spacing.sm,
-              alignItems: 'center',
+      <QueryState
+        query={q}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This purchase did not load"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {p ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
             }}
+            refreshControl={
+              <RefreshControl
+                refreshing={q.isRefetching}
+                onRefresh={() => q.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
           >
-            <Badge
-              label={BUYER_PURCHASE_STATUS[p.status].label}
-              tone={BUYER_PURCHASE_STATUS[p.status].tone}
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: spacing.sm,
+                alignItems: 'center',
+              }}
+            >
+              <Badge
+                label={BUYER_PURCHASE_STATUS[p.status].label}
+                tone={BUYER_PURCHASE_STATUS[p.status].tone}
+              />
+              {['ACTIVE', 'PAID_IN_FULL', 'COMPLETED'].includes(p.status) ? (
+                <Button
+                  label="Watch this plot"
+                  size="sm"
+                  variant="ghost"
+                  onPress={() => router.push('/(app)/land-watch')}
+                />
+              ) : null}
+            </View>
+            <Banners p={p} />
+            <PayNext p={p} onPaid={() => qc.invalidateQueries({ queryKey: qk.buyerLand.all })} />
+            <PriceCard p={p} />
+            <SegmentedControl
+              options={tabs}
+              value={tab}
+              onChange={setTab}
+              accessibilityLabel="Purchase section"
             />
-            {['ACTIVE', 'PAID_IN_FULL', 'COMPLETED'].includes(p.status) ? (
-              <Button
-                label="Watch this plot"
-                size="sm"
-                variant="ghost"
-                onPress={() => router.push('/(app)/land-watch')}
-              />
-            ) : null}
-          </View>
-          <Banners p={p} />
-          <PayNext p={p} onPaid={() => qc.invalidateQueries({ queryKey: qk.buyerLand.all })} />
-          <PriceCard p={p} />
-          <SegmentedControl
-            options={tabs}
-            value={tab}
-            onChange={setTab}
-            accessibilityLabel="Purchase section"
-          />
-          {tab === 'schedule' ? (
-            <Schedule p={p} />
-          ) : tab === 'conditions' ? (
-            <Card>
-              <BuyerConditions
-                conditions={p.conditions ?? []}
-                checklist={p.closingChecklist}
-                busyKey={settle.isPending ? (settle.variables?.key ?? null) : null}
-                onSettle={(key, how) => settle.mutate({ key, how })}
-              />
-            </Card>
-          ) : tab === 'conveyance' ? (
-            <View style={{ gap: spacing.md }}>
-              <CoApprovalCard deal={{ kind: 'purchase', id }} />
-              <HeldNote text="GetRentos holds your payments. Each step you confirm releases its share to the developer, never more than you have paid. Confirm in order, and only once you hold the document or have been shown the plot. Allocation, the deed and the survey in your name come after full payment." />
+            {tab === 'schedule' ? (
+              <Schedule p={p} />
+            ) : tab === 'conditions' ? (
               <Card>
-                <BuyerMilestones
-                  milestones={p.milestones}
-                  contractOpen={CONFIRMABLE.has(p.status)}
-                  showRelease
-                  busyKey={
-                    confirm.isPending
-                      ? (confirm.variables ?? null)
-                      : dispute.isPending
-                        ? (dispute.variables?.key ?? null)
-                        : null
-                  }
-                  onConfirm={(m) => confirm.mutate(m.key)}
-                  onDispute={(m, reason) => dispute.mutate({ key: m.key, reason })}
+                <BuyerConditions
+                  conditions={p.conditions ?? []}
+                  checklist={p.closingChecklist}
+                  busyKey={settle.isPending ? (settle.variables?.key ?? null) : null}
+                  onSettle={(key, how) => settle.mutate({ key, how })}
                 />
               </Card>
-            </View>
-          ) : tab === 'title' && p.perfection ? (
-            <TitlePerfection perfection={p.perfection} />
-          ) : (
-            <StatementView id={id} />
-          )}
-          <Documents p={p} />
-          {CANCELLABLE.has(p.status) ? (
-            <Card style={{ gap: spacing.sm }}>
-              <Text variant="bodyStrong">Cancel this purchase</Text>
-              <Text variant="callout" color="mutedForeground">
-                {p.canCancelInFull
-                  ? `Refund if you cancel now: ${formatNaira(p.amountPaid)}, everything you paid, because a condition was not met.`
-                  : (() => {
-                      const r = buyerRefundPreview(p);
-                      return `Refund if you cancel now: ${formatNaira(r.refund)} after a ${formatNaira(r.charge)} forfeiture. Late fees are not refunded.`;
-                    })()}
-              </Text>
-              <Button
-                label="Cancel this purchase"
-                size="sm"
-                variant="destructive"
-                onPress={() => setCancelling(true)}
-                style={{ alignSelf: 'flex-start' }}
-              />
-            </Card>
-          ) : null}
-        </ScrollView>
-      )}
+            ) : tab === 'conveyance' ? (
+              <View style={{ gap: spacing.md }}>
+                <CoApprovalCard deal={{ kind: 'purchase', id }} />
+                <HeldNote text="GetRentos holds your payments. Each step you confirm releases its share to the developer, never more than you have paid. Confirm in order, and only once you hold the document or have been shown the plot. Allocation, the deed and the survey in your name come after full payment." />
+                <Card>
+                  <BuyerMilestones
+                    milestones={p.milestones}
+                    contractOpen={CONFIRMABLE.has(p.status)}
+                    showRelease
+                    busyKey={
+                      confirm.isPending
+                        ? (confirm.variables ?? null)
+                        : dispute.isPending
+                          ? (dispute.variables?.key ?? null)
+                          : null
+                    }
+                    onConfirm={(m) => confirm.mutate(m.key)}
+                    onDispute={(m, reason) => dispute.mutate({ key: m.key, reason })}
+                  />
+                </Card>
+              </View>
+            ) : tab === 'title' && p.perfection ? (
+              <TitlePerfection perfection={p.perfection} />
+            ) : (
+              <StatementView id={id} />
+            )}
+            <Documents p={p} />
+            {CANCELLABLE.has(p.status) ? (
+              <Card style={{ gap: spacing.sm }}>
+                <Text variant="bodyStrong">Cancel this purchase</Text>
+                <Text variant="callout" color="mutedForeground">
+                  {p.canCancelInFull
+                    ? `Refund if you cancel now: ${formatNaira(p.amountPaid)}, everything you paid, because a condition was not met.`
+                    : (() => {
+                        const r = buyerRefundPreview(p);
+                        return `Refund if you cancel now: ${formatNaira(r.refund)} after a ${formatNaira(r.charge)} forfeiture. Late fees are not refunded.`;
+                      })()}
+                </Text>
+                <Button
+                  label="Cancel this purchase"
+                  size="sm"
+                  variant="destructive"
+                  onPress={() => setCancelling(true)}
+                  style={{ alignSelf: 'flex-start' }}
+                />
+              </Card>
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
       <Sheet open={cancelling} onClose={() => setCancelling(false)} title="Cancel this purchase?">
         {p ? <CancelForm p={p} onDone={() => setCancelling(false)} /> : null}
       </Sheet>
@@ -288,7 +281,7 @@ function PayNext({ p, onPaid }: { p: BuyerPurchaseDetail; onPaid: () => void }) 
       }
       onPaid();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not start the payment.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not start the payment.'), 'error'),
   });
   const payable = PAYABLE.has(p.status) && !!p.nextDue;
   return (
@@ -501,49 +494,52 @@ function StatementView({ id }: { id: string }) {
     queryFn: () => landBuyerApi.statement(id),
   });
   const s = q.data;
-  if (!s) return q.isError ? <ErrorState onRetry={() => q.refetch()} /> : <DetailSkeleton />;
   const signed = (n: number) => (n < 0 ? `${formatNaira(-n)} credit` : formatNaira(n));
   return (
-    <Card style={{ gap: spacing.md }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
-        {(
-          [
-            ['Charged to date', formatNaira(s.totalCharged)],
-            ['Paid', formatNaira(s.totalPaid)],
-            [s.balance < 0 ? 'Paid ahead' : 'Due now', formatNaira(Math.abs(s.balance))],
-            ['Left on contract', formatNaira(s.outstandingBalance)],
-          ] as const
-        ).map(([label, value]) => (
-          <View key={label} style={{ width: '50%', gap: 2 }}>
-            <Text variant="caption" color="mutedForeground">
-              {label}
-            </Text>
-            <Text variant="bodyStrong">{value}</Text>
+    <QueryState query={q} skeleton={<DetailSkeleton />}>
+      {s ? (
+        <Card style={{ gap: spacing.md }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
+            {(
+              [
+                ['Charged to date', formatNaira(s.totalCharged)],
+                ['Paid', formatNaira(s.totalPaid)],
+                [s.balance < 0 ? 'Paid ahead' : 'Due now', formatNaira(Math.abs(s.balance))],
+                ['Left on contract', formatNaira(s.outstandingBalance)],
+              ] as const
+            ).map(([label, value]) => (
+              <View key={label} style={{ width: '50%', gap: 2 }}>
+                <Text variant="caption" color="mutedForeground">
+                  {label}
+                </Text>
+                <Text variant="bodyStrong">{value}</Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
-      {s.entries.length === 0 ? (
-        <Text variant="callout" color="mutedForeground">
-          Nothing has been charged or paid yet.
-        </Text>
-      ) : (
-        s.entries.map((e, i) => (
-          <View key={`${e.date}-${i}`} style={{ gap: 2 }}>
-            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-              <Text variant="callout" style={{ flex: 1 }}>
-                {e.description}
-              </Text>
-              <Text variant="callout" style={{ fontWeight: '600' }}>
-                {e.debit ? formatNaira(e.debit) : `− ${formatNaira(e.credit)}`}
-              </Text>
-            </View>
-            <Text variant="caption" color="mutedForeground">
-              {formatDate(e.date, 'short')} · balance {signed(e.balance)}
+          {s.entries.length === 0 ? (
+            <Text variant="callout" color="mutedForeground">
+              Nothing has been charged or paid yet.
             </Text>
-          </View>
-        ))
-      )}
-    </Card>
+          ) : (
+            s.entries.map((e, i) => (
+              <View key={`${e.date}-${i}`} style={{ gap: 2 }}>
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Text variant="callout" style={{ flex: 1 }}>
+                    {e.description}
+                  </Text>
+                  <Text variant="callout" style={{ fontWeight: '600' }}>
+                    {e.debit ? formatNaira(e.debit) : `− ${formatNaira(e.credit)}`}
+                  </Text>
+                </View>
+                <Text variant="caption" color="mutedForeground">
+                  {formatDate(e.date, 'short')} · balance {signed(e.balance)}
+                </Text>
+              </View>
+            ))
+          )}
+        </Card>
+      ) : null}
+    </QueryState>
   );
 }
 
@@ -615,7 +611,7 @@ function CancelForm({ p, onDone }: { p: BuyerPurchaseDetail; onDone: () => void 
       toast.show(`Purchase cancelled. ${refundSentence(detail, formatNaira)}`, 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not cancel the purchase.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not cancel the purchase.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>

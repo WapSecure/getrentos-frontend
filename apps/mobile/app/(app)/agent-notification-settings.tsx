@@ -1,20 +1,19 @@
 import { ScrollView, View } from 'react-native';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   Divider,
-  ErrorState,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi, type AgentNotificationPreference } from '@/lib/api/agent';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -35,23 +34,14 @@ export default function AgentNotificationSettings() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const toast = useToast();
   const key = qk.agent.notificationPreferences;
   const query = useQuery({ queryKey: key, queryFn: agentApi.notificationPreferences });
 
-  const save = useMutation({
+  const save = useOptimisticMutation({
     mutationFn: (next: AgentNotificationPreference[]) =>
       agentApi.updateNotificationPreferences(next),
-    onMutate: async (next) => {
-      await qc.cancelQueries({ queryKey: key });
-      const previous = qc.getQueryData<AgentNotificationPreference[]>(key);
-      qc.setQueryData(key, next);
-      return { previous };
-    },
-    onError: (err, _next, ctx) => {
-      if (ctx?.previous) qc.setQueryData(key, ctx.previous);
-      toast.show(err instanceof ApiError ? err.message : 'Could not save that.', 'error');
-    },
+    patches: () => [{ queryKey: key, update: (_old, next) => next }],
+    errorMessage: 'Could not save that.',
     onSuccess: (saved) => qc.setQueryData(key, saved),
   });
 
@@ -76,14 +66,10 @@ export default function AgentNotificationSettings() {
         subtitle="What buzzes your phone, and what’s emailed"
         onBack={() => goBack()}
       />
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !query.data ? (
-        <Skeleton height={320} radius={radius.lg} />
-      ) : (
+      <QueryState query={query} skeleton={<Skeleton height={320} radius={radius.lg} />}>
         <>
           <Card elevated padding="none">
-            {query.data.map((p, i) => {
+            {(query.data ?? []).map((p, i) => {
               const copy = COPY[p.id] ?? { label: p.id, hint: '' };
               return (
                 <View key={p.id}>
@@ -111,7 +97,7 @@ export default function AgentNotificationSettings() {
             notifications are allowed for GetRentos in your phone’s settings.
           </Text>
         </>
-      )}
+      </QueryState>
     </ScrollView>
   );
 }

@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Check, CheckCircle2, FileSpreadsheet } from 'lucide-react-native';
+import { View } from 'react-native';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, CheckCircle2, FileSpreadsheet } from 'lucide-react-native';
 import {
   Button,
   DateField,
   FormAlert,
   Text,
-  TextField,
   TimeField,
   toISODate,
   useTheme,
@@ -22,16 +21,18 @@ import {
   deadlineIso,
   importSummary,
   type CsvImportResult,
+  type Household,
   type GuestListImportResult,
 } from '@/lib/api/estateManager';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickCsv } from '@/lib/filePicker';
-import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { CSV_MIME, shareTextFile } from '@/lib/shareFile';
+import { FilePickRow } from '@/components/forms/FilePickRow';
+import { HouseholdPicker } from '@/components/estate/HouseholdPicker';
 
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
-
-function FilePick({
+/** A CSV slot: the shared file row, wired to the CSV picker. */
+function CsvPick({
   file,
   onPick,
   label,
@@ -40,36 +41,17 @@ function FilePick({
   onPick: (f: PickedFile) => void;
   label: string;
 }) {
-  const { colors, spacing, radius } = useTheme();
   return (
-    <Pressable
-      onPress={async () => {
+    <FilePickRow
+      label={label}
+      file={file}
+      icon={FileSpreadsheet}
+      emptyText="Choose a CSV file"
+      onPick={async () => {
         const f = await pickCsv();
         if (f) onPick(f);
       }}
-      accessibilityRole="button"
-      accessibilityLabel={file ? `${label}: ${file.name}` : `${label}: choose a CSV file`}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        padding: spacing.md,
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderStyle: file ? 'solid' : 'dashed',
-        borderColor: file ? colors.success : colors.border,
-        backgroundColor: file ? colors.successSubtle : colors.card,
-      }}
-    >
-      {file ? (
-        <Check size={18} color={colors.success} />
-      ) : (
-        <FileSpreadsheet size={18} color={colors.mutedForeground} />
-      )}
-      <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
-        {file ? file.name : 'Choose a CSV file'}
-      </Text>
-    </Pressable>
+    />
   );
 }
 
@@ -81,12 +63,9 @@ function TemplateLink({ csv, fileName }: { csv: string; fileName: string }) {
       size="sm"
       variant="ghost"
       onPress={() =>
-        shareDownloadedFile(
-          new TextEncoder().encode(csv),
-          fileName,
-          CSV_MIME,
-          'CSV template'
-        ).catch(() => toast.show('Could not open the template.', 'error'))
+        shareTextFile(csv, fileName, CSV_MIME, 'CSV template').catch(() =>
+          toast.show('Could not open the template.', 'error')
+        )
       }
       style={{ alignSelf: 'flex-start' }}
     />
@@ -187,9 +166,9 @@ function ImportHouseholds({ estateId, onDone }: { estateId: string; onDone: () =
         contactEmail. The first row is read as headings.
       </Text>
       <TemplateLink csv={HOUSEHOLDS_CSV_TEMPLATE} fileName="households-template.csv" />
-      <FilePick file={file} onPick={setFile} label="Households file" />
+      <CsvPick file={file} onPick={setFile} label="Households file" />
       {run.isError ? (
-        <FormAlert message={errorText(run.error, 'That file could not be read.')} />
+        <FormAlert message={errorMessage(run.error, 'That file could not be read.')} />
       ) : null}
       <Button
         label="Import"
@@ -218,24 +197,14 @@ export function GuestListSheet({
 }
 
 function GuestList({ estateId, onDone }: { estateId: string; onDone: () => void }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [household, setHousehold] = useState<{ id: string; label: string } | null>(null);
+  const [household, setHousehold] = useState<Household | null>(null);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [file, setFile] = useState<PickedFile | null>(null);
   const [now] = useState(() => Date.now());
   const today = toISODate(new Date(now));
-  const homes = useQuery({
-    queryKey: [...qk.estateManager.households(estateId, search.trim(), 'ACTIVE'), 'guest-list'],
-    queryFn: () =>
-      estateManagerApi.households(estateId, {
-        search: search.trim() || undefined,
-        status: 'ACTIVE',
-      }),
-    enabled: !household,
-  });
   const deadline = deadlineIso(date, time);
   const expiresAt = deadline && Date.parse(deadline) > now ? deadline : null;
   const run = useMutation({
@@ -267,45 +236,12 @@ function GuestList({ estateId, onDone }: { estateId: string; onDone: () => void 
         the list does not admit anyone: each guest still shows their own pass.
       </Text>
 
-      <Text variant="callout" style={{ fontWeight: '600' }}>
-        Whose guests are they?
-      </Text>
-      {household ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text variant="callout" style={{ flex: 1 }}>
-            {household.label}
-          </Text>
-          <Button label="Change" size="sm" variant="ghost" onPress={() => setHousehold(null)} />
-        </View>
-      ) : (
-        <View style={{ gap: spacing.xs }}>
-          <TextField
-            placeholder="Search unit or resident"
-            accessibilityLabel="Search households"
-            value={search}
-            onChangeText={setSearch}
-            autoCapitalize="none"
-          />
-          {(homes.data?.items ?? []).slice(0, 6).map((h) => (
-            <Pressable
-              key={h.id}
-              onPress={() =>
-                setHousehold({ id: h.id, label: `${h.unitLabel} · ${h.residentName}` })
-              }
-              accessibilityRole="button"
-              style={{
-                padding: spacing.sm,
-                borderRadius: radius.md,
-                backgroundColor: colors.secondary,
-              }}
-            >
-              <Text variant="callout">
-                {h.unitLabel} · {h.residentName}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
+      <HouseholdPicker
+        estateId={estateId}
+        value={household}
+        onChange={setHousehold}
+        label="Whose guests are they?"
+      />
 
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <View style={{ flex: 1 }}>
@@ -325,9 +261,9 @@ function GuestList({ estateId, onDone }: { estateId: string; onDone: () => void 
         A CSV with a name column, and optional phone and purpose columns.
       </Text>
       <TemplateLink csv={GUEST_LIST_CSV_TEMPLATE} fileName="guest-list-template.csv" />
-      <FilePick file={file} onPick={setFile} label="Guest list" />
+      <CsvPick file={file} onPick={setFile} label="Guest list" />
       {run.isError ? (
-        <FormAlert message={errorText(run.error, 'That list could not be read.')} />
+        <FormAlert message={errorMessage(run.error, 'That list could not be read.')} />
       ) : null}
       <Button
         label="Add guests"

@@ -10,9 +10,9 @@ import {
   DetailSkeleton,
   Divider,
   EmptyState,
-  ErrorState,
   NumberField,
   Price,
+  QueryState,
   SwitchRow,
   Text,
   useTheme,
@@ -28,7 +28,7 @@ import {
   type PayoutRecord,
   type PayoutSchedule,
 } from '@/lib/api/landlordFinance';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -55,35 +55,33 @@ export default function LandlordAutoPayouts() {
         subtitle="Your held balance, paid out on a schedule"
         onBack={() => goBack()}
       />
-      {!query.data ? (
-        query.isError ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          {/* Keyed so a saved schedule from elsewhere reseeds the form. */}
-          <Settings key={query.data.schedule?.nextRunAt ?? 'none'} data={query.data} />
-          <Recent records={query.data.recent} />
-        </ScrollView>
-      )}
+      <QueryState
+        query={query}
+        skeleton={<DetailSkeleton />}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {query.data ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            {/* Keyed so a saved schedule from elsewhere reseeds the form. */}
+            <Settings key={query.data.schedule?.nextRunAt ?? 'none'} data={query.data} />
+            <Recent records={query.data.recent} />
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }
@@ -107,8 +105,7 @@ function Settings({ data }: { data: PayoutSchedule }) {
       qc.setQueryData(qk.landlord.payoutSchedule, updated);
       toast.show('Automatic payouts updated.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save these settings.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save these settings.'), 'error'),
   });
 
   return (

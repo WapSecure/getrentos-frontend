@@ -22,13 +22,11 @@ import {
   PRE_PURCHASE_DISCLAIMER,
   type Deal,
 } from '@/lib/api/landBuyerExtras';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDateTime } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 
 type Target = { listingId: string } | { plotId: string };
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** Ask the seller for a live video tour of a listing or an estate plot. */
 export function RequestTour({
@@ -68,7 +66,7 @@ export function RequestTour({
       onDone();
       router.push('/(app)/buyer-land-tours');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not request the tour.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not request the tour.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>
@@ -132,7 +130,7 @@ export function RequestInspection({
       onDone();
       router.push('/(app)/buyer-land-inspections');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not commission the inspection.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not commission the inspection.'), 'error'),
   });
   const toggle = (v: string) =>
     setFocus((f) => (f.includes(v) ? f.filter((x) => x !== v) : [...f, v]));
@@ -197,7 +195,7 @@ export function CoApprovalCard({ deal }: { deal: Deal }) {
     qc.invalidateQueries({ queryKey: key });
     toast.show(message, 'success');
   };
-  const fail = (e: unknown) => toast.show(errorText(e, 'That did not go through.'), 'error');
+  const fail = (e: unknown) => toast.show(errorMessage(e, 'That did not go through.'), 'error');
   const on = useMutation({
     mutationFn: () => landBuyerExtrasApi.turnOnCoApproval(deal, rep!),
     onSuccess: done('Two-person approval is on.'),

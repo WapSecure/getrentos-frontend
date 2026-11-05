@@ -7,11 +7,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageSquareText, Plus } from 'lucide-react-native';
 import {
   Button,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -24,7 +23,7 @@ import {
   type QueryCategory,
   type QuerySummary,
 } from '@/lib/api/management';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { QueryRow } from '@/components/management/QueryRow';
@@ -63,9 +62,18 @@ export default function ManagerQueries() {
         }
       />
 
-      {list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
-      ) : (
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={4} />}
+        isEmpty={(list.data ?? []).length === 0}
+        empty={{
+          icon: <MessageSquareText size={32} color={colors.mutedForeground} />,
+          title: 'No questions yet',
+          description: 'Ask whoever manages your property about rent, statements or repairs.',
+          action: <Button label="Ask a question" onPress={() => setAsking(true)} />,
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={list.data ?? []}
           keyExtractor={(q) => q.id}
@@ -81,20 +89,8 @@ export default function ManagerQueries() {
               tintColor={colors.mutedForeground}
             />
           }
-          ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={4} />
-            ) : (
-              <EmptyState
-                icon={<MessageSquareText size={32} color={colors.mutedForeground} />}
-                title="No questions yet"
-                description="Ask whoever manages your property about rent, statements or repairs."
-                action={<Button label="Ask a question" onPress={() => setAsking(true)} />}
-              />
-            )
-          }
         />
-      )}
+      </QueryState>
 
       <Sheet open={asking} onClose={() => setAsking(false)} title="Ask your manager">
         <AskForm
@@ -143,8 +139,7 @@ function AskForm({ onDone }: { onDone: (id: string) => void }) {
       qc.invalidateQueries({ queryKey: ['management', 'queries'] });
       onDone(q.id);
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send your question.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send your question.'), 'error'),
   });
 
   if (mandates.isLoading) return <ListSkeleton rows={3} />;

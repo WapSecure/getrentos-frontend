@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClipboardList, Plus } from 'lucide-react-native';
@@ -11,10 +11,10 @@ import {
   Card,
   DateField,
   EmptyState,
-  ErrorState,
   IconButton,
   ListSkeleton,
   PressableScale,
+  QueryState,
   SegmentedControl,
   Text,
   TextField,
@@ -32,7 +32,7 @@ import {
   type InspectionStatus,
   type InspectionType,
 } from '@/lib/api/management';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { Sheet } from '@/components/Sheet';
@@ -62,6 +62,8 @@ export default function PropertyInspections() {
   const list = useQuery({
     queryKey: qk.management.inspections(filter),
     queryFn: () => managementApi.inspections(filter === 'all' ? undefined : filter, 1, 50),
+    // Keep the list (and its filter header) on screen while another filter loads.
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -80,9 +82,11 @@ export default function PropertyInspections() {
         }
       />
 
-      {list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
-      ) : (
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={3} variant="card" height={96} />}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={list.data?.items ?? []}
           keyExtractor={(i) => i.id}
@@ -108,20 +112,17 @@ export default function PropertyInspections() {
               tintColor={colors.mutedForeground}
             />
           }
+          // The status filter lives in the header, so an empty result stays inside the list.
           ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={96} />
-            ) : (
-              <EmptyState
-                icon={<ClipboardList size={32} color={colors.mutedForeground} />}
-                title="No inspections"
-                description="Record a property's condition with photos, room by room."
-                action={<Button label="New inspection" onPress={() => setCreating(true)} />}
-              />
-            )
+            <EmptyState
+              icon={<ClipboardList size={32} color={colors.mutedForeground} />}
+              title="No inspections"
+              description="Record a property's condition with photos, room by room."
+              action={<Button label="New inspection" onPress={() => setCreating(true)} />}
+            />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={creating} onClose={() => setCreating(false)} title="New inspection">
         <CreateInspectionForm
@@ -187,8 +188,7 @@ function CreateInspectionForm({ onDone }: { onDone: (id: string) => void }) {
       qc.invalidateQueries({ queryKey: ['management', 'inspections'] });
       onDone(created.id);
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not create the inspection.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not create the inspection.'), 'error'),
   });
 
   if (homes.isLoading) return <ListSkeleton rows={3} />;

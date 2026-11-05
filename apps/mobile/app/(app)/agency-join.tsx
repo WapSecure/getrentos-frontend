@@ -16,7 +16,7 @@ import {
 } from '@getrentos/ui-native';
 import { agencyFirmApi, tokenFrom } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -94,8 +94,7 @@ function Invitation({ token, onReset }: { token: string; onReset: () => void }) 
       router.replace('/(app)/(manager)');
       toast.show(`Welcome to ${preview.data?.firmName ?? 'the firm'}.`, 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not join the firm.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not join the firm.'), 'error'),
   });
 
   if (preview.isLoading) return <DetailSkeleton />;

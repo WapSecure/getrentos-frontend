@@ -10,10 +10,10 @@ import {
   Card,
   DetailSkeleton,
   Divider,
-  ErrorState,
   FormAlert,
   IconButton,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -27,7 +27,7 @@ import {
   type DepositTreatment,
   type Handover,
 } from '@/lib/api/managementTransfers';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { shareDownloadedFile } from '@/lib/shareFile';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
@@ -38,8 +38,6 @@ const TREATMENTS = (Object.keys(DEPOSIT_TREATMENT_LABEL) as DepositTreatment[]).
   value: t,
   label: DEPOSIT_TREATMENT_LABEL[t],
 }));
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * The handover pack for a change of manager: the property's state when the
@@ -69,7 +67,7 @@ export default function HandoverScreen() {
     qc.invalidateQueries({ queryKey: ['management-transfers'] });
     toast.show(msg, 'success');
   };
-  const fail = (e: unknown) => toast.show(errorText(e, 'That did not go through.'), 'error');
+  const fail = (e: unknown) => toast.show(errorMessage(e, 'That did not go through.'), 'error');
 
   const h = q.data;
   const pack = h?.pack;
@@ -125,13 +123,13 @@ export default function HandoverScreen() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <DetailScreenHeader eyebrow="Change of manager" title="Handover" onBack={() => goBack()} />
-        {q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )}
+        <QueryState
+          query={q}
+          skeleton={<DetailSkeleton />}
+          style={{ paddingHorizontal: spacing.xl }}
+        >
+          {null}
+        </QueryState>
       </View>
     );
   }
@@ -189,257 +187,262 @@ export default function HandoverScreen() {
           />
         }
       />
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: spacing.xl,
-          paddingBottom: insets.bottom + spacing['3xl'],
-          gap: spacing.lg,
-        }}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <RefreshControl
-            refreshing={q.isRefetching}
-            onRefresh={() => q.refetch()}
-            tintColor={colors.mutedForeground}
-          />
-        }
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Badge label={statusBadge.label} tone={statusBadge.tone} />
-          <Text variant="caption" color="mutedForeground">
-            Pack {pack.hash.slice(0, 12)}
-          </Text>
-        </View>
-
-        <Card padding={spacing.lg} style={{ gap: spacing.sm }}>
-          <Text variant="bodyStrong" accessibilityRole="header">
-            Sign-off
-          </Text>
-          {steps.map((s) => (
-            <View
-              key={s.label}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-            >
-              {s.at ? (
-                <CheckCircle2 size={16} color={colors.success} />
-              ) : (
-                <Circle size={16} color={colors.mutedForeground} />
-              )}
-              <Text variant="callout" color={s.at ? 'foreground' : 'mutedForeground'}>
-                {s.label}
-                {s.at ? ` · ${formatDate(s.at, 'short')}` : ''}
-              </Text>
-            </View>
-          ))}
-          {pack.disputeReason ? (
-            <FormAlert
-              tone="warning"
-              title={`Disputed${pack.disputedAt ? ` ${formatDate(pack.disputedAt, 'short')}` : ''}`}
-              message={`${pack.disputeReason}\n${
-                pack.disputeResolution
-                  ? `Settled by GetRentos: ${pack.disputeResolution}`
-                  : 'GetRentos will settle it before sign-off resumes.'
-              }`}
+      <QueryState query={q} style={{ paddingHorizontal: spacing.xl }}>
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: spacing.xl,
+            paddingBottom: insets.bottom + spacing['3xl'],
+            gap: spacing.lg,
+          }}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl
+              refreshing={q.isRefetching}
+              onRefresh={() => q.refetch()}
+              tintColor={colors.mutedForeground}
             />
-          ) : null}
-        </Card>
+          }
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Badge label={statusBadge.label} tone={statusBadge.tone} />
+            <Text variant="caption" color="mutedForeground">
+              Pack {pack.hash.slice(0, 12)}
+            </Text>
+          </View>
 
-        <Card padding={spacing.lg} style={{ gap: spacing.md }}>
-          <Text variant="bodyStrong" accessibilityRole="header">
-            Money at handover
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
-            {money.map((m) => (
-              <View key={m.label} style={{ width: '50%', paddingRight: spacing.sm }}>
-                <Text variant="caption" color="mutedForeground">
-                  {m.label}
+          <Card padding={spacing.lg} style={{ gap: spacing.sm }}>
+            <Text variant="bodyStrong" accessibilityRole="header">
+              Sign-off
+            </Text>
+            {steps.map((s) => (
+              <View
+                key={s.label}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+              >
+                {s.at ? (
+                  <CheckCircle2 size={16} color={colors.success} />
+                ) : (
+                  <Circle size={16} color={colors.mutedForeground} />
+                )}
+                <Text variant="callout" color={s.at ? 'foreground' : 'mutedForeground'}>
+                  {s.label}
+                  {s.at ? ` · ${formatDate(s.at, 'short')}` : ''}
                 </Text>
-                <Price amount={m.value} variant="bodyStrong" />
               </View>
             ))}
-          </View>
-          {snap.leases.length ? <Divider /> : null}
-          {snap.leases.map((l) => (
-            <View key={l.leaseId} style={{ gap: 2 }}>
-              <Text variant="callout" style={{ fontWeight: '600' }}>
-                {l.tenant}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                {l.unit} · {formatDate(l.start, 'short')} – {formatDate(l.end, 'short')}
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                Rent {formatNaira(l.rent)} · owed {formatNaira(l.arrears)} · held{' '}
-                {formatNaira(l.heldForOwner)}
-                {l.deposit
-                  ? ` · deposit ${formatNaira(l.deposit.amount)} ${
-                      l.deposit.heldByGetRentos ? 'with GetRentos' : 'outside GetRentos'
-                    }`
-                  : ''}
-              </Text>
-            </View>
-          ))}
-        </Card>
+            {pack.disputeReason ? (
+              <FormAlert
+                tone="warning"
+                title={`Disputed${pack.disputedAt ? ` ${formatDate(pack.disputedAt, 'short')}` : ''}`}
+                message={`${pack.disputeReason}\n${
+                  pack.disputeResolution
+                    ? `Settled by GetRentos: ${pack.disputeResolution}`
+                    : 'GetRentos will settle it before sign-off resumes.'
+                }`}
+              />
+            ) : null}
+          </Card>
 
-        <Card padding={spacing.lg} style={{ gap: spacing.sm }}>
-          <Text variant="bodyStrong" accessibilityRole="header">
-            Open work
-          </Text>
-          {snap.openWork.length === 0 ? (
-            <Text variant="callout" color="mutedForeground">
-              None.
-            </Text>
-          ) : (
-            snap.openWork.map((w) => (
-              <Text key={w.id} variant="caption" color="mutedForeground">
-                {w.category.toLowerCase().replace(/_/g, ' ')}: {w.description.slice(0, 80)} (
-                {w.status.toLowerCase()})
-              </Text>
-            ))
-          )}
-          <Text variant="bodyStrong" accessibilityRole="header" style={{ marginTop: spacing.sm }}>
-            Open matters
-          </Text>
-          {snap.openItems.length === 0 ? (
-            <Text variant="callout" color="mutedForeground">
-              None.
-            </Text>
-          ) : (
-            snap.openItems.map((i) => (
-              <Text key={`${i.kind}-${i.id}`} variant="caption" color="mutedForeground">
-                • {i.label}
-              </Text>
-            ))
-          )}
-          <Text variant="bodyStrong" accessibilityRole="header" style={{ marginTop: spacing.sm }}>
-            Records
-          </Text>
-          <Text variant="caption" color="mutedForeground">
-            {snap.documents.length} document{snap.documents.length === 1 ? '' : 's'} ·{' '}
-            {snap.inspections.length} inspection{snap.inspections.length === 1 ? '' : 's'}. They
-            stay with the property; the incoming manager sees them from the effective date.
-          </Text>
-          {pack.keysDeclaration ? (
-            <>
-              <Text
-                variant="bodyStrong"
-                accessibilityRole="header"
-                style={{ marginTop: spacing.sm }}
-              >
-                Keys and access
-              </Text>
-              <Text variant="caption" color="mutedForeground">
-                {pack.keysDeclaration}
-              </Text>
-            </>
-          ) : null}
-          {pack.depositAttestations?.length ? (
-            <>
-              <Text
-                variant="bodyStrong"
-                accessibilityRole="header"
-                style={{ marginTop: spacing.sm }}
-              >
-                Deposits held outside GetRentos
-              </Text>
-              {pack.depositAttestations.map((a) => (
-                <Text key={a.depositHoldId} variant="caption" color="mutedForeground">
-                  {formatNaira(a.amount)}: {DEPOSIT_TREATMENT_LABEL[a.treatment]}
-                  {a.note ? ` (${a.note})` : ''}
-                </Text>
-              ))}
-            </>
-          ) : null}
-        </Card>
-
-        {canOutgoing ? (
           <Card padding={spacing.lg} style={{ gap: spacing.md }}>
             <Text variant="bodyStrong" accessibilityRole="header">
-              Sign as the outgoing manager
+              Money at handover
             </Text>
-            {outside.map((d) => (
-              <View key={d.id} style={{ gap: spacing.sm }}>
-                <ChipSelect
-                  label={`Deposit of ${formatNaira(d.amount)} (${d.tenant}, ${d.unit}) you held outside GetRentos`}
-                  options={TREATMENTS}
-                  value={deposits[d.id]?.treatment}
-                  onChange={(treatment) =>
-                    setDeposits((s) => ({ ...s, [d.id]: { note: s[d.id]?.note ?? '', treatment } }))
-                  }
-                />
-                <TextField
-                  label="Reference or note"
-                  optional
-                  value={deposits[d.id]?.note ?? ''}
-                  onChangeText={(note) =>
-                    setDeposits((s) => ({ ...s, [d.id]: { ...s[d.id], note } }))
-                  }
-                />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
+              {money.map((m) => (
+                <View key={m.label} style={{ width: '50%', paddingRight: spacing.sm }}>
+                  <Text variant="caption" color="mutedForeground">
+                    {m.label}
+                  </Text>
+                  <Price amount={m.value} variant="bodyStrong" />
+                </View>
+              ))}
+            </View>
+            {snap.leases.length ? <Divider /> : null}
+            {snap.leases.map((l) => (
+              <View key={l.leaseId} style={{ gap: 2 }}>
+                <Text variant="callout" style={{ fontWeight: '600' }}>
+                  {l.tenant}
+                </Text>
+                <Text variant="caption" color="mutedForeground">
+                  {l.unit} · {formatDate(l.start, 'short')} – {formatDate(l.end, 'short')}
+                </Text>
+                <Text variant="caption" color="mutedForeground">
+                  Rent {formatNaira(l.rent)} · owed {formatNaira(l.arrears)} · held{' '}
+                  {formatNaira(l.heldForOwner)}
+                  {l.deposit
+                    ? ` · deposit ${formatNaira(l.deposit.amount)} ${
+                        l.deposit.heldByGetRentos ? 'with GetRentos' : 'outside GetRentos'
+                      }`
+                    : ''}
+                </Text>
               </View>
             ))}
-            <TextField
-              label="Keys, codes and access handed over"
-              placeholder="e.g. Two sets of keys, gate remote, alarm code shared with the new manager"
-              value={keys}
-              onChangeText={setKeys}
-              multiline
-              hint="At least 10 characters."
-            />
-            <Button
-              label="Sign the handover"
-              loading={signOutgoing.isPending}
-              disabled={!outgoingReady || signOutgoing.isPending}
-              onPress={() => signOutgoing.mutate()}
-            />
           </Card>
-        ) : null}
 
-        {canOwner || canIncoming ? (
-          <Card padding={spacing.lg} style={{ gap: spacing.md }}>
-            <Text variant="callout">
-              {canOwner
-                ? 'Acknowledge that this is the state of your property at the handover.'
-                : 'Accept the handover: you take over from this state.'}
+          <Card padding={spacing.lg} style={{ gap: spacing.sm }}>
+            <Text variant="bodyStrong" accessibilityRole="header">
+              Open work
             </Text>
-            <Button
-              label={canOwner ? 'Acknowledge' : 'Accept the handover'}
-              loading={sign.isPending}
-              disabled={sign.isPending}
-              onPress={() => sign.mutate(canOwner ? 'owner' : 'incoming')}
-            />
+            {snap.openWork.length === 0 ? (
+              <Text variant="callout" color="mutedForeground">
+                None.
+              </Text>
+            ) : (
+              snap.openWork.map((w) => (
+                <Text key={w.id} variant="caption" color="mutedForeground">
+                  {w.category.toLowerCase().replace(/_/g, ' ')}: {w.description.slice(0, 80)} (
+                  {w.status.toLowerCase()})
+                </Text>
+              ))
+            )}
+            <Text variant="bodyStrong" accessibilityRole="header" style={{ marginTop: spacing.sm }}>
+              Open matters
+            </Text>
+            {snap.openItems.length === 0 ? (
+              <Text variant="callout" color="mutedForeground">
+                None.
+              </Text>
+            ) : (
+              snap.openItems.map((i) => (
+                <Text key={`${i.kind}-${i.id}`} variant="caption" color="mutedForeground">
+                  • {i.label}
+                </Text>
+              ))
+            )}
+            <Text variant="bodyStrong" accessibilityRole="header" style={{ marginTop: spacing.sm }}>
+              Records
+            </Text>
+            <Text variant="caption" color="mutedForeground">
+              {snap.documents.length} document{snap.documents.length === 1 ? '' : 's'} ·{' '}
+              {snap.inspections.length} inspection{snap.inspections.length === 1 ? '' : 's'}. They
+              stay with the property; the incoming manager sees them from the effective date.
+            </Text>
+            {pack.keysDeclaration ? (
+              <>
+                <Text
+                  variant="bodyStrong"
+                  accessibilityRole="header"
+                  style={{ marginTop: spacing.sm }}
+                >
+                  Keys and access
+                </Text>
+                <Text variant="caption" color="mutedForeground">
+                  {pack.keysDeclaration}
+                </Text>
+              </>
+            ) : null}
+            {pack.depositAttestations?.length ? (
+              <>
+                <Text
+                  variant="bodyStrong"
+                  accessibilityRole="header"
+                  style={{ marginTop: spacing.sm }}
+                >
+                  Deposits held outside GetRentos
+                </Text>
+                {pack.depositAttestations.map((a) => (
+                  <Text key={a.depositHoldId} variant="caption" color="mutedForeground">
+                    {formatNaira(a.amount)}: {DEPOSIT_TREATMENT_LABEL[a.treatment]}
+                    {a.note ? ` (${a.note})` : ''}
+                  </Text>
+                ))}
+              </>
+            ) : null}
           </Card>
-        ) : null}
 
-        {canDispute ? (
-          showDispute ? (
+          {canOutgoing ? (
             <Card padding={spacing.lg} style={{ gap: spacing.md }}>
+              <Text variant="bodyStrong" accessibilityRole="header">
+                Sign as the outgoing manager
+              </Text>
+              {outside.map((d) => (
+                <View key={d.id} style={{ gap: spacing.sm }}>
+                  <ChipSelect
+                    label={`Deposit of ${formatNaira(d.amount)} (${d.tenant}, ${d.unit}) you held outside GetRentos`}
+                    options={TREATMENTS}
+                    value={deposits[d.id]?.treatment}
+                    onChange={(treatment) =>
+                      setDeposits((s) => ({
+                        ...s,
+                        [d.id]: { note: s[d.id]?.note ?? '', treatment },
+                      }))
+                    }
+                  />
+                  <TextField
+                    label="Reference or note"
+                    optional
+                    value={deposits[d.id]?.note ?? ''}
+                    onChangeText={(note) =>
+                      setDeposits((s) => ({ ...s, [d.id]: { ...s[d.id], note } }))
+                    }
+                  />
+                </View>
+              ))}
               <TextField
-                label="What is wrong with the handover?"
-                value={disputeText}
-                onChangeText={setDisputeText}
+                label="Keys, codes and access handed over"
+                placeholder="e.g. Two sets of keys, gate remote, alarm code shared with the new manager"
+                value={keys}
+                onChangeText={setKeys}
                 multiline
                 hint="At least 10 characters."
               />
-              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <Button
-                  label="Dispute the handover"
-                  variant="destructive"
-                  loading={dispute.isPending}
-                  disabled={disputeText.trim().length < 10 || dispute.isPending}
-                  onPress={() => dispute.mutate()}
-                  style={{ flex: 1 }}
-                />
-                <Button label="Cancel" variant="ghost" onPress={() => setShowDispute(false)} />
-              </View>
+              <Button
+                label="Sign the handover"
+                loading={signOutgoing.isPending}
+                disabled={!outgoingReady || signOutgoing.isPending}
+                onPress={() => signOutgoing.mutate()}
+              />
             </Card>
-          ) : (
-            <Button
-              label="Something isn’t right? Dispute instead of signing"
-              variant="ghost"
-              onPress={() => setShowDispute(true)}
-            />
-          )
-        ) : null}
-      </ScrollView>
+          ) : null}
+
+          {canOwner || canIncoming ? (
+            <Card padding={spacing.lg} style={{ gap: spacing.md }}>
+              <Text variant="callout">
+                {canOwner
+                  ? 'Acknowledge that this is the state of your property at the handover.'
+                  : 'Accept the handover: you take over from this state.'}
+              </Text>
+              <Button
+                label={canOwner ? 'Acknowledge' : 'Accept the handover'}
+                loading={sign.isPending}
+                disabled={sign.isPending}
+                onPress={() => sign.mutate(canOwner ? 'owner' : 'incoming')}
+              />
+            </Card>
+          ) : null}
+
+          {canDispute ? (
+            showDispute ? (
+              <Card padding={spacing.lg} style={{ gap: spacing.md }}>
+                <TextField
+                  label="What is wrong with the handover?"
+                  value={disputeText}
+                  onChangeText={setDisputeText}
+                  multiline
+                  hint="At least 10 characters."
+                />
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Button
+                    label="Dispute the handover"
+                    variant="destructive"
+                    loading={dispute.isPending}
+                    disabled={disputeText.trim().length < 10 || dispute.isPending}
+                    onPress={() => dispute.mutate()}
+                    style={{ flex: 1 }}
+                  />
+                  <Button label="Cancel" variant="ghost" onPress={() => setShowDispute(false)} />
+                </View>
+              </Card>
+            ) : (
+              <Button
+                label="Something isn’t right? Dispute instead of signing"
+                variant="ghost"
+                onPress={() => setShowDispute(true)}
+              />
+            )
+          ) : null}
+        </ScrollView>
+      </QueryState>
     </View>
   );
 }

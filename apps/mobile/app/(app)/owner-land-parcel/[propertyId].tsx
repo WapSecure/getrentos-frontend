@@ -21,6 +21,7 @@ import {
   ErrorState,
   FormAlert,
   PressableScale,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -40,7 +41,7 @@ import {
   type LandCheckStatus,
   type OwnerLandRecord,
 } from '@/lib/api/ownerLand';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickDocument } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
@@ -48,8 +49,6 @@ import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { ParcelForm } from '@/components/land/ParcelForm';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * One parcel: where diligence stands and what moves it on, its documents, its
@@ -72,87 +71,93 @@ export default function OwnerLandParcel() {
         subtitle={r ? `${r.address}, ${r.city}` : undefined}
         onBack={() => goBack()}
       />
-      {!r ? (
-        list.isError || (list.data && !r) ? (
+      <QueryState
+        query={list}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl }}>
+            <DetailSkeleton />
+          </View>
+        }
+        errorTitle="This parcel did not load"
+        errorDescription="It may have been removed."
+      >
+        {!r ? (
+          // Loaded, but this parcel is not in the list.
           <ErrorState
             title="This parcel did not load"
             description="It may have been removed."
             onRetry={() => list.refetch()}
           />
         ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={list.isRefetching}
-              onRefresh={() => list.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <ParcelSummary r={r} onEdit={() => setEditing(true)} />
-          <ReviewPanel r={r} />
-          {readyToList(r) ? (
-            <Card style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
-                <ShieldCheck size={18} color={colors.success} />
-                <Text variant="bodyStrong">Ready to list</Text>
-              </View>
-              <Text variant="callout" color="mutedForeground">
-                This parcel has passed both gates. Create a sale listing the usual way; offers and
-                payment protection work the same.
-              </Text>
-              <Button
-                label="Open the property to list it"
-                variant="secondary"
-                onPress={() => router.push(`/(app)/owner-property/${r.propertyId}`)}
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={list.isRefetching}
+                onRefresh={() => list.refetch()}
+                tintColor={colors.mutedForeground}
               />
-            </Card>
-          ) : null}
-          <Documents propertyId={r.propertyId} />
-          {r.parcel ? <Risk propertyId={r.propertyId} /> : null}
-          {!r.ownershipProofCount ? (
-            <FormAlert
-              tone="info"
-              message="No ownership proof yet. Upload it from the property page; diligence matches it against the title."
+            }
+          >
+            <ParcelSummary r={r} onEdit={() => setEditing(true)} />
+            <ReviewPanel r={r} />
+            {readyToList(r) ? (
+              <Card style={{ gap: spacing.sm }}>
+                <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
+                  <ShieldCheck size={18} color={colors.success} />
+                  <Text variant="bodyStrong">Ready to list</Text>
+                </View>
+                <Text variant="callout" color="mutedForeground">
+                  This parcel has passed both gates. Create a sale listing the usual way; offers and
+                  payment protection work the same.
+                </Text>
+                <Button
+                  label="Open the property to list it"
+                  variant="secondary"
+                  onPress={() => router.push(`/(app)/owner-property/${r.propertyId}`)}
+                />
+              </Card>
+            ) : null}
+            <Documents propertyId={r.propertyId} />
+            {r.parcel ? <Risk propertyId={r.propertyId} /> : null}
+            {!r.ownershipProofCount ? (
+              <FormAlert
+                tone="info"
+                message="No ownership proof yet. Upload it from the property page; diligence matches it against the title."
+              />
+            ) : null}
+            <Button
+              label="Authority to sell"
+              variant="secondary"
+              onPress={() => router.push(`/(app)/owner-land-authority/${r.propertyId}`)}
             />
-          ) : null}
-          <Button
-            label="Authority to sell"
-            variant="secondary"
-            onPress={() => router.push(`/(app)/owner-land-authority/${r.propertyId}`)}
-          />
-          <Button
-            label="Estate layout and plots"
-            variant="secondary"
-            onPress={() => router.push(`/(app)/owner-land-layout/${r.propertyId}`)}
-          />
-          <Button
-            label="Seller analytics"
-            variant="secondary"
-            onPress={() => router.push(`/(app)/owner-land-analytics/${r.propertyId}`)}
-          />
-          <Button
-            label="Plot sales on this land"
-            variant="secondary"
-            onPress={() => router.push(`/(app)/owner-land-sales?property=${r.propertyId}`)}
-          />
-          <Button
-            label="Open property"
-            variant="ghost"
-            onPress={() => router.push(`/(app)/owner-property/${r.propertyId}`)}
-          />
-        </ScrollView>
-      )}
+            <Button
+              label="Estate layout and plots"
+              variant="secondary"
+              onPress={() => router.push(`/(app)/owner-land-layout/${r.propertyId}`)}
+            />
+            <Button
+              label="Seller analytics"
+              variant="secondary"
+              onPress={() => router.push(`/(app)/owner-land-analytics/${r.propertyId}`)}
+            />
+            <Button
+              label="Plot sales on this land"
+              variant="secondary"
+              onPress={() => router.push(`/(app)/owner-land-sales?property=${r.propertyId}`)}
+            />
+            <Button
+              label="Open property"
+              variant="ghost"
+              onPress={() => router.push(`/(app)/owner-property/${r.propertyId}`)}
+            />
+          </ScrollView>
+        )}
+      </QueryState>
 
       <Sheet open={editing && !!r} onClose={() => setEditing(false)} title="Parcel details">
         {r ? <ParcelForm key={r.propertyId} r={r} onDone={() => setEditing(false)} /> : null}
@@ -222,7 +227,7 @@ function ReviewPanel({ r }: { r: OwnerLandRecord }) {
       qc.invalidateQueries({ queryKey: qk.owner.land });
       toast.show('Submitted. Compliance reviews it next.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not submit for review.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not submit for review.'), 'error'),
   });
 
   const title =
@@ -357,7 +362,7 @@ function Documents({ propertyId }: { propertyId: string }) {
       refresh();
       toast.show('Document removed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not remove the document.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove the document.'), 'error'),
   });
 
   const list = docs.data ?? [];

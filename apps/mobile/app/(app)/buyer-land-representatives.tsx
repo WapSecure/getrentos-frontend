@@ -7,8 +7,8 @@ import {
   Button,
   Card,
   Checkbox,
-  ErrorState,
   ListSkeleton,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -24,13 +24,12 @@ import {
   type Appointment,
   type RepScope,
 } from '@/lib/api/landBuyerExtras';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 const scopeLabel = (s: RepScope) => REP_SCOPES.find((x) => x.value === s)?.label ?? s;
 
 /** People the buyer trusts to follow purchases, attend tours and co-approve payments. */
@@ -69,17 +68,15 @@ export default function BuyerLandRepresentatives() {
           attend site visits and approve payments with you. Video and representatives never replace
           official searches.
         </Text>
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={100} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (q.data ?? []).length === 0 ? (
-          <Text variant="callout" color="mutedForeground">
-            You have not appointed anyone yet.
-          </Text>
-        ) : (
-          q.data!.map((a) => <AppointmentRow key={a.id} appointment={a} />)
-        )}
+        <QueryState query={q} skeleton={<ListSkeleton rows={2} variant="card" height={100} />}>
+          {(q.data ?? []).length === 0 ? (
+            <Text variant="callout" color="mutedForeground">
+              You have not appointed anyone yet.
+            </Text>
+          ) : (
+            (q.data ?? []).map((a) => <AppointmentRow key={a.id} appointment={a} />)
+          )}
+        </QueryState>
         <AppointForm />
       </ScrollView>
     </View>
@@ -98,7 +95,7 @@ function AppointmentRow({ appointment: a }: { appointment: Appointment }) {
       qc.setQueryData(qk.buyerLand.representatives, list);
       toast.show('Appointment ended.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not end the appointment.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not end the appointment.'), 'error'),
   });
   const status = REP_STATUS[a.status];
   const len = reason.trim().length;
@@ -182,7 +179,7 @@ function AppointForm() {
       setEmail('');
       setNote('');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send the invitation.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send the invitation.'), 'error'),
   });
   const toggle = (s: RepScope) =>
     setScopes((x) => (x.includes(s) ? x.filter((y) => y !== s) : [...x, s]));

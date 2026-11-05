@@ -7,12 +7,11 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
   ListSkeleton,
   NumberField,
   Price,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -29,7 +28,7 @@ import {
   type BudgetPeriod,
   type ExpenseCategory,
 } from '@/lib/api/landlordFinance';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { Sheet } from '@/components/Sheet';
@@ -38,8 +37,6 @@ import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Budgets against actual spend, per property and category, for the current
@@ -87,8 +84,6 @@ export default function LandlordBudgets() {
             note={null}
           />
         </View>
-      ) : list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
       ) : (
         <ScrollView
           contentContainerStyle={{
@@ -104,18 +99,22 @@ export default function LandlordBudgets() {
             />
           }
         >
-          {list.isLoading ? (
-            <ListSkeleton rows={3} variant="card" height={110} />
-          ) : budgets.length === 0 ? (
-            <EmptyState
-              icon={<Target size={32} color={colors.mutedForeground} />}
-              title="No budgets yet"
-              description="Set a monthly, quarterly or annual target for a property to track spend against it."
-              action={<Button label="Set a budget" onPress={() => setEditing('new')} />}
-            />
-          ) : (
-            budgets.map((b) => <BudgetCard key={b.id} budget={b} onEdit={() => setEditing(b)} />)
-          )}
+          <QueryState
+            query={list}
+            skeleton={<ListSkeleton rows={3} variant="card" height={110} />}
+            isEmpty={budgets.length === 0}
+            empty={{
+              icon: <Target size={32} color={colors.mutedForeground} />,
+              title: 'No budgets yet',
+              description:
+                'Set a monthly, quarterly or annual target for a property to track spend against it.',
+              action: <Button label="Set a budget" onPress={() => setEditing('new')} />,
+            }}
+          >
+            {budgets.map((b) => (
+              <BudgetCard key={b.id} budget={b} onEdit={() => setEditing(b)} />
+            ))}
+          </QueryState>
         </ScrollView>
       )}
 
@@ -151,7 +150,7 @@ function BudgetCard({ budget: b, onEdit }: { budget: Budget; onEdit: () => void 
       qc.invalidateQueries({ queryKey: qk.landlord.budgets });
       toast.show('Budget removed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not remove the budget.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove the budget.'), 'error'),
   });
 
   return (
@@ -238,7 +237,7 @@ function BudgetForm({ budget, onDone }: { budget: Budget | null; onDone: () => v
       toast.show(budget ? 'Budget updated.' : 'Budget set.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the budget.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the budget.'), 'error'),
   });
 
   return (

@@ -9,12 +9,11 @@ import {
   Button,
   Card,
   Checkbox,
-  EmptyState,
-  ErrorState,
   FormAlert,
   ListSkeleton,
   NumberField,
   PressableScale,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -45,15 +44,13 @@ import {
   type ServicingTier,
   type VettedFirm,
 } from '@/lib/api/managedService';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatDateTime, formatNaira } from '@/lib/format';
 import { useMyHomes, type MyHome } from '@/hooks/useMyHomes';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Get a property managed: by GetRentos (request, site visit, proposal you
@@ -74,9 +71,16 @@ export default function GetManaged() {
   const mandates = useQuery({ queryKey: qk.managed.mandates, queryFn: managedApi.mandates });
   const intakes = useQuery({ queryKey: qk.managed.intakes, queryFn: managedApi.intakes });
 
-  const loading = homes.isLoading || mandates.isLoading || intakes.isLoading;
-  const failed = (homes.isError || mandates.isError || intakes.isError) && !loading;
   const refresh = () => qc.invalidateQueries({ queryKey: qk.managed.all });
+  // The properties section needs all three: the homes, and what is in place for each.
+  const propertiesQuery = {
+    data: homes.data && mandates.data && intakes.data ? homes.data : undefined,
+    isError: homes.isError || mandates.isError || intakes.isError,
+    refetch: () => {
+      homes.refetch();
+      refresh();
+    },
+  };
   const properties = homes.data ?? [];
   const cards = feeCard.data ?? [];
 
@@ -132,23 +136,17 @@ export default function GetManaged() {
         )}
 
         <SectionTitle icon={Building2} title="Your properties" />
-        {loading ? (
-          <ListSkeleton rows={3} variant="card" height={110} />
-        ) : failed ? (
-          <ErrorState
-            onRetry={() => {
-              homes.refetch();
-              refresh();
-            }}
-          />
-        ) : properties.length === 0 ? (
-          <EmptyState
-            icon={<Building2 size={32} color={colors.mutedForeground} />}
-            title="No properties yet"
-            description="Add a property first, then you can place it under management."
-          />
-        ) : (
-          properties.map((p) => (
+        <QueryState
+          query={propertiesQuery}
+          skeleton={<ListSkeleton rows={3} variant="card" height={110} />}
+          isEmpty={properties.length === 0}
+          empty={{
+            icon: <Building2 size={32} color={colors.mutedForeground} />,
+            title: 'No properties yet',
+            description: 'Add a property first, then you can place it under management.',
+          }}
+        >
+          {properties.map((p) => (
             <PropertyRow
               key={p.id}
               home={p}
@@ -157,8 +155,8 @@ export default function GetManaged() {
               onEnd={setEnding}
               onChanged={refresh}
             />
-          ))
-        )}
+          ))}
+        </QueryState>
 
         <SectionTitle icon={Briefcase} title="Vetted firms" />
         <Text variant="callout" color="mutedForeground">
@@ -341,7 +339,7 @@ function PropertyRow({
       toast.show('Handover confirmed.', 'success');
       onChanged();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not record the handover.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record the handover.'), 'error'),
   });
 
   const mandate = 'mandate' in state ? state.mandate : null;
@@ -483,7 +481,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
       toast.show('Accepted. GetRentos takes it from here.', 'success');
       onChanged();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not accept the proposal.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not accept the proposal.'), 'error'),
   });
   const withdraw = useMutation({
     mutationFn: () => managedApi.withdrawIntake(intake.id),
@@ -491,7 +489,7 @@ function IntakePanel({ intake, onChanged }: { intake: ManagedIntake; onChanged: 
       toast.show('Request withdrawn.', 'success');
       onChanged();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not withdraw the request.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw the request.'), 'error'),
   });
 
   return (
@@ -662,7 +660,7 @@ function IntakeForm({
       toast.show('Request sent. GetRentos books a site visit next.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send your request.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send your request.'), 'error'),
   });
 
   const toggle = (need: string) =>
@@ -771,7 +769,7 @@ function EndForm({ mandate, onDone }: { mandate: Mandate; onDone: () => void }) 
       toast.show(pending ? 'Request cancelled.' : 'Management ended.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not end the engagement.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not end the engagement.'), 'error'),
   });
   const short = reason.trim().length < END_REASON_MIN;
 
@@ -890,7 +888,7 @@ function AppointForm({
       toast.show(`Sent to ${firm.name} to accept.`, 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not appoint the firm.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not appoint the firm.'), 'error'),
   });
 
   if (options.length === 0) {

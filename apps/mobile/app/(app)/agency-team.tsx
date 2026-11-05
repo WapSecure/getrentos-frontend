@@ -7,8 +7,8 @@ import {
   Button,
   Card,
   DateField,
-  ErrorState,
   ListSkeleton,
+  QueryState,
   Text,
   TextField,
   toISODate,
@@ -26,14 +26,12 @@ import {
   type TeamMember,
 } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** The firm's team. Only the principal invites, changes roles and removes people. */
 export default function AgencyTeam() {
@@ -75,30 +73,23 @@ export default function AgencyTeam() {
           />
         }
       >
-        {members.isLoading ? (
-          <ListSkeleton rows={3} variant="card" height={80} />
-        ) : members.isError ? (
-          <ErrorState
-            description={errorText(members.error, '')}
-            onRetry={() => members.refetch()}
-          />
-        ) : (
-          (members.data ?? []).map((m) => (
+        <QueryState query={members} skeleton={<ListSkeleton rows={3} variant="card" height={80} />}>
+          {(members.data ?? []).map((m) => (
             <MemberRow
               key={m.userId}
               member={m}
               canEdit={principal && m.role !== 'OWNER'}
               onEdit={() => setEditing(m)}
             />
-          ))
-        )}
+          ))}
+        </QueryState>
         {principal ? (
           <>
             <InviteForm />
             {(invitations.data ?? []).length ? (
               <View style={{ gap: spacing.sm }}>
                 <Text variant="heading">Invitations</Text>
-                {invitations.data!.map((i) => (
+                {(invitations.data ?? []).map((i) => (
                   <InvitationRow key={i.id} invitation={i} />
                 ))}
               </View>
@@ -163,7 +154,7 @@ function MemberEditor({ member: m, onDone }: { member: TeamMember; onDone: () =>
   const [role, setRole] = useState<string>(m.role);
   const [until, setUntil] = useState(m.expiresAt ? m.expiresAt.slice(0, 10) : '');
   const refresh = () => qc.invalidateQueries({ queryKey: qk.agency.members });
-  const fail = (fallback: string) => (e: unknown) => toast.show(errorText(e, fallback), 'error');
+  const fail = (fallback: string) => (e: unknown) => toast.show(errorMessage(e, fallback), 'error');
 
   const save = useMutation({
     mutationFn: () =>
@@ -266,7 +257,7 @@ function InviteForm() {
       setEmail('');
       setUntil('');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send the invitation.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send the invitation.'), 'error'),
   });
   return (
     <Card style={{ gap: spacing.md }}>
@@ -313,7 +304,7 @@ function InvitationRow({ invitation: i }: { invitation: TeamInvitation }) {
       qc.invalidateQueries({ queryKey: qk.agency.invitations });
       toast.show('Invitation withdrawn.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not withdraw it.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw it.'), 'error'),
   });
   return (
     <Card padding={spacing.md} style={{ gap: 4 }}>

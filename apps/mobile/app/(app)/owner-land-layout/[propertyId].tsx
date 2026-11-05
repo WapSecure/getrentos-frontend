@@ -9,10 +9,10 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
   ListSkeleton,
   NumberField,
+  QueryState,
   SegmentedControl,
   SwitchRow,
   Text,
@@ -52,15 +52,13 @@ import {
   type LandAreaUnit,
   type OwnerLandRecord,
 } from '@/lib/api/ownerLand';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { LandDocumentChooser } from '@/components/land/LandDocumentChooser';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 type Tab = 'overview' | 'plots' | 'plans';
 const TABS: { value: Tab; label: string }[] = [
@@ -112,17 +110,15 @@ export default function OwnerLandLayout() {
         subtitle={record?.title}
         onBack={() => goBack()}
       />
-      {query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl }}>
-          <DetailSkeleton />
-        </View>
-      ) : query.isError ? (
-        <ErrorState
-          title="The estate layout could not be loaded"
-          description={errorText(query.error, 'Nothing has changed.')}
-          onRetry={() => query.refetch()}
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl }}>
+            <DetailSkeleton />
+          </View>
+        }
+        errorTitle="The estate layout could not be loaded"
+      >
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: spacing.xl,
@@ -168,7 +164,7 @@ export default function OwnerLandLayout() {
             </>
           )}
         </ScrollView>
-      )}
+      </QueryState>
 
       <Sheet
         open={editing && !!layout}
@@ -264,7 +260,7 @@ function LayoutFormView({
       );
       onSaved();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the estate.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the estate.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>
@@ -378,7 +374,7 @@ function StatusPanel({
       toast.show('Your estate is on sale. Buyers can now reserve available plots.', 'success');
     },
     // Kept on screen, not only toasted: it is usually something to fix first.
-    onError: (e) => setPublishError(errorText(e, 'The estate could not be published.')),
+    onError: (e) => setPublishError(errorMessage(e, 'The estate could not be published.')),
   });
   const close = useMutation({
     mutationFn: () => landLayoutApi.close(layout.propertyId),
@@ -386,7 +382,7 @@ function StatusPanel({
       onChanged();
       toast.show('Sales closed. Live contracts carry on as agreed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not close sales.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not close sales.'), 'error'),
   });
 
   return (
@@ -649,7 +645,7 @@ function Plots({
         'success'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Could not change that plot.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not change that plot.'), 'error'),
   });
 
   return (
@@ -813,7 +809,7 @@ function PlotFormView({
       toast.show(`${plotName(saved)} ${plot ? 'updated' : 'added'}.`, 'success');
       onSaved();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the plot.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the plot.'), 'error'),
   });
 
   return (
@@ -898,7 +894,7 @@ function Plans({
         'success'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Could not change the plan.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not change the plan.'), 'error'),
   });
 
   return (
@@ -1047,7 +1043,7 @@ function PlanFormView({
       );
       onSaved();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the plan.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the plan.'), 'error'),
   });
 
   return (

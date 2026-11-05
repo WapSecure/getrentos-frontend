@@ -24,7 +24,7 @@ import {
   type Reservation,
 } from '@/lib/api/landBuyer';
 import { formatBps } from '@/lib/api/landSales';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 
 /**
@@ -68,8 +68,7 @@ export function StartPurchase({
       onDone();
       router.push(`/(app)/buyer-land-purchase/${detail.id}`);
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not start the purchase.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not start the purchase.'), 'error'),
   });
 
   if (estate.isLoading) return <Skeleton height={200} />;

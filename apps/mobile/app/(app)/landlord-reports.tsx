@@ -8,9 +8,9 @@ import {
   Card,
   DateField,
   Divider,
-  ErrorState,
   ListSkeleton,
   Price,
+  QueryState,
   Text,
   toISODate,
   useTheme,
@@ -24,7 +24,7 @@ import {
   RENT_PERIOD_SUFFIX,
   type ReportExport,
 } from '@/lib/api/landlordFinance';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -64,7 +64,7 @@ export default function LandlordReports() {
       const { bytes } = await landlordFinanceApi.download(kind, { from, to });
       await shareDownloadedFile(bytes, EXPORTS[kind].file, CSV_MIME, EXPORTS[kind].label);
     } catch (e) {
-      toast.show(e instanceof ApiError ? e.message : 'Could not export that.', 'error');
+      toast.show(errorMessage(e, 'Could not export that.'), 'error');
     } finally {
       setExporting(null);
     }
@@ -121,37 +121,35 @@ export default function LandlordReports() {
                   <DateField label="To" value={to} onChange={setTo} min={from} />
                 </View>
               </View>
-              {pnl.isLoading ? (
-                <ListSkeleton rows={3} />
-              ) : pnl.isError && !pnl.data ? (
-                <ErrorState onRetry={() => pnl.refetch()} />
-              ) : (pnl.data?.rows ?? []).length === 0 ? (
-                <Text variant="callout" color="mutedForeground">
-                  No income or expenses in this period.
-                </Text>
-              ) : (
-                <Card padding="none">
-                  {pnl.data!.rows.map((r, i) => (
-                    <View key={r.propertyId}>
-                      {i > 0 ? <Divider /> : null}
-                      <PnlLine
-                        title={r.propertyTitle}
-                        income={r.income}
-                        expenses={r.expenses}
-                        net={r.net}
-                      />
-                    </View>
-                  ))}
-                  <Divider />
-                  <PnlLine
-                    title="Total"
-                    income={pnl.data!.totals.income}
-                    expenses={pnl.data!.totals.expenses}
-                    net={pnl.data!.totals.net}
-                    strong
-                  />
-                </Card>
-              )}
+              <QueryState query={pnl} skeleton={<ListSkeleton rows={3} />}>
+                {!pnl.data || pnl.data.rows.length === 0 ? (
+                  <Text variant="callout" color="mutedForeground">
+                    No income or expenses in this period.
+                  </Text>
+                ) : (
+                  <Card padding="none">
+                    {pnl.data.rows.map((r, i) => (
+                      <View key={r.propertyId}>
+                        {i > 0 ? <Divider /> : null}
+                        <PnlLine
+                          title={r.propertyTitle}
+                          income={r.income}
+                          expenses={r.expenses}
+                          net={r.net}
+                        />
+                      </View>
+                    ))}
+                    <Divider />
+                    <PnlLine
+                      title="Total"
+                      income={pnl.data.totals.income}
+                      expenses={pnl.data.totals.expenses}
+                      net={pnl.data.totals.net}
+                      strong
+                    />
+                  </Card>
+                )}
+              </QueryState>
             </View>
 
             <View style={{ gap: spacing.md }}>
@@ -161,50 +159,48 @@ export default function LandlordReports() {
                   <ExportButton kind="rent-roll" exporting={exporting} onExport={exportCsv} />
                 }
               />
-              {roll.isLoading ? (
-                <ListSkeleton rows={4} />
-              ) : roll.isError && !roll.data ? (
-                <ErrorState onRetry={() => roll.refetch()} />
-              ) : (roll.data ?? []).length === 0 ? (
-                <Text variant="callout" color="mutedForeground">
-                  No units yet.
-                </Text>
-              ) : (
-                <Card padding="none">
-                  {roll.data!.map((r, i) => (
-                    <View key={`${r.propertyTitle}-${r.unitName}-${i}`}>
-                      {i > 0 ? <Divider /> : null}
-                      <View style={{ padding: spacing.lg, gap: 2 }}>
-                        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                          <Text
-                            variant="callout"
-                            style={{ flex: 1, fontWeight: '600' }}
-                            numberOfLines={1}
-                          >
-                            {r.unitName}
+              <QueryState query={roll} skeleton={<ListSkeleton rows={4} />}>
+                {!roll.data || roll.data.length === 0 ? (
+                  <Text variant="callout" color="mutedForeground">
+                    No units yet.
+                  </Text>
+                ) : (
+                  <Card padding="none">
+                    {roll.data.map((r, i) => (
+                      <View key={`${r.propertyTitle}-${r.unitName}-${i}`}>
+                        {i > 0 ? <Divider /> : null}
+                        <View style={{ padding: spacing.lg, gap: 2 }}>
+                          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                            <Text
+                              variant="callout"
+                              style={{ flex: 1, fontWeight: '600' }}
+                              numberOfLines={1}
+                            >
+                              {r.unitName}
+                            </Text>
+                            <Text variant="callout">
+                              {r.rentAmount != null
+                                ? `${formatNaira(r.rentAmount)}${RENT_PERIOD_SUFFIX[r.rentPeriod ?? ''] ?? ''}`
+                                : '—'}
+                            </Text>
+                          </View>
+                          <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                            {r.propertyTitle} · {r.occupied ? r.tenantName || 'Tenant' : 'Vacant'}
                           </Text>
-                          <Text variant="callout">
-                            {r.rentAmount != null
-                              ? `${formatNaira(r.rentAmount)}${RENT_PERIOD_SUFFIX[r.rentPeriod ?? ''] ?? ''}`
-                              : '—'}
-                          </Text>
+                          {r.outstanding > 0 ? (
+                            <Text
+                              variant="caption"
+                              style={{ color: colors.warning, fontWeight: '600' }}
+                            >
+                              {formatNaira(r.outstanding)} outstanding
+                            </Text>
+                          ) : null}
                         </View>
-                        <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                          {r.propertyTitle} · {r.occupied ? r.tenantName || 'Tenant' : 'Vacant'}
-                        </Text>
-                        {r.outstanding > 0 ? (
-                          <Text
-                            variant="caption"
-                            style={{ color: colors.warning, fontWeight: '600' }}
-                          >
-                            {formatNaira(r.outstanding)} outstanding
-                          </Text>
-                        ) : null}
                       </View>
-                    </View>
-                  ))}
-                </Card>
-              )}
+                    ))}
+                  </Card>
+                )}
+              </QueryState>
             </View>
 
             <View style={{ gap: spacing.md }}>

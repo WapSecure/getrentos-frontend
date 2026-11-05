@@ -20,13 +20,11 @@ import {
   type PayoutAccount,
   type PayoutRecord,
 } from '@/lib/api/agencyFirm';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { AccountForm, History, MyPayout } from '@/components/agency/AgentSelfPayout';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Money out: the firm's own commission to its bank, agents' shares to theirs,
@@ -178,7 +176,7 @@ function FirmPayout({
       onChanged();
       toast.show('Payout account saved.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the account.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the account.'), 'error'),
   });
   const withdraw = useMutation({
     mutationFn: agencyFirmApi.requestFirmPayout,
@@ -186,7 +184,7 @@ function FirmPayout({
       onChanged();
       toast.show('Payout requested.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not request the payout.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not request the payout.'), 'error'),
   });
   return (
     <Card style={{ gap: spacing.md }}>
@@ -238,7 +236,7 @@ function PayAgentsButton({ total, onChanged }: { total: number; onChanged: () =>
       setSkipped(res.skipped);
       toast.show(`Paid ${res.paid.length} agents, ${res.skipped.length} skipped.`, 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not pay the agents.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not pay the agents.'), 'error'),
   });
   return (
     <>

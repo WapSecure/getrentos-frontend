@@ -12,7 +12,7 @@ import {
   type Mandate,
   type MandateAction,
 } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 
 /**
@@ -42,7 +42,7 @@ export function MandateActions({ mandate }: { mandate: Mandate }) {
       qc.invalidateQueries({ queryKey: qk.agency.terminationRequests(mandate.id) });
       toast.show(ACTION_DONE[action], 'success');
     },
-    onError: (e) => setError(e instanceof ApiError ? e.message : 'That did not go through.'),
+    onError: (e) => setError(errorMessage(e, 'That did not go through.')),
   });
 
   if (actions.length === 0) return null;

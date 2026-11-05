@@ -8,9 +8,8 @@ import {
   Button,
   Card,
   DateField,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
+  QueryState,
   Text,
   TextField,
   TimeField,
@@ -28,11 +27,10 @@ import {
   TOUR_STATUS,
   type LandTour,
 } from '@/lib/api/ownerLand';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 const OPEN = ['REQUESTED', 'PROPOSED', 'SCHEDULED'];
 
 /** Live video tours buyers have asked for on the owner's land. */
@@ -65,19 +63,20 @@ export default function OwnerLandTours() {
           />
         }
       >
-        {list.isLoading ? (
-          <ListSkeleton rows={3} variant="card" height={140} />
-        ) : list.isError ? (
-          <ErrorState onRetry={() => list.refetch()} />
-        ) : tours.length === 0 ? (
-          <EmptyState
-            icon={<Video size={32} color={colors.mutedForeground} />}
-            title="No tour requests"
-            description="When a buyer asks for a live video tour of your land, it appears here."
-          />
-        ) : (
-          tours.map((t) => <TourCard key={t.id} tour={t} />)
-        )}
+        <QueryState
+          query={list}
+          skeleton={<ListSkeleton rows={3} variant="card" height={140} />}
+          isEmpty={tours.length === 0}
+          empty={{
+            icon: <Video size={32} color={colors.mutedForeground} />,
+            title: 'No tour requests',
+            description: 'When a buyer asks for a live video tour of your land, it appears here.',
+          }}
+        >
+          {tours.map((t) => (
+            <TourCard key={t.id} tour={t} />
+          ))}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -169,7 +168,7 @@ function HostActions({ tour: t }: { tour: LandTour }) {
     qc.invalidateQueries({ queryKey: qk.owner.landTours });
     toast.show(message, 'success');
   };
-  const fail = (fallback: string) => (e: unknown) => toast.show(errorText(e, fallback), 'error');
+  const fail = (fallback: string) => (e: unknown) => toast.show(errorMessage(e, fallback), 'error');
 
   const propose = useMutation({
     mutationFn: () =>

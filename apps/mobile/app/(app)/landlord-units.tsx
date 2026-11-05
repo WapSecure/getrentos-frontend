@@ -25,11 +25,11 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
   IconButton,
   ListSkeleton,
   PressableScale,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -42,7 +42,7 @@ import {
   OCCUPANCY_TONE,
   type LandlordUnit,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { Sheet } from '@/components/Sheet';
@@ -103,8 +103,7 @@ export default function LandlordUnits() {
       qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
       toast.show('Tenant removed and unit marked vacant.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not update that unit.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update that unit.'), 'error'),
   });
 
   const startAdd = () => {
@@ -135,9 +134,12 @@ export default function LandlordUnits() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState title="We couldn't load your units" onRetry={() => query.refetch()} />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={<ListSkeleton rows={4} variant="card" height={96} />}
+        errorTitle="We couldn't load your units"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={units}
           keyExtractor={(u) => u.id}
@@ -224,24 +226,20 @@ export default function LandlordUnits() {
             />
           }
           ListEmptyComponent={
-            query.isLoading ? (
-              <ListSkeleton rows={4} variant="card" height={96} />
-            ) : (
-              <EmptyState
-                icon={<DoorClosed size={32} color={colors.mutedForeground} />}
-                title={term ? 'No units match' : 'No units found'}
-                description={
-                  term
-                    ? 'Try a unit name or a tenant’s name.'
-                    : properties.length
-                      ? 'Add a unit to one of your properties.'
-                      : 'Add a property first, then its units.'
-                }
-              />
-            )
+            <EmptyState
+              icon={<DoorClosed size={32} color={colors.mutedForeground} />}
+              title={term ? 'No units match' : 'No units found'}
+              description={
+                term
+                  ? 'Try a unit name or a tenant’s name.'
+                  : properties.length
+                    ? 'Add a unit to one of your properties.'
+                    : 'Add a property first, then its units.'
+              }
+            />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={pickingProperty} onClose={() => setPickingProperty(false)} title="Add a unit to">
         <ChipSelect

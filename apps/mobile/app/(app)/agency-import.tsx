@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   Card,
+  Divider,
   EmptyState,
   FormAlert,
   SegmentedControl,
@@ -27,18 +28,15 @@ import {
   type TenancyImportResult,
   type UnitImportResult,
 } from '@/lib/api/portfolioImport';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickCsv } from '@/lib/filePicker';
-import { CSV_MIME, shareDownloadedFile } from '@/lib/shareFile';
+import { CSV_MIME, shareTextFile } from '@/lib/shareFile';
 import { formatDate, formatNaira } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
 type Kind = 'units' | 'tenancies';
-const errorText = (e: unknown, fallback: string) =>
-  e instanceof ApiError || e instanceof Error ? e.message : fallback;
-
 /**
  * Bring a managed property's units, then its tenants, onto GetRentos from a
  * spreadsheet. Always a dry run first; a file with any error imports nothing.
@@ -117,7 +115,7 @@ function Importer({
   const check = useMutation({
     mutationFn: () => call(true),
     onSuccess: setPreview,
-    onError: (e) => toast.show(errorText(e, 'Could not check the file.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not check the file.'), 'error'),
   });
   const commit = useMutation({
     mutationFn: () => call(false),
@@ -134,7 +132,7 @@ function Importer({
         'success'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Nothing was imported.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Nothing was imported.'), 'error'),
   });
   const choose = async () => {
     const file = await pickCsv();
@@ -181,10 +179,8 @@ function Importer({
           size="sm"
           variant="ghost"
           onPress={() =>
-            shareDownloadedFile(
-              new TextEncoder().encode(
-                kind === 'units' ? UNITS_CSV_TEMPLATE : TENANCIES_CSV_TEMPLATE
-              ),
+            shareTextFile(
+              kind === 'units' ? UNITS_CSV_TEMPLATE : TENANCIES_CSV_TEMPLATE,
               kind === 'units'
                 ? 'getrentos-units-template.csv'
                 : 'getrentos-tenancies-template.csv',
@@ -308,9 +304,8 @@ function PreviewRow({ line, title, detail, tags }: Row) {
   const { colors, spacing } = useTheme();
   const isError = tags.some((t) => t.tone === 'danger');
   return (
-    <View
-      style={{ gap: 2, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border }}
-    >
+    <View style={{ gap: 2 }}>
+      <Divider style={{ marginBottom: spacing.xs }} />
       <Text variant="callout" style={{ fontWeight: '600' }}>
         Line {line}: {title}
       </Text>

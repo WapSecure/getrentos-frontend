@@ -10,9 +10,9 @@ import {
   Card,
   DetailSkeleton,
   Divider,
-  ErrorState,
   FormAlert,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -36,15 +36,13 @@ import {
   type PurchaseDetail,
   type SaleDocument,
 } from '@/lib/api/landSales';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { Sheet } from '@/components/Sheet';
 import { ConditionsList, DeliverForm, MilestoneList } from '@/components/land/Conveyance';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** One plot purchase from the seller's side: money, conditions, conveyance, title. */
 export default function OwnerLandPurchase() {
@@ -74,7 +72,7 @@ export default function OwnerLandPurchase() {
     qc.invalidateQueries({ queryKey: ['owner', 'land', 'collections'] });
     toast.show(message, 'success');
   };
-  const fail = (fallback: string) => (e: unknown) => toast.show(errorText(e, fallback), 'error');
+  const fail = (fallback: string) => (e: unknown) => toast.show(errorMessage(e, fallback), 'error');
 
   const deliver = useMutation({
     mutationFn: (input: { note?: string; documentId?: string }) =>
@@ -116,7 +114,7 @@ export default function OwnerLandPurchase() {
         kind === 'contract-of-sale' ? 'Contract of sale' : 'Allocation letter'
       );
     } catch (e) {
-      toast.show(errorText(e, 'Could not download that document.'), 'error');
+      toast.show(errorMessage(e, 'Could not download that document.'), 'error');
     } finally {
       setDownloading(null);
     }
@@ -134,229 +132,228 @@ export default function OwnerLandPurchase() {
         subtitle={d ? `${plotName(d)} · ${d.layoutName} · ${d.buyerName ?? 'Buyer'}` : undefined}
         onBack={() => goBack()}
       />
-      {!d ? (
-        query.isError ? (
-          <ErrorState
-            title="This purchase could not be loaded"
-            description={errorText(query.error, 'Nothing has changed.')}
-            onRetry={() => query.refetch()}
-          />
-        ) : (
+      <QueryState
+        query={query}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl }}>
             <DetailSkeleton />
           </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              gap: spacing.sm,
-              alignItems: 'center',
+        }
+        errorTitle="This purchase could not be loaded"
+      >
+        {d ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
             }}
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
           >
-            {status ? <Badge label={status.label} tone={status.tone} /> : null}
-            <Text variant="caption" color="mutedForeground">
-              {d.planName}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-            <Button
-              label="Contract of sale"
-              size="sm"
-              variant="secondary"
-              icon={<FileDown size={14} color={colors.foreground} />}
-              loading={downloading === 'contract-of-sale'}
-              disabled={!!downloading}
-              onPress={() => download('contract-of-sale')}
-            />
-            <Button
-              label="Allocation letter"
-              size="sm"
-              variant="secondary"
-              icon={<FileDown size={14} color={colors.foreground} />}
-              loading={downloading === 'allocation-letter'}
-              disabled={!!downloading || d.status === 'PENDING_DEPOSIT'}
-              onPress={() => download('allocation-letter')}
-            />
-          </View>
-          {d.status === 'PENDING_DEPOSIT' ? (
-            <Text variant="caption" color="mutedForeground">
-              A letter of allocation is issued once the deposit is paid.
-            </Text>
-          ) : null}
-
-          {d.status === 'DEFAULTED' ? (
-            <View style={{ gap: spacing.sm }}>
-              <FormAlert
-                tone="error"
-                message={`This purchase defaulted${d.defaultedAt ? ` on ${formatDate(d.defaultedAt)}` : ''}. You can revoke it to put the plot back on sale; the buyer is refunded what they paid less the ${formatBps(d.terms.revocationChargeBps)} forfeiture.`}
-              />
-              <Button label="Revoke" variant="destructive" onPress={() => setRevoking(true)} />
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: spacing.sm,
+                alignItems: 'center',
+              }}
+            >
+              {status ? <Badge label={status.label} tone={status.tone} /> : null}
+              <Text variant="caption" color="mutedForeground">
+                {d.planName}
+              </Text>
             </View>
-          ) : null}
-          {d.status === 'REVOKED' ? (
-            <FormAlert
-              tone="info"
-              message={`Revoked${d.revokedAt ? ` on ${formatDate(d.revokedAt)}` : ''}.${d.revocationReason ? ` ${d.revocationReason}` : ''}${d.refundDue !== undefined ? ` Refund due to the buyer: ${formatNaira(d.refundDue)}.` : ''}`}
-            />
-          ) : null}
-
-          <Section title="Money">
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
-              <Figure label="Plot price" amount={d.plotPrice} />
-              <Figure label="Premium + fees" amount={d.priceUplift + d.fees} />
-              <Figure label="Total price" amount={d.totalPrice} />
-              <Figure label="Paid" amount={d.amountPaid} color="success" />
-              <Figure
-                label="Outstanding"
-                amount={d.outstandingBalance}
-                color={d.nextDue?.overdue ? 'destructive' : undefined}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+              <Button
+                label="Contract of sale"
+                size="sm"
+                variant="secondary"
+                icon={<FileDown size={14} color={colors.foreground} />}
+                loading={downloading === 'contract-of-sale'}
+                disabled={!!downloading}
+                onPress={() => download('contract-of-sale')}
               />
-              <Figure label="Released to you" amount={d.releasedToSeller} />
+              <Button
+                label="Allocation letter"
+                size="sm"
+                variant="secondary"
+                icon={<FileDown size={14} color={colors.foreground} />}
+                loading={downloading === 'allocation-letter'}
+                disabled={!!downloading || d.status === 'PENDING_DEPOSIT'}
+                onPress={() => download('allocation-letter')}
+              />
             </View>
-            {d.nextDue ? (
-              <Text variant="callout" color="mutedForeground">
-                Next: {d.nextDue.label ? `${d.nextDue.label}, ` : ''}
-                {formatNaira(d.nextDue.amount)} {d.nextDue.overdue ? 'overdue since' : 'due'}{' '}
-                {formatDate(d.nextDue.dueDate)}.
+            {d.status === 'PENDING_DEPOSIT' ? (
+              <Text variant="caption" color="mutedForeground">
+                A letter of allocation is issued once the deposit is paid.
               </Text>
             ) : null}
-            <Text variant="caption" color="mutedForeground">
-              Terms fixed at purchase:{' '}
-              {d.terms.durationMonths === 0 ? 'outright' : `${d.terms.durationMonths} months`},{' '}
-              {formatBps(d.terms.initialDepositBps)} deposit, {formatBps(d.terms.lateFeeBps)} late
-              fee after {d.terms.gracePeriodDays} days’ grace, default after{' '}
-              {d.terms.defaultAfterDays} days.
-            </Text>
-          </Section>
 
-          {(d.conditions?.length ?? 0) > 0 ? (
-            <Section title="Conditions precedent">
-              <ConditionsList
-                conditions={d.conditions ?? []}
-                checklist={d.closingChecklist}
-                busyKey={
-                  deliverCondition.isPending ? (deliverCondition.variables?.key ?? null) : null
-                }
-                onDeliver={(key, note) => deliverCondition.mutate({ key, note })}
+            {d.status === 'DEFAULTED' ? (
+              <View style={{ gap: spacing.sm }}>
+                <FormAlert
+                  tone="error"
+                  message={`This purchase defaulted${d.defaultedAt ? ` on ${formatDate(d.defaultedAt)}` : ''}. You can revoke it to put the plot back on sale; the buyer is refunded what they paid less the ${formatBps(d.terms.revocationChargeBps)} forfeiture.`}
+                />
+                <Button label="Revoke" variant="destructive" onPress={() => setRevoking(true)} />
+              </View>
+            ) : null}
+            {d.status === 'REVOKED' ? (
+              <FormAlert
+                tone="info"
+                message={`Revoked${d.revokedAt ? ` on ${formatDate(d.revokedAt)}` : ''}.${d.revocationReason ? ` ${d.revocationReason}` : ''}${d.refundDue !== undefined ? ` Refund due to the buyer: ${formatNaira(d.refundDue)}.` : ''}`}
               />
+            ) : null}
+
+            <Section title="Money">
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.md }}>
+                <Figure label="Plot price" amount={d.plotPrice} />
+                <Figure label="Premium + fees" amount={d.priceUplift + d.fees} />
+                <Figure label="Total price" amount={d.totalPrice} />
+                <Figure label="Paid" amount={d.amountPaid} color="success" />
+                <Figure
+                  label="Outstanding"
+                  amount={d.outstandingBalance}
+                  color={d.nextDue?.overdue ? 'destructive' : undefined}
+                />
+                <Figure label="Released to you" amount={d.releasedToSeller} />
+              </View>
+              {d.nextDue ? (
+                <Text variant="callout" color="mutedForeground">
+                  Next: {d.nextDue.label ? `${d.nextDue.label}, ` : ''}
+                  {formatNaira(d.nextDue.amount)} {d.nextDue.overdue ? 'overdue since' : 'due'}{' '}
+                  {formatDate(d.nextDue.dueDate)}.
+                </Text>
+              ) : null}
               <Text variant="caption" color="mutedForeground">
-                Nothing is released to you while a condition is open or not met.
+                Terms fixed at purchase:{' '}
+                {d.terms.durationMonths === 0 ? 'outright' : `${d.terms.durationMonths} months`},{' '}
+                {formatBps(d.terms.initialDepositBps)} deposit, {formatBps(d.terms.lateFeeBps)} late
+                fee after {d.terms.gracePeriodDays} days’ grace, default after{' '}
+                {d.terms.defaultAfterDays} days.
               </Text>
             </Section>
-          ) : null}
 
-          <Section title="Conveyance">
-            <MilestoneList
-              milestones={d.milestones}
-              deliverability={(m) => deliverability(d.status, m)}
-              onDeliver={setDelivering}
-              showRelease
-            />
-          </Section>
+            {(d.conditions?.length ?? 0) > 0 ? (
+              <Section title="Conditions precedent">
+                <ConditionsList
+                  conditions={d.conditions ?? []}
+                  checklist={d.closingChecklist}
+                  busyKey={
+                    deliverCondition.isPending ? (deliverCondition.variables?.key ?? null) : null
+                  }
+                  onDeliver={(key, note) => deliverCondition.mutate({ key, note })}
+                />
+                <Text variant="caption" color="mutedForeground">
+                  Nothing is released to you while a condition is open or not met.
+                </Text>
+              </Section>
+            ) : null}
 
-          {d.perfection ? (
-            <Section title="Title perfection">
-              <PerfectionSteps
-                perfection={d.perfection}
-                busyKey={perfection.isPending ? (perfection.variables?.key ?? null) : null}
-                onUpdate={(key, s, reference) => perfection.mutate({ key, status: s, reference })}
+            <Section title="Conveyance">
+              <MilestoneList
+                milestones={d.milestones}
+                deliverability={(m) => deliverability(d.status, m)}
+                onDeliver={setDelivering}
+                showRelease
               />
             </Section>
-          ) : null}
 
-          <Section title="Installment schedule">
-            {d.installments.map((i, n) => {
-              const s = INSTALLMENT_STATUS[i.status] ?? INSTALLMENT_STATUS.PENDING;
-              return (
-                <View key={i.id} style={{ gap: 2 }}>
-                  {n > 0 ? <Divider style={{ marginBottom: spacing.sm }} /> : null}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                    <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
-                      {i.label}
-                    </Text>
-                    <Badge label={s.label} tone={s.tone} />
-                  </View>
-                  <Text variant="caption" color="mutedForeground">
-                    Due {formatDate(i.dueDate, 'short')} · {formatNaira(i.amount)}
-                    {i.lateFee > 0 ? ` + ${formatNaira(i.lateFee)} late fee` : ''} · paid{' '}
-                    {formatNaira(i.amountPaid)}
-                    {i.paidAt ? ` on ${formatDate(i.paidAt, 'short')}` : ''}
-                    {i.outstanding > 0 ? ` · ${formatNaira(i.outstanding)} left` : ''}
-                  </Text>
-                </View>
-              );
-            })}
-          </Section>
+            {d.perfection ? (
+              <Section title="Title perfection">
+                <PerfectionSteps
+                  perfection={d.perfection}
+                  busyKey={perfection.isPending ? (perfection.variables?.key ?? null) : null}
+                  onUpdate={(key, s, reference) => perfection.mutate({ key, status: s, reference })}
+                />
+              </Section>
+            ) : null}
 
-          <Section title="Payments and releases">
-            {d.payments.length === 0 ? (
-              <Text variant="callout" color="mutedForeground">
-                No payments yet.
-              </Text>
-            ) : (
-              d.payments.map((p) => {
-                const s = PAYMENT_STATUS[p.status] ?? PAYMENT_STATUS.PENDING;
+            <Section title="Installment schedule">
+              {d.installments.map((i, n) => {
+                const s = INSTALLMENT_STATUS[i.status] ?? INSTALLMENT_STATUS.PENDING;
                 return (
-                  <View
-                    key={p.id}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Price amount={p.amount} variant="callout" />
-                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                        {formatDate(p.confirmedAt ?? p.createdAt, 'short')} · {p.providerReference}
-                        {p.simulated ? ' · test payment' : ''}
+                  <View key={i.id} style={{ gap: 2 }}>
+                    {n > 0 ? <Divider style={{ marginBottom: spacing.sm }} /> : null}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                      <Text variant="callout" style={{ flex: 1, fontWeight: '600' }}>
+                        {i.label}
                       </Text>
+                      <Badge label={s.label} tone={s.tone} />
                     </View>
-                    <Badge label={s.label} tone={s.tone} />
+                    <Text variant="caption" color="mutedForeground">
+                      Due {formatDate(i.dueDate, 'short')} · {formatNaira(i.amount)}
+                      {i.lateFee > 0 ? ` + ${formatNaira(i.lateFee)} late fee` : ''} · paid{' '}
+                      {formatNaira(i.amountPaid)}
+                      {i.paidAt ? ` on ${formatDate(i.paidAt, 'short')}` : ''}
+                      {i.outstanding > 0 ? ` · ${formatNaira(i.outstanding)} left` : ''}
+                    </Text>
                   </View>
                 );
-              })
-            )}
-            {d.releases.length ? (
-              <>
-                <Text variant="bodyStrong">Released to you</Text>
-                {d.releases.map((r) => {
-                  const s = r.payoutStatus ? PAYOUT_STATUS[r.payoutStatus] : null;
+              })}
+            </Section>
+
+            <Section title="Payments and releases">
+              {d.payments.length === 0 ? (
+                <Text variant="callout" color="mutedForeground">
+                  No payments yet.
+                </Text>
+              ) : (
+                d.payments.map((p) => {
+                  const s = PAYMENT_STATUS[p.status] ?? PAYMENT_STATUS.PENDING;
                   return (
                     <View
-                      key={r.id}
+                      key={p.id}
                       style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
                     >
                       <View style={{ flex: 1 }}>
-                        <Text variant="callout" numberOfLines={2}>
-                          {r.reason}
-                        </Text>
-                        <Text variant="caption" color="mutedForeground">
-                          {formatNaira(r.amount)} · released {formatDate(r.createdAt, 'short')}
-                          {r.paidAt ? ` · paid ${formatDate(r.paidAt, 'short')}` : ''}
+                        <Price amount={p.amount} variant="callout" />
+                        <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                          {formatDate(p.confirmedAt ?? p.createdAt, 'short')} ·{' '}
+                          {p.providerReference}
+                          {p.simulated ? ' · test payment' : ''}
                         </Text>
                       </View>
-                      {s ? <Badge label={s.label} tone={s.tone} /> : null}
+                      <Badge label={s.label} tone={s.tone} />
                     </View>
                   );
-                })}
-              </>
-            ) : null}
-          </Section>
-        </ScrollView>
-      )}
+                })
+              )}
+              {d.releases.length ? (
+                <>
+                  <Text variant="bodyStrong">Released to you</Text>
+                  {d.releases.map((r) => {
+                    const s = r.payoutStatus ? PAYOUT_STATUS[r.payoutStatus] : null;
+                    return (
+                      <View
+                        key={r.id}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text variant="callout" numberOfLines={2}>
+                            {r.reason}
+                          </Text>
+                          <Text variant="caption" color="mutedForeground">
+                            {formatNaira(r.amount)} · released {formatDate(r.createdAt, 'short')}
+                            {r.paidAt ? ` · paid ${formatDate(r.paidAt, 'short')}` : ''}
+                          </Text>
+                        </View>
+                        {s ? <Badge label={s.label} tone={s.tone} /> : null}
+                      </View>
+                    );
+                  })}
+                </>
+              ) : null}
+            </Section>
+          </ScrollView>
+        ) : null}
+      </QueryState>
 
       <Sheet
         open={!!delivering}
@@ -440,7 +437,7 @@ function RevokeForm({
   const revoke = useMutation({
     mutationFn: () => landSalesApi.revoke(d.id, reason.trim()),
     onSuccess: onDone,
-    onError: (e) => toast.show(errorText(e, 'Could not revoke the purchase.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not revoke the purchase.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>
