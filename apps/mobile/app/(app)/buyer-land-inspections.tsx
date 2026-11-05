@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, Linking, RefreshControl, ScrollView, View } from 'react-native';
+import { Linking, RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ClipboardCheck } from 'lucide-react-native';
@@ -31,6 +31,7 @@ import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { Image as ExpoImage } from 'expo-image';
 
 /** Independent inspections the buyer commissioned before buying. */
 export default function BuyerLandInspections() {
@@ -161,7 +162,7 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
                     accessibilityRole="imagebutton"
                     accessibilityLabel={e.fileName}
                   >
-                    <Image
+                    <ExpoImage
                       source={{ uri: e.url }}
                       style={{
                         width: 96,
@@ -169,6 +170,8 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
                         borderRadius: radius.md,
                         backgroundColor: colors.secondary,
                       }}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
                     />
                   </PressableScale>
                 ))}

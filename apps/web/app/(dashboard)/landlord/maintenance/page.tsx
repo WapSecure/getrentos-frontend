@@ -3,7 +3,17 @@
 import { ClipboardList, Wrench } from 'lucide-react';
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 import { MaintenanceRequestsView } from '@/components/landlord/maintenance/MaintenanceRequestsView';
-import { HomeManagementWorkspace } from '@/components/home-management/HomeManagementWorkspace';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@getrentos/ui';
+
+// Only the Home management tab needs the workspace: load it when that tab opens.
+const HomeManagementWorkspace = dynamic(
+  () =>
+    import('@/components/home-management/HomeManagementWorkspace').then(
+      (m) => m.HomeManagementWorkspace
+    ),
+  { ssr: false, loading: () => <Skeleton className="h-96 rounded-xl" /> }
+);
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 
 const TABS: HubTab[] = [

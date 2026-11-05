@@ -1,12 +1,12 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
-import { Button, CardSkeleton, SegmentedControl, PageHeader } from '@getrentos/ui';
+import { Button, CardSkeleton, SegmentedControl, PageHeader, Skeleton } from '@getrentos/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
-import { EstateFinancialsChart } from '@/components/estate/financials/EstateFinancialsChart';
 import {
   EstatePayoutAccountCard,
   EstateStatementsView,
@@ -19,6 +19,18 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
 import type { EstateFinancialStats as EstateFinancialStatsData } from '@/types/estate';
+
+// Charts pull in recharts; load them after the page so it opens faster.
+const EstateFinancialsChart = dynamic(
+  () =>
+    import('@/components/estate/financials/EstateFinancialsChart').then(
+      (m) => m.EstateFinancialsChart
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-80 rounded-xl" />,
+  }
+);
 
 type ReportPeriod = 'monthly' | 'quarterly' | 'yearly';
 

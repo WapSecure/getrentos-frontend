@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Package, Plus } from 'lucide-react-native';
@@ -28,6 +28,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { Image as ExpoImage } from 'expo-image';
 
 /**
  * A household's parcels: what is coming, and what has already been taken in.
@@ -167,7 +168,7 @@ export default function ResidentDeliveries() {
             <Card key={d.id} elevated>
               <View style={{ flexDirection: 'row', gap: spacing.md }}>
                 {d.photoUrl ? (
-                  <Image
+                  <ExpoImage
                     source={{ uri: d.photoUrl }}
                     style={{
                       width: 52,
@@ -175,6 +176,8 @@ export default function ResidentDeliveries() {
                       borderRadius: radius.md,
                       backgroundColor: colors.secondary,
                     }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
                   />
                 ) : (
                   <View

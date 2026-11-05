@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import jsQR from 'jsqr';
 import { CheckCircle2, CloudOff, LogOut, Mic, QrCode, UserPlus, XCircle } from 'lucide-react';
 import {
   Alert,
@@ -61,6 +60,8 @@ async function decodeQrFromFile(file: File): Promise<string | null> {
   if (!ctx) return null;
   ctx.drawImage(image, 0, 0);
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  // The decoder (~50 kB) loads on the first scan, not with the page.
+  const { default: jsQR } = await import('jsqr');
   const code = jsQR(imageData.data, imageData.width, imageData.height);
   return code?.data ?? null;
 }
