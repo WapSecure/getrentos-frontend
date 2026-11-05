@@ -31,6 +31,7 @@ import {
 import { MandateActionButtons } from './MandateActionButtons';
 import { useMandateActions, type ReasonAction, type SimpleAction } from './useMandateActions';
 import { describeAgencyError } from './agencyAccess';
+import { CapabilityChip } from './mandatePresentation';
 
 /**
  * The engagements a firm holds, and what can be done to each one.
@@ -225,17 +226,5 @@ function MandateCard({
         </p>
       )}
     </Card>
-  );
-}
-
-function CapabilityChip({ on, label }: { on: boolean; label: string }) {
-  return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        on ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground line-through'
-      }`}
-    >
-      {label}
-    </span>
   );
 }
