@@ -35,6 +35,7 @@ import { PropertyGallery } from '@/components/renter/property-detail/PropertyGal
 import { PropertyLandlordCard } from '@/components/renter/property-detail/PropertyLandlordCard';
 import { PropertyTrustChain } from '@/components/renter/property-detail/PropertyTrustChain';
 import { ListingCheckCard } from '@/components/renter/property-detail/ListingCheckCard';
+import { AffordabilityCard } from '@/components/renter/property-detail/AffordabilityCard';
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
 import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
@@ -332,6 +333,7 @@ export default function PropertyDetailPage() {
 
         <div className="space-y-6">
           <ListingCheckCard listingId={property.id} />
+          <AffordabilityCard listingId={property.id} />
 
           <PropertyTrustChain property={property} />
 
