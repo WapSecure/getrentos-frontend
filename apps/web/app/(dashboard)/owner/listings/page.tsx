@@ -24,6 +24,7 @@ import { ownerKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { SaleListing, SaleListingStatus } from '@/types/owner';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 
 type StatusFilter = 'all' | SaleListingStatus;
 
@@ -145,6 +146,12 @@ export default function OwnerListingsPage() {
             New listing
           </Button>
         }
+      />
+
+      <IdentityNudge
+        verificationHref={ROUTES.OWNER_VERIFICATION}
+        unlocks="publish sale listings"
+        className="mb-6"
       />
 
       {/* Publishing a for-sale listing needs an identity-verified account (tier 2). */}

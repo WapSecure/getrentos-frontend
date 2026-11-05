@@ -13,7 +13,9 @@ import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
+import { ROUTES } from '@/lib/constants/auth';
 
 // recharts is heavy: load it only when this dashboard mounts.
 const RealtorCommissionChart = dynamic(
@@ -51,6 +53,17 @@ export default function RealtorDashboardPage() {
   return (
     <>
       <RealtorDashboardHeader greeting={greeting} firstName={firstName} />
+      <IdentityNudge
+        verificationHref={ROUTES.REALTOR_VERIFICATION}
+        unlocks="list for clients and receive commissions"
+        className="mb-6"
+      />
+      <IdentityNudge
+        requirement="licence"
+        verificationHref={ROUTES.REALTOR_VERIFICATION}
+        unlocks="list and take on clients"
+        className="mb-6"
+      />
       <AttentionFeed persona="realtor" />
 
       <RealtorStatsCards

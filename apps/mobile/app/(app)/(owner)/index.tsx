@@ -31,6 +31,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
+import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
 /** The kinds of activity the owner dashboard reports. */
 const ACTIVITY_ICON: Record<string, LucideIcon> = {
@@ -153,6 +154,8 @@ export default function OwnerHome() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again."
       >
+        {/* Before anything else: an unverified owner cannot publish or accept. */}
+        <IdentityNudge unlocks="sale listings and offers" />
         {/* What needs you first: offers waiting on an answer. */}
         {d?.pendingOffers ? (
           <AttentionCard

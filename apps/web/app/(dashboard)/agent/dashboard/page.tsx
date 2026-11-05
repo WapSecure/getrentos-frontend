@@ -9,7 +9,9 @@ import { useQuery } from '@tanstack/react-query';
 import { agentService, mapAgentTask } from '@/services/agentService';
 import { agentKeys } from '@/lib/queryKeys';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { unwrap } from '@/lib/apiHelpers';
+import { ROUTES } from '@/lib/constants/auth';
 
 export default function AgentDashboardPage() {
   const user = useAgentUser();
@@ -27,6 +29,11 @@ export default function AgentDashboardPage() {
   return (
     <div className="space-y-6">
       <AgentDashboardHeader greeting={greeting} firstName={firstName} />
+      <IdentityNudge
+        verificationHref={ROUTES.AGENT_VERIFICATION}
+        unlocks="run verification visits and receive payouts"
+        className="mb-6"
+      />
       <AttentionFeed persona="agent" />
 
       <AgentStatsCards
