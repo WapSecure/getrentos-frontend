@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Banknote, CalendarClock, Repeat } from 'lucide-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -19,6 +21,7 @@ import {
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
 import {
   disbursementScheduleService,
   type DisbursementFrequency,
@@ -56,6 +59,16 @@ export function DisbursementScheduleView() {
     queryKey: landlordKeys.disbursementSchedule,
     queryFn: () => unwrap(disbursementScheduleService.get()),
   });
+
+  // A schedule with no verified account to pay into skips every run silently.
+  const { data: payoutAccount, isFetched: payoutAccountChecked } = useQuery({
+    queryKey: ['landlord', 'settings', 'payout'],
+    queryFn: async () => {
+      const response = await landlordService.getPayoutAccount();
+      return response.success ? (response.data ?? null) : null;
+    },
+  });
+  const missingPayoutAccount = payoutAccountChecked && !payoutAccount?.verified;
 
   // Seed the form from the saved schedule once, during render (the React-blessed
   // "adjust state when data arrives" pattern — an effect that setState's would
@@ -138,6 +151,16 @@ export function DisbursementScheduleView() {
             aria-label="Enable automatic payouts"
           />
         </div>
+        {enabled && missingPayoutAccount && (
+          <Alert variant="warning" className="mt-4">
+            You have no verified payout account, so scheduled payouts are skipped until you add one
+            under{' '}
+            <Link href="/landlord/settings" className="font-medium underline">
+              Settings → Payout Account
+            </Link>
+            .
+          </Alert>
+        )}
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <Field label="How often">
