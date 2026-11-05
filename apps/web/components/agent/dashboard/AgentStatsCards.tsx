@@ -19,9 +19,9 @@ export const AgentStatsCards = ({
   const stats = [
     {
       icon: ClipboardList,
-      label: "Today's tasks",
+      label: 'Assigned',
       value: todaysTasks,
-      subtitle: 'Assigned to you',
+      subtitle: 'Not started, not yet due',
       accent: 'primary',
       compact: true,
     },
