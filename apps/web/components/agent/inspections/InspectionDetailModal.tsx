@@ -104,7 +104,7 @@ export const InspectionDetailModal = ({ inspection, onClose }: InspectionDetailM
                 icon={<RefreshCw className="w-3.5 h-3.5" />}
                 href="/agent/sync"
               >
-                Open sync center
+                Open sync centre
               </Button>
             )}
           </div>

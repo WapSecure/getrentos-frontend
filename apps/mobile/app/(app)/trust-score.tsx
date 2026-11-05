@@ -68,7 +68,7 @@ export default function TrustScore() {
         <DetailHeader
           eyebrow="Renter reputation"
           title="Trust score"
-          subtitle="Verification, payment behavior and earned badges"
+          subtitle="Verification, payment behaviour and earned badges"
           onBack={() => goBack()}
           style={{ flex: 1 }}
         />

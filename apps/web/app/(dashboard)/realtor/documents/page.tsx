@@ -102,7 +102,7 @@ export default function RealtorDocumentsPage() {
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
-    { value: 'license', label: 'License' },
+    { value: 'license', label: 'Licence' },
     { value: 'agency_agreement', label: 'Agency agreements' },
     { value: 'listing_contract', label: 'Listing contracts' },
     { value: 'closing_document', label: 'Closing documents' },

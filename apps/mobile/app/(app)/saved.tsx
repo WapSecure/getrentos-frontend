@@ -92,7 +92,7 @@ export default function Saved() {
       <DetailScreenHeader
         eyebrow="Your shortlist"
         title="Saved homes"
-        subtitle="Organize and compare favorite listings"
+        subtitle="Organise and compare favourite listings"
         onBack={() => goBack()}
         accessory={
           <IconButton

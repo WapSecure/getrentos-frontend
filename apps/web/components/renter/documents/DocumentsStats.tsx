@@ -54,7 +54,7 @@ export const DocumentsStats = ({ summary }: DocumentsStatsProps) => {
     },
     {
       icon: Star,
-      label: 'Favorites',
+      label: 'Favourites',
       value: summary.favorites,
       color: 'text-warning',
       bg: 'bg-warning-subtle',

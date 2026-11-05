@@ -14,7 +14,7 @@ import { unwrap } from '@/lib/apiHelpers';
 const DOCUMENT_TYPE_LABELS: Record<IdentityDocumentType, string> = {
   NATIONAL_ID: 'National ID',
   PASSPORT: 'International passport',
-  DRIVERS_LICENSE: "Driver's License",
+  DRIVERS_LICENSE: "Driver's Licence",
   VOTERS_CARD: "Voter's Card",
   NIN: 'NIN slip',
   BVN: 'BVN',

@@ -46,7 +46,7 @@ export default function ShortletWishlist() {
       <DetailScreenHeader
         eyebrow="Shortlet shortlist"
         title="Saved stays"
-        subtitle="Favorite stays ready for comparison"
+        subtitle="Favourite stays ready for comparison"
         onBack={() => goBack()}
       />
 

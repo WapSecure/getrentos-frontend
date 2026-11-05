@@ -37,7 +37,7 @@ export function GeoInsightsPanel({ listingId }: Props) {
   if (query.isLoading) {
     return (
       <View style={{ gap: spacing.sm }}>
-        <Text variant="bodyStrong">Neighborhood</Text>
+        <Text variant="bodyStrong">Neighbourhood</Text>
         <Skeleton height={140} radius={16} />
       </View>
     );
@@ -55,7 +55,7 @@ export function GeoInsightsPanel({ listingId }: Props) {
 
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text variant="bodyStrong">Neighborhood</Text>
+      <Text variant="bodyStrong">Neighbourhood</Text>
 
       {data.walkability ? (
         <Card elevated>

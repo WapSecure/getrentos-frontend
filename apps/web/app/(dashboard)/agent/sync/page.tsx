@@ -79,7 +79,7 @@ export default function AgentSyncPage() {
   return (
     <>
       <PageHeader
-        title="Sync center"
+        title="Sync centre"
         description={`${records.length} records waiting on this device`}
         actions={
           <Button

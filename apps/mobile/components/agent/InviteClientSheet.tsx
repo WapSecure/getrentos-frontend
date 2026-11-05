@@ -49,7 +49,7 @@ function InviteClientForm({
   return (
     <View style={{ gap: spacing.lg }}>
       <Text variant="body" color="mutedForeground">
-        Invite a landlord or property owner to authorize you as their field agent.
+        Invite a landlord or property owner to authorise you as their field agent.
       </Text>
       <TextField
         label="Their email address"

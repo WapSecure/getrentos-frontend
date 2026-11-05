@@ -8,7 +8,7 @@ const actions = [
   { label: 'Start inspection', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
   { label: 'Log verification', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
   { label: 'View tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
-  { label: 'Sync center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
+  { label: 'Sync centre', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
 ];
 
 export const AgentQuickActions = () => {

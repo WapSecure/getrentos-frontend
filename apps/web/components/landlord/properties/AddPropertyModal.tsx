@@ -399,7 +399,7 @@ export const AddPropertyModal = ({
                 onSelect={(file) => update('certificateOfOccupancy', file)}
               />
               <UploadField
-                label="Management authorization"
+                label="Management authorisation"
                 icon={FileText}
                 file={form.managementAuthorization}
                 accept=".pdf,image/jpeg,image/png,image/webp"
@@ -467,7 +467,7 @@ export const AddPropertyModal = ({
             <>
               {!hasAnyVerificationDoc && (
                 <p className="w-full text-xs text-muted-foreground" role="status">
-                  To submit for publishing, add a title deed, C of O or management authorization in
+                  To submit for publishing, add a title deed, C of O or management authorisation in
                   step 3. You can save a draft now and add it later.
                 </p>
               )}
