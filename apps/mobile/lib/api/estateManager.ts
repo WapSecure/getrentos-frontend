@@ -271,7 +271,57 @@ function q(params: Record<string, string | number | boolean | undefined | null>)
   return out ? `?${out}` : '';
 }
 
+/** Per-row outcome of a CSV import; row numbers are the spreadsheet's own lines. */
+export interface CsvImportResult {
+  created: number;
+  failed: number;
+  errors: { row: number; unitLabel?: string; visitorName?: string; message: string }[];
+}
+
+export interface GuestListImportResult extends CsvImportResult {
+  /** 'Added 2 of 3. 1 row needs attention.' */
+  label: string;
+  expiresAt: string;
+  deadlineLabel: string;
+}
+
+/** The template web offers for a households import. */
+export const HOUSEHOLDS_CSV_TEMPLATE =
+  'unitLabel,residentName,contactPhone,contactEmail\n' +
+  'Block A Plot 1,Chidi Okoro,08012345678,chidi@example.com\n';
+
+export const GUEST_LIST_CSV_TEMPLATE = 'name,phone,purpose\nAda Obi,08012345678,Birthday party\n';
+
+/** "1 household imported, 2 failed" */
+export function importSummary(r: CsvImportResult, noun: [string, string]): string {
+  const n = `${r.created} ${r.created === 1 ? noun[0] : noun[1]} imported`;
+  return r.failed > 0 ? `${n}, ${r.failed} failed` : n;
+}
+
+/** Builds the guest-list deadline from the picked local day and time. */
+export function deadlineIso(date: string, time: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) return null;
+  const at = new Date(`${date}T${time}:00`);
+  return Number.isNaN(at.getTime()) ? null : at.toISOString();
+}
+
 export const estateManagerApi = {
+  importHouseholds: (estateId: string, file: PickedFile) => {
+    const form = new FormData();
+    appendFile(form, 'file', file);
+    return apiUpload<CsvImportResult>(`/estate/${estateId}/households/import`, form);
+  },
+  /** One household's guest list, each guest screened like a single invitation. Enterprise. */
+  importGuestList: (
+    estateId: string,
+    input: { householdId: string; expiresAt: string; file: PickedFile }
+  ) => {
+    const form = new FormData();
+    form.append('householdId', input.householdId);
+    form.append('expiresAt', input.expiresAt);
+    appendFile(form, 'file', input.file);
+    return apiUpload<GuestListImportResult>(`/estate/${estateId}/expected-visitors/import`, form);
+  },
   listMine: () => apiFetch<ManagedEstate[]>('/estate/mine'),
   dashboard: (estateId: string) =>
     apiFetch<EstateDashboardStats>(`/estate/${estateId}/dashboard/stats`),

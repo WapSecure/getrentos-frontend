@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus, Search, Users, X } from 'lucide-react-native';
+import { Plus, Search, Upload, Users, X } from 'lucide-react-native';
 import {
   Button,
   Chip,
@@ -16,6 +16,7 @@ import {
   useTheme,
 } from '@getrentos/ui-native';
 import { HouseholdRow, HouseholdSheet } from '@/components/estate/EstateUI';
+import { ImportHouseholdsSheet } from '@/components/estate/CsvImportSheets';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useEstate } from '@/hooks/useEstate';
 import { estateManagerApi, type Household } from '@/lib/api/estateManager';
@@ -31,6 +32,7 @@ export default function EstateHouseholds() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('');
   const [adding, setAdding] = useState(false);
+  const [importing, setImporting] = useState(false);
   const term = useDebouncedValue(search.trim(), 300);
 
   const query = useInfiniteQuery({
@@ -82,6 +84,12 @@ export default function EstateHouseholds() {
                 : (estate?.name ?? ' ')}
             </Text>
           </View>
+          <IconButton
+            accessibilityLabel="Import households from a CSV"
+            disabled={!estateId}
+            icon={<Upload size={20} color={colors.primary} />}
+            onPress={() => setImporting(true)}
+          />
           <IconButton
             accessibilityLabel="Add a household"
             disabled={!estateId}
@@ -178,6 +186,11 @@ export default function EstateHouseholds() {
         />
       )}
       <HouseholdSheet open={adding} onClose={() => setAdding(false)} estateId={estateId} />
+      <ImportHouseholdsSheet
+        open={importing}
+        onClose={() => setImporting(false)}
+        estateId={estateId}
+      />
     </View>
   );
 }

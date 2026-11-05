@@ -25,6 +25,21 @@ function resolveMimeType(name: string, reported?: string | null): string {
   return (ext && EXT_MIME[ext]) || reported || 'application/octet-stream';
 }
 
+/**
+ * Picks a spreadsheet saved as CSV. Android reports CSV under several types, so
+ * all of them are offered; the file is always sent as text/csv.
+ */
+export async function pickCsv(): Promise<PickedFile | null> {
+  const result = await DocumentPicker.getDocumentAsync({
+    type: ['text/csv', 'text/comma-separated-values', 'application/csv', 'text/plain'],
+    copyToCacheDirectory: true,
+    multiple: false,
+  });
+  if (result.canceled || !result.assets?.length) return null;
+  const asset = result.assets[0];
+  return { uri: asset.uri, name: asset.name, mimeType: 'text/csv' };
+}
+
 /** Opens the system document picker (PDF or image). Returns `null` if the user cancels. */
 export async function pickDocument(): Promise<PickedFile | null> {
   const result = await DocumentPicker.getDocumentAsync({
