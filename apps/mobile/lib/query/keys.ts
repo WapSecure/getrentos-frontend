@@ -425,6 +425,9 @@ export const qk = {
   landlord: {
     statementExplanation: (id: string) => ['landlord', 'owner-statements', id, 'explain'] as const,
     collectionPlan: (language: string) => ['landlord', 'collection-plan', language] as const,
+    // Under the leases key, so sending an offer refreshes the advice's pending offer too.
+    renewalAdvice: (leaseId: string, language: string) =>
+      ['landlord', 'leases', leaseId, 'renewal-advice', language] as const,
     dashboardStats: ['landlord', 'dashboard', 'stats'] as const,
     activity: ['landlord', 'dashboard', 'activity'] as const,
     revenueTrend: ['landlord', 'dashboard', 'revenue-trend'] as const,
