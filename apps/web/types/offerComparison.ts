@@ -7,6 +7,8 @@ export interface ComparedOffer {
   amount: string;
   pricePosition: string;
   originalAmount: string | null;
+  /** Your own counter, waiting on the buyer. */
+  yourCounter: string | null;
   /** Who moved last: "yours" means the seller can respond. */
   turn: 'yours' | 'buyer' | 'new';
   deposit: string | null;
