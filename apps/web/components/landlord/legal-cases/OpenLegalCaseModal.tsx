@@ -105,7 +105,16 @@ export function OpenLegalCaseModal({
               onValueChange={setLeaseId}
               options={leases.map((candidate) => ({
                 value: candidate.id,
-                label: `${candidate.propertyName || 'Tenancy'}${candidate.tenantName ? ` — ${candidate.tenantName}` : ''}`,
+                // Unit and status too: one tenant can hold several leases at a property.
+                label: [
+                  [candidate.propertyName || 'Tenancy', candidate.unitName]
+                    .filter(Boolean)
+                    .join(', '),
+                  candidate.tenantName,
+                  candidate.status,
+                ]
+                  .filter(Boolean)
+                  .join(' — '),
               }))}
               placeholder={isLoadingLeases ? 'Loading tenancies…' : 'Choose a tenancy'}
             />

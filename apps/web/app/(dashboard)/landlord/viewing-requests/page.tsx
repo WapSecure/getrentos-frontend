@@ -16,6 +16,7 @@ import {
   Alert,
   ListSkeleton,
   Skeleton,
+  useToast,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
@@ -62,6 +63,8 @@ export default function LandlordViewingRequestsPage() {
     placeholderData: keepPreviousData,
   });
 
+  const toast = useToast();
+  const [openedAt] = useState(() => Date.now());
   const confirmMutation = useMutation({
     mutationFn: (iso: string) =>
       unwrap(landlordService.confirmViewingRequest(confirmTarget!.id, iso)),
@@ -76,6 +79,14 @@ export default function LandlordViewingRequestsPage() {
     mutationFn: (id: string) => unwrap(landlordService.cancelViewingRequest(id)),
     onSuccess: () =>
       void queryClient.invalidateQueries({ queryKey: landlordKeys.viewingRequests() }),
+    onError: (error: Error) => toast.error(error.message || 'Could not cancel this viewing.'),
+  });
+
+  const completeMutation = useMutation({
+    mutationFn: (id: string) => unwrap(landlordService.completeViewingRequest(id)),
+    onSuccess: () =>
+      void queryClient.invalidateQueries({ queryKey: landlordKeys.viewingRequests() }),
+    onError: (error: Error) => toast.error(error.message || 'Could not mark this viewing done.'),
   });
 
   if (query.isLoading) {
@@ -194,6 +205,33 @@ export default function LandlordViewingRequestsPage() {
                     <p className="mt-2 text-sm text-foreground">
                       Confirmed for {formatWhen(viewing.scheduledAt)}
                     </p>
+                  )}
+                  {viewing.status === 'confirmed' && (
+                    <div className="mt-3 flex gap-2">
+                      {viewing.scheduledAt && new Date(viewing.scheduledAt).getTime() < openedAt ? (
+                        <Button
+                          variant="outline"
+                          disabled={completeMutation.isPending}
+                          isLoading={
+                            completeMutation.isPending && completeMutation.variables === viewing.id
+                          }
+                          onClick={() => completeMutation.mutate(viewing.id)}
+                        >
+                          Mark as done
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          disabled={cancelMutation.isPending}
+                          isLoading={
+                            cancelMutation.isPending && cancelMutation.variables === viewing.id
+                          }
+                          onClick={() => cancelMutation.mutate(viewing.id)}
+                        >
+                          Cancel viewing
+                        </Button>
+                      )}
+                    </div>
                   )}
                   <div className="mt-2">
                     <VideoCallButton

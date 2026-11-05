@@ -72,7 +72,8 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
 
             return (
               <motion.div
-                key={payment.month}
+                // Several charges can fall in one month (rent plus a levy), so the label alone collides.
+                key={`${payment.month}-${payment.date}-${index}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}

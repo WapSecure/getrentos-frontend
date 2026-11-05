@@ -134,8 +134,7 @@ export const ApplicationDetailsModal = ({
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {application.status !== 'approved' &&
-                application.status !== 'rejected' &&
+              {(application.status === 'pending' || application.status === 'under_review') &&
                 onWithdraw && (
                   <IconButton
                     label="Withdraw application"

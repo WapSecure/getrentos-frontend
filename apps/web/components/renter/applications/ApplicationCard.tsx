@@ -47,7 +47,8 @@ export const ApplicationCard = ({
   onWithdraw,
 }: ApplicationCardProps) => {
   const status = applicationStatusBadges[application.status];
-  const canWithdraw = application.status !== 'approved' && application.status !== 'rejected';
+  // Matches the API: only an application still awaiting a decision can be withdrawn.
+  const canWithdraw = application.status === 'pending' || application.status === 'under_review';
 
   if (viewMode === 'list') {
     return (
