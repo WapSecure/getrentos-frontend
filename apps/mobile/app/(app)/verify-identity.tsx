@@ -13,7 +13,16 @@ import {
   ShieldCheck,
   ShieldX,
 } from 'lucide-react-native';
-import { Button, Card, Chip, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import {
+  Badge,
+  Button,
+  Card,
+  Chip,
+  Skeleton,
+  Text,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
 import { pickDocument, captureSelfie } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import {
@@ -24,6 +33,9 @@ import {
   type KycStatus,
 } from '@/lib/api/kyc';
 import { ApiError } from '@/lib/api/client';
+import { purposeFor } from '@/lib/api/trust';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { VerificationChecklist } from '@/components/trust/VerificationChecklist';
 
 type ColorKey = keyof ReturnType<typeof useTheme>['colors'];
 
@@ -52,6 +64,7 @@ export default function VerifyIdentity() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const qc = useQueryClient();
+  const { profile, usablePortal } = useAuth();
 
   const [documentType, setDocumentType] = useState<IdentityDocumentType>('NATIONAL_ID');
   const [document, setDocument] = useState<PickedFile | null>(null);
@@ -119,7 +132,9 @@ export default function VerifyIdentity() {
         }}
       >
         <Text variant="body" color="mutedForeground">
-          Verify your identity to unlock actions like submitting rental applications and offers.
+          {verified
+            ? 'Your identity is verified.'
+            : 'Run the instant checks below, or upload an ID document for a person to review.'}
         </Text>
 
         {statusQuery.isLoading ? (
@@ -148,8 +163,22 @@ export default function VerifyIdentity() {
           </Card>
         ) : null}
 
+        {statusQuery.data ? (
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <Badge label={`Trust score ${statusQuery.data.trustScore}`} tone="neutral" />
+            {statusQuery.data.tier !== undefined ? (
+              <Badge label={`Tier ${statusQuery.data.tier}`} tone="info" />
+            ) : null}
+          </View>
+        ) : null}
+
+        {statusQuery.data && !verified && profile?.id ? (
+          <VerificationChecklist subjectId={profile.id} purpose={purposeFor(usablePortal)} />
+        ) : null}
+
         {canSubmit ? (
           <View style={{ gap: spacing.lg }}>
+            <Text variant="heading">Or upload an ID document</Text>
             <View style={{ gap: spacing.sm }}>
               <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
                 Document type

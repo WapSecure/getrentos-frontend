@@ -524,4 +524,10 @@ export const qk = {
     vehicleLogs: (estateId: string) => ['gateman', estateId, 'vehicle-logs'] as const,
     incidents: (estateId: string) => ['gateman', estateId, 'incidents'] as const,
   },
+  /** The identity checks run by the trust orchestrator (the verification centre). */
+  trust: {
+    consents: ['trust', 'consents'] as const,
+    verification: (id: string) => ['trust', 'verification', id] as const,
+    appeals: ['trust', 'appeals', 'mine'] as const,
+  },
 } as const;
