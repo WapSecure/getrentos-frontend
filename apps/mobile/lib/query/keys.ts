@@ -194,6 +194,8 @@ export const qk = {
       ['estate-manager', estateId, 'watchlist', status] as const,
   },
   renter: {
+    deposits: ['renter', 'deposits'] as const,
+    homeTeam: ['renter', 'home-team'] as const,
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,
     applications: ['renter', 'applications'] as const,

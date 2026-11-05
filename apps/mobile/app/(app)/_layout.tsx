@@ -95,6 +95,9 @@ export default function AppLayout() {
         <Stack.Screen name="viewings" options={DETAIL_OPTIONS} />
         <Stack.Screen name="lease" options={DETAIL_OPTIONS} />
         <Stack.Screen name="renter-maintenance" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="renter-deposit" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="renter-home-team" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="delete-account" options={DETAIL_OPTIONS} />
         <Stack.Screen name="report-maintenance" options={DETAIL_OPTIONS} />
         <Stack.Screen name="documents" options={DETAIL_OPTIONS} />
         <Stack.Screen name="roommates" options={DETAIL_OPTIONS} />

@@ -1,0 +1,277 @@
+import { useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PiggyBank, ShieldCheck } from 'lucide-react-native';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  ListSkeleton,
+  Price,
+  Text,
+  TextField,
+  useTheme,
+  useToast,
+} from '@getrentos/ui-native';
+import { qk } from '@/lib/query/keys';
+import {
+  DEDUCTION_STATUS,
+  depositBack,
+  renterHomeApi,
+  sortDeposits,
+  type TenantDeduction,
+  type TenantDeposit,
+} from '@/lib/api/renterHome';
+import { ApiError } from '@/lib/api/client';
+import { formatDate, formatNaira } from '@/lib/format';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
+
+/**
+ * The tenant's deposit: how much, who holds it, every claim on it and what
+ * comes back. A claim the tenant disagrees with can be disputed, and the deposit
+ * is not returned until the owner has answered.
+ */
+export default function RenterDeposit() {
+  const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+  const q = useQuery({ queryKey: qk.renter.deposits, queryFn: renterHomeApi.deposits });
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <DetailScreenHeader
+        eyebrow="Your home"
+        title="Your deposit"
+        subtitle="Who holds it, and anything taken from it"
+        onBack={() => goBack()}
+      />
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: spacing.xl,
+          paddingBottom: insets.bottom + spacing['3xl'],
+          gap: spacing.md,
+        }}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={q.isRefetching}
+            onRefresh={() => q.refetch()}
+            tintColor={colors.mutedForeground}
+          />
+        }
+      >
+        {q.isLoading ? (
+          <ListSkeleton rows={2} variant="card" height={160} />
+        ) : q.isError ? (
+          <ErrorState onRetry={() => q.refetch()} />
+        ) : (q.data ?? []).length === 0 ? (
+          <EmptyState
+            icon={<PiggyBank size={32} color={colors.mutedForeground} />}
+            title="No deposit on record"
+            description="When a lease sets a deposit, it shows here."
+          />
+        ) : (
+          sortDeposits(q.data!).map((d) => <DepositCard key={d.leaseId} deposit={d} />)
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+function DepositCard({ deposit: d }: { deposit: TenantDeposit }) {
+  const { colors, spacing } = useTheme();
+  const hold = d.hold;
+  return (
+    <Card style={{ gap: spacing.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <Text variant="bodyStrong">{d.propertyTitle}</Text>
+          <Text variant="caption" color="mutedForeground">
+            {d.unitName}
+          </Text>
+        </View>
+        {hold ? (
+          <Badge
+            label={hold.status === 'RETURNED' ? 'Returned' : 'Held'}
+            tone={hold.status === 'RETURNED' ? 'neutral' : 'success'}
+          />
+        ) : null}
+      </View>
+
+      {!hold ? (
+        <View style={{ gap: spacing.xs }}>
+          <Text variant="callout" color="mutedForeground">
+            Your lease sets a deposit of {formatNaira(d.agreedAmount)}, but it is not recorded as
+            held yet.
+          </Text>
+          {d.paidThroughGetRentos?.paid ? (
+            <Text variant="callout" color="mutedForeground">
+              You paid it through GetRentos
+              {d.paidThroughGetRentos.paidDate
+                ? ` on ${formatDate(d.paidThroughGetRentos.paidDate, 'short')}`
+                : ''}
+              .
+            </Text>
+          ) : null}
+          <Text variant="caption" color="mutedForeground">
+            If you paid it directly, ask your landlord or manager to record it.
+          </Text>
+        </View>
+      ) : (
+        <>
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <Figure label="Deposit" amount={hold.amount} />
+            <Figure label="Deducted" amount={hold.summary.approvedDeductions} />
+            <Figure
+              label={hold.status === 'RETURNED' ? 'Returned' : 'Due back'}
+              amount={depositBack(hold)}
+            />
+          </View>
+          {hold.summary.proposedDeductions > 0 && hold.status !== 'RETURNED' ? (
+            <Text variant="caption" color="mutedForeground">
+              {formatNaira(hold.summary.proposedDeductions)} more is proposed but not agreed, so it
+              is not counted yet.
+            </Text>
+          ) : null}
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <ShieldCheck size={14} color={colors.success} style={{ marginTop: 2 }} />
+            <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+              {hold.heldByGetRentos
+                ? 'Held by GetRentos under Payment Protection, not by your landlord. It is only paid out as recorded here.'
+                : `Held by ${hold.heldBy ?? 'your landlord'}. GetRentos keeps the record, and every deduction shows here.`}
+            </Text>
+          </View>
+          <Text variant="caption" color="mutedForeground">
+            Recorded {formatDate(hold.takenAt, 'short')}
+            {hold.returnedAt ? ` · returned ${formatDate(hold.returnedAt, 'short')}` : ''}
+          </Text>
+
+          <Text variant="callout" style={{ fontWeight: '600', marginTop: spacing.xs }}>
+            Deductions
+          </Text>
+          {hold.deductions.length === 0 ? (
+            <Text variant="callout" color="mutedForeground">
+              None. Your full deposit is due back to you.
+            </Text>
+          ) : (
+            hold.deductions.map((x) => <Deduction key={x.id} d={x} />)
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
+function Figure({ label, amount }: { label: string; amount: number }) {
+  return (
+    <View style={{ flex: 1, gap: 2 }}>
+      <Text variant="caption" color="mutedForeground">
+        {label}
+      </Text>
+      <Price amount={amount} variant="bodyStrong" />
+    </View>
+  );
+}
+
+function Deduction({ d }: { d: TenantDeduction }) {
+  const { colors, spacing, radius } = useTheme();
+  const qc = useQueryClient();
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const dispute = useMutation({
+    mutationFn: () => renterHomeApi.disputeDeduction(d.id, reason.trim()),
+    onSuccess: () => {
+      setOpen(false);
+      setReason('');
+      qc.invalidateQueries({ queryKey: qk.renter.deposits });
+      toast.show(
+        'Dispute sent. The owner has to answer before your deposit is returned.',
+        'success'
+      );
+    },
+    onError: (e) =>
+      toast.show(e instanceof ApiError ? e.message : 'Could not send your dispute.', 'error'),
+  });
+  const status = DEDUCTION_STATUS[d.status];
+  return (
+    <View
+      style={{
+        gap: spacing.xs,
+        paddingTop: spacing.sm,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+      }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+        <View style={{ flex: 1 }}>
+          <Text variant="callout" style={{ fontWeight: '600' }}>
+            {formatNaira(d.amount)} · {d.reason}
+          </Text>
+          <Text variant="caption" color="mutedForeground">
+            {formatDate(d.createdAt, 'short')}
+            {d.fromInspection ? ' · from the move-out inspection' : ''}
+          </Text>
+        </View>
+        <Badge label={status.label} tone={status.tone} />
+      </View>
+      {d.decisionNote && d.status === 'REJECTED' && !d.disputeAnswer ? (
+        <Text variant="caption" color="mutedForeground">
+          Why it was dropped: {d.decisionNote}
+        </Text>
+      ) : null}
+      {d.disputedAt ? (
+        <View
+          style={{
+            backgroundColor: colors.secondary,
+            borderRadius: radius.md,
+            padding: spacing.sm,
+            gap: 2,
+          }}
+        >
+          <Text variant="caption">You disputed this: {d.disputeReason}</Text>
+          <Text variant="caption" color="mutedForeground">
+            {d.disputeAnswer
+              ? `Owner’s answer: ${d.disputeAnswer}`
+              : 'Waiting for the owner’s answer. Your deposit cannot be returned until they answer.'}
+          </Text>
+        </View>
+      ) : null}
+      {d.canDispute ? (
+        open ? (
+          <View style={{ gap: spacing.sm }}>
+            <TextField
+              label="Why you disagree"
+              placeholder="For example, the damage was there when you moved in"
+              value={reason}
+              onChangeText={setReason}
+              multiline
+              maxLength={2000}
+              hint="At least 10 characters."
+            />
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <Button
+                label="Send dispute"
+                size="sm"
+                loading={dispute.isPending}
+                disabled={reason.trim().length < 10 || dispute.isPending}
+                onPress={() => dispute.mutate()}
+              />
+              <Button label="Back" size="sm" variant="ghost" onPress={() => setOpen(false)} />
+            </View>
+          </View>
+        ) : (
+          <Button
+            label="Dispute this"
+            size="sm"
+            variant="ghost"
+            onPress={() => setOpen(true)}
+            style={{ alignSelf: 'flex-start' }}
+          />
+        )
+      ) : null}
+    </View>
+  );
+}
