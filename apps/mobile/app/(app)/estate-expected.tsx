@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BadgeCheck, CalendarCheck, Sparkles } from 'lucide-react-native';
+import { BadgeCheck, CalendarCheck, Sparkles, Upload } from 'lucide-react-native';
 import {
   Button,
   Card,
@@ -15,6 +16,7 @@ import {
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { isUpgradeError } from '@/components/host/HostUI';
 import { useEstate } from '@/hooks/useEstate';
+import { GuestListSheet } from '@/components/estate/CsvImportSheets';
 import { gatemanApi } from '@/lib/api/gateman';
 import { formatTime } from '@/lib/format';
 import { qk } from '@/lib/query/keys';
@@ -28,6 +30,7 @@ export default function EstateExpected() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const { estate, estateId } = useEstate();
+  const [guestList, setGuestList] = useState(false);
   const query = useQuery({
     queryKey: qk.estateManager.expectedToday(estateId),
     queryFn: () => gatemanApi.getExpectedToday(estateId),
@@ -63,6 +66,16 @@ export default function EstateExpected() {
         }
         onBack={() => goBack()}
       />
+      {d && estateId ? (
+        <Button
+          label="Enter a guest list"
+          size="sm"
+          variant="secondary"
+          icon={<Upload size={16} color={colors.foreground} />}
+          onPress={() => setGuestList(true)}
+          style={{ alignSelf: 'flex-start' }}
+        />
+      ) : null}
       {isUpgradeError(query.error) ? (
         <Card elevated style={{ gap: spacing.md }}>
           <Sparkles size={22} color={colors.primary} />
@@ -131,6 +144,7 @@ export default function EstateExpected() {
           </Text>
         </>
       )}
+      <GuestListSheet open={guestList} onClose={() => setGuestList(false)} estateId={estateId} />
     </ScrollView>
   );
 }
