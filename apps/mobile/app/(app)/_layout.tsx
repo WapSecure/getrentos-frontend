@@ -50,6 +50,9 @@ export default function AppLayout() {
         <Stack.Screen name="buyer-land" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-land-purchase/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="buyer-land-resale/[txId]" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="buyer-land-reservations" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="land-estates" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="land-estate/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="land-listing/[id]" options={DETAIL_OPTIONS} />
         <Stack.Screen name="shortlets" options={DETAIL_OPTIONS} />
         <Stack.Screen name="shortlet/[id]" options={DETAIL_OPTIONS} />

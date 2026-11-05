@@ -1,5 +1,12 @@
 import {
   buyerRefundPreview,
+  countdownTo,
+  filterPlots,
+  planTermsLine,
+  quotePlot,
+  splitReservations,
+  type EstatePlot,
+  type Reservation,
   cancelDescription,
   milestoneAction,
   plotLabel,
@@ -135,5 +142,119 @@ describe('confirming steps', () => {
   it('labels plots', () => {
     expect(plotLabel({ plotNumber: '12', block: 'B' })).toBe('Block B, plot 12');
     expect(plotLabel({ plotNumber: '12' })).toBe('Plot 12');
+  });
+});
+
+describe('estates and reservations', () => {
+  it('quotes a plot as the server prices it', () => {
+    // 6 months, 30% deposit, 10% uplift on ₦4.1m with ₦900k fees.
+    expect(
+      quotePlot(4_100_000, 900_000, {
+        durationMonths: 6,
+        initialDepositBps: 3000,
+        priceUpliftBps: 1000,
+      })
+    ).toEqual({
+      plotPrice: 4_100_000,
+      priceUplift: 410_000,
+      fees: 900_000,
+      totalPrice: 5_410_000,
+      initialPayment: 1_353_000 + 900_000,
+      monthlyInstallment: Math.floor((5_410_000 - 2_253_000) / 6),
+      durationMonths: 6,
+    });
+    expect(
+      quotePlot(4_100_000, 900_000, {
+        durationMonths: 0,
+        initialDepositBps: 10000,
+        priceUpliftBps: 1000,
+      })
+    ).toMatchObject({
+      priceUplift: 0,
+      totalPrice: 5_000_000,
+      initialPayment: 5_000_000,
+      monthlyInstallment: 0,
+    });
+  });
+
+  it('counts down as web does, urgent under an hour', () => {
+    const now = Date.parse('2026-11-05T10:00:00Z');
+    expect(countdownTo('2026-11-07T13:00:00Z', now)).toMatchObject({
+      label: '2d 3h',
+      urgent: false,
+    });
+    expect(countdownTo('2026-11-05T12:05:00Z', now).label).toBe('2h 05m');
+    expect(countdownTo('2026-11-05T10:09:07Z', now)).toMatchObject({
+      label: '9m 07s',
+      urgent: true,
+    });
+    expect(countdownTo('2026-11-05T09:00:00Z', now)).toMatchObject({
+      expired: true,
+      label: 'Expired',
+    });
+  });
+
+  it('filters plots by status, block and corner', () => {
+    const plot = (
+      id: string,
+      status: EstatePlot['status'],
+      block: string,
+      isCorner = false
+    ): EstatePlot => ({
+      id,
+      plotNumber: id,
+      block,
+      areaSqm: 450,
+      isCorner,
+      tags: [],
+      price: 1,
+      status,
+    });
+    const plots = [
+      plot('1', 'AVAILABLE', 'A', true),
+      plot('2', 'RESERVED', 'A'),
+      plot('3', 'SOLD', 'B'),
+      plot('4', 'ALLOCATED', 'B'),
+    ];
+    expect(filterPlots(plots, { status: 'available' }).map((p) => p.id)).toEqual(['1']);
+    expect(filterPlots(plots, { status: 'sold' }).map((p) => p.id)).toEqual(['3', '4']);
+    expect(
+      filterPlots(plots, { status: 'all', block: 'A', cornerOnly: true }).map((p) => p.id)
+    ).toEqual(['1']);
+  });
+
+  it('describes a plan’s terms', () => {
+    expect(planTermsLine({ durationMonths: 0, initialDepositBps: 10000, priceUpliftBps: 0 })).toBe(
+      'Pay in full to start. No price uplift.'
+    );
+    expect(planTermsLine({ durationMonths: 6, initialDepositBps: 3000, priceUpliftBps: 500 })).toBe(
+      '30% deposit, then 6 monthly installments. 5% added to the plot price.'
+    );
+  });
+
+  it('puts live holds first, soonest first, and treats run-out active holds as past', () => {
+    const now = Date.parse('2026-11-05T10:00:00Z');
+    const r = (id: string, status: Reservation['status'], expiresAt: string): Reservation => ({
+      id,
+      plotId: id,
+      layoutId: 'l',
+      layoutName: 'L',
+      plotNumber: id,
+      price: 1,
+      status,
+      expiresAt,
+      createdAt: '',
+    });
+    const { live, past } = splitReservations(
+      [
+        r('a', 'ACTIVE', '2026-11-06T10:00:00Z'),
+        r('b', 'ACTIVE', '2026-11-05T12:00:00Z'),
+        r('c', 'ACTIVE', '2026-11-05T09:00:00Z'),
+        r('d', 'CONVERTED', '2026-11-01T00:00:00Z'),
+      ],
+      now
+    );
+    expect(live.map((x) => x.id)).toEqual(['b', 'a']);
+    expect(past.map((x) => x.id)).toEqual(['c', 'd']);
   });
 });
