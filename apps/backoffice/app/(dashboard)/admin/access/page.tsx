@@ -33,6 +33,16 @@ import type { AdminStaffMember, AdminStaffRole } from '@/types/admin';
 
 const PAGE_SIZE = 10;
 
+/**
+ * The staff role the role picker edits. A member can also hold a marketplace
+ * role (e.g. property_owner) listed first, which the picker has no option for.
+ */
+function staffRoleOf(member: AdminStaffMember): AdminStaffRole | undefined {
+  return member.roles.find(({ role }) => role in ADMIN_ROLE_DETAILS)?.role as
+    | AdminStaffRole
+    | undefined;
+}
+
 export default function AdminAccessPage() {
   const queryClient = useQueryClient();
   const user = useAdminUser();
@@ -223,14 +233,14 @@ export default function AdminAccessPage() {
                   <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
                     <Select
                       ariaLabel={`Role for ${member.legalName}`}
-                      value={member.roles[0]?.role}
+                      value={staffRoleOf(member)}
                       disabled={
                         updateRoleMutation.isPending ||
                         isSelf(member) ||
                         member.accountStatus === 'pending'
                       }
                       onValueChange={(role) => {
-                        if (role !== member.roles[0]?.role)
+                        if (role !== staffRoleOf(member))
                           setRoleTarget({ member, role: role as AdminStaffRole });
                       }}
                       options={Object.entries(ADMIN_ROLE_DETAILS).map(([role, details]) => ({
@@ -238,7 +248,7 @@ export default function AdminAccessPage() {
                         label: details.label,
                         disabled:
                           !assignableRoles.has(role as AdminStaffRole) &&
-                          role !== member.roles[0]?.role,
+                          role !== staffRoleOf(member),
                       }))}
                       className="w-full sm:w-52"
                     />

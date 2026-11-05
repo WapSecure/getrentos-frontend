@@ -13,7 +13,7 @@ type Assignment = {
   status: string;
   agent: { legalName: string; email: string; companyName?: string | null };
 };
-type Property = { id: string; title: string; city: string; state: string };
+type Property = { id: string; title: string; city: string; state: string; assigned?: boolean };
 
 export function ClientAgentAccess() {
   const queryClient = useQueryClient();
@@ -71,6 +71,17 @@ export function ClientAgentAccess() {
         queryKey: agentKeys.assignableProperties(propertiesFor ?? ''),
       });
       toast.success('Property assigned to Agent.');
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+  const unassign = useMutation({
+    mutationFn: ({ id, propertyId }: { id: string; propertyId: string }) =>
+      unwrap(agentService.unassignClientProperty(id, propertyId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: agentKeys.assignableProperties(propertiesFor ?? ''),
+      });
+      toast.success('Property taken back from the Agent.');
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -137,16 +148,37 @@ export function ClientAgentAccess() {
                       <span className="min-w-0">
                         {property.title} · {property.city}, {property.state}
                       </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        isLoading={assign.isPending && assign.variables?.propertyId === property.id}
-                        onClick={() =>
-                          assign.mutate({ id: assignment.id, propertyId: property.id })
-                        }
-                      >
-                        Assign
-                      </Button>
+                      {property.assigned ? (
+                        <span className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Assigned</span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive"
+                            isLoading={
+                              unassign.isPending && unassign.variables?.propertyId === property.id
+                            }
+                            onClick={() =>
+                              unassign.mutate({ id: assignment.id, propertyId: property.id })
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          isLoading={
+                            assign.isPending && assign.variables?.propertyId === property.id
+                          }
+                          onClick={() =>
+                            assign.mutate({ id: assignment.id, propertyId: property.id })
+                          }
+                        >
+                          Assign
+                        </Button>
+                      )}
                     </div>
                   ))}
                   {propertyTotal > 0 && (

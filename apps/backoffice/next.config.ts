@@ -14,7 +14,9 @@ type ImageRemotePattern = {
  * host must be allowed for `next/image` to optimize them.
  */
 function imageRemotePatterns(): ImageRemotePattern[] {
-  const patterns: ImageRemotePattern[] = [{ protocol: 'http', hostname: 'localhost', port: '*' }];
+  // Local dev: MinIO serves uploads from http://localhost:9000. Omitting `port`
+  // matches any port; `port: '*'` does not, so every uploaded avatar crashed the page.
+  const patterns: ImageRemotePattern[] = [{ protocol: 'http', hostname: 'localhost' }];
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (apiUrl) {
@@ -53,6 +55,9 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: imageRemotePatterns(),
+    // Next 16 refuses to optimise images whose host resolves to a private IP.
+    // Locally MinIO is on localhost, so allow it in dev only (same as apps/web).
+    ...(process.env.NODE_ENV !== 'production' ? { dangerouslyAllowLocalIP: true } : {}),
   },
 };
 

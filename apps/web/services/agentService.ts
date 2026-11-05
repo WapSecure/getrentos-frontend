@@ -116,6 +116,8 @@ export interface AgentAssignableProperty {
   title: string;
   city: string;
   state: string;
+  /** Already assigned to this agent. */
+  assigned?: boolean;
 }
 
 const lower = <T extends string>(value: T) => value.toLowerCase() as Lowercase<T>;
@@ -269,6 +271,10 @@ export const agentService = {
         method: 'POST',
         body: JSON.stringify({ propertyId }),
       })
+    ),
+  unassignClientProperty: (id: string, propertyId: string) =>
+    safeCall(() =>
+      authFetch(`/agent/clients/${id}/properties/${propertyId}`, { method: 'DELETE' })
     ),
   createClientTask: (data: Record<string, unknown>) =>
     safeCall(() => authFetch('/agent/tasks', { method: 'POST', body: JSON.stringify(data) })),

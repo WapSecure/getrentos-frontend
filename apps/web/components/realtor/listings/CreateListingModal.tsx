@@ -310,6 +310,9 @@ export const CreateListingModal = ({
                 verificationHref={ROUTES.REALTOR_VERIFICATION}
               />
             ) : null}
+            <p className="text-xs text-muted-foreground">
+              Your client is notified and publishes the draft from their own Listings page.
+            </p>
             <div className="flex justify-end">
               <Button
                 variant="primary"

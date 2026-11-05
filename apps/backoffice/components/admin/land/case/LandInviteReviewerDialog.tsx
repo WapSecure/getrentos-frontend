@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { UserRoundPlus } from 'lucide-react';
 import {
   Button,
@@ -21,7 +22,11 @@ import {
 } from '@/types/land';
 import { humaniseEnum } from '@/lib/landDiligence';
 import { fromDateInput, tomorrowDateInput } from './shared';
-import { UserLookup, type PickedUser } from './UserLookup';
+import { unwrap } from '@getrentos/shared';
+import {
+  adminLandProfessionalService,
+  landProfessionalKeys,
+} from '@/services/adminLandProfessionalService';
 
 const MAX_CHECKS = 20;
 
@@ -29,7 +34,8 @@ interface LandInviteReviewerDialogProps {
   open: boolean;
   onClose: () => void;
   checks: LandDiligenceCheck[];
-  canSearchUsers: boolean;
+  /** No longer used: professionals come from the accredited list, not the user search. */
+  canSearchUsers?: boolean;
   isPending: boolean;
   onSubmit: (input: InviteLandReviewerInput) => void;
 }
@@ -42,19 +48,29 @@ export const LandInviteReviewerDialog = ({
   open,
   onClose,
   checks,
-  canSearchUsers,
   isPending,
   onSubmit,
 }: LandInviteReviewerDialogProps) => {
-  const [user, setUser] = useState<PickedUser | null>(null);
+  const [userId, setUserId] = useState('');
   const [role, setRole] = useState<LandReviewerRole>('SURVEYOR');
+  // Only accredited professionals of the chosen role can be engaged, so offer
+  // just those rather than every platform user (the API refuses anyone else).
+  const professionals = useQuery({
+    queryKey: landProfessionalKeys.list('ACCREDITED', role),
+    queryFn: () => unwrap(adminLandProfessionalService.list({ status: 'ACCREDITED', role })),
+    enabled: open,
+  });
+  const professionalOptions = (professionals.data ?? []).map((p) => ({
+    value: p.userId,
+    label: p.email ? `${p.name} · ${p.email}` : p.name,
+  }));
   const [checkKeys, setCheckKeys] = useState<string[]>([]);
   const [dueAt, setDueAt] = useState('');
   const [minDate] = useState(tomorrowDateInput);
 
   const toggle = (key: string, on: boolean) =>
     setCheckKeys((keys) => (on ? [...keys, key] : keys.filter((existing) => existing !== key)));
-  const canSubmit = Boolean(user) && checkKeys.length > 0 && checkKeys.length <= MAX_CHECKS;
+  const canSubmit = Boolean(userId) && checkKeys.length > 0 && checkKeys.length <= MAX_CHECKS;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && !isPending && onClose()}>
@@ -68,19 +84,14 @@ export const LandInviteReviewerDialog = ({
                 files a report. They never see the owner&apos;s contact details.
               </DialogDescription>
             </div>
-            <Field label="Professional" required>
-              <UserLookup
-                value={user}
-                onChange={setUser}
-                canSearch={canSearchUsers}
-                ariaLabel="Find the professional by name, email or user id"
-              />
-            </Field>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Role" required>
                 <Select
                   value={role}
-                  onValueChange={(value) => setRole(value as LandReviewerRole)}
+                  onValueChange={(value) => {
+                    setRole(value as LandReviewerRole);
+                    setUserId('');
+                  }}
                   ariaLabel="Reviewer role"
                   options={LAND_REVIEWER_ROLES.map((value) => ({
                     value,
@@ -92,6 +103,23 @@ export const LandInviteReviewerDialog = ({
                 <DatePicker value={dueAt} onChange={(next) => setDueAt(next)} min={minDate} />
               </Field>
             </div>
+            <Field
+              label="Professional"
+              required
+              hint={
+                professionals.isSuccess && professionalOptions.length === 0
+                  ? `No accredited ${humaniseEnum(role).toLowerCase()} yet.`
+                  : 'Accredited professionals for the role above.'
+              }
+            >
+              <Select
+                value={userId || undefined}
+                onValueChange={setUserId}
+                ariaLabel="Professional"
+                placeholder={professionals.isLoading ? 'Loading…' : 'Choose a professional'}
+                options={professionalOptions}
+              />
+            </Field>
             <Field
               label="Checks they may decide"
               required
@@ -129,8 +157,7 @@ export const LandInviteReviewerDialog = ({
                 isLoading={isPending}
                 icon={<UserRoundPlus className="h-4 w-4" />}
                 onClick={() =>
-                  user &&
-                  onSubmit({ userId: user.id, role, checkKeys, dueAt: fromDateInput(dueAt) })
+                  userId && onSubmit({ userId, role, checkKeys, dueAt: fromDateInput(dueAt) })
                 }
               >
                 Send invitation
