@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Pressable, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -8,6 +8,7 @@ import {
   IdCard,
   KeyRound,
   MapPin,
+  Mic,
   ScanLine,
   UserPlus,
   XCircle,
@@ -24,10 +25,13 @@ import {
   Text,
   useTheme,
   useToast,
+  SwitchRow,
 } from '@getrentos/ui-native';
 import { QrScannerSheet } from '@/components/gateman/QrScannerSheet';
 import { PostSwitcherSheet } from '@/components/gateman/PostSwitcherSheet';
 import { WalkInSheet } from '@/components/gateman/WalkInSheet';
+import { useGateVoice } from '@/components/gateman/useGateVoice';
+import { digitsFromSpeech, useVoiceInput } from '@/lib/voice';
 import { IdDocumentSheet } from '@/components/gateman/IdDocumentSheet';
 import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedSheet';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
@@ -89,6 +93,17 @@ export default function GatemanCheckIn() {
   } | null>(null);
   /** A failed override attempt, kept separate so the guard's typed reason survives it. */
   const [overrideError, setOverrideError] = useState<string | null>(null);
+
+  // Voice at the gate: say the PIN, and hear each outcome while watching the visitor.
+  const gateVoice = useGateVoice(result, blocked?.refusal.message ?? null);
+  // A spoken PIN fills the boxes and checks in once all six digits are heard.
+  const checkInRef = useRef<((code: string) => void) | null>(null);
+  const voicePin = useVoiceInput('en', (heard) => {
+    const digits = digitsFromSpeech(heard).slice(0, 6);
+    setResult(null);
+    setPin(digits);
+    if (digits.length === 6) checkInRef.current?.(digits);
+  });
 
   const {
     estate,
@@ -182,6 +197,14 @@ export default function GatemanCheckIn() {
       void haptics.error();
     },
   });
+
+  useEffect(() => {
+    checkInRef.current = (code) => {
+      if (verify.isPending) return;
+      setBlocked(null);
+      verify.mutate({ code });
+    };
+  }, [verify]);
 
   const checkOut = useMutation({
     mutationFn: (pass: VisitorPass) =>
@@ -531,6 +554,16 @@ export default function GatemanCheckIn() {
             <Text variant="caption" color="mutedForeground">
               or enter the PIN
             </Text>
+            {voicePin.available ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={voicePin.listening ? 'Stop listening' : 'Say the PIN'}
+                onPress={() => (voicePin.listening ? voicePin.stop() : void voicePin.start())}
+                hitSlop={8}
+              >
+                <Mic size={18} color={voicePin.listening ? colors.destructive : colors.primary} />
+              </Pressable>
+            ) : null}
             <View
               style={{ flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.border }}
             />
@@ -554,6 +587,18 @@ export default function GatemanCheckIn() {
             disabled={pin.length !== 6}
             onPress={submit}
             style={{ marginTop: spacing.lg }}
+          />
+
+          {voicePin.error ? (
+            <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.xs }}>
+              {voicePin.error}
+            </Text>
+          ) : null}
+          <SwitchRow
+            label="Speak results"
+            description="Hear who is checked in, or why not, while you watch the visitor."
+            value={gateVoice.enabled}
+            onValueChange={gateVoice.toggle}
           />
 
           {/* The visitor who has nothing arranged. Raising a request is not the
