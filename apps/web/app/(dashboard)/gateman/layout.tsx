@@ -78,7 +78,7 @@ export default function GatemanLayout({ children }: { children: ReactNode }) {
         <GateQueueSync />
         <div className="min-h-screen bg-background">
           <GatemanNavbar user={user} />
-          <main>
+          <main id="main-content" tabIndex={-1}>
             <div
               className={`${pathname === ROUTES.GATEMAN_DASHBOARD ? 'max-w-6xl' : 'max-w-lg'} mx-auto p-6 lg:p-8`}
             >
