@@ -529,3 +529,8 @@ export const mandateKeys = {
 export const attentionKeys = {
   feed: (persona: string, estateId?: string) => ['attention', persona, estateId ?? ''] as const,
 };
+
+/** Offers on a seller's listings, compared side by side (owners, landlords and managers). */
+export const sellerOfferKeys = {
+  comparison: ['seller', 'offers', 'compare'] as const,
+};
