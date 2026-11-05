@@ -156,12 +156,17 @@ export default function LandlordLeasesPage() {
       leaseId,
       newRent,
       newEndDate,
+      message,
     }: {
       leaseId: string;
       newRent: number;
       newEndDate: string;
-    }) => unwrap(landlordService.renewLease(leaseId, newRent, newEndDate)),
-    onSuccess: () => {
+      message: string;
+    }) => unwrap(landlordService.renewLease(leaseId, newRent, newEndDate, message)),
+    onSuccess: (_lease, { message }) => {
+      toast.success(
+        message.trim() ? 'Renewal offer sent, with your note as a message.' : 'Renewal offer sent.'
+      );
       queryClient.invalidateQueries({ queryKey: ['landlord', 'leases'] });
       setRenewingLease(null);
     },
@@ -184,9 +189,14 @@ export default function LandlordLeasesPage() {
   const handleSignLease = (id: string, signatureData: string) =>
     signLeaseMutation.mutate({ id, signatureData });
 
-  const handleSendRenewalOffer = async (leaseId: string, newRent: number, newEndDate: string) => {
+  const handleSendRenewalOffer = async (
+    leaseId: string,
+    newRent: number,
+    newEndDate: string,
+    message: string
+  ) => {
     try {
-      await renewLeaseMutation.mutateAsync({ leaseId, newRent, newEndDate });
+      await renewLeaseMutation.mutateAsync({ leaseId, newRent, newEndDate, message });
       return true;
     } catch {
       return false;
@@ -217,7 +227,11 @@ export default function LandlordLeasesPage() {
         </Button>
       </div>
 
-      <div className="mb-6 flex gap-2 overflow-x-auto" role="group" aria-label="Filter leases by status">
+      <div
+        className="mb-6 flex gap-2 overflow-x-auto"
+        role="group"
+        aria-label="Filter leases by status"
+      >
         {statusFilters.map((option) => (
           <ToggleChip
             key={option.value}

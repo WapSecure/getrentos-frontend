@@ -59,6 +59,7 @@ import type { ListingDraft, ListingSelfCheck, ListingSelfCheckInput } from '@/ty
 import type { StatementExplanation } from '@/types/statementExplanation';
 import type { CollectionPlan } from '@/types/collectionPlan';
 import type { ApplicantSummary } from '@/types/applicantSummary';
+import type { RenewalAdvice } from '@/types/renewalAdvice';
 
 export interface RentCollectionStats {
   totalCollected: number;
@@ -631,12 +632,30 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/leases/${id}/send`, { method: 'PATCH' }));
   },
 
-  async renewLease(id: string, rentAmount: number, leaseEnd: string): Promise<ApiResponse<Lease>> {
+  /** Sends a renewal offer; a note goes to the tenant as a message with it. */
+  async renewLease(
+    id: string,
+    rentAmount: number,
+    leaseEnd: string,
+    message?: string
+  ): Promise<ApiResponse<Lease>> {
     return safeCall(() =>
       authFetch(`/landlord/leases/${id}/renew`, {
         method: 'PATCH',
-        body: JSON.stringify({ rentAmount, leaseEnd }),
+        body: JSON.stringify({ rentAmount, leaseEnd, ...(message?.trim() ? { message } : {}) }),
       })
+    );
+  },
+
+  /** Renew or re-let: first-year figures for each, a suggested rent and a drafted note. */
+  async getRenewalAdvice(
+    id: string,
+    language: ReplyLanguage = 'en'
+  ): Promise<ApiResponse<RenewalAdvice>> {
+    return safeCall(() =>
+      authFetch(
+        `/landlord/leases/${id}/renewal-advice${language === 'en' ? '' : `?language=${language}`}`
+      )
     );
   },
 
