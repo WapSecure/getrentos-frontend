@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Badge, type BadgeVariant, Button, Select, type SelectOption } from '@getrentos/ui';
-import { unwrap } from '@getrentos/shared';
+import { unwrap, humaniseEnum } from '@getrentos/shared';
 import type { LucideIcon } from 'lucide-react';
 import {
   Building2,
@@ -317,7 +317,7 @@ export function ListingsQueue() {
       {
         key: 'type',
         header: 'Type',
-        render: (l) => <Pill label={l.listingType} variant="neutral" />,
+        render: (l) => <Pill label={humaniseEnum(l.listingType)} variant="neutral" />,
       },
       {
         key: 'price',

@@ -1,4 +1,5 @@
 import { Pressable, View } from 'react-native';
+import { humaniseEnum } from '@getrentos/shared';
 import { router } from 'expo-router';
 import { AlertTriangle, ChevronRight, Clock, Siren, Wrench } from 'lucide-react-native';
 import { Badge, Card, Text, useTheme } from '@getrentos/ui-native';
@@ -23,7 +24,7 @@ export const STATUS_TONE: Record<WorkOrderStatus, Tone> = {
 
 export function PriorityTag({ p }: { p: Priority }) {
   const tone = p === 'URGENT' ? 'danger' : p === 'HIGH' ? 'warning' : 'neutral';
-  return <Badge label={p} tone={tone} />;
+  return <Badge label={humaniseEnum(p)} tone={tone} />;
 }
 
 /** A work order at a glance: what, where, how urgent, and whether its clock is running out. */
@@ -38,7 +39,7 @@ export function WorkOrderCard({ w }: { w: WorkOrder }) {
         router.push({ pathname: '/(app)/home-care/work-order/[id]', params: { id: w.id } });
       }}
       accessibilityRole="button"
-      accessibilityLabel={`${w.isEmergency ? 'Emergency. ' : ''}${w.issueTitle}, ${w.priority} priority, ${STATUS_LABEL[w.status]}, ${where}${sla ? `. ${sla.label}` : ''}`}
+      accessibilityLabel={`${w.isEmergency ? 'Emergency. ' : ''}${w.issueTitle}, ${humaniseEnum(w.priority)} priority, ${STATUS_LABEL[w.status]}, ${where}${sla ? `. ${sla.label}` : ''}`}
     >
       {({ pressed }) => (
         <Card elevated style={{ gap: spacing.sm, opacity: pressed ? 0.92 : 1 }}>
