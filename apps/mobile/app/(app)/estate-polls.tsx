@@ -33,6 +33,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
+import { WriteItForMe } from '@/components/estate/WriteItForMe';
 import { goBack } from '@/lib/goBack';
 import { errorMessage } from '@/lib/api/client';
 
@@ -247,6 +248,14 @@ function CreateForm({
   const toast = useToast();
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
+  const [topic, setTopic] = useState('');
+  const draft = useMutation({
+    mutationFn: () => estateManagerApi.draftPoll(estateId, topic.trim()),
+    onSuccess: (d) => {
+      setQuestion(d.question);
+      setOptions(d.options);
+    },
+  });
   const clean = cleanPollOptions(options);
   const typed = options.filter((o) => o.trim()).length;
 
@@ -265,6 +274,16 @@ function CreateForm({
 
   return (
     <View style={{ gap: spacing.md }}>
+      <WriteItForMe
+        hint="Describe the decision. You get a neutral question and fair choices to edit."
+        placeholder="e.g. Backup pump for ₦850,000 split across households, or keep repairing"
+        value={topic}
+        onChange={setTopic}
+        draftLabel="Draft poll"
+        onDraft={() => draft.mutate()}
+        loading={draft.isPending}
+        error={draft.error ? errorMessage(draft.error, 'Could not draft it. Try again.') : null}
+      />
       <TextField
         label="Question"
         required
@@ -272,7 +291,6 @@ function CreateForm({
         onChangeText={setQuestion}
         multiline
         maxLength={500}
-        autoFocus
         placeholder="e.g. Should we raise the security levy to ₦15,000?"
       />
       <View style={{ gap: spacing.sm }}>

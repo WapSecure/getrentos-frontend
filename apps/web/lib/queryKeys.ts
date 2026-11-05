@@ -335,6 +335,7 @@ export const buyerKeys = {
 };
 
 export const estateKeys = {
+  reportDigest: (estateId: string) => ['estate', estateId, 'report-digest'] as const,
   collectionPlan: (estateId: string, language: string) =>
     ['estate', estateId, 'collection-plan', language] as const,
   myEstate: ['estate', 'me'] as const,

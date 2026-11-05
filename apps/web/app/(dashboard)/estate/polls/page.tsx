@@ -102,6 +102,7 @@ export default function EstatePollsPage() {
       )}
 
       <CreatePollModal
+        estateId={estate?.id}
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
         onSubmit={(data) => createPoll.mutate(data)}

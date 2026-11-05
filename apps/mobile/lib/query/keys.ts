@@ -161,6 +161,7 @@ export const qk = {
     invoices: ['billing', 'invoices'] as const,
   },
   estateManager: {
+    reportDigest: (estateId: string) => ['estate-manager', estateId, 'report-digest'] as const,
     collectionPlan: (estateId: string, language: string) =>
       ['estate-manager', estateId, 'collection-plan', language] as const,
     estates: ['estate-manager', 'estates'] as const,

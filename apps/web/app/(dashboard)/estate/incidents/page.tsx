@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   ToggleChip,
   PageHeader,
+  useToast,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -20,6 +21,8 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ReportIncidentModal } from '@/components/estate/incidents/ReportIncidentModal';
 import { CloseIncidentModal } from '@/components/estate/incidents/CloseIncidentModal';
 import { IncidentCard } from '@/components/estate/incidents/IncidentCard';
+import { ReportDigestPanel } from '@/components/estate/incidents/ReportDigestPanel';
+import { AnnouncementModal } from '@/components/estate/announcements/AnnouncementModal';
 import type { IncidentStatus } from '@/types/estate';
 
 const statusFilters: { value: IncidentStatus | 'all'; label: string }[] = [
@@ -41,6 +44,9 @@ export default function EstateIncidentsPage() {
   } | null>(null);
 
   const { estate, isLoading: isEstateLoading } = useSelectedEstate();
+  // "Draft an update" from a shared problem opens the announcement dialog with its notes.
+  const [updateNotes, setUpdateNotes] = useState<string | null>(null);
+  const toast = useToast();
 
   const { data: incidents = [], isLoading: isIncidentsLoading } = useQuery({
     queryKey: estateKeys.incidents(
@@ -58,6 +64,7 @@ export default function EstateIncidentsPage() {
   const invalidate = () => {
     if (!estate) return;
     queryClient.invalidateQueries({ queryKey: ['estate', estate.id, 'incidents'] });
+    queryClient.invalidateQueries({ queryKey: estateKeys.reportDigest(estate.id) });
   };
 
   const reportIncident = useMutation({
@@ -67,6 +74,17 @@ export default function EstateIncidentsPage() {
       invalidate();
       setIsReportOpen(false);
     },
+  });
+
+  const postUpdate = useMutation({
+    mutationFn: (data: Parameters<typeof estateService.createAnnouncement>[1]) =>
+      unwrap(estateService.createAnnouncement(estate!.id, data)),
+    onSuccess: () => {
+      toast.success('Update posted to residents.');
+      queryClient.invalidateQueries({ queryKey: estateKeys.announcements(estate!.id) });
+      setUpdateNotes(null);
+    },
+    onError: (error: Error) => toast.error(error.message || 'Could not post the update.'),
   });
 
   const closeMutation = useMutation({
@@ -124,6 +142,8 @@ export default function EstateIncidentsPage() {
         }
       />
 
+      <ReportDigestPanel estateId={estate.id} onDraftUpdate={setUpdateNotes} />
+
       <div
         className="flex flex-wrap gap-2 mb-6"
         role="group"
@@ -180,6 +200,16 @@ export default function EstateIncidentsPage() {
           closeMutation.mutate({ id: closeTarget.id, action: closeTarget.action, resolutionNotes })
         }
         isSubmitting={closeMutation.isPending}
+      />
+      <AnnouncementModal
+        key={updateNotes ?? 'none'}
+        estateId={estate.id}
+        initialNotes={updateNotes ?? ''}
+        isOpen={updateNotes !== null}
+        announcement={null}
+        onClose={() => setUpdateNotes(null)}
+        onSubmit={(data) => postUpdate.mutate(data)}
+        isSubmitting={postUpdate.isPending}
       />
     </>
   );

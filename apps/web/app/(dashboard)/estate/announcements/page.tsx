@@ -171,6 +171,7 @@ export default function EstateAnnouncementsPage() {
 
       <AnnouncementModal
         key={editingAnnouncement?.id ?? 'new'}
+        estateId={estate?.id}
         isOpen={isModalOpen}
         announcement={editingAnnouncement}
         onClose={() => {
