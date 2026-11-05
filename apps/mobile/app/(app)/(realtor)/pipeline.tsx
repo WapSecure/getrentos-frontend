@@ -25,6 +25,7 @@ import {
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
+import { FollowUpsCard } from '@/components/realtor/FollowUpsCard';
 import {
   LEAD_STAGES,
   realtorApi,
@@ -182,6 +183,14 @@ function Leads({ onAdd }: { onAdd: () => void }) {
           }}
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           renderItem={({ item }: { item: RealtorLead }) => <LeadCard lead={item} />}
+          ListHeaderComponent={
+            // Today's follow-ups sit above the open leads, not inside a search or stage.
+            filter === 'OPEN' && !term ? (
+              <View style={{ paddingBottom: spacing.md }}>
+                <FollowUpsCard />
+              </View>
+            ) : null
+          }
           ListEmptyComponent={
             <EmptyState
               icon={<Users size={34} color={colors.mutedForeground} />}

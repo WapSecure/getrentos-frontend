@@ -286,6 +286,8 @@ export const qk = {
     listings: ['realtor', 'listings'] as const,
     leads: (status?: string, search?: string) =>
       ['realtor', 'leads', { status: status ?? null, search: search ?? null }] as const,
+    // Under leads, so marking a lead contacted or changing its stage refreshes it.
+    followUps: (language: string) => ['realtor', 'leads', 'follow-ups', language] as const,
     lead: (id: string) => ['realtor', 'lead', id] as const,
     viewings: ['realtor', 'viewings'] as const,
     offers: ['realtor', 'offers'] as const,
