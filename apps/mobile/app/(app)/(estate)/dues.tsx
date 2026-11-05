@@ -27,6 +27,7 @@ import { DueRow, confirmPaid, errorText } from '@/components/estate/EstateUI';
 import { Stepper } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
 import { useEstate } from '@/hooks/useEstate';
+import { CollectionPlanCard } from '@/components/collections/CollectionPlanCard';
 import { estateManagerApi, type Due, type ManagedEstate } from '@/lib/api/estateManager';
 import { haptics } from '@/lib/haptics';
 import { qk } from '@/lib/query/keys';
@@ -170,6 +171,11 @@ export default function EstateDues() {
             paddingHorizontal: spacing.xl,
             paddingBottom: insets.bottom + spacing['3xl'],
           }}
+          ListHeaderComponent={
+            <View style={{ marginBottom: spacing.md }}>
+              <CollectionPlanCard path={`/estate/${estateId}/collections/plan`} />
+            </View>
+          }
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           renderItem={({ item }: { item: Due }) => (
             <DueRow

@@ -27,6 +27,7 @@ import {
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
+import { CollectionPlanCard } from '@/components/collections/CollectionPlanCard';
 
 const PAGE_SIZE = 20;
 
@@ -92,6 +93,7 @@ export default function LandlordArrears() {
                   onPress={() => router.push('/(app)/landlord-notices')}
                 />
               ) : null}
+              <CollectionPlanCard path="/landlord/collections/plan" />
             </View>
           }
           renderItem={({ item }: { item: ArrearsPayment }) => <ArrearsRow payment={item} />}

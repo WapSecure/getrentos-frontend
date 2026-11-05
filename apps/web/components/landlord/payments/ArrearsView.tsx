@@ -15,6 +15,7 @@ import {
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { CollectionPlanPanel } from '@/components/shared/collections/CollectionPlanPanel';
 import { landlordService } from '@/services/landlordService';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -87,6 +88,8 @@ export function ArrearsView() {
           </Card>
         )
       )}
+
+      <CollectionPlanPanel path="/landlord/collections/plan" noticesHref="/landlord/notices" />
 
       {arrearsQuery.isLoading ? (
         <ListSkeleton rows={4} />
