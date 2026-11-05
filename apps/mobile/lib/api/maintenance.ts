@@ -85,6 +85,18 @@ export interface CreateMaintenanceInput {
   photos?: PickedFile[];
 }
 
+/** A repair request drafted from photos, to check and send (web: types/repairDraft.ts). */
+export interface RepairDraft {
+  title: string;
+  category: MaintenanceCategory;
+  priority: MaintenancePriority;
+  description: string;
+  isEmergency: boolean;
+  safetyNote: string | null;
+  quickChecks: string[];
+  unclear: boolean;
+}
+
 export const maintenanceApi = {
   list: (page = 1, pageSize = 30) =>
     apiFetch<Paginated<MaintenanceRequest>>(
@@ -100,6 +112,14 @@ export const maintenanceApi = {
     if (input.isEmergency) form.append('isEmergency', 'true');
     input.photos?.forEach((p) => appendFile(form, 'files', p));
     return apiUpload<MaintenanceRequest>('/renter/maintenance', form);
+  },
+
+  /** A repair request drafted from photos (and a note). Nothing is stored or sent. */
+  draftFromPhotos: (photos: PickedFile[], note?: string) => {
+    const form = new FormData();
+    photos.slice(0, 3).forEach((p) => appendFile(form, 'files', p));
+    if (note?.trim()) form.append('note', note.trim());
+    return apiUpload<RepairDraft>('/renter/maintenance/photo-draft', form);
   },
 
   cancel: (id: string) =>
