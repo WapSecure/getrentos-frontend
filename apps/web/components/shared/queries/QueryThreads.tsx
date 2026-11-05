@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Clock, MessageSquareText, Plus } from 'lucide-react';
+import { ArrowLeft, Clock, MessageSquareText, Plus, Sparkles } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -15,10 +15,12 @@ import {
   ListSkeleton,
   PageErrorState,
   Select,
+  SuggestedDraft,
   Textarea,
 } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
+import type { OwnerQueryDraft } from '@/types/ownerQueryDraft';
 import { mine as myMandates } from '@/services/mandateService';
 import {
   CATEGORY_LABEL,
@@ -151,8 +153,19 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
     mutationFn: () => unwrap(ownerQueryService.reply(id, reply.trim())),
     onSuccess: () => {
       setReply('');
+      setDraft(null);
       setError(null);
       refresh();
+    },
+    onError,
+  });
+  // A drafted reply from the property's records, for the manager side.
+  const [draft, setDraft] = useState<OwnerQueryDraft | null>(null);
+  const drafting = useMutation({
+    mutationFn: () => unwrap(ownerQueryService.draftReply(id)),
+    onSuccess: (d) => {
+      setDraft(d);
+      setError(null);
     },
     onError,
   });
@@ -251,6 +264,17 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
               >
                 Send
               </Button>
+              {!isOwner && !resolved && (
+                <Button
+                  variant="outline"
+                  icon={<Sparkles className="h-4 w-4" aria-hidden />}
+                  isLoading={drafting.isPending}
+                  loadingText="Drafting…"
+                  onClick={() => drafting.mutate()}
+                >
+                  {draft ? 'Draft again' : 'Draft a reply'}
+                </Button>
+              )}
               {!resolved && (
                 <Button
                   variant="outline"
@@ -270,6 +294,17 @@ const ThreadView = ({ id, onBack }: { id: string; onBack: () => void }) => {
                 </Button>
               )}
             </div>
+            {draft && !isOwner && (
+              <SuggestedDraft
+                text={draft.reply}
+                toCheck={draft.toCheck}
+                sources={draft.facts}
+                sourcesLabel="Records it was written from"
+                disclaimer={draft.disclaimer}
+                onUse={setReply}
+                onDismiss={() => setDraft(null)}
+              />
+            )}
           </div>
         )}
         {error && (

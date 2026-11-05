@@ -28,6 +28,16 @@ export interface AdminQueryThread extends AdminQuerySummary {
   }[];
 }
 
+/** A drafted reply from the property's records; ops edit and send it. */
+export interface AdminOwnerQueryDraft {
+  queryId: string;
+  reply: string;
+  toCheck: string[];
+  facts: { title: string; lines: string[] }[];
+  source: 'ai' | 'heuristic';
+  disclaimer: string;
+}
+
 const post = <T>(path: string, body?: unknown): Promise<ApiResponse<T>> =>
   safeCall(() =>
     authFetch<T>(path, { method: 'POST', ...(body ? { body: JSON.stringify(body) } : {}) })
@@ -41,6 +51,9 @@ export const adminOwnerQueryService = {
   },
   get(id: string) {
     return safeCall(() => authFetch<AdminQueryThread>(`/admin/owner-queries/${id}`));
+  },
+  draftReply(id: string) {
+    return post<AdminOwnerQueryDraft>(`/admin/owner-queries/${id}/draft-reply`);
   },
   reply(id: string, body: string) {
     return post<AdminQueryThread>(`/admin/owner-queries/${id}/messages`, { body });

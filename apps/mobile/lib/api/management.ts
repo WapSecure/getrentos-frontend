@@ -367,6 +367,16 @@ export interface InspectionDetail extends InspectionListItem {
 
 /* --------------------------------- api --------------------------------- */
 
+/** A drafted reply to an owner's question; the manager edits and sends it. */
+export interface OwnerQueryDraft {
+  queryId: string;
+  reply: string;
+  toCheck: string[];
+  facts: { title: string; lines: string[] }[];
+  source: 'ai' | 'heuristic';
+  disclaimer: string;
+}
+
 export const managementApi = {
   activity: (input: { propertyId?: string; who: ActivityWho; before?: string | null }) =>
     apiFetch<ActivityPage>(
@@ -383,6 +393,9 @@ export const managementApi = {
   }) => apiFetch<QueryThread>('/owner-queries', { method: 'POST', body: input }),
   replyQuery: (id: string, body: string) =>
     apiFetch<QueryThread>(`/owner-queries/${id}/messages`, { method: 'POST', body: { body } }),
+  /** A drafted reply from the property's records, for the manager side. Nothing is sent. */
+  draftQueryReply: (id: string) =>
+    apiFetch<OwnerQueryDraft>(`/owner-queries/${id}/draft-reply`, { method: 'POST' }),
   resolveQuery: (id: string) =>
     apiFetch<QueryThread>(`/owner-queries/${id}/resolve`, { method: 'POST' }),
   reopenQuery: (id: string) =>

@@ -10,6 +10,7 @@ import {
   Card,
   DetailSkeleton,
   QueryState,
+  SuggestedDraft,
   Text,
   TextField,
   useTheme,
@@ -18,6 +19,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import {
   managementApi,
+  type OwnerQueryDraft,
   QUERY_CATEGORY_LABEL,
   queryStatusBadge,
   querySlaText,
@@ -49,9 +51,17 @@ export default function ManagerQueryThread() {
     mutationFn: () => managementApi.replyQuery(id, reply.trim()),
     onSuccess: () => {
       setReply('');
+      setDraft(null);
       refresh();
     },
     onError: fail,
+  });
+  // A drafted reply from the property's records, for the manager side.
+  const [draft, setDraft] = useState<OwnerQueryDraft | null>(null);
+  const drafting = useMutation({
+    mutationFn: () => managementApi.draftQueryReply(id),
+    onSuccess: setDraft,
+    onError: (e) => toast.show(errorMessage(e, 'Could not draft a reply.'), 'error'),
   });
   const resolve = useMutation({
     mutationFn: () => managementApi.resolveQuery(id),
@@ -161,6 +171,25 @@ export default function ManagerQueryThread() {
                   numberOfLines={3}
                   editable={!busy}
                 />
+                {!isOwner && !resolved ? (
+                  <Button
+                    label={draft ? 'Draft again' : 'Draft a reply'}
+                    variant="secondary"
+                    loading={drafting.isPending}
+                    loadingLabel="Drafting…"
+                    disabled={busy}
+                    onPress={() => drafting.mutate()}
+                  />
+                ) : null}
+                {draft && !isOwner ? (
+                  <SuggestedDraft
+                    text={draft.reply}
+                    toCheck={draft.toCheck}
+                    disclaimer={draft.disclaimer}
+                    onUse={setReply}
+                    onDismiss={() => setDraft(null)}
+                  />
+                ) : null}
                 <Button
                   label="Send"
                   loading={send.isPending}

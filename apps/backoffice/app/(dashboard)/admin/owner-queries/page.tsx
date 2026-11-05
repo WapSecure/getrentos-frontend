@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Clock, MessageSquareText } from 'lucide-react';
+import { ArrowLeft, Clock, MessageSquareText, Sparkles } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -14,6 +14,7 @@ import {
   PageErrorState,
   Tabs,
   TabsList,
+  SuggestedDraft,
   TabsTrigger,
   Textarea,
 } from '@getrentos/ui';
@@ -21,6 +22,7 @@ import { unwrap } from '@getrentos/shared';
 
 import {
   adminOwnerQueryService,
+  type AdminOwnerQueryDraft,
   type AdminQuerySummary,
   type QueryStatus,
 } from '@/services/adminOwnerQueryService';
@@ -70,8 +72,19 @@ const Thread = ({
     mutationFn: () => unwrap(adminOwnerQueryService.reply(id, reply.trim())),
     onSuccess: () => {
       setReply('');
+      setDraft(null);
       setError(null);
       refresh();
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+  // A drafted reply from the property's records.
+  const [draft, setDraft] = useState<AdminOwnerQueryDraft | null>(null);
+  const drafting = useMutation({
+    mutationFn: () => unwrap(adminOwnerQueryService.draftReply(id)),
+    onSuccess: (d) => {
+      setDraft(d);
+      setError(null);
     },
     onError: (err: Error) => setError(err.message),
   });
@@ -156,12 +169,32 @@ const Thread = ({
               </Button>
               <Button
                 variant="outline"
+                icon={<Sparkles className="h-4 w-4" aria-hidden />}
+                isLoading={drafting.isPending}
+                loadingText="Drafting…"
+                onClick={() => drafting.mutate()}
+              >
+                {draft ? 'Draft again' : 'Draft a reply'}
+              </Button>
+              <Button
+                variant="outline"
                 isLoading={resolve.isPending}
                 onClick={() => resolve.mutate()}
               >
                 Mark resolved
               </Button>
             </div>
+            {draft && (
+              <SuggestedDraft
+                text={draft.reply}
+                toCheck={draft.toCheck}
+                sources={draft.facts}
+                sourcesLabel="Records it was written from"
+                disclaimer={draft.disclaimer}
+                onUse={setReply}
+                onDismiss={() => setDraft(null)}
+              />
+            )}
           </div>
         )}
         {error && <Alert variant="danger">{error}</Alert>}
