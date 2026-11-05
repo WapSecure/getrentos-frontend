@@ -1,5 +1,6 @@
 'use client';
 
+import { humaniseEnum } from '@getrentos/shared';
 import { AlertTriangle, RotateCcw, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
 import {
   Dialog,
@@ -87,7 +88,7 @@ export const FraudAlertDetailModal = ({
                 {alert.subject.legalName}
               </DialogTitle>
               <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                {alert.subject.role}
+                {humaniseEnum(alert.subject.role)}
                 {alert.subject.email ? ` · ${alert.subject.email}` : ''}
                 {alert.subject.isVerified ? ' · verified' : ' · unverified'}
               </p>
@@ -130,7 +131,7 @@ export const FraudAlertDetailModal = ({
                 )}
                 <p className="truncate">
                   <span className="font-medium text-foreground">Role:</span>{' '}
-                  <span className="capitalize">{alert.subject.role}</span>
+                  <span>{humaniseEnum(alert.subject.role)}</span>
                 </p>
                 {alert.relatedEntityType && (
                   <p className="truncate">
