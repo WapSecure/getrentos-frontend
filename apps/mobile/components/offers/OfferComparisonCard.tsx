@@ -73,7 +73,9 @@ export function OfferComparisonCard({ side }: { side: OfferSide }) {
                   style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
                 />
               </Pressable>
-              <Text variant="caption">{l.overview}</Text>
+              <Text variant="caption" color={l.saleInProgress ? 'warning' : undefined}>
+                {l.overview}
+              </Text>
               {isOpen
                 ? l.offers.map((o) => (
                     <View
@@ -89,7 +91,9 @@ export function OfferComparisonCard({ side }: { side: OfferSide }) {
                         <Text variant="label" style={{ flex: 1 }} numberOfLines={1}>
                           {o.label} · {o.buyerName}
                         </Text>
-                        <Badge label={TURN[o.turn].label} tone={TURN[o.turn].tone} />
+                        {l.saleInProgress ? null : (
+                          <Badge label={TURN[o.turn].label} tone={TURN[o.turn].tone} />
+                        )}
                       </View>
                       <Text variant="callout">{o.amount}</Text>
                       <Text variant="caption" color="mutedForeground">
