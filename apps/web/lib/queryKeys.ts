@@ -320,6 +320,7 @@ export const shortletKeys = {
 export const buyerKeys = {
   dashboard: ['buyer', 'dashboard'] as const,
   listings: ['buyer', 'listings'] as const,
+  diligence: (listingId: string) => ['buyer', 'listings', listingId, 'diligence'] as const,
   saved: ['buyer', 'saved'] as const,
   viewings: ['buyer', 'viewings'] as const,
   offers: ['buyer', 'offers'] as const,

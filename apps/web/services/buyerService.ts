@@ -1,3 +1,4 @@
+import type { BuyerDiligence } from '@/types/buyerDiligence';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
@@ -224,6 +225,9 @@ export const buyerService = {
       );
       return { ...response, items: response.items.map(mapBuyerListing) };
     }),
+  /** Due diligence on a property for sale, from what is on file. Read-only. */
+  getDiligence: (listingId: string) =>
+    safeCall(() => authFetch<BuyerDiligence>(`/buyer/listings/${listingId}/diligence`)),
   saveListing: (listingId: string) =>
     safeCall(() => authFetch(`/buyer/saved/${listingId}`, { method: 'POST' })),
   unsaveListing: (listingId: string) =>

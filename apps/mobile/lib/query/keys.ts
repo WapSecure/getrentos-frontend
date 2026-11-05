@@ -412,6 +412,7 @@ export const qk = {
     listings: (filters: Record<string, unknown>) => ['buyer', 'listings', filters] as const,
     recommendations: ['buyer', 'listings', 'recommendations'] as const,
     listingDetail: (id: string) => ['buyer', 'listings', id] as const,
+    diligence: (id: string) => ['buyer', 'listings', id, 'diligence'] as const,
     viewings: (page = 1, pageSize = 20) => ['buyer', 'viewings', { page, pageSize }] as const,
     saved: (page = 1, pageSize = 50) => ['buyer', 'saved', { page, pageSize }] as const,
     offers: (page = 1, pageSize = 20) => ['buyer', 'offers', { page, pageSize }] as const,

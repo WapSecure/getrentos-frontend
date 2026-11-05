@@ -78,7 +78,25 @@ export interface ListingFilters {
   search?: string;
 }
 
+/** Due diligence on a property for sale, from what is on file (web: types/buyerDiligence.ts). */
+export interface BuyerDiligence {
+  listingId: string;
+  price: { asking: string; vsSimilar: string | null };
+  items: {
+    key: string;
+    title: string;
+    status: 'done' | 'in_progress' | 'to_do' | 'concern';
+    finding: string;
+    why: string;
+  }[];
+  summary: string;
+  questions: string[];
+  disclaimer: string;
+}
+
 export const buyerApi = {
+  diligence: (listingId: string) =>
+    apiFetch<BuyerDiligence>(`/buyer/listings/${listingId}/diligence`),
   dashboard: () => apiFetch<BuyerDashboard>('/buyer/dashboard'),
 
   profile: () => apiFetch<BuyerProfile>('/buyer/profile'),
