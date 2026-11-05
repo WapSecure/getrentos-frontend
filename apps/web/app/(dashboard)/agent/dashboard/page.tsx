@@ -4,6 +4,7 @@ import { useAgentUser } from '../layout';
 import { AgentDashboardHeader } from '@/components/agent/dashboard/AgentDashboardHeader';
 import { AgentStatsCards } from '@/components/agent/dashboard/AgentStatsCards';
 import { AgentTaskList } from '@/components/agent/dashboard/AgentTaskList';
+import { TodaysRoute } from '@/components/agent/dashboard/TodaysRoute';
 import { AgentQuickActions } from '@/components/agent/dashboard/AgentQuickActions';
 import { useQuery } from '@tanstack/react-query';
 import { agentService, mapAgentTask } from '@/services/agentService';
@@ -61,6 +62,7 @@ export default function AgentDashboardPage() {
 
       <div className="grid gap-6 xl:grid-cols-12">
         <div className="space-y-6 xl:col-span-8">
+          <TodaysRoute />
           <AgentTaskList tasks={(dashboard?.upcomingTasks ?? []).map(mapAgentTask)} />
         </div>
         <aside className="xl:col-span-4">
