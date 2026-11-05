@@ -57,7 +57,10 @@ export function ShortlistComparison({ listingIds }: { listingIds: string[] }) {
             className="space-y-1.5 rounded-lg border border-border p-3 text-xs"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-medium text-foreground">{h.title}</p>
+              <p className="text-sm font-medium text-foreground">
+                <span className="text-muted-foreground">{h.label} · </span>
+                {h.title}
+              </p>
               <Badge variant={CHECK[h.listingCheck].variant}>{CHECK[h.listingCheck].label}</Badge>
             </div>
             <p className="text-muted-foreground">
