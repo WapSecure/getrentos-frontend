@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from 'lucide-react';
 import { cn, formatCurrency, humaniseEnum } from '@getrentos/shared';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
+import { DisputeSummaryPanel } from './DisputeSummaryPanel';
 import type { Dispute, DisputeDetail, DisputeMessage, DisputeResolveOutcome } from '@/types/admin';
 
 const STATUS_VARIANT: Record<Dispute['status'], BadgeVariant> = {
@@ -191,6 +192,10 @@ export const DisputeCaseModal = ({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="px-4 py-3 border-b border-border">
+            <DisputeSummaryPanel disputeId={dispute.id} />
           </div>
 
           <EvidencePanel
