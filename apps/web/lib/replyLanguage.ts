@@ -1,26 +1,34 @@
-/** Languages GetRentos can answer in. pcm is Nigerian Pidgin. */
-export type ReplyLanguage = 'en' | 'pcm' | 'yo' | 'ha' | 'ig';
+import { languageLabels, type Language } from '@/lib/i18n/translations';
+
+/**
+ * Languages GetRentos can answer in: the app's own languages (English and
+ * Pidgin, from i18n) plus languages only the AI answers in so far.
+ */
+export type ReplyLanguage = Language | 'yo' | 'ha' | 'ig';
 
 export const REPLY_LANGUAGES: { value: ReplyLanguage; label: string }[] = [
-  { value: 'en', label: 'English' },
-  { value: 'pcm', label: 'Pidgin' },
+  { value: 'en', label: languageLabels.en },
+  { value: 'pcm', label: languageLabels.pcm },
   { value: 'yo', label: 'Yorùbá' },
   { value: 'ha', label: 'Hausa' },
   { value: 'ig', label: 'Igbo' },
 ];
 
 export const languageLabel = (code: ReplyLanguage) =>
-  REPLY_LANGUAGES.find((l) => l.value === code)?.label ?? 'English';
+  REPLY_LANGUAGES.find((l) => l.value === code)?.label ?? languageLabels.en;
 
 const KEY = 'getrentos.replyLanguage';
 
-/** The language this browser last chose. A convenience only: falls back to English. */
-export function savedReplyLanguage(): ReplyLanguage {
+/**
+ * A reply language the person chose in the assistant, overriding the app's
+ * language. Null when they never chose one, so answers follow the app.
+ */
+export function savedReplyLanguage(): ReplyLanguage | null {
   try {
     const v = typeof window === 'undefined' ? null : window.localStorage.getItem(KEY);
-    return REPLY_LANGUAGES.some((l) => l.value === v) ? (v as ReplyLanguage) : 'en';
+    return REPLY_LANGUAGES.some((l) => l.value === v) ? (v as ReplyLanguage) : null;
   } catch {
-    return 'en';
+    return null;
   }
 }
 

@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, BookOpen, Check, Copy } from 'lucide-react';
 import { Button, Card, Skeleton } from '@getrentos/ui';
-import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
-import type { LeaseGuide } from '@/types/leaseGuide';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import { renterService } from '@/services/renterService';
 
 /**
  * "Your lease, explained": what the renter's own lease says, any notice served,
@@ -18,8 +19,8 @@ export function LeaseGuideCard() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['renter', 'lease', 'guide'],
-    queryFn: () => unwrap(safeCall(() => authFetch<LeaseGuide>('/renter/lease/guide'))),
+    queryKey: renterKeys.leaseGuide,
+    queryFn: () => unwrap(renterService.getLeaseGuide()),
     staleTime: 10 * 60_000,
   });
 

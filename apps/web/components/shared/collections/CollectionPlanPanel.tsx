@@ -4,45 +4,22 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Copy, ListChecks } from 'lucide-react';
-import { Button, Card, Select, Skeleton } from '@getrentos/ui';
-import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
+import { Badge, Button, Card, Select, Skeleton, type BadgeVariant } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { estateKeys, landlordKeys } from '@/lib/queryKeys';
+import { estateService } from '@/services/estateService';
+import { landlordService } from '@/services/landlordService';
+import type { CollectionDebtor, CollectionStage } from '@/types/collectionPlan';
 import { REPLY_LANGUAGES, languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
-type Stage = 'reminder' | 'instalments' | 'formal_demand';
-
-interface DebtorPlan {
-  key: string;
-  ref: string;
-  label: string;
-  owed: string;
-  charges: number;
-  oldestDue: string;
-  daysOverdue: number;
-  paymentPattern: string;
-  stage: Stage;
-  reasons: string[];
-  instalments: { amount: string; due: string }[] | null;
-  nextNotice: string | null;
-  message: string;
-  messageLanguage?: ReplyLanguage;
-  messageInEnglish?: string | null;
-}
-
-interface CollectionPlan {
-  kind: 'rent' | 'dues';
-  overview: string;
-  totals: { owed: string; debtors: number; byStage: Record<Stage, number> };
-  debtors: DebtorPlan[];
-  language?: ReplyLanguage;
-  source: 'ai' | 'heuristic';
-  disclaimer: string;
-}
-
-const STAGE: Record<Stage, { label: string; cls: string }> = {
-  reminder: { label: 'Reminder', cls: 'bg-muted text-muted-foreground' },
-  instalments: { label: 'Offer instalments', cls: 'bg-primary/10 text-primary' },
-  formal_demand: { label: 'Formal demand', cls: 'bg-destructive/10 text-destructive' },
+const STAGE: Record<CollectionStage, { label: string; variant: BadgeVariant }> = {
+  reminder: { label: 'Reminder', variant: 'neutral' },
+  instalments: { label: 'Offer instalments', variant: 'info' },
+  formal_demand: { label: 'Formal demand', variant: 'danger' },
 };
+
+/** Rent arrears across the landlord's properties, or dues at one estate. */
+export type CollectionPlanSource = { kind: 'rent' } | { kind: 'dues'; estateId: string };
 
 /**
  * "Collection plan": who to contact first, what step fits each person, an
@@ -50,20 +27,26 @@ const STAGE: Record<Stage, { label: string; cls: string }> = {
  * from here; the person copies and sends it themselves.
  */
 export function CollectionPlanPanel({
-  path,
+  source,
   noticesHref,
 }: {
-  /** `/landlord/collections/plan` or `/estate/:id/collections/plan`. */
-  path: string;
+  source: CollectionPlanSource;
   /** Rent only: where the notice ladder lives. */
   noticesHref?: string;
 }) {
   // The tenant's or household's language, for the messages; the plan itself stays in English.
   const [language, setLanguage] = useState<ReplyLanguage>('en');
-  const url = language === 'en' ? path : `${path}?language=${language}`;
   const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: ['collection-plan', path, language],
-    queryFn: () => unwrap(safeCall(() => authFetch<CollectionPlan>(url))),
+    queryKey:
+      source.kind === 'rent'
+        ? landlordKeys.collectionPlan(language)
+        : estateKeys.collectionPlan(source.estateId, language),
+    queryFn: () =>
+      unwrap(
+        source.kind === 'rent'
+          ? landlordService.getCollectionPlan(language)
+          : estateService.getCollectionPlan(source.estateId, language)
+      ),
     placeholderData: (previous) => previous,
     staleTime: 5 * 60_000,
     retry: false,
@@ -81,7 +64,7 @@ export function CollectionPlanPanel({
   }
   if (isError || !data || data.debtors.length === 0) return null;
 
-  const copy = async (d: DebtorPlan) => {
+  const copy = async (d: CollectionDebtor) => {
     try {
       await navigator.clipboard.writeText(d.message);
       setCopied(d.ref);
@@ -140,11 +123,7 @@ export function CollectionPlanPanel({
                 </span>
                 <span className="text-sm font-semibold text-foreground">{d.owed}</span>
                 <span className="text-xs text-muted-foreground">{d.daysOverdue} days</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${STAGE[d.stage].cls}`}
-                >
-                  {STAGE[d.stage].label}
-                </span>
+                <Badge variant={STAGE[d.stage].variant}>{STAGE[d.stage].label}</Badge>
                 <ChevronDown
                   className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`}
                   aria-hidden="true"

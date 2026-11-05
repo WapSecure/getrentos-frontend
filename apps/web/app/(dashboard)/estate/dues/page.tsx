@@ -171,7 +171,7 @@ export default function EstateDuesPage() {
         </div>
       </div>
 
-      <CollectionPlanPanel path={`/estate/${estate.id}/collections/plan`} />
+      <CollectionPlanPanel source={{ kind: 'dues', estateId: estate.id }} />
 
       <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter dues by status">
         {statusFilters.map((filter) => (

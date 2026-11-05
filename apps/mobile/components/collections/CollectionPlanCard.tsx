@@ -12,36 +12,15 @@ import {
   useTheme,
   type BadgeTone,
 } from '@getrentos/ui-native';
-import { apiFetch } from '@/lib/api/client';
+import {
+  collectionsApi,
+  type CollectionPlanSource,
+  type CollectionStage,
+} from '@/lib/api/collections';
+import { qk } from '@/lib/query/keys';
 import { REPLY_LANGUAGES, languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
-type Stage = 'reminder' | 'instalments' | 'formal_demand';
-
-interface DebtorPlan {
-  ref: string;
-  label: string;
-  owed: string;
-  charges: number;
-  oldestDue: string;
-  daysOverdue: number;
-  paymentPattern: string;
-  stage: Stage;
-  reasons: string[];
-  instalments: { amount: string; due: string }[] | null;
-  nextNotice: string | null;
-  message: string;
-  messageLanguage?: ReplyLanguage;
-  messageInEnglish?: string | null;
-}
-
-interface CollectionPlan {
-  overview: string;
-  debtors: DebtorPlan[];
-  language?: ReplyLanguage;
-  disclaimer: string;
-}
-
-const STAGE: Record<Stage, { label: string; tone: BadgeTone }> = {
+const STAGE: Record<CollectionStage, { label: string; tone: BadgeTone }> = {
   reminder: { label: 'Reminder', tone: 'neutral' },
   instalments: { label: 'Offer instalments', tone: 'info' },
   formal_demand: { label: 'Formal demand', tone: 'danger' },
@@ -51,15 +30,17 @@ const STAGE: Record<Stage, { label: string; tone: BadgeTone }> = {
  * Collection plan on the phone: who first, which step, any instalment split,
  * and a message the person sends themselves through the share sheet.
  */
-export function CollectionPlanCard({ path }: { path: string }) {
+export function CollectionPlanCard({ source }: { source: CollectionPlanSource }) {
   const { colors, spacing, radius } = useTheme();
   const [open, setOpen] = useState<string | null>(null);
   // The tenant's or household's language, for the messages; the plan itself stays in English.
   const [language, setLanguage] = useState<ReplyLanguage>('en');
   const q = useQuery({
-    queryKey: ['collection-plan', path, language],
-    queryFn: () =>
-      apiFetch<CollectionPlan>(language === 'en' ? path : `${path}?language=${language}`),
+    queryKey:
+      source.kind === 'rent'
+        ? qk.landlord.collectionPlan(language)
+        : qk.estateManager.collectionPlan(source.estateId, language),
+    queryFn: () => collectionsApi.plan(source, language),
     placeholderData: (previous) => previous,
     staleTime: 5 * 60_000,
     retry: false,
@@ -157,9 +138,7 @@ export function CollectionPlanCard({ path }: { path: string }) {
                       gap: spacing.xs,
                     }}
                   >
-                    <Text variant="caption" style={{ fontWeight: '600' }}>
-                      Message to send
-                    </Text>
+                    <Text variant="label">Message to send</Text>
                     <Text variant="caption">{d.message}</Text>
                     {d.messageInEnglish ? (
                       <Text variant="caption" color="mutedForeground">
@@ -185,7 +164,7 @@ export function CollectionPlanCard({ path }: { path: string }) {
             </View>
           );
         })}
-        <Text variant="caption" color="mutedForeground" style={{ fontSize: 11 }}>
+        <Text variant="caption" color="mutedForeground">
           {plan.disclaimer}
         </Text>
       </View>

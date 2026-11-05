@@ -1,6 +1,9 @@
 import type { RenterListingsFilters } from '@/services/renterService';
 
 export const landlordKeys = {
+  listingSelfCheck: (input: object) => ['landlord', 'listing-self-check', input] as const,
+  statementExplanation: (id: string) => ['landlord', 'owner-statements', id, 'explain'] as const,
+  collectionPlan: (language: string) => ['landlord', 'collection-plan', language] as const,
   dashboardStats: ['landlord', 'dashboardStats'] as const,
   dashboardActivity: ['landlord', 'dashboardActivity'] as const,
   revenueTrend: ['landlord', 'revenueTrend'] as const,
@@ -96,6 +99,7 @@ export const renterKeys = {
   listing: (id: string) => ['renter', 'listing', id] as const,
   geoInsights: (id: string) => ['renter', 'listing', id, 'geo-insights'] as const,
   listingCheck: (id: string) => ['renter', 'listing', id, 'check'] as const,
+  leaseGuide: ['renter', 'lease', 'guide'] as const,
   savedListings: ['renter', 'savedListings'] as const,
   applications: ['renter', 'applications'] as const,
   viewings: ['renter', 'viewings'] as const,
@@ -319,6 +323,8 @@ export const buyerKeys = {
 };
 
 export const estateKeys = {
+  collectionPlan: (estateId: string, language: string) =>
+    ['estate', estateId, 'collection-plan', language] as const,
   myEstate: ['estate', 'me'] as const,
   myEstates: ['estate', 'mine'] as const,
   // Estate marketplace
@@ -514,4 +520,9 @@ export const mandateKeys = {
   one: (id: string) => ['management-mandates', id] as const,
   forProperty: (propertyId: string) => ['management-mandates', 'property', propertyId] as const,
   terminationRequests: (id: string) => ['management-mandates', id, 'termination-requests'] as const,
+};
+
+/** "Needs your attention" feeds, one per persona (and per estate). */
+export const attentionKeys = {
+  feed: (persona: string, estateId?: string) => ['attention', persona, estateId ?? ''] as const,
 };

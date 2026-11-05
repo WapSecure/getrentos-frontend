@@ -13,6 +13,7 @@ import type {
 import type { AgentDocument, InspectionPhoto } from '@/types/agent';
 import type { TrustProfile } from '@/types/trust-score';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
+import type { InspectionDraft, InspectionDraftRequest } from '@/types/inspectionDraft';
 
 export interface AgentDashboard {
   assignedProperties: number;
@@ -213,6 +214,15 @@ export interface AgentWorkOrder {
 }
 
 export const agentService = {
+  /** Suggest each room's condition and notes from the inspection photos. Saves nothing. */
+  draftInspectionReport: (taskId: string, body: InspectionDraftRequest) =>
+    safeCall<InspectionDraft>(() =>
+      authFetch(`/agent/inspections/${taskId}/draft-report`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+    ),
+
   askAssistant: (question: string, history: AssistantTurn[], language?: ReplyLanguage) =>
     safeCall<AssistantReply>(() =>
       authFetch('/agent/assistant/ask', {

@@ -55,6 +55,9 @@ import type {
 import type { Conversation } from '@/components/landlord/messages/ConversationList';
 import type { ThreadMessage } from '@/components/landlord/messages/MessageThread';
 import type { VideoCallJoin } from '@getrentos/shared';
+import type { ListingDraft, ListingSelfCheck, ListingSelfCheckInput } from '@/types/listingDraft';
+import type { StatementExplanation } from '@/types/statementExplanation';
+import type { CollectionPlan } from '@/types/collectionPlan';
 
 export interface RentCollectionStats {
   totalCollected: number;
@@ -952,6 +955,38 @@ export const landlordService = {
   // ---- Portfolio ----
   async getPortfolioAnalytics(): Promise<ApiResponse<PortfolioAnalytics>> {
     return safeCall(() => authFetch('/landlord/portfolio/analytics'));
+  },
+
+  /** Draft a title, amenities and description for a unit from its property and photos. Saves nothing. */
+  async draftListing(unitId: string): Promise<ApiResponse<ListingDraft>> {
+    return safeCall(() =>
+      authFetch('/landlord/listings/assist/draft', {
+        method: 'POST',
+        body: JSON.stringify({ unitId }),
+      })
+    );
+  },
+
+  /** Check a listing before publishing: price, photos, contact details, warning signs. */
+  async selfCheckListing(input: ListingSelfCheckInput): Promise<ApiResponse<ListingSelfCheck>> {
+    return safeCall(() =>
+      authFetch('/landlord/listings/assist/self-check', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+    );
+  },
+
+  /** An owner statement in plain words: where the money went, what changed, what to ask. */
+  async explainStatement(id: string): Promise<ApiResponse<StatementExplanation>> {
+    return safeCall(() => authFetch(`/landlord/owner-statements/${id}/explain`));
+  },
+
+  /** A step and a message per tenant in arrears; messages in `language` when given. */
+  async getCollectionPlan(language: ReplyLanguage = 'en'): Promise<ApiResponse<CollectionPlan>> {
+    return safeCall(() =>
+      authFetch(`/landlord/collections/plan${language === 'en' ? '' : `?language=${language}`}`)
+    );
   },
 
   async askAssistant(

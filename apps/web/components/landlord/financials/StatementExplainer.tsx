@@ -2,17 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Bell, Clock, MessageCircleQuestion, Sparkles } from 'lucide-react';
-import { Skeleton } from '@getrentos/ui';
-import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
-
-interface StatementExplanation {
-  headline: string;
-  points: string[];
-  questions: string[];
-  flags: { code: string; severity: 'urgent' | 'soon' | 'info'; detail: string }[];
-  source: 'ai' | 'heuristic';
-  disclaimer: string;
-}
+import { Card, Skeleton } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
 
 const TONE = {
   urgent: { icon: AlertCircle, cls: 'text-destructive' },
@@ -27,32 +20,24 @@ const TONE = {
  */
 export function StatementExplainer({ statementId }: { statementId: string }) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['landlord', 'owner-statements', statementId, 'explain'],
-    queryFn: () =>
-      unwrap(
-        safeCall(() =>
-          authFetch<StatementExplanation>(`/landlord/owner-statements/${statementId}/explain`)
-        )
-      ),
+    queryKey: landlordKeys.statementExplanation(statementId),
+    queryFn: () => unwrap(landlordService.explainStatement(statementId)),
     staleTime: 10 * 60_000,
     retry: false,
   });
 
   if (isLoading) {
     return (
-      <div className="mt-5 space-y-2 rounded-lg border border-border p-4">
+      <Card static className="mt-5 space-y-2 p-4">
         <Skeleton className="h-4 w-48" />
         <Skeleton className="h-12 w-full" />
-      </div>
+      </Card>
     );
   }
   if (isError || !data) return null;
 
   return (
-    <section
-      className="mt-5 rounded-lg border border-border bg-muted/30 p-4 space-y-3"
-      aria-labelledby="statement-explainer-title"
-    >
+    <Card static className="mt-5 space-y-3 p-4" aria-labelledby="statement-explainer-title">
       <div className="flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
         <h3 id="statement-explainer-title" className="text-sm font-semibold text-foreground">
@@ -104,6 +89,6 @@ export function StatementExplainer({ statementId }: { statementId: string }) {
       )}
 
       <p className="text-[11px] text-muted-foreground">{data.disclaimer}</p>
-    </section>
+    </Card>
   );
 }

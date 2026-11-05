@@ -93,7 +93,7 @@ export default function LandlordArrears() {
                   onPress={() => router.push('/(app)/landlord-notices')}
                 />
               ) : null}
-              <CollectionPlanCard path="/landlord/collections/plan" />
+              <CollectionPlanCard source={{ kind: 'rent' }} />
             </View>
           }
           renderItem={({ item }: { item: ArrearsPayment }) => <ArrearsRow payment={item} />}

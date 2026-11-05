@@ -173,7 +173,7 @@ export default function EstateDues() {
           }}
           ListHeaderComponent={
             <View style={{ marginBottom: spacing.md }}>
-              <CollectionPlanCard path={`/estate/${estateId}/collections/plan`} />
+              <CollectionPlanCard source={{ kind: 'dues', estateId }} />
             </View>
           }
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}

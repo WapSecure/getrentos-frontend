@@ -3,31 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Check, Info, Sparkles } from 'lucide-react';
-import { Button, useToast } from '@getrentos/ui';
-import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
-
-interface PriceGuide {
-  similarHomes: number;
-  typicalPerYear: string | null;
-  typicalRange: { low: string; high: string } | null;
-}
-
-interface ListingDraft {
-  title: string;
-  amenities: { name: string; why: string }[];
-  descriptionSuggestion: string | null;
-  price: PriceGuide;
-  photosUsed: number;
-  source: 'ai' | 'heuristic';
-}
-
-interface SelfCheck {
-  items: { key: string; level: 'fix' | 'consider'; message: string }[];
-  price: PriceGuide & { vsTypicalPercent: number | null };
-}
-
-const post = <T,>(path: string, body: unknown) =>
-  unwrap(safeCall(() => authFetch<T>(path, { method: 'POST', body: JSON.stringify(body) })));
+import { Button, Card, useToast } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { landlordKeys } from '@/lib/queryKeys';
+import { landlordService } from '@/services/landlordService';
+import type { ListingDraft } from '@/types/listingDraft';
 
 /**
  * "Draft it for me": fills the title and amenities from the unit's property and
@@ -43,7 +23,7 @@ export function DraftAssist({
   const toast = useToast();
   const [draft, setDraft] = useState<ListingDraft | null>(null);
   const run = useMutation({
-    mutationFn: () => post<ListingDraft>('/landlord/listings/assist/draft', { unitId }),
+    mutationFn: () => unwrap(landlordService.draftListing(unitId)),
     onSuccess: (d) => {
       setDraft(d);
       onApply({ title: d.title, amenities: d.amenities.map((a) => a.name) });
@@ -129,18 +109,15 @@ export function SelfCheckPanel({
 
   const ready = Boolean(inputs.unitId && inputs.listingTitle.trim() && inputs.askingRent > 0);
   const { data } = useQuery({
-    queryKey: ['landlord', 'listing-self-check', inputs],
-    queryFn: () => post<SelfCheck>('/landlord/listings/assist/self-check', inputs),
+    queryKey: landlordKeys.listingSelfCheck(inputs),
+    queryFn: () => unwrap(landlordService.selfCheckListing(inputs)),
     enabled: ready,
     staleTime: 60_000,
   });
   if (!ready || !data) return null;
 
   return (
-    <section
-      aria-labelledby="self-check-title"
-      className="space-y-1.5 rounded-lg border border-border p-3"
-    >
+    <Card static aria-labelledby="self-check-title" className="space-y-1.5 p-3">
       <h3 id="self-check-title" className="text-xs font-semibold text-foreground">
         Before you publish
       </h3>
@@ -169,6 +146,6 @@ export function SelfCheckPanel({
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
