@@ -2,16 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  AlertOctagon,
-  AlertTriangle,
-  CheckCircle2,
-  ExternalLink,
-  FileCheck,
-  FileX,
-  Phone,
-  Users,
-} from 'lucide-react';
+import { ExternalLink, FileCheck, FileX, Phone, Users } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -27,23 +18,8 @@ import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import { CreditSummaryView } from '@/components/shared/credit/CreditSummaryView';
 import { ApplicantSummary } from './ApplicantSummary';
-import type {
-  AffordabilityBand,
-  ReferenceOutcome,
-  ScreeningFlagLevel,
-  ScreeningReference,
-} from '@/types/landlord';
-
-// Flag tints are an icon colour, not a status chip, so they map to the
-// semantic text tokens rather than to <Badge>.
-const flagStyle: Record<
-  ScreeningFlagLevel,
-  { icon: React.ElementType; className: string; label: string }
-> = {
-  concern: { icon: AlertOctagon, className: 'text-destructive', label: 'Concern' },
-  watch: { icon: AlertTriangle, className: 'text-warning', label: 'Worth a look' },
-  ok: { icon: CheckCircle2, className: 'text-success', label: 'Fine' },
-};
+import { CheckList } from '@/components/shared/checks/CheckList';
+import type { AffordabilityBand, ReferenceOutcome, ScreeningReference } from '@/types/landlord';
 
 const bandLabel: Record<AffordabilityBand, { text: string; variant: BadgeVariant }> = {
   comfortable: { text: 'Comfortable', variant: 'success' },
@@ -229,21 +205,7 @@ export const ScreeningPanel = ({
       <ApplicantSummary applicationId={applicationId} />
       <div>
         <SectionTitle>At a glance</SectionTitle>
-        <ul className="space-y-1.5">
-          {data.flags.map((flag) => {
-            const style = flagStyle[flag.level];
-            const Icon = style.icon;
-            return (
-              <li key={flag.text} className="flex items-start gap-2 text-sm text-foreground">
-                <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${style.className}`} aria-hidden="true" />
-                <span>
-                  <span className="sr-only">{style.label}: </span>
-                  {flag.text}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        <CheckList items={data.flags} />
       </div>
 
       <div className="p-3 rounded-lg border border-border">

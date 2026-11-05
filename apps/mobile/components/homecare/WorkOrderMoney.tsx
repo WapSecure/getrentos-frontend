@@ -36,6 +36,7 @@ import { Sheet } from '@/components/Sheet';
 import { StatusPill, type Tone } from '@/components/host/HostUI';
 import { VendorPicker } from './VendorPicker';
 import { ReasonSheet } from './ReasonSheet';
+import { InvoiceCheckCard } from './InvoiceCheckCard';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
@@ -396,20 +397,23 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
                   />
                 </View>
               ) : inv.status === 'SUBMITTED' ? (
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  <Button
-                    label="Reject"
-                    variant="ghost"
-                    style={{ flex: 1 }}
-                    disabled={busy}
-                    onPress={() => withReason('reject', inv.id)}
-                  />
-                  <Button
-                    label="Approve"
-                    style={{ flex: 1 }}
-                    loading={busy}
-                    onPress={() => act.mutate({ kind: 'approve', id: inv.id })}
-                  />
+                <View style={{ gap: spacing.sm }}>
+                  <InvoiceCheckCard invoiceId={inv.id} />
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <Button
+                      label="Reject"
+                      variant="ghost"
+                      style={{ flex: 1 }}
+                      disabled={busy}
+                      onPress={() => withReason('reject', inv.id)}
+                    />
+                    <Button
+                      label="Approve"
+                      style={{ flex: 1 }}
+                      loading={busy}
+                      onPress={() => act.mutate({ kind: 'approve', id: inv.id })}
+                    />
+                  </View>
                 </View>
               ) : inv.status === 'APPROVED' &&
                 (inv.payoutStatus === 'PENDING' || inv.payoutStatus === 'FAILED') ? (

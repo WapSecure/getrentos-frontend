@@ -32,6 +32,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { getStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
+import { InvoiceCheckPanel } from './InvoiceCheckPanel';
 import {
   homeManagementService,
   type CreateHomeManagementWorkOrderInvoiceInput,
@@ -1109,6 +1110,11 @@ export function HomeManagementWorkOrderInvoices({
                       ? `Reject “${invoiceNumberLabel(actionDialog.invoice)}”. The reason will remain with the operational record.`
                       : `Void “${invoiceNumberLabel(actionDialog.invoice)}”. This preserves the invoice record while preventing further processing.`}
               </DialogDescription>
+              {(actionDialog.action === 'approve' || actionDialog.action === 'reject') && (
+                <div className="mt-4">
+                  <InvoiceCheckPanel invoiceId={actionDialog.invoice.id} />
+                </div>
+              )}
 
               {actionNeedsReason && (
                 <div className="mt-6">

@@ -1,3 +1,4 @@
+import type { InvoiceCheck } from '@/types/invoiceCheck';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 
 export type HomeManagementDashboard = {
@@ -756,6 +757,9 @@ export const homeManagementService = {
         method: 'POST',
       })
     ),
+  /** Checks on an invoice before approving it. Read-only. */
+  checkWorkOrderInvoice: (invoiceId: string) =>
+    safeCall(() => authFetch<InvoiceCheck>(`/home-management/invoices/${invoiceId}/check`)),
   approveWorkOrderInvoice: (invoiceId: string) =>
     safeCall(() =>
       authFetch<HomeManagementWorkOrderInvoice>(`/home-management/invoices/${invoiceId}/approve`, {
