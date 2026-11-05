@@ -19,6 +19,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { ListState } from '@/components/shared/ListState';
 import { landlordKeys } from '@/lib/queryKeys';
 import type { Unit } from '@/types/landlord';
+import { pluralize } from '@/lib/format';
 
 const PAGE_SIZE = 10;
 
@@ -202,8 +203,8 @@ function LandlordUnitsPageContent() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Units</h1>
           <p className="text-muted-foreground mt-1">
-            {totalUnits} units across {totalProperties} propert
-            {totalProperties === 1 ? 'y' : 'ies'}
+            {pluralize(totalUnits, 'unit')} across{' '}
+            {pluralize(totalProperties, 'property', 'properties')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

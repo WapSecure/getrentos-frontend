@@ -81,7 +81,7 @@ export default function OwnerDashboardPage() {
           description="Add your first property to verify ownership, list it for sale, and track its investment performance."
           action={
             <Button href={ROUTES.OWNER_PROPERTIES} variant="primary">
-              Add Your First Property
+              Add your first property
             </Button>
           }
         />
