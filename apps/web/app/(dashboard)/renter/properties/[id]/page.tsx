@@ -39,6 +39,9 @@ import { AffordabilityCard } from '@/components/renter/property-detail/Affordabi
 import { PropertyReviews } from '@/components/renter/property-detail/PropertyReviews';
 import { SimilarProperties } from '@/components/renter/property-detail/SimilarProperties';
 import { GeoInsightsPanel } from '@/components/maps/GeoInsightsPanel';
+import { CommuteCalculator } from '@/components/renter/discover/features/CommuteCalculator';
+import { RentVsBuyCalculator } from '@/components/renter/discover/features/RentVsBuyCalculator';
+import { NeighborhoodCompare } from '@/components/renter/discover/features/NeighborhoodCompare';
 import { formatPrice, monthlyEquivalent } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
@@ -332,6 +335,22 @@ export default function PropertyDetailPage() {
           )}
 
           <GeoInsightsPanel listingId={property.id} title={property.title} />
+
+          {/* Moved here from every Discover card: these are questions about one
+              home, asked once a renter is weighing it, not while scanning. */}
+          <Card className="p-4">
+            <h2 className="text-sm font-semibold text-foreground">Plan your move</h2>
+            <div className="mt-2 flex flex-wrap gap-4 text-xs text-muted-foreground">
+              <CommuteCalculator listingId={property.id} propertyLocation={property.location} />
+              {/* The calculator compares against a monthly mortgage payment, so
+                  the rent is normalised to a month first. */}
+              <RentVsBuyCalculator
+                propertyPrice={property.price}
+                monthlyRent={property.period === 'year' ? property.price / 12 : property.price}
+              />
+              <NeighborhoodCompare listingId={property.id} propertyLocation={property.location} />
+            </div>
+          </Card>
 
           {property.reviews && <PropertyReviews reviews={property.reviews} />}
 
