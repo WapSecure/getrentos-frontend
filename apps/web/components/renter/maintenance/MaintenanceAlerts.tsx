@@ -53,7 +53,9 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
       <div className="relative">
         <PopoverTrigger asChild>
           <IconButton
-            label={unreadCount > 0 ? `Maintenance alerts, ${unreadCount} unread` : 'Maintenance alerts'}
+            label={
+              unreadCount > 0 ? `Maintenance alerts, ${unreadCount} unread` : 'Maintenance alerts'
+            }
             icon={<Bell />}
           />
         </PopoverTrigger>
@@ -65,7 +67,7 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
       <PopoverContent aria-label="Maintenance alerts" layout="sections">
         <PopoverHeader>
           <div>
-            <h3 className="font-semibold text-foreground">Maintenance Alerts</h3>
+            <h3 className="font-semibold text-foreground">Maintenance alerts</h3>
             <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
           </div>
           {unreadCount > 0 && (
@@ -99,13 +101,9 @@ export const MaintenanceAlerts = ({ alerts, onMarkAsRead, onClearAll }: Maintena
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground">{alert.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{alert.message}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatDate(alert.date)}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{formatDate(alert.date)}</p>
                     </div>
-                    {!alert.read && (
-                      <span className="w-2 h-2 bg-info rounded-full mt-2 shrink-0" />
-                    )}
+                    {!alert.read && <span className="w-2 h-2 bg-info rounded-full mt-2 shrink-0" />}
                   </div>
                 </button>
               );

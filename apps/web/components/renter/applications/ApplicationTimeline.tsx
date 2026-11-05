@@ -37,7 +37,7 @@ const getStatusLabel = (status: string): string => {
     case 'pending':
       return 'Pending';
     case 'under_review':
-      return 'Under Review';
+      return 'Under review';
     case 'approved':
       return 'Approved';
     case 'rejected':
@@ -135,20 +135,20 @@ export const ApplicationTimeline = ({ timeline, currentStatus }: ApplicationTime
       )}
 
       {currentStatus === 'rejected' && (
-        <Alert variant="danger" icon={AlertCircle} title="Application Not Approved">
+        <Alert variant="danger" icon={AlertCircle} title="Application not approved">
           Contact the landlord for feedback or continue exploring other properties.
         </Alert>
       )}
 
       {currentStatus === 'pending' && (
-        <Alert variant="warning" icon={Clock} title="Awaiting Review">
+        <Alert variant="warning" icon={Clock} title="Awaiting review">
           Your application is being reviewed by the landlord. You&apos;ll be notified of any
           updates.
         </Alert>
       )}
 
       {currentStatus === 'under_review' && (
-        <Alert variant="info" icon={UserCheck} title="Under Review">
+        <Alert variant="info" icon={UserCheck} title="Under review">
           The landlord is reviewing your application. Decisions typically take 2-5 business days.
         </Alert>
       )}

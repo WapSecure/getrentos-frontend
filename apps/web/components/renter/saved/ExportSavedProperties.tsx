@@ -71,8 +71,8 @@ export const ExportSavedProperties = ({
       )
       .join('');
     printHtml(
-      'Saved Properties',
-      `<h1>Saved Properties</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${properties.length} propert${properties.length === 1 ? 'y' : 'ies'}</p><table><thead><tr><th>Property</th><th>Location</th><th>Price</th><th>Beds</th><th>Baths</th><th>Size</th><th>Verified</th></tr></thead><tbody>${rows || '<tr><td colspan="7">No saved properties</td></tr>'}</tbody></table>`
+      'Saved properties',
+      `<h1>Saved properties</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${properties.length} propert${properties.length === 1 ? 'y' : 'ies'}</p><table><thead><tr><th>Property</th><th>Location</th><th>Price</th><th>Beds</th><th>Baths</th><th>Size</th><th>Verified</th></tr></thead><tbody>${rows || '<tr><td colspan="7">No saved properties</td></tr>'}</tbody></table>`
     );
     finishExport();
   };
@@ -106,7 +106,7 @@ export const ExportSavedProperties = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogTitle className="pr-8 font-semibold text-foreground">
-          Export Saved Properties
+          Export saved properties
         </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           {properties.length} properties on this page to export

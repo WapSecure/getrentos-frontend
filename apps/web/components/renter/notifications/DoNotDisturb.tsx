@@ -21,7 +21,7 @@ export const DoNotDisturb = () => {
         <div className="flex items-center gap-2">
           <Moon className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Do Not Disturb</h3>
+            <h3 className="font-semibold text-foreground">Do not disturb</h3>
             <p className="text-xs text-muted-foreground">
               Silence notifications during quiet hours
             </p>
@@ -37,7 +37,7 @@ export const DoNotDisturb = () => {
       {isExpanded && (
         <div className="p-4 pt-0 space-y-4">
           <Switch
-            label="Quiet Hours"
+            label="Quiet hours"
             description="Mute notifications during these hours"
             checked={isEnabled}
             onCheckedChange={setIsEnabled}
@@ -45,10 +45,10 @@ export const DoNotDisturb = () => {
 
           {isEnabled && (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Start Time">
+              <Field label="Start time">
                 <TimePicker value={startTime} onChange={setStartTime} />
               </Field>
-              <Field label="End Time">
+              <Field label="End time">
                 <TimePicker value={endTime} onChange={setEndTime} />
               </Field>
             </div>

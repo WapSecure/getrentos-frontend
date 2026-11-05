@@ -179,7 +179,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Shortlet Management</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Shortlet management</h1>
           <p className="mt-1 text-muted-foreground">
             Publish short-stay listings and manage bookings.
           </p>
@@ -231,7 +231,7 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
         <TabsList className="max-w-full">
           {(['listings', 'bookings'] as Tab[]).map((t) => (
             <TabsTrigger key={t} value={t} className="px-4 text-sm">
-              {t === 'listings' ? 'My Listings' : `Booking Requests (${bookingsData?.total ?? 0})`}
+              {t === 'listings' ? 'My listings' : `Booking requests (${bookingsData?.total ?? 0})`}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -784,7 +784,7 @@ function CreateListingDialog({
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-lg p-0">
         <div className="p-5">
-          <DialogTitle>New Shortlet Listing</DialogTitle>
+          <DialogTitle>New shortlet listing</DialogTitle>
           <DialogDescription>
             Publish a furnished short-stay listing on one of your properties.
           </DialogDescription>

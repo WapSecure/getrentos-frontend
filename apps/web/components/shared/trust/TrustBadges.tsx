@@ -43,7 +43,7 @@ export const TrustBadges = ({ badges }: TrustBadgesProps) => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Award className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Trust Badges</h3>
+          <h3 className="font-semibold text-foreground">Trust badges</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
           {earnedCount} of {badges.length} badges earned

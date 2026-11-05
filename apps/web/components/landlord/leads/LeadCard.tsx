@@ -92,11 +92,11 @@ export const LeadCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-muted-foreground">Trust Score</p>
+          <p className="text-xs text-muted-foreground">Trust score</p>
           <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">First Contact</p>
+          <p className="text-xs text-muted-foreground">First contact</p>
           <p className="text-sm font-medium text-foreground">{formatDate(lead.inquiryDate)}</p>
         </div>
       </div>
@@ -116,7 +116,7 @@ export const LeadCard = ({
         {lead.applicationId && (
           <Button variant="outline" size="sm" className="gap-1.5" onClick={onViewApplication}>
             <FileText className="w-3.5 h-3.5" />
-            View Application
+            View application
           </Button>
         )}
         {lead.viewingRequestId && lead.stage === 'requested' && (
@@ -129,13 +129,13 @@ export const LeadCard = ({
               onClick={onConfirmViewing}
             >
               <CalendarCheck className="w-3.5 h-3.5" />
-              Confirm Viewing
+              Confirm viewing
             </Button>
             <Button
               variant="ghost"
               size="sm"
               className="px-2.5 text-muted-foreground"
-              title="Cancel Viewing"
+              title="Cancel viewing"
               disabled={isUpdatingViewing}
               onClick={onCancelViewing}
             >

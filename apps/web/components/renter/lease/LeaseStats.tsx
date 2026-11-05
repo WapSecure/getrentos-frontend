@@ -35,7 +35,7 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
     },
     {
       icon: Calendar,
-      label: 'Days Remaining',
+      label: 'Days remaining',
       value: getDaysRemaining(),
       suffix: ' days',
     },
@@ -46,7 +46,7 @@ export const LeaseStats = ({ lease }: LeaseStatsProps) => {
     },
     {
       icon: FileText,
-      label: 'Security Deposit',
+      label: 'Security deposit',
       value: formatCurrency(lease.securityDeposit),
     },
   ];

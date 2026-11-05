@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { formatTrend, monthTrend } from '@getrentos/shared';
 import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { landlordService } from '@/services/landlordService';
@@ -44,9 +45,7 @@ export const LandlordRevenueChart = () => {
   const revenueData: RevenuePoint[] = data.map((p) => ({ month: p.label, collected: p.value }));
   const hasData = revenueData.some((p) => p.collected > 0);
 
-  const currentMonth = revenueData[revenueData.length - 1]?.collected ?? 0;
-  const previousMonth = revenueData[revenueData.length - 2]?.collected ?? 0;
-  const change = previousMonth > 0 ? ((currentMonth - previousMonth) / previousMonth) * 100 : null;
+  const trend = monthTrend(data);
 
   return (
     <Card className="p-6">
@@ -59,13 +58,13 @@ export const LandlordRevenueChart = () => {
             Collected income over the last 6 months
           </p>
         </div>
-        {change !== null && (
+        {trend && (
           <Badge
-            variant={change >= 0 ? 'success' : 'danger'}
-            icon={<TrendingUp className={change < 0 ? 'w-3 h-3 rotate-180' : 'w-3 h-3'} />}
+            variant={trend.change >= 0 ? 'success' : 'danger'}
+            icon={<TrendingUp className={trend.change < 0 ? 'w-3 h-3 rotate-180' : 'w-3 h-3'} />}
+            title={`${trend.months[1]} against ${trend.months[0]}`}
           >
-            {change >= 0 ? '+' : ''}
-            {change.toFixed(1)}%
+            {formatTrend(trend.change)}
           </Badge>
         )}
       </div>

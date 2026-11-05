@@ -25,7 +25,7 @@ import type { ViolationStatus } from '@/types/estate';
 const statusFilters: { value: ViolationStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'reported', label: 'Reported' },
-  { value: 'warning_issued', label: 'Warning Issued' },
+  { value: 'warning_issued', label: 'Warning issued' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'dismissed', label: 'Dismissed' },
 ];
@@ -132,7 +132,7 @@ export default function EstateViolationsPage() {
         actions={
           <Button variant="primary" className="gap-2" onClick={() => setIsReportOpen(true)}>
             <Plus className="w-4 h-4" />
-            Report Violation
+            Report violation
           </Button>
         }
       />

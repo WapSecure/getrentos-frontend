@@ -60,7 +60,7 @@ const statusConfig: Record<MaintenanceRequest['status'], BadgeConfig> = {
     icon: UserCheck,
   },
   in_progress: {
-    label: 'In Progress',
+    label: 'In progress',
     variant: 'warning',
     icon: Wrench,
   },
@@ -238,16 +238,16 @@ export const MaintenanceCard = ({
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           {request.status === 'resolved' && !request.vendorRating && onRateVendor && (
             <Button size="sm" variant="outline" onClick={handleRateVendor}>
-              Rate Vendor
+              Rate vendor
             </Button>
           )}
           {request.status === 'submitted' && onUpdateStatus && (
             <Button size="sm" variant="ghost" className="text-destructive" onClick={handleCancel}>
-              Cancel Request
+              Cancel request
             </Button>
           )}
           <Button size="sm" variant="ghost" className="gap-1" onClick={handleViewDetails}>
-            View Details
+            View details
             <ChevronRight className="w-3 h-3" />
           </Button>
         </div>

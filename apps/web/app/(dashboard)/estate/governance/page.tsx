@@ -29,7 +29,7 @@ import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToPro
 const typeFilters: { value: GovernanceRecordType | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'bylaws', label: 'Bylaws' },
-  { value: 'meeting_minutes', label: 'Meeting Minutes' },
+  { value: 'meeting_minutes', label: 'Meeting minutes' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -134,7 +134,7 @@ export default function EstateGovernancePage() {
             }}
           >
             <Plus className="w-4 h-4" />
-            Upload Record
+            Upload record
           </Button>
         }
       />

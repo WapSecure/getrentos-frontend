@@ -30,7 +30,7 @@ export const RoommatesList = ({ roommates, onRemove, onUpdateShare }: RoommatesL
         icon={Users}
         title="No roommates yet"
         description="Invite your first roommate to start sharing your space"
-        action={<Button variant="primary">Invite Roommate</Button>}
+        action={<Button variant="primary">Invite roommate</Button>}
       />
     );
   }

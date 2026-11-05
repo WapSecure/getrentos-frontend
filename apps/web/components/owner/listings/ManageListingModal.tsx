@@ -46,7 +46,7 @@ export const ManageListingModal = ({
             className="rounded-lg border border-border px-3 [&>div]:py-2"
             items={[
               { label: 'Property', value: listing.propertyName },
-              { label: 'Asking Price', value: formatCurrency(listing.askingPrice) },
+              { label: 'Asking price', value: formatCurrency(listing.askingPrice) },
             ]}
           />
 
@@ -58,7 +58,7 @@ export const ManageListingModal = ({
                 onClick={() => setStatus('published')}
                 icon={<Megaphone className="h-4 w-4" />}
               >
-                Publish Listing
+                Publish listing
               </Button>
             )}
             {listing.status === 'published' && (
@@ -68,7 +68,7 @@ export const ManageListingModal = ({
                 onClick={() => setStatus('paused')}
                 icon={<Pause className="h-4 w-4" />}
               >
-                Pause Listing
+                Pause listing
               </Button>
             )}
             {listing.status === 'paused' && (
@@ -78,7 +78,7 @@ export const ManageListingModal = ({
                 onClick={() => setStatus('published')}
                 icon={<Play className="h-4 w-4" />}
               >
-                Resume Listing
+                Resume listing
               </Button>
             )}
             {(listing.status === 'published' || listing.status === 'paused') && (
@@ -89,7 +89,7 @@ export const ManageListingModal = ({
                 onClick={() => setStatus('closed')}
                 icon={<XCircle className="h-4 w-4" />}
               >
-                Close Listing
+                Close listing
               </Button>
             )}
             {listing.status === 'closed' && (

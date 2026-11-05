@@ -26,7 +26,7 @@ import { goBack } from '@/lib/goBack';
 
 const TYPE_LABEL: Record<GovernanceRecordType, string> = {
   bylaws: 'Bylaws',
-  meeting_minutes: 'Meeting Minutes',
+  meeting_minutes: 'Meeting minutes',
   other: 'Document',
 };
 
@@ -143,7 +143,7 @@ function RecordCard({ record, onSign }: { record: GovernanceRecord; onSign: () =
       >
         {progressLabel ? <Badge label={progressLabel} tone={progressTone} /> : null}
         <Button
-          label="View Document"
+          label="View document"
           variant="outline"
           size="sm"
           fullWidth={false}
@@ -198,7 +198,7 @@ function SignForm({
       </Text>
       <SignaturePad onChange={setSignature} />
       <Button
-        label="Confirm Signature"
+        label="Confirm signature"
         loadingLabel="Signing…"
         disabled={!signature}
         loading={submitting}

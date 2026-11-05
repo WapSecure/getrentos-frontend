@@ -34,7 +34,7 @@ const statusConfig: Record<
     message: 'Ownership has been confirmed. This property is eligible to be listed for rent.',
   },
   pending: {
-    label: 'Pending Review',
+    label: 'Pending review',
     icon: ShieldAlert,
     bg: 'bg-warning-subtle',
     color: 'text-warning',
@@ -95,7 +95,7 @@ export const LandlordVerificationStatusModal = ({
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
           <div className="min-w-0">
             <DialogTitle className="font-semibold text-foreground">
-              Ownership Verification
+              Ownership verification
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               {property.name}
@@ -171,7 +171,7 @@ export const LandlordVerificationStatusModal = ({
               loadingText="Submitting…"
               className="flex-1"
             >
-              Submit Document
+              Submit document
             </Button>
           )}
         </div>

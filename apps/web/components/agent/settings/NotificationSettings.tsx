@@ -21,8 +21,8 @@ interface NotificationPreference {
 
 // Only what is actually sent to an agent; the server returns these categories.
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
-  verification: { label: 'Verification Results', icon: ShieldCheck },
-  system: { label: 'Account & Listing Updates', icon: Bell },
+  verification: { label: 'Verification results', icon: ShieldCheck },
+  system: { label: 'Account & listing updates', icon: Bell },
 };
 
 export const NotificationSettings = () => {
@@ -126,7 +126,7 @@ export const NotificationSettings = () => {
         disabled={preferences.length === 0}
         onClick={() => save.mutate()}
       >
-        Save Preferences
+        Save preferences
       </Button>
     </div>
   );

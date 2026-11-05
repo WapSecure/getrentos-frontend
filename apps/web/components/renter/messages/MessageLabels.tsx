@@ -38,7 +38,7 @@ export const MessageLabels = ({ labels, onSelectLabel, selectedLabel }: MessageL
               : 'hover:bg-secondary text-foreground'
           }`}
         >
-          <span>All Conversations</span>
+          <span>All conversations</span>
           <span className="text-xs text-muted-foreground">
             {labels.reduce((sum, l) => sum + l.count, 0)}
           </span>

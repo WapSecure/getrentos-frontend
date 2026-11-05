@@ -130,7 +130,7 @@ const ProfileSettingsForm = ({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Profile Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Profile settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Update your personal information and profile photo
       </p>
@@ -178,12 +178,12 @@ const ProfileSettingsForm = ({
             />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Profile Photo</p>
+            <p className="text-sm font-medium text-foreground">Profile photo</p>
             <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max 5MB.</p>
           </div>
         </div>
 
-        <Field label="Full Name">
+        <Field label="Full name">
           <Input
             leadingIcon={<User className="w-4 h-4" />}
             type="text"
@@ -193,7 +193,7 @@ const ProfileSettingsForm = ({
         </Field>
 
         <div>
-          <Field label="Email Address">
+          <Field label="Email address">
             <Input
               leadingIcon={<Mail className="w-4 h-4" />}
               type="email"
@@ -205,7 +205,7 @@ const ProfileSettingsForm = ({
         </div>
 
         <Field
-          label="Phone Number"
+          label="Phone number"
           error={otpError || undefined}
           labelAside={
             phoneVerified && (
@@ -259,7 +259,7 @@ const ProfileSettingsForm = ({
           />
         </Field>
 
-        <SaveButton type="submit" label="Save Changes" />
+        <SaveButton type="submit" label="Save changes" />
       </form>
     </div>
   );

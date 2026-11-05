@@ -32,7 +32,7 @@ export const LandlordMetrics = ({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <MessageCircle className="w-3 h-3 text-primary" />
-          <span className="text-xs text-foreground/75">Landlord Response</span>
+          <span className="text-xs text-foreground/75">Landlord response</span>
         </div>
         {verifiedBadge && (
           <div className="flex items-center gap-1">

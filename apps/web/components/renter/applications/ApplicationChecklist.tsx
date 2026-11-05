@@ -23,14 +23,14 @@ const defaultChecklist: ChecklistItem[] = [
   },
   {
     id: '2',
-    title: 'Proof of Income',
+    title: 'Proof of income',
     description: 'Upload payslip or employment letter',
     completed: false,
     required: true,
   },
   {
     id: '3',
-    title: 'Bank Statement',
+    title: 'Bank statement',
     description: 'Upload last 3 months of bank statements',
     completed: false,
     required: true,
@@ -44,7 +44,7 @@ const defaultChecklist: ChecklistItem[] = [
   },
   {
     id: '5',
-    title: 'Review Application',
+    title: 'Review application',
     description: 'Review all details before submitting',
     completed: false,
     required: true,

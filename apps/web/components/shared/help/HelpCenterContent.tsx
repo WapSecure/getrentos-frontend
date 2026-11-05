@@ -33,7 +33,7 @@ const faqs: FAQItem[] = [
   {
     question: 'How do I contact someone about my account?',
     answer:
-      'Use the "Contact Support" options below, or message your assigned account contact directly from the Messages tab.',
+      'Use the "Contact support" options below, or message your assigned account contact directly from the Messages tab.',
   },
   {
     question: 'Where can I see the status of an ongoing request?',
@@ -56,7 +56,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
       <div className="mb-6">
         <div className="flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Help Center</h1>
+          <h1 className="text-2xl font-bold text-foreground">Help center</h1>
         </div>
         <p className="text-muted-foreground mt-1">
           Answers and support for your GetRentos {roleLabel} account
@@ -65,7 +65,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-sm font-semibold text-foreground mb-1">Frequently Asked Questions</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-1">Frequently asked questions</h2>
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
@@ -95,7 +95,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
 
         <div className="space-y-4">
           <Card className="p-4">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Contact Support</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Contact support</h3>
             <div className="space-y-3">
               <a
                 href={`mailto:${SUPPORT.email}`}
@@ -151,7 +151,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
               onClick={() => router.push(messagesHref)}
             >
               <MessageCircle className="w-4 h-4" />
-              Message Support
+              Message support
               <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </Card>

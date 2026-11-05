@@ -11,9 +11,11 @@ export function premiumTabBarOptions(colors: Palette, bottomInset: number) {
     tabBarStyle: {
       backgroundColor: colors.card,
       borderTopColor: colors.border,
-      height: 62 + bottomInset,
-      paddingTop: 7,
-      paddingBottom: Math.max(bottomInset, 7),
+      // Icon (24) + label (14) + item margins (6) need 50px clear; 62 clipped
+      // the labels on phones without a bottom inset.
+      height: 68 + bottomInset,
+      paddingTop: 6,
+      paddingBottom: Math.max(bottomInset, 6),
     },
     tabBarLabelStyle: {
       fontSize: 11,

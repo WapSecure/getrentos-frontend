@@ -70,15 +70,23 @@ export const IssueVisitorPassModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Issue Visitor Pass</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">
+          Issue visitor pass
+        </DialogTitle>
 
         <div className="mt-4 space-y-4">
           <Field label="Household" required>
             <div className="overflow-hidden rounded-lg border border-border">
               {isHouseholdsLoading ? (
-                <ListSkeleton rows={3} label="Loading households" className="rounded-none border-0" />
+                <ListSkeleton
+                  rows={3}
+                  label="Loading households"
+                  className="rounded-none border-0"
+                />
               ) : activeHouseholds.length === 0 ? (
-                <p className="px-3 py-4 text-sm text-muted-foreground">No active households found.</p>
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  No active households found.
+                </p>
               ) : (
                 <RadioGroup
                   value={householdId}
@@ -101,7 +109,7 @@ export const IssueVisitorPassModal = ({
             </div>
           </Field>
 
-          <Field label="Visitor Name" required>
+          <Field label="Visitor name" required>
             <Input
               type="text"
               value={visitorName}
@@ -152,7 +160,7 @@ export const IssueVisitorPassModal = ({
               })
             }
           >
-            Issue Pass
+            Issue pass
           </Button>
         </div>
       </DialogContent>

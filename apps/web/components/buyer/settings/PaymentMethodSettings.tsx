@@ -51,7 +51,7 @@ export const PaymentMethodSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Payment Method</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Payment method</h2>
       <p className="text-sm text-muted-foreground mb-6">
         The account you pay deposits and balances from
       </p>
@@ -68,7 +68,7 @@ export const PaymentMethodSettings = () => {
       )}
 
       <div className="space-y-4">
-        <Field label="Bank Name">
+        <Field label="Bank name">
           <Input
             value={bankName}
             onChange={(e) => setBankName(e.target.value)}
@@ -76,14 +76,14 @@ export const PaymentMethodSettings = () => {
             leadingIcon={<Landmark className="h-4 w-4" />}
           />
         </Field>
-        <Field label="Account Number">
+        <Field label="Account number">
           <NumberInput
             value={accountNumber}
             onValueChange={setAccountNumber}
             placeholder="0123456789"
           />
         </Field>
-        <Field label="Account Name">
+        <Field label="Account name">
           <Input
             value={accountName}
             onChange={(e) => setAccountName(e.target.value)}
@@ -99,7 +99,7 @@ export const PaymentMethodSettings = () => {
         disabled={!bankName || !accountNumber || !accountName || save.isPending}
         onClick={() => save.mutate()}
       >
-        Update Payment Method
+        Update payment method
       </Button>
     </div>
   );

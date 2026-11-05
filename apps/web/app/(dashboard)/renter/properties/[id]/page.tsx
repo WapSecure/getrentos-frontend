@@ -265,7 +265,7 @@ export default function PropertyDetailPage() {
               >
                 {property.acceptingApplications === false
                   ? 'Not accepting applications'
-                  : 'Apply Now'}
+                  : 'Apply now'}
               </Button>
               {property.acceptingApplications === false ? null : (
                 <Button
@@ -273,7 +273,7 @@ export default function PropertyDetailPage() {
                   icon={<Calendar className="w-4 h-4" />}
                   onClick={() => openTour('booking')}
                 >
-                  Schedule Viewing
+                  Schedule viewing
                 </Button>
               )}
               <IconButton
@@ -341,7 +341,7 @@ export default function PropertyDetailPage() {
 
           {property.additionalFees && property.additionalFees.length > 0 && (
             <Card className="p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Cost Breakdown</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Cost breakdown</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Rent ({property.period}ly)</span>
@@ -370,7 +370,7 @@ export default function PropertyDetailPage() {
 
           {property.period === 'year' && (
             <Card className="p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">Payment Options</h3>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Payment options</h3>
               {property.allowsMonthlyPayment && !flexOpen ? (
                 <div className="flex items-start gap-2 text-sm">
                   <Zap className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -398,7 +398,7 @@ export default function PropertyDetailPage() {
                     onClick={() => router.push(`${ROUTES.RENTER_PAYMENTS}?tab=financing`)}
                   >
                     <Zap className="w-4 h-4" />
-                    See Monthly Payment Plans
+                    See monthly payment plans
                   </Button>
                 </div>
               ) : (

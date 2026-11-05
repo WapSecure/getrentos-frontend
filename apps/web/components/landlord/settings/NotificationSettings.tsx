@@ -18,11 +18,11 @@ const PREFERENCE_META: {
   label: string;
   icon: React.ElementType;
 }[] = [
-  { id: 'payments', label: 'Rent Payments Received', icon: CreditCard },
-  { id: 'applications', label: 'New Rental Applications', icon: FileText },
-  { id: 'maintenance', label: 'Maintenance Requests', icon: Wrench },
-  { id: 'messages', label: 'New Messages', icon: MessageCircle },
-  { id: 'reviews', label: 'New Reviews', icon: Star },
+  { id: 'payments', label: 'Rent payments received', icon: CreditCard },
+  { id: 'applications', label: 'New rental applications', icon: FileText },
+  { id: 'maintenance', label: 'Maintenance requests', icon: Wrench },
+  { id: 'messages', label: 'New messages', icon: MessageCircle },
+  { id: 'reviews', label: 'New reviews', icon: Star },
 ];
 
 const DEFAULT_PREFERENCES: NotificationPreference[] = PREFERENCE_META.map((meta) => ({

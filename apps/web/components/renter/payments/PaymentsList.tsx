@@ -73,7 +73,7 @@ export const PaymentsList = ({
         <div className="border-b border-border/70 p-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-foreground">Payment History</h2>
+              <h2 className="font-semibold text-foreground">Payment history</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {payments.length} payments total
               </p>

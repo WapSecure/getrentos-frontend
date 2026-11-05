@@ -94,7 +94,7 @@ export const AddUnitModal = ({
             />
           </Field>
 
-          <Field label="Unit Name" required>
+          <Field label="Unit name" required>
             <Input
               type="text"
               value={unitName}
@@ -150,7 +150,7 @@ export const AddUnitModal = ({
             disabled={!isValid}
             isLoading={isSubmitting}
           >
-            Add Unit
+            Add unit
           </Button>
           <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
             Cancel

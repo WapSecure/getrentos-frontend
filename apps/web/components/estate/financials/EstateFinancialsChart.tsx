@@ -56,7 +56,7 @@ export const EstateFinancialsChart = ({ estateId }: EstateFinancialsChartProps) 
   return (
     <Card className="p-5 mb-6">
       <div className="mb-4">
-        <h3 className="font-semibold text-foreground">Dues Collected</h3>
+        <h3 className="font-semibold text-foreground">Dues collected</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Monthly, last 6 months</p>
       </div>
 

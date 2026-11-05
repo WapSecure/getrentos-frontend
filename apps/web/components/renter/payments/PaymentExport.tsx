@@ -104,8 +104,8 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
       .join('');
 
     printHtml(
-      'Payments Export',
-      `<h1>Payments Export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${filteredPayments.length} payment${filteredPayments.length === 1 ? '' : 's'} · Total ${escapeHtml(
+      'Payments export',
+      `<h1>Payments export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${filteredPayments.length} payment${filteredPayments.length === 1 ? '' : 's'} · Total ${escapeHtml(
         formatCurrency(filteredPayments.reduce((sum, p) => sum + p.amount, 0))
       )}</p><table><thead><tr><th>Property</th><th>Amount</th><th>Date</th><th>Status</th><th>Method</th></tr></thead><tbody>${rows || '<tr><td colspan="5">No payments</td></tr>'}</tbody></table>`
     );
@@ -122,19 +122,19 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="p-0 sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Export Payments</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Export payments</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {payments.length} payments available to export
           </DialogDescription>
         </div>
 
         <div className="p-4 space-y-4">
-          <Field label="Date Range">
+          <Field label="Date range">
             <Select
               value={dateRange}
               onValueChange={(value) => setDateRange(value as 'all' | 'last3' | 'last6' | 'last12')}
               options={[
-                { value: 'all', label: 'All Time' },
+                { value: 'all', label: 'All time' },
                 { value: 'last3', label: 'Last 3 Months' },
                 { value: 'last6', label: 'Last 6 Months' },
                 { value: 'last12', label: 'Last 12 Months' },
@@ -166,11 +166,11 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
           {/* Payment Summary */}
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Total Payments</span>
+              <span className="text-muted-foreground">Total payments</span>
               <span className="font-medium text-foreground">{getFilteredPayments().length}</span>
             </div>
             <div className="flex justify-between text-sm mt-1">
-              <span className="text-muted-foreground">Total Amount</span>
+              <span className="text-muted-foreground">Total amount</span>
               <span className="font-medium text-primary">
                 {formatCurrency(getFilteredPayments().reduce((sum, p) => sum + p.amount, 0))}
               </span>
@@ -186,7 +186,7 @@ export const PaymentExport = ({ isOpen, onClose, payments }: PaymentExportProps)
             loadingText="Exporting..."
             icon={completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
           >
-            {completed ? 'Exported!' : 'Export Payments'}
+            {completed ? 'Exported!' : 'Export payments'}
           </Button>
         </div>
       </DialogContent>

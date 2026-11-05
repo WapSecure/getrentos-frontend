@@ -101,7 +101,7 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
           className="gap-1.5"
         >
           <FileCheck className="w-3.5 h-3.5" />
-          View Lease
+          View lease
         </Button>
       </div>
     </motion.div>

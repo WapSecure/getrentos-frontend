@@ -177,11 +177,11 @@ const EditOwnerPropertyForm = ({
       </div>
 
       <div className="p-4 space-y-3">
-        <Field label="Property Name" required>
+        <Field label="Property name" required>
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
 
-        <Field label="Property Type">
+        <Field label="Property type">
           <Select
             value={propertyType}
             onValueChange={setPropertyType}
@@ -217,7 +217,7 @@ const EditOwnerPropertyForm = ({
           }}
         />
 
-        <Field label="Estimated Value">
+        <Field label="Estimated value">
           <CurrencyInput
             prefix="₦"
             min={0}
@@ -338,7 +338,7 @@ const EditOwnerPropertyForm = ({
           isLoading={isSaving}
           loadingText="Saving…"
         >
-          Save Changes
+          Save changes
         </Button>
 
         {error && <Alert variant="danger">{error}</Alert>}

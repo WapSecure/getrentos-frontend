@@ -5,10 +5,10 @@ import { Button, Card, CardHeader, CardTitle } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Discover Properties', href: ROUTES.BUYER_DISCOVER, icon: Search },
-  { label: 'Request Viewing', href: ROUTES.BUYER_VIEWINGS, icon: CalendarClock },
-  { label: 'View Offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
-  { label: 'Upload Documents', href: ROUTES.BUYER_DOCUMENTS, icon: FileUp },
+  { label: 'Discover properties', href: ROUTES.BUYER_DISCOVER, icon: Search },
+  { label: 'Request viewing', href: ROUTES.BUYER_VIEWINGS, icon: CalendarClock },
+  { label: 'View offers', href: ROUTES.BUYER_OFFERS, icon: Handshake },
+  { label: 'Upload documents', href: ROUTES.BUYER_DOCUMENTS, icon: FileUp },
 ];
 
 export const BuyerQuickActions = () => {

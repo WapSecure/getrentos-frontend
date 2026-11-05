@@ -31,7 +31,7 @@ export const LeaseTimeline = ({ lease }: LeaseTimelineProps) => {
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Lease Timeline</h3>
+            <h3 className="font-semibold text-foreground">Lease timeline</h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">Key events and milestones</p>
         </div>

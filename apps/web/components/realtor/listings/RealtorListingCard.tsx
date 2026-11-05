@@ -19,7 +19,7 @@ const statusConfig: Record<
   { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   draft: { label: 'Draft', icon: FileEdit, variant: 'neutral' },
-  pending_approval: { label: 'Pending Approval', icon: ShieldAlert, variant: 'warning' },
+  pending_approval: { label: 'Pending approval', icon: ShieldAlert, variant: 'warning' },
   published: { label: 'Published', icon: Megaphone, variant: 'success' },
   paused: { label: 'Paused', icon: Pause, variant: 'warning' },
   closed: { label: 'Closed', icon: XCircle, variant: 'danger' },
@@ -48,7 +48,7 @@ export const RealtorListingCard = ({ listing, onClick }: RealtorListingCardProps
           {status.label}
         </Badge>
         <Badge variant="primary" className="absolute top-3 right-3">
-          {listing.category === 'sale' ? 'For Sale' : 'For Rent'}
+          {listing.category === 'sale' ? 'For sale' : 'For rent'}
         </Badge>
       </div>
 

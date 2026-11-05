@@ -290,7 +290,7 @@ export default function GatemanIncidents() {
         </View>
 
         <Button
-          label="Report Incident"
+          label="Report incident"
           loadingLabel="Reporting…"
           loading={report.isPending}
           fullWidth

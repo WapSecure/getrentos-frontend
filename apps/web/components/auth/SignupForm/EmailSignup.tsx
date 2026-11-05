@@ -193,7 +193,6 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
       <Button
         type="submit"
         disabled={!isValid || !agreedToTerms}
-
         isLoading={isLoading}
         fullWidth
         size="lg"
@@ -201,7 +200,7 @@ export const EmailSignup = ({ onSubmit, isLoading }: EmailSignupProps) => {
         icon={<ArrowRight className="w-4 h-4" />}
         iconPosition="right"
       >
-        Create Account
+        Create account
       </Button>
     </form>
   );

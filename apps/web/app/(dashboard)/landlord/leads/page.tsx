@@ -34,11 +34,11 @@ const PAGE_SIZE = 12;
 const filterOptions: { value: StageFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'inquiry', label: 'Inquiry' },
-  { value: 'requested', label: 'Viewing Requested' },
-  { value: 'confirmed', label: 'Viewing Confirmed' },
-  { value: 'completed', label: 'Viewing Completed' },
+  { value: 'requested', label: 'Viewing requested' },
+  { value: 'confirmed', label: 'Viewing confirmed' },
+  { value: 'completed', label: 'Viewing completed' },
   { value: 'pending', label: 'Applied' },
-  { value: 'under_review', label: 'Under Review' },
+  { value: 'under_review', label: 'Under review' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'cancelled', label: 'Cancelled' },
@@ -188,7 +188,11 @@ export default function LandlordLeadsPage() {
       </div>
 
       <div className="mb-6">
-        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter leads by status">
+        <div
+          className="flex gap-2 overflow-x-auto"
+          role="group"
+          aria-label="Filter leads by status"
+        >
           {filterOptions.map((option) => (
             <ToggleChip
               key={option.value}

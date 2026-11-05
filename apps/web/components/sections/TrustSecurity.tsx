@@ -10,7 +10,7 @@ import { MarketingCard, SectionHeading } from './primitives';
 const trustFeatures = [
   {
     icon: Shield,
-    title: 'Identity Verification',
+    title: 'Identity verification',
     description:
       'Identity is checked before high-stakes actions such as listing, paying or signing.',
   },
@@ -22,25 +22,25 @@ const trustFeatures = [
   },
   {
     icon: CreditCard,
-    title: 'Payments Through Paystack',
+    title: 'Payments through Paystack',
     description:
       'Card and bank payments are processed by Paystack, so payment details never sit with landlords.',
   },
   {
     icon: FileCheck,
-    title: 'Reviewed Documents',
+    title: 'Reviewed documents',
     description:
       'Ownership and title documents are reviewed by our team before a property is verified.',
   },
   {
     icon: Eye,
-    title: 'Fraud Review',
+    title: 'Fraud review',
     description:
       'Fraud reports and alerts are reviewed by our team, and sensitive actions leave an audit trail.',
   },
   {
     icon: Users,
-    title: 'You Choose What to Share',
+    title: 'You choose what to share',
     description:
       'Tenancy history and credit checks are shared only when you agree, and you can take them back.',
   },

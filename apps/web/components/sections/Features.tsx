@@ -14,13 +14,13 @@ import { MarketingCard, SectionHeading } from './primitives';
 const features = [
   {
     icon: Shield,
-    title: 'Identity Verification',
+    title: 'Identity verification',
     description:
       'Identity is checked before high-stakes actions, so you know who you are dealing with.',
   },
   {
     icon: FileCheck,
-    title: 'Property Verification',
+    title: 'Property verification',
     description: 'Ownership and title documents are reviewed before a property is marked verified.',
   },
   {
@@ -31,27 +31,27 @@ const features = [
   },
   {
     icon: Eye,
-    title: 'Fraud Review',
+    title: 'Fraud review',
     description: 'Fraud reports and alerts are reviewed by our team.',
   },
   {
     icon: Banknote,
-    title: 'Payouts to Your Bank',
+    title: 'Payouts to your bank',
     description: 'Earnings are paid to your bank account once conditions are met.',
   },
   {
     icon: BarChart3,
-    title: 'Analytics Dashboard',
+    title: 'Analytics dashboard',
     description: 'See income, spending and how each property performs.',
   },
   {
     icon: Users2,
-    title: 'Role-Based Access',
+    title: 'Role-based access',
     description: 'Granular permissions for every user type.',
   },
   {
     icon: Smartphone,
-    title: 'Works on Your Phone',
+    title: 'Works on your phone',
     description: 'Use it in your phone’s browser today, with a mobile app on the way.',
   },
 ];

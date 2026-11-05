@@ -24,7 +24,7 @@ export const RealtorStatsCards = ({
   const stats = [
     {
       icon: Users,
-      label: 'Active Clients',
+      label: 'Active clients',
       value: activeClients,
       subtitle: 'Owners & landlords',
       accent: 'blue',
@@ -32,7 +32,7 @@ export const RealtorStatsCards = ({
     },
     {
       icon: Megaphone,
-      label: 'Active Listings',
+      label: 'Active listings',
       value: activeListings,
       subtitle: 'Published on your behalf',
       accent: 'orange',
@@ -40,7 +40,7 @@ export const RealtorStatsCards = ({
     },
     {
       icon: UserPlus,
-      label: 'Active Leads',
+      label: 'Active leads',
       value: activeLeads,
       subtitle: 'In your pipeline',
       accent: 'purple',
@@ -48,7 +48,7 @@ export const RealtorStatsCards = ({
     },
     {
       icon: CalendarClock,
-      label: 'Upcoming Viewings',
+      label: 'Upcoming viewings',
       value: upcomingViewings,
       subtitle: 'Scheduled tours',
       accent: 'primary',
@@ -56,7 +56,7 @@ export const RealtorStatsCards = ({
     },
     {
       icon: Handshake,
-      label: 'Pending Offers',
+      label: 'Pending offers',
       value: pendingOffers,
       subtitle: 'Awaiting response',
       accent: 'green',

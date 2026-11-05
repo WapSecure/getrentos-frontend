@@ -28,10 +28,10 @@ const statusFilters: { value: VisitorPassStatus | 'all'; label: string }[] = [
   { value: 'pending', label: 'Pending' },
   // The estate office needs to see walk-ins the gate has raised, both still
   // waiting on the household and approved but not yet admitted.
-  { value: 'awaiting_approval', label: 'Awaiting Approval' },
+  { value: 'awaiting_approval', label: 'Awaiting approval' },
   { value: 'approved', label: 'Approved' },
-  { value: 'checked_in', label: 'Checked In' },
-  { value: 'checked_out', label: 'Checked Out' },
+  { value: 'checked_in', label: 'Checked in' },
+  { value: 'checked_out', label: 'Checked out' },
   { value: 'expired', label: 'Expired' },
   { value: 'revoked', label: 'Revoked' },
   { value: 'denied', label: 'Refused' },
@@ -133,7 +133,7 @@ export default function EstateVisitorPassesPage() {
   return (
     <>
       <PageHeader
-        title="Visitor Passes"
+        title="Visitor passes"
         description={
           <>
             {isPassesLoading ? (
@@ -156,7 +156,7 @@ export default function EstateVisitorPassesPage() {
             }}
           >
             <Plus className="w-4 h-4" />
-            Issue Pass
+            Issue pass
           </Button>
         }
       />

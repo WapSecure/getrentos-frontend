@@ -32,7 +32,7 @@ export const GovernanceVersionsModal = ({
   return (
     <Dialog open={!!recordId} onOpenChange={(next) => !next && onClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Version History</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Version history</DialogTitle>
 
         <div className="mt-4">
           {isLoading ? (

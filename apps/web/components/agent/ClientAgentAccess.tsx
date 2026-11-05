@@ -89,15 +89,15 @@ export function ClientAgentAccess() {
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Field Agent access</h2>
+        <h2 className="text-xl font-semibold text-foreground">Field agent access</h2>
         <p className="mt-1 text-muted-foreground">
-          Approve Agents and assign only the properties they may work on.
+          Approve agents and assign only the properties they may work on.
         </p>
       </div>
       {isLoading ? (
-        <ListSkeleton variant="cards" rows={3} label="Loading Agent requests" />
+        <ListSkeleton variant="cards" rows={3} label="Loading agent requests" />
       ) : assignments.length === 0 ? (
-        <EmptyState icon={UserCheck} title="No Agent requests." />
+        <EmptyState icon={UserCheck} title="No agent requests." />
       ) : (
         <div className="space-y-4">
           {assignments.map((assignment) => (

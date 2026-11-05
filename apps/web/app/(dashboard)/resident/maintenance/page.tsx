@@ -24,7 +24,7 @@ const categoryOptions = [
   { value: 'PLUMBING', label: 'Plumbing' },
   { value: 'ELECTRICAL', label: 'Electrical' },
   { value: 'STRUCTURAL', label: 'Structural' },
-  { value: 'COMMON_AREA', label: 'Common Area' },
+  { value: 'COMMON_AREA', label: 'Common area' },
   { value: 'OTHER', label: 'Other' },
 ];
 
@@ -116,12 +116,12 @@ export default function ResidentMaintenancePage() {
             })
           }
         >
-          Report Ticket
+          Report ticket
         </Button>
       </Card>
 
       <h2 className="text-sm font-semibold text-foreground mb-3">
-        Your Tickets ({tickets?.length ?? 0})
+        Your tickets ({tickets?.length ?? 0})
       </h2>
       {isLoading ? (
         <ListSkeleton rows={3} />

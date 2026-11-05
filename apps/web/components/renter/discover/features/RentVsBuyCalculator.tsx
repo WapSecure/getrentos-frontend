@@ -74,7 +74,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
         className="gap-1 text-xs font-normal text-muted-foreground hover:text-primary"
       >
         <Calculator className="w-3 h-3" />
-        Rent vs Buy
+        Rent vs buy
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -85,7 +85,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
             </div>
             <div className="min-w-0">
               <DialogTitle className="font-semibold text-foreground">
-                Rent vs Buy Analysis
+                Rent vs buy analysis
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
                 Compare costs and make informed decisions
@@ -99,14 +99,14 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
               <div className="rounded-lg border border-info/20 bg-info-subtle p-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Home className="w-4 h-4 text-info" />
-                  <span className="text-xs text-info">Property Price</span>
+                  <span className="text-xs text-info">Property price</span>
                 </div>
                 <p className="text-lg font-bold text-foreground">{formatCurrency(propertyPrice)}</p>
               </div>
               <div className="rounded-lg border border-success/20 bg-success-subtle p-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Wallet className="w-4 h-4 text-success" />
-                  <span className="text-xs text-success">Monthly Rent</span>
+                  <span className="text-xs text-success">Monthly rent</span>
                 </div>
                 <p className="text-lg font-bold text-foreground">
                   {formatCurrency(monthlyRent)}/mo
@@ -117,7 +117,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
             {/* Input Section */}
             <div className="space-y-3">
               <Field
-                label="Down Payment"
+                label="Down payment"
                 hint={
                   downPayment < propertyPrice * 0.2
                     ? '⚠️ Consider a larger down payment to avoid extra costs'
@@ -128,14 +128,14 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
               </Field>
 
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Interest Rate (%)">
+                <Field label="Interest rate (%)">
                   <NumberInput
                     integer={false}
                     value={interestRate}
                     onValueChange={(v) => setInterestRate(Number(v) || 0)}
                   />
                 </Field>
-                <Field label="Loan Term">
+                <Field label="Loan term">
                   <Select
                     value={String(loanTerm)}
                     onValueChange={(v) => setLoanTerm(Number(v))}
@@ -149,18 +149,18 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
             <div className="space-y-3">
               <h4 className="font-semibold text-foreground flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" />
-                Monthly Cost Breakdown
+                Monthly cost breakdown
               </h4>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-lg bg-secondary">
-                  <p className="text-xs text-muted-foreground">Mortgage Payment</p>
+                  <p className="text-xs text-muted-foreground">Mortgage payment</p>
                   <p className="text-lg font-bold text-foreground">
                     {formatCurrency(monthlyMortgage)}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-secondary">
-                  <p className="text-xs text-muted-foreground">Maintenance & Tax</p>
+                  <p className="text-xs text-muted-foreground">Maintenance & tax</p>
                   <p className="text-lg font-bold text-foreground">
                     {formatCurrency(monthlyMaintenance + monthlyPropertyTax)}
                   </p>
@@ -175,7 +175,7 @@ export const RentVsBuyCalculator = ({ propertyPrice, monthlyRent }: RentVsBuyCal
                 }
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3">
-                  <span className="text-sm font-medium text-foreground">Monthly Difference</span>
+                  <span className="text-sm font-medium text-foreground">Monthly difference</span>
                   <span
                     className={`text-xl font-bold ${monthlyDifference <= 0 ? 'text-success' : 'text-warning'}`}
                   >

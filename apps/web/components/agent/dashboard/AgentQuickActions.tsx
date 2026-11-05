@@ -5,10 +5,10 @@ import { Button, Card, CardHeader, CardTitle } from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 
 const actions = [
-  { label: 'Start Inspection', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
-  { label: 'Log Verification', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
-  { label: 'View Tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
-  { label: 'Sync Center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
+  { label: 'Start inspection', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
+  { label: 'Log verification', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
+  { label: 'View tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
+  { label: 'Sync center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
 ];
 
 export const AgentQuickActions = () => {

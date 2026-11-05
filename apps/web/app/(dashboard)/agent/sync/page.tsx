@@ -79,7 +79,7 @@ export default function AgentSyncPage() {
   return (
     <>
       <PageHeader
-        title="Sync Center"
+        title="Sync center"
         description={`${records.length} records waiting on this device`}
         actions={
           <Button
@@ -89,7 +89,7 @@ export default function AgentSyncPage() {
             loadingText="Syncing..."
             disabled={!records.length || !isOnline || sync.isPending || queue.isError}
           >
-            Sync All
+            Sync all
           </Button>
         }
       />

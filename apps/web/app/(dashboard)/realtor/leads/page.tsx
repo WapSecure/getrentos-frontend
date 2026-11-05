@@ -158,9 +158,9 @@ export default function RealtorLeadsPage() {
     { value: 'all', label: 'All' },
     { value: 'new', label: 'New' },
     { value: 'contacted', label: 'Contacted' },
-    { value: 'viewing_scheduled', label: 'Viewing Scheduled' },
-    { value: 'closed_won', label: 'Closed Won' },
-    { value: 'closed_lost', label: 'Closed Lost' },
+    { value: 'viewing_scheduled', label: 'Viewing scheduled' },
+    { value: 'closed_won', label: 'Closed won' },
+    { value: 'closed_lost', label: 'Closed lost' },
   ];
 
   return (

@@ -29,7 +29,7 @@ const statusFilters: { value: 'all' | MaintenanceRequestStatus; label: string }[
   { value: 'all', label: 'All' },
   { value: 'submitted', label: 'Submitted' },
   { value: 'assigned', label: 'Assigned' },
-  { value: 'in_progress', label: 'In Progress' },
+  { value: 'in_progress', label: 'In progress' },
   { value: 'resolved', label: 'Resolved' },
 ];
 

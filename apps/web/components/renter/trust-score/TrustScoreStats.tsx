@@ -33,37 +33,37 @@ export const TrustScoreStats = ({
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       <StatCard
         icon={TrendingUp}
-        label="Trust Score"
+        label="Trust score"
         value={`${trustScore} / 100`}
         accent="primary"
       />
       <StatCard
         icon={CheckCircle}
-        label="Verifications Complete"
+        label="Verifications complete"
         value={`${verifiedCount}/${totalVerifications}`}
         accent="green"
       />
       <StatCard
         icon={Clock}
-        label="Pending Verifications"
+        label="Pending verifications"
         value={`${pendingCount}`}
         accent="orange"
       />
       <StatCard
         icon={netChange < 0 ? AlertCircle : TrendingUp}
-        label="Net Score Change"
+        label="Net score change"
         value={history.length === 0 ? '—' : netChangeLabel}
         accent={netChange > 0 ? 'green' : netChange < 0 ? 'red' : 'blue'}
       />
       <StatCard
         icon={Award}
-        label="Badges Earned"
+        label="Badges earned"
         value={`${earnedBadges}/${badges.length}`}
         accent="orange"
       />
       <StatCard
         icon={Users}
-        label="Trust Level"
+        label="Trust level"
         value={trustBand(trustScore).label}
         accent="primary"
       />

@@ -74,8 +74,8 @@ export default function OwnerLeadsPage() {
     { value: 'new', label: 'New' },
     { value: 'contacted', label: 'Contacted' },
     { value: 'qualified', label: 'Qualified' },
-    { value: 'viewing_scheduled', label: 'Viewing Scheduled' },
-    { value: 'offer_made', label: 'Offer Made' },
+    { value: 'viewing_scheduled', label: 'Viewing scheduled' },
+    { value: 'offer_made', label: 'Offer made' },
     { value: 'closed', label: 'Closed' },
     { value: 'lost', label: 'Lost' },
   ];
@@ -83,7 +83,7 @@ export default function OwnerLeadsPage() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Buyer Leads</h1>
+        <h1 className="text-2xl font-bold text-foreground">Buyer leads</h1>
         <p className="text-muted-foreground mt-1">
           {total} inquir{total === 1 ? 'y' : 'ies'} across your sale listings
         </p>

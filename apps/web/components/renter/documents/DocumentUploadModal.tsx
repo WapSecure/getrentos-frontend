@@ -30,9 +30,9 @@ interface UploadData {
 }
 
 const documentTypes: { value: string; label: string }[] = [
-  { value: 'lease', label: 'Lease Agreement' },
+  { value: 'lease', label: 'Lease agreement' },
   { value: 'receipt', label: 'Receipt' },
-  { value: 'inspection', label: 'Inspection Report' },
+  { value: 'inspection', label: 'Inspection report' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -131,7 +131,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
       <Dialog open={isOpen} onOpenChange={(next) => !next && !isUploading && onClose()}>
         <DialogContent size="md" padded={false} showClose={!isUploading}>
           <div className="p-4 pr-12 border-b border-border">
-            <DialogTitle className="font-semibold text-foreground">Upload Document</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Upload document</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Upload a new document to your vault
             </DialogDescription>
@@ -187,7 +187,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
             </div>
 
             <div className="space-y-3">
-              <Field label="Document Name">
+              <Field label="Document name">
                 <Input
                   type="text"
                   value={name}
@@ -197,7 +197,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
               </Field>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Document Type">
+                <Field label="Document type">
                   <Select value={type} onValueChange={setType} options={documentTypes} />
                 </Field>
 
@@ -247,7 +247,7 @@ export const DocumentUploadModal = ({ isOpen, onClose, onSubmit }: DocumentUploa
               loadingText="Uploading..."
               icon={<Upload className="h-4 w-4" />}
             >
-              Upload Document
+              Upload document
             </Button>
           </div>
         </DialogContent>

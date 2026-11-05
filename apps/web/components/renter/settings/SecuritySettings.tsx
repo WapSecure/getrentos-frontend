@@ -184,7 +184,7 @@ export const SecuritySettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Security Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Security settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage your account security and authentication methods
       </p>
@@ -252,7 +252,7 @@ export const SecuritySettings = () => {
                 <Shield className="w-5 h-5 text-info" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-medium text-foreground">Two-Factor Authentication</h3>
+                <h3 className="font-medium text-foreground">Two-factor authentication</h3>
                 <p
                   className="text-sm text-muted-foreground"
                   role={twoFactorFailed && !twoFactorKnown ? 'alert' : undefined}

@@ -26,7 +26,7 @@ export const CalendarSync = () => {
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Calendar Sync</h3>
+            <h3 className="font-semibold text-foreground">Calendar sync</h3>
             <p className="text-xs text-muted-foreground">Sync with external calendars</p>
           </div>
         </div>
@@ -40,13 +40,13 @@ export const CalendarSync = () => {
           <Switch
             checked={syncEnabled}
             onCheckedChange={setSyncEnabled}
-            label="Sync Calendar"
+            label="Sync calendar"
             size="sm"
           />
 
           {syncEnabled && (
             <>
-              <Field label="Select Calendar Service">
+              <Field label="Select calendar service">
                 <RadioGroup
                   variant="card"
                   value={syncProvider}

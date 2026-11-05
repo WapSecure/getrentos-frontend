@@ -135,7 +135,7 @@ export const LeaseView = () => {
         ) : (
           <EmptyState
             icon={FileText}
-            title="No Active Lease"
+            title="No active lease"
             description="You don't have an active lease agreement at the moment."
           />
         )}

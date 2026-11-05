@@ -118,7 +118,7 @@ export const RequestViewingModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && !isSubmitting && handleClose()}>
       <DialogContent size="sm" padded={false}>
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Request Viewing</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Request viewing</DialogTitle>
         </div>
 
         <div className="p-4 space-y-4">
@@ -199,12 +199,7 @@ export const RequestViewingModal = ({
               {submitError}
             </p>
           )}
-          <Button
-            variant="ghost"
-            onClick={handleClose}
-            className="flex-1"
-            disabled={isSubmitting}
-          >
+          <Button variant="ghost" onClick={handleClose} className="flex-1" disabled={isSubmitting}>
             Cancel
           </Button>
           <Button

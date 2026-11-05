@@ -89,7 +89,7 @@ export const PayoutSettings = () => {
       )}
 
       <div className="space-y-4">
-        <Field label="Bank Code">
+        <Field label="Bank code">
           <NumberInput
             value={bankCode}
             onValueChange={setBankCode}
@@ -98,7 +98,7 @@ export const PayoutSettings = () => {
             leadingIcon={<Landmark className="w-4 h-4" />}
           />
         </Field>
-        <Field label="Account Number">
+        <Field label="Account number">
           <NumberInput
             value={accountNumber}
             onValueChange={setAccountNumber}
@@ -114,7 +114,7 @@ export const PayoutSettings = () => {
           href={ROUTES.LANDLORD_SETTINGS}
           verificationHref={ROUTES.LANDLORD_VERIFICATION}
         />
-        <SaveButton label="Update Payout Account" onClick={handleSave} />
+        <SaveButton label="Update payout account" onClick={handleSave} />
       </div>
     </div>
   );

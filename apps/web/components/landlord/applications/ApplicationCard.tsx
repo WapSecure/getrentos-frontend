@@ -61,7 +61,7 @@ export const ApplicationCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-foreground/70">Monthly Income</p>
+          <p className="text-xs text-foreground/70">Monthly income</p>
           <p className="text-sm font-medium text-foreground">
             {formatCurrency(application.monthlyIncome, { compact: true })}
           </p>
@@ -75,7 +75,7 @@ export const ApplicationCard = ({
       </div>
 
       <div className="flex items-center gap-1.5 mt-3">
-        <span className="text-xs text-muted-foreground">Trust Score</span>
+        <span className="text-xs text-muted-foreground">Trust score</span>
         <span className="text-xs font-bold text-primary">{application.trustScore}</span>
       </div>
 

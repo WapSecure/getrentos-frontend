@@ -94,7 +94,7 @@ export const RenterReviews = () => {
         className="bg-card rounded-xl border border-border overflow-hidden"
       >
         <div className="p-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">Reviews & Ratings</h2>
+          <h2 className="text-lg font-semibold text-foreground">Reviews & ratings</h2>
           <p className="text-sm text-muted-foreground">Share your experience</p>
         </div>
 
@@ -121,7 +121,7 @@ export const RenterReviews = () => {
           {/* Pending Reviews */}
           {pending.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-foreground mb-3">Pending Reviews</h3>
+              <h3 className="text-sm font-medium text-foreground mb-3">Pending reviews</h3>
               <div className="space-y-3">
                 {pending.map((review, index) => (
                   <motion.div
@@ -140,7 +140,7 @@ export const RenterReviews = () => {
                       </p>
                     </div>
                     <Button size="sm" onClick={() => handleStartReview(review)}>
-                      Write Review
+                      Write review
                     </Button>
                   </motion.div>
                 ))}
@@ -150,7 +150,7 @@ export const RenterReviews = () => {
 
           {submitted.length > 0 && (
             <div className="mt-4">
-              <h3 className="text-sm font-medium text-foreground mb-3">Your Reviews</h3>
+              <h3 className="text-sm font-medium text-foreground mb-3">Your reviews</h3>
               <div className="space-y-3">
                 {submitted.map((review) => (
                   <div key={review.id} className="p-3 rounded-lg bg-secondary/60">
@@ -196,7 +196,7 @@ export const RenterReviews = () => {
         {selectedReview && (
           <DialogContent showClose={!submitMutation.isPending}>
             <DialogTitle className="pr-8 text-xl font-semibold text-foreground mb-2">
-              Write a Review
+              Write a review
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground mb-4">
               {selectedReview.type === 'property'
@@ -252,7 +252,7 @@ export const RenterReviews = () => {
                 disabled={rating === 0 || submitMutation.isPending}
                 isLoading={submitMutation.isPending}
               >
-                Submit Review
+                Submit review
               </Button>
             </div>
           </DialogContent>

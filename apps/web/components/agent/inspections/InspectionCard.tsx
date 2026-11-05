@@ -17,8 +17,8 @@ const syncConfig: Record<
   { label: string; variant: BadgeVariant }
 > = {
   synced: { label: 'Synced', variant: 'success' },
-  pending: { label: 'Pending Sync', variant: 'warning' },
-  failed: { label: 'Sync Failed', variant: 'danger' },
+  pending: { label: 'Pending sync', variant: 'warning' },
+  failed: { label: 'Sync failed', variant: 'danger' },
 };
 
 const typeConfig: Record<InspectionType, string> = {

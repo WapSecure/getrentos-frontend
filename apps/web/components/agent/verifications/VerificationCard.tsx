@@ -42,7 +42,7 @@ export const VerificationCard = ({ visit }: VerificationCardProps) => {
           }
           className="shrink-0 whitespace-nowrap"
         >
-          {visit.syncStatus === 'synced' ? 'Synced' : 'Pending Sync'}
+          {visit.syncStatus === 'synced' ? 'Synced' : 'Pending sync'}
         </Badge>
       </div>
 
@@ -61,7 +61,7 @@ export const VerificationCard = ({ visit }: VerificationCardProps) => {
           ) : (
             <XCircle className="w-4 h-4 text-muted-foreground/50" />
           )}
-          <span className="text-xs text-muted-foreground">Address Confirmed</span>
+          <span className="text-xs text-muted-foreground">Address confirmed</span>
         </div>
       </div>
 

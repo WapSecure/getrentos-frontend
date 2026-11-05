@@ -125,8 +125,8 @@ export function ClientAgentTaskForm() {
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <Field label="Agent">
           <Select
-            ariaLabel="Select Agent"
-            placeholder="Select Agent"
+            ariaLabel="Select agent"
+            placeholder="Select agent"
             value={assignmentId}
             onValueChange={(value) => {
               setAssignmentId(value);

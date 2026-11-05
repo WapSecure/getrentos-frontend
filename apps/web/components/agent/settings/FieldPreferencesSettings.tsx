@@ -79,7 +79,7 @@ export const FieldPreferencesSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Field Preferences</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Field preferences</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Where and when you take field work. Clients see these when they assign you a task, and tasks
         can&apos;t be booked on a day you don&apos;t work or beyond your daily limit.
@@ -197,7 +197,7 @@ export const FieldPreferencesSettings = () => {
               })
             }
           >
-            Save Preferences
+            Save preferences
           </Button>
         </>
       )}

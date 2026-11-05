@@ -23,10 +23,10 @@ import { formatDate } from '@/lib/format';
 import type { OwnershipTransferDocument } from '@/types/owner';
 
 const categoryLabels: Record<OwnershipTransferDocument['category'], string> = {
-  transfer_agreement: 'Transfer Agreement',
-  payment_receipt: 'Payment Receipt',
-  government_filing: 'Government Filing',
-  title_transfer: 'Title Transfer',
+  transfer_agreement: 'Transfer agreement',
+  payment_receipt: 'Payment receipt',
+  government_filing: 'Government filing',
+  title_transfer: 'Title transfer',
   other: 'Other',
 };
 
@@ -114,10 +114,10 @@ export default function OwnerDocumentsPage() {
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
-    { value: 'transfer_agreement', label: 'Transfer Agreements' },
-    { value: 'payment_receipt', label: 'Payment Receipts' },
-    { value: 'government_filing', label: 'Government Filings' },
-    { value: 'title_transfer', label: 'Title Transfer' },
+    { value: 'transfer_agreement', label: 'Transfer agreements' },
+    { value: 'payment_receipt', label: 'Payment receipts' },
+    { value: 'government_filing', label: 'Government filings' },
+    { value: 'title_transfer', label: 'Title transfer' },
   ];
 
   return (
@@ -134,7 +134,7 @@ export default function OwnerDocumentsPage() {
           onClick={() => setIsUploadOpen(true)}
           icon={<Upload className="w-4 h-4" />}
         >
-          Upload Document
+          Upload document
         </Button>
       </div>
 
@@ -199,7 +199,7 @@ export default function OwnerDocumentsPage() {
                 }`}
               >
                 {doc.sharedWithBuyer && <Check className="w-3 h-3" />}
-                {doc.sharedWithBuyer ? 'Shared with Buyer' : 'Not Shared'}
+                {doc.sharedWithBuyer ? 'Shared with buyer' : 'Not shared'}
               </button>
               <div className="flex items-center gap-1 shrink-0">
                 {doc.downloadUrl && (

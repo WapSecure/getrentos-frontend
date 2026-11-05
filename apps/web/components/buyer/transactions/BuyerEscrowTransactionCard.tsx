@@ -10,16 +10,16 @@ import type { BuyerEscrowTransaction, BuyerEscrowStatus } from '@/types/buyer';
 // released. (VERIFICATION_PENDING / SETTLEMENT_PENDING exist in the enum but no
 // transaction is ever moved into them, so they are not shown as progress steps.)
 const escrowSteps: { key: BuyerEscrowStatus; label: string }[] = [
-  { key: 'deposit_pending', label: 'Deposit Pending' },
-  { key: 'funds_held', label: 'Funds Held' },
+  { key: 'deposit_pending', label: 'Deposit pending' },
+  { key: 'funds_held', label: 'Funds held' },
   { key: 'released', label: 'Released' },
 ];
 
 const statusLabels: Record<BuyerEscrowStatus, string> = {
-  deposit_pending: 'Deposit Pending',
-  funds_held: 'Funds Held',
+  deposit_pending: 'Deposit pending',
+  funds_held: 'Funds held',
   released: 'Completed',
-  frozen: 'Frozen: Dispute',
+  frozen: 'Frozen: dispute',
   refunded: 'Refunded',
 };
 

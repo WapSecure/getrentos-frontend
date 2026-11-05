@@ -24,8 +24,8 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'verification', label: 'Verification', icon: ShieldCheck },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'payment', label: 'Payment Method', icon: Landmark },
-  { id: 'preferences', label: 'Search Preferences', icon: SlidersHorizontal },
+  { id: 'payment', label: 'Payment method', icon: Landmark },
+  { id: 'preferences', label: 'Search preferences', icon: SlidersHorizontal },
   { id: 'data', label: 'Your data', icon: Download },
 ];
 

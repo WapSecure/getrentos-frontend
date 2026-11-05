@@ -98,7 +98,7 @@ export const PaymentDetailsModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="p-0 sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Payment Details</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Payment details</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {payment.propertyName}
           </DialogDescription>
@@ -128,14 +128,14 @@ export const PaymentDetailsModal = ({
             <div className="p-2 rounded-lg bg-secondary">
               <div className="flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Due Date</span>
+                <span className="text-xs text-muted-foreground">Due date</span>
               </div>
               <p className="text-sm font-medium text-foreground">{formatDate(payment.dueDate)}</p>
             </div>
             <div className="p-2 rounded-lg bg-secondary">
               <div className="flex items-center gap-1">
                 <NairaSign className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">Paid On</span>
+                <span className="text-xs text-muted-foreground">Paid on</span>
               </div>
               <p className="text-sm font-medium text-foreground">{formatDate(payment.date)}</p>
             </div>
@@ -151,7 +151,7 @@ export const PaymentDetailsModal = ({
                 <Building2 className="w-3 h-3 text-muted-foreground" />
               )}
               {payment.method === 'wallet' && <Wallet className="w-3 h-3 text-muted-foreground" />}
-              <span className="text-xs text-muted-foreground">Payment Method</span>
+              <span className="text-xs text-muted-foreground">Payment method</span>
             </div>
             <p className="text-sm font-medium text-foreground capitalize">
               {payment.method.replace('_', ' ')}
@@ -206,7 +206,7 @@ export const PaymentDetailsModal = ({
                 icon={<Download className="w-4 h-4" />}
                 onClick={() => onDownloadReceipt(payment.id)}
               >
-                Download Receipt
+                Download receipt
               </Button>
             )}
             {payment.status === 'paid' && payment.escrowStatus === 'held' && (

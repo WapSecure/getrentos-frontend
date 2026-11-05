@@ -39,7 +39,7 @@ export const VerificationTimeline = ({ verifications }: VerificationTimelineProp
         <div className="flex min-w-0 items-center gap-2">
           <Clock className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Verification Timeline</h3>
+            <h3 className="font-semibold text-foreground">Verification timeline</h3>
             <p className="text-xs text-muted-foreground">
               {timelineItems.filter((t) => t.status === 'completed').length} of{' '}
               {timelineItems.length} complete

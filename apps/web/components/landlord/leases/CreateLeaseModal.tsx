@@ -135,7 +135,7 @@ export const CreateLeaseModal = ({
       <DialogContent padded={false} className="flex flex-col">
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Create Lease</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Create lease</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Draft a new lease agreement
             </DialogDescription>
@@ -166,7 +166,7 @@ export const CreateLeaseModal = ({
               </Field>
 
               <div>
-                <Field label="Tenant Name" required>
+                <Field label="Tenant name" required>
                   <Input
                     type="text"
                     value={tenantName}
@@ -191,16 +191,16 @@ export const CreateLeaseModal = ({
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Lease Start" required>
+                <Field label="Lease start" required>
                   <DatePicker value={leaseStart} onChange={setLeaseStart} />
                 </Field>
-                <Field label="Lease End" required>
+                <Field label="Lease end" required>
                   <DatePicker value={leaseEnd} onChange={setLeaseEnd} min={leaseStart} />
                 </Field>
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Rent Amount" required>
+                <Field label="Rent amount" required>
                   <CurrencyInput
                     prefix="₦"
                     value={rentAmount}
@@ -230,7 +230,7 @@ export const CreateLeaseModal = ({
               isLoading={submitting === 'draft'}
               loadingText="Saving…"
             >
-              Save Draft
+              Save draft
             </Button>
             <Button
               variant="primary"
@@ -240,7 +240,7 @@ export const CreateLeaseModal = ({
               isLoading={submitting === 'send'}
               loadingText="Sending…"
             >
-              Send Lease
+              Send lease
             </Button>
           </div>
         )}

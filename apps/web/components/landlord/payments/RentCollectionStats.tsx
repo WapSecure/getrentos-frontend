@@ -20,14 +20,14 @@ export const RentCollectionStats = ({
   const stats = [
     {
       icon: Wallet,
-      label: 'Total Collected',
+      label: 'Total collected',
       value: formatCurrency(totalCollected, { compact: true }),
       subtitle: 'This month',
       accent: 'emerald',
     },
     {
       icon: AlertTriangle,
-      label: 'Outstanding Balance',
+      label: 'Outstanding balance',
       value: formatCurrency(outstandingBalance, { compact: true }),
       subtitle: 'Unpaid rent',
       accent: 'red',
@@ -41,7 +41,7 @@ export const RentCollectionStats = ({
     },
     {
       icon: CalendarClock,
-      label: 'Upcoming Payments',
+      label: 'Upcoming payments',
       value: upcomingPayments,
       subtitle: 'Due in 7 days',
       accent: 'orange',

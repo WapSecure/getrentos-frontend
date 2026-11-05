@@ -154,7 +154,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
           <div className="mb-4 flex justify-center">
             <Logo size="md" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Reset Password</h2>
+          <h2 className="text-2xl font-bold text-foreground">Reset password</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             We&apos;ll help you get back into your account
           </p>
@@ -181,7 +181,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
                 size="lg"
                 className="w-full mt-6"
               >
-                Send Reset Code
+                Send reset code
               </Button>
             </motion.div>
           )}
@@ -208,7 +208,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
                 size="lg"
                 className="w-full mt-6"
               >
-                Verify Code
+                Verify code
               </Button>
             </motion.div>
           )}
@@ -233,7 +233,7 @@ export const ForgotPasswordForm = ({ onSuccess, showToast }: ForgotPasswordFormP
                 size="lg"
                 className="w-full mt-6"
               >
-                Reset Password
+                Reset password
               </Button>
             </motion.div>
           )}

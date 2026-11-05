@@ -44,7 +44,7 @@ const propertyTypes: { value: PropertyType; label: string }[] = [
   { value: 'duplex', label: 'Duplex' },
   { value: 'condo', label: 'Condo' },
   { value: 'commercial', label: 'Commercial' },
-  { value: 'shared_apartment', label: 'Shared Apartment' },
+  { value: 'shared_apartment', label: 'Shared apartment' },
 ];
 
 export const EditPropertyModal = ({ property, onClose, onSave }: EditPropertyModalProps) => {
@@ -209,7 +209,7 @@ const EditPropertyForm = ({
     <>
       <div className="p-4 pr-12 border-b border-border">
         <DialogTitle className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-          Edit Property
+          Edit property
         </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Update your property&apos;s core details
@@ -217,11 +217,11 @@ const EditPropertyForm = ({
       </div>
 
       <div className="p-4 space-y-3">
-        <Field label="Property Name" required>
+        <Field label="Property name" required>
           <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
 
-        <Field label="Property Type">
+        <Field label="Property type">
           <Select
             value={type}
             onValueChange={(value) => setType(value as PropertyType)}
@@ -256,7 +256,7 @@ const EditPropertyForm = ({
           }}
         />
 
-        <Field label="Number of Units">
+        <Field label="Number of units">
           <NumberInput min={1} value={totalUnits} onValueChange={setTotalUnits} />
         </Field>
 
@@ -407,7 +407,7 @@ const EditPropertyForm = ({
           isLoading={saving}
           loadingText="Saving…"
         >
-          Save Changes
+          Save changes
         </Button>
       </div>
     </>

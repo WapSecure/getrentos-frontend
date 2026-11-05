@@ -14,7 +14,7 @@ export const MaintenanceStats = ({ summary }: MaintenanceStatsProps) => {
   const stats = [
     {
       icon: Wrench,
-      label: 'Total Requests',
+      label: 'Total requests',
       value: total,
       color: 'text-muted-foreground',
       bg: 'bg-secondary',

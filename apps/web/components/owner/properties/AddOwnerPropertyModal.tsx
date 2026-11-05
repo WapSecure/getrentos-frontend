@@ -43,7 +43,7 @@ export interface OwnerPropertySubmissionResult {
   failedProofCount: number;
 }
 
-const steps = ['Ownership Info', 'Documents', 'Declaration', 'Status'];
+const steps = ['Ownership info', 'Documents', 'Declaration', 'Status'];
 
 /** sessionStorage key for a property being added when the session ran out. */
 export const ADD_OWNER_PROPERTY_DRAFT_KEY = 'owner-add-property';
@@ -256,7 +256,7 @@ export const AddOwnerPropertyModal = ({
           )}
           {step === 0 && (
             <>
-              <Field label="Property Name" required>
+              <Field label="Property name" required>
                 <Input
                   type="text"
                   value={form.name}
@@ -265,7 +265,7 @@ export const AddOwnerPropertyModal = ({
                 />
               </Field>
 
-              <Field label="Property Type">
+              <Field label="Property type">
                 <Select
                   value={form.propertyType}
                   onValueChange={(v) => update('propertyType', v)}
@@ -273,7 +273,7 @@ export const AddOwnerPropertyModal = ({
                 />
               </Field>
 
-              <Field label="Registered Owner Name" required>
+              <Field label="Registered owner name" required>
                 <Input
                   type="text"
                   value={form.ownerName}
@@ -311,7 +311,7 @@ export const AddOwnerPropertyModal = ({
               />
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Purchase Price">
+                <Field label="Purchase price">
                   <CurrencyInput
                     prefix="₦"
                     min={0}
@@ -319,7 +319,7 @@ export const AddOwnerPropertyModal = ({
                     onValueChange={(v) => update('purchasePrice', v === 0 ? '' : String(v))}
                   />
                 </Field>
-                <Field label="Estimated Value">
+                <Field label="Estimated value">
                   <CurrencyInput
                     prefix="₦"
                     min={0}
@@ -329,7 +329,7 @@ export const AddOwnerPropertyModal = ({
                 </Field>
               </div>
 
-              <Field label="Purchase Date">
+              <Field label="Purchase date">
                 <DatePicker
                   value={form.purchaseDate}
                   onChange={(v) => update('purchaseDate', v)}
@@ -346,7 +346,7 @@ export const AddOwnerPropertyModal = ({
                 before your property can be listed for sale.
               </Alert>
               <UploadField
-                label="Title Deed"
+                label="Title deed"
                 file={form.titleDeed}
                 onSelect={(file) => update('titleDeed', file)}
               />
@@ -361,7 +361,7 @@ export const AddOwnerPropertyModal = ({
                 onSelect={(file) => update('deedOfAssignment', file)}
               />
               <UploadField
-                label="Government Registry Extract"
+                label="Government registry extract"
                 file={form.govtRegistryExtract}
                 onSelect={(file) => update('govtRegistryExtract', file)}
               />
@@ -459,7 +459,7 @@ export const AddOwnerPropertyModal = ({
               loadingText="Submitting…"
               icon={<ShieldCheck className="h-4 w-4" />}
             >
-              Submit for Verification
+              Submit for verification
             </Button>
           )}
           {step === 3 && (

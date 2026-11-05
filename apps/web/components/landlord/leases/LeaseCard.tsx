@@ -69,7 +69,7 @@ export const LeaseCard = ({
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-muted-foreground">Lease Period</p>
+          <p className="text-xs text-muted-foreground">Lease period</p>
           <p className="text-sm font-medium text-foreground">
             {formatDate(lease.leaseStart)} – {formatDate(lease.leaseEnd)}
           </p>
@@ -123,7 +123,7 @@ export const LeaseCard = ({
             onClick={() => onSendLease(lease.id)}
           >
             <Send className="w-3.5 h-3.5" />
-            Send Lease
+            Send lease
           </Button>
         )}
         {lease.status === 'sent' && (
@@ -201,7 +201,7 @@ export const LeaseCard = ({
             onClick={() => onRequestRenewal(lease)}
           >
             <FileCheck className="w-3.5 h-3.5" />
-            {lease.pendingRenewalOffer ? 'Replace offer' : 'Create New Lease'}
+            {lease.pendingRenewalOffer ? 'Replace offer' : 'Create new lease'}
           </Button>
         )}
       </div>

@@ -45,13 +45,13 @@ export const RoommateAgreementModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-2xl">
-        <DialogTitle className="pr-8 font-semibold text-foreground">Roommate Agreement</DialogTitle>
+        <DialogTitle className="pr-8 font-semibold text-foreground">Roommate agreement</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Review and agree to the roommate terms
         </DialogDescription>
 
         <div className="mt-5 space-y-6">
-          <Alert variant="info" icon={FileText} title="Household Agreement">
+          <Alert variant="info" icon={FileText} title="Household agreement">
             This agreement outlines the shared responsibilities and expectations for all roommates.
           </Alert>
 
@@ -73,7 +73,7 @@ export const RoommateAgreementModal = ({
                 <Home className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-medium text-foreground">Shared Responsibilities</h4>
+                <h4 className="font-medium text-foreground">Shared responsibilities</h4>
                 <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                   <li>Keep common areas clean and tidy</li>
                   <li>Respect quiet hours (10 PM - 8 AM)</li>
@@ -89,7 +89,7 @@ export const RoommateAgreementModal = ({
                 <NairaSign className="w-4 h-4 text-muted-foreground" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-medium text-foreground">Financial Agreement</h4>
+                <h4 className="font-medium text-foreground">Financial agreement</h4>
                 <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                   <li>Rent split according to agreed percentages</li>
                   <li>Utilities and shared expenses equally divided</li>
@@ -100,7 +100,7 @@ export const RoommateAgreementModal = ({
             </div>
           </div>
 
-          <Alert variant="warning" icon={Clock} title="Notice Period">
+          <Alert variant="warning" icon={Clock} title="Notice period">
             Any roommate wishing to leave must provide 30 days notice and find a suitable
             replacement.
           </Alert>
@@ -121,7 +121,7 @@ export const RoommateAgreementModal = ({
             isLoading={isSubmitting}
             icon={<Check className="w-4 h-4" />}
           >
-            Sign Agreement
+            Sign agreement
           </Button>
         </div>
       </DialogContent>

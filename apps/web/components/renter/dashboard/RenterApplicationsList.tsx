@@ -21,12 +21,12 @@ const statusConfig: Record<
   { label: string; variant: BadgeVariant; icon: React.ElementType }
 > = {
   pending: {
-    label: 'Pending Review',
+    label: 'Pending review',
     variant: 'warning',
     icon: Clock,
   },
   under_review: {
-    label: 'Under Review',
+    label: 'Under review',
     variant: 'info',
     icon: Building2,
   },
@@ -122,95 +122,95 @@ export const RenterApplicationsList = () => {
         }}
         loading={<ListSkeleton rows={3} className="rounded-none border-0" />}
       >
-      <div className="divide-y divide-border">
-        {applications.map((app, index) => {
-          const StatusIcon = statusConfig[app.status].icon;
+        <div className="divide-y divide-border">
+          {applications.map((app, index) => {
+            const StatusIcon = statusConfig[app.status].icon;
 
-          return (
-            <motion.div
-              key={app.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 * index, duration: 0.3 }}
-              className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
-              onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}
-            >
-              <div className="flex flex-col md:flex-row md:items-start gap-4">
-                <div className="flex h-16 w-full shrink-0 items-center justify-center rounded-xl bg-muted md:w-16">
-                  <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
-                    <Home className="w-4 h-4 text-primary" />
+            return (
+              <motion.div
+                key={app.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 * index, duration: 0.3 }}
+                className="p-4 hover:bg-secondary transition-colors cursor-pointer group"
+                onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}
+              >
+                <div className="flex flex-col md:flex-row md:items-start gap-4">
+                  <div className="flex h-16 w-full shrink-0 items-center justify-center rounded-xl bg-muted md:w-16">
+                    <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                      <Home className="w-4 h-4 text-primary" />
+                    </div>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap justify-between items-start gap-2">
+                      <div>
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          {app.title}
+                        </h3>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
+                          <MapPin className="w-3 h-3" />
+                          <span>{app.address}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-primary">
+                          {formatPrice(app.price, app.period)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Bed className="w-3 h-3" />
+                        <span>
+                          {app.bedrooms} {app.bedrooms === 1 ? 'bed' : 'beds'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Bath className="w-3 h-3" />
+                        <span>
+                          {app.bathrooms} {app.bathrooms === 1 ? 'bath' : 'baths'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Square className="w-3 h-3" />
+                        <span>{app.size} sqm</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <CalendarDays className="w-3 h-3" />
+                        <span>Applied {formatDate(app.date)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between md:justify-end gap-3">
+                    <Badge
+                      variant={statusConfig[app.status].variant}
+                      icon={<StatusIcon className="w-3 h-3" />}
+                    >
+                      {statusConfig[app.status].label}
+                    </Badge>
+                    <Button
+                      href={ROUTES.RENTER_APPLICATIONS}
+                      variant="outline"
+                      size="sm"
+                      className="hidden md:inline-flex"
+                    >
+                      View details
+                    </Button>
                   </div>
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap justify-between items-start gap-2">
-                    <div>
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {app.title}
-                      </h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-                        <MapPin className="w-3 h-3" />
-                        <span>{app.address}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-primary">
-                        {formatPrice(app.price, app.period)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Bed className="w-3 h-3" />
-                      <span>
-                        {app.bedrooms} {app.bedrooms === 1 ? 'bed' : 'beds'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Bath className="w-3 h-3" />
-                      <span>
-                        {app.bathrooms} {app.bathrooms === 1 ? 'bath' : 'baths'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Square className="w-3 h-3" />
-                      <span>{app.size} sqm</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <CalendarDays className="w-3 h-3" />
-                      <span>Applied {formatDate(app.date)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between md:justify-end gap-3">
-                  <Badge
-                    variant={statusConfig[app.status].variant}
-                    icon={<StatusIcon className="w-3 h-3" />}
-                  >
-                    {statusConfig[app.status].label}
-                  </Badge>
-                  <Button
-                    href={ROUTES.RENTER_APPLICATIONS}
-                    variant="outline"
-                    size="sm"
-                    className="hidden md:inline-flex"
-                  >
-                    View Details
+                <div className="mt-3 md:hidden">
+                  <Button href={ROUTES.RENTER_APPLICATIONS} variant="outline" size="sm" fullWidth>
+                    View details
                   </Button>
                 </div>
-              </div>
-
-              <div className="mt-3 md:hidden">
-                <Button href={ROUTES.RENTER_APPLICATIONS} variant="outline" size="sm" fullWidth>
-                  View Details
-                </Button>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
       </QueryState>
     </motion.div>
   );

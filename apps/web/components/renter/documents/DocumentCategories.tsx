@@ -59,7 +59,7 @@ export const DocumentCategories = ({
         >
           <div className="flex items-center gap-2">
             <FolderOpen className="w-4 h-4" />
-            <span>All Documents</span>
+            <span>All documents</span>
           </div>
           <span className="text-xs text-muted-foreground">{total}</span>
         </button>

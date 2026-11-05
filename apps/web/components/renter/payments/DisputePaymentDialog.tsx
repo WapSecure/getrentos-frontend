@@ -62,7 +62,7 @@ export const DisputePaymentDialog = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="p-0 sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Dispute Payment</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Dispute payment</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             Tell us what&apos;s wrong with this charge: our support team will review it within 2
             business days.
@@ -92,7 +92,7 @@ export const DisputePaymentDialog = ({
             disabled={isSubmitting}
             isLoading={isSubmitting}
           >
-            Submit Dispute
+            Submit dispute
           </Button>
         </div>
       </DialogContent>

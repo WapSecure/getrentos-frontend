@@ -16,7 +16,7 @@ type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'da
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'payouts', label: 'Payout Account', icon: Landmark },
+  { id: 'payouts', label: 'Payout account', icon: Landmark },
   { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
   { id: 'data', label: 'Your data', icon: Download },
 ];

@@ -24,10 +24,10 @@ import { realtorKeys } from '@/lib/queryKeys';
 import { realtorService } from '@/services/realtorService';
 
 const categoryLabels: Record<RealtorDocument['category'], string> = {
-  agency_agreement: 'Agency Agreement',
-  listing_contract: 'Listing Contract',
-  closing_document: 'Closing Document',
-  license: 'Realtor License',
+  agency_agreement: 'Agency agreement',
+  listing_contract: 'Listing contract',
+  closing_document: 'Closing document',
+  license: 'Realtor license',
   other: 'Other',
 };
 
@@ -103,9 +103,9 @@ export default function RealtorDocumentsPage() {
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'license', label: 'License' },
-    { value: 'agency_agreement', label: 'Agency Agreements' },
-    { value: 'listing_contract', label: 'Listing Contracts' },
-    { value: 'closing_document', label: 'Closing Documents' },
+    { value: 'agency_agreement', label: 'Agency agreements' },
+    { value: 'listing_contract', label: 'Listing contracts' },
+    { value: 'closing_document', label: 'Closing documents' },
     { value: 'other', label: 'Other' },
   ];
 
@@ -123,7 +123,7 @@ export default function RealtorDocumentsPage() {
           icon={<Upload className="w-4 h-4" />}
           onClick={() => setIsUploadOpen(true)}
         >
-          Upload Document
+          Upload document
         </Button>
       </div>
 

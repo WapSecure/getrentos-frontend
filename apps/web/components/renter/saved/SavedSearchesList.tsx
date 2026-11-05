@@ -73,7 +73,7 @@ export const SavedSearchesList = () => {
     <div className="p-4 border-b border-border">
       <div className="flex flex-wrap justify-between items-center gap-2">
         <div className="min-w-0">
-          <h2 className="font-semibold text-foreground">Saved Searches</h2>
+          <h2 className="font-semibold text-foreground">Saved searches</h2>
           <p className="text-xs text-muted-foreground">
             {savedSearches.length === 0
               ? 'Get notified for new matches'
@@ -87,7 +87,7 @@ export const SavedSearchesList = () => {
             icon={<Search className="w-3 h-3" />}
             href={ROUTES.RENTER_DISCOVER}
           >
-            New Search
+            New search
           </Button>
         )}
       </div>
@@ -207,7 +207,7 @@ export const SavedSearchesList = () => {
                       icon={<Search className="w-3 h-3" />}
                       onClick={() => runSearch(search)}
                     >
-                      Run Search Again
+                      Run search again
                     </Button>
                   </div>
                 </motion.div>

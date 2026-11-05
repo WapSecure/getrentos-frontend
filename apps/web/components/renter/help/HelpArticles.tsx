@@ -58,15 +58,13 @@ export const HelpArticles = ({ searchQuery, selectedCategory }: HelpArticlesProp
   });
 
   if (filteredArticles.length === 0) {
-    return (
-      <EmptyState icon={FileText} title="No articles found" size="compact" />
-    );
+    return <EmptyState icon={FileText} title="No articles found" size="compact" />;
   }
 
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Help Articles</h3>
+        <h3 className="font-semibold text-foreground">Help articles</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
           {filteredArticles.length} articles found
         </p>

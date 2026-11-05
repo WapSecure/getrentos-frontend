@@ -20,12 +20,12 @@ interface NotificationPreference {
 }
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
-  offers: { label: 'Offer Updates', icon: Handshake },
-  messages: { label: 'New Messages', icon: MessageCircle },
-  clients: { label: 'Client Activity', icon: UserPlus },
-  payments: { label: 'Commission Payouts', icon: Wallet },
-  reviews: { label: 'Reviews & Ratings', icon: Star },
-  viewings: { label: 'Viewing Confirmations', icon: CalendarClock },
+  offers: { label: 'Offer updates', icon: Handshake },
+  messages: { label: 'New messages', icon: MessageCircle },
+  clients: { label: 'Client activity', icon: UserPlus },
+  payments: { label: 'Commission payouts', icon: Wallet },
+  reviews: { label: 'Reviews & ratings', icon: Star },
+  viewings: { label: 'Viewing confirmations', icon: CalendarClock },
 };
 
 export const NotificationSettings = () => {
@@ -129,7 +129,7 @@ export const NotificationSettings = () => {
         disabled={preferences.length === 0}
         onClick={() => save.mutate()}
       >
-        Save Preferences
+        Save preferences
       </Button>
     </div>
   );

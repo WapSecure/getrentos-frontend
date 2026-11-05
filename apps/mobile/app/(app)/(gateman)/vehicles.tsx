@@ -280,7 +280,7 @@ export default function GatemanVehicles() {
         </View>
 
         <Button
-          label="Log Vehicle"
+          label="Log vehicle"
           loadingLabel="Logging…"
           loading={logEntry.isPending}
           fullWidth

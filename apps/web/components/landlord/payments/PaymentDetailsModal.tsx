@@ -12,7 +12,7 @@ interface PaymentDetailsModalProps {
 }
 
 const escrowSteps: { key: EscrowStatus; label: string }[] = [
-  { key: 'held', label: 'Funds Held' },
+  { key: 'held', label: 'Funds held' },
   { key: 'pending_review', label: 'Verification' },
   { key: 'released', label: 'Released' },
 ];
@@ -60,7 +60,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
           />
 
           {payment.escrowStatus === 'frozen' ? (
-            <Alert variant="danger" title="Funds Frozen: Dispute Raised">
+            <Alert variant="danger" title="Funds frozen: dispute raised">
               {payment.disputeReason ||
                 'A dispute has been raised on this payment. Funds are frozen until the dispute is resolved by GetRentos support.'}
             </Alert>

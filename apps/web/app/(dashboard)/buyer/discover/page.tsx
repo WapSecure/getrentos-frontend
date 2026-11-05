@@ -126,7 +126,7 @@ export default function BuyerDiscoverPage() {
   return (
     <>
       <PageHeader
-        title="Discover Properties"
+        title="Discover properties"
         description={
           <>
             {total} propert{total === 1 ? 'y' : 'ies'} for sale
@@ -169,10 +169,10 @@ export default function BuyerDiscoverPage() {
           }}
         >
           {sortOrder === 'default'
-            ? 'Sort by Price'
+            ? 'Sort by price'
             : sortOrder === 'price_asc'
-              ? 'Price: Low to High'
-              : 'Price: High to Low'}
+              ? 'Price: low to high'
+              : 'Price: high to low'}
         </Button>
       </div>
 

@@ -53,8 +53,8 @@ export const DataExport = () => {
         downloadCsv(`getrentos-data-export-${date}.csv`, ['Section', 'Data'], rows);
       } else {
         printHtml(
-          'GetRentos Data Export',
-          `<h1>GetRentos Data Export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()}</p>${buildSectionsHtml(data ?? {})}`
+          'GetRentos data export',
+          `<h1>GetRentos data export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()}</p>${buildSectionsHtml(data ?? {})}`
         );
       }
       setCompleted(true);
@@ -71,14 +71,14 @@ export const DataExport = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Data Export</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Data export</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Export your personal data and activity history
       </p>
 
       <div className="space-y-4">
         <div className="p-4 rounded-lg border border-border">
-          <h3 className="font-medium text-foreground mb-2">Export Format</h3>
+          <h3 className="font-medium text-foreground mb-2">Export format</h3>
           <RadioGroup
             value={exportType}
             onValueChange={setExportType}
@@ -116,7 +116,7 @@ export const DataExport = () => {
           loadingText="Exporting..."
           icon={completed ? <Check className="w-4 h-4" /> : <Download className="w-4 h-4" />}
         >
-          {completed ? 'Exported!' : 'Export Data'}
+          {completed ? 'Exported!' : 'Export data'}
         </Button>
       </div>
     </div>

@@ -233,7 +233,7 @@ export function HomeOverviewView() {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-primary">
           <House className="h-8 w-8" />
         </div>
-        <h1 className="mt-6 text-3xl font-semibold tracking-[-0.03em] text-foreground">My Home</h1>
+        <h1 className="mt-6 text-3xl font-semibold tracking-[-0.03em] text-foreground">My home</h1>
         <p className="mt-3 text-base leading-7 text-muted-foreground">
           Once a lease is active, this is where you will manage repairs, records, payments, and
           communication for your home.
@@ -625,7 +625,11 @@ export function HomeOverviewView() {
                       : `${nextPayment.daysRemaining} day${nextPayment.daysRemaining === 1 ? '' : 's'} remaining.`}
                 </p>
                 <Button
-                  href={nextPayment.isFirstPayment ? `${ROUTES.RENTER_HOME}?tab=lease` : ROUTES.RENTER_PAYMENTS}
+                  href={
+                    nextPayment.isFirstPayment
+                      ? `${ROUTES.RENTER_HOME}?tab=lease`
+                      : ROUTES.RENTER_PAYMENTS
+                  }
                   variant="outline"
                   size="sm"
                   rounded="lg"

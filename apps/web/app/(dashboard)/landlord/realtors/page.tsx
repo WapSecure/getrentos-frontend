@@ -6,7 +6,7 @@ export default function LandlordRealtorsPage() {
   return (
     <div className="space-y-12">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Realtor Access</h1>
+        <h1 className="text-2xl font-bold text-foreground">Realtor access</h1>
         <p className="text-muted-foreground mt-1">
           Choose which realtors and agents can work on your properties, and hand tasks to an agent.
         </p>

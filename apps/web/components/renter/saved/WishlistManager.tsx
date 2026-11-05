@@ -115,7 +115,7 @@ export const WishlistManager = ({
         >
           <span className="flex items-center gap-2">
             <FolderPlus className="w-4 h-4" aria-hidden="true" />
-            <span className="text-sm font-medium">All Properties</span>
+            <span className="text-sm font-medium">All properties</span>
           </span>
           <span className="text-xs text-muted-foreground">{totalProperties}</span>
         </button>

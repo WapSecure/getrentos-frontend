@@ -92,7 +92,7 @@ export const HelpFAQs = ({ selectedCategory }: HelpFAQsProps) => {
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Frequently Asked Questions</h3>
+        <h3 className="font-semibold text-foreground">Frequently asked questions</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Quick answers to common questions</p>
       </div>
 

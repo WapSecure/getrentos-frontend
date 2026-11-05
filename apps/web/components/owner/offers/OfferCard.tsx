@@ -64,9 +64,7 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
           <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
-          <p
-            className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}
-          >
+          <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>
             {diffPct >= 0 ? '+' : ''}
             {diffPct.toFixed(1)}% vs asking
           </p>

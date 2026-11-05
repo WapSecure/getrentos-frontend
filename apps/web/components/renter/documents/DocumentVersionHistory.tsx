@@ -61,7 +61,7 @@ export const DocumentVersionHistory = ({
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Version History</h3>
+            <h3 className="font-semibold text-foreground">Version history</h3>
             <p className="text-xs text-muted-foreground">{versions.length} versions</p>
           </div>
         </div>

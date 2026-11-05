@@ -24,12 +24,12 @@ interface NeighborhoodCompareProps {
 
 const CATEGORY_LABELS: Record<string, string> = {
   schools: 'Schools',
-  transit: 'Transit & Commute',
+  transit: 'Transit & commute',
   amenities: 'Amenities',
-  food: 'Food & Dining',
+  food: 'Food & dining',
   healthcare: 'Healthcare',
   shopping: 'Shopping',
-  parks: 'Parks & Recreation',
+  parks: 'Parks & recreation',
   nightlife: 'Nightlife',
 };
 
@@ -74,7 +74,7 @@ export const NeighborhoodCompare = ({ listingId, propertyLocation }: Neighborhoo
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="p-0 sm:max-w-3xl">
           <div className="sticky top-0 bg-card p-4 pr-12 border-b border-border">
-            <DialogTitle className="font-semibold text-foreground">Area Insights</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Area insights</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Real nearby places and commute times for {propertyLocation}
             </DialogDescription>

@@ -88,7 +88,7 @@ export const ApplicationDetailsModal = ({
       case 'pending':
         return { label: 'Pending', variant: 'warning' };
       case 'under_review':
-        return { label: 'Under Review', variant: 'info' };
+        return { label: 'Under review', variant: 'info' };
       case 'approved':
         return { label: 'Approved', variant: 'success' };
       case 'rejected':
@@ -318,14 +318,14 @@ export const ApplicationDetailsModal = ({
                     className="flex-1"
                     icon={<MessageCircle className="w-4 h-4" />}
                   >
-                    Contact Landlord
+                    Contact landlord
                   </Button>
                   <Button
                     variant="outline"
                     className="flex-1"
                     icon={<Download className="w-4 h-4" />}
                   >
-                    Download Application
+                    Download application
                   </Button>
                 </div>
               </div>

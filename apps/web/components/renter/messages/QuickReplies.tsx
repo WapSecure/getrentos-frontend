@@ -52,7 +52,7 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
       >
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">Quick Replies</span>
+          <span className="text-sm font-medium text-foreground">Quick replies</span>
         </div>
         {isExpanded ? (
           <ChevronUp className="w-4 h-4 text-muted-foreground" />
@@ -121,7 +121,7 @@ export const QuickReplies = ({ onSelectReply }: QuickRepliesProps) => {
             icon={<Plus className="w-3 h-3" />}
             onClick={() => setIsAdding(!isAdding)}
           >
-            Add Custom Reply
+            Add custom reply
           </Button>
         </div>
       )}

@@ -12,11 +12,11 @@ import { ownerService, type OwnerNotificationPreference } from '@/services/owner
 import { categorySendsEmail } from '@getrentos/shared';
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
-  offers: { label: 'New Offers & Counters', icon: Handshake },
+  offers: { label: 'New offers & counters', icon: Handshake },
   escrow: { label: 'Sale payment updates', icon: ShieldCheck },
-  verification: { label: 'Verification Status Changes', icon: FileText },
-  messages: { label: 'New Messages', icon: MessageCircle },
-  reviews: { label: 'New Reviews', icon: Star },
+  verification: { label: 'Verification status changes', icon: FileText },
+  messages: { label: 'New messages', icon: MessageCircle },
+  reviews: { label: 'New reviews', icon: Star },
 };
 
 export const NotificationSettings = () => {
@@ -45,8 +45,7 @@ export const NotificationSettings = () => {
       queryClient.invalidateQueries({ queryKey: ownerKeys.notificationPrefs });
       toast.success('Notification preferences saved.');
     },
-    onError: (error) =>
-      toast.error(error.message || 'Failed to save notification preferences.'),
+    onError: (error) => toast.error(error.message || 'Failed to save notification preferences.'),
   });
 
   return (
@@ -107,7 +106,7 @@ export const NotificationSettings = () => {
         disabled={preferences.length === 0}
         onClick={() => save.mutate()}
       >
-        Save Preferences
+        Save preferences
       </Button>
     </div>
   );

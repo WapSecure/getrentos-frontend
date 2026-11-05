@@ -26,7 +26,7 @@ export const DocumentsStats = ({ summary }: DocumentsStatsProps) => {
   const stats = [
     {
       icon: FileText,
-      label: 'Total Documents',
+      label: 'Total documents',
       value: summary.total,
       color: 'text-info',
       bg: 'bg-info-subtle',
@@ -40,7 +40,7 @@ export const DocumentsStats = ({ summary }: DocumentsStatsProps) => {
     },
     {
       icon: Clock,
-      label: 'Expiring Soon',
+      label: 'Expiring soon',
       value: summary.expiring,
       color: 'text-warning',
       bg: 'bg-warning-subtle',
@@ -68,7 +68,7 @@ export const DocumentsStats = ({ summary }: DocumentsStatsProps) => {
     },
     {
       icon: Database,
-      label: 'Storage Used',
+      label: 'Storage used',
       value: formatBytes(summary.storageUsedBytes),
       color: 'text-primary',
       bg: 'bg-primary/10',

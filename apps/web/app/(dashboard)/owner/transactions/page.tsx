@@ -65,8 +65,8 @@ export default function OwnerTransactionsPage() {
 
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
-    { value: 'deposit_pending', label: 'Deposit Pending' },
-    { value: 'funds_held', label: 'Funds Held' },
+    { value: 'deposit_pending', label: 'Deposit pending' },
+    { value: 'funds_held', label: 'Funds held' },
     { value: 'released', label: 'Released' },
     { value: 'frozen', label: 'Frozen' },
     { value: 'refunded', label: 'Refunded' },

@@ -33,7 +33,7 @@ const statusConfig: Record<
   { label: string; variant: BadgeVariant; icon: LucideIcon }
 > = {
   scheduled: { label: 'Scheduled', variant: 'info', icon: Clock },
-  in_progress: { label: 'In Progress', variant: 'warning', icon: Wrench },
+  in_progress: { label: 'In progress', variant: 'warning', icon: Wrench },
   completed: { label: 'Completed', variant: 'success', icon: CheckCircle },
   cancelled: { label: 'Cancelled', variant: 'danger', icon: AlertCircle },
 };
@@ -58,7 +58,7 @@ export const ScheduledMaintenance = ({ schedules, onSchedule }: ScheduledMainten
         <div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <h2 className="font-semibold text-foreground">Scheduled Maintenance</h2>
+            <h2 className="font-semibold text-foreground">Scheduled maintenance</h2>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">Upcoming and ongoing maintenance</p>
         </div>

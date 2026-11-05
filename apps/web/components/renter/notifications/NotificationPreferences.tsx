@@ -27,7 +27,7 @@ const CATEGORY_META: { category: string; id: string; label: string; description:
   {
     category: 'application',
     id: 'applications',
-    label: 'Application Updates',
+    label: 'Application updates',
     description: 'Get notified about your application status changes',
   },
   {
@@ -39,25 +39,25 @@ const CATEGORY_META: { category: string; id: string; label: string; description:
   {
     category: 'payment',
     id: 'payments',
-    label: 'Payment Alerts',
+    label: 'Payment alerts',
     description: 'Get notified about payment confirmations and reminders',
   },
   {
     category: 'maintenance',
     id: 'maintenance',
-    label: 'Maintenance Updates',
+    label: 'Maintenance updates',
     description: 'Get notified about maintenance request updates',
   },
   {
     category: 'lease',
     id: 'lease',
-    label: 'Lease Reminders',
+    label: 'Lease reminders',
     description: 'Get notified about lease renewals and important dates',
   },
   {
     category: 'system',
     id: 'system',
-    label: 'System & Trust Score',
+    label: 'System & trust score',
     description: 'Get notified about trust score changes and security alerts',
   },
 ];
@@ -217,7 +217,7 @@ const NotificationPreferencesForm = ({
         <div className="flex items-center gap-2">
           <Settings className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Notification Preferences</h3>
+            <h3 className="font-semibold text-foreground">Notification preferences</h3>
             <p className="text-xs text-muted-foreground">Manage how you receive notifications</p>
           </div>
         </div>
@@ -254,7 +254,7 @@ const NotificationPreferencesForm = ({
                     onCheckedChange={() => toggleChannel(pref.id, 'push')}
                   />
                   <Checkbox
-                    label="In-App"
+                    label="In-app"
                     checked={pref.channels.inApp}
                     onCheckedChange={() => toggleChannel(pref.id, 'inApp')}
                   />

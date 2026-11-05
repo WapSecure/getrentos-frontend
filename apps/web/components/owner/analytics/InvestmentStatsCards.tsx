@@ -20,13 +20,13 @@ export const InvestmentStatsCards = ({
   const stats = [
     {
       icon: Wallet,
-      label: 'Total Invested',
+      label: 'Total invested',
       value: formatCurrency(totalInvested, { compact: true }),
       color: 'blue',
     },
     {
       icon: LineChart,
-      label: 'Current Portfolio Value',
+      label: 'Current portfolio value',
       value: formatCurrency(totalCurrentValue, { compact: true }),
       color: 'emerald',
     },

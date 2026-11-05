@@ -95,7 +95,7 @@ export const ApplicationWithdrawModal = ({
                 isLoading={isLoading}
                 loadingText="Withdrawing..."
               >
-                Confirm Withdrawal
+                Confirm withdrawal
               </Button>
               <Button variant="ghost" fullWidth onClick={onClose} disabled={isLoading}>
                 Cancel

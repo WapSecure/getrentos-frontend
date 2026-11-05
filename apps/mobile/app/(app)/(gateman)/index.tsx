@@ -547,7 +547,7 @@ export default function GatemanCheckIn() {
             onComplete={submit}
           />
           <Button
-            label="Check In"
+            label="Check in"
             loadingLabel="Checking…"
             loading={verify.isPending}
             fullWidth

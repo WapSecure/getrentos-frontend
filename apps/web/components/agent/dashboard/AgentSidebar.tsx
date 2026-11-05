@@ -32,7 +32,7 @@ export const navItems: NavItem[] = [
   { labelKey: 'sidebar.tasks', href: ROUTES.AGENT_TASKS, icon: ClipboardList },
   { labelKey: 'sidebar.inspections', href: ROUTES.AGENT_INSPECTIONS, icon: ClipboardCheck },
   { labelKey: 'sidebar.verifications', href: ROUTES.AGENT_VERIFICATIONS, icon: UserCheck },
-  { label: 'Work Orders', href: ROUTES.AGENT_WORK_ORDERS, icon: Wrench },
+  { label: 'Work orders', href: ROUTES.AGENT_WORK_ORDERS, icon: Wrench },
   { labelKey: 'sidebar.sync_center', href: ROUTES.AGENT_SYNC, icon: RefreshCw },
   { labelKey: 'sidebar.documents', href: ROUTES.AGENT_DOCUMENTS, icon: FolderOpen },
   { labelKey: 'sidebar.messages', href: ROUTES.AGENT_MESSAGES, icon: MessageCircle },

@@ -73,7 +73,7 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
                       onClick={() => onViewDetails(payment)}
                       aria-label={`View details for ${payment.tenantName}`}
                     >
-                      View Details
+                      View details
                     </Button>
                   </td>
                 </tr>

@@ -73,16 +73,16 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Account Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Account settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage your account security and contact information
       </p>
 
       {/* Change Password */}
       <div className="mb-6">
-        <h3 className="text-lg font-medium text-foreground mb-3">Change Password</h3>
+        <h3 className="text-lg font-medium text-foreground mb-3">Change password</h3>
         <form method="post" onSubmit={handlePasswordUpdate} className="space-y-4">
-          <Field label="Current Password" error={currentPasswordError || undefined}>
+          <Field label="Current password" error={currentPasswordError || undefined}>
             <Input
               leadingIcon={<Lock className="w-4 h-4" />}
               type="password"
@@ -91,7 +91,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
               placeholder="Enter current password"
             />
           </Field>
-          <Field label="New Password">
+          <Field label="New password">
             <Input
               leadingIcon={<Lock className="w-4 h-4" />}
               type="password"
@@ -100,7 +100,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
               placeholder="Enter new password"
             />
           </Field>
-          <Field label="Confirm New Password" error={confirmPasswordError || undefined}>
+          <Field label="Confirm new password" error={confirmPasswordError || undefined}>
             <Input
               leadingIcon={<Lock className="w-4 h-4" />}
               type="password"
@@ -110,15 +110,15 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             />
           </Field>
           <Button type="submit" variant="primary" isLoading={updatePasswordMutation.isPending}>
-            Update Password
+            Update password
           </Button>
         </form>
       </div>
 
       <div className="border-t border-border pt-6">
-        <h3 className="text-lg font-medium text-foreground mb-3">Contact Information</h3>
+        <h3 className="text-lg font-medium text-foreground mb-3">Contact information</h3>
         <form onSubmit={handleEmailUpdate} className="space-y-4">
-          <Field label="Email Address">
+          <Field label="Email address">
             <Input
               leadingIcon={<Mail className="w-4 h-4" />}
               type="email"
@@ -126,7 +126,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
               onChange={(e) => setEmail(e.target.value)}
             />
           </Field>
-          <Field label="Phone Number">
+          <Field label="Phone number">
             <Input
               leadingIcon={<Phone className="w-4 h-4" />}
               type="tel"
@@ -135,7 +135,7 @@ const AccountSettingsForm = ({ initial }: { initial: { email: string; phone: str
             />
           </Field>
           <Button type="submit" variant="primary" isLoading={updateProfileMutation.isPending}>
-            Update Contact Info
+            Update contact info
           </Button>
         </form>
       </div>

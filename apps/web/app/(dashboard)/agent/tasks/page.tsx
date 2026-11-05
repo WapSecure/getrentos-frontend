@@ -93,17 +93,17 @@ export default function AgentTasksPage() {
   const statusOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'assigned', label: 'Assigned' },
-    { value: 'in_progress', label: 'In Progress' },
+    { value: 'in_progress', label: 'In progress' },
     { value: 'completed', label: 'Completed' },
     { value: 'overdue', label: 'Overdue' },
   ];
 
   const typeOptions: { value: TypeFilter; label: string }[] = [
-    { value: 'all', label: 'All Types' },
+    { value: 'all', label: 'All types' },
     { value: 'inspection', label: 'Inspection' },
     { value: 'verification', label: 'Verification' },
     { value: 'valuation', label: 'Valuation' },
-    { value: 'document_pickup', label: 'Document Pickup' },
+    { value: 'document_pickup', label: 'Document pickup' },
   ];
 
   return (

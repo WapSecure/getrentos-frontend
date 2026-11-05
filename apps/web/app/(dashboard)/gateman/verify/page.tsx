@@ -531,7 +531,7 @@ export default function GatemanVerifyPage() {
               isLoading={verify.isPending}
               loadingText="Verifying…"
             >
-              Check In
+              Check in
             </Button>
           </form>
 

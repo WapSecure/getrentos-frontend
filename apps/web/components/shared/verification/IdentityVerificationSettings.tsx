@@ -13,10 +13,10 @@ import { unwrap } from '@/lib/apiHelpers';
 
 const DOCUMENT_TYPE_LABELS: Record<IdentityDocumentType, string> = {
   NATIONAL_ID: 'National ID',
-  PASSPORT: 'International Passport',
+  PASSPORT: 'International passport',
   DRIVERS_LICENSE: "Driver's License",
   VOTERS_CARD: "Voter's Card",
-  NIN: 'NIN Slip',
+  NIN: 'NIN slip',
   BVN: 'BVN',
 };
 
@@ -31,13 +31,13 @@ const statusConfig: Record<
     bg: 'bg-success-subtle',
   },
   PENDING_REVIEW: {
-    label: 'Pending Review',
+    label: 'Pending review',
     icon: ShieldAlert,
     color: 'text-warning',
     bg: 'bg-warning-subtle',
   },
   NEEDS_CLARIFICATION: {
-    label: 'Needs Clarification',
+    label: 'Needs clarification',
     icon: HelpCircle,
     color: 'text-warning',
     bg: 'bg-warning-subtle',
@@ -105,7 +105,7 @@ export const IdentityVerificationSettings = ({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">Identity Verification</h3>
+        <h3 className="text-lg font-semibold text-foreground">Identity verification</h3>
         <p className="text-sm text-muted-foreground mt-1">{description}</p>
       </div>
 
@@ -173,7 +173,7 @@ export const IdentityVerificationSettings = ({
             isLoading={submitMutation.isPending}
             loadingText="Submitting…"
           >
-            Submit for Verification
+            Submit for verification
           </Button>
         </div>
       )}

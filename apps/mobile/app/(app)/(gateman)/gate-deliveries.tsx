@@ -120,7 +120,7 @@ export default function GatemanDeliveries() {
       />
 
       <Button
-        label="Log Delivery"
+        label="Log delivery"
         fullWidth
         icon={<Plus size={16} color={colors.primaryForeground} />}
         onPress={() => setLogOpen(true)}
@@ -518,7 +518,7 @@ function LogDeliveryForm({
       </View>
 
       <Button
-        label="Log Delivery"
+        label="Log delivery"
         loadingLabel="Logging…"
         loading={submitting}
         fullWidth

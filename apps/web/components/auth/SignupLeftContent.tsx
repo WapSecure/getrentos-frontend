@@ -16,7 +16,7 @@ import { Logo } from '@/components/ui/Logo';
 const trustFeatures = [
   {
     icon: Shield,
-    title: 'Bank-Grade Security',
+    title: 'Bank-grade security',
     description: 'Sensitive account data is protected by secure controls',
   },
   {
@@ -26,22 +26,22 @@ const trustFeatures = [
   },
   {
     icon: Fingerprint,
-    title: 'Identity Verification',
+    title: 'Identity verification',
     description: 'Biometric and government ID verification',
   },
   {
     icon: FileCheck,
-    title: 'Document Authentication',
+    title: 'Document authentication',
     description: 'Document checks that flag possible forgery',
   },
   {
     icon: Building2,
-    title: 'Property Verification',
+    title: 'Property verification',
     description: 'Title deed and ownership verification',
   },
   {
     icon: Users,
-    title: 'Multi-Role Support',
+    title: 'Multi-role support',
     description: 'Manage multiple roles with one account',
   },
 ];
@@ -106,7 +106,7 @@ export const SignupLeftContent = () => {
               className="rounded-xl border border-border bg-card p-4"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-foreground">Your Trust Score</span>
+                <span className="text-sm font-medium text-foreground">Your trust score</span>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="w-3 h-3 text-primary" />
                   <span className="text-xs text-muted-foreground">Starts at 0</span>

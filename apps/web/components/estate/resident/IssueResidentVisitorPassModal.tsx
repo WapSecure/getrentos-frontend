@@ -48,11 +48,11 @@ export const IssueResidentVisitorPassModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
         <DialogTitle className="text-lg font-semibold text-foreground">
-          Issue Visitor Pass
+          Issue visitor pass
         </DialogTitle>
 
         <div className="mt-5 space-y-4">
-          <Field label="Visitor Name" required>
+          <Field label="Visitor name" required>
             <Input
               type="text"
               value={visitorName}
@@ -103,7 +103,7 @@ export const IssueResidentVisitorPassModal = ({
               })
             }
           >
-            Issue Pass
+            Issue pass
           </Button>
         </div>
       </DialogContent>

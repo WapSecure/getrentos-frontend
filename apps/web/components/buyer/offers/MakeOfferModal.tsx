@@ -201,7 +201,7 @@ export const MakeOfferModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && !isSubmitting && handleClose()}>
       <DialogContent size="sm" padded={false} className="flex flex-col overflow-hidden">
         <div className="p-4 pr-12 border-b border-border shrink-0">
-          <DialogTitle className="font-semibold text-foreground">Make an Offer</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Make an offer</DialogTitle>
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
@@ -244,7 +244,7 @@ export const MakeOfferModal = ({
             />
           </Field>
 
-          <Field label="Offer Amount" required hint={amountHint} error={amountError}>
+          <Field label="Offer amount" required hint={amountHint} error={amountError}>
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -253,7 +253,7 @@ export const MakeOfferModal = ({
             />
           </Field>
 
-          <Field label="Financing Type">
+          <Field label="Financing type">
             <RadioGroup
               value={financingType}
               onValueChange={setFinancingType}
@@ -263,7 +263,7 @@ export const MakeOfferModal = ({
           </Field>
 
           <Field
-            label="Deposit Amount"
+            label="Deposit amount"
             optionalLabel="(optional)"
             error={depositError}
             hint={
@@ -282,7 +282,7 @@ export const MakeOfferModal = ({
             />
           </Field>
 
-          <Field label="Message to Owner" optionalLabel="(optional)">
+          <Field label="Message to owner" optionalLabel="(optional)">
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -345,7 +345,7 @@ export const MakeOfferModal = ({
             }
             isLoading={isSubmitting}
           >
-            Submit Offer
+            Submit offer
           </Button>
         </div>
       </DialogContent>

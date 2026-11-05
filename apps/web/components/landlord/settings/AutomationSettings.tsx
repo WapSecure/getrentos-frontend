@@ -25,25 +25,25 @@ interface AutomationToggle {
 const TOGGLE_META: AutomationToggle[] = [
   {
     id: 'rentReminders',
-    label: 'Send Rent Reminders',
+    label: 'Send rent reminders',
     description: 'Automatically remind tenants a few days before rent is due',
     icon: BellRing,
   },
   {
     id: 'overdueAlerts',
-    label: 'Send Overdue Alerts',
+    label: 'Send overdue alerts',
     description: 'Notify tenants and yourself when a payment becomes overdue',
     icon: AlertOctagon,
   },
   {
     id: 'leaseExpiry',
-    label: 'Lease Expiry Alerts',
+    label: 'Lease expiry alerts',
     description: 'Get notified 60 days before a lease is set to expire',
     icon: CalendarClock,
   },
   {
     id: 'lateFees',
-    label: 'Charge Late Fees',
+    label: 'Charge late fees',
     description: 'Automatically add a late fee to rent left unpaid past the window below',
     icon: Coins,
   },
@@ -147,7 +147,7 @@ export const AutomationSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Automation & Reminders</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Automation & reminders</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Let GetRentos handle routine communication with your tenants
       </p>

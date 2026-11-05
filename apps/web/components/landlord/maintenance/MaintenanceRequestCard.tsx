@@ -160,7 +160,7 @@ export const MaintenanceRequestCard = ({
             disabled={isBusy}
           >
             <UserCog className="w-3.5 h-3.5" />
-            {request.assignedVendorName ? 'Reassign' : 'Assign Vendor'}
+            {request.assignedVendorName ? 'Reassign' : 'Assign vendor'}
           </Button>
           {request.assignedVendorName && (
             <Button
@@ -191,8 +191,8 @@ export const MaintenanceRequestCard = ({
             variant="primary"
             size="sm"
             className="px-2.5"
-            title="Mark Resolved"
-            aria-label="Mark Resolved"
+            title="Mark resolved"
+            aria-label="Mark resolved"
             onClick={() => onMarkResolved(request.id)}
             isLoading={isMarkingResolved}
             disabled={isBusy}

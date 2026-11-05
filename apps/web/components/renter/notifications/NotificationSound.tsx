@@ -31,7 +31,7 @@ export const NotificationSound = () => {
             <VolumeX className="w-4 h-4 text-muted-foreground" />
           )}
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Notification Sound</h3>
+            <h3 className="font-semibold text-foreground">Notification sound</h3>
             <p className="text-xs text-muted-foreground">Play sound for new notifications</p>
           </div>
         </div>
@@ -44,10 +44,10 @@ export const NotificationSound = () => {
 
       {isExpanded && (
         <div className="p-4 pt-0 space-y-3">
-          <Switch label="Sound Enabled" checked={isEnabled} onCheckedChange={setIsEnabled} />
+          <Switch label="Sound enabled" checked={isEnabled} onCheckedChange={setIsEnabled} />
 
           {isEnabled && (
-            <Field label="Sound Type">
+            <Field label="Sound type">
               <Select
                 value={selectedSound}
                 onValueChange={setSelectedSound}

@@ -71,7 +71,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
           <div className="p-4 bg-success-subtle border-b border-success/20">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-success" />
-              <h3 className="font-semibold text-success">Renewal Accepted</h3>
+              <h3 className="font-semibold text-success">Renewal accepted</h3>
             </div>
           </div>
           <div className="p-4">
@@ -81,7 +81,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             </p>
             <Button variant="outline" className="mt-3 w-full gap-2" onClick={handleContactLandlord}>
               <Mail className="w-4 h-4" />
-              Contact Landlord
+              Contact landlord
             </Button>
           </div>
         </Card>
@@ -96,7 +96,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
           <div className="p-4 border-b border-border">
             <div className="flex items-center gap-2">
               <XCircle className="w-5 h-5 text-muted-foreground" />
-              <h3 className="font-semibold text-foreground">Renewal Declined</h3>
+              <h3 className="font-semibold text-foreground">Renewal declined</h3>
             </div>
           </div>
           <div className="p-4">
@@ -120,7 +120,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
         <div className="border-b border-border bg-muted/30 p-4">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">Renewal Offer</h3>
+            <h3 className="font-semibold text-foreground">Renewal offer</h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
             Your landlord has sent a renewal offer
@@ -132,7 +132,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             <div className="p-2 rounded-lg bg-secondary">
               <div className="flex items-center gap-1">
                 <NairaSign className="w-3 h-3 text-primary" />
-                <span className="text-xs text-muted-foreground">Current Rent</span>
+                <span className="text-xs text-muted-foreground">Current rent</span>
               </div>
               <p className="text-sm font-semibold text-foreground">
                 {formatCurrency(lease.rentAmount)}
@@ -141,7 +141,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             <div className="p-2 rounded-lg bg-secondary">
               <div className="flex items-center gap-1">
                 <TrendingUp className="w-3 h-3 text-primary" />
-                <span className="text-xs text-muted-foreground">New Rent</span>
+                <span className="text-xs text-muted-foreground">New rent</span>
               </div>
               <p className="text-sm font-semibold text-foreground">
                 {formatCurrency(renewalOffer.newRentAmount)}
@@ -153,7 +153,7 @@ export const LeaseRenewalOffer = ({ renewalOffer, lease, onRespond }: LeaseRenew
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-info" />
               <span className="text-xs font-medium text-info">
-                New Term: {formatDate(renewalOffer.newEndDate)}
+                New term: {formatDate(renewalOffer.newEndDate)}
               </span>
             </div>
             <p className="text-xs text-info mt-1">{renewalOffer.terms}</p>

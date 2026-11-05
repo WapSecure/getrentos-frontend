@@ -25,7 +25,7 @@ import type { DeliveryLogStatus } from '@/types/estate';
 
 const statusFilters: { value: DeliveryLogStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'received', label: 'Awaiting Pickup' },
+  { value: 'received', label: 'Awaiting pickup' },
   { value: 'collected', label: 'Collected' },
 ];
 
@@ -141,7 +141,7 @@ export default function EstateDeliveriesPage() {
           <>
             <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
               <Settings2 className="w-4 h-4" />
-              Manage Gates
+              Manage gates
             </Button>
             <Button
               variant="primary"
@@ -152,7 +152,7 @@ export default function EstateDeliveriesPage() {
               }}
             >
               <Plus className="w-4 h-4" />
-              Log Delivery
+              Log delivery
             </Button>
           </>
         }

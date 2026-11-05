@@ -22,7 +22,7 @@ export const ScoreNotifications = ({ history }: ScoreNotificationsProps) => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Score Updates</h3>
+          <h3 className="font-semibold text-foreground">Score updates</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Recent activity affecting your score</p>
       </div>

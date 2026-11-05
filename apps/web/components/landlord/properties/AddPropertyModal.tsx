@@ -67,10 +67,10 @@ const propertyTypes: { value: PropertyType; label: string }[] = [
   { value: 'duplex', label: 'Duplex' },
   { value: 'condo', label: 'Condo' },
   { value: 'commercial', label: 'Commercial' },
-  { value: 'shared_apartment', label: 'Shared Apartment' },
+  { value: 'shared_apartment', label: 'Shared apartment' },
 ];
 
-const steps = ['Property Info', 'Media', 'Verification', 'Review'];
+const steps = ['Property info', 'Media', 'Verification', 'Review'];
 
 /** sessionStorage key for a property being added when the session ran out. */
 export const ADD_PROPERTY_DRAFT_KEY = 'landlord-add-property';
@@ -245,7 +245,7 @@ export const AddPropertyModal = ({
           )}
           {step === 0 && (
             <>
-              <Field label="Property Name" required>
+              <Field label="Property name" required>
                 <Input
                   type="text"
                   value={form.name}
@@ -254,7 +254,7 @@ export const AddPropertyModal = ({
                 />
               </Field>
 
-              <Field label="Property Type">
+              <Field label="Property type">
                 <Select
                   value={form.type}
                   onValueChange={(value) => update('type', value as PropertyType)}
@@ -290,7 +290,7 @@ export const AddPropertyModal = ({
                 onChange={(pin) => update('pin', pin)}
               />
 
-              <Field label="Number of Units">
+              <Field label="Number of units">
                 <NumberInput
                   min={1}
                   value={form.totalUnits}
@@ -312,7 +312,7 @@ export const AddPropertyModal = ({
           {step === 1 && (
             <>
               <UploadField
-                label="Cover Image"
+                label="Cover image"
                 required
                 icon={ImageIcon}
                 file={form.coverImage}
@@ -321,7 +321,7 @@ export const AddPropertyModal = ({
               />
               <div>
                 <p className="block text-sm font-medium text-foreground mb-1">
-                  Gallery Images{' '}
+                  Gallery images{' '}
                   <span className="text-muted-foreground/60 font-normal">(optional)</span>
                 </p>
                 <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring transition-colors">
@@ -358,7 +358,7 @@ export const AddPropertyModal = ({
                 )}
               </div>
               <UploadField
-                label="Video Tour"
+                label="Video tour"
                 icon={Video}
                 file={form.videoTour}
                 accept="video/mp4,video/webm,video/quicktime"
@@ -378,7 +378,7 @@ export const AddPropertyModal = ({
                 one document will show as unverified to renters and buyers until submitted.
               </Alert>
               <UploadField
-                label="Title Deed"
+                label="Title deed"
                 icon={FileText}
                 file={form.titleDeed}
                 accept=".pdf,image/jpeg,image/png,image/webp"
@@ -392,7 +392,7 @@ export const AddPropertyModal = ({
                 onSelect={(file) => update('certificateOfOccupancy', file)}
               />
               <UploadField
-                label="Management Authorization"
+                label="Management authorization"
                 icon={FileText}
                 file={form.managementAuthorization}
                 accept=".pdf,image/jpeg,image/png,image/webp"
@@ -414,11 +414,11 @@ export const AddPropertyModal = ({
                   value={`${form.address}, ${form.city}, ${form.state}`}
                 />
                 <SummaryRow label="Units" value={form.totalUnits} />
-                <SummaryRow label="Cover Image" value={form.coverImage?.name || 'Not selected'} />
+                <SummaryRow label="Cover image" value={form.coverImage?.name || 'Not selected'} />
                 <SummaryRow label="Gallery" value={`${form.galleryImages.length} image(s)`} />
-                <SummaryRow label="Video Tour" value={form.videoTour?.name || 'Not selected'} />
+                <SummaryRow label="Video tour" value={form.videoTour?.name || 'Not selected'} />
                 <SummaryRow
-                  label="Verification Docs"
+                  label="Verification docs"
                   value={hasAnyVerificationDoc ? 'Submitted' : 'None uploaded'}
                 />
               </div>
@@ -456,7 +456,7 @@ export const AddPropertyModal = ({
                 onClick={() => handlePublish(false)}
                 disabled={isSubmitting}
               >
-                Save Draft
+                Save draft
               </Button>
               <Button
                 variant="primary"

@@ -186,7 +186,7 @@ export function EstateStatementsView({ estateId }: EstateStatementsViewProps) {
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Dues Statements</h2>
+          <h2 className="text-xl font-semibold text-foreground">Dues statements</h2>
           <p className="text-muted-foreground mt-1 text-sm">
             Generate a per-period statement from real collected dues, and pay it out to the
             estate&apos;s account
@@ -438,7 +438,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
 
   return (
     <Card className="p-6 mb-6">
-      <h3 className="text-base font-semibold text-foreground mb-1">Payout Account</h3>
+      <h3 className="text-base font-semibold text-foreground mb-1">Payout account</h3>
       <p className="text-sm text-muted-foreground mb-4">
         Where estate dues are sent when you issue a statement.
       </p>
@@ -461,7 +461,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Bank Code">
+        <Field label="Bank code">
           <NumberInput
             leadingIcon={<Landmark className="w-4 h-4" />}
             value={bankCode}
@@ -470,7 +470,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
             maxLength={6}
           />
         </Field>
-        <Field label="Account Number">
+        <Field label="Account number">
           <NumberInput
             value={accountNumber}
             onValueChange={setAccountNumber}
@@ -514,7 +514,7 @@ export function EstatePayoutAccountCard({ estateId }: { estateId: string }) {
           loadingText="Saving…"
           onClick={() => save.mutate()}
         >
-          Update Payout Account
+          Update payout account
         </Button>
       </div>
     </Card>

@@ -64,7 +64,7 @@ export default function BuyerSavedPage() {
   return (
     <>
       <PageHeader
-        title="Saved Properties"
+        title="Saved properties"
         description={
           isLoading ? (
             <Skeleton className="inline-block h-4 w-48 align-middle" />
@@ -86,7 +86,7 @@ export default function BuyerSavedPage() {
           description: 'Tap the heart icon on any property to save it here for later.',
           action: (
             <Button href={ROUTES.BUYER_DISCOVER} variant="primary">
-              Discover Properties
+              Discover properties
             </Button>
           ),
         }}

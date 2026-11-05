@@ -63,7 +63,7 @@ export const SharePropertyModal = ({ isOpen, onClose, property }: SharePropertyM
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
-        <DialogTitle className="pr-8 font-semibold text-foreground">Share Property</DialogTitle>
+        <DialogTitle className="pr-8 font-semibold text-foreground">Share property</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           {property.title}
         </DialogDescription>

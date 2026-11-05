@@ -57,7 +57,7 @@ interface ApplicationWizardProps {
 }
 
 const steps = [
-  { key: 'personal', label: 'Personal Info', icon: User },
+  { key: 'personal', label: 'Personal info', icon: User },
   { key: 'employment', label: 'Employment', icon: Briefcase },
   { key: 'documents', label: 'Documents', icon: FileText },
   { key: 'review', label: 'Review', icon: ClipboardCheck },

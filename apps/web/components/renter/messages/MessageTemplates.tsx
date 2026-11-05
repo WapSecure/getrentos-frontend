@@ -154,7 +154,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
           className="flex min-w-0 flex-1 items-center gap-2 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <FileText className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">Message Templates</span>
+          <span className="text-sm font-medium text-foreground">Message templates</span>
           <span className="text-xs text-muted-foreground">({templates.length})</span>
         </button>
         <div className="flex items-center gap-1">
@@ -213,7 +213,7 @@ export const MessageTemplates = ({ onSelectTemplate }: MessageTemplatesProps) =>
                   disabled={!newTemplate.title || !newTemplate.content}
                   isLoading={addMutation.isPending}
                 >
-                  Add Template
+                  Add template
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
                   Cancel

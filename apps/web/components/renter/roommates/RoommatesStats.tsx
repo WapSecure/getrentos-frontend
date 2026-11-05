@@ -20,7 +20,7 @@ export const RoommatesStats = ({ roommates }: RoommatesStatsProps) => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <StatCard icon={Users} label="Total Roommates" value={total} accent="primary" />
+      <StatCard icon={Users} label="Total roommates" value={total} accent="primary" />
       <StatCard icon={UserCheck} label="Active" value={active} accent="green" />
       <StatCard icon={UserPlus} label="Pending" value={pending} accent="orange" />
       <StatCard icon={UserX} label="Inactive" value={inactive} accent="red" />

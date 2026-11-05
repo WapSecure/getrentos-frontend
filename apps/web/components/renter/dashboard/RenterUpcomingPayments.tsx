@@ -54,7 +54,7 @@ export const RenterUpcomingPayments = () => {
       className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm"
     >
       <div className="p-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-foreground">Upcoming Payments</h2>
+        <h2 className="text-lg font-semibold text-foreground">Upcoming payments</h2>
         <p className="text-sm text-muted-foreground">Don&apos;t miss your rent deadlines</p>
       </div>
 
@@ -96,7 +96,7 @@ export const RenterUpcomingPayments = () => {
               fullWidth
               className="gap-2"
             >
-              Pay Now
+              Pay now
               <ArrowRight className="w-3 h-3" />
             </Button>
           </motion.div>
@@ -105,7 +105,7 @@ export const RenterUpcomingPayments = () => {
 
       <div className="p-4 border-t border-border">
         <Button href={ROUTES.RENTER_PAYMENTS} variant="ghost" size="sm" fullWidth className="gap-1">
-          View Payment History
+          View payment history
           <ArrowRight className="w-3 h-3" />
         </Button>
       </div>

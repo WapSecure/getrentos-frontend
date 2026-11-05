@@ -26,7 +26,7 @@ const statusConfig: Record<
     variant: 'neutral',
   },
   pending_verification: {
-    label: 'Pending Verification',
+    label: 'Pending verification',
     icon: ShieldAlert,
     variant: 'warning',
   },

@@ -29,7 +29,7 @@ export const SimilarProperties = ({ currentId }: SimilarPropertiesProps) => {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-foreground mb-3">Similar Properties</h3>
+      <h3 className="text-sm font-semibold text-foreground mb-3">Similar properties</h3>
       <div className="grid sm:grid-cols-3 gap-3">
         {similar.map((property) => (
           <Link

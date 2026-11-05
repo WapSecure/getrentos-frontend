@@ -222,7 +222,7 @@ export const CreateListingModal = ({
                 />
               )}
 
-              <Field label="Listing Title" required>
+              <Field label="Listing title" required>
                 <Input
                   type="text"
                   value={listingTitle}
@@ -231,7 +231,7 @@ export const CreateListingModal = ({
               </Field>
 
               <Field
-                label="Rent Period"
+                label="Rent period"
                 required
                 hint="Most Nigerian landlords let tenants a full year upfront. Choose monthly only for short-let or month-to-month arrangements."
               >
@@ -250,7 +250,7 @@ export const CreateListingModal = ({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field
-                  label={rentPeriod === 'year' ? 'Annual Rent (₦)' : 'Monthly Rent (₦)'}
+                  label={rentPeriod === 'year' ? 'Annual rent (₦)' : 'Monthly rent (₦)'}
                   required
                 >
                   <CurrencyInput
@@ -259,7 +259,7 @@ export const CreateListingModal = ({
                     onValueChange={(v) => setAskingRent(v === 0 ? '' : String(v))}
                   />
                 </Field>
-                <Field label="Security Deposit">
+                <Field label="Security deposit">
                   <CurrencyInput
                     prefix="₦"
                     value={securityDeposit}
@@ -289,7 +289,7 @@ export const CreateListingModal = ({
                 </div>
               )}
 
-              <Field label="Availability Date" required>
+              <Field label="Availability date" required>
                 <DatePicker value={availabilityDate} onChange={setAvailabilityDate} />
               </Field>
 

@@ -12,7 +12,7 @@ interface NotificationFiltersProps {
 }
 
 const typeOptions = [
-  { value: 'all', label: 'All Types' },
+  { value: 'all', label: 'All types' },
   { value: 'application', label: 'Applications' },
   { value: 'message', label: 'Messages' },
   { value: 'payment', label: 'Payments' },
@@ -61,7 +61,7 @@ export const NotificationFilters = ({
         <div className="p-4 pt-0 space-y-3">
           <div role="group" aria-labelledby="notification-filter-type">
             <p id="notification-filter-type" className="text-xs font-medium text-foreground mb-1">
-              Notification Type
+              Notification type
             </p>
             <div className="flex flex-wrap gap-2">
               {typeOptions.map((option) => (

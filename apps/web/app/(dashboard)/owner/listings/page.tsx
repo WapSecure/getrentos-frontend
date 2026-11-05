@@ -128,7 +128,7 @@ export default function OwnerListingsPage() {
   return (
     <>
       <PageHeader
-        title="Sale Listings"
+        title="Sale listings"
         description={
           isLoading ? (
             <Skeleton className="h-5 w-48" />
@@ -142,7 +142,7 @@ export default function OwnerListingsPage() {
             onClick={() => setIsCreateModalOpen(true)}
             icon={<Plus className="w-4 h-4" />}
           >
-            New Listing
+            New listing
           </Button>
         }
       />

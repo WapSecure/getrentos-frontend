@@ -134,7 +134,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
       <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           <NairaSign className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Expense Tracker</h3>
+          <h3 className="font-semibold text-foreground">Expense tracker</h3>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">
@@ -208,7 +208,7 @@ export const ExpenseTracker = ({ expenses, roommates, onAddExpense }: ExpenseTra
                   disabled={!newExpense.description || !newExpense.amount || !newExpense.paidBy}
                   isLoading={isSaving}
                 >
-                  Add Expense
+                  Add expense
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setShowAddExpense(false)}>
                   Cancel

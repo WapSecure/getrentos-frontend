@@ -30,7 +30,7 @@ import { useRenterUser } from '../layout';
 
 const TABS: HubTab[] = [
   { id: 'payments', label: 'Payments', icon: CreditCard },
-  { id: 'financing', label: 'Flex Financing', icon: Zap },
+  { id: 'financing', label: 'Flex financing', icon: Zap },
 ];
 
 /** Real gateway checkout redirect: pulled out of component scope so it reads as an
@@ -115,7 +115,7 @@ export default function PaymentsPage() {
       const left = updated.outstanding ?? 0;
       pushNotification({
         type: 'success',
-        title: 'Payment Successful',
+        title: 'Payment successful',
         message:
           left > 0
             ? `Payment received for ${updated.propertyName}. ₦${left.toLocaleString()} is still owed on this charge.`
@@ -125,7 +125,7 @@ export default function PaymentsPage() {
     onError: (error: Error) => {
       pushNotification({
         type: 'error',
-        title: 'Payment Unsuccessful',
+        title: 'Payment unsuccessful',
         message: error.message || 'We could not process this payment. Please try again.',
       });
     },
@@ -184,13 +184,13 @@ export default function PaymentsPage() {
       }
       pushNotification({
         type: 'success',
-        title: 'Payments Successful',
+        title: 'Payments successful',
         message: `${completedCount} payment${completedCount === 1 ? '' : 's'} totalling ₦${payableTotal.toLocaleString()} completed successfully.`,
       });
     } catch {
       pushNotification({
         type: 'error',
-        title: 'Payment Batch Stopped',
+        title: 'Payment batch stopped',
         message:
           completedCount > 0
             ? `${completedCount} payment${completedCount === 1 ? '' : 's'} completed before an error occurred. Review the refreshed payment list before trying again.`
@@ -208,7 +208,7 @@ export default function PaymentsPage() {
     if (!receipt?.url) {
       pushNotification({
         type: 'error',
-        title: 'Receipt Unavailable',
+        title: 'Receipt unavailable',
         message: 'This receipt file is not available yet. Please try again later.',
       });
       return;
@@ -216,7 +216,7 @@ export default function PaymentsPage() {
     window.open(receipt.url, '_blank', 'noopener,noreferrer');
     pushNotification({
       type: 'info',
-      title: 'Receipt Opened',
+      title: 'Receipt opened',
       message: `${receipt.fileName} opened in a new tab, where you can save or print it.`,
     });
   };
@@ -232,14 +232,14 @@ export default function PaymentsPage() {
       queryClient.invalidateQueries({ queryKey: renterKeys.payments });
       pushNotification({
         type: 'info',
-        title: 'Dispute Submitted',
+        title: 'Dispute submitted',
         message: `Your dispute for ${updated.propertyName} has been submitted for review: "${reason}"`,
       });
     },
     onError: (error: Error) => {
       pushNotification({
         type: 'error',
-        title: 'Dispute Not Submitted',
+        title: 'Dispute not submitted',
         message: error.message || 'We could not submit this dispute. Please try again.',
       });
     },
@@ -269,7 +269,7 @@ export default function PaymentsPage() {
     onError: (error: Error) => {
       pushNotification({
         type: 'error',
-        title: 'Rent Not Released',
+        title: 'Rent not released',
         message: error.message || 'We could not release this payment. Please try again.',
       });
     },
@@ -295,7 +295,7 @@ export default function PaymentsPage() {
     mutationFn: (id: string) => unwrap(renterService.setDefaultPaymentMethod(id)),
     onSuccess: invalidatePaymentMethods,
     onError: notifyPaymentMethodError(
-      'Default Payment Method Not Updated',
+      'Default payment method not updated',
       'We could not update your default payment method. Please try again.'
     ),
   });
@@ -304,7 +304,7 @@ export default function PaymentsPage() {
     mutationFn: (id: string) => unwrap(renterService.removePaymentMethod(id)),
     onSuccess: invalidatePaymentMethods,
     onError: notifyPaymentMethodError(
-      'Payment Method Not Removed',
+      'Payment method not removed',
       'We could not remove this payment method. Please try again.'
     ),
   });
@@ -321,7 +321,7 @@ export default function PaymentsPage() {
       ),
     onSuccess: invalidatePaymentMethods,
     onError: notifyPaymentMethodError(
-      'Payment Method Not Added',
+      'Payment method not added',
       'We could not add this payment method. Please try again.'
     ),
   });

@@ -76,7 +76,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
       <DialogContent padded={false}>
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Send Renewal Offer</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Send renewal offer</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               To {lease.tenantName}: {lease.unitName}
             </DialogDescription>
@@ -110,7 +110,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
             </Alert>
           )}
 
-          <Field label="New Lease End Date" required>
+          <Field label="New lease end date" required>
             <DatePicker value={newEndDate} onChange={setNewEndDate} />
           </Field>
         </div>
@@ -129,7 +129,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
             loadingText="Sending…"
           >
             <RefreshCcw className="w-3.5 h-3.5" />
-            Send Offer
+            Send offer
           </Button>
         </div>
         {errorMessage && (

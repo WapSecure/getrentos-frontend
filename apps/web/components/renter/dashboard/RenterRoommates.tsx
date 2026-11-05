@@ -91,7 +91,7 @@ export const RenterRoommates = () => {
                 isLoading={inviteMutation.isPending}
                 className="mb-6"
               >
-                Send Invite
+                Send invite
               </Button>
             </div>
           </div>
@@ -133,7 +133,7 @@ export const RenterRoommates = () => {
           {/* Rent Split Summary */}
           <div className="mt-4 p-3 rounded-lg bg-accent border border-primary/20">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-foreground">Rent Split</span>
+              <span className="text-sm font-medium text-foreground">Rent split</span>
               <span className="text-sm font-medium text-foreground">{totalShare}% allocated</span>
             </div>
             <div className="h-2 bg-secondary rounded-full overflow-hidden">
@@ -152,7 +152,7 @@ export const RenterRoommates = () => {
             href={ROUTES.RENTER_PAYMENTS}
           >
             <span className="text-sm">₦</span>
-            Split Payments
+            Split payments
           </Button>
         </div>
       </motion.div>
