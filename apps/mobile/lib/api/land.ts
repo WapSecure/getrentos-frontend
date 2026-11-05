@@ -1,3 +1,4 @@
+import type { LandAssuranceTier, LandNotVerifiedItem, LandTrustLabel } from '@getrentos/shared';
 import { apiFetch } from './client';
 import { toQuery } from './query';
 import type { Paginated } from './buyer';
@@ -132,7 +133,17 @@ export interface LandListing {
   propertyVerificationStatus: string;
   publishedAt: string;
   parcel: LandParcelPublic;
-  diligence: { status: LandDiligenceStatus; reviewedAt?: string; expiresAt?: string };
+  diligence: {
+    status: LandDiligenceStatus;
+    reviewedAt?: string;
+    expiresAt?: string;
+    /** The review level, once reviewed. */
+    assuranceTier?: LandAssuranceTier;
+    /** What was checked, by whom and when. */
+    labels?: LandTrustLabel[];
+    /** What was not checked, or was flagged. */
+    notVerified?: LandNotVerifiedItem[];
+  };
 }
 
 export interface LandFilters {
@@ -149,7 +160,31 @@ export function formatLandArea(value: number, unit: LandAreaUnit): string {
   return `${value.toLocaleString()} ${LAND_AREA_UNIT_LABEL[unit]}`;
 }
 
+/** Comparable verified land, and where this parcel's ₦/m² sits among it. */
+export interface LandComparables {
+  listingId: string;
+  subjectPricePerSqm?: number;
+  /** 0-100: where this parcel's ₦/m² sits among the comparables returned. */
+  subjectPercentile?: number;
+  comparablesMedianPricePerSqm?: number;
+  comparables: {
+    id: string;
+    title: string;
+    city: string;
+    state: string;
+    estateName?: string;
+    price: number;
+    areaSqm?: number;
+    pricePerSqm?: number;
+    titleType?: LandTitleType;
+  }[];
+}
+
 export const landApi = {
+  comparables: (listingId: string, limit = 6) =>
+    apiFetch<LandComparables>(
+      `/land/listings/${encodeURIComponent(listingId)}/comparables${toQuery({ limit })}`
+    ),
   list: (filters: LandFilters = {}, page = 1, pageSize = 20) =>
     apiFetch<Paginated<LandListing>>(`/land${toQuery({ ...filters, page, pageSize })}`),
 

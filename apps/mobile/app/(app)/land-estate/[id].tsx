@@ -214,6 +214,7 @@ export default function LandEstate() {
         {starting ? (
           <StartPurchase
             reservation={starting}
+            onLeave={() => setStarting(null)}
             onDone={() => {
               setStarting(null);
               setSelectedId(null);

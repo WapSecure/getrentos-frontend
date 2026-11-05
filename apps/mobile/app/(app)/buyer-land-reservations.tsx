@@ -142,7 +142,11 @@ export default function BuyerLandReservations() {
       </ScrollView>
       <Sheet open={!!starting} onClose={() => setStarting(null)} title="Start your purchase">
         {starting ? (
-          <StartPurchase reservation={starting} onDone={() => setStarting(null)} />
+          <StartPurchase
+            reservation={starting}
+            onDone={() => setStarting(null)}
+            onLeave={() => setStarting(null)}
+          />
         ) : null}
       </Sheet>
     </View>
