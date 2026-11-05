@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { isUpgradeError } from '@/components/host/HostUI';
 import { View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -46,7 +47,12 @@ export default function OwnerHome() {
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
-  const trend = useQuery({ queryKey: qk.owner.portfolioTrend, queryFn: ownerApi.portfolioTrend });
+  // Pro only: a Free plan answers with an upgrade error, which is final, so don't retry it.
+  const trend = useQuery({
+    queryKey: qk.owner.portfolioTrend,
+    queryFn: ownerApi.portfolioTrend,
+    retry: (n, e) => !isUpgradeError(e) && n < 2,
+  });
   // Drives the bell badge; the notifications screen owns the full list.
   const notifications = useQuery({
     queryKey: qk.owner.notifications,
