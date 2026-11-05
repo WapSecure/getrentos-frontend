@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, EmptyState, PageErrorState, Skeleton, useToast } from '@getrentos/ui';
+import { Alert, EmptyState, PageErrorState, PageHeader, Skeleton, useToast } from '@getrentos/ui';
 import { AlertTriangle, ArrowLeft, Lock, ScrollText } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
@@ -101,13 +101,10 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Transactions
       </Link>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Land conveyance</h1>
-        <p className="mt-1 max-w-2xl text-muted-foreground">
-          A land purchase is not complete when the money moves. It is complete when the deed is
-          executed and you have possession.
-        </p>
-      </div>
+      <PageHeader
+        title="Land conveyance"
+        description="A land purchase is not complete when the money moves. It is complete when the deed is executed and you have possession."
+      />
 
       <p className="flex gap-2 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
         <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />

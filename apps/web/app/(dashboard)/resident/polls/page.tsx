@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Vote } from 'lucide-react';
-import { EmptyState, ListSkeleton } from '@getrentos/ui';
+import { EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -24,10 +24,7 @@ export default function ResidentPollsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Polls</h1>
-        <p className="text-muted-foreground mt-1">Have your say on estate decisions</p>
-      </div>
+      <PageHeader title="Polls" description="Have your say on estate decisions" />
 
       {isLoading ? (
         <ListSkeleton rows={3} />

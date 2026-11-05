@@ -3,7 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Cloud, CloudOff, Wifi, WifiOff } from 'lucide-react';
-import { Alert, Badge, Button, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  EmptyState,
+  ListSkeleton,
+  PageErrorState,
+  PageHeader,
+} from '@getrentos/ui';
 import { formatRelativeTime } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
@@ -70,23 +78,21 @@ export default function AgentSyncPage() {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Sync Center</h1>
-          <p className="mt-1 text-muted-foreground">
-            {records.length} records waiting on this device
-          </p>
-        </div>
-        <Button
-          icon={<RefreshCw className="h-4 w-4" />}
-          onClick={() => sync.mutate(undefined)}
-          isLoading={sync.isPending}
-          loadingText="Syncing..."
-          disabled={!records.length || !isOnline || sync.isPending || queue.isError}
-        >
-          Sync All
-        </Button>
-      </div>
+      <PageHeader
+        title="Sync Center"
+        description={`${records.length} records waiting on this device`}
+        actions={
+          <Button
+            icon={<RefreshCw className="h-4 w-4" />}
+            onClick={() => sync.mutate(undefined)}
+            isLoading={sync.isPending}
+            loadingText="Syncing..."
+            disabled={!records.length || !isOnline || sync.isPending || queue.isError}
+          >
+            Sync All
+          </Button>
+        }
+      />
 
       <Alert
         variant={isOnline ? 'success' : 'warning'}

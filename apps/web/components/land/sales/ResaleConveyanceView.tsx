@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, PageErrorState, Skeleton } from '@getrentos/ui';
+import { Card, PageErrorState, PageHeader, Skeleton } from '@getrentos/ui';
 import { ArrowLeft, Info } from 'lucide-react';
 import { ROUTES } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -91,13 +91,11 @@ export const ResaleConveyanceView = ({ txId }: { txId: string }) => {
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Sales in progress
       </Link>
-      <h1 className="mt-2 text-2xl font-bold tracking-[-0.03em] text-foreground">
-        Land conveyance
-      </h1>
-      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-        Mark each step delivered as you complete it. The buyer confirms each one, and the payment is
-        released to you once every required step is confirmed.
-      </p>
+      <PageHeader
+        className="mt-2"
+        title="Land conveyance"
+        description="Mark each step delivered as you complete it. The buyer confirms each one, and the payment is released to you once every required step is confirmed."
+      />
 
       {conditions.data && conditions.data.length > 0 && (
         <Card static className="mt-6 p-5">

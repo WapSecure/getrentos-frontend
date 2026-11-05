@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { tierAtLeast } from '@getrentos/shared';
-import { Alert, Button, CardSkeleton } from '@getrentos/ui';
+import { Alert, Button, CardSkeleton, PageHeader } from '@getrentos/ui';
 import { Upload } from 'lucide-react';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -69,22 +69,24 @@ export default function EstateExpectedPage() {
   return (
     <EstateFeatureGate feature="Expected today" error={boardQuery.error}>
       <>
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Expected today</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+        <PageHeader
+          title="Expected today"
+          description={
+            <>
               Unused invitations, regular visitors due today and parcels still waiting. on one
               board.
-            </p>
-          </div>
-          <Button
-            rounded="md"
-            icon={<Upload className="h-4 w-4" />}
-            onClick={() => setIsImportOpen(true)}
-          >
-            Enter a guest list
-          </Button>
-        </div>
+            </>
+          }
+          actions={
+            <Button
+              rounded="md"
+              icon={<Upload className="h-4 w-4" />}
+              onClick={() => setIsImportOpen(true)}
+            >
+              Enter a guest list
+            </Button>
+          }
+        />
 
         <Alert variant="neutral" className="mb-6">
           <p className="text-xs leading-5">

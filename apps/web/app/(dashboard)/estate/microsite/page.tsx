@@ -14,6 +14,7 @@ import {
   Switch,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -92,12 +93,12 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
 
   return (
     <div className="max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Microsite</h1>
-        <p className="text-muted-foreground mt-1">
-          A public page showcasing {estateName}: share one link with prospective residents.
-        </p>
-      </div>
+      <PageHeader
+        title="Microsite"
+        description={
+          <>A public page showcasing {estateName}: share one link with prospective residents.</>
+        }
+      />
 
       <Card className="p-6 space-y-6">
         <Switch

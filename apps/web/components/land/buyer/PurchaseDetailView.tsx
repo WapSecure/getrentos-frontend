@@ -7,6 +7,7 @@ import {
   Alert,
   Button,
   PageErrorState,
+  PageHeader,
   Skeleton,
   Tabs,
   TabsContent,
@@ -198,37 +199,41 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         <ArrowLeft className="h-4 w-4" aria-hidden /> My land
       </Link>
 
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
+      <PageHeader
+        title={
+          <>
             {plotLabel(purchase)} · {purchase.layoutName}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          </>
+        }
+        description={
+          <>
             {purchase.reference} · {purchase.planName}
             {purchase.startedAt ? ` · started ${formatDate(purchase.startedAt)}` : ''}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <PurchaseStatusBadge status={purchase.status} />
-          {['ACTIVE', 'PAID_IN_FULL', 'COMPLETED'].includes(purchase.status) && (
-            <Link
-              href="/land/watch"
-              className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-            >
-              Watch this plot
-            </Link>
-          )}
-          {purchase.propertyId && (
-            <Button
-              variant="link"
-              onClick={() => setReporting(true)}
-              className="text-xs font-medium text-muted-foreground hover:text-foreground"
-            >
-              Report a problem
-            </Button>
-          )}
-        </div>
-      </header>
+          </>
+        }
+        actions={
+          <div className="flex flex-col items-end gap-2">
+            <PurchaseStatusBadge status={purchase.status} />
+            {['ACTIVE', 'PAID_IN_FULL', 'COMPLETED'].includes(purchase.status) && (
+              <Link
+                href="/land/watch"
+                className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+              >
+                Watch this plot
+              </Link>
+            )}
+            {purchase.propertyId && (
+              <Button
+                variant="link"
+                onClick={() => setReporting(true)}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                Report a problem
+              </Button>
+            )}
+          </div>
+        }
+      />
       {purchase.propertyId && (
         <ReportLandProblemDialog
           open={reporting}

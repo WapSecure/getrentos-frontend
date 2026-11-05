@@ -9,6 +9,7 @@ import {
   QueryState,
   SearchInput,
   SegmentedControl,
+  PageHeader,
 } from '@getrentos/ui';
 import { DocumentUploadDialog, type UploadedDocumentData } from '@getrentos/ui';
 import { DocumentPreviewButton } from '@getrentos/ui';
@@ -80,22 +81,24 @@ export default function BuyerDocumentsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Documents</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Documents"
+        description={
+          <>
             Your financial documents and purchase records, {total} file{total === 1 ? '' : 's'}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Upload className="w-4 h-4" />}
-          className="w-fit"
-          onClick={() => setIsUploadOpen(true)}
-        >
-          Upload Document
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Upload className="w-4 h-4" />}
+            className="w-fit"
+            onClick={() => setIsUploadOpen(true)}
+          >
+            Upload Document
+          </Button>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

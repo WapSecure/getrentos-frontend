@@ -32,6 +32,7 @@ import {
   Textarea,
   type ToastVariant,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   LAND_INCIDENT_KIND_LABELS,
@@ -92,20 +93,17 @@ const WatchList = ({ onOpen, notify }: { onOpen: (id: string) => void; notify: N
 
   return (
     <>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Land Watch</h1>
-          <p className="mt-1 max-w-2xl text-muted-foreground">
-            Independent eyes on land you own: inspections with photo and location evidence, alerts
-            when something changes, and reminders for the charges land attracts.
-          </p>
-        </div>
-        {!adding && (
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setAdding(true)}>
-            Watch land
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Land Watch"
+        description="Independent eyes on land you own: inspections with photo and location evidence, alerts when something changes, and reminders for the charges land attracts."
+        actions={
+          !adding ? (
+            <Button icon={<Plus className="h-4 w-4" />} onClick={() => setAdding(true)}>
+              Watch land
+            </Button>
+          ) : undefined
+        }
+      />
       {adding && (
         <SubscribeCard
           onCancel={() => setAdding(false)}
@@ -346,16 +344,19 @@ const WatchDetail = ({
         >
           Land Watch
         </Button>
-        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold text-foreground">{w.land.label}</h1>
-            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+        <PageHeader
+          className="mt-2"
+          title={w.land.label}
+          description={
+            <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               {[w.land.city, w.land.state].filter(Boolean).join(', ')}
-            </p>
-          </div>
-          <PlanControls watch={w} onSaved={saved} onFailed={failed} onCancelled={onBack} />
-        </div>
+            </span>
+          }
+          actions={
+            <PlanControls watch={w} onSaved={saved} onFailed={failed} onCancelled={onBack} />
+          }
+        />
         <p className="mt-3 max-w-3xl text-xs text-muted-foreground">{w.disclaimer}</p>
       </div>
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">

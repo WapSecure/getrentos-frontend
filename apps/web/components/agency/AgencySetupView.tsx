@@ -3,8 +3,18 @@
 import { useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Building2, Clock, FileText, ShieldAlert, Upload } from 'lucide-react';
-import { Badge, Button, Card, CardSkeleton, Field, Input, Select, useToast } from '@getrentos/ui';
+import { BadgeCheck, Clock, FileText, ShieldAlert, Upload } from 'lucide-react';
+import {
+  Badge,
+  Button,
+  Card,
+  CardSkeleton,
+  Field,
+  Input,
+  PageHeader,
+  Select,
+  useToast,
+} from '@getrentos/ui';
 import { NIGERIA_STATES } from '@/lib/constants/locations';
 import { getStoredUser, updateStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
@@ -220,17 +230,14 @@ export function AgencySetupView() {
 
   return (
     <div className="mx-auto max-w-3xl p-6">
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Building2 className="h-6 w-6 text-primary" aria-hidden />
-          {firm ? firm.name : 'Start your property management firm'}
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          {firm
+      <PageHeader
+        title={firm ? firm.name : 'Start your property management firm'}
+        description={
+          firm
             ? 'Your firm’s registration with GetRentos.'
-            : 'Manage properties for owners on GetRentos. Set up now; GetRentos verifies your CAC registration before you can receive payouts or appear to owners.'}
-        </p>
-      </div>
+            : 'Manage properties for owners on GetRentos. Set up now; GetRentos verifies your CAC registration before you can receive payouts or appear to owners.'
+        }
+      />
 
       {firm && <StatusCard firm={firm} />}
 

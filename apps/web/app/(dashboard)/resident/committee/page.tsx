@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Landmark } from 'lucide-react';
-import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -32,10 +32,7 @@ export default function ResidentCommitteePage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Committee</h1>
-        <p className="text-muted-foreground mt-1">Who&apos;s on your estate&apos;s board</p>
-      </div>
+      <PageHeader title="Committee" description={<>Who&apos;s on your estate&apos;s board</>} />
 
       {isLoading ? (
         <ListSkeleton rows={3} />

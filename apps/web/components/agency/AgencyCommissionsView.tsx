@@ -17,6 +17,7 @@ import {
   PageErrorState,
   type BadgeVariant,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -142,12 +143,10 @@ export function AgencyCommissionsView() {
         All clients
       </Link>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Commissions</h1>
-        <p className="mt-1 text-muted-foreground">
-          What your firm has earned letting and renewing your clients’ tenancies.
-        </p>
-      </div>
+      <PageHeader
+        title="Commissions"
+        description="What your firm has earned letting and renewing your clients’ tenancies."
+      />
 
       {/* Totals */}
       <div className="grid gap-4 sm:grid-cols-3">

@@ -11,6 +11,7 @@ import {
   CardSkeleton,
   EmptyState,
   PageErrorState,
+  PageHeader,
   Skeleton,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
@@ -101,19 +102,19 @@ export function MandateListView() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-[-0.01em]">Client engagements</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {live.length > 0
-              ? `${live.length} you can act under right now.`
-              : 'A mandate lets you act for a property you do not own.'}
-          </p>
-        </div>
-        <Button variant="outline" href="/agency">
-          Go to the workspace
-        </Button>
-      </header>
+      <PageHeader
+        title="Client engagements"
+        description={
+          live.length > 0
+            ? `${live.length} you can act under right now.`
+            : 'A mandate lets you act for a property you do not own.'
+        }
+        actions={
+          <Button variant="outline" href="/agency">
+            Go to the workspace
+          </Button>
+        }
+      />
 
       {act.isError && <Alert variant="danger">{(act.error as Error).message}</Alert>}
 

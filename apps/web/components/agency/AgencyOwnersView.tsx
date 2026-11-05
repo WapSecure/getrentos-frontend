@@ -4,13 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  UserRound,
-  Building2,
-  ArrowRight,
-  Mail,
-  UserPlus,
-} from 'lucide-react';
+import { UserRound, Building2, ArrowRight, Mail, UserPlus } from 'lucide-react';
 import {
   Alert,
   Badge,
@@ -20,6 +14,7 @@ import {
   ListSkeleton,
   type BadgeVariant,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { useCustody } from './CustodyProvider';
 import { InviteOwnerModal } from './InviteOwnerModal';
@@ -146,19 +141,19 @@ export function AgencyOwnersView() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Clients</h1>
-          <p className="mt-1 text-muted-foreground">
-            {groups.length === 0
-              ? 'The owners whose properties you manage will appear here.'
-              : `${groups.length} owner${groups.length === 1 ? '' : 's'} across ${mandates.length} propert${mandates.length === 1 ? 'y' : 'ies'}.`}
-          </p>
-        </div>
-        <Button onClick={() => setInviteOpen(true)} icon={<UserPlus className="h-4 w-4" />}>
-          Invite owner
-        </Button>
-      </div>
+      <PageHeader
+        title="Clients"
+        description={
+          groups.length === 0
+            ? 'The owners whose properties you manage will appear here.'
+            : `${groups.length} owner${groups.length === 1 ? '' : 's'} across ${mandates.length} propert${mandates.length === 1 ? 'y' : 'ies'}.`
+        }
+        actions={
+          <Button onClick={() => setInviteOpen(true)} icon={<UserPlus className="h-4 w-4" />}>
+            Invite owner
+          </Button>
+        }
+      />
 
       {groups.length === 0 ? (
         <EmptyState

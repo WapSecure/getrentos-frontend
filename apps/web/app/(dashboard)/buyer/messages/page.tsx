@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Pagination, useOptimisticMutation } from '@getrentos/ui';
+import { Button, Pagination, useOptimisticMutation, PageHeader } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/buyer/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/buyer/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -143,15 +143,17 @@ export default function BuyerMessagesPage() {
 
   return (
     <div className="h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-1">Communicate with owners, realtors, and support</p>
-        {startError ? (
-          <p role="alert" className="mt-2 text-sm text-destructive">
-            {startError}
-          </p>
-        ) : null}
-      </div>
+      <PageHeader
+        title="Messages"
+        description="Communicate with owners, realtors, and support"
+        meta={
+          startError ? (
+            <p role="alert" className="text-sm text-destructive">
+              {startError}
+            </p>
+          ) : null
+        }
+      />
 
       <div className="flex gap-4 h-[calc(100%-4.5rem)]">
         <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>

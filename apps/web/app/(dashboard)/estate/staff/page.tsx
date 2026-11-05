@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  PageHeader,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -65,25 +72,27 @@ export default function EstateStaffPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Staff</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Staff"
+        description={
+          <>
             {total} gateman{total === 1 ? '' : 'men'} at {estate.name}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            inviteGateman.reset();
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Add Gateman
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              inviteGateman.reset();
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Gateman
+          </Button>
+        }
+      />
 
       {isStaffLoading ? (
         <ListSkeleton rows={3} />

@@ -12,6 +12,7 @@ import {
   Field,
   Input,
   PageErrorState,
+  PageHeader,
   Select,
   TableSkeleton,
   useToast,
@@ -69,8 +70,7 @@ export function AgencyTeamView() {
     refresh();
     toast.success(message);
   };
-  const fail = (e: Error) =>
-    toast.error(e.message || 'Something went wrong.');
+  const fail = (e: Error) => toast.error(e.message || 'Something went wrong.');
   const run =
     <T,>(fn: () => Promise<{ success: boolean; error?: string; data?: T }>) =>
     async () => {
@@ -128,16 +128,10 @@ export function AgencyTeamView() {
 
   return (
     <div className="mx-auto max-w-5xl p-6">
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Users className="h-6 w-6 text-primary" aria-hidden />
-          Team
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Who works for the firm, in what role, and until when. Operating roles get your clients’
-          properties as soon as they join; suspending or removing someone takes that away at once.
-        </p>
-      </div>
+      <PageHeader
+        title="Team"
+        description="Who works for the firm, in what role, and until when. Operating roles get your clients’ properties as soon as they join; suspending or removing someone takes that away at once."
+      />
 
       {isPrincipal && (
         <Card className="mb-6 p-5">

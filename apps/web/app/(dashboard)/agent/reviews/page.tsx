@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Star, MessageCircle } from 'lucide-react';
-import { Card, EmptyState, ListSkeleton, Pagination, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Card,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  StatGridSkeleton,
+  PageHeader,
+} from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
@@ -54,10 +61,10 @@ export default function AgentReviewsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reviews & Reputation</h1>
-        <p className="text-muted-foreground mt-1">See how clients and admins rate your fieldwork</p>
-      </div>
+      <PageHeader
+        title="Reviews & Reputation"
+        description="See how clients and admins rate your fieldwork"
+      />
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <Card className="p-6 flex flex-col items-center justify-center text-center">

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarCheck } from 'lucide-react';
-import { Button, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Button, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -45,10 +45,7 @@ export default function ResidentAmenitiesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Amenities</h1>
-        <p className="text-muted-foreground mt-1">Book shared facilities in your estate</p>
-      </div>
+      <PageHeader title="Amenities" description="Book shared facilities in your estate" />
 
       <h2 className="text-sm font-semibold text-foreground mb-3">Available</h2>
       {isAmenitiesLoading ? (
