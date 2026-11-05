@@ -25,7 +25,8 @@
     "./auth": {
       "import": "./src/auth/index.ts",
       "types": "./src/auth/index.ts"
-    }
+    },
+    "./constants/app-links.json": "./src/constants/app-links.json"
   },
   "scripts": {
     "build": "echo 'No build step yet'",

@@ -1,0 +1,21 @@
+{
+  "$comment": "Website paths the GetRentos app opens when a link to them is tapped on a phone with the app installed (iOS universal links, Android app links). Read by apps/mobile/app.config.js (Android intent filters) and apps/web (apple-app-site-association). The app's lib/deepLinks.ts must handle every prefix listed in `claimed`; paths under `webOnly` are claimed implicitly by a prefix but have no screen in the app, so iOS excludes them and the app hands them back to the browser.",
+  "claimed": [
+    "/rent",
+    "/buy",
+    "/shortlets",
+    "/land",
+    "/estates",
+    "/magic-link",
+    "/dashboard",
+    "/renter",
+    "/landlord",
+    "/owner",
+    "/buyer",
+    "/realtor",
+    "/agent",
+    "/estate",
+    "/resident"
+  ],
+  "webOnly": ["/land/market", "/land/dossier", "/land/disputes", "/land/reviews"]
+}

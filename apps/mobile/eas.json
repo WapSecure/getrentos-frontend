@@ -38,7 +38,8 @@
       "channel": "production",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.getrentos.com"
+        "EXPO_PUBLIC_API_URL": "https://api.getrentos.com",
+        "APP_LINK_DOMAIN": "getrentos.com"
       }
     }
   },
