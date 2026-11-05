@@ -15,6 +15,7 @@ import {
   UserCog,
   Users,
   Wallet,
+  FileSpreadsheet,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
@@ -110,6 +111,13 @@ export default function AgencyAccount() {
       description: 'Registration and verification',
       icon: Building,
       onPress: go('/(app)/agency-setup'),
+    },
+    {
+      key: 'import',
+      label: 'Import from a spreadsheet',
+      description: 'Bring a property’s units and tenants over',
+      icon: FileSpreadsheet,
+      onPress: go('/(app)/agency-import'),
     },
   ];
 
