@@ -133,8 +133,24 @@ export const reportReady = (claimedToBe: string, description: string) =>
 export const DELETE_PHRASE = 'delete my account';
 export const deletePhraseOk = (typed: string) => typed.trim().toLowerCase() === DELETE_PHRASE;
 
+/** Getting a held deposit back, worked out by GetRentos (web: DepositSection's plan panel). */
+export interface DepositPlan {
+  leaseId: string;
+  overview: string;
+  steps: { kind: 'do' | 'keep' | 'dispute'; text: string }[];
+  disputes: {
+    deductionId: string;
+    amount: string;
+    reason: string;
+    grounds: string[];
+    draft: string;
+  }[];
+}
+
 export const renterHomeApi = {
   deposits: () => apiFetch<TenantDeposit[]>('/renter/deposits'),
+  depositPlans: () =>
+    apiFetch<{ plans: DepositPlan[]; disclaimer: string }>('/renter/deposits/plan'),
   disputeDeduction: (deductionId: string, reason: string) =>
     apiFetch<{ disputed: boolean }>(`/renter/deposits/deductions/${deductionId}/dispute`, {
       method: 'POST',

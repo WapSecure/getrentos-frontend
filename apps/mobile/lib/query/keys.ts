@@ -202,6 +202,8 @@ export const qk = {
     leaseGuide: ['renter', 'lease', 'guide'] as const,
     listingCheck: (listingId: string) => ['renter', 'listing', listingId, 'check'] as const,
     deposits: ['renter', 'deposits'] as const,
+    // Under deposits, so a dispute refreshes the plan too.
+    depositPlan: ['renter', 'deposits', 'plan'] as const,
     homeTeam: ['renter', 'home-team'] as const,
     dashboardStats: ['renter', 'dashboard', 'stats'] as const,
     moveInChecklist: ['renter', 'dashboard', 'move-in-checklist'] as const,

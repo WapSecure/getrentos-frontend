@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { depositHolderText, noDeductionsText } from '@getrentos/shared';
-import { PiggyBank, ShieldCheck } from 'lucide-react-native';
+import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -25,6 +25,7 @@ import {
   sortDeposits,
   type TenantDeduction,
   type TenantDeposit,
+  type DepositPlan,
 } from '@/lib/api/renterHome';
 import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
@@ -40,6 +41,13 @@ export default function RenterDeposit() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const q = useQuery({ queryKey: qk.renter.deposits, queryFn: renterHomeApi.deposits });
+  // Hidden if it fails: the deposit itself is shown either way.
+  const plans = useQuery({
+    queryKey: qk.renter.depositPlan,
+    queryFn: renterHomeApi.depositPlans,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
@@ -74,7 +82,12 @@ export default function RenterDeposit() {
           }}
         >
           {sortDeposits(q.data ?? []).map((d) => (
-            <DepositCard key={d.leaseId} deposit={d} />
+            <DepositCard
+              key={d.leaseId}
+              deposit={d}
+              plan={plans.data?.plans.find((p) => p.leaseId === d.leaseId)}
+              disclaimer={plans.data?.disclaimer ?? ''}
+            />
           ))}
         </QueryState>
       </ScrollView>
@@ -82,7 +95,15 @@ export default function RenterDeposit() {
   );
 }
 
-function DepositCard({ deposit: d }: { deposit: TenantDeposit }) {
+function DepositCard({
+  deposit: d,
+  plan,
+  disclaimer,
+}: {
+  deposit: TenantDeposit;
+  plan?: DepositPlan;
+  disclaimer: string;
+}) {
   const { colors, spacing } = useTheme();
   const hold = d.hold;
   return (
@@ -156,11 +177,47 @@ function DepositCard({ deposit: d }: { deposit: TenantDeposit }) {
               {noDeductionsText(hold.status === 'RETURNED')}
             </Text>
           ) : (
-            hold.deductions.map((x) => <Deduction key={x.id} d={x} />)
+            hold.deductions.map((x) => (
+              <Deduction
+                key={x.id}
+                d={x}
+                suggestion={plan?.disputes.find((g) => g.deductionId === x.id)}
+              />
+            ))
           )}
         </>
       )}
+      {plan ? <DepositPlanBlock plan={plan} disclaimer={disclaimer} /> : null}
     </Card>
+  );
+}
+
+/** "Getting it back": steps, evidence to keep and deductions worth questioning. */
+function DepositPlanBlock({ plan, disclaimer }: { plan: DepositPlan; disclaimer: string }) {
+  const { colors, spacing } = useTheme();
+  const ICON = { do: CircleCheck, keep: FileCheck2, dispute: Scale } as const;
+  return (
+    <View style={{ gap: spacing.xs, marginTop: spacing.sm }}>
+      <Divider />
+      <Text variant="callout" style={{ fontWeight: '600' }}>
+        Getting it back
+      </Text>
+      <Text variant="callout">{plan.overview}</Text>
+      {plan.steps.map((st) => {
+        const Icon = ICON[st.kind];
+        return (
+          <View key={st.text} style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <Icon size={16} color={colors.primary} style={{ marginTop: 2 }} />
+            <Text variant="caption" style={{ flex: 1 }}>
+              {st.text}
+            </Text>
+          </View>
+        );
+      })}
+      <Text variant="caption" color="mutedForeground">
+        {disclaimer}
+      </Text>
+    </View>
   );
 }
 
@@ -175,7 +232,14 @@ function Figure({ label, amount }: { label: string; amount: number }) {
   );
 }
 
-function Deduction({ d }: { d: TenantDeduction }) {
+function Deduction({
+  d,
+  suggestion,
+}: {
+  d: TenantDeduction;
+  /** Grounds and a drafted reason from the deposit-back plan. */
+  suggestion?: DepositPlan['disputes'][number];
+}) {
   const { colors, spacing, radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
@@ -256,13 +320,24 @@ function Deduction({ d }: { d: TenantDeduction }) {
             </View>
           </View>
         ) : (
-          <Button
-            label="Dispute this"
-            size="sm"
-            variant="ghost"
-            onPress={() => setOpen(true)}
-            style={{ alignSelf: 'flex-start' }}
-          />
+          <View style={{ gap: 2 }}>
+            {suggestion?.grounds.map((g) => (
+              <Text key={g} variant="caption" color="mutedForeground">
+                • {g}
+              </Text>
+            ))}
+            <Button
+              label={suggestion ? 'Dispute this (reason drafted)' : 'Dispute this'}
+              size="sm"
+              variant="ghost"
+              onPress={() => {
+                // Start from the drafted reason; the tenant edits it before sending.
+                if (suggestion && !reason) setReason(suggestion.draft);
+                setOpen(true);
+              }}
+              style={{ alignSelf: 'flex-start' }}
+            />
+          </View>
         )
       ) : null}
     </View>

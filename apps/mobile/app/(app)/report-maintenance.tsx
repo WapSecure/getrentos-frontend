@@ -3,7 +3,7 @@ import { Image, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AlertTriangle, ChevronLeft, Plus, X } from 'lucide-react-native';
+import { AlertTriangle, ChevronLeft, Plus, Sparkles, X } from 'lucide-react-native';
 import {
   Button,
   Card,
@@ -13,6 +13,7 @@ import {
   TextField,
   useTheme,
   useToast,
+  FormAlert,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
@@ -23,6 +24,7 @@ import {
   MAINTENANCE_PRIORITY_LABEL,
   type MaintenanceCategory,
   type MaintenancePriority,
+  type RepairDraft,
 } from '@/lib/api/maintenance';
 import { pickPhoto } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
@@ -42,6 +44,21 @@ export default function ReportMaintenance() {
   const [description, setDescription] = useState('');
   const [isEmergency, setIsEmergency] = useState(false);
   const [photos, setPhotos] = useState<PickedFile[]>([]);
+  // "Fill in from photos": a draft of the fields above, shown with any safety note.
+  const [draft, setDraft] = useState<RepairDraft | null>(null);
+  const fill = useMutation({
+    mutationFn: () => maintenanceApi.draftFromPhotos(photos, description),
+    onSuccess: (d) => {
+      setDraft(d);
+      setTitle(d.title);
+      setCategory(d.category);
+      setPriority(d.priority);
+      setDescription(d.description);
+      if (d.isEmergency) setIsEmergency(true);
+    },
+    onError: (e) =>
+      toast.show(errorMessage(e, 'Could not read the photos. Fill in the form instead.'), 'error'),
+  });
 
   const effectivePriority = isEmergency ? 'urgent' : priority;
 
@@ -224,6 +241,30 @@ export default function ReportMaintenance() {
           </View>
         </View>
 
+        {photos.length ? (
+          <Button
+            label="Fill in from photos"
+            variant="secondary"
+            icon={<Sparkles size={16} color={colors.foreground} />}
+            loading={fill.isPending}
+            loadingLabel="Reading photos…"
+            disabled={fill.isPending || mutation.isPending}
+            onPress={() => fill.mutate()}
+          />
+        ) : null}
+        {draft?.safetyNote ? <FormAlert title="Do this now" message={draft.safetyNote} /> : null}
+        {draft && draft.quickChecks.length ? (
+          <Text variant="caption" color="mutedForeground">
+            While you wait, you could check: {draft.quickChecks.join('; ')}.
+          </Text>
+        ) : null}
+        {draft ? (
+          <Text variant="caption" color="mutedForeground">
+            {draft.unclear
+              ? 'The photos did not show the problem clearly: check the details and add what you can see.'
+              : 'Filled in from your photos. Check every field before you submit.'}
+          </Text>
+        ) : null}
         <Button
           label="Submit request"
           loading={mutation.isPending}
