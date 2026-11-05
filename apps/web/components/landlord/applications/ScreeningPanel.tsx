@@ -26,6 +26,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { landlordService } from '@/services/landlordService';
 import { CreditSummaryView } from '@/components/shared/credit/CreditSummaryView';
+import { ApplicantSummary } from './ApplicantSummary';
 import type {
   AffordabilityBand,
   ReferenceOutcome,
@@ -225,6 +226,7 @@ export const ScreeningPanel = ({
 
   return (
     <div className="space-y-5">
+      <ApplicantSummary applicationId={applicationId} />
       <div>
         <SectionTitle>At a glance</SectionTitle>
         <ul className="space-y-1.5">

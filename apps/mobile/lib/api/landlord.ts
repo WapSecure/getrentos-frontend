@@ -438,6 +438,16 @@ export type OwnerStatementStatus = 'draft' | 'issued' | 'paid';
 export type PayoutStatus = 'pending' | 'processing' | 'paid' | 'failed';
 
 /** An owner statement in plain words, as the API returns it. */
+/** An applicant's screening facts in plain words, as the API returns it. */
+export interface ApplicantSummary {
+  applicationId: string;
+  summary: string;
+  questions: string[];
+  checks: string[];
+  source: 'ai' | 'heuristic';
+  disclaimer: string;
+}
+
 export interface StatementExplanation {
   headline: string;
   points: string[];
@@ -1200,6 +1210,10 @@ export const landlordApi = {
 
   tenancyStanding: (applicationId: string) =>
     apiFetch<TenancyStanding>(`/landlord/applications/${applicationId}/tenancy-standing`),
+
+  /** The screening facts in plain words, with questions and checks. Never a ranking or a decision. */
+  applicantSummary: (applicationId: string) =>
+    apiFetch<ApplicantSummary>(`/landlord/applications/${applicationId}/screening/summary`),
 
   /** Empty 200 when nothing is configured yet, which the client reads as undefined. */
   managementFeeConfig: (propertyId: string) =>

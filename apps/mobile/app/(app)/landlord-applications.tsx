@@ -29,6 +29,7 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { TenancyStandingPanel } from '@/components/landlord/TenancyStandingPanel';
+import { ApplicantSummaryPanel } from '@/components/landlord/ApplicantSummaryPanel';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -224,6 +225,7 @@ function ApplicationCard({
         </View>
 
         <TenancyStandingPanel applicationId={a.id} />
+        <ApplicantSummaryPanel applicationId={a.id} />
 
         {decidable ? (
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
