@@ -157,7 +157,7 @@ export default function EstateDuesPage() {
           <>
             <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
               <Settings className="w-4 h-4" />
-              Due Settings
+              Due settings
             </Button>
             <Button
               variant="primary"
@@ -168,7 +168,7 @@ export default function EstateDuesPage() {
               }}
             >
               <Plus className="w-4 h-4" />
-              Charge Dues
+              Charge dues
             </Button>
           </>
         }

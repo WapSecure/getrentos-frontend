@@ -25,6 +25,7 @@ describe('monthTrend', () => {
 
   it('formats with a real minus sign', () => {
     expect(formatTrend(12.345)).toBe('+12.3%');
-    expect(formatTrend(-4)).toBe('−4.0%');
+    expect(formatTrend(-4)).toBe('−4%');
+    expect(formatTrend(-100)).toBe('−100%');
   });
 });

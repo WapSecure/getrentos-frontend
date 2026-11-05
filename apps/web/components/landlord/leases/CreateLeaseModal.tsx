@@ -182,10 +182,14 @@ export const CreateLeaseModal = ({
                       is linked to their account so they can review and sign it in their own portal.
                     </span>
                   </p>
-                ) : (
+                ) : selectedUnit ? (
                   <p className="mt-1.5 text-xs text-muted-foreground">
                     No approved applicant for this unit: the lease is recorded against this name
                     only, and the tenant will not see it in a GetRentos account.
+                  </p>
+                ) : (
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    Choose a unit first: an approved applicant for it is filled in here.
                   </p>
                 )}
               </div>
