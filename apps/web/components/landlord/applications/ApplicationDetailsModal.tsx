@@ -12,6 +12,11 @@ interface ApplicationDetailsModalProps {
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onRequestInfo: (id: string) => void;
+  /**
+   * Who already holds an approved application for this unit, when the page
+   * knows. Approving would be refused, so say so here instead of after.
+   */
+  unitHeldBy?: string | null;
 }
 
 export const ApplicationDetailsModal = ({
@@ -20,6 +25,7 @@ export const ApplicationDetailsModal = ({
   onApprove,
   onReject,
   onRequestInfo,
+  unitHeldBy = null,
 }: ApplicationDetailsModalProps) => {
   // Only an open application can be decided; withdrawn ones are closed like approved and rejected.
   const isDecided = application?.status !== 'pending' && application?.status !== 'under_review';
@@ -48,7 +54,7 @@ export const ApplicationDetailsModal = ({
             <div className="p-3 rounded-lg bg-accent border border-primary/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">Platform Trust Score</span>
+                <span className="text-sm font-medium text-foreground">Platform trust score</span>
               </div>
               <span className="text-lg font-bold text-primary">{application.trustScore}</span>
             </div>
@@ -82,6 +88,12 @@ export const ApplicationDetailsModal = ({
 
           {!isDecided && (
             <div className="p-4 border-t border-border flex flex-wrap gap-2 shrink-0 sm:flex-nowrap">
+              {unitHeldBy && (
+                <p className="w-full text-xs text-muted-foreground" role="status">
+                  {unitHeldBy}&apos;s application for this unit is already approved, so this one can
+                  only be declined. Reject it, or ask the applicant whether another unit suits.
+                </p>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -90,7 +102,7 @@ export const ApplicationDetailsModal = ({
                 onClick={() => onRequestInfo(application.id)}
               >
                 <MessageSquareText className="w-3.5 h-3.5" />
-                Request Info
+                Request info
               </Button>
               <Button variant="danger" size="sm" fullWidth onClick={() => onReject(application.id)}>
                 Reject
@@ -101,6 +113,7 @@ export const ApplicationDetailsModal = ({
                 fullWidth
                 className="gap-1.5"
                 onClick={() => onApprove(application.id)}
+                disabled={Boolean(unitHeldBy)}
               >
                 <Check className="w-3.5 h-3.5" />
                 Approve

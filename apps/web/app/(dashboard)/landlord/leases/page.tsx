@@ -223,7 +223,7 @@ export default function LandlordLeasesPage() {
           onClick={() => setIsCreateModalOpen(true)}
           icon={<Plus className="w-4 h-4" />}
         >
-          Create Lease
+          Create lease
         </Button>
       </div>
 

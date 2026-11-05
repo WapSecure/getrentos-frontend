@@ -135,7 +135,7 @@ export const ApplicationCard = ({
                   icon={<ChevronRight className="w-3 h-3" />}
                   iconPosition="right"
                 >
-                  View Details
+                  View details
                 </Button>
               </div>
             </div>

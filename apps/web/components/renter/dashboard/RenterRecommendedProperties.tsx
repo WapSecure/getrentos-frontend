@@ -75,7 +75,7 @@ export const RenterRecommendedProperties = () => {
           </p>
         </div>
         <Button href={ROUTES.RENTER_DISCOVER} variant="ghost" size="sm" className="gap-1">
-          View All
+          View all
           <Eye className="w-3 h-3" />
         </Button>
       </div>
@@ -170,7 +170,7 @@ export const RenterRecommendedProperties = () => {
                     variant="outline"
                     href={buildRoute.renterPropertyDetail(property.id)}
                   >
-                    View Details
+                    View details
                   </Button>
                 </div>
               </div>

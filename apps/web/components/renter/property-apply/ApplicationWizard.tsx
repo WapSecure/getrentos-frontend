@@ -22,6 +22,7 @@ import { nameOnly } from '@/lib/validations/input';
 import { renterService, type RenterDocument } from '@/services/renterService';
 import { renterKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
+import { formatDate } from '@/lib/format';
 
 /** A line of help under a document, where the name alone doesn't say what to bring. */
 const DOCUMENT_HINTS: Record<string, string> = {
@@ -54,6 +55,8 @@ interface ApplicationWizardProps {
   initialData: ApplicationFormData;
   onSubmit: (data: ApplicationFormData) => void;
   isSubmitting?: boolean;
+  /** Why the last submission was refused, shown on the review step. */
+  submitError?: string | null;
 }
 
 const steps = [
@@ -76,6 +79,10 @@ const FIELD_IDS = {
   phone: 'apply-phone',
   currentAddress: 'apply-current-address',
   monthlyIncome: 'apply-monthly-income',
+  nextOfKinName: 'apply-next-of-kin-name',
+  nextOfKinPhone: 'apply-next-of-kin-phone',
+  referenceName: 'apply-reference-name',
+  referencePhone: 'apply-reference-phone',
 } as const;
 
 const documentUploadId = (index: number) => `apply-document-${index}`;
@@ -102,6 +109,7 @@ export const ApplicationWizard = ({
   initialData,
   onSubmit,
   isSubmitting = false,
+  submitError = null,
 }: ApplicationWizardProps) => {
   const [stepIndex, setStepIndex] = useState(0);
   const [data, setData] = useState<ApplicationFormData>(initialData);
@@ -223,6 +231,40 @@ export const ApplicationWizard = ({
     // same step offers "Student" as an employment status, so only income is required.
     if (index === 1 && !data.monthlyIncome.trim())
       errors.push([FIELD_IDS.monthlyIncome, 'Enter your monthly income.']);
+    // Next of kin and reference are optional as a whole, but a half-filled one
+    // is refused by the API (a reference must have a phone number), and that
+    // refusal used to surface on the review step with nothing highlighted.
+    if (index === 1) {
+      const contact = (
+        who: string,
+        name: string,
+        phone: string,
+        nameId: string,
+        phoneId: string
+      ) => {
+        if (!name.trim() && !phone.trim()) return;
+        if (!name.trim())
+          errors.push([nameId, `Enter your ${who}'s name, or clear their phone number.`]);
+        if (!phone.trim())
+          errors.push([phoneId, `Enter a phone number for your ${who}, or clear their name.`]);
+        else if (!isValidPhone(phone))
+          errors.push([phoneId, `Enter a phone number with at least 10 digits for your ${who}.`]);
+      };
+      contact(
+        'next of kin',
+        data.nextOfKinName,
+        data.nextOfKinPhone,
+        FIELD_IDS.nextOfKinName,
+        FIELD_IDS.nextOfKinPhone
+      );
+      contact(
+        'reference',
+        data.referenceName,
+        data.referencePhone,
+        FIELD_IDS.referenceName,
+        FIELD_IDS.referencePhone
+      );
+    }
     if (index === 2 && missingDocuments.length > 0)
       errors.push([
         documentUploadId(data.documents.indexOf(missingDocuments[0])),
@@ -313,6 +355,11 @@ export const ApplicationWizard = ({
             We kept the application you were filling in when your session ended. Check it and carry
             on.
           </p>
+        )}
+        {submitError && stepIndex === steps.length - 1 && (
+          <Alert variant="danger" title="Not sent yet">
+            {submitError}
+          </Alert>
         )}
         {showErrors && currentErrors.length > 0 && (
           <Alert variant="danger" title="Before you continue">
@@ -435,14 +482,22 @@ export const ApplicationWizard = ({
               Next of kin (optional)
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Full name">
+              <Field
+                label="Full name"
+                htmlFor={FIELD_IDS.nextOfKinName}
+                error={errorFor(FIELD_IDS.nextOfKinName)}
+              >
                 <Input
                   value={data.nextOfKinName}
                   onChange={(e) => update('nextOfKinName', e.target.value)}
                   placeholder="e.g. Ngozi Okoro"
                 />
               </Field>
-              <Field label="Phone number">
+              <Field
+                label="Phone number"
+                htmlFor={FIELD_IDS.nextOfKinPhone}
+                error={errorFor(FIELD_IDS.nextOfKinPhone)}
+              >
                 <Input
                   type="tel"
                   value={data.nextOfKinPhone}
@@ -463,14 +518,22 @@ export const ApplicationWizard = ({
               Reference (optional)
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Full name">
+              <Field
+                label="Full name"
+                htmlFor={FIELD_IDS.referenceName}
+                error={errorFor(FIELD_IDS.referenceName)}
+              >
                 <Input
                   value={data.referenceName}
                   onChange={(e) => update('referenceName', e.target.value)}
                   placeholder="e.g. Previous landlord"
                 />
               </Field>
-              <Field label="Phone number">
+              <Field
+                label="Phone number"
+                htmlFor={FIELD_IDS.referencePhone}
+                error={errorFor(FIELD_IDS.referencePhone)}
+              >
                 <Input
                   type="tel"
                   value={data.referencePhone}
@@ -623,7 +686,10 @@ export const ApplicationWizard = ({
                     ? nairaFormatter.format(Number(data.monthlyIncome))
                     : '',
                 },
-                { label: 'Move-in / Term', value: `${data.moveInDate || '—'} · ${data.leaseTerm}` },
+                {
+                  label: 'Move-in / Term',
+                  value: `${data.moveInDate ? formatDate(data.moveInDate) : '—'} · ${data.leaseTerm}`,
+                },
                 {
                   label: 'Documents ready',
                   value: `${data.documents.filter((d) => d.uploaded).length}/${data.documents.length}`,

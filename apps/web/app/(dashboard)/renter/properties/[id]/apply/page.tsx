@@ -21,7 +21,7 @@ import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import type { Property } from '@/types/renter';
 import { renterService } from '@/services/renterService';
 import { kycService } from '@/services/kycService';
-import { unwrap } from '@/lib/apiHelpers';
+import { unwrap, ApiError } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 
@@ -70,6 +70,26 @@ const buildInitialData = (
   ],
 });
 
+/** Turns the API's refusal into a sentence that says what to change and where. */
+function refusalMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status === 400) {
+    const body = error.details as { message?: string | string[] } | undefined;
+    const messages = Array.isArray(body?.message)
+      ? body.message
+      : body?.message
+        ? [body.message]
+        : [];
+    if (messages.some((m) => /^references\./.test(m)))
+      return 'Your reference needs a name and a phone number. Go back to Employment and complete them, or clear the reference.';
+    if (messages.some((m) => /^nextOfKin/.test(m)))
+      return 'Your next of kin needs a name and a phone number. Go back to Employment and complete them, or clear the entry.';
+    if (messages.length) return `The application was not accepted: ${messages[0]}.`;
+  }
+  return error instanceof Error && error.message
+    ? error.message
+    : 'The application could not be sent. Please try again.';
+}
+
 export default function PropertyApplyPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -95,9 +115,13 @@ export default function PropertyApplyPage() {
     kycQuery.data?.identityVerified ?? kycQuery.data?.identity?.status === 'APPROVED';
   const verificationHref = `${ROUTES.RENTER_SETTINGS}?tab=verification`;
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const submitMutation = useMutation({
     mutationFn: (data: ApplicationFormData) =>
       unwrap(renterService.submitApplication(property?.id ?? '', data)),
+    onMutate: () => setSubmitError(null),
+    // The API's validation messages name DTO fields; say which step to fix.
+    onError: (error) => setSubmitError(refusalMessage(error)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: renterKeys.applications });
       queryClient.invalidateQueries({ queryKey: renterKeys.dashboardStats });
@@ -167,10 +191,10 @@ export default function PropertyApplyPage() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
           <Button variant="primary" onClick={() => router.push(ROUTES.RENTER_APPLICATIONS)}>
-            View My Applications
+            View my applications
           </Button>
           <Button variant="outline" onClick={() => router.push(ROUTES.RENTER_DISCOVER)}>
-            Keep Browsing
+            Keep browsing
           </Button>
         </div>
       </div>
@@ -203,6 +227,7 @@ export default function PropertyApplyPage() {
               <VerificationRequiredNotice error={submitMutation.error} href={verificationHref} />
             )}
             <ApplicationWizard
+              submitError={submitError}
               property={property}
               initialData={buildInitialData(property, user)}
               onSubmit={handleSubmit}

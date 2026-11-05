@@ -157,6 +157,16 @@ export default function LandlordApplicationsPage() {
         onApprove={handleApprove}
         onReject={handleReject}
         onRequestInfo={handleRequestInfo}
+        unitHeldBy={
+          selectedApplication
+            ? (applications.find(
+                (a) =>
+                  a.id !== selectedApplication.id &&
+                  a.unitId === selectedApplication.unitId &&
+                  a.status === 'approved'
+              )?.applicantName ?? null)
+            : null
+        }
       />
 
       <RequestInfoDialog
