@@ -90,7 +90,7 @@ export const ApplicationNotes = ({
           onClick={() => setIsAdding(true)}
           icon={<Plus className="w-3 h-3" />}
         >
-          Add Note
+          Add note
         </Button>
       </div>
 

@@ -50,7 +50,7 @@ export default function BuyerReviewsPage() {
           </div>
         </div>
         <Button href={ROUTES.BUYER_TRANSACTIONS} variant="outline" size="sm">
-          View Transactions
+          View transactions
         </Button>
       </div>
 

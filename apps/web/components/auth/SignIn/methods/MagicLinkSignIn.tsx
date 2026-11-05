@@ -57,7 +57,7 @@ export const MagicLinkSignIn = ({ isLoading, setIsLoading, showToast }: MagicLin
     <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-foreground mb-1.5">
-          Email Address
+          Email address
         </label>
         <div className="relative">
           <LegacyInput

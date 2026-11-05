@@ -170,7 +170,7 @@ const EditOwnerPropertyForm = ({
   return (
     <>
       <div className="p-4 border-b border-border">
-        <DialogTitle className="font-semibold text-foreground">Edit Property</DialogTitle>
+        <DialogTitle className="font-semibold text-foreground">Edit property</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Update your property&apos;s core details
         </DialogDescription>
@@ -227,7 +227,7 @@ const EditOwnerPropertyForm = ({
         </Field>
 
         <div>
-          <p className="mb-1 text-sm font-medium text-foreground">Property Photo</p>
+          <p className="mb-1 text-sm font-medium text-foreground">Property photo</p>
           <div className="flex items-center gap-3">
             <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
               {previewUrl ? (
@@ -274,7 +274,7 @@ const EditOwnerPropertyForm = ({
         </div>
 
         <div>
-          <p className="mb-1 text-sm font-medium text-foreground">Video Tour</p>
+          <p className="mb-1 text-sm font-medium text-foreground">Video tour</p>
           {videoKey && videoPreview ? (
             <video
               src={videoPreview}

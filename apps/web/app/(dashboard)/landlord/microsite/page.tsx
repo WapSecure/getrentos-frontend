@@ -223,7 +223,7 @@ export default function LandlordMicrositePage() {
               isLoading={isSaving}
               disabled={!slugIsValid}
             >
-              Save Changes
+              Save changes
             </Button>
           </div>
         </Card>

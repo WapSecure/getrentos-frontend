@@ -196,7 +196,7 @@ export const CreateListingModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg sm:p-0">
         <div className="p-4 pr-12 border-b border-border shrink-0">
-          <DialogTitle className="font-semibold text-foreground">Add Listing</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Add listing</DialogTitle>
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1">

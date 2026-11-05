@@ -84,7 +84,7 @@ const ProfileSettingsForm = ({
             />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Profile Photo</p>
+            <p className="text-sm font-medium text-foreground">Profile photo</p>
             <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max 5MB.</p>
           </div>
         </div>

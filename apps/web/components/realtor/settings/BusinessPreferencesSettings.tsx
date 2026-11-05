@@ -69,7 +69,7 @@ export const BusinessPreferencesSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Business Preferences</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Business preferences</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Defaults used across your listings and deals
       </p>

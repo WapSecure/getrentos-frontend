@@ -40,7 +40,7 @@ export const ForgotPasswordLeftContent = () => {
               <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary">
                 <Key className="w-5 h-5 text-primary" />
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Secure Reset Process</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Secure reset process</h3>
                   <p className="text-xs text-muted-foreground">
                     Multi-step verification ensures security
                   </p>
@@ -49,7 +49,7 @@ export const ForgotPasswordLeftContent = () => {
               <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary">
                 <Lock className="w-5 h-5 text-primary" />
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Create Strong Password</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Create strong password</h3>
                   <p className="text-xs text-muted-foreground">
                     Use a unique password you haven&apos;t used before
                   </p>

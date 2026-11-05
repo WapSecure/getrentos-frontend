@@ -161,7 +161,7 @@ export const OwnerVerificationStatusModal = ({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="flex max-h-[90vh] max-w-md flex-col overflow-hidden p-0">
         <div className="shrink-0 border-b border-border p-4 pr-12">
-          <DialogTitle className="font-semibold text-foreground">Verification Status</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Verification status</DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
             {property.name}
           </DialogDescription>

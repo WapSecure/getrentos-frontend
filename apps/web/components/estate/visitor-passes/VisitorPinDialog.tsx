@@ -28,7 +28,7 @@ export const VisitorPinDialog = ({ pass, onClose }: VisitorPinDialogProps) => {
               <KeyRound className="w-6 h-6" aria-hidden="true" />
             </div>
             <DialogTitle className="text-lg font-semibold text-foreground mb-1">
-              Visitor Pass Issued
+              Visitor pass issued
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground mb-4">
               For {pass.visitorName}: {pass.unitLabel}

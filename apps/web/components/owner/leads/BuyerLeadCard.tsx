@@ -83,7 +83,7 @@ export const BuyerLeadCard = ({ lead, delay = 0, onMessage }: BuyerLeadCardProps
 
         <div className="grid grid-cols-2 gap-3 mt-4">
           <div>
-            <p className="text-xs text-muted-foreground">Trust Score</p>
+            <p className="text-xs text-muted-foreground">Trust score</p>
             <p className="text-sm font-bold text-primary">{lead.trustScore}</p>
           </div>
           <div>

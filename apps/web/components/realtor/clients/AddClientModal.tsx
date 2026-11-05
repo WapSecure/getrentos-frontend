@@ -119,7 +119,7 @@ export const AddClientModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="p-0 sm:max-w-sm sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Add Client</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Add client</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             Add an owner or landlord by their GetRentos account email
           </DialogDescription>

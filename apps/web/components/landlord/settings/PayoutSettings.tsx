@@ -57,7 +57,7 @@ export const PayoutSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Payout Account</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Payout account</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Where rent released by GetRentos Payment Protection is sent: transfers run through Paystack.
       </p>

@@ -70,7 +70,7 @@ export const PollCard = ({ poll, onClose, onVote, isUpdating }: PollCardProps) =
 
       {onClose && poll.status === 'open' && (
         <Button variant="ghost" size="sm" className="mt-3" disabled={isUpdating} onClick={onClose}>
-          Close Poll
+          Close poll
         </Button>
       )}
     </div>

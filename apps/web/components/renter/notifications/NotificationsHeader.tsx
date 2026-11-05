@@ -28,7 +28,7 @@ export const NotificationsHeader = ({
           {unreadCount > 0 && (
             <Button variant="outline" className="gap-2" size="sm" onClick={onMarkAllAsRead}>
               <CheckCheck className="w-4 h-4" />
-              Mark All Read
+              Mark all read
             </Button>
           )}
           {totalCount > 0 && (
@@ -39,7 +39,7 @@ export const NotificationsHeader = ({
               onClick={onClearAll}
             >
               <Trash2 className="w-4 h-4" />
-              Clear All
+              Clear all
             </Button>
           )}
         </>

@@ -55,7 +55,7 @@ export const DocumentExpiryAlerts = ({ documents, summary }: DocumentExpiryAlert
           <Badge>+{needsAttention - visibleDocumentCount} more</Badge>
         )}
         <Button size="sm" variant="ghost" className="text-xs">
-          Review All
+          Review all
         </Button>
       </div>
     </Alert>

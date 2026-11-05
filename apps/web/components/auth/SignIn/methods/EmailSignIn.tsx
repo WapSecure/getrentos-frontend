@@ -266,7 +266,7 @@ export const EmailSignIn = ({
             isLoading={isLoading || loginMutation.isPending}
           >
             <LogIn className="w-4 h-4" />
-            Sign In
+            Sign in
           </Button>
         </>
       )}

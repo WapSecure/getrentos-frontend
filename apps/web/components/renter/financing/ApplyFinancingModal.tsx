@@ -147,7 +147,7 @@ export const ApplyFinancingModal = ({
                 isLoading={isSubmitting}
                 icon={<Zap className="h-3.5 w-3.5" />}
               >
-                Submit Application
+                Submit application
               </Button>
             </div>
           </div>

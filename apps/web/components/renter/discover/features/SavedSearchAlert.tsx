@@ -154,7 +154,7 @@ export const SavedSearchAlert = ({ currentFilters, onApplyFilters }: SavedSearch
               isLoading={saveMutation.isPending}
               icon={<Save className="w-3 h-3" />}
             >
-              Save Search
+              Save search
             </Button>
           </div>
 

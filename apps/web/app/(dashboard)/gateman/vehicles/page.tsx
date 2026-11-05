@@ -224,7 +224,7 @@ export default function GatemanVehiclesPage() {
             logEntry.mutate({});
           }}
         >
-          Log Vehicle
+          Log vehicle
         </Button>
 
         {refusal && (

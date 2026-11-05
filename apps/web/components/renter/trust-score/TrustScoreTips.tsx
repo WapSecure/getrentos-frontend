@@ -17,7 +17,7 @@ export const TrustScoreTips = () => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Lightbulb className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Trust Score Tips</h3>
+          <h3 className="font-semibold text-foreground">Trust score tips</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Daily tips to improve your score</p>
       </div>

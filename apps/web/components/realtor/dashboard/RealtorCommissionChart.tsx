@@ -54,7 +54,7 @@ export const RealtorCommissionChart = () => {
     <Card className="p-5">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-semibold text-foreground">Commission Trend</h3>
+          <h3 className="font-semibold text-foreground">Commission trend</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             Monthly commission earned, last 6 months
           </p>

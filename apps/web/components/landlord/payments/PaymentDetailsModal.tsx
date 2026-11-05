@@ -30,7 +30,7 @@ export const PaymentDetailsModal = ({ payment, onClose }: PaymentDetailsModalPro
       <DialogContent padded={false}>
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Payment Details</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Payment details</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               {payment.tenantName}: {payment.unitName}
             </DialogDescription>

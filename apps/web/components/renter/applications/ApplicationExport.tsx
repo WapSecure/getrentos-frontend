@@ -81,7 +81,7 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
     <Dialog open={isOpen} onOpenChange={(next) => !next && onClose()}>
       <DialogContent padded={false}>
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Export Applications</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Export applications</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {applications.length} applications to export
           </DialogDescription>

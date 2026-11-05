@@ -173,7 +173,7 @@ export const ApplicationDetailsModal = ({
               <div className="space-y-6">
                 {/* Property Info */}
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-3">Property Details</h4>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Property details</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-secondary">
                       <p className="text-xs text-muted-foreground">Address</p>
@@ -189,7 +189,7 @@ export const ApplicationDetailsModal = ({
                       </p>
                     </div>
                     <div className="p-3 rounded-lg bg-secondary">
-                      <p className="text-xs text-muted-foreground">Property Details</p>
+                      <p className="text-xs text-muted-foreground">Property details</p>
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-sm text-foreground">
                           {pluralize(application.bedrooms, 'bed')}
@@ -201,7 +201,7 @@ export const ApplicationDetailsModal = ({
                       </div>
                     </div>
                     <div className="p-3 rounded-lg bg-secondary">
-                      <p className="text-xs text-muted-foreground">Lease Details</p>
+                      <p className="text-xs text-muted-foreground">Lease details</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm text-foreground">
@@ -217,7 +217,7 @@ export const ApplicationDetailsModal = ({
 
                 {/* Landlord Info */}
                 <div>
-                  <h4 className="text-sm font-medium text-foreground mb-3">Landlord Information</h4>
+                  <h4 className="text-sm font-medium text-foreground mb-3">Landlord information</h4>
                   <div className="p-3 rounded-lg bg-secondary">
                     <div className="flex items-start gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
@@ -304,7 +304,7 @@ export const ApplicationDetailsModal = ({
                 {/* Notes */}
                 {application.applicationNotes && (
                   <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Application Notes</h4>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Application notes</h4>
                     <p className="text-sm text-muted-foreground p-3 rounded-lg bg-secondary">
                       {application.applicationNotes}
                     </p>

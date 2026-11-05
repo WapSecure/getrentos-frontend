@@ -139,7 +139,7 @@ export default function LandlordVendorsPage() {
           </p>
         </div>
         <Button variant="primary" onClick={openAddForm} icon={<Plus className="w-4 h-4" />}>
-          Add Vendor
+          Add vendor
         </Button>
       </div>
 

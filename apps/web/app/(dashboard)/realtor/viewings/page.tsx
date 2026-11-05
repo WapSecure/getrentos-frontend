@@ -94,7 +94,7 @@ function RealtorViewingsPageContent() {
           icon={<Plus className="w-4 h-4" />}
           onClick={() => setIsModalOpen(true)}
         >
-          Schedule Viewing
+          Schedule viewing
         </Button>
       </div>
 
