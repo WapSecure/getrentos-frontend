@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { X, Plus, Trash2, Camera, Check } from 'lucide-react';
 import {
   Alert,
@@ -63,7 +64,58 @@ export const NewInspectionModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const [loadedNote, setLoadedNote] = useState<string | null>(null);
+  const [hydratedFor, setHydratedFor] = useState<string | null>(null);
+
   const selectedTask = tasks.find((t) => t.id === taskId);
+
+  // Photos are saved to the task's draft as soon as they are taken (often on the
+  // phone), so picking a task must bring them in; otherwise the web form looks
+  // empty and "Draft the report" has nothing to read. Rooms come from the saved
+  // draft, or from the photos' room labels when the draft has none yet.
+  const saved = useQuery({
+    queryKey: ['agent', 'inspection-draft', taskId],
+    queryFn: () => unwrap(agentService.getInspection(taskId)),
+    enabled: isOpen && Boolean(taskId),
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+  if (isOpen && taskId && hydratedFor !== taskId && !saved.isFetching) {
+    if (saved.isError) {
+      setHydratedFor(taskId);
+      setPhotoError('Could not load the photos already on this task.');
+    } else if (saved.isSuccess) {
+      setHydratedFor(taskId);
+      const draft = saved.data;
+      const existing = draft?.photos ?? [];
+      setPhotos(existing);
+      if (draft) {
+        const fromDraft = (draft.rooms ?? []).filter((r) => r.room?.trim());
+        const names = [...new Set(existing.map((p) => p.room.trim()).filter(Boolean))];
+        const nextRooms: InspectionRoomEntry[] = fromDraft.length
+          ? fromDraft.map((r) => ({ ...emptyRoom, ...r, notes: r.notes ?? '' }))
+          : names.map((room) => ({ ...emptyRoom, room }));
+        if (nextRooms.length) setRooms(nextRooms);
+        if (draft.type && draft.type !== 'other') setType(draft.type);
+        if (draft.clientName && draft.clientName !== 'Property client') {
+          setClientName(draft.clientName);
+        }
+      }
+      setLoadedNote(
+        existing.length
+          ? `Loaded ${existing.length} photo${existing.length === 1 ? '' : 's'} already attached to this task.`
+          : null
+      );
+    }
+  }
+
+  const selectTask = (id: string) => {
+    setTaskId(id);
+    setPhotos([]);
+    setLoadedNote(null);
+    setPhotoError(null);
+  };
 
   const handleClose = () => {
     setTaskId(defaultTaskId || '');
@@ -71,6 +123,8 @@ export const NewInspectionModal = ({
     setClientName('');
     setRooms([{ ...emptyRoom }]);
     setPhotos([]);
+    setLoadedNote(null);
+    setHydratedFor(null);
     setUploadingRoom(null);
     setPhotoError(null);
     setSubmitError(null);
@@ -163,7 +217,7 @@ export const NewInspectionModal = ({
           <Field label="Task" required>
             <Select
               value={taskId}
-              onValueChange={setTaskId}
+              onValueChange={selectTask}
               placeholder="Select an inspection task"
               options={tasks.map((task) => ({
                 value: task.id,
@@ -300,6 +354,11 @@ export const NewInspectionModal = ({
               ))}
             </div>
             {photoError && <p className="mt-2 text-xs text-destructive">{photoError}</p>}
+            {loadedNote && (
+              <p className="mt-2 text-xs text-muted-foreground" role="status">
+                {loadedNote}
+              </p>
+            )}
             <div className="mt-3">
               <InspectionDraftPanel
                 taskId={taskId}
