@@ -269,9 +269,9 @@ function CheckRunner({
     onSuccess: () => qc.invalidateQueries({ queryKey: qk.trust.consents }),
     onError: (e) => toast.show(errorMessage(e, 'Could not record your consent.'), 'error'),
   });
+  // The numbered line above already names the check, so no title or card here.
   return (
-    <Card style={{ gap: spacing.md }}>
-      <Text variant="bodyStrong">{RUNNER_TITLE[kind]}</Text>
+    <View style={{ gap: spacing.md }}>
       {consentType && !consented ? (
         <View style={{ gap: spacing.sm }}>
           <Text variant="callout" color="mutedForeground">
@@ -296,7 +296,7 @@ function CheckRunner({
       ) : (
         <DocumentForm verificationId={verificationId} onDone={onDone} />
       )}
-    </Card>
+    </View>
   );
 }
 
