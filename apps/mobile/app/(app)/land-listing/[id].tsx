@@ -38,6 +38,8 @@ import { PropertyGallery, toGallery } from '@/components/property/PropertyGaller
 import { formatDate } from '@/lib/format';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { accountRolesApi } from '@/lib/api/accountRoles';
+import { RequestInspection, RequestTour } from '@/components/land/LandRequests';
+import { Sheet } from '@/components/Sheet';
 import { ApiError } from '@/lib/api/client';
 import { useAskSeller } from '@/hooks/useAskSeller';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
@@ -79,6 +81,7 @@ export default function LandListingDetail() {
   const isBuyer = workspaces.includes('buyer');
   const [offerOpen, setOfferOpen] = useState(false);
   const [viewingOpen, setViewingOpen] = useState(false);
+  const [request, setRequest] = useState<'tour' | 'inspection' | null>(null);
   const ask = useAskSeller();
   const addBuyer = useMutation({
     mutationFn: () => accountRolesApi.add('buyer'),
@@ -332,6 +335,22 @@ export default function LandListingDetail() {
                     onPress={() => setOfferOpen(true)}
                   />
                 </View>
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Button
+                    label="Live video tour"
+                    size="sm"
+                    variant="ghost"
+                    style={{ flex: 1 }}
+                    onPress={() => setRequest('tour')}
+                  />
+                  <Button
+                    label="Independent inspection"
+                    size="sm"
+                    variant="ghost"
+                    style={{ flex: 1 }}
+                    onPress={() => setRequest('inspection')}
+                  />
+                </View>
                 <Button
                   label="Ask the seller a question"
                   loadingLabel="Opening chat…"
@@ -357,6 +376,29 @@ export default function LandListingDetail() {
             )}
           </View>
 
+          <Sheet
+            open={!!request}
+            onClose={() => setRequest(null)}
+            title={
+              request === 'tour'
+                ? 'Ask for a live video tour'
+                : 'Commission an independent inspection'
+            }
+          >
+            {request === 'tour' ? (
+              <RequestTour
+                target={{ listingId: listing.id }}
+                landName={listing.title}
+                onDone={() => setRequest(null)}
+              />
+            ) : request === 'inspection' ? (
+              <RequestInspection
+                target={{ listingId: listing.id }}
+                landName={listing.title}
+                onDone={() => setRequest(null)}
+              />
+            ) : null}
+          </Sheet>
           <RequestViewingSheet
             open={viewingOpen}
             onClose={() => setViewingOpen(false)}

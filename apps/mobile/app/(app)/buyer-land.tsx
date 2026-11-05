@@ -104,6 +104,26 @@ export default function BuyerLand() {
                   </Card>
                 </PressableScale>
               </View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                <Button
+                  label="Video tours"
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => router.push('/(app)/buyer-land-tours')}
+                />
+                <Button
+                  label="Inspections"
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => router.push('/(app)/buyer-land-inspections')}
+                />
+                <Button
+                  label="Representatives"
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => router.push('/(app)/buyer-land-representatives')}
+                />
+              </View>
               <ChipSelect
                 options={[
                   { value: ALL, label: 'All purchases' },

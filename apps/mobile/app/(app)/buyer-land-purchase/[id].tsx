@@ -43,6 +43,7 @@ import { formatDate, formatNaira } from '@/lib/format';
 import { PDF_MIME, shareDownloadedFile } from '@/lib/shareFile';
 import { Sheet } from '@/components/Sheet';
 import { BuyerConditions, BuyerMilestones, HeldNote } from '@/components/land/BuyerConveyance';
+import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -192,6 +193,7 @@ export default function BuyerLandPurchase() {
             </Card>
           ) : tab === 'conveyance' ? (
             <View style={{ gap: spacing.md }}>
+              <CoApprovalCard deal={{ kind: 'purchase', id }} />
               <HeldNote text="GetRentos holds your payments. Each step you confirm releases its share to the developer, never more than you have paid. Confirm in order, and only once you hold the document or have been shown the plot. Allocation, the deed and the survey in your name come after full payment." />
               <Card>
                 <BuyerMilestones
