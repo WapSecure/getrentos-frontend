@@ -332,7 +332,7 @@ export const buyerService = {
     const form = new FormData();
     form.append('file', file);
     form.append('name', name);
-    form.append('type', type);
+    form.append('type', type.toUpperCase());
     if (offerId) form.append('offerId', offerId);
     if (transactionId) form.append('transactionId', transactionId);
     return safeCall(() => authFetch('/buyer/documents', { method: 'POST', body: form }));

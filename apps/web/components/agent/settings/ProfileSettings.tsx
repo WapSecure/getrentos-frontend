@@ -1,29 +1,60 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInitials } from '@/lib/format';
-import { Button, Field, Input, SaveButton, Select } from '@getrentos/ui';
+import { Button, Field, Input, useToast } from '@getrentos/ui';
 import { nameOnly } from '@/lib/validations/input';
 import { ChangeEmailButton } from '@/components/shared/security/ChangeEmailButton';
+import { agentService } from '@/services/agentService';
+import { unwrap } from '@/lib/apiHelpers';
+import { agentKeys } from '@/lib/queryKeys';
 
 interface ProfileSettingsProps {
   user: { fullName: string; email: string } | null;
 }
 
+/** The agent's own name and phone, saved to their account (email changes are verified separately). */
 export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
-  const [fullName, setFullName] = useState(user?.fullName || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('+234 803 000 0000');
-  const [vehicleType, setVehicleType] = useState('Car');
+  const { data: profile } = useQuery({
+    queryKey: agentKeys.profile,
+    queryFn: () => unwrap(agentService.getProfile()),
+  });
 
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  return (
+    <ProfileForm
+      key={profile ? 'loaded' : 'initial'}
+      initial={{
+        fullName: profile?.legalName ?? user?.fullName ?? '',
+        email: profile?.email ?? user?.email ?? '',
+        phone: profile?.phone ?? '',
+      }}
+    />
+  );
+};
 
-  const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setPhotoUrl(URL.createObjectURL(file));
-    e.target.value = '';
-  };
+const ProfileForm = ({
+  initial,
+}: {
+  initial: { fullName: string; email: string; phone: string };
+}) => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [fullName, setFullName] = useState(initial.fullName);
+  const [email, setEmail] = useState(initial.email);
+  const [phone, setPhone] = useState(initial.phone);
+
+  const save = useMutation({
+    mutationFn: () =>
+      unwrap(agentService.updateProfile({ fullName: fullName.trim(), phone: phone.trim() })),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: agentKeys.profile });
+      toast.success('Profile saved.');
+    },
+    onError: (error: Error) => toast.error(error.message || 'Could not save your profile.'),
+  });
+
+  const dirty = fullName.trim() !== initial.fullName || phone.trim() !== initial.phone;
 
   return (
     <div>
@@ -31,24 +62,9 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
       <p className="text-sm text-muted-foreground mb-6">Manage your personal information</p>
 
       <div className="flex items-center gap-4 mb-6">
-        {photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={photoUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
-            {getInitials(fullName || 'User')}
-          </div>
-        )}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handlePhotoSelected}
-        />
-        <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-          Change Photo
-        </Button>
+        <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl">
+          {getInitials(fullName || 'User')}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -65,22 +81,19 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone Number">
+        <Field label="Phone Number" hint="A new number has to be verified again.">
           <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        </Field>
-        <Field label="Vehicle Type">
-          <Select
-            value={vehicleType}
-            onValueChange={setVehicleType}
-            options={['Car', 'Motorcycle', 'Public Transport', 'None'].map((option) => ({
-              value: option,
-              label: option,
-            }))}
-          />
         </Field>
       </div>
 
-      <SaveButton label="Save Changes" className="mt-6" />
+      <Button
+        className="mt-6"
+        onClick={() => save.mutate()}
+        disabled={!dirty || fullName.trim().length < 2}
+        isLoading={save.isPending}
+      >
+        Save Changes
+      </Button>
     </div>
   );
 };

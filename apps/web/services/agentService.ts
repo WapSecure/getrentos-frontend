@@ -284,6 +284,9 @@ export const agentService = {
   getProfile: () =>
     safeCall(() =>
       authFetch<{
+        legalName?: string | null;
+        email?: string | null;
+        phone?: string | null;
         trustScore: number;
         isVerified: boolean;
         completedTasks: number;
@@ -291,6 +294,8 @@ export const agentService = {
         reviewCount: number;
       }>('/agent/profile')
     ),
+  updateProfile: (data: { fullName?: string; phone?: string }) =>
+    safeCall(() => authFetch('/agent/profile', { method: 'PUT', body: JSON.stringify(data) })),
   getTrustProfile: () => safeCall(() => authFetch<TrustProfile>('/agent/trust-profile')),
   getReviews: (options: AgentPageOptions = {}) =>
     safeCall(() =>

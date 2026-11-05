@@ -1363,6 +1363,12 @@ export const landlordService = {
     );
   },
 
+  async completeViewingRequest(id: string): Promise<ApiResponse<LandlordViewingRequest>> {
+    return safeCall(() =>
+      authFetch(`/landlord/viewing-requests/${id}/complete`, { method: 'PATCH' })
+    );
+  },
+
   // ---- Offers (for-sale listings the landlord owns or manages) ----
   async listOffers(
     params: { page?: number; pageSize?: number; status?: string; search?: string } = {}
