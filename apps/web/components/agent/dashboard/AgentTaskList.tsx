@@ -20,15 +20,15 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
   return (
     <Card>
       <CardHeader className="border-b border-border pb-4">
-        <CardTitle>Today&apos;s tasks</CardTitle>
-        <CardDescription>Your assigned inspections and verification visits</CardDescription>
+        <CardTitle as="h2">Upcoming tasks</CardTitle>
+        <CardDescription>Your next inspections and visits, soonest first</CardDescription>
       </CardHeader>
 
       <div className="divide-y divide-border">
         {tasks.length === 0 ? (
           <EmptyState
             icon={ClipboardCheck}
-            title="No tasks scheduled for today"
+            title="No upcoming tasks"
             size="compact"
             bare
           />
