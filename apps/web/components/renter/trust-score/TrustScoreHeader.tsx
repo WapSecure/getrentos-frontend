@@ -1,7 +1,7 @@
 'use client';
 
 import { Shield, TrendingUp } from 'lucide-react';
-import { Badge, Button, type BadgeVariant } from '@getrentos/ui';
+import { Badge, Button, PageHeader, type BadgeVariant } from '@getrentos/ui';
 import { trustBand } from '@/lib/trustScore';
 
 interface TrustScoreHeaderProps {
@@ -21,23 +21,25 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
 
   return (
     <div className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold text-foreground">Trust score</h1>
-            <Badge variant={bandVariant} icon={<Shield className="w-4 h-4" aria-hidden="true" />}>
-              {scoreInfo.label}
-            </Badge>
-          </div>
-          <p className="text-muted-foreground mt-1">
-            Your trust score determines your credibility on the platform
-          </p>
-        </div>
-
-        <Button variant="primary" size="sm" icon={<TrendingUp className="w-4 h-4" />}>
-          Improve score
-        </Button>
-      </div>
+      <PageHeader
+        title="Trust score"
+        description="Your trust score determines your credibility on the platform"
+        meta={
+          <Badge variant={bandVariant} icon={<Shield className="w-4 h-4" aria-hidden="true" />}>
+            {scoreInfo.label}
+          </Badge>
+        }
+        actions={
+          <Button
+            variant="primary"
+            size="sm"
+            href="/renter/trust-score?tab=verification"
+            icon={<TrendingUp className="w-4 h-4" />}
+          >
+            Improve score
+          </Button>
+        }
+      />
 
       <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
         <div className="flex items-center gap-3">

@@ -18,6 +18,8 @@ import type { CreateMaintenanceRequestInput, MaintenanceCategory } from '@/types
 
 interface QuickReportProps {
   onQuickReport: (data: CreateMaintenanceRequestInput) => Promise<boolean>;
+  /** Opens the full report form for anything the quick options don't cover. */
+  onCustomReport: () => void;
 }
 
 const quickOptions: {
@@ -57,7 +59,7 @@ const quickOptions: {
   },
 ];
 
-export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
+export const QuickReport = ({ onQuickReport, onCustomReport }: QuickReportProps) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [pendingOptionId, setPendingOptionId] = useState<string | null>(null);
 
@@ -136,7 +138,7 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
           );
         })}
 
-        <Button variant="ghost" size="sm" fullWidth className="gap-1 mt-2">
+        <Button variant="ghost" size="sm" fullWidth className="gap-1 mt-2" onClick={onCustomReport}>
           <Plus className="w-3 h-3" />
           Custom report
         </Button>

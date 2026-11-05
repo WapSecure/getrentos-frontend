@@ -246,7 +246,10 @@ export default function MaintenancePage() {
             />
           </div>
           <div className="space-y-6">
-            <QuickReport onQuickReport={handleReportIssue} />
+            <QuickReport
+              onQuickReport={handleReportIssue}
+              onCustomReport={() => setShowReportModal(true)}
+            />
             {summary && <MaintenanceAnalytics summary={summary} />}
             <MaintenanceChecklist />
             <ScheduledMaintenance

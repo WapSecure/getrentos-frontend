@@ -13,9 +13,15 @@ interface Document {
 interface DocumentExpiryAlertsProps {
   documents: Document[];
   summary?: { expiring: number; expired: number };
+  /** Filters the list down to the documents that need attention. */
+  onReview?: () => void;
 }
 
-export const DocumentExpiryAlerts = ({ documents, summary }: DocumentExpiryAlertsProps) => {
+export const DocumentExpiryAlerts = ({
+  documents,
+  summary,
+  onReview,
+}: DocumentExpiryAlertsProps) => {
   if (!summary) return null;
 
   const expiringDocsOnPage = documents.filter(
@@ -54,9 +60,11 @@ export const DocumentExpiryAlerts = ({ documents, summary }: DocumentExpiryAlert
         {needsAttention > visibleDocumentCount && (
           <Badge>+{needsAttention - visibleDocumentCount} more</Badge>
         )}
-        <Button size="sm" variant="ghost" className="text-xs">
-          Review All
-        </Button>
+        {onReview && (
+          <Button size="sm" variant="ghost" className="text-xs" onClick={onReview}>
+            Review all
+          </Button>
+        )}
       </div>
     </Alert>
   );

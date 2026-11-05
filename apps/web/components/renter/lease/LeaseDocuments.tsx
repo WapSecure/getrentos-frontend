@@ -81,7 +81,13 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
         </div>
 
         <div className="p-3 border-t border-border">
-          <Button variant="ghost" size="sm" fullWidth className="gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            fullWidth
+            className="gap-1"
+            href="/renter/home?tab=documents"
+          >
             View all documents
           </Button>
         </div>
