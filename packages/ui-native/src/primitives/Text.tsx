@@ -1,6 +1,6 @@
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from 'react-native';
 import type { TypographyVariant } from '@getrentos/tokens';
-import { useTheme } from '../theme';
+import { useTheme, withFont } from '../theme';
 
 type ColorToken =
   | 'foreground'
@@ -51,7 +51,7 @@ export function Text({
       maxFontSizeMultiplier={2}
       accessibilityRole={headingLevel ? 'header' : rest.accessibilityRole}
       {...(headingLevel ? { 'aria-level': headingLevel } : {})}
-      style={[
+      style={withFont(theme, [
         {
           fontSize: t.fontSize,
           lineHeight: t.lineHeight,
@@ -62,7 +62,7 @@ export function Text({
           textTransform: uppercase ? 'uppercase' : undefined,
         },
         style,
-      ]}
+      ])}
       {...rest}
     >
       {children}

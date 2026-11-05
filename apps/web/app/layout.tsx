@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Manrope } from 'next/font/google';
 import { ThemeProvider } from '@getrentos/ui/providers/ThemeProvider';
 import { QueryProvider } from '@getrentos/ui/providers/QueryProvider';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
@@ -11,6 +12,9 @@ import {
   SITE_TWITTER_HANDLE,
 } from '@/lib/site';
 import './globals.css';
+
+// Self-hosted at build time; @getrentos/ui reads --font-manrope into --font-ui.
+const manrope = Manrope({ subsets: ['latin'], display: 'swap', variable: '--font-manrope' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -78,7 +82,7 @@ export const viewport: Viewport = {
  */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={manrope.variable} suppressHydrationWarning>
       <body className="bg-background antialiased">
         <ThemeProvider>
           <QueryProvider>

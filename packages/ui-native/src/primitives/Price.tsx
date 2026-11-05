@@ -1,6 +1,6 @@
 import { Text as RNText, type TextStyle } from 'react-native';
 import type { TypographyVariant } from '@getrentos/tokens';
-import { useTheme } from '../theme';
+import { useTheme, withFont } from '../theme';
 
 type PricePeriod = 'month' | 'year' | 'night' | 'total' | null;
 
@@ -72,7 +72,7 @@ export function Price({
   return (
     <RNText
       maxFontSizeMultiplier={2}
-      style={[
+      style={withFont(theme, [
         {
           fontSize: t.fontSize,
           lineHeight: t.lineHeight,
@@ -82,15 +82,15 @@ export function Price({
           fontVariant: ['tabular-nums'],
         },
         style,
-      ]}
+      ])}
     >
       {hasAmount ? formatFigure(amount, compact) : '—'}
       {suffix ? (
         <RNText
           style={{
             fontSize: theme.typography.caption.fontSize,
-            fontWeight: '500',
             color: periodColor ?? theme.colors.mutedForeground,
+            ...theme.font('500'),
           }}
         >
           {' '}

@@ -22,6 +22,7 @@
     "go:tunnel": "expo start --go --tunnel"
   },
   "dependencies": {
+    "@expo-google-fonts/manrope": "0.4.3",
     "@expo/dom-webview": "~57.0.1",
     "@expo/metro-runtime": "~57.0.16",
     "@getrentos/shared": "workspace:*",

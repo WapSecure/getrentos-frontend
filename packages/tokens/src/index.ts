@@ -141,8 +141,9 @@ export type RadiusKey = keyof typeof radius;
 
 /**
  * Type ramp. `-apple-system` on the web resolves to San Francisco; on native
- * we let the platform pick its own UI face (SF on iOS, Roboto on Android) by
- * leaving `fontFamily` undefined and only setting weight.
+ * the ramp sets weight only. The brand face (Manrope, loaded by the app and
+ * handed to ui-native's ThemeProvider as `fonts`) is resolved per weight at
+ * render time; without it the platform's own UI face is used.
  */
 export const typography = {
   display: { fontSize: 34, lineHeight: 41, fontWeight: '700', letterSpacing: -0.5 },
