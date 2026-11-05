@@ -20,10 +20,14 @@ import {
   UserRound,
   Wallet,
   ClipboardList,
+  BadgeCheck,
+  SlidersHorizontal,
+  Landmark,
 } from 'lucide-react-native';
 import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useProSettings } from '@/hooks/useProSettings';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 
@@ -33,6 +37,7 @@ export default function RealtorAccount() {
   const { profile, signOut } = useAuth();
   const { colors, spacing } = useTheme();
   const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const { licenseLabel, inAgency } = useProSettings();
 
   const business: SettingsItem[] = [
     {
@@ -111,6 +116,13 @@ export default function RealtorAccount() {
       onPress: go('/(app)/verify-identity'),
     },
     {
+      key: 'license',
+      label: 'Licence',
+      description: licenseLabel ?? 'Verify your realtor licence',
+      icon: BadgeCheck,
+      onPress: go('/(app)/license-verification'),
+    },
+    {
       key: 'reviews',
       label: 'Reviews',
       description: 'What clients say about you',
@@ -127,6 +139,31 @@ export default function RealtorAccount() {
       icon: UserRound,
       onPress: go('/(app)/realtor-profile'),
     },
+    {
+      key: 'preferences',
+      label: 'Business preferences',
+      description: 'Commission rate, areas and property types',
+      icon: SlidersHorizontal,
+      onPress: go('/(app)/realtor-preferences'),
+    },
+    {
+      key: 'sale-payouts',
+      label: 'Sale payouts',
+      description: 'Where money from properties you sell is paid',
+      icon: Landmark,
+      onPress: go('/(app)/seller-payout'),
+    },
+    ...(inAgency
+      ? [
+          {
+            key: 'agency-share',
+            label: 'Agency commission',
+            description: 'Your share of your firm’s commissions',
+            icon: Wallet,
+            onPress: go('/(app)/agency-share'),
+          },
+        ]
+      : []),
     {
       key: 'notifications',
       label: 'Notifications',

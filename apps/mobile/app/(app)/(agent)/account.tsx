@@ -13,12 +13,16 @@ import {
   Star,
   Wrench,
   ClipboardList,
+  BellRing,
+  Landmark,
+  Wallet,
 } from 'lucide-react-native';
 import { Screen } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agentApi } from '@/lib/api/agent';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
+import { useProSettings } from '@/hooks/useProSettings';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { AccountFooter, AccountHeader, AppearanceFooter } from '@/components/account/AccountParts';
@@ -30,6 +34,7 @@ export default function AgentAccount() {
   // The agent profile adds what the session doesn't carry: ratings and tasks done.
   const agent = useQuery({ queryKey: qk.agent.profile, queryFn: agentApi.profile }).data;
   const { verified, known: identityKnown, label: identityLabel } = useIdentityVerification();
+  const { licenseLabel, inAgency } = useProSettings();
 
   const work: SettingsItem[] = [
     {
@@ -102,6 +107,13 @@ export default function AgentAccount() {
       onPress: go('/(app)/verify-identity'),
     },
     {
+      key: 'license',
+      label: 'Licence',
+      description: licenseLabel ?? 'Verify your agent licence',
+      icon: BadgeCheck,
+      onPress: go('/(app)/license-verification'),
+    },
+    {
       key: 'reviews',
       label: 'Reviews',
       description: 'Ratings from your clients',
@@ -112,6 +124,31 @@ export default function AgentAccount() {
   ];
 
   const settings: SettingsItem[] = [
+    {
+      key: 'alerts',
+      label: 'Alerts',
+      description: 'What buzzes your phone, and what’s emailed',
+      icon: BellRing,
+      onPress: go('/(app)/agent-notification-settings'),
+    },
+    {
+      key: 'sale-payouts',
+      label: 'Sale payouts',
+      description: 'Where money from properties you sell is paid',
+      icon: Landmark,
+      onPress: go('/(app)/seller-payout'),
+    },
+    ...(inAgency
+      ? [
+          {
+            key: 'agency-share',
+            label: 'Agency commission',
+            description: 'Your share of your firm’s commissions',
+            icon: Wallet,
+            onPress: go('/(app)/agency-share'),
+          },
+        ]
+      : []),
     {
       key: 'security',
       label: 'Security',

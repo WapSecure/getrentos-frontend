@@ -98,6 +98,10 @@ export default function AppLayout() {
         <Stack.Screen name="renter-deposit" options={DETAIL_OPTIONS} />
         <Stack.Screen name="renter-home-team" options={DETAIL_OPTIONS} />
         <Stack.Screen name="delete-account" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="license-verification" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="realtor-preferences" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-share" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agent-notification-settings" options={DETAIL_OPTIONS} />
         <Stack.Screen name="report-maintenance" options={DETAIL_OPTIONS} />
         <Stack.Screen name="documents" options={DETAIL_OPTIONS} />
         <Stack.Screen name="roommates" options={DETAIL_OPTIONS} />

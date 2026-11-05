@@ -268,6 +268,7 @@ export const qk = {
   },
   realtor: {
     dashboard: ['realtor', 'dashboard'] as const,
+    businessPreferences: ['realtor', 'settings', 'preferences'] as const,
     activity: ['realtor', 'activity'] as const,
     clients: ['realtor', 'clients'] as const,
     assigned: (relationshipId: string) =>
@@ -296,6 +297,7 @@ export const qk = {
   },
   agent: {
     dashboard: ['agent', 'dashboard'] as const,
+    notificationPreferences: ['agent', 'settings', 'notifications'] as const,
     profile: ['agent', 'profile'] as const,
     workOrders: ['agent', 'work-orders'] as const,
     properties: (page = 1, pageSize = 20, search?: string) =>
