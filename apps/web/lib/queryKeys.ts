@@ -77,6 +77,8 @@ export const landlordKeys = {
     ['landlord', 'tenancyStanding', applicationId] as const,
   applicationScreening: (applicationId: string) =>
     ['landlord', 'applicationScreening', applicationId] as const,
+  applicantSummary: (applicationId: string) =>
+    ['landlord', 'applicationScreening', applicationId, 'summary'] as const,
 };
 
 export const renterKeys = {

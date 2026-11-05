@@ -58,6 +58,7 @@ import type { VideoCallJoin } from '@getrentos/shared';
 import type { ListingDraft, ListingSelfCheck, ListingSelfCheckInput } from '@/types/listingDraft';
 import type { StatementExplanation } from '@/types/statementExplanation';
 import type { CollectionPlan } from '@/types/collectionPlan';
+import type { ApplicantSummary } from '@/types/applicantSummary';
 
 export interface RentCollectionStats {
   totalCollected: number;
@@ -550,6 +551,11 @@ export const landlordService = {
 
   async getApplicationScreening(applicationId: string): Promise<ApiResponse<ScreeningReport>> {
     return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening`));
+  },
+
+  /** The screening facts in plain words, with questions and checks. Never a ranking or a decision. */
+  async getApplicantSummary(applicationId: string): Promise<ApiResponse<ApplicantSummary>> {
+    return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening/summary`));
   },
 
   async updateReferenceCheck(
