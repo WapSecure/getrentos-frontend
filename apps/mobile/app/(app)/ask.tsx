@@ -10,7 +10,7 @@ import {
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowRight, ChevronLeft, Send } from 'lucide-react-native';
+import { ArrowRight, ChevronLeft, Mic, Send, Square, Volume2 } from 'lucide-react-native';
 import { Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
 import {
   REPLY_LANGUAGES,
@@ -19,6 +19,7 @@ import {
   saveReplyLanguage,
   type ReplyLanguage,
 } from '@/lib/replyLanguage';
+import { useReadAloud, useVoiceInput } from '@/lib/voice';
 import {
   assistantApi,
   mobileRouteFor,
@@ -28,6 +29,8 @@ import {
 } from '@/lib/api/assistant';
 
 interface ChatMessage extends AssistantTurn {
+  /** The language an answer is in, for reading it aloud. */
+  language?: ReplyLanguage;
   /** Set when the answer could not be given in the language asked for. */
   fellBackFrom?: ReplyLanguage;
   links?: AssistantLink[];
@@ -171,6 +174,7 @@ export default function AskScreen() {
           content: reply.answer,
           links: reply.links,
           suggestions: reply.suggestions,
+          language: reply.language ?? 'en',
           fellBackFrom:
             reply.requestedLanguage && reply.language !== reply.requestedLanguage
               ? reply.requestedLanguage
@@ -191,6 +195,10 @@ export default function AskScreen() {
     setText('');
     ask.mutate({ question, history });
   };
+
+  // Spoken words land in the box, so the person can check them before sending.
+  const voice = useVoiceInput(language, setText);
+  const readAloud = useReadAloud();
 
   const lastIndex = messages.length - 1;
   const canSend = !!text.trim() && !ask.isPending;
@@ -301,6 +309,20 @@ export default function AskScreen() {
                   {m.content}
                 </Text>
               </View>
+              {!mine && readAloud.canRead(m.language ?? 'en') ? (
+                <Chip
+                  size="sm"
+                  label={readAloud.speaking === i ? 'Stop reading' : 'Read aloud'}
+                  leadingIcon={
+                    readAloud.speaking === i ? (
+                      <Square size={12} color={colors.foreground} />
+                    ) : (
+                      <Volume2 size={13} color={colors.foreground} />
+                    )
+                  }
+                  onPress={() => readAloud.toggle(i, m.content, m.language ?? 'en')}
+                />
+              ) : null}
               {m.fellBackFrom ? (
                 <Text variant="caption" color="mutedForeground">
                   Answered in English: replies in {languageLabel(m.fellBackFrom)} are not available
@@ -346,6 +368,19 @@ export default function AskScreen() {
         ) : null}
       </ScrollView>
 
+      {voice.error || voice.listening || !voice.available ? (
+        <Text
+          variant="caption"
+          color={voice.error ? 'destructive' : 'mutedForeground'}
+          accessibilityLiveRegion="polite"
+          style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.xs }}
+        >
+          {voice.error ??
+            (voice.listening
+              ? `Listening in ${languageLabel(language)}… tap the square when you finish.`
+              : 'To speak your question, tap the microphone on your keyboard.')}
+        </Text>
+      ) : null}
       <View
         style={{
           flexDirection: 'row',
@@ -356,6 +391,29 @@ export default function AskScreen() {
           paddingBottom: insets.bottom + spacing.sm,
         }}
       >
+        {voice.available ? (
+          <Pressable
+            onPress={() => (voice.listening ? voice.stop() : void voice.start())}
+            disabled={ask.isPending}
+            accessibilityRole="button"
+            accessibilityLabel={voice.listening ? 'Stop listening' : 'Speak your question'}
+            accessibilityState={{ disabled: ask.isPending }}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: voice.listening ? colors.destructive : colors.secondary,
+            }}
+          >
+            {voice.listening ? (
+              <Square size={15} color={colors.destructiveForeground} />
+            ) : (
+              <Mic size={18} color={colors.foreground} />
+            )}
+          </Pressable>
+        ) : null}
         <View style={{ flex: 1 }}>
           <TextField
             placeholder={copy.placeholder}
