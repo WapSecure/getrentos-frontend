@@ -75,7 +75,7 @@ export const ApplicationDetailsModal = ({
               employmentStatus={application.employmentStatus}
             />
 
-            <p className="text-xs text-muted-foreground/60">
+            <p className="text-xs text-muted-foreground">
               Submitted {formatDate(application.applicationDate, 'long')}
             </p>
           </div>

@@ -322,7 +322,7 @@ export const AddPropertyModal = ({
               <div>
                 <p className="block text-sm font-medium text-foreground mb-1">
                   Gallery images{' '}
-                  <span className="text-muted-foreground/60 font-normal">(optional)</span>
+                  <span className="text-muted-foreground font-normal">(optional)</span>
                 </p>
                 <label className="w-full flex cursor-pointer items-center justify-center gap-2 px-3 py-6 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary focus-within:ring-2 focus-within:ring-ring transition-colors">
                   <input
