@@ -45,7 +45,7 @@ export default function RealtorSettingsPage() {
         return <NotificationSettings />;
       case 'payouts':
         return (
-          <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once GetRentos pays it out to you. Commission from your clients is paid to you directly, not through GetRentos." />
+          <SellerPayoutSettings description="Where money from properties you sell on the marketplace is sent once GetRentos pays it out to you. Commission GetRentos settles on your deals has its own account, on the Commissions page." />
         );
       case 'preferences':
         return <BusinessPreferencesSettings />;

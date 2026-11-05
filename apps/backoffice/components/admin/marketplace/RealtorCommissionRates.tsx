@@ -104,9 +104,11 @@ export const RealtorCommissionRates = () => {
         ) : (
           <>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Listing side (%)" hint="Paid to the realtor who listed the property">
+              <Field
+                label="Listing side (%)"
+                hint="Whole percent, paid to the realtor who listed the property"
+              >
                 <NumberInput
-                  integer={false}
                   value={listingSidePct}
                   onValueChange={(value) =>
                     setDraft((d) => ({
@@ -116,9 +118,11 @@ export const RealtorCommissionRates = () => {
                   }
                 />
               </Field>
-              <Field label="Buyer side (%)" hint="Paid to the realtor who represented the buyer">
+              <Field
+                label="Buyer side (%)"
+                hint="Whole percent, paid to the realtor who represented the buyer"
+              >
                 <NumberInput
-                  integer={false}
                   value={buyerSidePct}
                   onValueChange={(value) =>
                     setDraft((d) => ({

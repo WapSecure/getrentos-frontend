@@ -93,6 +93,11 @@ export const RealtorListingPreviewModal = ({
                 )}
                 <span className="capitalize">{listing.propertyType}</span>
               </div>
+              {listing.status === 'draft' && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Waiting for your client to publish it from their Listings page.
+                </p>
+              )}
             </div>
           </>
         )}

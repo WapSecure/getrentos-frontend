@@ -333,7 +333,7 @@ export function WorkOrdersQueue() {
               actions.request({
                 title: 'Cancel work order?',
                 description: 'Cancellation is audited and cannot be silently reversed.',
-                label: 'Cancel',
+                label: 'Cancel work order',
                 reasonRequired: true,
                 run: (reason) =>
                   unwrap(

@@ -68,6 +68,8 @@ export interface RealtorAssignablePropertyApi {
   state: string;
   verificationStatus: string;
   isVerified: boolean;
+  /** Already assigned to this realtor. */
+  assigned?: boolean;
 }
 
 export interface RealtorListingApi {
@@ -524,6 +526,10 @@ export const realtorService = {
         method: 'POST',
         body: JSON.stringify({ propertyId }),
       })
+    ),
+  unassignProperty: (relationshipId: string, propertyId: string) =>
+    safeCall(() =>
+      authFetch(`/realtor/clients/${relationshipId}/properties/${propertyId}`, { method: 'DELETE' })
     ),
 
   // Settings

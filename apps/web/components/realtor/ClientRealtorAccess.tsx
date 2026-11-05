@@ -94,6 +94,16 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
     },
     onError: (error: Error) => toast.error(error.message),
   });
+  const unassign = useMutation({
+    mutationFn: ({ id, propertyId }: { id: string; propertyId: string }) =>
+      unwrap(realtorService.unassignProperty(id, propertyId)),
+    onSuccess: (_result, { id }) => {
+      queryClient.invalidateQueries({ queryKey: realtorKeys.assignableProperties(id) });
+      refreshInvitations();
+      toast.success('Property taken back from the Realtor.');
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const toggleProperties = (relationshipId: string) => {
     setPropertiesFor((current) => (current === relationshipId ? null : relationshipId));
@@ -206,18 +216,37 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
                         <span className="min-w-0">
                           {property.title} · {property.city}, {property.state}
                         </span>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          isLoading={
-                            assign.isPending && assign.variables?.propertyId === property.id
-                          }
-                          onClick={() =>
-                            assign.mutate({ id: invitation.id, propertyId: property.id })
-                          }
-                        >
-                          Assign
-                        </Button>
+                        {property.assigned ? (
+                          <span className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Assigned</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive"
+                              isLoading={
+                                unassign.isPending && unassign.variables?.propertyId === property.id
+                              }
+                              onClick={() =>
+                                unassign.mutate({ id: invitation.id, propertyId: property.id })
+                              }
+                            >
+                              Remove
+                            </Button>
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            isLoading={
+                              assign.isPending && assign.variables?.propertyId === property.id
+                            }
+                            onClick={() =>
+                              assign.mutate({ id: invitation.id, propertyId: property.id })
+                            }
+                          >
+                            Assign
+                          </Button>
+                        )}
                       </div>
                     ))
                   )}
