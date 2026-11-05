@@ -164,7 +164,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
               id="calendar-event-color-label"
               className="block text-sm font-medium text-foreground mb-1"
             >
-              Color
+              Colour
             </p>
             <div className="flex gap-2 flex-wrap">
               {colors.map((color) => (

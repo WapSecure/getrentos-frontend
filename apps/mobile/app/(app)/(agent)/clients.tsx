@@ -55,7 +55,7 @@ export default function AgentClients() {
         <DashboardHeader
           eyebrow="Field operations"
           title="Clients"
-          subtitle="Authorized property relationships"
+          subtitle="Authorised property relationships"
           style={{ flex: 1 }}
         />
         <IconButton
@@ -79,7 +79,7 @@ export default function AgentClients() {
         empty={{
           icon: <Users size={34} color={colors.mutedForeground} />,
           title: 'No clients yet',
-          description: 'Invite a landlord or property owner to authorize you as their field agent.',
+          description: 'Invite a landlord or property owner to authorise you as their field agent.',
         }}
       >
         <FlashList

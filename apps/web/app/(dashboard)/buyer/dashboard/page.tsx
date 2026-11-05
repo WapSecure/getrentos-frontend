@@ -53,7 +53,7 @@ export default function BuyerDashboardPage() {
         <EmptyState
           icon={Search}
           title="Start your property search"
-          description="Browse verified for-sale properties, save your favorites, and track offers all in one place."
+          description="Browse verified for-sale properties, save your favourites, and track offers all in one place."
           action={
             <Button href={ROUTES.BUYER_DISCOVER} variant="primary">
               Discover properties

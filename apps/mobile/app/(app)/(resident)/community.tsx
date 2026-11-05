@@ -56,7 +56,7 @@ const ROWS = [
   {
     href: '/(app)/directory',
     label: 'Directory',
-    description: 'Browse and opt into the neighbor directory',
+    description: 'Browse and opt into the neighbour directory',
     icon: Contact,
   },
   { href: '/(app)/polls', label: 'Polls', description: 'Vote on estate decisions', icon: Vote },

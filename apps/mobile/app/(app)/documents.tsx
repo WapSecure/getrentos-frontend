@@ -128,7 +128,7 @@ export default function Documents() {
           }}
         >
           <SummaryTile label="Total" value={summaryQuery.data.total} />
-          <SummaryTile label="Favorites" value={summaryQuery.data.favorites} />
+          <SummaryTile label="Favourites" value={summaryQuery.data.favorites} />
           {summaryQuery.data.expiring > 0 ? (
             <SummaryTile label="Expiring" value={summaryQuery.data.expiring} tone="warning" />
           ) : null}

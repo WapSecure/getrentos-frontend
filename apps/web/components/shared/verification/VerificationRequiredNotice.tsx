@@ -20,7 +20,7 @@ const BASE_COPY: Record<
     cta: 'Verify identity',
   },
   LICENSE_REQUIRED: {
-    message: 'Verify your realtor/agent license to do this.',
+    message: 'Verify your realtor/agent licence to do this.',
     cta: 'Verify license',
   },
   OWNERSHIP_PROOF_REQUIRED: {

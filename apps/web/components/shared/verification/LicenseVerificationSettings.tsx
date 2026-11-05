@@ -58,7 +58,7 @@ export const LicenseVerificationSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
     },
     onError: (reason) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to submit your license.'),
+      setError(reason instanceof Error ? reason.message : 'Unable to submit your licence.'),
   });
 
   const license = status?.license;
@@ -75,7 +75,7 @@ export const LicenseVerificationSettings = () => {
       <div>
         <h3 className="text-lg font-semibold text-foreground">License verification</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Verify your realtor/agent license to unlock inviting owners and landlords as clients.
+          Verify your realtor/agent licence to unlock inviting owners and landlords as clients.
         </p>
       </div>
 
@@ -93,7 +93,7 @@ export const LicenseVerificationSettings = () => {
 
       {canSubmit && (
         <div className="space-y-4">
-          <Field label="License number" required>
+          <Field label="Licence number" required>
             <Input
               type="text"
               value={licenseNumber}

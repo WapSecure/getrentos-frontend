@@ -53,7 +53,7 @@ export default function ResidentDirectory() {
       <DetailScreenHeader
         eyebrow="Community"
         title="Directory"
-        subtitle="Connect with opted-in neighbors"
+        subtitle="Connect with opted-in neighbours"
         onBack={() => goBack()}
       />
       <Screen>
@@ -70,7 +70,7 @@ export default function ResidentDirectory() {
         {!optedIn ? (
           <EmptyState
             icon={<Contact size={34} color={colors.mutedForeground} />}
-            title="Opt in to see your neighbors"
+            title="Opt in to see your neighbours"
             description="Turn on the toggle above to view and be listed in the resident directory."
           />
         ) : directory.isLoading ? (
@@ -96,7 +96,7 @@ export default function ResidentDirectory() {
         ) : (
           <EmptyState
             icon={<Contact size={34} color={colors.mutedForeground} />}
-            title="No neighbors listed yet"
+            title="No neighbours listed yet"
             description="Nobody else has opted in to the directory so far."
           />
         )}

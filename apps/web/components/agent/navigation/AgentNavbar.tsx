@@ -81,7 +81,7 @@ export const AgentNavbar = ({ user }: AgentNavbarProps) => {
                 href={ROUTES.AGENT_SYNC}
                 className="text-muted-foreground hover:text-primary transition-colors"
               >
-                Sync center
+                Sync centre
               </Link>
             </div>
 

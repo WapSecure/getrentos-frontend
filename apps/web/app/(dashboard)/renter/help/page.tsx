@@ -14,7 +14,7 @@ import { LegalResourcesView } from '@/components/renter/legal/LegalResourcesView
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
-  { id: 'help', label: 'Help center', icon: LifeBuoy },
+  { id: 'help', label: 'Help centre', icon: LifeBuoy },
   { id: 'legal', label: 'Legal resources', icon: Scale },
 ];
 
