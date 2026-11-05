@@ -10,9 +10,8 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -55,21 +54,22 @@ export default function Support() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={78} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<LifeBuoy size={34} color={colors.mutedForeground} />}
-          title="No support requests yet"
-          description="Reach out and our team will get back to you."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={78} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <LifeBuoy size={34} color={colors.mutedForeground} />,
+          title: 'No support requests yet',
+          description: 'Reach out and our team will get back to you.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -125,7 +125,7 @@ export default function Support() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <ComposeSheet open={composeOpen} onClose={() => setComposeOpen(false)} />
     </View>

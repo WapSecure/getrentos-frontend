@@ -1,4 +1,4 @@
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -8,9 +8,9 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -80,15 +80,14 @@ export default function OwnerTransactions() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={200} radius={radius.lg} />
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={200} radius={radius.lg} />
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(t) => t.id}
@@ -107,7 +106,7 @@ export default function OwnerTransactions() {
           }
           renderItem={({ item: t }: { item: OwnerTransaction }) => <SaleCard t={t} />}
         />
-      )}
+      </QueryState>
     </View>
   );
 }

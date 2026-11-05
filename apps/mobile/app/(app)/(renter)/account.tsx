@@ -33,7 +33,16 @@ import {
   Wrench,
   UserCheck,
 } from 'lucide-react-native';
-import { Avatar, Button, Card, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import {
+  Avatar,
+  Button,
+  Card,
+  Divider,
+  Screen,
+  Text,
+  ThemeToggle,
+  useTheme,
+} from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
@@ -332,17 +341,13 @@ export default function Account() {
         title="Settings"
         items={settings}
         footer={
-          <View
-            style={{
-              padding: spacing.lg,
-              gap: spacing.sm,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
-            }}
-          >
-            <Text variant="bodyStrong">Appearance</Text>
-            <ThemeToggle variant="segmented" />
-          </View>
+          <>
+            <Divider />
+            <View style={{ padding: spacing.lg, gap: spacing.sm }}>
+              <Text variant="bodyStrong">Appearance</Text>
+              <ThemeToggle variant="segmented" />
+            </View>
+          </>
         }
       />
       <SettingsGroup title="Help" items={help} />

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -9,10 +9,10 @@ import {
   Avatar,
   Button,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -106,17 +106,16 @@ export default function RealtorMessages() {
         ) : null}
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={64} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={64} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(c) => c.id}
@@ -141,7 +140,7 @@ export default function RealtorMessages() {
           }
           renderItem={({ item }: { item: RealtorConversation }) => <Row c={item} />}
         />
-      )}
+      </QueryState>
 
       <Sheet open={picking} onClose={() => setPicking(false)} title="Message a client">
         {picking ? <ClientPicker onDone={() => setPicking(false)} /> : null}
@@ -220,57 +219,57 @@ function ClientPicker({ onDone }: { onDone: () => void }) {
     },
   });
   const active = clients.data?.items.filter((c) => c.status === 'ACTIVE') ?? [];
-  if (clients.isError && !clients.data) return <ErrorState onRetry={() => clients.refetch()} />;
-  if (clients.isPending) return <ListSkeleton rows={3} />;
-  if (!active.length)
-    return (
-      <View style={{ gap: spacing.md }}>
-        <FormAlert
-          tone="info"
-          message="You can message clients once they’ve approved you. Invite an owner or landlord to get started."
-        />
-        <Button
-          label="Go to clients"
-          variant="secondary"
-          onPress={() => {
-            onDone();
-            router.push('/(app)/realtor-clients');
-          }}
-        />
-      </View>
-    );
   return (
-    <View style={{ gap: spacing.xs }}>
-      {active.map((c) => (
-        <Pressable
-          key={c.id}
-          onPress={() => start.mutate(c)}
-          disabled={start.isPending}
-          accessibilityRole="button"
-          accessibilityLabel={`Message ${clientName(c)}, ${clientRole(c)}`}
-          style={({ pressed }) => ({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.md,
-            paddingVertical: spacing.sm,
-            opacity: pressed || (start.isPending && start.variables?.id === c.id) ? 0.6 : 1,
-          })}
-        >
-          <Avatar name={clientName(c)} size={40} />
-          <View style={{ flex: 1 }}>
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {clientName(c)}
-            </Text>
-            <Text variant="caption" color="mutedForeground">
-              {clientRole(c)}
-            </Text>
-          </View>
-          <MessageCircle size={18} color={colors.primary} />
-        </Pressable>
-      ))}
-      {start.error ? (
-        <FormAlert message={errorMessage(start.error, 'Could not open that chat.')} />
-      ) : null}
-    </View>
+    <QueryState query={clients} skeleton={<ListSkeleton rows={3} />}>
+      {!active.length ? (
+        <View style={{ gap: spacing.md }}>
+          <FormAlert
+            tone="info"
+            message="You can message clients once they’ve approved you. Invite an owner or landlord to get started."
+          />
+          <Button
+            label="Go to clients"
+            variant="secondary"
+            onPress={() => {
+              onDone();
+              router.push('/(app)/realtor-clients');
+            }}
+          />
+        </View>
+      ) : (
+        <View style={{ gap: spacing.xs }}>
+          {active.map((c) => (
+            <Pressable
+              key={c.id}
+              onPress={() => start.mutate(c)}
+              disabled={start.isPending}
+              accessibilityRole="button"
+              accessibilityLabel={`Message ${clientName(c)}, ${clientRole(c)}`}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.md,
+                paddingVertical: spacing.sm,
+                opacity: pressed || (start.isPending && start.variables?.id === c.id) ? 0.6 : 1,
+              })}
+            >
+              <Avatar name={clientName(c)} size={40} />
+              <View style={{ flex: 1 }}>
+                <Text variant="bodyStrong" numberOfLines={1}>
+                  {clientName(c)}
+                </Text>
+                <Text variant="caption" color="mutedForeground">
+                  {clientRole(c)}
+                </Text>
+              </View>
+              <MessageCircle size={18} color={colors.primary} />
+            </Pressable>
+          ))}
+          {start.error ? (
+            <FormAlert message={errorMessage(start.error, 'Could not open that chat.')} />
+          ) : null}
+        </View>
+      )}
+    </QueryState>
   );
 }

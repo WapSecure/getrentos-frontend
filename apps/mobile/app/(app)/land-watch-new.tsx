@@ -7,9 +7,8 @@ import { MapPinned, ShieldCheck } from 'lucide-react-native';
 import {
   Button,
   Checkbox,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
+  QueryState,
   RadioGroup,
   Text,
   useTheme,
@@ -80,82 +79,77 @@ export default function LandWatchNew() {
           onBack={() => goBack()}
         />
 
-        {options.isError && !options.data ? (
-          <ErrorState onRetry={() => options.refetch()} />
-        ) : options.isPending ? (
-          <ListSkeleton rows={3} variant="card" height={72} />
-        ) : !available.length ? (
-          <EmptyState
-            icon={<MapPinned size={34} color={colors.mutedForeground} />}
-            title={options.data.length ? 'All your land is watched' : 'No land to watch yet'}
-            description={
-              options.data.length
-                ? 'Every parcel and plot you hold is already under Land Watch.'
-                : 'Land you list as its owner, or a plot you buy on GetRentos, can be watched here.'
-            }
+        <QueryState
+          query={options}
+          skeleton={<ListSkeleton rows={3} variant="card" height={72} />}
+          isEmpty={!available.length}
+          empty={{
+            icon: <MapPinned size={34} color={colors.mutedForeground} />,
+            title: options.data?.length ? 'All your land is watched' : 'No land to watch yet',
+            description: options.data?.length
+              ? 'Every parcel and plot you hold is already under Land Watch.'
+              : 'Land you list as its owner, or a plot you buy on GetRentos, can be watched here.',
+          }}
+        >
+          <RadioGroup
+            label="Which land"
+            variant="card"
+            value={target}
+            onChange={(next) => {
+              void haptics.tap();
+              setTarget(next);
+            }}
+            options={available.map((o) => ({
+              value: optionValue(o),
+              label: o.label,
+              description: o.kind === 'PLOT' ? 'A plot you bought' : o.place || 'Land you own',
+            }))}
           />
-        ) : (
-          <>
-            <RadioGroup
-              label="Which land"
-              variant="card"
-              value={target}
-              onChange={(next) => {
-                void haptics.tap();
-                setTarget(next);
+
+          <RadioGroup
+            label="Level"
+            variant="card"
+            value={tier}
+            onChange={(next) => {
+              void haptics.tap();
+              setTier(next);
+            }}
+            options={TIERS.map((t) => ({
+              value: t,
+              label: LAND_WATCH_TIER_LABELS[t].label,
+              description: LAND_WATCH_TIER_LABELS[t].description,
+            }))}
+          />
+
+          {terms.data ? (
+            <View
+              style={{
+                gap: spacing.sm,
+                padding: spacing.md,
+                borderRadius: radius.md,
+                backgroundColor: colors.secondary,
               }}
-              options={available.map((o) => ({
-                value: optionValue(o),
-                label: o.label,
-                description: o.kind === 'PLOT' ? 'A plot you bought' : o.place || 'Land you own',
-              }))}
-            />
+            >
+              <Checkbox checked={accepted} onChange={setAccepted} label={terms.data.disclaimer} />
+            </View>
+          ) : null}
 
-            <RadioGroup
-              label="Level"
-              variant="card"
-              value={tier}
-              onChange={(next) => {
-                void haptics.tap();
-                setTier(next);
-              }}
-              options={TIERS.map((t) => ({
-                value: t,
-                label: LAND_WATCH_TIER_LABELS[t].label,
-                description: LAND_WATCH_TIER_LABELS[t].description,
-              }))}
-            />
+          <Text variant="caption" color="mutedForeground">
+            {tier === 'ESSENTIAL'
+              ? 'Your documents and payment reminders are kept in one place.'
+              : 'The first inspection is booked as soon as you start.'}
+          </Text>
 
-            {terms.data ? (
-              <View
-                style={{
-                  gap: spacing.sm,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  backgroundColor: colors.secondary,
-                }}
-              >
-                <Checkbox checked={accepted} onChange={setAccepted} label={terms.data.disclaimer} />
-              </View>
-            ) : null}
-
-            <Text variant="caption" color="mutedForeground">
-              {tier === 'ESSENTIAL'
-                ? 'Your documents and payment reminders are kept in one place.'
-                : 'The first inspection is booked as soon as you start.'}
-            </Text>
-
-            <Button
-              label="Start watching"
-              icon={<ShieldCheck size={18} color={colors.primaryForeground} />}
-              fullWidth
-              loading={subscribe.isPending}
-              loadingLabel="Starting…"
-              disabled={!target || !accepted || !terms.data}
-              onPress={() => subscribe.mutate()}
-            />
-          </>
-        )}
+          <Button
+            label="Start watching"
+            icon={<ShieldCheck size={18} color={colors.primaryForeground} />}
+            fullWidth
+            loading={subscribe.isPending}
+            loadingLabel="Starting…"
+            disabled={!target || !accepted || !terms.data}
+            onPress={() => subscribe.mutate()}
+          />
+        </QueryState>
       </ScrollView>
     </View>
   );

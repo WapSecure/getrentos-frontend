@@ -6,8 +6,7 @@ import { ClipboardList } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -60,18 +59,17 @@ export default function LandInspections() {
           subtitle="Visits assigned to you"
           onBack={() => goBack()}
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <Skeleton height={140} radius={radius.lg} />
-        ) : !items.length ? (
-          <EmptyState
-            icon={<ClipboardList size={34} color={colors.mutedForeground} />}
-            title="Nothing assigned"
-            description="New inspections appear here."
-          />
-        ) : (
-          items.map((j) => {
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={140} radius={radius.lg} />}
+          isEmpty={!items.length}
+          empty={{
+            icon: <ClipboardList size={34} color={colors.mutedForeground} />,
+            title: 'Nothing assigned',
+            description: 'New inspections appear here.',
+          }}
+        >
+          {items.map((j) => {
             const [label, tone] = WORDS[j.status] ?? [j.status, 'neutral' as BadgeTone];
             const waiting = queued.filter((q) => q.inspectionId === j.id && !q.error).length;
             return (
@@ -105,8 +103,8 @@ export default function LandInspections() {
                 </Card>
               </Pressable>
             );
-          })
-        )}
+          })}
+        </QueryState>
       </ScrollView>
     </View>
   );

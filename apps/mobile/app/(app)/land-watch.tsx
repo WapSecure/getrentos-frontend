@@ -8,7 +8,7 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -49,73 +49,73 @@ export default function LandWatch() {
           subtitle="Independent eyes on land you own"
           onBack={() => goBack()}
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <Skeleton height={140} radius={radius.lg} />
-        ) : !items.length ? (
-          <>
-            <EmptyState
-              icon={<Eye size={34} color={colors.mutedForeground} />}
-              title="Nothing watched yet"
-              description="Get independent inspections, incident alerts and payment reminders for a parcel you own or a plot you bought."
-            />
-            <Button
-              label="Watch land"
-              icon={<Plus size={18} color={colors.primaryForeground} />}
-              onPress={() => router.push('/(app)/land-watch-new')}
-            />
-          </>
-        ) : (
-          <>
-            <Button
-              label="Watch more land"
-              variant="outline"
-              size="sm"
-              icon={<Plus size={16} color={colors.foreground} />}
-              onPress={() => router.push('/(app)/land-watch-new')}
-              style={{ alignSelf: 'flex-start' }}
-            />
-            {items.map((w) => (
-              <Pressable
-                key={w.id}
-                accessibilityRole="button"
-                accessibilityLabel={`${w.land.label}, ${w.land.city}, ${w.land.state}`}
-                onPress={() =>
-                  router.push({ pathname: '/(app)/land-watch-detail/[id]', params: { id: w.id } })
-                }
-              >
-                <Card elevated style={{ gap: spacing.xs }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong">{w.land.label}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {w.land.city}, {w.land.state}
-                      </Text>
+        <QueryState query={query} skeleton={<Skeleton height={140} radius={radius.lg} />}>
+          {!items.length ? (
+            <>
+              <EmptyState
+                icon={<Eye size={34} color={colors.mutedForeground} />}
+                title="Nothing watched yet"
+                description="Get independent inspections, incident alerts and payment reminders for a parcel you own or a plot you bought."
+              />
+              <Button
+                label="Watch land"
+                icon={<Plus size={18} color={colors.primaryForeground} />}
+                onPress={() => router.push('/(app)/land-watch-new')}
+              />
+            </>
+          ) : (
+            <>
+              <Button
+                label="Watch more land"
+                variant="outline"
+                size="sm"
+                icon={<Plus size={16} color={colors.foreground} />}
+                onPress={() => router.push('/(app)/land-watch-new')}
+                style={{ alignSelf: 'flex-start' }}
+              />
+              {items.map((w) => (
+                <Pressable
+                  key={w.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${w.land.label}, ${w.land.city}, ${w.land.state}`}
+                  onPress={() =>
+                    router.push({ pathname: '/(app)/land-watch-detail/[id]', params: { id: w.id } })
+                  }
+                >
+                  <Card elevated style={{ gap: spacing.xs }}>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}
+                    >
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text variant="bodyStrong">{w.land.label}</Text>
+                        <Text variant="caption" color="mutedForeground">
+                          {w.land.city}, {w.land.state}
+                        </Text>
+                      </View>
+                      <Badge
+                        label={`${LAND_WATCH_TIER_LABELS[w.tier].label}${w.status === 'PAUSED' ? ' · paused' : ''}`}
+                        tone={w.status === 'ACTIVE' ? 'success' : 'neutral'}
+                      />
                     </View>
-                    <Badge
-                      label={`${LAND_WATCH_TIER_LABELS[w.tier].label}${w.status === 'PAUSED' ? ' · paused' : ''}`}
-                      tone={w.status === 'ACTIVE' ? 'success' : 'neutral'}
-                    />
-                  </View>
-                  <Text variant="caption" color="mutedForeground">
-                    Last inspection{' '}
-                    {w.lastInspection ? formatDate(w.lastInspection, 'short') : 'none yet'}
-                    {w.nextInspectionDue
-                      ? ` · next ${formatDate(w.nextInspectionDue, 'short')}`
-                      : ''}
-                  </Text>
-                  {w.openIncidents ? (
-                    <Badge
-                      label={`${w.openIncidents} open incident${w.openIncidents === 1 ? '' : 's'}`}
-                      tone="danger"
-                    />
-                  ) : null}
-                </Card>
-              </Pressable>
-            ))}
-          </>
-        )}
+                    <Text variant="caption" color="mutedForeground">
+                      Last inspection{' '}
+                      {w.lastInspection ? formatDate(w.lastInspection, 'short') : 'none yet'}
+                      {w.nextInspectionDue
+                        ? ` · next ${formatDate(w.nextInspectionDue, 'short')}`
+                        : ''}
+                    </Text>
+                    {w.openIncidents ? (
+                      <Badge
+                        label={`${w.openIncidents} open incident${w.openIncidents === 1 ? '' : 's'}`}
+                        tone="danger"
+                      />
+                    ) : null}
+                  </Card>
+                </Pressable>
+              ))}
+            </>
+          )}
+        </QueryState>
       </ScrollView>
     </View>
   );

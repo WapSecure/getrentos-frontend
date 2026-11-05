@@ -7,11 +7,10 @@ import { ArrowRightLeft } from 'lucide-react-native';
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -27,7 +26,7 @@ import {
   realtorApi,
   vsAsking,
 } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -72,88 +71,89 @@ export default function RealtorOfferDetail() {
           subtitle={o ? `From ${o.buyer.legalName || o.buyer.email}` : undefined}
           onBack={() => goBack()}
         />
-        {offers.isError && !offers.data ? (
-          <ErrorState onRetry={() => offers.refetch()} />
-        ) : offers.isPending ? (
-          <Skeleton height={240} radius={radius.lg} />
-        ) : !o ? (
-          <EmptyState
-            title="Offer not found"
-            description="It may have been withdrawn, or the listing is no longer yours."
-          />
-        ) : (
-          <>
-            <Card elevated style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  On the table
+        <QueryState
+          query={offers}
+          skeleton={<Skeleton height={240} radius={radius.lg} />}
+          isEmpty={!o}
+          empty={{
+            title: 'Offer not found',
+            description: 'It may have been withdrawn, or the listing is no longer yours.',
+          }}
+        >
+          {o ? (
+            <>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                    On the table
+                  </Text>
+                  <StatusPill
+                    label={(OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED).label}
+                    tone={(OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED).tone}
+                  />
+                </View>
+                <Price amount={currentAmount(o)} variant="title" />
+                {o.listing.price ? (
+                  <Text variant="callout" color="mutedForeground">
+                    Asking ₦{Math.round(o.listing.price).toLocaleString('en-NG')}
+                    {vsAsking(currentAmount(o), o.listing.price)
+                      ? ` · ${vsAsking(currentAmount(o), o.listing.price)}`
+                      : ''}
+                  </Text>
+                ) : null}
+              </Card>
+
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading" headingLevel={2}>
+                  Negotiation
                 </Text>
-                <StatusPill
-                  label={(OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED).label}
-                  tone={(OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED).tone}
-                />
+                {offerThread(o).map((step, i) => {
+                  const you = step.who === 'you';
+                  return (
+                    <View
+                      key={step.id}
+                      accessible
+                      accessibilityLabel={`${you ? 'You countered' : i === 0 ? 'Buyer offered' : 'Buyer countered'} ${Math.round(step.amount).toLocaleString('en-NG')} naira, ${relativeTime(step.at)}${step.message ? `. ${step.message}` : ''}`}
+                      style={{
+                        alignSelf: you ? 'flex-end' : 'flex-start',
+                        maxWidth: '85%',
+                        padding: spacing.md,
+                        borderRadius: radius.lg,
+                        backgroundColor: you ? colors.accent : colors.secondary,
+                        gap: 4,
+                      }}
+                    >
+                      <Text variant="caption" color="mutedForeground">
+                        {you ? 'You countered' : i === 0 ? 'Buyer offered' : 'Buyer countered'}
+                      </Text>
+                      <Price amount={step.amount} variant="bodyStrong" />
+                      {step.message ? <Text variant="callout">{step.message}</Text> : null}
+                      <Text variant="caption" color="mutedForeground">
+                        {relativeTime(step.at)}
+                      </Text>
+                    </View>
+                  );
+                })}
               </View>
-              <Price amount={currentAmount(o)} variant="title" />
-              {o.listing.price ? (
-                <Text variant="callout" color="mutedForeground">
-                  Asking ₦{Math.round(o.listing.price).toLocaleString('en-NG')}
-                  {vsAsking(currentAmount(o), o.listing.price)
-                    ? ` · ${vsAsking(currentAmount(o), o.listing.price)}`
-                    : ''}
-                </Text>
-              ) : null}
-            </Card>
 
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" headingLevel={2}>
-                Negotiation
+              {canCounter(o.status) ? (
+                <CounterForm offerId={o.id} current={currentAmount(o)} asking={o.listing.price} />
+              ) : (
+                <FormAlert
+                  tone={o.status === 'ACCEPTED' ? 'success' : 'info'}
+                  message={
+                    o.status === 'ACCEPTED'
+                      ? 'Your client accepted this offer. The buyer pays the deposit to GetRentos, which holds it until the buyer confirms receipt.'
+                      : 'This offer is settled and can’t be countered.'
+                  }
+                />
+              )}
+              <Text variant="caption" color="mutedForeground" center>
+                Made {formatDate(o.createdAt, 'medium')}. Only your client can accept or decline.
               </Text>
-              {offerThread(o).map((step, i) => {
-                const you = step.who === 'you';
-                return (
-                  <View
-                    key={step.id}
-                    accessible
-                    accessibilityLabel={`${you ? 'You countered' : i === 0 ? 'Buyer offered' : 'Buyer countered'} ${Math.round(step.amount).toLocaleString('en-NG')} naira, ${relativeTime(step.at)}${step.message ? `. ${step.message}` : ''}`}
-                    style={{
-                      alignSelf: you ? 'flex-end' : 'flex-start',
-                      maxWidth: '85%',
-                      padding: spacing.md,
-                      borderRadius: radius.lg,
-                      backgroundColor: you ? colors.accent : colors.secondary,
-                      gap: 4,
-                    }}
-                  >
-                    <Text variant="caption" color="mutedForeground">
-                      {you ? 'You countered' : i === 0 ? 'Buyer offered' : 'Buyer countered'}
-                    </Text>
-                    <Price amount={step.amount} variant="bodyStrong" />
-                    {step.message ? <Text variant="callout">{step.message}</Text> : null}
-                    <Text variant="caption" color="mutedForeground">
-                      {relativeTime(step.at)}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-
-            {canCounter(o.status) ? (
-              <CounterForm offerId={o.id} current={currentAmount(o)} asking={o.listing.price} />
-            ) : (
-              <FormAlert
-                tone={o.status === 'ACCEPTED' ? 'success' : 'info'}
-                message={
-                  o.status === 'ACCEPTED'
-                    ? 'Your client accepted this offer. The buyer pays the deposit to GetRentos, which holds it until the buyer confirms receipt.'
-                    : 'This offer is settled and can’t be countered.'
-                }
-              />
-            )}
-            <Text variant="caption" color="mutedForeground" center>
-              Made {formatDate(o.createdAt, 'medium')}. Only your client can accept or decline.
-            </Text>
-          </>
-        )}
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -213,13 +213,7 @@ function CounterForm({
         <FormAlert tone="warning" message="That’s the amount already on the table." />
       ) : null}
       {counter.error ? (
-        <FormAlert
-          message={
-            counter.error instanceof ApiError
-              ? counter.error.message
-              : 'Could not send the counter.'
-          }
-        />
+        <FormAlert message={errorMessage(counter.error, 'Could not send the counter.')} />
       ) : null}
       <Button
         label={n ? `Counter at ₦${n.toLocaleString('en-NG')}` : 'Send counter'}

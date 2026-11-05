@@ -18,9 +18,9 @@ import {
   Button,
   Chip,
   EmptyState,
-  ErrorState,
   IconButton,
   PropertyCard,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -44,7 +44,6 @@ import {
 import { formatNaira } from '@/lib/format';
 import { track } from '@/lib/analytics';
 import { withTrustLabel } from '@/lib/trustLabel';
-import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 
 const MAP_PAGE_SIZE = 100;
 
@@ -312,76 +311,67 @@ export default function Discover() {
       </View>
 
       {viewMode === 'map' ? (
-        mapQuery.data === undefined ? (
-          mapQuery.isError ? (
-            <ErrorState onRetry={() => mapQuery.refetch()} />
-          ) : (
+        <QueryState
+          query={mapQuery}
+          skeleton={
             <View style={{ flex: 1, padding: spacing.xl, paddingTop: spacing.md, gap: spacing.sm }}>
               <Skeleton height={12} width="35%" />
               <Skeleton height={420} radius={radius.lg} />
             </View>
-          )
-        ) : mapMarkers.length === 0 ? (
-          <EmptyState
-            icon={<MapIcon size={34} color={colors.mutedForeground} />}
-            title="Nothing to show on the map"
-            description="These listings don't have map coordinates yet, or none match your filters."
-          />
-        ) : (
-          <View style={{ flex: 1, padding: spacing.xl, paddingTop: spacing.md }}>
-            <Text variant="caption" color="mutedForeground" style={{ marginBottom: spacing.sm }}>
-              {mapMarkers.length} {mapMarkers.length === 1 ? 'home' : 'homes'} on the map
-            </Text>
-            <PropertyMapView
-              markers={mapMarkers}
-              zoom={12}
-              style={{ flex: 1 }}
-              onMarkerPress={(id) => router.push(`/(app)/property/${id}`)}
-            />
-          </View>
-        )
-      ) : query.isError && items.length === 0 ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <LoadingList />
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Search size={34} color={colors.mutedForeground} />}
-          title="No listings match"
-          description="Try widening your price range or clearing a filter."
-          action={
-            chips.length > 0 || searchText ? (
-              <Button
-                label="Clear search and filters"
-                variant="outline"
-                onPress={() => {
-                  setSearchText('');
-                  setFilters({});
-                }}
-              />
-            ) : undefined
           }
-        />
+        >
+          {mapMarkers.length === 0 ? (
+            <EmptyState
+              icon={<MapIcon size={34} color={colors.mutedForeground} />}
+              title="Nothing to show on the map"
+              description="These listings don't have map coordinates yet, or none match your filters."
+            />
+          ) : (
+            <View style={{ flex: 1, padding: spacing.xl, paddingTop: spacing.md }}>
+              <Text variant="caption" color="mutedForeground" style={{ marginBottom: spacing.sm }}>
+                {mapMarkers.length} {mapMarkers.length === 1 ? 'home' : 'homes'} on the map
+              </Text>
+              <PropertyMapView
+                markers={mapMarkers}
+                zoom={12}
+                style={{ flex: 1 }}
+                onMarkerPress={(id) => router.push(`/(app)/property/${id}`)}
+              />
+            </View>
+          )}
+        </QueryState>
       ) : (
-        <FlashList
-          maintainVisibleContentPosition={{ disabled: true }}
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          onEndReached={onEndReached}
-          onEndReachedThreshold={0.6}
-          keyboardDismissMode="on-drag"
-          keyboardShouldPersistTaps="handled"
-          ListHeaderComponent={
-            <>
-              {query.isRefetchError ? (
-                <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.sm }}>
-                  <RefreshFailedNotice
-                    onRetry={() => query.refetch()}
-                    retrying={query.isFetching}
-                  />
-                </View>
-              ) : null}
+        <QueryState
+          query={query}
+          skeleton={<LoadingList />}
+          isEmpty={items.length === 0}
+          empty={{
+            icon: <Search size={34} color={colors.mutedForeground} />,
+            title: 'No listings match',
+            description: 'Try widening your price range or clearing a filter.',
+            action:
+              chips.length > 0 || searchText ? (
+                <Button
+                  label="Clear search and filters"
+                  variant="outline"
+                  onPress={() => {
+                    setSearchText('');
+                    setFilters({});
+                  }}
+                />
+              ) : undefined,
+          }}
+        >
+          <FlashList
+            maintainVisibleContentPosition={{ disabled: true }}
+            data={items}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            onEndReached={onEndReached}
+            onEndReachedThreshold={0.6}
+            keyboardDismissMode="on-drag"
+            keyboardShouldPersistTaps="handled"
+            ListHeaderComponent={
               <Text
                 variant="caption"
                 color="mutedForeground"
@@ -393,25 +383,25 @@ export default function Discover() {
               >
                 {total} {total === 1 ? 'home' : 'homes'} found
               </Text>
-            </>
-          }
-          ListFooterComponent={
-            query.isFetchingNextPage ? (
-              <View accessible accessibilityLabel="Loading more homes">
-                <LoadingList count={1} />
-              </View>
-            ) : (
-              <View style={{ height: spacing['3xl'] }} />
-            )
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching && !query.isFetchingNextPage}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        />
+            }
+            ListFooterComponent={
+              query.isFetchingNextPage ? (
+                <View accessible accessibilityLabel="Loading more homes">
+                  <LoadingList count={1} />
+                </View>
+              ) : (
+                <View style={{ height: spacing['3xl'] }} />
+              )
+            }
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching && !query.isFetchingNextPage}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          />
+        </QueryState>
       )}
 
       <PropertyFilterSheet

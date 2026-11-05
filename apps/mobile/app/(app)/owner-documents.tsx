@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Linking, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, Linking, Pressable, RefreshControl, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -8,9 +8,8 @@ import { FileStack, FileText, Plus, Trash2 } from 'lucide-react-native';
 import {
   Button,
   Card,
-  EmptyState,
   IconButton,
-  ErrorState,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -21,6 +20,7 @@ import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerDocument } from '@/lib/api/owner';
 import type { Paginated } from '@/lib/api/properties';
 import { errorMessage } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { UploadOwnerDocumentSheet } from '@/components/owner/UploadOwnerDocumentSheet';
@@ -58,26 +58,22 @@ export default function OwnerDocuments() {
     );
 
   // Optimistic: the switch moves at once, and snaps back if the API refuses.
-  const share = useMutation({
+  const share = useOptimisticMutation({
     mutationFn: ({ id, shared }: { id: string; shared: boolean }) =>
       ownerApi.setDocumentShared(id, shared),
-    onMutate: async ({ id, shared }) => {
-      await qc.cancelQueries({ queryKey: qk.owner.documents });
-      const previous = qc.getQueryData<Paginated<OwnerDocument>>(qk.owner.documents);
-      qc.setQueryData<Paginated<OwnerDocument>>(qk.owner.documents, (old) =>
-        old
-          ? {
-              ...old,
-              items: old.items.map((d) => (d.id === id ? { ...d, sharedWithBuyer: shared } : d)),
-            }
-          : old
-      );
-      return { previous };
-    },
-    onError: (err, _v, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.owner.documents, ctx.previous);
-      toast.show(errorMessage(err, 'Could not change who can see this.'), 'error');
-    },
+    patches: ({ id, shared }) => [
+      {
+        queryKey: qk.owner.documents,
+        update: (old) => {
+          const o = old as Paginated<OwnerDocument>;
+          return {
+            ...o,
+            items: o.items.map((d) => (d.id === id ? { ...d, sharedWithBuyer: shared } : d)),
+          };
+        },
+      },
+    ],
+    errorMessage: 'Could not change who can see this.',
   });
 
   const refresh = (
@@ -111,16 +107,24 @@ export default function OwnerDocuments() {
           }
         />
       </View>
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={72} radius={radius.lg} />
-          <Skeleton height={72} radius={radius.lg} />
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            <Skeleton height={72} radius={radius.lg} />
+            <Skeleton height={72} radius={radius.lg} />
+          </View>
+        }
+        isEmpty={!query.data?.items.length}
+        empty={{
+          icon: <FileStack size={34} color={colors.mutedForeground} />,
+          title: 'No documents yet',
+          description:
+            'Upload transfer agreements, receipts and filings, then share them with your buyer when you’re ready.',
+          action: <Button label="Upload a document" onPress={() => setUploading(true)} />,
+        }}
+      >
         <FlashList
           data={query.data?.items ?? []}
           keyExtractor={(d) => d.id}
@@ -130,14 +134,6 @@ export default function OwnerDocuments() {
             paddingBottom: insets.bottom + spacing['3xl'],
           }}
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<FileStack size={34} color={colors.mutedForeground} />}
-              title="No documents yet"
-              description="Upload transfer agreements, receipts and filings, then share them with your buyer when you’re ready."
-              action={<Button label="Upload a document" onPress={() => setUploading(true)} />}
-            />
-          }
           renderItem={({ item: d }: { item: OwnerDocument }) => {
             const sharingThis = share.isPending && share.variables?.id === d.id;
             return (
@@ -193,7 +189,7 @@ export default function OwnerDocuments() {
             );
           }}
         />
-      )}
+      </QueryState>
       <UploadOwnerDocumentSheet open={uploading} onClose={() => setUploading(false)} />
     </View>
   );

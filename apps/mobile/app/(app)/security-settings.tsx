@@ -19,7 +19,7 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
+  QueryState,
   NumberField,
   PasswordField,
   Skeleton,
@@ -73,22 +73,22 @@ export default function SecuritySettings() {
         }}
       >
         <AppLockSection />
-        {overview.isError && !overview.data ? (
-          <ErrorState onRetry={() => overview.refetch()} />
-        ) : !overview.data ? (
-          <Skeleton height={180} />
-        ) : (
-          <>
-            <EmailSection />
-            <PhoneVerificationSection overview={overview.data} />
-            <PasskeySection />
-            <TwoFactorSection overview={overview.data} />
-            {overview.data.hasPassword ? <TransactionPinSection overview={overview.data} /> : null}
-            {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
-            {isRenter ? <DataExportSection /> : null}
-            {overview.data.hasPassword ? <DangerSection /> : null}
-          </>
-        )}
+        <QueryState query={overview} skeleton={<Skeleton height={180} />}>
+          {overview.data ? (
+            <>
+              <EmailSection />
+              <PhoneVerificationSection overview={overview.data} />
+              <PasskeySection />
+              <TwoFactorSection overview={overview.data} />
+              {overview.data.hasPassword ? (
+                <TransactionPinSection overview={overview.data} />
+              ) : null}
+              {overview.data.hasPassword ? <PasswordSection /> : <SocialOnlyNote />}
+              {isRenter ? <DataExportSection /> : null}
+              {overview.data.hasPassword ? <DangerSection /> : null}
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
     </View>
   );

@@ -15,8 +15,8 @@ import {
   Button,
   Chip,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -158,17 +158,16 @@ function Leads({ onAdd }: { onAdd: () => void }) {
           ))}
         </ScrollView>
       </View>
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={88} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={88} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -196,7 +195,7 @@ function Leads({ onAdd }: { onAdd: () => void }) {
             />
           }
         />
-      )}
+      </QueryState>
     </>
   );
 }
@@ -275,12 +274,24 @@ function Viewings({ onAdd }: { onAdd: () => void }) {
         gap: spacing.lg,
       }}
     >
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isPending ? (
-        [0, 1, 2].map((i) => <Skeleton key={i} height={84} radius={radius.lg} />)
-      ) : sections.length ? (
-        sections.map((s) => (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.lg }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={84} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={!sections.length}
+        empty={{
+          icon: <CalendarClock size={34} color={colors.mutedForeground} />,
+          title: 'No viewings booked',
+          description: 'Book a viewing for a lead and it shows up here on the day.',
+          action: <Button label="Book a viewing" onPress={onAdd} />,
+        }}
+      >
+        {sections.map((s) => (
           <View key={s.title} style={{ gap: spacing.sm }}>
             <Text variant="heading" headingLevel={2}>
               {s.title}
@@ -296,15 +307,8 @@ function Viewings({ onAdd }: { onAdd: () => void }) {
               />
             ))}
           </View>
-        ))
-      ) : (
-        <EmptyState
-          icon={<CalendarClock size={34} color={colors.mutedForeground} />}
-          title="No viewings booked"
-          description="Book a viewing for a lead and it shows up here on the day."
-          action={<Button label="Book a viewing" onPress={onAdd} />}
-        />
-      )}
+        ))}
+      </QueryState>
     </ScrollView>
   );
 }

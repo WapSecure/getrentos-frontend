@@ -11,8 +11,8 @@ import {
   Button,
   Chip,
   EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -29,7 +29,6 @@ import {
 } from '@/lib/api/applications';
 import { ApplicationAssistantCard } from '@/components/applications/ApplicationAssistantCard';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 
 type Filter = 'all' | ApplicationStatus;
 
@@ -105,60 +104,56 @@ export default function Applications() {
         ) : null}
       </View>
 
-      {query.isRefetchError && all.length > 0 ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.sm }}>
-          <RefreshFailedNotice onRetry={() => query.refetch()} retrying={query.isFetching} />
-        </View>
-      ) : null}
-
-      {query.isError && all.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={104} radius={radius.lg} />
-          ))}
-        </View>
-      ) : all.length === 0 ? (
-        <ScrollView
-          contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
-          refreshControl={refresh}
-        >
-          <ApplicationAssistantCard />
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ paddingTop: spacing.lg, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={104} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
+        {all.length === 0 ? (
+          <ScrollView
+            contentContainerStyle={{ padding: spacing.xl, gap: spacing.lg }}
+            refreshControl={refresh}
+          >
+            <ApplicationAssistantCard />
+            <EmptyState
+              icon={<FileText size={34} color={colors.mutedForeground} />}
+              title="No applications yet"
+              description="Submitted rental applications, their status, and required documents will appear here."
+              action={
+                <Button
+                  label="Browse listings"
+                  onPress={() => router.push('/(app)/(renter)/discover')}
+                />
+              }
+            />
+          </ScrollView>
+        ) : items.length === 0 ? (
           <EmptyState
             icon={<FileText size={34} color={colors.mutedForeground} />}
-            title="No applications yet"
-            description="Submitted rental applications, their status, and required documents will appear here."
-            action={
-              <Button
-                label="Browse listings"
-                onPress={() => router.push('/(app)/(renter)/discover')}
-              />
-            }
+            title="Nothing here"
+            description="No applications match this filter."
+            action={<Button label="Show all" variant="outline" onPress={() => setFilter('all')} />}
           />
-        </ScrollView>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<FileText size={34} color={colors.mutedForeground} />}
-          title="Nothing here"
-          description="No applications match this filter."
-          action={<Button label="Show all" variant="outline" onPress={() => setFilter('all')} />}
-        />
-      ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: RenterApplication }) => (
-            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <ApplicationRow application={item} />
-            </View>
-          )}
-          contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: spacing['3xl'] }}
-          refreshControl={refresh}
-        />
-      )}
+        ) : (
+          <FlashList
+            data={items}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }: { item: RenterApplication }) => (
+              <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+                <ApplicationRow application={item} />
+              </View>
+            )}
+            contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: spacing['3xl'] }}
+            refreshControl={refresh}
+          />
+        )}
+      </QueryState>
     </View>
   );
 }

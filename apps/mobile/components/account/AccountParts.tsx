@@ -1,7 +1,7 @@
 import { Alert, View } from 'react-native';
 import Constants from 'expo-constants';
 import { LogOut } from 'lucide-react-native';
-import { Avatar, Button, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import { Avatar, Button, Divider, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useIdentityVerification } from '@/hooks/useIdentityVerification';
 
@@ -64,19 +64,15 @@ export function AccountHeader({
 
 /** Light / dark / auto, as the last row of the Settings group. */
 export function AppearanceFooter() {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   return (
-    <View
-      style={{
-        padding: spacing.lg,
-        gap: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-      }}
-    >
-      <Text variant="bodyStrong">Appearance</Text>
-      <ThemeToggle variant="segmented" />
-    </View>
+    <>
+      <Divider />
+      <View style={{ padding: spacing.lg, gap: spacing.sm }}>
+        <Text variant="bodyStrong">Appearance</Text>
+        <ThemeToggle variant="segmented" />
+      </View>
+    </>
   );
 }
 

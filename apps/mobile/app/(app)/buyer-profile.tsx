@@ -8,7 +8,7 @@ import {
   Avatar,
   Button,
   Card,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -34,15 +34,16 @@ export default function BuyerProfileScreen() {
         onBack={() => goBack()}
       />
 
-      {query.data ? (
-        <ProfileForm data={query.data} />
-      ) : query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={220} radius={16} />
-        </View>
-      ) : (
-        <ErrorState onRetry={() => query.refetch()} />
-      )}
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={220} radius={16} />
+          </View>
+        }
+      >
+        {query.data ? <ProfileForm data={query.data} /> : null}
+      </QueryState>
     </View>
   );
 }

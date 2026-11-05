@@ -16,8 +16,8 @@ import {
   Card,
   DetailSkeleton,
   Divider,
-  ErrorState,
   Price,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -121,291 +121,297 @@ export default function LandListingDetail() {
         </Text>
       </View>
 
-      {query.isError && !listing ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !listing ? (
-        <DetailSkeleton style={{ paddingHorizontal: spacing.xl }} />
-      ) : (
-        <>
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 140, gap: spacing.lg }}
-          >
-            <PropertyGallery
-              images={toGallery(listing.coverImageUrl, listing.galleryImageUrls)}
-              height={220}
-              emptyLabel="No photos for this parcel yet"
-            />
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={<DetailSkeleton />}
+      >
+        {listing ? (
+          <>
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: insets.bottom + 140, gap: spacing.lg }}
+            >
+              <PropertyGallery
+                images={toGallery(listing.coverImageUrl, listing.galleryImageUrls)}
+                height={220}
+                emptyLabel="No photos for this parcel yet"
+              />
 
-            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-              <View style={{ gap: 4 }}>
-                <Price amount={listing.price} variant="display" />
-                <Text variant="callout" color="mutedForeground">
-                  {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
-                </Text>
-                {listing.addressHidden ? (
-                  <Text variant="caption" color="mutedForeground">
-                    The exact address is shared once the property is verified.
+              <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+                <View style={{ gap: 4 }}>
+                  <Price amount={listing.price} variant="display" />
+                  <Text variant="callout" color="mutedForeground">
+                    {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
                   </Text>
-                ) : null}
-                <Text variant="bodyStrong" style={{ marginTop: 4 }}>
-                  {formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
-                </Text>
-              </View>
-
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                <Badge
-                  label={LAND_DILIGENCE_LABEL[listing.diligence.status]}
-                  tone={LAND_DILIGENCE_TONE[listing.diligence.status]}
-                />
-                <Badge
-                  label={`Encumbrance: ${LAND_ENCUMBRANCE_LABEL[listing.parcel.encumbranceStatus]}`}
-                  tone={LAND_ENCUMBRANCE_TONE[listing.parcel.encumbranceStatus]}
-                />
-                {listing.parcel.subdivisionAllowed ? (
-                  <Badge label="Subdivision allowed" tone="info" />
-                ) : null}
-                {listing.parcel.fractionalOwnershipAllowed ? (
-                  <Badge label="Fractional ownership" tone="info" />
-                ) : null}
-              </View>
-
-              {listing.diligence.status === 'VERIFIED' ? (
-                <Card
-                  elevated
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: spacing.md,
-                    backgroundColor: colors.successSubtle,
-                  }}
-                >
-                  <ShieldCheck size={20} color={colors.success} />
-                  <View style={{ flex: 1 }}>
-                    <Text variant="bodyStrong" style={{ color: colors.success }}>
-                      Title diligence verified
-                    </Text>
+                  {listing.addressHidden ? (
                     <Text variant="caption" color="mutedForeground">
-                      {listing.diligence.reviewedAt
-                        ? `Reviewed ${formatDate(listing.diligence.reviewedAt, 'medium')}`
-                        : 'Reviewed by GetRentos'}
-                      {listing.diligence.expiresAt
-                        ? ` · valid to ${formatDate(listing.diligence.expiresAt, 'medium')}`
-                        : ''}
-                    </Text>
-                  </View>
-                </Card>
-              ) : null}
-
-              <Divider />
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading">About this parcel</Text>
-                <Text variant="body" color="mutedForeground">
-                  {listing.description}
-                </Text>
-              </View>
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading">Parcel facts</Text>
-                <Card elevated>
-                  <Fact label="Plot" value={listing.parcel.plotNumber} />
-                  <Fact label="Block" value={listing.parcel.block} />
-                  <Fact label="Estate" value={listing.parcel.estateName} />
-                  <Fact
-                    label="Area"
-                    value={formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
-                  />
-                  <Fact
-                    label="Frontage"
-                    value={listing.parcel.frontage ? `${listing.parcel.frontage} m` : undefined}
-                  />
-                  <Fact
-                    label="Depth"
-                    value={listing.parcel.depth ? `${listing.parcel.depth} m` : undefined}
-                  />
-                  <Fact label="Zoning" value={listing.parcel.zoning} />
-                  <Fact label="Permitted use" value={listing.parcel.permittedUse} />
-                  <Fact label="Terrain" value={listing.parcel.terrain} />
-                  <Fact
-                    label="Road access"
-                    value={
-                      listing.parcel.roadAccess == null
-                        ? undefined
-                        : listing.parcel.roadAccess
-                          ? 'Yes'
-                          : 'No'
-                    }
-                  />
-                  <Fact
-                    label="Title type"
-                    value={
-                      listing.parcel.titleType
-                        ? LAND_TITLE_TYPE_LABEL[listing.parcel.titleType]
-                        : undefined
-                    }
-                  />
-                  <Fact label="Tenure" value={listing.parcel.tenure} />
-                </Card>
-                <Text variant="caption" color="mutedForeground">
-                  Title and survey numbers are shared with serious buyers after an enquiry, not
-                  published publicly.
-                </Text>
-              </View>
-
-              {listing.parcel.utilities?.length ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading">Utilities</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                    {listing.parcel.utilities.map((u) => (
-                      <Badge key={u} label={u} tone="neutral" />
-                    ))}
-                  </View>
-                </View>
-              ) : null}
-
-              {listing.parcel.boundaryNotes ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading">Boundaries</Text>
-                  <Text variant="body" color="mutedForeground">
-                    {listing.parcel.boundaryNotes}
-                  </Text>
-                </View>
-              ) : null}
-
-              {outline || (listing.latitude != null && listing.longitude != null) ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading">Location</Text>
-                  <PropertyMapView
-                    markers={
-                      listing.latitude != null && listing.longitude != null
-                        ? [
-                            {
-                              id: listing.id,
-                              latitude: listing.latitude,
-                              longitude: listing.longitude,
-                            },
-                          ]
-                        : []
-                    }
-                    variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
-                    boundary={outline ?? undefined}
-                    zoom={14}
-                    height={outline ? 240 : 200}
-                  />
-                  {outline ? (
-                    <Text variant="caption" color="mutedForeground">
-                      The shaded outline is the plot as drawn by the owner.
+                      The exact address is shared once the property is verified.
                     </Text>
                   ) : null}
+                  <Text variant="bodyStrong" style={{ marginTop: 4 }}>
+                    {formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
+                  </Text>
                 </View>
-              ) : null}
+
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+                  <Badge
+                    label={LAND_DILIGENCE_LABEL[listing.diligence.status]}
+                    tone={LAND_DILIGENCE_TONE[listing.diligence.status]}
+                  />
+                  <Badge
+                    label={`Encumbrance: ${LAND_ENCUMBRANCE_LABEL[listing.parcel.encumbranceStatus]}`}
+                    tone={LAND_ENCUMBRANCE_TONE[listing.parcel.encumbranceStatus]}
+                  />
+                  {listing.parcel.subdivisionAllowed ? (
+                    <Badge label="Subdivision allowed" tone="info" />
+                  ) : null}
+                  {listing.parcel.fractionalOwnershipAllowed ? (
+                    <Badge label="Fractional ownership" tone="info" />
+                  ) : null}
+                </View>
+
+                {listing.diligence.status === 'VERIFIED' ? (
+                  <Card
+                    elevated
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: spacing.md,
+                      backgroundColor: colors.successSubtle,
+                    }}
+                  >
+                    <ShieldCheck size={20} color={colors.success} />
+                    <View style={{ flex: 1 }}>
+                      <Text variant="bodyStrong" style={{ color: colors.success }}>
+                        Title diligence verified
+                      </Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {listing.diligence.reviewedAt
+                          ? `Reviewed ${formatDate(listing.diligence.reviewedAt, 'medium')}`
+                          : 'Reviewed by GetRentos'}
+                        {listing.diligence.expiresAt
+                          ? ` · valid to ${formatDate(listing.diligence.expiresAt, 'medium')}`
+                          : ''}
+                      </Text>
+                    </View>
+                  </Card>
+                ) : null}
+
+                <Divider />
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading">About this parcel</Text>
+                  <Text variant="body" color="mutedForeground">
+                    {listing.description}
+                  </Text>
+                </View>
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading">Parcel facts</Text>
+                  <Card elevated>
+                    <Fact label="Plot" value={listing.parcel.plotNumber} />
+                    <Fact label="Block" value={listing.parcel.block} />
+                    <Fact label="Estate" value={listing.parcel.estateName} />
+                    <Fact
+                      label="Area"
+                      value={formatLandArea(listing.parcel.areaValue, listing.parcel.areaUnit)}
+                    />
+                    <Fact
+                      label="Frontage"
+                      value={listing.parcel.frontage ? `${listing.parcel.frontage} m` : undefined}
+                    />
+                    <Fact
+                      label="Depth"
+                      value={listing.parcel.depth ? `${listing.parcel.depth} m` : undefined}
+                    />
+                    <Fact label="Zoning" value={listing.parcel.zoning} />
+                    <Fact label="Permitted use" value={listing.parcel.permittedUse} />
+                    <Fact label="Terrain" value={listing.parcel.terrain} />
+                    <Fact
+                      label="Road access"
+                      value={
+                        listing.parcel.roadAccess == null
+                          ? undefined
+                          : listing.parcel.roadAccess
+                            ? 'Yes'
+                            : 'No'
+                      }
+                    />
+                    <Fact
+                      label="Title type"
+                      value={
+                        listing.parcel.titleType
+                          ? LAND_TITLE_TYPE_LABEL[listing.parcel.titleType]
+                          : undefined
+                      }
+                    />
+                    <Fact label="Tenure" value={listing.parcel.tenure} />
+                  </Card>
+                  <Text variant="caption" color="mutedForeground">
+                    Title and survey numbers are shared with serious buyers after an enquiry, not
+                    published publicly.
+                  </Text>
+                </View>
+
+                {listing.parcel.utilities?.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="heading">Utilities</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+                      {listing.parcel.utilities.map((u) => (
+                        <Badge key={u} label={u} tone="neutral" />
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
+
+                {listing.parcel.boundaryNotes ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="heading">Boundaries</Text>
+                    <Text variant="body" color="mutedForeground">
+                      {listing.parcel.boundaryNotes}
+                    </Text>
+                  </View>
+                ) : null}
+
+                {outline || (listing.latitude != null && listing.longitude != null) ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="heading">Location</Text>
+                    <PropertyMapView
+                      markers={
+                        listing.latitude != null && listing.longitude != null
+                          ? [
+                              {
+                                id: listing.id,
+                                latitude: listing.latitude,
+                                longitude: listing.longitude,
+                              },
+                            ]
+                          : []
+                      }
+                      variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
+                      boundary={outline ?? undefined}
+                      zoom={14}
+                      height={outline ? 240 : 200}
+                    />
+                    {outline ? (
+                      <Text variant="caption" color="mutedForeground">
+                        The shaded outline is the plot as drawn by the owner.
+                      </Text>
+                    ) : null}
+                  </View>
+                ) : null}
+              </View>
+            </ScrollView>
+
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: colors.background,
+              }}
+            >
+              <Divider />
+              <View
+                style={{
+                  gap: spacing.sm,
+                  padding: spacing.xl,
+                  paddingBottom: insets.bottom + spacing.sm,
+                }}
+              >
+                {isBuyer ? (
+                  <>
+                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                      <Button
+                        label="Request viewing"
+                        variant="outline"
+                        icon={<Calendar size={16} color={colors.foreground} />}
+                        style={{ flex: 1 }}
+                        onPress={() => setViewingOpen(true)}
+                      />
+                      <Button
+                        label="Make offer"
+                        icon={<FileSignature size={16} color={colors.primaryForeground} />}
+                        style={{ flex: 1 }}
+                        onPress={() => setOfferOpen(true)}
+                      />
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                      <Button
+                        label="Live video tour"
+                        size="sm"
+                        variant="ghost"
+                        style={{ flex: 1 }}
+                        onPress={() => setRequest('tour')}
+                      />
+                      <Button
+                        label="Independent inspection"
+                        size="sm"
+                        variant="ghost"
+                        style={{ flex: 1 }}
+                        onPress={() => setRequest('inspection')}
+                      />
+                    </View>
+                    <Button
+                      label="Ask the seller a question"
+                      loadingLabel="Opening chat…"
+                      variant="ghost"
+                      icon={<MessageCircle size={16} color={colors.foreground} />}
+                      loading={ask.isPending}
+                      onPress={() => ask.mutate(listing.id)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Text variant="caption" color="mutedForeground">
+                      Questions, viewings and offers on land come from a buyer account. Add one to
+                      this account to go ahead.
+                    </Text>
+                    <Button
+                      label="Add a buyer account"
+                      loadingLabel="Adding…"
+                      loading={addBuyer.isPending}
+                      onPress={() => addBuyer.mutate()}
+                    />
+                  </>
+                )}
+              </View>
             </View>
-          </ScrollView>
 
-          <View
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              gap: spacing.sm,
-              padding: spacing.xl,
-              paddingBottom: insets.bottom + spacing.sm,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
-              backgroundColor: colors.background,
-            }}
-          >
-            {isBuyer ? (
-              <>
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  <Button
-                    label="Request viewing"
-                    variant="outline"
-                    icon={<Calendar size={16} color={colors.foreground} />}
-                    style={{ flex: 1 }}
-                    onPress={() => setViewingOpen(true)}
-                  />
-                  <Button
-                    label="Make offer"
-                    icon={<FileSignature size={16} color={colors.primaryForeground} />}
-                    style={{ flex: 1 }}
-                    onPress={() => setOfferOpen(true)}
-                  />
-                </View>
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  <Button
-                    label="Live video tour"
-                    size="sm"
-                    variant="ghost"
-                    style={{ flex: 1 }}
-                    onPress={() => setRequest('tour')}
-                  />
-                  <Button
-                    label="Independent inspection"
-                    size="sm"
-                    variant="ghost"
-                    style={{ flex: 1 }}
-                    onPress={() => setRequest('inspection')}
-                  />
-                </View>
-                <Button
-                  label="Ask the seller a question"
-                  loadingLabel="Opening chat…"
-                  variant="ghost"
-                  icon={<MessageCircle size={16} color={colors.foreground} />}
-                  loading={ask.isPending}
-                  onPress={() => ask.mutate(listing.id)}
+            <Sheet
+              open={!!request}
+              onClose={() => setRequest(null)}
+              title={
+                request === 'tour'
+                  ? 'Ask for a live video tour'
+                  : 'Commission an independent inspection'
+              }
+            >
+              {request === 'tour' ? (
+                <RequestTour
+                  target={{ listingId: listing.id }}
+                  landName={listing.title}
+                  onDone={() => setRequest(null)}
                 />
-              </>
-            ) : (
-              <>
-                <Text variant="caption" color="mutedForeground">
-                  Questions, viewings and offers on land come from a buyer account. Add one to this
-                  account to go ahead.
-                </Text>
-                <Button
-                  label="Add a buyer account"
-                  loadingLabel="Adding…"
-                  loading={addBuyer.isPending}
-                  onPress={() => addBuyer.mutate()}
+              ) : request === 'inspection' ? (
+                <RequestInspection
+                  target={{ listingId: listing.id }}
+                  landName={listing.title}
+                  onDone={() => setRequest(null)}
                 />
-              </>
-            )}
-          </View>
-
-          <Sheet
-            open={!!request}
-            onClose={() => setRequest(null)}
-            title={
-              request === 'tour'
-                ? 'Ask for a live video tour'
-                : 'Commission an independent inspection'
-            }
-          >
-            {request === 'tour' ? (
-              <RequestTour
-                target={{ listingId: listing.id }}
-                landName={listing.title}
-                onDone={() => setRequest(null)}
-              />
-            ) : request === 'inspection' ? (
-              <RequestInspection
-                target={{ listingId: listing.id }}
-                landName={listing.title}
-                onDone={() => setRequest(null)}
-              />
-            ) : null}
-          </Sheet>
-          <RequestViewingSheet
-            open={viewingOpen}
-            onClose={() => setViewingOpen(false)}
-            listing={target}
-          />
-          <MakeOfferSheet open={offerOpen} onClose={() => setOfferOpen(false)} listing={target} />
-        </>
-      )}
+              ) : null}
+            </Sheet>
+            <RequestViewingSheet
+              open={viewingOpen}
+              onClose={() => setViewingOpen(false)}
+              listing={target}
+            />
+            <MakeOfferSheet open={offerOpen} onClose={() => setOfferOpen(false)} listing={target} />
+          </>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

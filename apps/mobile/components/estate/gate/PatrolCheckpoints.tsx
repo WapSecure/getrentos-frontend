@@ -5,9 +5,8 @@ import { MapPin, Plus } from 'lucide-react-native';
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -114,18 +113,18 @@ export function PatrolCheckpoints({ estateId }: { estateId: string }) {
         disabled={!estateId}
         onPress={() => setAdding(true)}
       />
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !query.data ? (
-        <Skeleton height={160} radius={radius.lg} />
-      ) : !query.data.length ? (
-        <EmptyState
-          icon={<MapPin size={34} color={colors.mutedForeground} />}
-          title="No checkpoints yet"
-          description="Add the places a patrol must reach: the gate, the generator house, the back fence. Each one gets a code to print and put up."
-        />
-      ) : (
-        query.data.map((c) => (
+      <QueryState
+        query={query}
+        skeleton={<Skeleton height={160} radius={radius.lg} />}
+        isEmpty={!query.data?.length}
+        empty={{
+          icon: <MapPin size={34} color={colors.mutedForeground} />,
+          title: 'No checkpoints yet',
+          description:
+            'Add the places a patrol must reach: the gate, the generator house, the back fence. Each one gets a code to print and put up.',
+        }}
+      >
+        {(query.data ?? []).map((c) => (
           <Card key={c.id} elevated style={{ gap: spacing.sm }}>
             <View
               accessible
@@ -171,8 +170,8 @@ export function PatrolCheckpoints({ estateId }: { estateId: string }) {
               />
             </View>
           </Card>
-        ))
-      )}
+        ))}
+      </QueryState>
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add a checkpoint">
         {adding ? (

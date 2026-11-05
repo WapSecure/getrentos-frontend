@@ -17,8 +17,8 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -93,181 +93,184 @@ export default function ApplicationDetail() {
         </View>
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
-          {!query.data ? (
-            query.isError ? (
-              <ErrorState onRetry={() => query.refetch()} />
-            ) : (
+          <QueryState
+            query={query}
+            skeleton={
               <View style={{ gap: spacing.md }}>
                 <Skeleton height={24} width="60%" />
                 <Skeleton height={80} />
               </View>
-            )
-          ) : !app ? (
-            <Text variant="body" color="mutedForeground">
-              This application could not be found.
-            </Text>
-          ) : (
-            <>
-              <View style={{ gap: 6 }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Price amount={app.price} period={app.period} variant="title" />
-                  <Badge
-                    label={APPLICATION_STATUS_LABEL[app.status]}
-                    tone={APPLICATION_STATUS_TONE[app.status]}
-                  />
+            }
+          >
+            {!app ? (
+              <Text variant="body" color="mutedForeground">
+                This application could not be found.
+              </Text>
+            ) : (
+              <>
+                <View style={{ gap: 6 }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <Price amount={app.price} period={app.period} variant="title" />
+                    <Badge
+                      label={APPLICATION_STATUS_LABEL[app.status]}
+                      tone={APPLICATION_STATUS_TONE[app.status]}
+                    />
+                  </View>
+                  <Text variant="heading">{app.title}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <MapPin size={13} color={colors.mutedForeground} />
+                    <Text variant="callout" color="mutedForeground">
+                      {app.address}
+                    </Text>
+                  </View>
                 </View>
-                <Text variant="heading">{app.title}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <MapPin size={13} color={colors.mutedForeground} />
-                  <Text variant="callout" color="mutedForeground">
-                    {app.address}
-                  </Text>
-                </View>
-              </View>
 
-              <Card elevated padding="none">
-                <View style={{ padding: spacing.lg, gap: spacing.md }}>
-                  {app.timeline.map((step, i) => (
-                    <View key={step.stage} style={{ flexDirection: 'row', gap: spacing.md }}>
-                      <View style={{ alignItems: 'center', width: 22 }}>
-                        <View
-                          style={{
-                            width: 20,
-                            height: 20,
-                            borderRadius: 10,
-                            borderWidth: 1.5,
-                            borderColor: step.completed ? colors.primary : colors.border,
-                            backgroundColor: step.completed ? colors.primary : 'transparent',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          {step.completed ? (
-                            <Check size={11} color={colors.primaryForeground} strokeWidth={3} />
-                          ) : null}
-                        </View>
-                        {i < app.timeline.length - 1 ? (
+                <Card elevated padding="none">
+                  <View style={{ padding: spacing.lg, gap: spacing.md }}>
+                    {app.timeline.map((step, i) => (
+                      <View key={step.stage} style={{ flexDirection: 'row', gap: spacing.md }}>
+                        <View style={{ alignItems: 'center', width: 22 }}>
                           <View
                             style={{
-                              flex: 1,
-                              width: 2,
-                              backgroundColor: colors.border,
-                              marginVertical: 2,
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              borderWidth: 1.5,
+                              borderColor: step.completed ? colors.primary : colors.border,
+                              backgroundColor: step.completed ? colors.primary : 'transparent',
+                              alignItems: 'center',
+                              justifyContent: 'center',
                             }}
-                          />
-                        ) : null}
-                      </View>
-                      <View
-                        style={{
-                          flex: 1,
-                          paddingBottom: i < app.timeline.length - 1 ? spacing.md : 0,
-                        }}
-                      >
-                        <Text
-                          variant="bodyStrong"
+                          >
+                            {step.completed ? (
+                              <Check size={11} color={colors.primaryForeground} strokeWidth={3} />
+                            ) : null}
+                          </View>
+                          {i < app.timeline.length - 1 ? (
+                            <View
+                              style={{
+                                flex: 1,
+                                width: 2,
+                                backgroundColor: colors.border,
+                                marginVertical: 2,
+                              }}
+                            />
+                          ) : null}
+                        </View>
+                        <View
                           style={{
-                            color: step.completed ? colors.foreground : colors.mutedForeground,
+                            flex: 1,
+                            paddingBottom: i < app.timeline.length - 1 ? spacing.md : 0,
                           }}
                         >
-                          {step.stage}
-                        </Text>
-                        <Text variant="caption" color="mutedForeground">
-                          {/* The API sends an ISO date once a stage happens, and
+                          <Text
+                            variant="bodyStrong"
+                            style={{
+                              color: step.completed ? colors.foreground : colors.mutedForeground,
+                            }}
+                          >
+                            {step.stage}
+                          </Text>
+                          <Text variant="caption" color="mutedForeground">
+                            {/* The API sends an ISO date once a stage happens, and
                               the literal word "Pending" before it does. */}
-                          {/^\d{4}-\d{2}-\d{2}/.test(step.date) ? formatDate(step.date) : step.date}
-                        </Text>
+                            {/^\d{4}-\d{2}-\d{2}/.test(step.date)
+                              ? formatDate(step.date)
+                              : step.date}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  ))}
+                    ))}
+                  </View>
+                </Card>
+
+                <View style={{ flexDirection: 'row', gap: spacing.xl }}>
+                  {app.moveInDate ? (
+                    <Detail
+                      icon={<CalendarClock size={15} color={colors.foreground} />}
+                      label="Move-in"
+                      value={formatDate(app.moveInDate)}
+                    />
+                  ) : null}
+                  {app.leaseTerm ? (
+                    <Detail
+                      icon={<FileCheck2 size={15} color={colors.foreground} />}
+                      label="Lease term"
+                      value={app.leaseTerm}
+                    />
+                  ) : null}
                 </View>
-              </Card>
 
-              <View style={{ flexDirection: 'row', gap: spacing.xl }}>
-                {app.moveInDate ? (
-                  <Detail
-                    icon={<CalendarClock size={15} color={colors.foreground} />}
-                    label="Move-in"
-                    value={formatDate(app.moveInDate)}
-                  />
-                ) : null}
-                {app.leaseTerm ? (
-                  <Detail
-                    icon={<FileCheck2 size={15} color={colors.foreground} />}
-                    label="Lease term"
-                    value={app.leaseTerm}
-                  />
-                ) : null}
-              </View>
-
-              {app.documents?.length ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong">Documents</Text>
-                  {app.documents.map((doc) => (
-                    <View
-                      key={doc.name}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: spacing.md,
-                        borderRadius: radius.md,
-                        backgroundColor: colors.secondary,
-                      }}
-                    >
-                      <Text variant="callout">{doc.name}</Text>
-                      <Text
-                        variant="caption"
+                {app.documents?.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="bodyStrong">Documents</Text>
+                    {app.documents.map((doc) => (
+                      <View
+                        key={doc.name}
                         style={{
-                          color: doc.uploaded ? colors.success : colors.mutedForeground,
-                          fontWeight: '600',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: spacing.md,
+                          borderRadius: radius.md,
+                          backgroundColor: colors.secondary,
                         }}
                       >
-                        {doc.uploaded ? 'Ready' : doc.required ? 'Required' : 'Optional'}
+                        <Text variant="callout">{doc.name}</Text>
+                        <Text
+                          variant="caption"
+                          style={{
+                            color: doc.uploaded ? colors.success : colors.mutedForeground,
+                            fontWeight: '600',
+                          }}
+                        >
+                          {doc.uploaded ? 'Ready' : doc.required ? 'Required' : 'Optional'}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+
+                {app.applicationNotes ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="bodyStrong">Your note to the landlord</Text>
+                    <Text variant="body" color="mutedForeground">
+                      {app.applicationNotes}
+                    </Text>
+                  </View>
+                ) : null}
+
+                <ApplicationNotesSection applicationId={app.id} />
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="bodyStrong">Landlord</Text>
+                  <Text variant="body">{app.landlord.name}</Text>
+                  {app.landlord.phone ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Phone size={13} color={colors.mutedForeground} />
+                      <Text variant="callout" color="mutedForeground">
+                        {app.landlord.phone}
                       </Text>
                     </View>
-                  ))}
+                  ) : null}
+                  {app.landlord.email ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Mail size={13} color={colors.mutedForeground} />
+                      <Text variant="callout" color="mutedForeground">
+                        {app.landlord.email}
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
-              ) : null}
-
-              {app.applicationNotes ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="bodyStrong">Your note to the landlord</Text>
-                  <Text variant="body" color="mutedForeground">
-                    {app.applicationNotes}
-                  </Text>
-                </View>
-              ) : null}
-
-              <ApplicationNotesSection applicationId={app.id} />
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="bodyStrong">Landlord</Text>
-                <Text variant="body">{app.landlord.name}</Text>
-                {app.landlord.phone ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Phone size={13} color={colors.mutedForeground} />
-                    <Text variant="callout" color="mutedForeground">
-                      {app.landlord.phone}
-                    </Text>
-                  </View>
-                ) : null}
-                {app.landlord.email ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Mail size={13} color={colors.mutedForeground} />
-                    <Text variant="callout" color="mutedForeground">
-                      {app.landlord.email}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-            </>
-          )}
+              </>
+            )}
+          </QueryState>
         </View>
       </ScrollView>
 

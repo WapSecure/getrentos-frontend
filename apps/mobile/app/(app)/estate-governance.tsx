@@ -21,9 +21,8 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -159,19 +158,25 @@ export default function EstateGovernance() {
           ))}
         </ScrollView>
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          [0, 1, 2].map((i) => <Skeleton key={i} height={96} radius={radius.lg} />)
-        ) : !records.length ? (
-          <EmptyState
-            icon={<BookOpen size={34} color={colors.mutedForeground} />}
-            title={filter === 'all' ? 'No records yet' : `No ${filterLabel} yet`}
-            description="Upload bylaws or meeting minutes so they survive committee turnover. Residents read them in their app."
-            action={<Button label="Upload a record" onPress={() => setPanel({ kind: 'upload' })} />}
-          />
-        ) : (
-          records.map((r) => (
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={96} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={!records.length}
+          empty={{
+            icon: <BookOpen size={34} color={colors.mutedForeground} />,
+            title: filter === 'all' ? 'No records yet' : `No ${filterLabel} yet`,
+            description:
+              'Upload bylaws or meeting minutes so they survive committee turnover. Residents read them in their app.',
+            action: <Button label="Upload a record" onPress={() => setPanel({ kind: 'upload' })} />,
+          }}
+        >
+          {records.map((r) => (
             <RecordCard
               key={r.id}
               r={r}
@@ -180,8 +185,8 @@ export default function EstateGovernance() {
                 setPanel({ kind: 'actions', record: r });
               }}
             />
-          ))
-        )}
+          ))}
+        </QueryState>
       </ScrollView>
 
       <Sheet

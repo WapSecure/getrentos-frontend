@@ -8,11 +8,9 @@ import {
   Badge,
   Button,
   Card,
-  Chip,
-  ErrorState,
   FormAlert,
-  NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -20,12 +18,12 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
-  COMMON_BANKS,
   sellerPayoutApi,
   type SellerPayoutStatus,
   type SellerSalePayout,
 } from '@/lib/api/sellerPayout';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
+import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -82,38 +80,35 @@ export default function SellerPayout() {
           onBack={() => goBack()}
         />
 
-        {account.isError && !a ? (
-          <ErrorState onRetry={() => account.refetch()} />
-        ) : !a ? (
-          <Skeleton height={96} radius={radius.lg} />
-        ) : a.accountNumber ? (
-          <Card
-            elevated
-            accessible
-            accessibilityLabel={`${a.bankName}, account ${a.accountNumber}, ${a.accountName}. ${a.verified ? 'Verified' : 'Not verified yet'}`}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-          >
-            <Landmark size={22} color={colors.primary} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="bodyStrong">{a.bankName}</Text>
-              <Text variant="callout" color="mutedForeground">
-                {a.accountNumber} · {a.accountName}
-              </Text>
-            </View>
-            {a.verified ? (
-              <BadgeCheck size={20} color={colors.success} />
-            ) : (
-              <Badge label="Not verified" tone="warning" />
-            )}
-          </Card>
-        ) : (
-          <FormAlert
-            tone="info"
-            message="No payout account yet. Add one so your sale proceeds can reach you."
-          />
-        )}
-
-        {a ? <AccountForm hasAccount={!!a.accountNumber} /> : null}
+        <QueryState query={account} skeleton={<Skeleton height={96} radius={radius.lg} />}>
+          {!a ? null : a.accountNumber ? (
+            <Card
+              elevated
+              accessible
+              accessibilityLabel={`${a.bankName}, account ${a.accountNumber}, ${a.accountName}. ${a.verified ? 'Verified' : 'Not verified yet'}`}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+            >
+              <Landmark size={22} color={colors.primary} />
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text variant="bodyStrong">{a.bankName}</Text>
+                <Text variant="callout" color="mutedForeground">
+                  {a.accountNumber} · {a.accountName}
+                </Text>
+              </View>
+              {a.verified ? (
+                <BadgeCheck size={20} color={colors.success} />
+              ) : (
+                <Badge label="Not verified" tone="warning" />
+              )}
+            </Card>
+          ) : (
+            <FormAlert
+              tone="info"
+              message="No payout account yet. Add one so your sale proceeds can reach you."
+            />
+          )}
+          {a ? <AccountForm hasAccount={!!a.accountNumber} /> : null}
+        </QueryState>
 
         <View style={{ gap: spacing.sm }}>
           <Text variant="heading" headingLevel={2}>
@@ -139,7 +134,6 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
-  const [other, setOther] = useState(false);
   const [accountNumber, setAccountNumber] = useState('');
 
   const save = useMutation({
@@ -159,60 +153,20 @@ function AccountForm({ hasAccount }: { hasAccount: boolean }) {
       <Text variant="bodyStrong" headingLevel={2}>
         {hasAccount ? 'Change account' : 'Add an account'}
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-        {COMMON_BANKS.map((b) => (
-          <Chip
-            key={b.code}
-            label={b.name}
-            size="sm"
-            selected={!other && bankCode === b.code}
-            onPress={() => {
-              setOther(false);
-              setBankCode(b.code);
-            }}
-          />
-        ))}
-        <Chip
-          label="Other bank"
-          size="sm"
-          selected={other}
-          onPress={() => {
-            setOther(true);
-            setBankCode('');
-          }}
-        />
-      </View>
-      {other ? (
-        <NumberField
-          label="Bank code"
-          value={bankCode}
-          onValueChange={setBankCode}
-          code
-          maxLength={6}
-          required
-          hint="Your bank’s code, e.g. 058 for GTBank"
-        />
-      ) : null}
-      <NumberField
-        label="Account number"
-        value={accountNumber}
-        onValueChange={setAccountNumber}
-        code
-        maxLength={10}
-        required
+      <BankAccountFields
+        bankCode={bankCode}
+        onBankCode={setBankCode}
+        accountNumber={accountNumber}
+        onAccountNumber={setAccountNumber}
       />
       {save.error ? (
         <FormAlert
-          message={
-            save.error instanceof ApiError
-              ? save.error.message
-              : 'We couldn’t check that account. Try again.'
-          }
+          message={errorMessage(save.error, 'We couldn’t check that account. Try again.')}
         />
       ) : null}
       <Button
         label={hasAccount ? 'Update payout account' : 'Save payout account'}
-        disabled={!bankCode || accountNumber.length !== 10}
+        disabled={!bankCode || !accountNumberOk(accountNumber)}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />

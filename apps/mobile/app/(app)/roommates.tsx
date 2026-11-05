@@ -12,10 +12,10 @@ import {
   Checkbox,
   Divider,
   EmptyState,
-  ErrorState,
   IconButton,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -150,15 +150,22 @@ export default function Roommates() {
         />
       </View>
 
-      {isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.lg} />
-          ))}
-        </View>
-      ) : roommatesQuery.isError && !roommatesQuery.data ? (
-        <ErrorState onRetry={refetchAll} />
-      ) : (
+      <QueryState
+        query={{
+          // Hold the skeleton until all three sections have their first answer.
+          data: isLoading ? undefined : roommatesQuery.data,
+          isError: roommatesQuery.isError,
+          refetch: refetchAll,
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={90} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <ScrollView
           contentContainerStyle={{
             padding: spacing.xl,
@@ -338,7 +345,7 @@ export default function Roommates() {
             )}
           </View>
         </ScrollView>
-      )}
+      </QueryState>
 
       <AssignTaskSheet
         open={!!assigningTo}

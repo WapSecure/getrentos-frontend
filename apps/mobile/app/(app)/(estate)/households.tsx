@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, View } from 'react-native';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,8 +8,8 @@ import {
   Button,
   Chip,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -134,56 +134,57 @@ export default function EstateHouseholds() {
           title="No estate yet"
           description="Households appear here once your estate is set up."
         />
-      ) : query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} height={74} radius={radius.lg} />
-          ))}
-        </View>
       ) : (
-        <FlashList
-          maintainVisibleContentPosition={{ disabled: true }}
-          data={items}
-          keyExtractor={(h) => h.id}
-          keyboardDismissMode="on-drag"
-          refreshControl={refresh}
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
-          }}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          renderItem={({ item }: { item: Household }) => <HouseholdRow h={item} />}
-          ListFooterComponent={
-            query.isFetchingNextPage ? (
-              <View style={{ paddingTop: spacing.md }}>
-                <Skeleton height={74} radius={radius.lg} />
-              </View>
-            ) : null
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} height={74} radius={radius.lg} />
+              ))}
+            </View>
           }
-          ListEmptyComponent={
-            <EmptyState
-              icon={<Users size={34} color={colors.mutedForeground} />}
-              title={filtered ? 'No household matches' : 'No households yet'}
-              description={
-                filtered
-                  ? 'Try the unit label, the resident’s name or their phone number.'
-                  : 'Add each home so you can charge dues, issue visitor passes and reach its resident. Many at once? Import a spreadsheet on the website.'
-              }
-              action={
-                filtered ? undefined : (
-                  <Button label="Add a household" onPress={() => setAdding(true)} />
-                )
-              }
-            />
-          }
-        />
+        >
+          <FlashList
+            maintainVisibleContentPosition={{ disabled: true }}
+            data={items}
+            keyExtractor={(h) => h.id}
+            keyboardDismissMode="on-drag"
+            refreshControl={refresh}
+            onEndReached={() => {
+              if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+            }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+            renderItem={({ item }: { item: Household }) => <HouseholdRow h={item} />}
+            ListFooterComponent={
+              query.isFetchingNextPage ? (
+                <View style={{ paddingTop: spacing.md }}>
+                  <Skeleton height={74} radius={radius.lg} />
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              <EmptyState
+                icon={<Users size={34} color={colors.mutedForeground} />}
+                title={filtered ? 'No household matches' : 'No households yet'}
+                description={
+                  filtered
+                    ? 'Try the unit label, the resident’s name or their phone number.'
+                    : 'Add each home so you can charge dues, issue visitor passes and reach its resident. Many at once? Import a spreadsheet on the website.'
+                }
+                action={
+                  filtered ? undefined : (
+                    <Button label="Add a household" onPress={() => setAdding(true)} />
+                  )
+                }
+              />
+            }
+          />
+        </QueryState>
       )}
       <HouseholdSheet open={adding} onClose={() => setAdding(false)} estateId={estateId} />
       <ImportHouseholdsSheet

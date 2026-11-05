@@ -10,8 +10,8 @@ import {
   Card,
   Divider,
   EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -76,28 +76,22 @@ export default function LeaseScreen() {
     />
   );
 
-  if (leaseQuery.isLoading || (noActiveLease && pendingQuery.isLoading)) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        {header}
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={120} radius={16} />
-          <Skeleton height={200} radius={16} />
-        </View>
-      </View>
-    );
-  }
-
-  if (leaseQuery.isError && !noActiveLease && !leaseQuery.data) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        {header}
-        <ErrorState onRetry={() => leaseQuery.refetch()} />
-      </View>
-    );
-  }
+  const skeleton = (
+    <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+      <Skeleton height={120} radius={16} />
+      <Skeleton height={200} radius={16} />
+    </View>
+  );
 
   if (noActiveLease) {
+    if (pendingQuery.isLoading) {
+      return (
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          {header}
+          {skeleton}
+        </View>
+      );
+    }
     if (pendingQuery.data) {
       return (
         <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -118,250 +112,265 @@ export default function LeaseScreen() {
     );
   }
 
-  const lease = leaseQuery.data!;
-  const recentPayments = lease.paymentHistory.slice(-3).reverse();
+  const lease = leaseQuery.data;
+  const recentPayments = lease ? lease.paymentHistory.slice(-3).reverse() : [];
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {header}
-      <Screen padded>
-        <Card elevated>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              justifyContent: 'space-between',
-              gap: spacing.sm,
-            }}
-          >
-            <View style={{ flex: 1, gap: 3 }}>
-              <Text variant="bodyStrong">{lease.propertyName}</Text>
-              <Text variant="caption" color="mutedForeground">
-                {lease.address}
-              </Text>
-            </View>
-            <Badge
-              label={lease.status[0].toUpperCase() + lease.status.slice(1)}
-              tone={LEASE_STATUS_TONE[lease.status]}
-            />
-          </View>
-          <Divider style={{ marginVertical: spacing.md }} />
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <View>
-              <Text variant="caption" color="mutedForeground">
-                Rent
-              </Text>
-              <Price
-                amount={lease.rentAmount}
-                period={lease.rentPeriod ?? 'year'}
-                variant="bodyStrong"
-              />
-            </View>
-            <View>
-              <Text variant="caption" color="mutedForeground">
-                Security deposit
-              </Text>
-              <Price amount={lease.securityDeposit} variant="bodyStrong" />
-            </View>
-          </View>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.md }}
-          >
-            <Calendar size={13} color={colors.mutedForeground} />
-            <Text variant="caption" color="mutedForeground">
-              {formatDate(lease.startDate, 'short')} – {formatDate(lease.endDate, 'short')}
-            </Text>
-          </View>
-        </Card>
-
-        <LeaseGuideCard />
-
-        {renewalQuery.data && renewalQuery.data.status === 'pending' ? (
-          <RenewalOfferCard offer={renewalQuery.data} period={lease.rentPeriod ?? 'year'} />
-        ) : null}
-
-        <Card elevated>
-          <Text variant="bodyStrong" style={{ marginBottom: spacing.sm }}>
-            Landlord
-          </Text>
-          <Text variant="body">{lease.landlord.name}</Text>
-          {lease.landlord.phone ? (
-            <Text variant="caption" color="mutedForeground">
-              {lease.landlord.phone}
-            </Text>
-          ) : null}
-          {lease.landlord.email ? (
-            <Text variant="caption" color="mutedForeground">
-              {lease.landlord.email}
-            </Text>
-          ) : null}
-        </Card>
-
-        {lease.documents.length > 0 ? (
-          <Card elevated padding="none">
-            {lease.documents.map((doc, i) => (
-              <View key={doc.name}>
-                {i > 0 ? <Divider /> : null}
-                <Pressable
-                  onPress={() => Linking.openURL(doc.url)}
-                  accessibilityRole="link"
-                  accessibilityLabel={`Open ${doc.name}`}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: spacing.sm,
-                    padding: spacing.lg,
-                  }}
-                >
-                  <FileText size={16} color={colors.mutedForeground} />
-                  <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
-                    {doc.name}
+      <QueryState query={leaseQuery} skeleton={skeleton}>
+        {lease ? (
+          <Screen padded>
+            <Card elevated>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: spacing.sm,
+                }}
+              >
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text variant="bodyStrong">{lease.propertyName}</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {lease.address}
                   </Text>
-                  <ChevronRight size={16} color={colors.mutedForeground} />
-                </Pressable>
+                </View>
+                <Badge
+                  label={lease.status[0].toUpperCase() + lease.status.slice(1)}
+                  tone={LEASE_STATUS_TONE[lease.status]}
+                />
               </View>
-            ))}
-          </Card>
-        ) : null}
+              <Divider style={{ marginVertical: spacing.md }} />
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View>
+                  <Text variant="caption" color="mutedForeground">
+                    Rent
+                  </Text>
+                  <Price
+                    amount={lease.rentAmount}
+                    period={lease.rentPeriod ?? 'year'}
+                    variant="bodyStrong"
+                  />
+                </View>
+                <View>
+                  <Text variant="caption" color="mutedForeground">
+                    Security deposit
+                  </Text>
+                  <Price amount={lease.securityDeposit} variant="bodyStrong" />
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  marginTop: spacing.md,
+                }}
+              >
+                <Calendar size={13} color={colors.mutedForeground} />
+                <Text variant="caption" color="mutedForeground">
+                  {formatDate(lease.startDate, 'short')} – {formatDate(lease.endDate, 'short')}
+                </Text>
+              </View>
+            </Card>
 
-        <View style={{ gap: spacing.md }}>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <Text variant="heading" headingLevel={2}>
-              Payments
-            </Text>
-            <Pressable
-              onPress={() => router.push('/(app)/payments')}
-              accessibilityRole="button"
-              accessibilityLabel="See all payments"
-              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
-            >
-              <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
-                See all
+            <LeaseGuideCard />
+
+            {renewalQuery.data && renewalQuery.data.status === 'pending' ? (
+              <RenewalOfferCard offer={renewalQuery.data} period={lease.rentPeriod ?? 'year'} />
+            ) : null}
+
+            <Card elevated>
+              <Text variant="bodyStrong" style={{ marginBottom: spacing.sm }}>
+                Landlord
               </Text>
-              <ChevronRight size={15} color={colors.primary} />
-            </Pressable>
-          </View>
-          {recentPayments.length === 0 ? (
-            <Text variant="callout" color="mutedForeground">
-              No payments recorded yet.
-            </Text>
-          ) : (
-            <Card elevated padding="none">
-              {recentPayments.map((p, i) => (
-                <View key={`${p.month}-${p.date}`}>
-                  {i > 0 ? <Divider /> : null}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: spacing.lg,
-                    }}
-                  >
-                    <Text variant="callout">{p.month}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <Price amount={p.amount} variant="callout" />
-                      <Badge
-                        label={p.status[0].toUpperCase() + p.status.slice(1)}
-                        tone={PAYMENT_ROW_TONE[p.status]}
-                      />
-                    </View>
-                  </View>
-                </View>
-              ))}
+              <Text variant="body">{lease.landlord.name}</Text>
+              {lease.landlord.phone ? (
+                <Text variant="caption" color="mutedForeground">
+                  {lease.landlord.phone}
+                </Text>
+              ) : null}
+              {lease.landlord.email ? (
+                <Text variant="caption" color="mutedForeground">
+                  {lease.landlord.email}
+                </Text>
+              ) : null}
             </Card>
-          )}
-        </View>
 
-        {(remindersQuery.data ?? []).length > 0 ? (
-          <View style={{ gap: spacing.md }}>
-            <Text variant="heading">Coming up</Text>
-            <Card elevated padding="none">
-              {(remindersQuery.data ?? []).map((r, i) => (
-                <View key={r.id}>
-                  {i > 0 ? <Divider /> : null}
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: spacing.lg,
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text variant="callout">{r.propertyName}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        Due {formatDate(r.dueDate)}
-                      </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                      <Price amount={r.amount} variant="callout" />
-                      <Badge
-                        label={
-                          r.daysRemaining <= 0
-                            ? 'Due now'
-                            : `in ${r.daysRemaining} day${r.daysRemaining === 1 ? '' : 's'}`
-                        }
-                        tone={r.daysRemaining <= 3 ? 'warning' : 'neutral'}
-                      />
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </Card>
-          </View>
-        ) : null}
-
-        {(rentIncreasesQuery.data ?? []).length > 0 ? (
-          <View style={{ gap: spacing.md }}>
-            <Text variant="heading">Rent history</Text>
-            <Card elevated padding="none">
-              {(rentIncreasesQuery.data ?? []).map((inc, i) => (
-                <View key={`${inc.date}-${inc.newAmount}`}>
-                  {i > 0 ? <Divider /> : null}
-                  <View style={{ padding: spacing.lg, gap: 4 }}>
-                    <View
+            {lease.documents.length > 0 ? (
+              <Card elevated padding="none">
+                {lease.documents.map((doc, i) => (
+                  <View key={doc.name}>
+                    {i > 0 ? <Divider /> : null}
+                    <Pressable
+                      onPress={() => Linking.openURL(doc.url)}
+                      accessibilityRole="link"
+                      accessibilityLabel={`Open ${doc.name}`}
                       style={{
                         flexDirection: 'row',
                         alignItems: 'center',
-                        justifyContent: 'space-between',
+                        gap: spacing.sm,
+                        padding: spacing.lg,
                       }}
                     >
-                      <Text variant="callout">{formatDate(inc.date)}</Text>
-                      <Badge
-                        label={`${inc.percentageChange > 0 ? '+' : ''}${formatPercent(inc.percentageChange)}%`}
-                        tone={inc.percentageChange > 0 ? 'warning' : 'success'}
-                      />
-                    </View>
-                    <Text variant="caption" color="mutedForeground">
-                      {formatNaira(inc.oldAmount)} → {formatNaira(inc.newAmount)}
-                      {inc.reason ? ` · ${inc.reason}` : ''}
-                    </Text>
+                      <FileText size={16} color={colors.mutedForeground} />
+                      <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
+                        {doc.name}
+                      </Text>
+                      <ChevronRight size={16} color={colors.mutedForeground} />
+                    </Pressable>
                   </View>
-                </View>
-              ))}
-            </Card>
-          </View>
-        ) : null}
+                ))}
+              </Card>
+            ) : null}
 
-        <DownloadLeaseButton />
+            <View style={{ gap: spacing.md }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Text variant="heading" headingLevel={2}>
+                  Payments
+                </Text>
+                <Pressable
+                  onPress={() => router.push('/(app)/payments')}
+                  accessibilityRole="button"
+                  accessibilityLabel="See all payments"
+                  hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}
+                >
+                  <Text variant="callout" color="primary" style={{ fontWeight: '600' }}>
+                    See all
+                  </Text>
+                  <ChevronRight size={15} color={colors.primary} />
+                </Pressable>
+              </View>
+              {recentPayments.length === 0 ? (
+                <Text variant="callout" color="mutedForeground">
+                  No payments recorded yet.
+                </Text>
+              ) : (
+                <Card elevated padding="none">
+                  {recentPayments.map((p, i) => (
+                    <View key={`${p.month}-${p.date}`}>
+                      {i > 0 ? <Divider /> : null}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: spacing.lg,
+                        }}
+                      >
+                        <Text variant="callout">{p.month}</Text>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                        >
+                          <Price amount={p.amount} variant="callout" />
+                          <Badge
+                            label={p.status[0].toUpperCase() + p.status.slice(1)}
+                            tone={PAYMENT_ROW_TONE[p.status]}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              )}
+            </View>
 
-        {lease.status !== 'expired' ? (
-          <Pressable
-            onPress={() => setTerminationSheetOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Request lease termination"
-            style={{ alignItems: 'center', justifyContent: 'center', minHeight: 44 }}
-          >
-            <Text variant="callout" color="destructive">
-              Request lease termination
-            </Text>
-          </Pressable>
+            {(remindersQuery.data ?? []).length > 0 ? (
+              <View style={{ gap: spacing.md }}>
+                <Text variant="heading">Coming up</Text>
+                <Card elevated padding="none">
+                  {(remindersQuery.data ?? []).map((r, i) => (
+                    <View key={r.id}>
+                      {i > 0 ? <Divider /> : null}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: spacing.lg,
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text variant="callout">{r.propertyName}</Text>
+                          <Text variant="caption" color="mutedForeground">
+                            Due {formatDate(r.dueDate)}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                          <Price amount={r.amount} variant="callout" />
+                          <Badge
+                            label={
+                              r.daysRemaining <= 0
+                                ? 'Due now'
+                                : `in ${r.daysRemaining} day${r.daysRemaining === 1 ? '' : 's'}`
+                            }
+                            tone={r.daysRemaining <= 3 ? 'warning' : 'neutral'}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              </View>
+            ) : null}
+
+            {(rentIncreasesQuery.data ?? []).length > 0 ? (
+              <View style={{ gap: spacing.md }}>
+                <Text variant="heading">Rent history</Text>
+                <Card elevated padding="none">
+                  {(rentIncreasesQuery.data ?? []).map((inc, i) => (
+                    <View key={`${inc.date}-${inc.newAmount}`}>
+                      {i > 0 ? <Divider /> : null}
+                      <View style={{ padding: spacing.lg, gap: 4 }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Text variant="callout">{formatDate(inc.date)}</Text>
+                          <Badge
+                            label={`${inc.percentageChange > 0 ? '+' : ''}${formatPercent(inc.percentageChange)}%`}
+                            tone={inc.percentageChange > 0 ? 'warning' : 'success'}
+                          />
+                        </View>
+                        <Text variant="caption" color="mutedForeground">
+                          {formatNaira(inc.oldAmount)} → {formatNaira(inc.newAmount)}
+                          {inc.reason ? ` · ${inc.reason}` : ''}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              </View>
+            ) : null}
+
+            <DownloadLeaseButton />
+
+            {lease.status !== 'expired' ? (
+              <Pressable
+                onPress={() => setTerminationSheetOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Request lease termination"
+                style={{ alignItems: 'center', justifyContent: 'center', minHeight: 44 }}
+              >
+                <Text variant="callout" color="destructive">
+                  Request lease termination
+                </Text>
+              </Pressable>
+            ) : null}
+          </Screen>
         ) : null}
-      </Screen>
+      </QueryState>
 
       <LeaseTerminationSheet
         open={terminationSheetOpen}

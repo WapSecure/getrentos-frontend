@@ -9,9 +9,8 @@ import {
   Badge,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -81,25 +80,24 @@ export default function BuyerOffers() {
         </ScrollView>
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<FileSignature size={34} color={colors.mutedForeground} />}
-          title="No offers"
-          description={
-            status
-              ? 'No offers match this filter.'
-              : 'Offers you make on a listing will show up here.'
-          }
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={90} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <FileSignature size={34} color={colors.mutedForeground} />,
+          title: 'No offers',
+          description: status
+            ? 'No offers match this filter.'
+            : 'Offers you make on a listing will show up here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(offer) => offer.id}
@@ -149,7 +147,7 @@ export default function BuyerOffers() {
             </Pressable>
           )}
         />
-      )}
+      </QueryState>
     </View>
   );
 }

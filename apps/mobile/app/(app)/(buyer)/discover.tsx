@@ -8,10 +8,9 @@ import { Heart, ImageOff, Search } from 'lucide-react-native';
 import {
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -228,21 +227,22 @@ export default function BuyerDiscover() {
         </ScrollView>
       </View>
 
-      {query.isError && items.length === 0 ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={140} radius={16} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Search size={34} color={colors.mutedForeground} />}
-          title="No listings match"
-          description="Try a different search."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={140} radius={16} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Search size={34} color={colors.mutedForeground} />,
+          title: 'No listings match',
+          description: 'Try a different search.',
+        }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -283,7 +283,7 @@ export default function BuyerDiscover() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

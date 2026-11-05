@@ -7,8 +7,8 @@ import {
   Button,
   Card,
   Chip,
-  ErrorState,
   NumberField,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -43,15 +43,16 @@ export default function BuyerSearchPreferences() {
         onBack={() => goBack()}
       />
 
-      {query.data ? (
-        <SearchPreferencesForm data={query.data} />
-      ) : query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={260} radius={16} />
-        </View>
-      ) : (
-        <ErrorState onRetry={() => query.refetch()} />
-      )}
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={260} radius={16} />
+          </View>
+        }
+      >
+        {query.data ? <SearchPreferencesForm data={query.data} /> : null}
+      </QueryState>
     </View>
   );
 }

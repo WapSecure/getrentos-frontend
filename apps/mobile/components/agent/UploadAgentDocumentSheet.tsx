@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText } from 'lucide-react-native';
 import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import {
   agentDocumentsApi,
   AGENT_DOCUMENT_CATEGORIES,
@@ -37,7 +37,7 @@ function UploadForm({
   onClose,
   onSubmittingChange,
 }: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -68,33 +68,14 @@ function UploadForm({
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <Pressable
-        onPress={pick}
-        disabled={mutation.isPending}
-        accessibilityRole="button"
-        accessibilityLabel={file ? `Selected file ${file.name}. Choose another` : 'Choose a file'}
-        accessibilityState={{ disabled: mutation.isPending }}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.lg,
-          borderRadius: 12,
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: colors.border,
+      <FilePickRow
+        label="File"
+        file={file}
+        emptyText="Choose a file"
+        onPick={() => {
+          if (!mutation.isPending) void pick();
         }}
-      >
-        <FileText size={18} color={colors.mutedForeground} />
-        <Text
-          variant="callout"
-          color={file ? 'foreground' : 'mutedForeground'}
-          numberOfLines={1}
-          style={{ flex: 1 }}
-        >
-          {file ? file.name : 'Choose a file'}
-        </Text>
-      </Pressable>
+      />
 
       <TextField
         label="Name"

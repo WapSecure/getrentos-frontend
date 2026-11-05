@@ -8,8 +8,7 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -18,7 +17,7 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { estateAgreementsApi, MIN_REASON, type EstateAgreement } from '@/lib/api/estateAgreements';
-import { ApiError, errorMessage } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -67,42 +66,40 @@ export default function EstateAgreements() {
           </Text>
         </Card>
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <Skeleton height={140} radius={radius.lg} />
-        ) : !requests.length && !active.length ? (
-          <EmptyState
-            icon={<Trees size={34} color={colors.mutedForeground} />}
-            title="No requests"
-            description="When an estate your property sits in asks to market it, you’ll decide here."
-          />
-        ) : (
-          <>
-            {requests.length ? (
-              <Section title="Waiting for you">
-                {requests.map((a) => (
-                  <AgreementCard
-                    key={a.id}
-                    a={a}
-                    onClose={(action) => setClosing({ agreement: a, action })}
-                  />
-                ))}
-              </Section>
-            ) : null}
-            {active.length ? (
-              <Section title="Marketing now">
-                {active.map((a) => (
-                  <AgreementCard
-                    key={a.id}
-                    a={a}
-                    onClose={(action) => setClosing({ agreement: a, action })}
-                  />
-                ))}
-              </Section>
-            ) : null}
-          </>
-        )}
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={140} radius={radius.lg} />}
+          isEmpty={!requests.length && !active.length}
+          empty={{
+            icon: <Trees size={34} color={colors.mutedForeground} />,
+            title: 'No requests',
+            description:
+              'When an estate your property sits in asks to market it, you’ll decide here.',
+          }}
+        >
+          {requests.length ? (
+            <Section title="Waiting for you">
+              {requests.map((a) => (
+                <AgreementCard
+                  key={a.id}
+                  a={a}
+                  onClose={(action) => setClosing({ agreement: a, action })}
+                />
+              ))}
+            </Section>
+          ) : null}
+          {active.length ? (
+            <Section title="Marketing now">
+              {active.map((a) => (
+                <AgreementCard
+                  key={a.id}
+                  a={a}
+                  onClose={(action) => setClosing({ agreement: a, action })}
+                />
+              ))}
+            </Section>
+          ) : null}
+        </QueryState>
       </ScrollView>
 
       <Sheet
@@ -242,11 +239,7 @@ function ReasonForm({ closing, onDone }: { closing: Closing; onDone: () => void 
           onChangeText={setReason}
           multiline
           error={
-            submit.error
-              ? submit.error instanceof ApiError
-                ? submit.error.message
-                : 'That didn’t go through. Try again.'
-              : null
+            submit.error ? errorMessage(submit.error, 'That didn’t go through. Try again.') : null
           }
           hint={short ? `At least ${MIN_REASON} characters` : undefined}
         />

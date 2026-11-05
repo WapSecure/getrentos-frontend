@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { FileText } from 'lucide-react-native';
-import { Button, Chip, FormAlert, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Chip, FormAlert, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, OWNERSHIP_DOCUMENTS, type OwnershipDocumentType } from '@/lib/api/owner';
 import { pickDocument } from '@/lib/filePicker';
@@ -26,7 +26,7 @@ export function OwnershipProofSheet({ propertyId, open, onClose }: Props) {
 }
 
 function ProofForm({ propertyId, onClose }: Omit<Props, 'open'>) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [type, setType] = useState<OwnershipDocumentType>('C_OF_O');
@@ -56,35 +56,15 @@ function ProofForm({ propertyId, onClose }: Omit<Props, 'open'>) {
           />
         ))}
       </View>
-      <Pressable
-        onPress={async () => {
+      <FilePickRow
+        label="Document"
+        file={file}
+        emptyText="Choose a PDF or photo of the document"
+        onPick={async () => {
           const picked = await pickDocument();
           if (picked) setFile(picked);
         }}
-        accessibilityRole="button"
-        accessibilityLabel={file ? `Chosen file ${file.name}. Choose another` : 'Choose a file'}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.lg,
-          minHeight: 44,
-          borderRadius: radius.md,
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: colors.border,
-        }}
-      >
-        <FileText size={18} color={colors.mutedForeground} />
-        <Text
-          variant="callout"
-          color={file ? 'foreground' : 'mutedForeground'}
-          numberOfLines={1}
-          style={{ flex: 1 }}
-        >
-          {file ? file.name : 'Choose a PDF or photo of the document'}
-        </Text>
-      </Pressable>
+      />
       {send.error ? (
         <FormAlert message={errorMessage(send.error, 'Could not send the document.')} />
       ) : null}

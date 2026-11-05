@@ -10,9 +10,9 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -35,6 +35,7 @@ import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import { goBack } from '@/lib/goBack';
 
 /** Agency agreements, listing contracts, closing papers and the realtor's licence. */
@@ -114,17 +115,17 @@ export default function RealtorDocuments() {
         ) : null}
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={70} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={70} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(d) => d.id}
@@ -180,7 +181,7 @@ export default function RealtorDocuments() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet
         open={uploading}
@@ -202,7 +203,7 @@ function UploadForm({
   onDone: () => void;
   onSubmittingChange: (submitting: boolean) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -228,33 +229,14 @@ function UploadForm({
   };
   return (
     <View style={{ gap: spacing.md }}>
-      <Pressable
-        onPress={pick}
-        disabled={upload.isPending}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: upload.isPending }}
-        accessibilityLabel={file ? `Chosen file ${file.name}. Choose another` : 'Choose a file'}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.lg,
-          borderRadius: radius.lg,
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: colors.border,
+      <FilePickRow
+        label="File"
+        file={file}
+        onPick={() => {
+          if (!upload.isPending) void pick();
         }}
-      >
-        <FileText size={18} color={colors.mutedForeground} />
-        <Text
-          variant="callout"
-          color={file ? 'foreground' : 'mutedForeground'}
-          numberOfLines={1}
-          style={{ flex: 1 }}
-        >
-          {file ? file.name : 'Choose a file (up to 20 MB)'}
-        </Text>
-      </Pressable>
+        emptyText="Choose a file (up to 20 MB)"
+      />
       <TextField
         label="Name"
         required

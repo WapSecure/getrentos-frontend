@@ -6,8 +6,8 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -31,6 +31,7 @@ export function ApplicationNotesSection({ applicationId }: Props) {
     queryKey: qk.renter.applicationNotes(applicationId),
     queryFn: () => applicationsApi.listNotes(applicationId),
   });
+  const notes = query.data ?? [];
 
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -119,84 +120,88 @@ export function ApplicationNotesSection({ applicationId }: Props) {
         </View>
       ) : null}
 
-      {query.data === undefined ? (
-        query.isError ? (
-          <ErrorState title="Your notes did not load" onRetry={() => void query.refetch()} />
-        ) : (
-          <Skeleton height={72} radius={radius.lg} />
-        )
-      ) : query.data.length > 0 ? (
-        <Card elevated padding="none">
-          {query.data.map((note: ApplicationNote, i) => (
-            <View key={note.id}>
-              {i > 0 ? <Divider /> : null}
-              <View style={{ padding: spacing.lg }}>
-                {editingId === note.id ? (
-                  <View style={{ gap: spacing.sm }}>
-                    <TextField
-                      multiline
-                      numberOfLines={3}
-                      value={editingDraft}
-                      onChangeText={setEditingDraft}
-                      autoFocus
-                    />
-                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                      <View style={{ flex: 1 }}>
-                        <Button label="Cancel" variant="ghost" onPress={() => setEditingId(null)} />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Button
-                          label="Save"
-                          loading={updateMutation.isPending}
-                          disabled={!editingDraft.trim()}
-                          onPress={() =>
-                            updateMutation.mutate({ id: note.id, content: editingDraft.trim() })
-                          }
-                        />
-                      </View>
-                    </View>
-                  </View>
-                ) : (
-                  <>
-                    <Text variant="callout">{note.content}</Text>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: spacing.sm,
-                      }}
-                    >
-                      <Text variant="caption" color="mutedForeground">
-                        {formatDate(note.updatedAt, 'short')}
-                      </Text>
-                      <View style={{ flexDirection: 'row', gap: spacing.md }}>
-                        <IconButton
-                          accessibilityLabel="Edit note"
-                          icon={<Pencil size={14} color={colors.mutedForeground} />}
-                          onPress={() => {
-                            setEditingId(note.id);
-                            setEditingDraft(note.content);
-                          }}
-                        />
-                        <IconButton
-                          accessibilityLabel="Delete note"
-                          icon={<Trash2 size={14} color={colors.destructive} />}
-                          onPress={() => removeMutation.mutate(note.id)}
-                        />
+      <QueryState
+        query={query}
+        errorTitle="Your notes did not load"
+        skeleton={<Skeleton height={72} radius={radius.lg} />}
+      >
+        {notes.length > 0 ? (
+          <Card elevated padding="none">
+            {notes.map((note: ApplicationNote, i) => (
+              <View key={note.id}>
+                {i > 0 ? <Divider /> : null}
+                <View style={{ padding: spacing.lg }}>
+                  {editingId === note.id ? (
+                    <View style={{ gap: spacing.sm }}>
+                      <TextField
+                        multiline
+                        numberOfLines={3}
+                        value={editingDraft}
+                        onChangeText={setEditingDraft}
+                        autoFocus
+                      />
+                      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                        <View style={{ flex: 1 }}>
+                          <Button
+                            label="Cancel"
+                            variant="ghost"
+                            onPress={() => setEditingId(null)}
+                          />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Button
+                            label="Save"
+                            loading={updateMutation.isPending}
+                            disabled={!editingDraft.trim()}
+                            onPress={() =>
+                              updateMutation.mutate({ id: note.id, content: editingDraft.trim() })
+                            }
+                          />
+                        </View>
                       </View>
                     </View>
-                  </>
-                )}
+                  ) : (
+                    <>
+                      <Text variant="callout">{note.content}</Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: spacing.sm,
+                        }}
+                      >
+                        <Text variant="caption" color="mutedForeground">
+                          {formatDate(note.updatedAt, 'short')}
+                        </Text>
+                        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+                          <IconButton
+                            accessibilityLabel="Edit note"
+                            icon={<Pencil size={14} color={colors.mutedForeground} />}
+                            onPress={() => {
+                              setEditingId(note.id);
+                              setEditingDraft(note.content);
+                            }}
+                          />
+                          <IconButton
+                            accessibilityLabel="Delete note"
+                            icon={<Trash2 size={14} color={colors.destructive} />}
+                            onPress={() => removeMutation.mutate(note.id)}
+                          />
+                        </View>
+                      </View>
+                    </>
+                  )}
+                </View>
               </View>
-            </View>
-          ))}
-        </Card>
-      ) : !composing ? (
-        <Text variant="callout" color="mutedForeground">
-          No notes yet.
-        </Text>
-      ) : null}
+            ))}
+          </Card>
+        ) : !composing ? (
+          <Text variant="callout" color="mutedForeground">
+            No notes yet.
+          </Text>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

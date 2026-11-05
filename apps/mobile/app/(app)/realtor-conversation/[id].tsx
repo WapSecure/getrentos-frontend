@@ -24,9 +24,9 @@ import {
 import {
   Avatar,
   EmptyState,
-  ErrorState,
   IconButton,
   LinkButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -176,155 +176,162 @@ export default function RealtorConversation() {
           description="The client relationship has ended, so you can’t send new messages here."
           action={<LinkButton label="Back to messages" onPress={() => router.back()} />}
         />
-      ) : messages.isError && !messages.data ? (
-        <ErrorState onRetry={() => messages.refetch()} />
-      ) : messages.isPending ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={40} width="60%" />
-          <Skeleton height={40} width="75%" />
-        </View>
       ) : (
-        <FlatList
-          data={rows}
-          inverted
-          keyExtractor={(r) => (r.kind === 'sent' ? r.m.id : `p-${r.key}`)}
-          contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, gap: spacing.sm }}
-          keyboardDismissMode="interactive"
-          keyboardShouldPersistTaps="handled"
-          initialNumToRender={20}
-          maxToRenderPerBatch={12}
-          windowSize={9}
-          removeClippedSubviews={Platform.OS === 'android'}
-          ListEmptyComponent={
-            // The inverted list un-flips its empty component through `style`, which
-            // EmptyState doesn't take; a plain View carries it.
-            <View>
-              <EmptyState
-                icon={<MessageCircle size={34} color={colors.mutedForeground} />}
-                title="Start the conversation"
-                description="Talk through a listing, an offer or a viewing."
-              />
+        <QueryState
+          query={messages}
+          skeleton={
+            <View style={{ padding: spacing.xl, gap: spacing.md }}>
+              <Skeleton height={40} width="60%" />
+              <Skeleton height={40} width="75%" />
             </View>
           }
-          renderItem={({ item }) => {
-            const mine = item.kind === 'pending' || item.m.senderType === 'realtor';
-            const body = item.kind === 'sent' ? item.m.text : item.text;
-            const attachments =
-              item.kind === 'sent'
-                ? (item.m.attachments ?? []).map((a) => ({ key: a.id, name: a.name, url: a.url }))
-                : item.files.map((f, i) => ({ key: `${i}`, name: f.name, url: undefined }));
-            const failed = item.kind === 'pending' && !!item.error;
-            return (
-              <View
-                style={{ maxWidth: '82%', alignSelf: mine ? 'flex-end' : 'flex-start', gap: 4 }}
-                accessible={!attachments.some((a) => a.url)}
-                accessibilityLabel={`${mine ? 'You' : name}, ${body || `${attachments.length} attachment${attachments.length === 1 ? '' : 's'}`}, ${
-                  item.kind === 'sent'
-                    ? relativeTime(item.m.createdAt)
-                    : failed
-                      ? `not sent. ${item.error}`
-                      : 'sending'
-                }`}
-              >
-                {body ? (
-                  <View
-                    style={{
-                      paddingVertical: 9,
-                      paddingHorizontal: 13,
-                      borderRadius: radius.lg,
-                      borderBottomRightRadius: mine ? 4 : radius.lg,
-                      borderBottomLeftRadius: mine ? radius.lg : 4,
-                      backgroundColor: mine ? colors.primary : colors.secondary,
-                      opacity: item.kind === 'pending' && !failed ? 0.7 : 1,
-                      borderWidth: failed ? 1.5 : 0,
-                      borderColor: colors.destructive,
-                    }}
-                  >
-                    <Text
-                      variant="callout"
-                      style={{ color: mine ? colors.primaryForeground : colors.foreground }}
-                    >
-                      {body}
-                    </Text>
-                  </View>
-                ) : null}
-                {attachments.map((a) => (
-                  <Pressable
-                    key={a.key}
-                    disabled={!a.url}
-                    onPress={() => a.url && Linking.openURL(a.url)}
-                    accessibilityRole={a.url ? 'link' : undefined}
-                    accessibilityLabel={`Attachment ${a.name}${a.url ? ', open' : ''}`}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: spacing.sm,
-                      paddingVertical: 8,
-                      paddingHorizontal: 12,
-                      borderRadius: radius.md,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      backgroundColor: colors.card,
-                      alignSelf: mine ? 'flex-end' : 'flex-start',
-                    }}
-                  >
-                    <Paperclip size={14} color={colors.primary} />
-                    <Text variant="caption" numberOfLines={1} style={{ maxWidth: 200 }}>
-                      {a.name}
-                    </Text>
-                  </Pressable>
-                ))}
-                {item.kind === 'sent' ? (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 4,
-                      alignSelf: mine ? 'flex-end' : 'flex-start',
-                    }}
-                  >
-                    {item.m.contactMasked ? (
-                      <ShieldCheck size={12} color={colors.mutedForeground} />
-                    ) : null}
-                    <Text variant="caption" color="mutedForeground">
-                      {item.m.contactMasked ? 'Contact details hidden · ' : ''}
-                      {relativeTime(item.m.createdAt)}
-                    </Text>
-                  </View>
-                ) : failed ? (
-                  <View
-                    accessibilityRole="alert"
-                    accessibilityLiveRegion="polite"
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: spacing.sm,
-                      alignSelf: 'flex-end',
-                    }}
-                  >
-                    <AlertCircle size={13} color={colors.destructive} />
-                    <Text variant="caption" style={{ color: colors.destructive }}>
-                      {item.error}
-                    </Text>
-                    <LinkButton
-                      label="Retry"
-                      accessibilityHint="Sends the message again"
-                      onPress={() => {
-                        const retry = { ...item, error: undefined };
-                        setPending((list) => list.map((x) => (x.key === item.key ? retry : x)));
-                        send.mutate(retry);
-                      }}
-                    />
-                  </View>
-                ) : (
-                  <Text variant="caption" color="mutedForeground" style={{ alignSelf: 'flex-end' }}>
-                    Sending…
-                  </Text>
-                )}
+        >
+          <FlatList
+            data={rows}
+            inverted
+            keyExtractor={(r) => (r.kind === 'sent' ? r.m.id : `p-${r.key}`)}
+            contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, gap: spacing.sm }}
+            keyboardDismissMode="interactive"
+            keyboardShouldPersistTaps="handled"
+            initialNumToRender={20}
+            maxToRenderPerBatch={12}
+            windowSize={9}
+            removeClippedSubviews={Platform.OS === 'android'}
+            ListEmptyComponent={
+              // The inverted list un-flips its empty component through `style`, which
+              // EmptyState doesn't take; a plain View carries it.
+              <View>
+                <EmptyState
+                  icon={<MessageCircle size={34} color={colors.mutedForeground} />}
+                  title="Start the conversation"
+                  description="Talk through a listing, an offer or a viewing."
+                />
               </View>
-            );
-          }}
-        />
+            }
+            renderItem={({ item }) => {
+              const mine = item.kind === 'pending' || item.m.senderType === 'realtor';
+              const body = item.kind === 'sent' ? item.m.text : item.text;
+              const attachments =
+                item.kind === 'sent'
+                  ? (item.m.attachments ?? []).map((a) => ({ key: a.id, name: a.name, url: a.url }))
+                  : item.files.map((f, i) => ({ key: `${i}`, name: f.name, url: undefined }));
+              const failed = item.kind === 'pending' && !!item.error;
+              return (
+                <View
+                  style={{ maxWidth: '82%', alignSelf: mine ? 'flex-end' : 'flex-start', gap: 4 }}
+                  accessible={!attachments.some((a) => a.url)}
+                  accessibilityLabel={`${mine ? 'You' : name}, ${body || `${attachments.length} attachment${attachments.length === 1 ? '' : 's'}`}, ${
+                    item.kind === 'sent'
+                      ? relativeTime(item.m.createdAt)
+                      : failed
+                        ? `not sent. ${item.error}`
+                        : 'sending'
+                  }`}
+                >
+                  {body ? (
+                    <View
+                      style={{
+                        paddingVertical: 9,
+                        paddingHorizontal: 13,
+                        borderRadius: radius.lg,
+                        borderBottomRightRadius: mine ? 4 : radius.lg,
+                        borderBottomLeftRadius: mine ? radius.lg : 4,
+                        backgroundColor: mine ? colors.primary : colors.secondary,
+                        opacity: item.kind === 'pending' && !failed ? 0.7 : 1,
+                        borderWidth: failed ? 1.5 : 0,
+                        borderColor: colors.destructive,
+                      }}
+                    >
+                      <Text
+                        variant="callout"
+                        style={{ color: mine ? colors.primaryForeground : colors.foreground }}
+                      >
+                        {body}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {attachments.map((a) => (
+                    <Pressable
+                      key={a.key}
+                      disabled={!a.url}
+                      onPress={() => a.url && Linking.openURL(a.url)}
+                      accessibilityRole={a.url ? 'link' : undefined}
+                      accessibilityLabel={`Attachment ${a.name}${a.url ? ', open' : ''}`}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: spacing.sm,
+                        paddingVertical: 8,
+                        paddingHorizontal: 12,
+                        borderRadius: radius.md,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        backgroundColor: colors.card,
+                        alignSelf: mine ? 'flex-end' : 'flex-start',
+                      }}
+                    >
+                      <Paperclip size={14} color={colors.primary} />
+                      <Text variant="caption" numberOfLines={1} style={{ maxWidth: 200 }}>
+                        {a.name}
+                      </Text>
+                    </Pressable>
+                  ))}
+                  {item.kind === 'sent' ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 4,
+                        alignSelf: mine ? 'flex-end' : 'flex-start',
+                      }}
+                    >
+                      {item.m.contactMasked ? (
+                        <ShieldCheck size={12} color={colors.mutedForeground} />
+                      ) : null}
+                      <Text variant="caption" color="mutedForeground">
+                        {item.m.contactMasked ? 'Contact details hidden · ' : ''}
+                        {relativeTime(item.m.createdAt)}
+                      </Text>
+                    </View>
+                  ) : failed ? (
+                    <View
+                      accessibilityRole="alert"
+                      accessibilityLiveRegion="polite"
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: spacing.sm,
+                        alignSelf: 'flex-end',
+                      }}
+                    >
+                      <AlertCircle size={13} color={colors.destructive} />
+                      <Text variant="caption" style={{ color: colors.destructive }}>
+                        {item.error}
+                      </Text>
+                      <LinkButton
+                        label="Retry"
+                        accessibilityHint="Sends the message again"
+                        onPress={() => {
+                          const retry = { ...item, error: undefined };
+                          setPending((list) => list.map((x) => (x.key === item.key ? retry : x)));
+                          send.mutate(retry);
+                        }}
+                      />
+                    </View>
+                  ) : (
+                    <Text
+                      variant="caption"
+                      color="mutedForeground"
+                      style={{ alignSelf: 'flex-end' }}
+                    >
+                      Sending…
+                    </Text>
+                  )}
+                </View>
+              );
+            }}
+          />
+        </QueryState>
       )}
 
       <View

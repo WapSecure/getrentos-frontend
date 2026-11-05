@@ -9,7 +9,7 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -52,10 +52,7 @@ export default function LandlordMicrosite() {
         }
       />
 
-      {query.data ? (
-        /* Mounted only once settings arrive, so the form seeds from props. */
-        <MicrositeForm initial={query.data} />
-      ) : locked ? (
+      {locked && !query.data ? (
         <View style={{ paddingHorizontal: spacing.xl }}>
           <ProUpsell
             title="Your microsite is part of Pro"
@@ -68,14 +65,21 @@ export default function LandlordMicrosite() {
             note={null}
           />
         </View>
-      ) : query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={140} radius={radius.lg} />
-          ))}
-        </View>
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={140} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          style={{ paddingHorizontal: spacing.xl }}
+        >
+          {/* Mounted only once settings arrive, so the form seeds from props. */}
+          {query.data ? <MicrositeForm initial={query.data} /> : null}
+        </QueryState>
       )}
     </View>
   );

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, RefreshControl, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import {
@@ -17,10 +17,10 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   NumberField,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -162,17 +162,16 @@ export default function EstateDeliveries() {
         </View>
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={104} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={104} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -277,7 +276,7 @@ export default function EstateDeliveries() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={logging} onClose={() => setLogging(false)} title="Log a delivery">
         {logging ? <LogDeliveryForm estateId={estateId} onDone={() => setLogging(false)} /> : null}

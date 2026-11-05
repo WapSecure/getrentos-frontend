@@ -9,8 +9,8 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
   Price,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -47,6 +47,7 @@ const INSTALLMENT_STATUS_TONE: Record<
 export default function Financing() {
   const { colors, spacing } = useTheme();
   const query = useQuery({ queryKey: qk.renter.financing, queryFn: financingApi.getOverview });
+  const overview = query.data;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -57,26 +58,26 @@ export default function Financing() {
         onBack={() => goBack()}
       />
 
-      {query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={180} radius={16} />
-        </View>
-      ) : !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
-        <Screen padded>
-          {(() => {
-            const overview = query.data;
-            return overview.plan ? (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={180} radius={16} />
+          </View>
+        }
+      >
+        {overview ? (
+          <Screen padded>
+            {overview.plan ? (
               <ActivePlanCard overview={{ plan: overview.plan }} />
             ) : overview.newPlansOpen !== true ? (
               <PausedCard />
             ) : (
               <EligibilityCard overview={overview} />
-            );
-          })()}
-        </Screen>
-      )}
+            )}
+          </Screen>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

@@ -10,8 +10,8 @@ import {
   Chip,
   Divider,
   EmptyState,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -100,7 +100,7 @@ export default function ServiceTargets() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: spacing.sm }}
           >
-            {homes.data!.map((h) => (
+            {(homes.data ?? []).map((h) => (
               <Chip
                 key={h.id}
                 label={h.name}
@@ -116,12 +116,8 @@ export default function ServiceTargets() {
           ) : (
             <EmptyState title="No homes yet" description="Add a property first." />
           )
-        ) : policies.isError && !policies.data ? (
-          <ErrorState onRetry={() => policies.refetch()} />
-        ) : policies.isPending ? (
-          <Skeleton height={240} radius={radius.lg} />
         ) : (
-          <>
+          <QueryState query={policies} skeleton={<Skeleton height={240} radius={radius.lg} />}>
             {escalations.data?.items.length ? (
               <View style={{ gap: spacing.sm }}>
                 <Text variant="heading" headingLevel={2}>
@@ -210,7 +206,7 @@ export default function ServiceTargets() {
                   );
                 })}
             </Card>
-          </>
+          </QueryState>
         )}
       </ScrollView>
       <Sheet

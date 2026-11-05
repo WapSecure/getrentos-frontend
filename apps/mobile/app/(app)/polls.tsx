@@ -5,8 +5,7 @@ import { Check, Vote } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -134,29 +133,30 @@ export default function ResidentPolls() {
         onBack={() => goBack()}
       />
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={140} radius={16} />
-            <Skeleton height={140} radius={16} />
-          </View>
-        ) : query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.data && query.data.length > 0 ? (
-          query.data.map((poll) => (
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.md }}>
+              <Skeleton height={140} radius={16} />
+              <Skeleton height={140} radius={16} />
+            </View>
+          }
+          isEmpty={!query.data?.length}
+          empty={{
+            icon: <Vote size={34} color={colors.mutedForeground} />,
+            title: 'No polls right now',
+            description: "When your estate opens a vote, it'll show up here.",
+          }}
+        >
+          {(query.data ?? []).map((poll) => (
             <PollCard
               key={poll.id}
               poll={poll}
               voting={vote.isPending}
               onVote={(optionId) => vote.mutate({ pollId: poll.id, optionId })}
             />
-          ))
-        ) : (
-          <EmptyState
-            icon={<Vote size={34} color={colors.mutedForeground} />}
-            title="No polls right now"
-            description="When your estate opens a vote, it'll show up here."
-          />
-        )}
+          ))}
+        </QueryState>
       </Screen>
     </View>
   );

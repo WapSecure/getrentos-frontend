@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileSignature } from 'lucide-react-native';
-import { EmptyState, ErrorState, SegmentedControl, Skeleton, useTheme } from '@getrentos/ui-native';
+import { EmptyState, QueryState, SegmentedControl, Skeleton, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { canCounter, realtorApi, type RealtorOffer } from '@/lib/api/realtor';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -61,17 +61,16 @@ export default function RealtorOffers() {
           ]}
         />
       </View>
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={116} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={116} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(o) => o.id}
@@ -94,7 +93,7 @@ export default function RealtorOffers() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

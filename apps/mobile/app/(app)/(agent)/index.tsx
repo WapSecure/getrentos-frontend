@@ -15,8 +15,8 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Screen,
   SectionHeader,
   Skeleton,
@@ -94,111 +94,113 @@ export default function AgentHome() {
       ]
     : [];
 
-  if (dashboard.isError && !dashboard.data) {
-    return (
-      <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-        {header}
-        <ErrorState
-          title="We couldn't load your dashboard"
-          description="Check your connection and try again. Your assigned work is safe."
-          onRetry={() => dashboard.refetch()}
-        />
-      </Screen>
-    );
-  }
+  const quickActions = (
+    <QuickActions
+      actions={[
+        { label: 'My tasks', Icon: ClipboardList, onPress: toTasks },
+        { label: 'Clients', Icon: Users, onPress: () => router.push('/(app)/(agent)/clients') },
+        {
+          label: 'Inspections',
+          Icon: ClipboardCheck,
+          onPress: () => router.push('/(app)/agent-inspections'),
+        },
+        {
+          label: 'Verifications',
+          Icon: BadgeCheck,
+          onPress: () => router.push('/(app)/agent-verifications'),
+        },
+      ]}
+    />
+  );
 
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
       {header}
 
-      {/* What needs you first: work past its deadline. */}
-      {dashboard.data && dashboard.data.overdueTasks > 0 ? (
-        <AttentionCard
-          Icon={AlertTriangle}
-          tone="warning"
-          title={`${dashboard.data.overdueTasks} overdue ${dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}`}
-          detail="Take a look before they pile up"
-          onPress={toTasks}
-        />
-      ) : null}
-
-      <MetricGrid metrics={metrics} loading={dashboard.isPending} />
-
-      <QuickActions
-        actions={[
-          { label: 'My tasks', Icon: ClipboardList, onPress: toTasks },
-          { label: 'Clients', Icon: Users, onPress: () => router.push('/(app)/(agent)/clients') },
-          {
-            label: 'Inspections',
-            Icon: ClipboardCheck,
-            onPress: () => router.push('/(app)/agent-inspections'),
-          },
-          {
-            label: 'Verifications',
-            Icon: BadgeCheck,
-            onPress: () => router.push('/(app)/agent-verifications'),
-          },
-        ]}
-      />
-
-      <View style={{ gap: spacing.md }}>
-        <SectionHeader
-          title="Upcoming tasks"
-          description="Prioritized by deadline and status"
-          actionLabel="See all"
-          onAction={() => router.push('/(app)/(agent)/tasks')}
-        />
-
-        {dashboard.isPending ? (
-          <View style={{ gap: spacing.sm }}>
-            <Skeleton height={80} radius={16} />
-            <Skeleton height={80} radius={16} />
+      <QueryState
+        query={dashboard}
+        skeleton={
+          <View style={{ gap: spacing.lg }}>
+            <MetricGrid metrics={[]} loading />
+            {quickActions}
+            <View style={{ gap: spacing.sm }}>
+              <Skeleton height={80} radius={16} />
+              <Skeleton height={80} radius={16} />
+            </View>
           </View>
-        ) : !dashboard.data?.upcomingTasks.length ? (
-          <EmptyState
-            icon={<ClipboardCheck size={30} color={colors.mutedForeground} />}
-            title="You're all caught up"
-            description="New field assignments will appear here when they are scheduled."
+        }
+        errorTitle="We couldn't load your dashboard"
+        errorDescription="Check your connection and try again. Your assigned work is safe."
+      >
+        {/* What needs you first: work past its deadline. */}
+        {dashboard.data && dashboard.data.overdueTasks > 0 ? (
+          <AttentionCard
+            Icon={AlertTriangle}
+            tone="warning"
+            title={`${dashboard.data.overdueTasks} overdue ${dashboard.data.overdueTasks === 1 ? 'task' : 'tasks'}`}
+            detail="Take a look before they pile up"
+            onPress={toTasks}
           />
-        ) : (
-          dashboard.data.upcomingTasks.map((task: AgentTask) => (
-            <Pressable
-              key={task.id}
-              onPress={() => router.push(`/(app)/agent-task/${task.id}`)}
-              accessibilityRole="button"
-              accessibilityLabel={`${task.title}, ${AGENT_TASK_TYPE_LABEL[task.type]}, ${AGENT_TASK_STATUS_LABEL[task.status]}, due ${formatDate(task.dueAt, 'short')}`}
-              accessibilityHint="Opens task details"
-            >
-              <Card elevated>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                    gap: spacing.sm,
-                  }}
-                >
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text variant="bodyStrong" numberOfLines={1}>
-                      {task.title}
-                    </Text>
-                    <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                      {AGENT_TASK_TYPE_LABEL[task.type]} · {task.property.title}
-                    </Text>
-                    <Text variant="caption" color="mutedForeground">
-                      Due {formatDate(task.dueAt, 'short')}
-                    </Text>
+        ) : null}
+
+        <MetricGrid metrics={metrics} loading={false} />
+
+        {quickActions}
+
+        <View style={{ gap: spacing.md }}>
+          <SectionHeader
+            title="Upcoming tasks"
+            description="Prioritized by deadline and status"
+            actionLabel="See all"
+            onAction={() => router.push('/(app)/(agent)/tasks')}
+          />
+
+          {!dashboard.data?.upcomingTasks.length ? (
+            <EmptyState
+              icon={<ClipboardCheck size={30} color={colors.mutedForeground} />}
+              title="You're all caught up"
+              description="New field assignments will appear here when they are scheduled."
+            />
+          ) : (
+            dashboard.data.upcomingTasks.map((task: AgentTask) => (
+              <Pressable
+                key={task.id}
+                onPress={() => router.push(`/(app)/agent-task/${task.id}`)}
+                accessibilityRole="button"
+                accessibilityLabel={`${task.title}, ${AGENT_TASK_TYPE_LABEL[task.type]}, ${AGENT_TASK_STATUS_LABEL[task.status]}, due ${formatDate(task.dueAt, 'short')}`}
+                accessibilityHint="Opens task details"
+              >
+                <Card elevated>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'flex-start',
+                      justifyContent: 'space-between',
+                      gap: spacing.sm,
+                    }}
+                  >
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong" numberOfLines={1}>
+                        {task.title}
+                      </Text>
+                      <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                        {AGENT_TASK_TYPE_LABEL[task.type]} · {task.property.title}
+                      </Text>
+                      <Text variant="caption" color="mutedForeground">
+                        Due {formatDate(task.dueAt, 'short')}
+                      </Text>
+                    </View>
+                    <Badge
+                      label={AGENT_TASK_STATUS_LABEL[task.status]}
+                      tone={AGENT_TASK_STATUS_TONE[task.status]}
+                    />
                   </View>
-                  <Badge
-                    label={AGENT_TASK_STATUS_LABEL[task.status]}
-                    tone={AGENT_TASK_STATUS_TONE[task.status]}
-                  />
-                </View>
-              </Card>
-            </Pressable>
-          ))
-        )}
-      </View>
+                </Card>
+              </Pressable>
+            ))
+          )}
+        </View>
+      </QueryState>
     </Screen>
   );
 }

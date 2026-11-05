@@ -9,9 +9,9 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -145,168 +145,182 @@ export default function EstateHousehold() {
             title="Household not found"
             description="It may have been removed, or it belongs to another estate."
           />
-        ) : household.isError && !h ? (
-          <ErrorState onRetry={() => household.refetch()} />
-        ) : !h ? (
-          <Skeleton height={180} radius={radius.lg} />
         ) : (
-          <>
-            <Card elevated style={{ gap: spacing.md }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                <Avatar name={h.residentName} size={52} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="bodyStrong">{h.residentName}</Text>
-                  <Text variant="caption" color="mutedForeground" selectable>
-                    {[h.contactPhone, h.contactEmail].filter(Boolean).join(' · ') ||
-                      'No contact details yet'}
+          <QueryState query={household} skeleton={<Skeleton height={180} radius={radius.lg} />}>
+            {h ? (
+              <>
+                <Card elevated style={{ gap: spacing.md }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                    <Avatar name={h.residentName} size={52} />
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{h.residentName}</Text>
+                      <Text variant="caption" color="mutedForeground" selectable>
+                        {[h.contactPhone, h.contactEmail].filter(Boolean).join(' · ') ||
+                          'No contact details yet'}
+                      </Text>
+                    </View>
+                    {inactive ? <StatusPill label="Inactive" tone="neutral" /> : null}
+                  </View>
+                  <ContactActions
+                    phone={h.contactPhone}
+                    email={h.contactEmail}
+                    name={h.residentName}
+                  />
+                </Card>
+
+                <Card elevated style={{ gap: spacing.xs }}>
+                  <Text variant="caption" color="mutedForeground">
+                    Owes now
                   </Text>
-                </View>
-                {inactive ? <StatusPill label="Inactive" tone="neutral" /> : null}
-              </View>
-              <ContactActions phone={h.contactPhone} email={h.contactEmail} name={h.residentName} />
-            </Card>
-
-            <Card elevated style={{ gap: spacing.xs }}>
-              <Text variant="caption" color="mutedForeground">
-                Owes now
-              </Text>
-              {dues.isPending ? (
-                <Skeleton height={30} width="45%" />
-              ) : (
-                <Price amount={balance.total} variant="title" />
-              )}
-              <Text
-                variant="caption"
-                style={{ color: balance.overdue ? colors.destructive : colors.mutedForeground }}
-              >
-                {dues.isPending
-                  ? ' '
-                  : balance.overdue
-                    ? `₦${Math.round(balance.overdue).toLocaleString('en-NG')} of it is overdue`
-                    : balance.count
-                      ? `${balance.count} open ${balance.count === 1 ? 'charge' : 'charges'}, none late`
-                      : 'All paid up'}
-              </Text>
-              {!inactive ? (
-                <Button
-                  label="Charge this household"
-                  variant="secondary"
-                  icon={<WalletCards size={16} color={colors.foreground} />}
-                  style={{ marginTop: spacing.sm }}
-                  onPress={() =>
-                    router.push({ pathname: '/(app)/estate-charge', params: { householdId: h.id } })
-                  }
-                />
-              ) : null}
-            </Card>
-
-            <Card elevated style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                {h.residentLinked ? (
-                  <BadgeCheck size={18} color={colors.success} />
-                ) : (
-                  <Link2 size={18} color={colors.mutedForeground} />
-                )}
-                <Text variant="bodyStrong" style={{ flex: 1 }}>
-                  {h.residentLinked ? 'GetRentos account linked' : 'No GetRentos account linked'}
-                </Text>
-              </View>
-              <Text variant="caption" color="mutedForeground">
-                {h.residentLinked
-                  ? 'They pay dues, invite visitors and get your announcements in their own app.'
-                  : 'Link their account so they can pay online and invite visitors themselves.'}
-              </Text>
-              {h.residentLinked ? (
-                <Button
-                  label="Unlink account"
-                  variant="ghost"
-                  loading={unlink.isPending}
-                  onPress={() =>
-                    Alert.alert(
-                      'Unlink this account?',
-                      `${h.residentName} will stop seeing this home’s dues, passes and announcements.`,
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Unlink', style: 'destructive', onPress: () => unlink.mutate() },
-                      ]
-                    )
-                  }
-                />
-              ) : (
-                <Button
-                  label="Link an account"
-                  variant="secondary"
-                  onPress={() => setSheet('link')}
-                />
-              )}
-            </Card>
-
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" headingLevel={2}>
-                Dues
-              </Text>
-              {dues.isPending ? (
-                <Skeleton height={100} radius={radius.lg} />
-              ) : dues.isError && !dues.data ? (
-                <ErrorState onRetry={() => dues.refetch()} />
-              ) : !list.length ? (
-                <Text variant="callout" color="mutedForeground">
-                  Nothing charged to this home yet.
-                </Text>
-              ) : (
-                <>
-                  {open.map((d) => (
-                    <DueRow
-                      key={d.id}
-                      d={d}
-                      showHousehold={false}
-                      paying={pay.isPending && pay.variables?.id === d.id}
-                      onPaid={() => confirmPaid(d, () => pay.mutate(d))}
+                  {dues.isPending ? (
+                    <Skeleton height={30} width="45%" />
+                  ) : (
+                    <Price amount={balance.total} variant="title" />
+                  )}
+                  <Text
+                    variant="caption"
+                    style={{ color: balance.overdue ? colors.destructive : colors.mutedForeground }}
+                  >
+                    {dues.isPending
+                      ? ' '
+                      : balance.overdue
+                        ? `₦${Math.round(balance.overdue).toLocaleString('en-NG')} of it is overdue`
+                        : balance.count
+                          ? `${balance.count} open ${balance.count === 1 ? 'charge' : 'charges'}, none late`
+                          : 'All paid up'}
+                  </Text>
+                  {!inactive ? (
+                    <Button
+                      label="Charge this household"
+                      variant="secondary"
+                      icon={<WalletCards size={16} color={colors.foreground} />}
+                      style={{ marginTop: spacing.sm }}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/(app)/estate-charge',
+                          params: { householdId: h.id },
+                        })
+                      }
                     />
-                  ))}
-                  {settled.slice(0, 12).map((d) => (
-                    <DueRow key={d.id} d={d} showHousehold={false} />
-                  ))}
-                </>
-              )}
-            </View>
+                  ) : null}
+                </Card>
 
-            <View style={{ gap: spacing.sm }}>
-              <Button
-                label={inactive ? 'Mark active again' : 'Mark inactive (moved out)'}
-                variant="outline"
-                loading={setStatus.isPending}
-                onPress={() =>
-                  inactive
-                    ? setStatus.mutate('ACTIVE')
-                    : Alert.alert(
-                        'Mark this household inactive?',
-                        'Use this when the resident moves out. New charges and announcements skip it, and its payment history is kept.',
-                        [
+                <Card elevated style={{ gap: spacing.sm }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    {h.residentLinked ? (
+                      <BadgeCheck size={18} color={colors.success} />
+                    ) : (
+                      <Link2 size={18} color={colors.mutedForeground} />
+                    )}
+                    <Text variant="bodyStrong" style={{ flex: 1 }}>
+                      {h.residentLinked
+                        ? 'GetRentos account linked'
+                        : 'No GetRentos account linked'}
+                    </Text>
+                  </View>
+                  <Text variant="caption" color="mutedForeground">
+                    {h.residentLinked
+                      ? 'They pay dues, invite visitors and get your announcements in their own app.'
+                      : 'Link their account so they can pay online and invite visitors themselves.'}
+                  </Text>
+                  {h.residentLinked ? (
+                    <Button
+                      label="Unlink account"
+                      variant="ghost"
+                      loading={unlink.isPending}
+                      onPress={() =>
+                        Alert.alert(
+                          'Unlink this account?',
+                          `${h.residentName} will stop seeing this home’s dues, passes and announcements.`,
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Unlink',
+                              style: 'destructive',
+                              onPress: () => unlink.mutate(),
+                            },
+                          ]
+                        )
+                      }
+                    />
+                  ) : (
+                    <Button
+                      label="Link an account"
+                      variant="secondary"
+                      onPress={() => setSheet('link')}
+                    />
+                  )}
+                </Card>
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    Dues
+                  </Text>
+                  <QueryState query={dues} skeleton={<Skeleton height={100} radius={radius.lg} />}>
+                    {!list.length ? (
+                      <Text variant="callout" color="mutedForeground">
+                        Nothing charged to this home yet.
+                      </Text>
+                    ) : (
+                      <>
+                        {open.map((d) => (
+                          <DueRow
+                            key={d.id}
+                            d={d}
+                            showHousehold={false}
+                            paying={pay.isPending && pay.variables?.id === d.id}
+                            onPaid={() => confirmPaid(d, () => pay.mutate(d))}
+                          />
+                        ))}
+                        {settled.slice(0, 12).map((d) => (
+                          <DueRow key={d.id} d={d} showHousehold={false} />
+                        ))}
+                      </>
+                    )}
+                  </QueryState>
+                </View>
+
+                <View style={{ gap: spacing.sm }}>
+                  <Button
+                    label={inactive ? 'Mark active again' : 'Mark inactive (moved out)'}
+                    variant="outline"
+                    loading={setStatus.isPending}
+                    onPress={() =>
+                      inactive
+                        ? setStatus.mutate('ACTIVE')
+                        : Alert.alert(
+                            'Mark this household inactive?',
+                            'Use this when the resident moves out. New charges and announcements skip it, and its payment history is kept.',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Mark inactive',
+                                onPress: () => setStatus.mutate('INACTIVE'),
+                              },
+                            ]
+                          )
+                    }
+                  />
+                  {removable ? (
+                    <Button
+                      label="Remove household"
+                      variant="ghost"
+                      loading={remove.isPending}
+                      onPress={() =>
+                        Alert.alert('Remove this household?', 'For a home added by mistake.', [
                           { text: 'Cancel', style: 'cancel' },
-                          { text: 'Mark inactive', onPress: () => setStatus.mutate('INACTIVE') },
-                        ]
-                      )
-                }
-              />
-              {removable ? (
-                <Button
-                  label="Remove household"
-                  variant="ghost"
-                  loading={remove.isPending}
-                  onPress={() =>
-                    Alert.alert('Remove this household?', 'For a home added by mistake.', [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'Remove', style: 'destructive', onPress: () => remove.mutate() },
-                    ])
-                  }
-                />
-              ) : null}
-            </View>
-            <Text variant="caption" color="mutedForeground" center>
-              Added {formatDate(h.createdAt, 'medium')}
-            </Text>
-          </>
+                          { text: 'Remove', style: 'destructive', onPress: () => remove.mutate() },
+                        ])
+                      }
+                    />
+                  ) : null}
+                </View>
+                <Text variant="caption" color="mutedForeground" center>
+                  Added {formatDate(h.createdAt, 'medium')}
+                </Text>
+              </>
+            ) : null}
+          </QueryState>
         )}
       </ScrollView>
       {h ? (

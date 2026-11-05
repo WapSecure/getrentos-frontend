@@ -9,8 +9,8 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -45,6 +45,14 @@ export default function BuyerOfferDetail() {
     queryKey: qk.buyer.offerThread(id),
     queryFn: () => buyerOffersApi.thread(id),
   });
+
+  const thread = threadQuery.data ?? [];
+
+  const offerSkeleton = (
+    <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+      <Skeleton height={140} radius={radius.lg} />
+    </View>
+  );
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['buyer', 'offers'] });
@@ -99,149 +107,151 @@ export default function BuyerOfferDetail() {
         <Text variant="title">Offer</Text>
       </View>
 
-      {offersQuery.isError && !offer ? (
-        <ErrorState onRetry={() => offersQuery.refetch()} />
-      ) : !offer ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={140} radius={radius.lg} />
-        </View>
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-        >
-          <Card elevated>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-              }}
-            >
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="bodyStrong" numberOfLines={1}>
-                  {offer.propertyTitle}
-                </Text>
+      <QueryState query={offersQuery} skeleton={offerSkeleton}>
+        {/* An offer missing from the list keeps the placeholder, as before. */}
+        {!offer ? (
+          offerSkeleton
+        ) : (
+          <ScrollView
+            contentContainerStyle={{
+              padding: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+          >
+            <Card elevated>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyStrong" numberOfLines={1}>
+                    {offer.propertyTitle}
+                  </Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {offer.ownerName}
+                  </Text>
+                </View>
+                <Badge
+                  label={BUYER_OFFER_STATUS_LABEL[offer.status]}
+                  tone={BUYER_OFFER_STATUS_TONE[offer.status]}
+                />
+              </View>
+
+              <Divider style={{ marginVertical: spacing.sm }} />
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View>
+                  <Text variant="caption" color="mutedForeground">
+                    Your offer
+                  </Text>
+                  <Price amount={offer.offerAmount} variant="bodyStrong" />
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text variant="caption" color="mutedForeground">
+                    Asking price
+                  </Text>
+                  <Price amount={offer.askingPrice} variant="bodyStrong" />
+                </View>
+              </View>
+
+              <View style={{ marginTop: spacing.sm, gap: 4 }}>
                 <Text variant="caption" color="mutedForeground">
-                  {offer.ownerName}
+                  Financing: {offer.financingType}
+                </Text>
+                {offer.depositAmount ? (
+                  <Text variant="caption" color="mutedForeground">
+                    Deposit: ₦{offer.depositAmount.toLocaleString()}
+                  </Text>
+                ) : null}
+                <Text variant="caption" color="mutedForeground">
+                  Submitted {formatDate(offer.submittedAt, 'medium')}
                 </Text>
               </View>
-              <Badge
-                label={BUYER_OFFER_STATUS_LABEL[offer.status]}
-                tone={BUYER_OFFER_STATUS_TONE[offer.status]}
-              />
-            </View>
 
-            <Divider style={{ marginVertical: spacing.sm }} />
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View>
-                <Text variant="caption" color="mutedForeground">
-                  Your offer
-                </Text>
-                <Price amount={offer.offerAmount} variant="bodyStrong" />
-              </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text variant="caption" color="mutedForeground">
-                  Asking price
-                </Text>
-                <Price amount={offer.askingPrice} variant="bodyStrong" />
-              </View>
-            </View>
-
-            <View style={{ marginTop: spacing.sm, gap: 4 }}>
-              <Text variant="caption" color="mutedForeground">
-                Financing: {offer.financingType}
-              </Text>
-              {offer.depositAmount ? (
-                <Text variant="caption" color="mutedForeground">
-                  Deposit: ₦{offer.depositAmount.toLocaleString()}
-                </Text>
+              {offer.message ? (
+                <>
+                  <Divider style={{ marginVertical: spacing.sm }} />
+                  <Text variant="callout" color="mutedForeground">
+                    {offer.message}
+                  </Text>
+                </>
               ) : null}
-              <Text variant="caption" color="mutedForeground">
-                Submitted {formatDate(offer.submittedAt, 'medium')}
-              </Text>
-            </View>
+            </Card>
 
-            {offer.message ? (
-              <>
-                <Divider style={{ marginVertical: spacing.sm }} />
-                <Text variant="callout" color="mutedForeground">
-                  {offer.message}
-                </Text>
-              </>
-            ) : null}
-          </Card>
-
-          {offer.status === 'submitted' || offer.status === 'countered' ? (
-            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-              {offer.status === 'countered' ? (
+            {offer.status === 'submitted' || offer.status === 'countered' ? (
+              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                {offer.status === 'countered' ? (
+                  <Button
+                    label="Accept"
+                    size="sm"
+                    style={{ flex: 1 }}
+                    loading={acceptMutation.isPending}
+                    onPress={() => acceptMutation.mutate()}
+                  />
+                ) : null}
                 <Button
-                  label="Accept"
+                  label="Counter"
+                  variant="outline"
                   size="sm"
                   style={{ flex: 1 }}
-                  loading={acceptMutation.isPending}
-                  onPress={() => acceptMutation.mutate()}
+                  onPress={() => setCounterOpen(true)}
                 />
-              ) : null}
-              <Button
-                label="Counter"
-                variant="outline"
-                size="sm"
-                style={{ flex: 1 }}
-                onPress={() => setCounterOpen(true)}
-              />
-              <Button
-                label="Withdraw"
-                variant="destructive"
-                size="sm"
-                style={{ flex: 1 }}
-                loading={withdrawMutation.isPending}
-                onPress={confirmWithdraw}
-              />
-            </View>
-          ) : null}
+                <Button
+                  label="Withdraw"
+                  variant="destructive"
+                  size="sm"
+                  style={{ flex: 1 }}
+                  loading={withdrawMutation.isPending}
+                  onPress={confirmWithdraw}
+                />
+              </View>
+            ) : null}
 
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading">Activity</Text>
-            {!threadQuery.data ? (
-              <Skeleton height={60} radius={radius.md} />
-            ) : threadQuery.data.length === 0 ? (
-              <Text variant="callout" color="mutedForeground">
-                No activity yet.
-              </Text>
-            ) : (
-              threadQuery.data.map((m: BuyerOfferThreadMessage) => (
-                <Card key={m.id} elevated padding={12}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <Text variant="bodyStrong">{m.senderName}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {formatDate(m.timestamp, 'short')}
-                    </Text>
-                  </View>
-                  {m.text ? (
-                    <Text variant="callout" color="mutedForeground" style={{ marginTop: 2 }}>
-                      {m.text}
-                    </Text>
-                  ) : null}
-                  {m.amount ? (
-                    <Price amount={m.amount} variant="callout" style={{ marginTop: 2 }} />
-                  ) : null}
-                </Card>
-              ))
-            )}
-          </View>
-        </ScrollView>
-      )}
+            <View style={{ gap: spacing.sm }}>
+              <Text variant="heading">Activity</Text>
+              <QueryState
+                query={threadQuery}
+                skeleton={<Skeleton height={60} radius={radius.md} />}
+              >
+                {thread.length === 0 ? (
+                  <Text variant="callout" color="mutedForeground">
+                    No activity yet.
+                  </Text>
+                ) : (
+                  thread.map((m: BuyerOfferThreadMessage) => (
+                    <Card key={m.id} elevated padding={12}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <Text variant="bodyStrong">{m.senderName}</Text>
+                        <Text variant="caption" color="mutedForeground">
+                          {formatDate(m.timestamp, 'short')}
+                        </Text>
+                      </View>
+                      {m.text ? (
+                        <Text variant="callout" color="mutedForeground" style={{ marginTop: 2 }}>
+                          {m.text}
+                        </Text>
+                      ) : null}
+                      {m.amount ? (
+                        <Price amount={m.amount} variant="callout" style={{ marginTop: 2 }} />
+                      ) : null}
+                    </Card>
+                  ))
+                )}
+              </QueryState>
+            </View>
+          </ScrollView>
+        )}
+      </QueryState>
 
       <CounterOfferSheet
         open={counterOpen}

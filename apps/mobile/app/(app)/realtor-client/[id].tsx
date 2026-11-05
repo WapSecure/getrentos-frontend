@@ -8,9 +8,9 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
   ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -77,93 +77,94 @@ export default function RealtorClientDetail() {
       }}
     >
       <DetailHeader eyebrow="Client" title={c ? clientName(c) : 'Client'} onBack={() => goBack()} />
-      {clients.isError && !clients.data ? (
-        <ErrorState onRetry={() => clients.refetch()} />
-      ) : clients.isPending ? (
-        <Skeleton height={160} radius={radius.lg} />
-      ) : !c ? (
-        <EmptyState title="Client not found" description="This relationship may have ended." />
-      ) : (
-        <>
-          <Card elevated style={{ gap: spacing.md }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Avatar name={clientName(c)} size={52} />
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyStrong">{clientName(c)}</Text>
-                <Text variant="caption" color="mutedForeground">
-                  {clientRole(c)} · client since {formatDate(c.createdAt, 'medium')}
-                </Text>
+      <QueryState
+        query={clients}
+        skeleton={<Skeleton height={160} radius={radius.lg} />}
+        isEmpty={!c}
+        empty={{ title: 'Client not found', description: 'This relationship may have ended.' }}
+      >
+        {c ? (
+          <>
+            <Card elevated style={{ gap: spacing.md }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <Avatar name={clientName(c)} size={52} />
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyStrong">{clientName(c)}</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {clientRole(c)} · client since {formatDate(c.createdAt, 'medium')}
+                  </Text>
+                </View>
               </View>
-            </View>
-            <ContactActions phone={c.client.phone} email={c.client.email} name={clientName(c)} />
-            <Button
-              label="Message on GetRentos"
-              variant="secondary"
-              icon={<MessageCircle size={16} color={colors.foreground} />}
-              loading={message.isPending}
-              onPress={() => message.mutate()}
-            />
-          </Card>
-
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" headingLevel={2}>
-              Properties you handle
-            </Text>
-            {properties.isError && !properties.data ? (
-              <ErrorState onRetry={() => properties.refetch()} />
-            ) : properties.isLoading ? (
-              <Skeleton height={72} radius={radius.lg} />
-            ) : !properties.data?.items.length ? (
-              <FormAlert
-                tone="info"
-                message={`${clientName(c)} hasn’t assigned you a property yet. They choose which ones from their Realtors & agents screen.`}
+              <ContactActions phone={c.client.phone} email={c.client.email} name={clientName(c)} />
+              <Button
+                label="Message on GetRentos"
+                variant="secondary"
+                icon={<MessageCircle size={16} color={colors.foreground} />}
+                loading={message.isPending}
+                onPress={() => message.mutate()}
               />
-            ) : (
-              properties.data.items.map((p) => {
-                const listed = listedIds.has(p.id);
-                return (
-                  <Card
-                    key={p.id}
-                    elevated
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-                  >
-                    <Building2 size={20} color={colors.primary} />
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong" numberOfLines={1}>
-                        {p.title}
-                      </Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                        <MapPin size={12} color={colors.mutedForeground} />
-                        <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                          {[p.city, p.state].filter(Boolean).join(', ')}
+            </Card>
+
+            <View style={{ gap: spacing.sm }}>
+              <Text variant="heading" headingLevel={2}>
+                Properties you handle
+              </Text>
+              {properties.isError && !properties.data ? (
+                <ErrorState onRetry={() => properties.refetch()} />
+              ) : properties.isLoading ? (
+                <Skeleton height={72} radius={radius.lg} />
+              ) : !properties.data?.items.length ? (
+                <FormAlert
+                  tone="info"
+                  message={`${clientName(c)} hasn’t assigned you a property yet. They choose which ones from their Realtors & agents screen.`}
+                />
+              ) : (
+                properties.data.items.map((p) => {
+                  const listed = listedIds.has(p.id);
+                  return (
+                    <Card
+                      key={p.id}
+                      elevated
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                    >
+                      <Building2 size={20} color={colors.primary} />
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text variant="bodyStrong" numberOfLines={1}>
+                          {p.title}
                         </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={12} color={colors.mutedForeground} />
+                          <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                            {[p.city, p.state].filter(Boolean).join(', ')}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                    {listed ? (
-                      <Badge label="Listed" />
-                    ) : (
-                      <Button
-                        label="List it"
-                        variant="ghost"
-                        size="sm"
-                        fullWidth={false}
-                        icon={<Plus size={16} color={colors.primary} />}
-                        accessibilityLabel={`List ${p.title}`}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/(app)/realtor-new-listing',
-                            params: { relationshipId: c.id, propertyId: p.id },
-                          })
-                        }
-                      />
-                    )}
-                  </Card>
-                );
-              })
-            )}
-          </View>
-        </>
-      )}
+                      {listed ? (
+                        <Badge label="Listed" />
+                      ) : (
+                        <Button
+                          label="List it"
+                          variant="ghost"
+                          size="sm"
+                          fullWidth={false}
+                          icon={<Plus size={16} color={colors.primary} />}
+                          accessibilityLabel={`List ${p.title}`}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/(app)/realtor-new-listing',
+                              params: { relationshipId: c.id, propertyId: p.id },
+                            })
+                          }
+                        />
+                      )}
+                    </Card>
+                  );
+                })
+              )}
+            </View>
+          </>
+        ) : null}
+      </QueryState>
     </ScrollView>
   );
 }

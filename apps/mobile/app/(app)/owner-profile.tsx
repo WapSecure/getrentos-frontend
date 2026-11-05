@@ -7,7 +7,7 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -45,13 +45,9 @@ export default function OwnerProfileScreen() {
           subtitle="How buyers and realtors see you"
           onBack={() => goBack()}
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !query.data ? (
-          <Skeleton height={320} radius={radius.lg} />
-        ) : (
-          <ProfileForm initial={query.data} />
-        )}
+        <QueryState query={query} skeleton={<Skeleton height={320} radius={radius.lg} />}>
+          {query.data ? <ProfileForm initial={query.data} /> : null}
+        </QueryState>
       </ScrollView>
     </KeyboardAvoidingView>
   );

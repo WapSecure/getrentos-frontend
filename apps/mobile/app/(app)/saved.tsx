@@ -7,10 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, MoreHorizontal, Settings2 } from 'lucide-react-native';
 import {
   Chip,
-  EmptyState,
-  ErrorState,
   IconButton,
   PropertyCard,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -120,7 +119,7 @@ export default function Saved() {
             onPress={() => setActiveWishlistId(undefined)}
             size="sm"
           />
-          {wishlistsQuery.data!.map((w) => (
+          {(wishlistsQuery.data ?? []).map((w) => (
             <Chip
               key={w.id}
               label={w.name}
@@ -137,29 +136,26 @@ export default function Saved() {
         <RecentlyViewedStrip />
       </View>
 
-      {listQuery.isError && !listQuery.data ? (
-        <ErrorState
-          title="Couldn't load your saved homes"
-          description="Check your connection and try again. Your shortlist is safe."
-          onRetry={() => listQuery.refetch()}
-        />
-      ) : listQuery.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={116} radius={16} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Heart size={34} color={colors.mutedForeground} />}
-          title={activeWishlistId ? 'Nothing in this wishlist yet' : 'Nothing saved yet'}
-          description={
-            activeWishlistId
-              ? 'Move a saved home here from its card menu.'
-              : 'Tap the heart on any listing to keep it here for later.'
-          }
-        />
-      ) : (
+      <QueryState
+        query={listQuery}
+        errorTitle="Couldn't load your saved homes"
+        errorDescription="Check your connection and try again. Your shortlist is safe."
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={116} radius={16} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Heart size={34} color={colors.mutedForeground} />,
+          title: activeWishlistId ? 'Nothing in this wishlist yet' : 'Nothing saved yet',
+          description: activeWishlistId
+            ? 'Move a saved home here from its card menu.'
+            : 'Tap the heart on any listing to keep it here for later.',
+        }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -177,7 +173,7 @@ export default function Saved() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <WishlistManageSheet open={manageOpen} onClose={() => setManageOpen(false)} />
       <MoveToWishlistSheet

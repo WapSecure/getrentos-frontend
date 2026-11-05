@@ -16,10 +16,10 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
   FormAlert,
   NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -117,8 +117,6 @@ export default function WorkOrderDetail() {
     onError: (e) => toast.show(err(e, 'Could not cancel it.'), 'error'),
   });
 
-  if (query.isError && !w) return <ErrorState onRetry={() => query.refetch()} />;
-
   const open = w && w.status !== 'RESOLVED' && w.status !== 'CANCELLED';
   const needsApproval = !!w && w.approvalRequired && !w.approvedAt;
   const sla = w ? slaState(w) : null;
@@ -148,189 +146,194 @@ export default function WorkOrderDetail() {
           }
           onBack={() => goBack()}
         />
-        {!w ? (
-          <>
-            <Skeleton height={120} radius={radius.lg} />
-            <Skeleton height={200} radius={radius.lg} />
-          </>
-        ) : (
-          <>
-            <View
-              style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                gap: spacing.sm,
-                alignItems: 'center',
-              }}
-            >
-              <StatusPill label={STATUS_LABEL[w.status]} tone={STATUS_TONE[w.status]} />
-              <PriorityTag p={w.priority} />
-              <Text variant="caption" color="mutedForeground">
-                {categoryLabel(w.category)} · logged {formatDate(w.createdAt, 'medium')}
-              </Text>
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              <Skeleton height={120} radius={radius.lg} />
+              <Skeleton height={200} radius={radius.lg} />
             </View>
-
-            {open ? (
-              <Card
-                elevated
+          }
+        >
+          {w ? (
+            <>
+              <View
                 style={{
-                  gap: spacing.md,
-                  borderWidth: sla?.overdue ? 1.5 : 0,
-                  borderColor: colors.destructive,
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  gap: spacing.sm,
+                  alignItems: 'center',
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  {w.isEmergency ? (
-                    <Siren size={18} color={colors.destructive} />
-                  ) : sla?.overdue ? (
-                    <AlertTriangle size={18} color={colors.destructive} />
-                  ) : (
-                    <Clock size={18} color={colors.primary} />
-                  )}
-                  <Text
-                    variant="bodyStrong"
-                    style={{
-                      flex: 1,
-                      color: sla?.overdue ? colors.destructive : colors.foreground,
-                    }}
-                  >
-                    {sla?.label ?? 'No deadline set'}
-                  </Text>
-                </View>
-                <View style={{ gap: 4 }}>
-                  <Row
-                    k="Respond by"
-                    v={w.acknowledgedAt ? `Done ${dt(w.acknowledgedAt)}` : dt(w.responseDueAt)}
-                  />
-                  <Row k="Resolve by" v={dt(w.resolutionDueAt ?? w.dueAt)} />
-                  {w.escalatedAt ? (
-                    <Row k="Escalated" v={dt(w.escalatedAt)} />
-                  ) : w.escalationDueAt ? (
-                    <Row k="Escalates at" v={dt(w.escalationDueAt)} />
-                  ) : null}
-                </View>
+                <StatusPill label={STATUS_LABEL[w.status]} tone={STATUS_TONE[w.status]} />
+                <PriorityTag p={w.priority} />
                 <Text variant="caption" color="mutedForeground">
-                  {nextStep(w)}
+                  {categoryLabel(w.category)} · logged {formatDate(w.createdAt, 'medium')}
                 </Text>
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  {!w.acknowledgedAt ? (
-                    <Button
-                      label="Acknowledge"
-                      style={{ flex: 1 }}
-                      loading={act.isPending && act.variables === 'acknowledge'}
-                      onPress={() => act.mutate('acknowledge')}
-                    />
-                  ) : null}
-                  {!w.escalatedAt ? (
-                    <Button
-                      label="Escalate"
-                      variant="secondary"
-                      style={{ flex: 1 }}
-                      loading={act.isPending && act.variables === 'escalate'}
-                      onPress={() =>
-                        Alert.alert(
-                          'Escalate this job?',
-                          'It’s flagged as needing senior attention and notifications go out.',
-                          [
-                            { text: 'Not now', style: 'cancel' },
-                            { text: 'Escalate', onPress: () => act.mutate('escalate') },
-                          ]
-                        )
-                      }
-                    />
-                  ) : null}
-                </View>
-              </Card>
-            ) : null}
+              </View>
 
-            <Card elevated style={{ gap: spacing.sm }}>
-              <Text variant="body">{w.description}</Text>
-              {w.images?.length ? (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: spacing.sm }}
+              {open ? (
+                <Card
+                  elevated
+                  style={{
+                    gap: spacing.md,
+                    borderWidth: sla?.overdue ? 1.5 : 0,
+                    borderColor: colors.destructive,
+                  }}
                 >
-                  {w.images.map((uri, i) => (
-                    <Image
-                      key={uri}
-                      source={{ uri }}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    {w.isEmergency ? (
+                      <Siren size={18} color={colors.destructive} />
+                    ) : sla?.overdue ? (
+                      <AlertTriangle size={18} color={colors.destructive} />
+                    ) : (
+                      <Clock size={18} color={colors.primary} />
+                    )}
+                    <Text
+                      variant="bodyStrong"
                       style={{
-                        width: 120,
-                        height: 90,
-                        borderRadius: radius.md,
-                        backgroundColor: colors.secondary,
+                        flex: 1,
+                        color: sla?.overdue ? colors.destructive : colors.foreground,
                       }}
-                      contentFit="cover"
-                      accessibilityLabel={`Evidence photo ${i + 1}`}
+                    >
+                      {sla?.label ?? 'No deadline set'}
+                    </Text>
+                  </View>
+                  <View style={{ gap: 4 }}>
+                    <Row
+                      k="Respond by"
+                      v={w.acknowledgedAt ? `Done ${dt(w.acknowledgedAt)}` : dt(w.responseDueAt)}
                     />
-                  ))}
-                </ScrollView>
+                    <Row k="Resolve by" v={dt(w.resolutionDueAt ?? w.dueAt)} />
+                    {w.escalatedAt ? (
+                      <Row k="Escalated" v={dt(w.escalatedAt)} />
+                    ) : w.escalationDueAt ? (
+                      <Row k="Escalates at" v={dt(w.escalationDueAt)} />
+                    ) : null}
+                  </View>
+                  <Text variant="caption" color="mutedForeground">
+                    {nextStep(w)}
+                  </Text>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    {!w.acknowledgedAt ? (
+                      <Button
+                        label="Acknowledge"
+                        style={{ flex: 1 }}
+                        loading={act.isPending && act.variables === 'acknowledge'}
+                        onPress={() => act.mutate('acknowledge')}
+                      />
+                    ) : null}
+                    {!w.escalatedAt ? (
+                      <Button
+                        label="Escalate"
+                        variant="secondary"
+                        style={{ flex: 1 }}
+                        loading={act.isPending && act.variables === 'escalate'}
+                        onPress={() =>
+                          Alert.alert(
+                            'Escalate this job?',
+                            'It’s flagged as needing senior attention and notifications go out.',
+                            [
+                              { text: 'Not now', style: 'cancel' },
+                              { text: 'Escalate', onPress: () => act.mutate('escalate') },
+                            ]
+                          )
+                        }
+                      />
+                    ) : null}
+                  </View>
+                </Card>
               ) : null}
-              <Divider />
-              {w.tenant?.legalName ? <Row k="Reported by" v={w.tenant.legalName} /> : null}
-              {w.asset?.name ? <Row k="Item" v={w.asset.name} /> : null}
-              <Row k="Vendor" v={w.assignedVendor?.name ?? 'Not assigned'} />
-            </Card>
 
-            <Card elevated style={{ gap: spacing.md }}>
-              <Text variant="bodyStrong">Budget</Text>
-              <Row
-                k="Estimated"
-                v={w.estimatedCost != null ? `₦${w.estimatedCost.toLocaleString('en-NG')}` : '—'}
-              />
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                  Approved
-                </Text>
-                {w.approvedCost != null ? (
-                  <Price amount={w.approvedCost} variant="bodyStrong" />
-                ) : (
-                  <Text variant="callout">—</Text>
-                )}
-              </View>
-              {needsApproval ? (
-                <Button label="Approve spend" onPress={() => setPanel('approve')} />
-              ) : null}
-            </Card>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <Text variant="body">{w.description}</Text>
+                {w.images?.length ? (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ gap: spacing.sm }}
+                  >
+                    {w.images.map((uri, i) => (
+                      <Image
+                        key={uri}
+                        source={{ uri }}
+                        style={{
+                          width: 120,
+                          height: 90,
+                          borderRadius: radius.md,
+                          backgroundColor: colors.secondary,
+                        }}
+                        contentFit="cover"
+                        accessibilityLabel={`Evidence photo ${i + 1}`}
+                      />
+                    ))}
+                  </ScrollView>
+                ) : null}
+                <Divider />
+                {w.tenant?.legalName ? <Row k="Reported by" v={w.tenant.legalName} /> : null}
+                {w.asset?.name ? <Row k="Item" v={w.asset.name} /> : null}
+                <Row k="Vendor" v={w.assignedVendor?.name ?? 'Not assigned'} />
+              </Card>
 
-            {open ? (
-              <View style={{ gap: spacing.sm }}>
-                {w.status === 'SUBMITTED' || w.status === 'ASSIGNED' ? (
-                  <Button
-                    label={w.assignedVendor ? 'Change vendor' : 'Assign a vendor'}
-                    variant={w.assignedVendor ? 'secondary' : 'primary'}
-                    onPress={() => setPanel('assign')}
-                  />
-                ) : null}
-                {w.status === 'ASSIGNED' ? (
-                  <Button
-                    label="Start the job"
-                    disabled={needsApproval}
-                    loading={act.isPending && act.variables === 'start'}
-                    onPress={() => act.mutate('start')}
-                  />
-                ) : null}
-                {w.status === 'ASSIGNED' || w.status === 'IN_PROGRESS' ? (
-                  <Button
-                    label="Resolve"
-                    variant={w.status === 'IN_PROGRESS' ? 'primary' : 'secondary'}
-                    disabled={needsApproval}
-                    onPress={() => setPanel('resolve')}
-                  />
-                ) : null}
-                <Button
-                  label="Cancel work order"
-                  variant="ghost"
-                  onPress={() => setPanel('cancel')}
+              <Card elevated style={{ gap: spacing.md }}>
+                <Text variant="bodyStrong">Budget</Text>
+                <Row
+                  k="Estimated"
+                  v={w.estimatedCost != null ? `₦${w.estimatedCost.toLocaleString('en-NG')}` : '—'}
                 />
-              </View>
-            ) : null}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+                    Approved
+                  </Text>
+                  {w.approvedCost != null ? (
+                    <Price amount={w.approvedCost} variant="bodyStrong" />
+                  ) : (
+                    <Text variant="callout">—</Text>
+                  )}
+                </View>
+                {needsApproval ? (
+                  <Button label="Approve spend" onPress={() => setPanel('approve')} />
+                ) : null}
+              </Card>
 
-            <QuotesSection w={w} />
-            <InvoicesSection w={w} />
-          </>
-        )}
+              {open ? (
+                <View style={{ gap: spacing.sm }}>
+                  {w.status === 'SUBMITTED' || w.status === 'ASSIGNED' ? (
+                    <Button
+                      label={w.assignedVendor ? 'Change vendor' : 'Assign a vendor'}
+                      variant={w.assignedVendor ? 'secondary' : 'primary'}
+                      onPress={() => setPanel('assign')}
+                    />
+                  ) : null}
+                  {w.status === 'ASSIGNED' ? (
+                    <Button
+                      label="Start the job"
+                      disabled={needsApproval}
+                      loading={act.isPending && act.variables === 'start'}
+                      onPress={() => act.mutate('start')}
+                    />
+                  ) : null}
+                  {w.status === 'ASSIGNED' || w.status === 'IN_PROGRESS' ? (
+                    <Button
+                      label="Resolve"
+                      variant={w.status === 'IN_PROGRESS' ? 'primary' : 'secondary'}
+                      disabled={needsApproval}
+                      onPress={() => setPanel('resolve')}
+                    />
+                  ) : null}
+                  <Button
+                    label="Cancel work order"
+                    variant="ghost"
+                    onPress={() => setPanel('cancel')}
+                  />
+                </View>
+              ) : null}
+
+              <QuotesSection w={w} />
+              <InvoicesSection w={w} />
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
 
       <Sheet

@@ -8,8 +8,7 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -77,21 +76,20 @@ export default function LandConsents() {
           </Text>
         </Card>
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <Skeleton height={160} radius={radius.lg} />
-        ) : !items.length ? (
-          <EmptyState
-            icon={<Inbox size={34} color={colors.mutedForeground} />}
-            title="No consent requests"
-            description="When a seller names you on their land sale, it appears here."
-          />
-        ) : (
-          items.map((item) => (
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={160} radius={radius.lg} />}
+          isEmpty={!items.length}
+          empty={{
+            icon: <Inbox size={34} color={colors.mutedForeground} />,
+            title: 'No consent requests',
+            description: 'When a seller names you on their land sale, it appears here.',
+          }}
+        >
+          {items.map((item) => (
             <ConsentCard key={item.signatoryId} item={item} onObject={() => setObjecting(item)} />
-          ))
-        )}
+          ))}
+        </QueryState>
       </ScrollView>
 
       <Sheet open={!!objecting} onClose={() => setObjecting(null)} title="Object to the sale">

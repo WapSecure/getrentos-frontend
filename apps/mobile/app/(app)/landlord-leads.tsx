@@ -10,7 +10,7 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -23,7 +23,7 @@ import {
   LEAD_STAGE_TONE,
   type LandlordLead,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
@@ -41,8 +41,7 @@ export default function LandlordLeads() {
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['landlord', 'leads'] });
-  const fail = (e: unknown, fallback: string) =>
-    toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+  const fail = (e: unknown, fallback: string) => toast.show(errorMessage(e, fallback), 'error');
 
   const nudge = useMutation({
     mutationFn: (id: string) => landlordApi.nudgeLead(id),
@@ -110,15 +109,17 @@ export default function LandlordLeads() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={96} radius={radius.md} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={96} radius={radius.md} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(l) => l.id}
@@ -144,7 +145,7 @@ export default function LandlordLeads() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

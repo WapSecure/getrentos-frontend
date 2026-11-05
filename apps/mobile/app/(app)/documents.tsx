@@ -9,9 +9,8 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -139,21 +138,22 @@ export default function Documents() {
         </View>
       ) : null}
 
-      {listQuery.isError && !listQuery.data ? (
-        <ErrorState onRetry={() => listQuery.refetch()} />
-      ) : listQuery.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={80} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<FileStack size={34} color={colors.mutedForeground} />}
-          title="No documents yet"
-          description="Upload leases, receipts and other paperwork to keep them all in one place."
-        />
-      ) : (
+      <QueryState
+        query={listQuery}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={80} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <FileStack size={34} color={colors.mutedForeground} />,
+          title: 'No documents yet',
+          description: 'Upload leases, receipts and other paperwork to keep them all in one place.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -246,7 +246,7 @@ export default function Documents() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <UploadDocumentSheet open={uploadOpen} onClose={() => setUploadOpen(false)} />
 

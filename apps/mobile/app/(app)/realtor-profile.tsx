@@ -9,8 +9,8 @@ import {
   Avatar,
   Button,
   Card,
-  ErrorState,
   LinkButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -49,13 +49,9 @@ export default function RealtorProfileScreen() {
           subtitle="How clients and buyers see you"
           onBack={() => goBack()}
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !query.data ? (
-          <Skeleton height={280} radius={radius.lg} />
-        ) : (
-          <ProfileForm initial={query.data} />
-        )}
+        <QueryState query={query} skeleton={<Skeleton height={280} radius={radius.lg} />}>
+          {query.data ? <ProfileForm initial={query.data} /> : null}
+        </QueryState>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, RefreshControl, View } from 'react-native';
 
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -16,9 +16,9 @@ import {
 import {
   Button,
   EmptyState,
-  ErrorState,
   IconButton,
   SegmentedControl,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -143,12 +143,18 @@ export default function EstateMarketplace() {
     );
 
   const inv = inventory.data;
-  const failed =
-    (inventory.isError && !inv) ||
-    (agreements.isError && !agreements.data) ||
-    (listingsQuery.isError && !listingsQuery.data);
-  const loading =
-    estatePending || (!!estateId && (agreements.isPending || listingsQuery.isPending));
+  // The three queries as one for QueryState: loaded once agreements and
+  // listings are in and the counts have not failed outright.
+  const combined = {
+    data:
+      agreements.data !== undefined &&
+      listingsQuery.data !== undefined &&
+      !(inventory.isError && !inv)
+        ? listings
+        : undefined,
+    isError: inventory.isError || agreements.isError || listingsQuery.isError,
+    refetch: refreshAll,
+  };
 
   const refresh = (
     <RefreshControl
@@ -263,82 +269,85 @@ export default function EstateMarketplace() {
           title="No estate yet"
           description="The marketplace appears here once your estate is set up."
         />
-      ) : failed ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={refreshAll} />
-        </ScrollView>
-      ) : loading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={208} radius={radius.lg} />
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={92} radius={radius.lg} />
-          ))}
-        </View>
-      ) : tab === 'listings' ? (
-        <FlashList
-          key="listings"
-          data={listings}
-          keyExtractor={(l) => l.id}
-          refreshControl={refresh}
-          onEndReached={() => {
-            if (listingsQuery.hasNextPage && !listingsQuery.isFetchingNextPage)
-              void listingsQuery.fetchNextPage();
-          }}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ListHeaderComponent={header}
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          renderItem={({ item }: { item: EstateListing }) => (
-            <ListingCard listing={item} onPress={() => setManagingId(item.id)} />
-          )}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<Home size={34} color={colors.mutedForeground} />}
-              title="Nothing advertised yet"
-              description={
-                inv?.agreementsActive
-                  ? 'Create a listing for a property you’re cleared to market and it goes live in the market and on the estate page.'
-                  : 'Add a property and, once its owner agrees, create a listing for it here.'
-              }
-              action={
-                <Button
-                  label={inv?.agreementsActive ? 'New listing' : 'Add a property'}
-                  onPress={() => (inv?.agreementsActive ? setCreating(true) : setAdding(true))}
+      ) : (
+        <QueryState
+          query={combined}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              <Skeleton height={208} radius={radius.lg} />
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={92} radius={radius.lg} />
+              ))}
+            </View>
+          }
+        >
+          {tab === 'listings' ? (
+            <FlashList
+              key="listings"
+              data={listings}
+              keyExtractor={(l) => l.id}
+              refreshControl={refresh}
+              onEndReached={() => {
+                if (listingsQuery.hasNextPage && !listingsQuery.isFetchingNextPage)
+                  void listingsQuery.fetchNextPage();
+              }}
+              contentContainerStyle={{
+                paddingHorizontal: spacing.xl,
+                paddingBottom: insets.bottom + spacing['3xl'],
+              }}
+              ListHeaderComponent={header}
+              ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+              renderItem={({ item }: { item: EstateListing }) => (
+                <ListingCard listing={item} onPress={() => setManagingId(item.id)} />
+              )}
+              ListEmptyComponent={
+                <EmptyState
+                  icon={<Home size={34} color={colors.mutedForeground} />}
+                  title="Nothing advertised yet"
+                  description={
+                    inv?.agreementsActive
+                      ? 'Create a listing for a property you’re cleared to market and it goes live in the market and on the estate page.'
+                      : 'Add a property and, once its owner agrees, create a listing for it here.'
+                  }
+                  action={
+                    <Button
+                      label={inv?.agreementsActive ? 'New listing' : 'Add a property'}
+                      onPress={() => (inv?.agreementsActive ? setCreating(true) : setAdding(true))}
+                    />
+                  }
                 />
               }
             />
-          }
-        />
-      ) : (
-        <FlashList
-          key="properties"
-          data={properties}
-          keyExtractor={(a) => a.id}
-          refreshControl={refresh}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ListHeaderComponent={header}
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          renderItem={({ item }: { item: MarketingAgreement }) => (
-            <AgreementCard
-              agreement={item}
-              removing={detach.isPending && detach.variables?.id === item.id}
-              onRemove={() => confirmDetach(item)}
+          ) : (
+            <FlashList
+              key="properties"
+              data={properties}
+              keyExtractor={(a) => a.id}
+              refreshControl={refresh}
+              contentContainerStyle={{
+                paddingHorizontal: spacing.xl,
+                paddingBottom: insets.bottom + spacing['3xl'],
+              }}
+              ListHeaderComponent={header}
+              ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+              renderItem={({ item }: { item: MarketingAgreement }) => (
+                <AgreementCard
+                  agreement={item}
+                  removing={detach.isPending && detach.variables?.id === item.id}
+                  onRemove={() => confirmDetach(item)}
+                />
+              )}
+              ListEmptyComponent={
+                <EmptyState
+                  icon={<Building2 size={34} color={colors.mutedForeground} />}
+                  title="No properties yet"
+                  description="Find a home in the estate by its address and ask its owner for permission to advertise it."
+                  action={<Button label="Add a property" onPress={() => setAdding(true)} />}
+                />
+              }
             />
           )}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<Building2 size={34} color={colors.mutedForeground} />}
-              title="No properties yet"
-              description="Find a home in the estate by its address and ask its owner for permission to advertise it."
-              action={<Button label="Add a property" onPress={() => setAdding(true)} />}
-            />
-          }
-        />
+        </QueryState>
       )}
 
       <AddPropertySheet open={adding} onClose={() => setAdding(false)} estateId={estateId} />

@@ -9,8 +9,7 @@ import {
   Card,
   Chip,
   Divider,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -19,6 +18,7 @@ import {
 } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { residentApi, type Amenity } from '@/lib/api/resident';
+import { errorMessage } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';
 import { APP_TIME_ZONE, formatDate, formatTime } from '@/lib/format';
 import { dayNoon, isSlotFree, lagosDays, slotStart, type LagosDay } from '@/lib/amenitySlots';
@@ -79,10 +79,7 @@ export default function ResidentAmenities() {
     onError: (err) => {
       // Someone may have taken the slot meanwhile: refresh what the sheet hides.
       qc.invalidateQueries({ queryKey: ['resident', 'amenity-busy'] });
-      toast.show(
-        err instanceof Error ? err.message : "Couldn't book that slot. Try again.",
-        'error'
-      );
+      toast.show(errorMessage(err, "Couldn't book that slot. Try again."), 'error');
     },
   });
 
@@ -95,6 +92,7 @@ export default function ResidentAmenities() {
     onError: () => toast.show("Couldn't cancel that booking. Try again.", 'error'),
   });
 
+  const amenityList = amenities.data ?? [];
   const activeBookings = (bookings.data ?? []).filter((b) => b.status === 'confirmed');
 
   return (
@@ -108,11 +106,18 @@ export default function ResidentAmenities() {
       <Screen>
         <View style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">Available</Text>
-          {amenities.isLoading ? (
-            <Skeleton height={64} radius={16} />
-          ) : amenities.data && amenities.data.length > 0 ? (
+          <QueryState
+            query={amenities}
+            skeleton={<Skeleton height={64} radius={16} />}
+            isEmpty={!amenityList.length}
+            empty={{
+              icon: <CalendarCheck size={34} color={colors.mutedForeground} />,
+              title: 'No amenities yet',
+              description: "Your estate manager hasn't added any bookable amenities.",
+            }}
+          >
             <Card padding="none">
-              {amenities.data.map((a, i) => (
+              {amenityList.map((a, i) => (
                 <View key={a.id}>
                   <View
                     style={{
@@ -138,59 +143,53 @@ export default function ResidentAmenities() {
                       onPress={() => setBookingTarget(a)}
                     />
                   </View>
-                  {i < amenities.data!.length - 1 ? <Divider /> : null}
+                  {i < amenityList.length - 1 ? <Divider /> : null}
                 </View>
               ))}
             </Card>
-          ) : (
-            <EmptyState
-              icon={<CalendarCheck size={34} color={colors.mutedForeground} />}
-              title="No amenities yet"
-              description="Your estate manager hasn't added any bookable amenities."
-            />
-          )}
+          </QueryState>
         </View>
 
         <View style={{ gap: spacing.sm }}>
           <Text variant="bodyStrong">My bookings ({activeBookings.length})</Text>
-          {bookings.isLoading ? (
-            <Skeleton height={64} radius={16} />
-          ) : activeBookings.length > 0 ? (
-            activeBookings.map((b) => (
-              <Card key={b.id} elevated>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text variant="bodyStrong">{b.amenityName}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {formatDate(b.startsAt, 'short')} · {formatTime(b.startsAt)}
-                      {' – '}
-                      {formatTime(b.endsAt)}
-                    </Text>
+          <QueryState query={bookings} skeleton={<Skeleton height={64} radius={16} />}>
+            {activeBookings.length > 0 ? (
+              activeBookings.map((b) => (
+                <Card key={b.id} elevated>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'flex-start',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{b.amenityName}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {formatDate(b.startsAt, 'short')} · {formatTime(b.startsAt)}
+                        {' – '}
+                        {formatTime(b.endsAt)}
+                      </Text>
+                    </View>
+                    <Badge label="Confirmed" tone="success" />
                   </View>
-                  <Badge label="Confirmed" tone="success" />
-                </View>
-                <Button
-                  label="Cancel"
-                  variant="outline"
-                  size="sm"
-                  fullWidth={false}
-                  loading={cancel.isPending && cancel.variables === b.id}
-                  onPress={() => cancel.mutate(b.id)}
-                  style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
-                />
-              </Card>
-            ))
-          ) : (
-            <Text variant="caption" color="mutedForeground">
-              You haven&apos;t booked anything yet.
-            </Text>
-          )}
+                  <Button
+                    label="Cancel"
+                    variant="outline"
+                    size="sm"
+                    fullWidth={false}
+                    loading={cancel.isPending && cancel.variables === b.id}
+                    onPress={() => cancel.mutate(b.id)}
+                    style={{ marginTop: spacing.md, alignSelf: 'flex-start' }}
+                  />
+                </Card>
+              ))
+            ) : (
+              <Text variant="caption" color="mutedForeground">
+                You haven&apos;t booked anything yet.
+              </Text>
+            )}
+          </QueryState>
         </View>
       </Screen>
 
@@ -289,27 +288,25 @@ function BookAmenityForm({
         </View>
       </Field>
       <Field label="Start time">
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {busyQuery.isPending ? (
-            <Skeleton height={36} radius={18} />
-          ) : busyQuery.isError ? (
-            <ErrorState onRetry={() => busyQuery.refetch()} />
-          ) : hours.length === 0 ? (
-            <Text variant="caption" color="mutedForeground">
-              No free times left on this day. Try another day.
-            </Text>
-          ) : (
-            hours.map((h) => (
-              <Chip
-                key={h}
-                label={hourLabel(h)}
-                selected={hour === h}
-                onPress={() => setHour(h)}
-                disabled={submitting}
-              />
-            ))
-          )}
-        </View>
+        <QueryState query={busyQuery} skeleton={<Skeleton height={36} radius={18} />}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            {hours.length === 0 ? (
+              <Text variant="caption" color="mutedForeground">
+                No free times left on this day. Try another day.
+              </Text>
+            ) : (
+              hours.map((h) => (
+                <Chip
+                  key={h}
+                  label={hourLabel(h)}
+                  selected={hour === h}
+                  onPress={() => setHour(h)}
+                  disabled={submitting}
+                />
+              ))
+            )}
+          </View>
+        </QueryState>
       </Field>
       <Field label="Duration">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>

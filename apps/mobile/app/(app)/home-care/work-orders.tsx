@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -8,8 +8,8 @@ import { Plus, Wrench } from 'lucide-react-native';
 import {
   Button,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   SegmentedControl,
   Skeleton,
   useTheme,
@@ -102,17 +102,17 @@ export default function WorkOrders() {
           ]}
         />
       </View>
-      {active.isError && !active.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => active.refetch()} />
-        </ScrollView>
-      ) : active.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={120} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={active}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={120} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -148,7 +148,7 @@ export default function WorkOrders() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

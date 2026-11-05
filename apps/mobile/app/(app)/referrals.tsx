@@ -7,8 +7,8 @@ import {
   Card,
   Divider,
   EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -25,6 +25,8 @@ export default function Referrals() {
   const insets = useSafeAreaInsets();
 
   const query = useQuery({ queryKey: qk.renter.referrals, queryFn: referralsApi.getSummary });
+
+  const d = query.data;
 
   const share = () => {
     if (!query.data) return;
@@ -54,120 +56,123 @@ export default function Referrals() {
         />
       </View>
 
-      {query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={180} radius={16} />
-        </View>
-      ) : !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
-        <Screen padded>
-          {query.data.referredByName ? (
-            <Card elevated style={{ backgroundColor: colors.accent }}>
-              <Text variant="callout" style={{ color: colors.accentForeground }}>
-                You joined via{' '}
-                <Text style={{ fontWeight: '700', color: colors.accentForeground }}>
-                  {query.data.referredByName}
-                </Text>
-                &apos;s referral
-                {query.data.refereeRewardAmount
-                  ? `: you earned ₦${query.data.refereeRewardAmount.toLocaleString()}`
-                  : ''}
-                .
-              </Text>
-            </Card>
-          ) : null}
-
-          <Card elevated>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <Gift size={20} color={colors.primary} />
-              <Text variant="heading">Invite friends, earn rewards</Text>
-            </View>
-            <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-              Share your code: when a friend signs up and completes their first move, you both earn
-              a reward.
-            </Text>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: spacing.lg,
-                padding: spacing.lg,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                borderStyle: 'dashed',
-                borderColor: colors.border,
-              }}
-            >
-              <Text variant="heading" style={{ fontWeight: '800', letterSpacing: 2 }}>
-                {query.data.code}
-              </Text>
-              <Pressable
-                onPress={share}
-                accessibilityRole="button"
-                accessibilityLabel="Share your referral code"
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}
-                hitSlop={8}
-              >
-                <Share2 size={16} color={colors.primary} />
-                <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                  Share
-                </Text>
-              </Pressable>
-            </View>
-          </Card>
-
-          <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <StatCard
-              icon={<Users size={16} color={colors.primary} />}
-              label="People referred"
-              value={String(query.data.totalReferred)}
-            />
-            <StatCard
-              icon={<Gift size={16} color={colors.primary} />}
-              label="Total earned"
-              value={`₦${query.data.totalEarned.toLocaleString()}`}
-            />
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={180} radius={16} />
           </View>
-
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading">Referral history</Text>
-            {query.data.referrals.length === 0 ? (
-              <EmptyState
-                icon={<Users size={34} color={colors.mutedForeground} />}
-                title="No referrals yet"
-                description="Share your code to start earning rewards."
-              />
-            ) : (
-              <Card elevated padding="none">
-                {query.data.referrals.map((r: ReferredUser, i) => (
-                  <View key={`${r.name}-${r.date}`}>
-                    {i > 0 ? <Divider /> : null}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: spacing.lg,
-                      }}
-                    >
-                      <View>
-                        <Text variant="callout">{r.name}</Text>
-                        <Text variant="caption" color="mutedForeground">
-                          {formatDate(r.date, 'short')}
-                        </Text>
-                      </View>
-                      <Price amount={r.rewardAmount} variant="callout" />
-                    </View>
-                  </View>
-                ))}
+        }
+      >
+        {d ? (
+          <Screen padded>
+            {d.referredByName ? (
+              <Card elevated style={{ backgroundColor: colors.accent }}>
+                <Text variant="callout" style={{ color: colors.accentForeground }}>
+                  You joined via{' '}
+                  <Text style={{ fontWeight: '700', color: colors.accentForeground }}>
+                    {d.referredByName}
+                  </Text>
+                  &apos;s referral
+                  {d.refereeRewardAmount
+                    ? `: you earned ₦${d.refereeRewardAmount.toLocaleString()}`
+                    : ''}
+                  .
+                </Text>
               </Card>
-            )}
-          </View>
-        </Screen>
-      )}
+            ) : null}
+
+            <Card elevated>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <Gift size={20} color={colors.primary} />
+                <Text variant="heading">Invite friends, earn rewards</Text>
+              </View>
+              <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.sm }}>
+                Share your code: when a friend signs up and completes their first move, you both
+                earn a reward.
+              </Text>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginTop: spacing.lg,
+                  padding: spacing.lg,
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  borderStyle: 'dashed',
+                  borderColor: colors.border,
+                }}
+              >
+                <Text variant="heading" style={{ fontWeight: '800', letterSpacing: 2 }}>
+                  {d.code}
+                </Text>
+                <Pressable
+                  onPress={share}
+                  accessibilityRole="button"
+                  accessibilityLabel="Share your referral code"
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44 }}
+                  hitSlop={8}
+                >
+                  <Share2 size={16} color={colors.primary} />
+                  <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
+                    Share
+                  </Text>
+                </Pressable>
+              </View>
+            </Card>
+
+            <View style={{ flexDirection: 'row', gap: spacing.md }}>
+              <StatCard
+                icon={<Users size={16} color={colors.primary} />}
+                label="People referred"
+                value={String(d.totalReferred)}
+              />
+              <StatCard
+                icon={<Gift size={16} color={colors.primary} />}
+                label="Total earned"
+                value={`₦${d.totalEarned.toLocaleString()}`}
+              />
+            </View>
+
+            <View style={{ gap: spacing.sm }}>
+              <Text variant="heading">Referral history</Text>
+              {d.referrals.length === 0 ? (
+                <EmptyState
+                  icon={<Users size={34} color={colors.mutedForeground} />}
+                  title="No referrals yet"
+                  description="Share your code to start earning rewards."
+                />
+              ) : (
+                <Card elevated padding="none">
+                  {d.referrals.map((r: ReferredUser, i) => (
+                    <View key={`${r.name}-${r.date}`}>
+                      {i > 0 ? <Divider /> : null}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: spacing.lg,
+                        }}
+                      >
+                        <View>
+                          <Text variant="callout">{r.name}</Text>
+                          <Text variant="caption" color="mutedForeground">
+                            {formatDate(r.date, 'short')}
+                          </Text>
+                        </View>
+                        <Price amount={r.rewardAmount} variant="callout" />
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              )}
+            </View>
+          </Screen>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

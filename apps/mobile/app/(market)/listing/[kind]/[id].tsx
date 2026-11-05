@@ -21,12 +21,13 @@ import {
   Button,
   Card,
   Chip,
+  Divider,
   EmptyState,
-  ErrorState,
   IconButton,
   LinkButton,
   Price,
   PropertyCard,
+  QueryState,
   SectionHeader,
   Skeleton,
   Text,
@@ -103,21 +104,22 @@ export default function PublicListing() {
               title="Listing not found"
               description="This link doesn’t point to a listing."
             />
-          ) : query.isError && !p ? (
-            <ErrorState
-              title="We couldn’t load this listing"
-              description="It may have been taken down, or your connection dropped."
-              onRetry={() => query.refetch()}
-            />
-          ) : !p ? (
-            <View style={{ gap: spacing.md }} accessibilityLabel="Loading listing">
-              <Skeleton height={30} width="50%" />
-              <Skeleton height={20} width="80%" />
-              <Skeleton height={16} width="60%" />
-              <Skeleton height={96} />
-            </View>
           ) : (
-            <Body listing={p} />
+            <QueryState
+              query={query}
+              errorTitle="We couldn’t load this listing"
+              errorDescription="It may have been taken down, or your connection dropped."
+              skeleton={
+                <View style={{ gap: spacing.md }} accessibilityLabel="Loading listing">
+                  <Skeleton height={30} width="50%" />
+                  <Skeleton height={20} width="80%" />
+                  <Skeleton height={16} width="60%" />
+                  <Skeleton height={96} />
+                </View>
+              }
+            >
+              {p ? <Body listing={p} /> : null}
+            </QueryState>
           )}
         </View>
       </ScrollView>
@@ -455,7 +457,7 @@ function Body({ listing: p }: { listing: MarketDetail }) {
 }
 
 function CostContext({ listing }: { listing: MarketDetail }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   const monthlyEquivalent =
     listing.kind === 'rent' && listing.period === 'year' ? listing.price / 12 : undefined;
   const annualEquivalent =
@@ -480,33 +482,33 @@ function CostContext({ listing }: { listing: MarketDetail }) {
           <Price amount={listing.price} period={listing.period} variant="bodyStrong" />
         </View>
         {monthlyEquivalent || annualEquivalent ? (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              gap: spacing.lg,
-              paddingHorizontal: spacing.lg,
-              paddingVertical: spacing.md,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
-            }}
-          >
-            <Text variant="callout" color="mutedForeground">
-              {monthlyEquivalent ? 'Monthly equivalent' : 'Annual equivalent'}
-            </Text>
-            <Price
-              amount={monthlyEquivalent ?? annualEquivalent ?? 0}
-              period={monthlyEquivalent ? 'month' : 'year'}
-              variant="bodyStrong"
-            />
-          </View>
+          <>
+            <Divider />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                gap: spacing.lg,
+                paddingHorizontal: spacing.lg,
+                paddingVertical: spacing.md,
+              }}
+            >
+              <Text variant="callout" color="mutedForeground">
+                {monthlyEquivalent ? 'Monthly equivalent' : 'Annual equivalent'}
+              </Text>
+              <Price
+                amount={monthlyEquivalent ?? annualEquivalent ?? 0}
+                period={monthlyEquivalent ? 'month' : 'year'}
+                variant="bodyStrong"
+              />
+            </View>
+          </>
         ) : null}
+        <Divider />
         <View
           style={{
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.md,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
           }}
         >
           <Text variant="caption" color="mutedForeground">

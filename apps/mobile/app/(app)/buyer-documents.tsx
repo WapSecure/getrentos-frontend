@@ -7,9 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FileStack, FileText, Plus, Trash2 } from 'lucide-react-native';
 import {
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -88,21 +87,23 @@ export default function BuyerDocuments() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={70} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<FileStack size={34} color={colors.mutedForeground} />}
-          title="No documents yet"
-          description="Proof of funds, preapprovals and title documents you upload will appear here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={70} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <FileStack size={34} color={colors.mutedForeground} />,
+          title: 'No documents yet',
+          description:
+            'Proof of funds, preapprovals and title documents you upload will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -156,7 +157,7 @@ export default function BuyerDocuments() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <UploadBuyerDocumentSheet open={uploadOpen} onClose={() => setUploadOpen(false)} />
     </View>

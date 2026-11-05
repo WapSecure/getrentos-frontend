@@ -7,9 +7,8 @@ import { Calendar as CalendarIcon, MapPin, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -65,21 +64,22 @@ export default function CalendarScreen() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={70} radius={radius.lg} />
-          ))}
-        </View>
-      ) : groups.length === 0 ? (
-        <EmptyState
-          icon={<CalendarIcon size={34} color={colors.mutedForeground} />}
-          title="Nothing on your calendar"
-          description="Viewings, payments and lease dates will show up here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={70} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={groups.length === 0}
+        empty={{
+          icon: <CalendarIcon size={34} color={colors.mutedForeground} />,
+          title: 'Nothing on your calendar',
+          description: 'Viewings, payments and lease dates will show up here.',
+        }}
+      >
         <ScrollView
           contentContainerStyle={{
             padding: spacing.xl,
@@ -158,7 +158,7 @@ export default function CalendarScreen() {
             </View>
           ))}
         </ScrollView>
-      )}
+      </QueryState>
 
       <CalendarEventSheet open={creating} onClose={() => setCreating(false)} event={null} />
       <CalendarEventSheet

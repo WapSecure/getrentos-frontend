@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarDays } from 'lucide-react-native';
-import { EmptyState, ErrorState, SegmentedControl, Skeleton, useTheme } from '@getrentos/ui-native';
+import { EmptyState, QueryState, SegmentedControl, Skeleton, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type BookingView, type HostBooking } from '@/lib/api/hostShortlets';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -64,17 +64,17 @@ export default function HostBookings() {
           options={VIEWS.map(({ value, label }) => ({ value, label }))}
         />
       </View>
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={132} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={132} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -107,7 +107,7 @@ export default function HostBookings() {
             ) : null
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

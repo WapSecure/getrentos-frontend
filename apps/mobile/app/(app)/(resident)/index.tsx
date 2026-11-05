@@ -21,9 +21,8 @@ import {
   Button,
   Card,
   Divider,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Screen,
   SectionHeader,
   Skeleton,
@@ -102,6 +101,8 @@ export default function ResidentHome() {
     notifications.refetch();
   };
 
+  const recent = announcements.data?.items ?? [];
+
   const outstanding = (dues.data?.items ?? [])
     .filter((d) => d.status === 'pending' || d.status === 'overdue' || d.status === 'processing')
     // `amount` already includes any late fee.
@@ -159,17 +160,12 @@ export default function ResidentHome() {
         />
       ) : null}
 
-      {dues.isError && !dues.data ? (
-        <Card elevated>
-          <ErrorState
-            title="We couldn't load your dues"
-            description="Check your connection and try again before making a payment."
-            onRetry={() => dues.refetch()}
-          />
-        </Card>
-      ) : dues.isLoading ? (
-        <Skeleton height={90} radius={16} />
-      ) : (
+      <QueryState
+        query={dues}
+        skeleton={<Skeleton height={90} radius={16} />}
+        errorTitle="We couldn't load your dues"
+        errorDescription="Check your connection and try again before making a payment."
+      >
         <Card elevated>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
             <ReceiptText size={18} color={colors.primary} />
@@ -199,7 +195,7 @@ export default function ResidentHome() {
             />
           </View>
         </Card>
-      )}
+      </QueryState>
 
       <Card elevated>
         <SectionHeader
@@ -209,19 +205,24 @@ export default function ResidentHome() {
           onAction={() => router.push('/(app)/(resident)/announcements')}
         />
         <View style={{ marginTop: spacing.md, gap: spacing.md }}>
-          {announcements.isError && !announcements.data ? (
-            <ErrorState
-              title="Announcements are unavailable"
-              description="Try again to load the latest updates from your estate team."
-              onRetry={() => announcements.refetch()}
-            />
-          ) : announcements.isLoading ? (
-            <>
-              <Skeleton height={14} width="90%" />
-              <Skeleton height={14} width="70%" />
-            </>
-          ) : announcements.data && announcements.data.items.length > 0 ? (
-            announcements.data.items.map((a, i) => (
+          <QueryState
+            query={announcements}
+            skeleton={
+              <View style={{ gap: spacing.md }}>
+                <Skeleton height={14} width="90%" />
+                <Skeleton height={14} width="70%" />
+              </View>
+            }
+            errorTitle="Announcements are unavailable"
+            errorDescription="Try again to load the latest updates from your estate team."
+            isEmpty={!recent.length}
+            empty={{
+              icon: <Megaphone size={28} color={colors.mutedForeground} />,
+              title: "You're up to date",
+              description: 'New community announcements will appear here.',
+            }}
+          >
+            {recent.map((a, i) => (
               <View key={a.id}>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
                   <View style={{ flex: 1, gap: 2 }}>
@@ -237,18 +238,10 @@ export default function ResidentHome() {
                   </View>
                   {a.priority === 'urgent' ? <Badge label="Urgent" tone="danger" /> : null}
                 </View>
-                {i < announcements.data.items.length - 1 ? (
-                  <Divider style={{ marginTop: spacing.md }} />
-                ) : null}
+                {i < recent.length - 1 ? <Divider style={{ marginTop: spacing.md }} /> : null}
               </View>
-            ))
-          ) : (
-            <EmptyState
-              icon={<Megaphone size={28} color={colors.mutedForeground} />}
-              title="You're up to date"
-              description="New community announcements will appear here."
-            />
-          )}
+            ))}
+          </QueryState>
         </View>
       </Card>
 

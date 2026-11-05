@@ -24,10 +24,10 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   IconButton,
   ListSkeleton,
   PropertyCard,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -496,33 +496,32 @@ function Listings({
     </>
   );
 
-  if (query.isError && items.length === 0) {
+  // Before the first page arrives the header (and its filters) stays on screen
+  // above the skeleton or the error.
+  if (query.data === undefined) {
     return (
       <View style={{ flex: 1 }}>
         {header}
-        <ErrorState
-          title="We couldn’t load these listings"
-          description="Check your connection and try again."
-          onRetry={() => query.refetch()}
-        />
-        {sheet}
-      </View>
-    );
-  }
-
-  if (query.isPending) {
-    return (
-      <View style={{ flex: 1 }}>
-        {header}
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md, gap: spacing.lg }}>
-          {[0, 1, 2].map((i) => (
-            <View key={i} style={{ gap: spacing.sm }}>
-              <Skeleton height={176} radius={16} />
-              <Skeleton height={16} width="45%" />
-              <Skeleton height={13} width="70%" />
+        <QueryState
+          query={query}
+          errorTitle="We couldn’t load these listings"
+          errorDescription="Check your connection and try again."
+          skeleton={
+            <View
+              style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md, gap: spacing.lg }}
+            >
+              {[0, 1, 2].map((i) => (
+                <View key={i} style={{ gap: spacing.sm }}>
+                  <Skeleton height={176} radius={16} />
+                  <Skeleton height={16} width="45%" />
+                  <Skeleton height={13} width="70%" />
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
+          }
+        >
+          {null}
+        </QueryState>
         {sheet}
       </View>
     );
@@ -530,57 +529,59 @@ function Listings({
 
   return (
     <>
-      <FlashList
-        ref={listRef}
-        // Results are replaced wholesale on a new search or sort; anchoring to
-        // the card that was in view would leave the user at the bottom.
-        maintainVisibleContentPosition={{ disabled: true }}
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        onEndReached={onEndReached}
-        onEndReachedThreshold={0.6}
-        keyboardDismissMode="on-drag"
-        keyboardShouldPersistTaps="handled"
-        ListHeaderComponent={<View style={{ paddingBottom: spacing.md }}>{header}</View>}
-        ListEmptyComponent={
-          <EmptyState
-            icon={<Search size={34} color={colors.mutedForeground} />}
-            title={estate ? 'Nothing listed here yet' : 'No listings match that'}
-            description={
-              estate
-                ? `${estate.name} has nothing in this market right now.`
-                : 'Try a different area, widen the price range, or clear a filter.'
-            }
-            action={
-              refineCount > 0 ? (
-                <Button label="Clear filters" variant="outline" onPress={() => setRefine({})} />
-              ) : estate ? (
-                <Button label="Show all listings" variant="outline" onPress={onClearEstate} />
-              ) : undefined
-            }
-          />
-        }
-        ListFooterComponent={
-          query.isFetchingNextPage ? (
-            <ListSkeleton
-              variant="card"
-              rows={1}
-              height={176}
-              style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
+      <QueryState query={query} style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.sm }}>
+        <FlashList
+          ref={listRef}
+          // Results are replaced wholesale on a new search or sort; anchoring to
+          // the card that was in view would leave the user at the bottom.
+          maintainVisibleContentPosition={{ disabled: true }}
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          onEndReached={onEndReached}
+          onEndReachedThreshold={0.6}
+          keyboardDismissMode="on-drag"
+          keyboardShouldPersistTaps="handled"
+          ListHeaderComponent={<View style={{ paddingBottom: spacing.md }}>{header}</View>}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<Search size={34} color={colors.mutedForeground} />}
+              title={estate ? 'Nothing listed here yet' : 'No listings match that'}
+              description={
+                estate
+                  ? `${estate.name} has nothing in this market right now.`
+                  : 'Try a different area, widen the price range, or clear a filter.'
+              }
+              action={
+                refineCount > 0 ? (
+                  <Button label="Clear filters" variant="outline" onPress={() => setRefine({})} />
+                ) : estate ? (
+                  <Button label="Show all listings" variant="outline" onPress={onClearEstate} />
+                ) : undefined
+              }
             />
-          ) : (
-            <View style={{ height: 120 }} />
-          )
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={query.isRefetching && !query.isFetchingNextPage}
-            onRefresh={() => query.refetch()}
-            tintColor={colors.mutedForeground}
-          />
-        }
-      />
+          }
+          ListFooterComponent={
+            query.isFetchingNextPage ? (
+              <ListSkeleton
+                variant="card"
+                rows={1}
+                height={176}
+                style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.xl }}
+              />
+            ) : (
+              <View style={{ height: 120 }} />
+            )
+          }
+          refreshControl={
+            <RefreshControl
+              refreshing={query.isRefetching && !query.isFetchingNextPage}
+              onRefresh={() => query.refetch()}
+              tintColor={colors.mutedForeground}
+            />
+          }
+        />
+      </QueryState>
       {compared.length > 0 ? (
         <View
           style={{
@@ -688,89 +689,94 @@ function EstatesDirectory({
     </View>
   );
 
-  if (query.isError && items.length === 0) {
+  if (query.data === undefined) {
     return (
       <View style={{ flex: 1 }}>
         {header}
-        <ErrorState onRetry={() => query.refetch()} />
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} height={112} radius={radius.lg} />
+              ))}
+            </View>
+          }
+        >
+          {null}
+        </QueryState>
       </View>
     );
   }
 
   return (
-    <FlashList
-      maintainVisibleContentPosition={{ disabled: true }}
-      data={items}
-      keyExtractor={(e) => e.estateId}
-      keyboardDismissMode="on-drag"
-      ListHeaderComponent={header}
-      onEndReached={() => {
-        if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
-      }}
-      ListEmptyComponent={
-        query.isPending ? (
-          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} height={112} radius={radius.lg} />
-            ))}
-          </View>
-        ) : (
+    <QueryState query={query} style={{ paddingHorizontal: spacing.xl }}>
+      <FlashList
+        maintainVisibleContentPosition={{ disabled: true }}
+        data={items}
+        keyExtractor={(e) => e.estateId}
+        keyboardDismissMode="on-drag"
+        ListHeaderComponent={header}
+        onEndReached={() => {
+          if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
+        }}
+        ListEmptyComponent={
           <EmptyState
             icon={<Building2 size={34} color={colors.mutedForeground} />}
             title="No estates found"
             description="Try another name or area."
           />
-        )
-      }
-      ListFooterComponent={<View style={{ height: 120 }} />}
-      renderItem={({ item }) => (
-        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-          <Card elevated style={{ gap: spacing.md }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <View
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: radius.md,
-                  backgroundColor: colors.accent,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Building2 size={20} color={colors.primary} />
+        }
+        ListFooterComponent={<View style={{ height: 120 }} />}
+        renderItem={({ item }) => (
+          <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+            <Card elevated style={{ gap: spacing.md }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: radius.md,
+                    backgroundColor: colors.accent,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Building2 size={20} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyStrong" numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                    {[item.city, item.state].filter(Boolean).join(', ')}
+                  </Text>
+                </View>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyStrong" numberOfLines={1}>
-                  {item.name}
+              {item.slug ? (
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Chip
+                    label={`For rent · ${item.rentCount}`}
+                    disabled={item.rentCount === 0}
+                    onPress={() => onOpen(item, 'rent')}
+                  />
+                  <Chip
+                    label={`For sale · ${item.saleCount}`}
+                    disabled={item.saleCount === 0}
+                    onPress={() => onOpen(item, 'sale')}
+                  />
+                </View>
+              ) : (
+                <Text variant="caption" color="mutedForeground">
+                  {item.listingCount} {item.listingCount === 1 ? 'listing' : 'listings'} · no public
+                  page yet
                 </Text>
-                <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                  {[item.city, item.state].filter(Boolean).join(', ')}
-                </Text>
-              </View>
-            </View>
-            {item.slug ? (
-              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <Chip
-                  label={`For rent · ${item.rentCount}`}
-                  disabled={item.rentCount === 0}
-                  onPress={() => onOpen(item, 'rent')}
-                />
-                <Chip
-                  label={`For sale · ${item.saleCount}`}
-                  disabled={item.saleCount === 0}
-                  onPress={() => onOpen(item, 'sale')}
-                />
-              </View>
-            ) : (
-              <Text variant="caption" color="mutedForeground">
-                {item.listingCount} {item.listingCount === 1 ? 'listing' : 'listings'} · no public
-                page yet
-              </Text>
-            )}
-          </Card>
-        </View>
-      )}
-    />
+              )}
+            </Card>
+          </View>
+        )}
+      />
+    </QueryState>
   );
 }
 

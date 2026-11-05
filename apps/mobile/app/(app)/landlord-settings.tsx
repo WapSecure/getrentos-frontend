@@ -10,7 +10,7 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -61,107 +61,101 @@ export default function LandlordSettings() {
         onBack={() => goBack()}
       />
 
-      {profile.isError && !profile.data ? (
-        <ErrorState onRetry={() => profile.refetch()} />
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-        >
-          <Section title="Profile">
-            {profile.isLoading ? (
-              <Skeleton height={130} radius={radius.lg} />
-            ) : profile.data ? (
-              <ProfileForm initial={profile.data} />
-            ) : null}
-          </Section>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: spacing.xl,
+          paddingBottom: insets.bottom + spacing['3xl'],
+          gap: spacing.lg,
+        }}
+      >
+        <Section title="Profile">
+          <QueryState query={profile} skeleton={<Skeleton height={130} radius={radius.lg} />}>
+            {profile.data ? <ProfileForm initial={profile.data} /> : null}
+          </QueryState>
+        </Section>
 
-          <Section title="Payout account">
-            {payout.isLoading ? (
-              <Skeleton height={96} radius={radius.lg} />
-            ) : (
-              <Pressable
-                onPress={() => setEditingPayout(true)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  payout.data?.accountNumber
-                    ? `Payout account ${payout.data.bankName}, ${payout.data.accountNumber}, ${payout.data.verified ? 'verified' : 'not verified'}. Change it.`
-                    : 'Add a payout account to receive rent'
-                }
-              >
-                <Card padding={spacing.lg}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-                    <View
-                      style={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: radius.md,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: colors.secondary,
-                      }}
-                    >
-                      <Banknote size={17} color={colors.foreground} />
-                    </View>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      {payout.data?.accountNumber ? (
-                        <>
-                          <View
-                            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-                          >
-                            <Text variant="bodyStrong">{payout.data.bankName}</Text>
-                            {payout.data.verified ? (
-                              <Badge label="Verified" tone="success" />
-                            ) : (
-                              <Badge label="Unverified" tone="warning" />
-                            )}
-                          </View>
-                          <Text variant="caption" color="mutedForeground">
-                            {payout.data.accountNumber}
-                            {payout.data.accountName ? ` · ${payout.data.accountName}` : ''}
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Text variant="bodyStrong">Add a payout account</Text>
-                          <Text variant="caption" color="mutedForeground">
-                            Where your rent is paid out
-                          </Text>
-                        </>
-                      )}
-                    </View>
-                    <ChevronRight size={18} color={colors.mutedForeground} />
+        <Section title="Payout account">
+          {payout.isLoading ? (
+            <Skeleton height={96} radius={radius.lg} />
+          ) : (
+            <Pressable
+              onPress={() => setEditingPayout(true)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                payout.data?.accountNumber
+                  ? `Payout account ${payout.data.bankName}, ${payout.data.accountNumber}, ${payout.data.verified ? 'verified' : 'not verified'}. Change it.`
+                  : 'Add a payout account to receive rent'
+              }
+            >
+              <Card padding={spacing.lg}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                  <View
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: radius.md,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: colors.secondary,
+                    }}
+                  >
+                    <Banknote size={17} color={colors.foreground} />
                   </View>
-                </Card>
-              </Pressable>
-            )}
-            <PayoutAccountSheet
-              open={editingPayout}
-              onClose={() => setEditingPayout(false)}
-              account={payout.data ?? undefined}
-            />
-          </Section>
+                  <View style={{ flex: 1, gap: 2 }}>
+                    {payout.data?.accountNumber ? (
+                      <>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                        >
+                          <Text variant="bodyStrong">{payout.data.bankName}</Text>
+                          {payout.data.verified ? (
+                            <Badge label="Verified" tone="success" />
+                          ) : (
+                            <Badge label="Unverified" tone="warning" />
+                          )}
+                        </View>
+                        <Text variant="caption" color="mutedForeground">
+                          {payout.data.accountNumber}
+                          {payout.data.accountName ? ` · ${payout.data.accountName}` : ''}
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <Text variant="bodyStrong">Add a payout account</Text>
+                        <Text variant="caption" color="mutedForeground">
+                          Where your rent is paid out
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                  <ChevronRight size={18} color={colors.mutedForeground} />
+                </View>
+              </Card>
+            </Pressable>
+          )}
+          <PayoutAccountSheet
+            open={editingPayout}
+            onClose={() => setEditingPayout(false)}
+            account={payout.data ?? undefined}
+          />
+        </Section>
 
-          <Section title="Automation">
-            {automation.isLoading ? (
-              <Skeleton height={190} radius={radius.lg} />
-            ) : automation.data ? (
-              <AutomationCard initial={automation.data} />
-            ) : null}
-          </Section>
+        <Section title="Automation">
+          {automation.isLoading ? (
+            <Skeleton height={190} radius={radius.lg} />
+          ) : automation.data ? (
+            <AutomationCard initial={automation.data} />
+          ) : null}
+        </Section>
 
-          <Section title="Notifications">
-            {prefs.isLoading ? (
-              <Skeleton height={190} radius={radius.lg} />
-            ) : prefs.data ? (
-              <PreferencesCard initial={prefs.data} />
-            ) : null}
-          </Section>
-        </ScrollView>
-      )}
+        <Section title="Notifications">
+          {prefs.isLoading ? (
+            <Skeleton height={190} radius={radius.lg} />
+          ) : prefs.data ? (
+            <PreferencesCard initial={prefs.data} />
+          ) : null}
+        </Section>
+      </ScrollView>
     </View>
   );
 }

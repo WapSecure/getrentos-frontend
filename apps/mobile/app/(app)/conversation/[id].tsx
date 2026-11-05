@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertCircle, ChevronLeft, FileText, Paperclip, Send, X } from 'lucide-react-native';
 import {
   Avatar,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -192,19 +192,18 @@ export default function ConversationThread() {
         </View>
       </View>
 
-      {query.isError && !conversation ? (
-        <ErrorState
-          title="We couldn’t open this conversation"
-          description="Check your connection and try again."
-          onRetry={() => query.refetch()}
-        />
-      ) : !conversation ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={40} width="60%" />
-          <Skeleton height={40} width="75%" />
-          <Skeleton height={40} width="50%" />
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        errorTitle="We couldn’t open this conversation"
+        errorDescription="Check your connection and try again."
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={40} width="60%" />
+            <Skeleton height={40} width="75%" />
+            <Skeleton height={40} width="50%" />
+          </View>
+        }
+      >
         <FlatList
           data={rows}
           inverted
@@ -231,7 +230,7 @@ export default function ConversationThread() {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
         />
-      )}
+      </QueryState>
 
       {attachment ? (
         <View

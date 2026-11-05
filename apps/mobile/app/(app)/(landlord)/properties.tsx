@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -10,10 +10,10 @@ import {
   Badge,
   Button,
   EmptyState,
-  ErrorState,
   IconButton,
   PressableScale,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -74,26 +74,16 @@ export default function LandlordProperties() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={104} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <EmptyState
-            icon={<Building2 size={34} color={colors.mutedForeground} />}
-            title="Add your first property"
-            description="Record a property you let, add its units, then list them and collect rent."
-            action={<Button label="Add property" onPress={() => setCreating(true)} />}
-          />
-        </ScrollView>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={104} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(p) => p.id}
@@ -104,8 +94,16 @@ export default function LandlordProperties() {
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           refreshControl={refresh}
           renderItem={({ item }: { item: LandlordProperty }) => <PropertyRow property={item} />}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<Building2 size={34} color={colors.mutedForeground} />}
+              title="Add your first property"
+              description="Record a property you let, add its units, then list them and collect rent."
+              action={<Button label="Add property" onPress={() => setCreating(true)} />}
+            />
+          }
         />
-      )}
+      </QueryState>
 
       <CreatePropertySheet open={creating} onClose={() => setCreating(false)} />
     </View>

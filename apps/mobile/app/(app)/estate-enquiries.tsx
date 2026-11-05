@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Inbox, Search, ShieldCheck } from 'lucide-react-native';
 import {
   EmptyState,
-  ErrorState,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -115,71 +115,72 @@ export default function EstateEnquiries() {
           title="No estate yet"
           description="Enquiries appear here once your estate is set up."
         />
-      ) : query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : estatePending || query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={128} radius={radius.lg} />
-          ))}
-        </View>
       ) : (
-        <FlashList
-          maintainVisibleContentPosition={{ disabled: true }}
-          data={leads}
-          keyExtractor={(l) => l.id}
-          refreshControl={refresh}
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
-          }}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ListHeaderComponent={
-            leads.length ? (
-              <Text
-                variant="caption"
-                color="mutedForeground"
-                style={{ paddingBottom: spacing.md }}
-                accessibilityLiveRegion="polite"
-              >
-                {total.toLocaleString('en-NG')} {total === 1 ? 'enquiry' : 'enquiries'}
-                {filtered ? ' match' : ''}
-              </Text>
-            ) : null
-          }
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          renderItem={({ item }: { item: EstateLead }) => <LeadCard lead={item} />}
-          ListEmptyComponent={
-            <EmptyState
-              icon={<Inbox size={34} color={colors.mutedForeground} />}
-              title={filtered ? 'No matches' : 'No enquiries yet'}
-              description={
-                filtered
-                  ? 'No enquiry matches that. Try another name, or all markets.'
-                  : 'When someone books a viewing, applies, makes an offer or books a short let on a home you market, they appear here.'
-              }
-            />
-          }
-          ListFooterComponent={
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: spacing.sm,
-                paddingTop: spacing.xl,
-              }}
-            >
-              <ShieldCheck size={16} color={colors.mutedForeground} style={{ marginTop: 1 }} />
-              <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                You only see enquiries on homes whose owner lets the estate market them. The owner
-                sees these too, so bring them in when someone is serious.
-              </Text>
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={128} radius={radius.lg} />
+              ))}
             </View>
           }
-        />
+        >
+          <FlashList
+            maintainVisibleContentPosition={{ disabled: true }}
+            data={leads}
+            keyExtractor={(l) => l.id}
+            refreshControl={refresh}
+            onEndReached={() => {
+              if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+            }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            ListHeaderComponent={
+              leads.length ? (
+                <Text
+                  variant="caption"
+                  color="mutedForeground"
+                  style={{ paddingBottom: spacing.md }}
+                  accessibilityLiveRegion="polite"
+                >
+                  {total.toLocaleString('en-NG')} {total === 1 ? 'enquiry' : 'enquiries'}
+                  {filtered ? ' match' : ''}
+                </Text>
+              ) : null
+            }
+            ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+            renderItem={({ item }: { item: EstateLead }) => <LeadCard lead={item} />}
+            ListEmptyComponent={
+              <EmptyState
+                icon={<Inbox size={34} color={colors.mutedForeground} />}
+                title={filtered ? 'No matches' : 'No enquiries yet'}
+                description={
+                  filtered
+                    ? 'No enquiry matches that. Try another name, or all markets.'
+                    : 'When someone books a viewing, applies, makes an offer or books a short let on a home you market, they appear here.'
+                }
+              />
+            }
+            ListFooterComponent={
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: spacing.sm,
+                  paddingTop: spacing.xl,
+                }}
+              >
+                <ShieldCheck size={16} color={colors.mutedForeground} style={{ marginTop: 1 }} />
+                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                  You only see enquiries on homes whose owner lets the estate market them. The owner
+                  sees these too, so bring them in when someone is serious.
+                </Text>
+              </View>
+            }
+          />
+        </QueryState>
       )}
     </View>
   );

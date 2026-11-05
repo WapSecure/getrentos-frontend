@@ -16,7 +16,7 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -110,15 +110,16 @@ export default function OwnerNotifications() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} height={86} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
+            {[0, 1, 2, 3].map((i) => (
+              <Skeleton key={i} height={86} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(n) => n.id}
@@ -204,7 +205,7 @@ export default function OwnerNotifications() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

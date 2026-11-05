@@ -11,9 +11,9 @@ import {
   Card,
   Divider,
   EmptyState,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -22,7 +22,7 @@ import {
 import { qk } from '@/lib/query/keys';
 import { GenerateStatementSheet } from '@/components/landlord/SmallFormSheets';
 import { landlordApi, PAYOUT_TONE, type OwnerStatement } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -47,8 +47,7 @@ export default function LandlordOwnerStatements() {
   const locked = !!planRefusal(query.error);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['landlord', 'owner-statements'] });
-  const fail = (e: unknown, fallback: string) =>
-    toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+  const fail = (e: unknown, fallback: string) => toast.show(errorMessage(e, fallback), 'error');
 
   const issue = useMutation({
     mutationFn: (id: string) => landlordApi.issueOwnerStatement(id),
@@ -117,47 +116,49 @@ export default function LandlordOwnerStatements() {
             note={null}
           />
         </View>
-      ) : query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
       ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(s) => s.id}
-          renderItem={({ item }: { item: OwnerStatement }) => (
-            <StatementCard
-              statement={item}
-              busy={busyId === item.id}
-              onIssue={() => issue.mutate(item.id)}
-              onRetry={() => retry.mutate(item.id)}
-            />
-          )}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.sm }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={160} radius={radius.md} />
+              ))}
+            </View>
           }
-          ListEmptyComponent={
-            query.isLoading ? (
-              <View style={{ gap: spacing.sm }}>
-                {[0, 1].map((i) => (
-                  <Skeleton key={i} height={160} radius={radius.md} />
-                ))}
-              </View>
-            ) : (
+          style={{ paddingHorizontal: spacing.xl }}
+        >
+          <FlashList
+            data={items}
+            keyExtractor={(s) => s.id}
+            renderItem={({ item }: { item: OwnerStatement }) => (
+              <StatementCard
+                statement={item}
+                busy={busyId === item.id}
+                onIssue={() => issue.mutate(item.id)}
+                onRetry={() => retry.mutate(item.id)}
+              />
+            )}
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+            ListEmptyComponent={
               <EmptyState
                 icon={<Wallet size={32} color={colors.mutedForeground} />}
                 title="No statements yet"
                 description="Period statements summarise gross income, fees and what was paid out."
               />
-            )
-          }
-        />
+            }
+          />
+        </QueryState>
       )}
 
       <GenerateStatementSheet open={creating} onClose={() => setCreating(false)} />

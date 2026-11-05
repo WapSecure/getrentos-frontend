@@ -4,15 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronRight, FileStack } from 'lucide-react-native';
-import {
-  Card,
-  EmptyState,
-  ErrorState,
-  Price,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Card, Price, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { paymentsApi, type Receipt } from '@/lib/api/payments';
 import { formatDate } from '@/lib/format';
@@ -50,21 +42,22 @@ export default function Receipts() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={64} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<FileStack size={34} color={colors.mutedForeground} />}
-          title="No receipts yet"
-          description="Receipts for paid rent will appear here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={64} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <FileStack size={34} color={colors.mutedForeground} />,
+          title: 'No receipts yet',
+          description: 'Receipts for paid rent will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -101,7 +94,7 @@ export default function Receipts() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

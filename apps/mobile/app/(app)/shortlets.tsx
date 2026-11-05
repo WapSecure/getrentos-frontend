@@ -14,7 +14,7 @@ import {
   BadgeCheck,
   Users,
 } from 'lucide-react-native';
-import { Chip, IconButton, Text, TextField, useTheme } from '@getrentos/ui-native';
+import { Chip, Divider, IconButton, Text, TextField, useTheme } from '@getrentos/ui-native';
 import type { ShortletFilters } from '@/lib/api/shortlets';
 import { guestsLabel, isDettySeason, seasonRange } from '@/lib/stays';
 import { haptics } from '@/lib/haptics';
@@ -83,7 +83,8 @@ export default function Shortlets() {
             onChangeText={setSearchText}
           />
         </View>
-        <View style={{ flexDirection: 'row', borderTopWidth: 1, borderTopColor: colors.border }}>
+        <Divider />
+        <View style={{ flexDirection: 'row' }}>
           <SearchCell
             icon={<CalendarDays size={17} color={colors.foreground} />}
             label="When"

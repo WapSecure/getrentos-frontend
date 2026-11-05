@@ -12,8 +12,8 @@ import {
   Chip,
   DateField,
   EmptyState,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   TimeField,
@@ -29,7 +29,7 @@ import {
 } from '@/lib/api/landlord';
 import { VIEWING_STATUS_LABEL, VIEWING_STATUS_TONE } from '@/lib/api/viewings';
 import { localInstant } from '@/lib/api/realtor';
-import { ApiError, errorMessage } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatTime } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { Sheet } from '@/components/Sheet';
@@ -64,8 +64,7 @@ export default function LandlordViewings() {
   const items = query.data?.items ?? [];
 
   const refresh = () => qc.invalidateQueries({ queryKey: ['landlord', 'viewings'] });
-  const fail = (e: unknown, fallback: string) =>
-    toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+  const fail = (e: unknown, fallback: string) => toast.show(errorMessage(e, fallback), 'error');
 
   const decline = useMutation({
     mutationFn: (id: string) => landlordApi.cancelViewing(id),
@@ -113,15 +112,16 @@ export default function LandlordViewings() {
         </View>
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={120} radius={radius.md} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={120} radius={radius.md} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -166,7 +166,7 @@ export default function LandlordViewings() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={!!confirming} onClose={() => setConfirming(null)} title="Confirm a time">
         {confirming ? (

@@ -8,9 +8,8 @@ import { AlertTriangle, Ban, Plus, Star, Wrench } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -86,21 +85,22 @@ export default function Maintenance() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={110} radius={radius.md} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Wrench size={34} color={colors.mutedForeground} />}
-          title="No maintenance requests"
-          description="Report an issue and your landlord will be notified right away."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={110} radius={radius.md} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Wrench size={34} color={colors.mutedForeground} />,
+          title: 'No maintenance requests',
+          description: 'Report an issue and your landlord will be notified right away.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -227,7 +227,7 @@ export default function Maintenance() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

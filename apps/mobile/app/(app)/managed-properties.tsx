@@ -9,9 +9,8 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -82,19 +81,21 @@ export default function ManagedProperties() {
           onBack={() => goBack()}
         />
 
-        {managed.isError && !managed.data ? (
-          <ErrorState onRetry={() => managed.refetch()} />
-        ) : managed.isPending ? (
-          <Skeleton height={140} radius={radius.lg} />
-        ) : !managed.data.length ? (
-          <EmptyState
-            icon={<KeyRound size={34} color={colors.mutedForeground} />}
-            title="Not managing anyone’s property"
-            description="If an owner has asked you to manage one, file a claim below. An officer checks it first."
-          />
-        ) : (
-          managed.data.map((p) => <ManagedCard key={p.mandateId} p={p} />)
-        )}
+        <QueryState
+          query={managed}
+          skeleton={<Skeleton height={140} radius={radius.lg} />}
+          isEmpty={!managed.data?.length}
+          empty={{
+            icon: <KeyRound size={34} color={colors.mutedForeground} />,
+            title: 'Not managing anyone’s property',
+            description:
+              'If an owner has asked you to manage one, file a claim below. An officer checks it first.',
+          }}
+        >
+          {(managed.data ?? []).map((p) => (
+            <ManagedCard key={p.mandateId} p={p} />
+          ))}
+        </QueryState>
 
         {open.length ? (
           <View style={{ gap: spacing.sm }}>

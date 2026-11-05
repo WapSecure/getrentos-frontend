@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 
 import {
   keepPreviousData,
@@ -17,9 +17,9 @@ import {
   Chip,
   DateField,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -187,17 +187,16 @@ export default function EstateContractors() {
         </View>
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={132} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={132} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -274,7 +273,7 @@ export default function EstateContractors() {
             )
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Authorise a regular visitor">
         {adding ? (

@@ -9,7 +9,7 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -43,25 +43,28 @@ export default function WhatsAppSettings() {
         accessory={saved?.connected ? <Badge label="Connected" tone="success" /> : null}
       />
 
-      {query.data ? (
-        /* Mounted only once the stored bag has arrived, so the form can seed its
-           own state from props instead of syncing it in an effect. */
-        <WhatsAppForm
-          initial={{
-            connected: saved?.connected === true,
-            phone: saved?.phone ?? '',
-            preferences: { ...DEFAULT_WHATSAPP_TOPICS, ...(saved?.preferences ?? {}) },
-          }}
-        />
-      ) : query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={140} radius={radius.lg} />
-          ))}
-        </View>
-      )}
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={140} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
+        {query.data ? (
+          /* Mounted only once the stored bag has arrived, so the form can seed its
+             own state from props instead of syncing it in an effect. */
+          <WhatsAppForm
+            initial={{
+              connected: saved?.connected === true,
+              phone: saved?.phone ?? '',
+              preferences: { ...DEFAULT_WHATSAPP_TOPICS, ...(saved?.preferences ?? {}) },
+            }}
+          />
+        ) : null}
+      </QueryState>
     </View>
   );
 }

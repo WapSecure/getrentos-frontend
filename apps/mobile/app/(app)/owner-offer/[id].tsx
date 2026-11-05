@@ -8,10 +8,9 @@ import {
   Button,
   Card,
   Divider,
-  EmptyState,
-  ErrorState,
   NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -110,183 +109,185 @@ export default function OwnerOfferDetail() {
           onBack={() => goBack()}
         />
 
-        {offers.isError && !offers.data ? (
-          <ErrorState
-            title="We couldn't load this offer"
-            description="Check your connection and try again."
-            onRetry={() => offers.refetch()}
-          />
-        ) : offers.isPending ? (
-          <Skeleton height={180} radius={radius.lg} />
-        ) : !offer ? (
-          <EmptyState title="Offer not found" description="It may have been withdrawn." />
-        ) : (
-          <>
-            <Card elevated style={{ gap: spacing.sm }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Text variant="bodyStrong">{offer.buyerName}</Text>
-                <Badge
-                  label={OWNER_OFFER_LABEL[offer.status]}
-                  tone={OWNER_OFFER_TONE[offer.status]}
-                />
-              </View>
-              <Divider />
-              <View
-                style={{
-                  flexDirection: stackActions ? 'column' : 'row',
-                  justifyContent: 'space-between',
-                  gap: spacing.md,
-                }}
-              >
-                <View>
-                  <Text variant="caption" color="mutedForeground">
-                    Offer
-                  </Text>
-                  <Price amount={offer.offerAmount} variant="heading" />
-                  <Text
-                    variant="caption"
-                    color={offer.offerAmount < offer.askingPrice ? 'warning' : 'success'}
-                  >
-                    {offerGap(offer.offerAmount, offer.askingPrice)}
-                  </Text>
+        <QueryState
+          query={offers}
+          skeleton={<Skeleton height={180} radius={radius.lg} />}
+          errorTitle="We couldn't load this offer"
+          errorDescription="Check your connection and try again."
+          isEmpty={!offer}
+          empty={{ title: 'Offer not found', description: 'It may have been withdrawn.' }}
+        >
+          {offer ? (
+            <>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Text variant="bodyStrong">{offer.buyerName}</Text>
+                  <Badge
+                    label={OWNER_OFFER_LABEL[offer.status]}
+                    tone={OWNER_OFFER_TONE[offer.status]}
+                  />
                 </View>
-                <View style={{ alignItems: stackActions ? 'flex-start' : 'flex-end' }}>
-                  <Text variant="caption" color="mutedForeground">
-                    Your asking price
-                  </Text>
-                  <Price amount={offer.askingPrice} variant="bodyStrong" />
+                <Divider />
+                <View
+                  style={{
+                    flexDirection: stackActions ? 'column' : 'row',
+                    justifyContent: 'space-between',
+                    gap: spacing.md,
+                  }}
+                >
+                  <View>
+                    <Text variant="caption" color="mutedForeground">
+                      Offer
+                    </Text>
+                    <Price amount={offer.offerAmount} variant="heading" />
+                    <Text
+                      variant="caption"
+                      color={offer.offerAmount < offer.askingPrice ? 'warning' : 'success'}
+                    >
+                      {offerGap(offer.offerAmount, offer.askingPrice)}
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: stackActions ? 'flex-start' : 'flex-end' }}>
+                    <Text variant="caption" color="mutedForeground">
+                      Your asking price
+                    </Text>
+                    <Price amount={offer.askingPrice} variant="bodyStrong" />
+                  </View>
                 </View>
-              </View>
-              <Divider />
-              <Fact
-                label="Financing"
-                value={FINANCING[offer.financingType] ?? offer.financingType}
-              />
-              {offer.depositAmount ? (
+                <Divider />
                 <Fact
-                  label="Deposit offered"
-                  value={`₦${offer.depositAmount.toLocaleString('en-NG')}`}
+                  label="Financing"
+                  value={FINANCING[offer.financingType] ?? offer.financingType}
                 />
-              ) : null}
-              <Fact label="Received" value={formatDate(offer.submittedAt, 'medium')} />
-              {offer.message ? (
-                <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.xs }}>
-                  “{offer.message}”
-                </Text>
-              ) : null}
-            </Card>
+                {offer.depositAmount ? (
+                  <Fact
+                    label="Deposit offered"
+                    value={`₦${offer.depositAmount.toLocaleString('en-NG')}`}
+                  />
+                ) : null}
+                <Fact label="Received" value={formatDate(offer.submittedAt, 'medium')} />
+                {offer.message ? (
+                  <Text variant="callout" color="mutedForeground" style={{ marginTop: spacing.xs }}>
+                    “{offer.message}”
+                  </Text>
+                ) : null}
+              </Card>
 
-            {open ? (
-              <View style={{ gap: spacing.sm }}>
-                <VerificationGateNotice
-                  error={accept.error}
-                  scoreHref="/(app)/owner-trust-profile"
-                />
-                <Button
-                  label="Accept offer"
-                  loading={accept.isPending}
-                  disabled={reject.isPending}
-                  onPress={() =>
-                    Alert.alert(
-                      'Accept this offer?',
-                      `You're agreeing to sell ${offer.propertyName} to ${offer.buyerName} for ₦${offer.offerAmount.toLocaleString('en-NG')}. Other open offers stay open until you answer them.`,
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        { text: 'Accept offer', onPress: () => accept.mutate() },
-                      ]
-                    )
-                  }
-                />
-                <View style={{ flexDirection: stackActions ? 'column' : 'row', gap: spacing.sm }}>
-                  <Button
-                    label="Counter"
-                    variant="outline"
-                    style={{ flex: 1 }}
-                    disabled={accept.isPending || reject.isPending}
-                    onPress={() => setCounterOpen(true)}
+              {open ? (
+                <View style={{ gap: spacing.sm }}>
+                  <VerificationGateNotice
+                    error={accept.error}
+                    scoreHref="/(app)/owner-trust-profile"
                   />
                   <Button
-                    label="Decline"
-                    variant="secondary"
-                    style={{ flex: 1 }}
-                    loading={reject.isPending}
-                    disabled={accept.isPending}
+                    label="Accept offer"
+                    loading={accept.isPending}
+                    disabled={reject.isPending}
                     onPress={() =>
                       Alert.alert(
-                        'Decline this offer?',
-                        `${offer.buyerName} will be told you declined.`,
+                        'Accept this offer?',
+                        `You're agreeing to sell ${offer.propertyName} to ${offer.buyerName} for ₦${offer.offerAmount.toLocaleString('en-NG')}. Other open offers stay open until you answer them.`,
                         [
                           { text: 'Cancel', style: 'cancel' },
-                          { text: 'Decline', style: 'destructive', onPress: () => reject.mutate() },
+                          { text: 'Accept offer', onPress: () => accept.mutate() },
                         ]
                       )
                     }
                   />
+                  <View style={{ flexDirection: stackActions ? 'column' : 'row', gap: spacing.sm }}>
+                    <Button
+                      label="Counter"
+                      variant="outline"
+                      style={{ flex: 1 }}
+                      disabled={accept.isPending || reject.isPending}
+                      onPress={() => setCounterOpen(true)}
+                    />
+                    <Button
+                      label="Decline"
+                      variant="secondary"
+                      style={{ flex: 1 }}
+                      loading={reject.isPending}
+                      disabled={accept.isPending}
+                      onPress={() =>
+                        Alert.alert(
+                          'Decline this offer?',
+                          `${offer.buyerName} will be told you declined.`,
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Decline',
+                              style: 'destructive',
+                              onPress: () => reject.mutate(),
+                            },
+                          ]
+                        )
+                      }
+                    />
+                  </View>
                 </View>
-              </View>
-            ) : offer.status === 'accepted' && side === 'owner' ? (
-              <Button
-                label="Follow the sale"
-                variant="outline"
-                onPress={() => router.push('/(app)/owner-transactions')}
-              />
-            ) : null}
-
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" headingLevel={2}>
-                Negotiation
-              </Text>
-              {thread.isError && !thread.data ? (
-                <ErrorState
-                  title="We couldn't load the negotiation"
-                  description="Your offer is safe. Try loading the conversation again."
-                  onRetry={() => thread.refetch()}
+              ) : offer.status === 'accepted' && side === 'owner' ? (
+                <Button
+                  label="Follow the sale"
+                  variant="outline"
+                  onPress={() => router.push('/(app)/owner-transactions')}
                 />
-              ) : thread.isPending ? (
-                <Skeleton height={60} radius={radius.md} />
-              ) : !thread.data?.length ? (
-                <Text variant="callout" color="mutedForeground">
-                  No counter-offers yet.
+              ) : null}
+
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading" headingLevel={2}>
+                  Negotiation
                 </Text>
-              ) : (
-                thread.data.map((m) => (
-                  <Card
-                    key={m.id}
-                    padding={12}
-                    accessible
-                    accessibilityLabel={[
-                      m.senderName,
-                      m.amount ? `${Math.round(m.amount).toLocaleString('en-NG')} naira` : null,
-                      m.text,
-                      formatDate(m.timestamp, 'short'),
-                    ]
-                      .filter(Boolean)
-                      .join(', ')}
-                  >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                      <Text variant="bodyStrong">{m.senderName}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {formatDate(m.timestamp, 'short')}
-                      </Text>
-                    </View>
-                    {m.amount ? <Price amount={m.amount} variant="callout" /> : null}
-                    {m.text ? (
-                      <Text variant="callout" color="mutedForeground">
-                        {m.text}
-                      </Text>
-                    ) : null}
-                  </Card>
-                ))
-              )}
-            </View>
-          </>
-        )}
+                <QueryState
+                  query={thread}
+                  skeleton={<Skeleton height={60} radius={radius.md} />}
+                  errorTitle="We couldn't load the negotiation"
+                  errorDescription="Your offer is safe. Try loading the conversation again."
+                >
+                  {!thread.data?.length ? (
+                    <Text variant="callout" color="mutedForeground">
+                      No counter-offers yet.
+                    </Text>
+                  ) : (
+                    thread.data.map((m) => (
+                      <Card
+                        key={m.id}
+                        padding={12}
+                        accessible
+                        accessibilityLabel={[
+                          m.senderName,
+                          m.amount ? `${Math.round(m.amount).toLocaleString('en-NG')} naira` : null,
+                          m.text,
+                          formatDate(m.timestamp, 'short'),
+                        ]
+                          .filter(Boolean)
+                          .join(', ')}
+                      >
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                          <Text variant="bodyStrong">{m.senderName}</Text>
+                          <Text variant="caption" color="mutedForeground">
+                            {formatDate(m.timestamp, 'short')}
+                          </Text>
+                        </View>
+                        {m.amount ? <Price amount={m.amount} variant="callout" /> : null}
+                        {m.text ? (
+                          <Text variant="callout" color="mutedForeground">
+                            {m.text}
+                          </Text>
+                        ) : null}
+                      </Card>
+                    ))
+                  )}
+                </QueryState>
+              </View>
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
 
       <Sheet open={counterOpen} onClose={() => setCounterOpen(false)} title="Counter this offer">

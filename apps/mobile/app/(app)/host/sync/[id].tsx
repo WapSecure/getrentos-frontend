@@ -9,9 +9,9 @@ import {
   Card,
   Chip,
   Divider,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -44,6 +44,7 @@ export default function HostCalendarSync() {
     queryKey: qk.host.sync(id),
     queryFn: () => hostShortletsApi.calendarSync(id),
   });
+  const d = sync.data;
   const refresh = () => {
     qc.invalidateQueries({ queryKey: qk.host.sync(id) });
     qc.invalidateQueries({ queryKey: qk.host.blocked(id) });
@@ -94,121 +95,121 @@ export default function HostCalendarSync() {
         subtitle="Never sell the same night twice"
         onBack={() => goBack()}
       />
-      {sync.isError && !sync.data ? (
-        <ErrorState onRetry={() => sync.refetch()} />
-      ) : !sync.data ? (
-        <Skeleton height={220} radius={radius.lg} />
-      ) : (
-        <>
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" headingLevel={2}>
-              1 · Your GetRentos calendar
-            </Text>
-            <Card elevated style={{ gap: spacing.md }}>
-              <Text variant="callout" color="mutedForeground">
-                In Airbnb or Booking.com, find “Import calendar” and paste this link. Stays booked
-                here then block those nights there.
+      <QueryState query={sync} skeleton={<Skeleton height={220} radius={radius.lg} />}>
+        {d ? (
+          <>
+            <View style={{ gap: spacing.sm }}>
+              <Text variant="heading" headingLevel={2}>
+                1 · Your GetRentos calendar
               </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: spacing.sm,
-                  padding: spacing.md,
-                  borderRadius: radius.md,
-                  backgroundColor: colors.secondary,
-                }}
-              >
-                <Link2 size={16} color={colors.mutedForeground} />
-                <Text variant="caption" numberOfLines={1} style={{ flex: 1 }}>
-                  {sync.data.exportUrl}
+              <Card elevated style={{ gap: spacing.md }}>
+                <Text variant="callout" color="mutedForeground">
+                  In Airbnb or Booking.com, find “Import calendar” and paste this link. Stays booked
+                  here then block those nights there.
                 </Text>
-              </View>
-              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <Button
-                  label="Share or copy link"
-                  style={{ flex: 1 }}
-                  onPress={() =>
-                    Share.share({ message: sync.data!.exportUrl, url: sync.data!.exportUrl })
-                  }
-                />
-                <Button
-                  label="Reset"
-                  variant="ghost"
-                  loading={reset.isPending}
-                  onPress={() =>
-                    Alert.alert(
-                      'Make a new link?',
-                      'The old link stops working. Use this if it was shared somewhere it shouldn’t be.',
-                      [
-                        { text: 'Cancel', style: 'cancel' },
-                        {
-                          text: 'Make new link',
-                          style: 'destructive',
-                          onPress: () => reset.mutate(),
-                        },
-                      ]
-                    )
-                  }
-                />
-              </View>
-            </Card>
-          </View>
-
-          <View style={{ gap: spacing.sm }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
-                2 · Their calendars
-              </Text>
-              <IconButton
-                accessibilityLabel="Add a calendar"
-                icon={<Plus size={20} color={colors.primary} />}
-                onPress={() => setAdding(true)}
-              />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: spacing.sm,
+                    padding: spacing.md,
+                    borderRadius: radius.md,
+                    backgroundColor: colors.secondary,
+                  }}
+                >
+                  <Link2 size={16} color={colors.mutedForeground} />
+                  <Text variant="caption" numberOfLines={1} style={{ flex: 1 }}>
+                    {d.exportUrl}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Button
+                    label="Share or copy link"
+                    style={{ flex: 1 }}
+                    onPress={() => Share.share({ message: d.exportUrl, url: d.exportUrl })}
+                  />
+                  <Button
+                    label="Reset"
+                    variant="ghost"
+                    loading={reset.isPending}
+                    onPress={() =>
+                      Alert.alert(
+                        'Make a new link?',
+                        'The old link stops working. Use this if it was shared somewhere it shouldn’t be.',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Make new link',
+                            style: 'destructive',
+                            onPress: () => reset.mutate(),
+                          },
+                        ]
+                      )
+                    }
+                  />
+                </View>
+              </Card>
             </View>
-            {sync.data.feeds.length === 0 ? (
-              <Card
-                elevated
-                style={{ alignItems: 'center', gap: spacing.sm, paddingVertical: spacing['2xl'] }}
-              >
-                <CalendarSync size={28} color={colors.mutedForeground} />
-                <Text variant="callout" color="mutedForeground" center>
-                  Paste the “Export calendar” link from each site you also list on. Their bookings
-                  will block nights here automatically.
+
+            <View style={{ gap: spacing.sm }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text variant="heading" headingLevel={2} style={{ flex: 1 }}>
+                  2 · Their calendars
                 </Text>
-                <Button
-                  label="Add a calendar"
-                  variant="secondary"
+                <IconButton
+                  accessibilityLabel="Add a calendar"
+                  icon={<Plus size={20} color={colors.primary} />}
                   onPress={() => setAdding(true)}
                 />
-              </Card>
-            ) : (
-              <Card elevated padding="none">
-                {sync.data.feeds.map((f, i) => (
-                  <View key={f.id}>
-                    {i ? <Divider /> : null}
-                    <FeedRow
-                      f={f}
-                      syncing={syncNow.isPending && syncNow.variables === f.id}
-                      onSync={() => syncNow.mutate(f.id)}
-                      onRemove={() =>
-                        Alert.alert(`Remove ${f.name}?`, 'Nights it blocked open up again here.', [
-                          { text: 'Keep', style: 'cancel' },
-                          {
-                            text: 'Remove',
-                            style: 'destructive',
-                            onPress: () => removeFeed.mutate(f.id),
-                          },
-                        ])
-                      }
-                    />
-                  </View>
-                ))}
-              </Card>
-            )}
-          </View>
-        </>
-      )}
+              </View>
+              {d.feeds.length === 0 ? (
+                <Card
+                  elevated
+                  style={{ alignItems: 'center', gap: spacing.sm, paddingVertical: spacing['2xl'] }}
+                >
+                  <CalendarSync size={28} color={colors.mutedForeground} />
+                  <Text variant="callout" color="mutedForeground" center>
+                    Paste the “Export calendar” link from each site you also list on. Their bookings
+                    will block nights here automatically.
+                  </Text>
+                  <Button
+                    label="Add a calendar"
+                    variant="secondary"
+                    onPress={() => setAdding(true)}
+                  />
+                </Card>
+              ) : (
+                <Card elevated padding="none">
+                  {d.feeds.map((f, i) => (
+                    <View key={f.id}>
+                      {i ? <Divider /> : null}
+                      <FeedRow
+                        f={f}
+                        syncing={syncNow.isPending && syncNow.variables === f.id}
+                        onSync={() => syncNow.mutate(f.id)}
+                        onRemove={() =>
+                          Alert.alert(
+                            `Remove ${f.name}?`,
+                            'Nights it blocked open up again here.',
+                            [
+                              { text: 'Keep', style: 'cancel' },
+                              {
+                                text: 'Remove',
+                                style: 'destructive',
+                                onPress: () => removeFeed.mutate(f.id),
+                              },
+                            ]
+                          )
+                        }
+                      />
+                    </View>
+                  ))}
+                </Card>
+              )}
+            </View>
+          </>
+        ) : null}
+      </QueryState>
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add a calendar">
         {adding ? <AddFeed listingId={id} onDone={() => setAdding(false)} /> : null}
       </Sheet>

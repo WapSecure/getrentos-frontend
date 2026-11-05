@@ -9,8 +9,8 @@ import {
   Button,
   Chip,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -99,17 +99,17 @@ export default function HostListings() {
         ) : null}
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={108} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingVertical: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={108} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={shown}
           keyExtractor={(l) => l.id}
@@ -160,7 +160,7 @@ export default function HostListings() {
             ) : null
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

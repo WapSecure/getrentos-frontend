@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { FlashList } from '@shopify/flash-list';
@@ -8,7 +8,7 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -47,7 +47,13 @@ export function QueueScreen<T extends { id: string }>({
   title: string;
   subtitle?: string;
   accessory?: ReactNode;
-  query: { isPending: boolean; isError: boolean; isRefetching: boolean; refetch: () => unknown };
+  query: {
+    data?: unknown;
+    isPending: boolean;
+    isError: boolean;
+    isRefetching: boolean;
+    refetch: () => unknown;
+  };
   items: T[];
   view: QueueView;
   onView: (v: QueueView) => void;
@@ -94,17 +100,17 @@ export function QueueScreen<T extends { id: string }>({
           ]}
         />
       </View>
-      {query.isError && !items.length ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={132} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={132} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(i) => i.id}
@@ -119,7 +125,7 @@ export function QueueScreen<T extends { id: string }>({
             <EmptyState icon={icon} title={empty.title} description={empty.description} />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

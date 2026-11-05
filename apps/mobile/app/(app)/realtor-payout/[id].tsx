@@ -5,9 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   EmptyState,
-  ErrorState,
   FormAlert,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -63,40 +63,40 @@ export default function RealtorPayoutDetail() {
       />
       {notFound ? (
         <EmptyState title="Payout not found" />
-      ) : payout.isError && !p ? (
-        <ErrorState onRetry={() => payout.refetch()} />
-      ) : !p ? (
-        <Skeleton height={160} radius={radius.lg} />
       ) : (
-        <>
-          <Card elevated style={{ gap: spacing.sm }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                Amount
+        <QueryState query={payout} skeleton={<Skeleton height={160} radius={radius.lg} />}>
+          {p ? (
+            <>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                    Amount
+                  </Text>
+                  <StatusPill label={LABEL[p.status].label} tone={LABEL[p.status].tone} />
+                </View>
+                <Price amount={p.amount} variant="title" />
+                <Text variant="caption" color="mutedForeground">
+                  {p.paidAt
+                    ? `Paid ${formatDate(p.paidAt, 'medium')}`
+                    : `Requested ${formatDate(p.createdAt, 'medium')}`}
+                  {p.transferRef ? ` · Ref ${p.transferRef}` : ''}
+                </Text>
+              </Card>
+              {p.status === 'failed' ? (
+                <FormAlert
+                  tone="warning"
+                  message={`${p.failureReason ?? 'The bank didn’t accept this transfer.'} This commission stays reserved for this payout, and support retries it to your account. If your bank details changed, update them first.`}
+                />
+              ) : null}
+              <Text variant="heading" headingLevel={2}>
+                {p.status === 'success' ? 'What it paid' : 'What it covers'}
               </Text>
-              <StatusPill label={LABEL[p.status].label} tone={LABEL[p.status].tone} />
-            </View>
-            <Price amount={p.amount} variant="title" />
-            <Text variant="caption" color="mutedForeground">
-              {p.paidAt
-                ? `Paid ${formatDate(p.paidAt, 'medium')}`
-                : `Requested ${formatDate(p.createdAt, 'medium')}`}
-              {p.transferRef ? ` · Ref ${p.transferRef}` : ''}
-            </Text>
-          </Card>
-          {p.status === 'failed' ? (
-            <FormAlert
-              tone="warning"
-              message={`${p.failureReason ?? 'The bank didn’t accept this transfer.'} This commission stays reserved for this payout, and support retries it to your account. If your bank details changed, update them first.`}
-            />
+              {p.commissions.map((c) => (
+                <CommissionRow key={c.id} c={c} />
+              ))}
+            </>
           ) : null}
-          <Text variant="heading" headingLevel={2}>
-            {p.status === 'success' ? 'What it paid' : 'What it covers'}
-          </Text>
-          {p.commissions.map((c) => (
-            <CommissionRow key={c.id} c={c} />
-          ))}
-        </>
+        </QueryState>
       )}
     </ScrollView>
   );

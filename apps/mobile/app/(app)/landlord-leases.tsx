@@ -9,9 +9,9 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -106,15 +106,17 @@ export default function LandlordLeases() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={120} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={120} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(l) => l.id}
@@ -147,7 +149,7 @@ export default function LandlordLeases() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <SignLeaseSheet open={!!signing} onClose={() => setSigning(null)} lease={signing} />
       <RenewLeaseSheet open={!!renewing} onClose={() => setRenewing(null)} lease={renewing} />

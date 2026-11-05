@@ -15,7 +15,7 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
-import { ErrorState, IconButton, Screen, useTheme } from '@getrentos/ui-native';
+import { IconButton, QueryState, Screen, useTheme } from '@getrentos/ui-native';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
 import {
@@ -41,7 +41,7 @@ const ACTIVITY_ICON: Record<string, LucideIcon> = {
 
 export default function OwnerHome() {
   const { profile } = useAuth();
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const dashboard = useQuery({ queryKey: qk.owner.dashboard, queryFn: ownerApi.dashboard });
   const d = dashboard.data;
@@ -77,19 +77,6 @@ export default function OwnerHome() {
     />
   );
 
-  if (dashboard.isError && !d) {
-    return (
-      <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
-        {header}
-        <ErrorState
-          title="We couldn't load your dashboard"
-          description="Check your connection and try again."
-          onRetry={() => dashboard.refetch()}
-        />
-      </Screen>
-    );
-  }
-
   const metrics = d
     ? [
         {
@@ -119,68 +106,92 @@ export default function OwnerHome() {
       ]
     : [];
 
+  const quickActions = (
+    <QuickActions
+      actions={[
+        {
+          label: 'Add property',
+          Icon: Plus,
+          onPress: () => router.push('/(app)/owner-add-property'),
+        },
+        { label: 'Buyer leads', Icon: Users, onPress: () => router.push('/(app)/owner-leads') },
+        {
+          label: 'Sales in progress',
+          Icon: Wallet,
+          onPress: () => router.push('/(app)/owner-transactions'),
+          badge: d?.activeTransactions,
+        },
+        {
+          label: 'Analytics',
+          Icon: BarChart3,
+          onPress: () => router.push('/(app)/owner-analytics'),
+        },
+      ]}
+    />
+  );
+
   return (
     <Screen refreshing={dashboard.isRefetching} onRefresh={() => dashboard.refetch()}>
       {header}
 
-      {/* What needs you first: offers waiting on an answer. */}
-      {d?.pendingOffers ? (
-        <AttentionCard
-          Icon={FileSignature}
-          title={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer' : 'offers'} waiting for you`}
-          detail="Accept, counter or decline"
-          accessibilityLabel={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer is' : 'offers are'} waiting for your answer`}
-          onPress={() => router.push('/(app)/(owner)/offers')}
-        />
-      ) : null}
-
-      <PortfolioCard
-        label="Portfolio value"
-        amount={d?.portfolioValue ?? 0}
-        hint="Estimated from your properties’ recorded values"
-        loading={dashboard.isPending}
-        visible={showMoney}
-        onToggle={toggleMoney}
+      <QueryState
+        query={dashboard}
+        skeleton={
+          <View style={{ gap: spacing.lg }}>
+            <PortfolioCard
+              label="Portfolio value"
+              amount={0}
+              hint="Estimated from your properties’ recorded values"
+              loading
+              visible={showMoney}
+              onToggle={toggleMoney}
+            />
+            <MetricGrid metrics={[]} loading />
+            {quickActions}
+          </View>
+        }
+        errorTitle="We couldn't load your dashboard"
+        errorDescription="Check your connection and try again."
       >
-        {/* A single point isn't a trend, so the chart waits for two. */}
-        {(trend.data?.length ?? 0) > 1 ? <RevenueTrendChart points={trend.data!} /> : null}
-      </PortfolioCard>
+        {/* What needs you first: offers waiting on an answer. */}
+        {d?.pendingOffers ? (
+          <AttentionCard
+            Icon={FileSignature}
+            title={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer' : 'offers'} waiting for you`}
+            detail="Accept, counter or decline"
+            accessibilityLabel={`${d.pendingOffers} ${d.pendingOffers === 1 ? 'offer is' : 'offers are'} waiting for your answer`}
+            onPress={() => router.push('/(app)/(owner)/offers')}
+          />
+        ) : null}
 
-      <MetricGrid metrics={metrics} loading={dashboard.isPending} />
+        <PortfolioCard
+          label="Portfolio value"
+          amount={d?.portfolioValue ?? 0}
+          hint="Estimated from your properties’ recorded values"
+          loading={false}
+          visible={showMoney}
+          onToggle={toggleMoney}
+        >
+          {/* A single point isn't a trend, so the chart waits for two. */}
+          {(trend.data?.length ?? 0) > 1 ? <RevenueTrendChart points={trend.data!} /> : null}
+        </PortfolioCard>
 
-      <QuickActions
-        actions={[
-          {
-            label: 'Add property',
-            Icon: Plus,
-            onPress: () => router.push('/(app)/owner-add-property'),
-          },
-          { label: 'Buyer leads', Icon: Users, onPress: () => router.push('/(app)/owner-leads') },
-          {
-            label: 'Sales in progress',
-            Icon: Wallet,
-            onPress: () => router.push('/(app)/owner-transactions'),
-            badge: d?.activeTransactions,
-          },
-          {
-            label: 'Analytics',
-            Icon: BarChart3,
-            onPress: () => router.push('/(app)/owner-analytics'),
-          },
-        ]}
-      />
+        <MetricGrid metrics={metrics} loading={false} />
 
-      <ActivityFeed
-        description="The latest movement across your properties"
-        loading={dashboard.isPending}
-        emptyText="Nothing has happened across your properties yet."
-        items={(d?.recentActivity ?? []).slice(0, 6).map((a) => ({
-          id: a.id,
-          Icon: ACTIVITY_ICON[a.type] ?? Bell,
-          title: a.message,
-          timestamp: a.timestamp,
-        }))}
-      />
+        {quickActions}
+
+        <ActivityFeed
+          description="The latest movement across your properties"
+          loading={false}
+          emptyText="Nothing has happened across your properties yet."
+          items={(d?.recentActivity ?? []).slice(0, 6).map((a) => ({
+            id: a.id,
+            Icon: ACTIVITY_ICON[a.type] ?? Bell,
+            title: a.message,
+            timestamp: a.timestamp,
+          }))}
+        />
+      </QueryState>
     </Screen>
   );
 }

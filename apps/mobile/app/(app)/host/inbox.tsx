@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -7,8 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageCircle } from 'lucide-react-native';
 import {
   Avatar,
+  Divider,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -75,17 +76,17 @@ export default function HostInbox() {
           />
         ) : null}
       </View>
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={72} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={72} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(c) => c.id}
@@ -107,7 +108,7 @@ export default function HostInbox() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }
@@ -116,69 +117,70 @@ function Row({ c }: { c: HostConversation }) {
   const { colors, spacing } = useTheme();
   const unread = c.unreadCount > 0;
   return (
-    <Pressable
-      onPress={() =>
-        router.push({ pathname: '/(app)/host/conversation/[id]', params: { id: c.id } })
-      }
-      accessibilityRole="button"
-      accessibilityLabel={`${c.participantName}, ${c.propertyName}${unread ? `, ${c.unreadCount} unread` : ''}. ${c.lastMessage}`}
-      style={({ pressed }) => ({
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.md,
-        paddingVertical: spacing.md,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        opacity: pressed ? 0.7 : 1,
-      })}
-    >
-      <Avatar name={c.participantName} size={46} />
-      <View style={{ flex: 1, gap: 2 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text variant={unread ? 'bodyStrong' : 'body'} numberOfLines={1} style={{ flex: 1 }}>
-            {c.participantName}
+    <View>
+      <Pressable
+        onPress={() =>
+          router.push({ pathname: '/(app)/host/conversation/[id]', params: { id: c.id } })
+        }
+        accessibilityRole="button"
+        accessibilityLabel={`${c.participantName}, ${c.propertyName}${unread ? `, ${c.unreadCount} unread` : ''}. ${c.lastMessage}`}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.md,
+          paddingVertical: spacing.md,
+          opacity: pressed ? 0.7 : 1,
+        })}
+      >
+        <Avatar name={c.participantName} size={46} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Text variant={unread ? 'bodyStrong' : 'body'} numberOfLines={1} style={{ flex: 1 }}>
+              {c.participantName}
+            </Text>
+            <Text variant="caption" color={unread ? 'primary' : 'mutedForeground'}>
+              {relativeTime(c.lastMessageAt)}
+            </Text>
+          </View>
+          <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+            {c.propertyName}
           </Text>
-          <Text variant="caption" color={unread ? 'primary' : 'mutedForeground'}>
-            {relativeTime(c.lastMessageAt)}
-          </Text>
-        </View>
-        <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-          {c.propertyName}
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Text
-            variant="callout"
-            numberOfLines={1}
-            style={{
-              flex: 1,
-              color: unread ? colors.foreground : colors.mutedForeground,
-              fontWeight: unread ? '600' : '400',
-            }}
-          >
-            {c.lastMessage}
-          </Text>
-          {unread ? (
-            <View
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <Text
+              variant="callout"
+              numberOfLines={1}
               style={{
-                minWidth: 20,
-                height: 20,
-                paddingHorizontal: 6,
-                borderRadius: 10,
-                backgroundColor: colors.primary,
-                alignItems: 'center',
-                justifyContent: 'center',
+                flex: 1,
+                color: unread ? colors.foreground : colors.mutedForeground,
+                fontWeight: unread ? '600' : '400',
               }}
             >
-              <Text
-                variant="caption"
-                style={{ color: colors.primaryForeground, fontWeight: '800' }}
+              {c.lastMessage}
+            </Text>
+            {unread ? (
+              <View
+                style={{
+                  minWidth: 20,
+                  height: 20,
+                  paddingHorizontal: 6,
+                  borderRadius: 10,
+                  backgroundColor: colors.primary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                {c.unreadCount}
-              </Text>
-            </View>
-          ) : null}
+                <Text
+                  variant="caption"
+                  style={{ color: colors.primaryForeground, fontWeight: '800' }}
+                >
+                  {c.unreadCount}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+      <Divider />
+    </View>
   );
 }

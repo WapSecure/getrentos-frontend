@@ -6,9 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronRight, Gavel, ShieldCheck } from 'lucide-react-native';
 import {
   Card,
-  EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -87,29 +86,30 @@ export default function HostDisputes() {
           { value: 'claims', label: `Deposit claims${claims.data ? ` ${claims.data.total}` : ''}` },
         ]}
       />
-      {active.isError && !active.data ? (
-        <ErrorState onRetry={() => active.refetch()} />
-      ) : active.isPending ? (
-        <Skeleton height={110} radius={radius.lg} />
-      ) : tab === 'disputes' ? (
-        disputes.data!.items.length ? (
-          disputes.data!.items.map((d) => <DisputeRow key={d.id} d={d} />)
-        ) : (
-          <EmptyState
-            icon={<Gavel size={34} color={colors.mutedForeground} />}
-            title="No disputes"
-            description="If something goes wrong with a stay, report it from the booking and support steps in."
-          />
-        )
-      ) : claims.data!.items.length ? (
-        claims.data!.items.map((c) => <ClaimRow key={c.id} c={c} />)
-      ) : (
-        <EmptyState
-          icon={<ShieldCheck size={34} color={colors.mutedForeground} />}
-          title="No deposit claims"
-          description="After a stay with a deposit, you can claim for damage from the booking."
-        />
-      )}
+      <QueryState
+        query={active}
+        skeleton={<Skeleton height={110} radius={radius.lg} />}
+        isEmpty={!active.data?.items.length}
+        empty={
+          tab === 'disputes'
+            ? {
+                icon: <Gavel size={34} color={colors.mutedForeground} />,
+                title: 'No disputes',
+                description:
+                  'If something goes wrong with a stay, report it from the booking and support steps in.',
+              }
+            : {
+                icon: <ShieldCheck size={34} color={colors.mutedForeground} />,
+                title: 'No deposit claims',
+                description:
+                  'After a stay with a deposit, you can claim for damage from the booking.',
+              }
+        }
+      >
+        {tab === 'disputes'
+          ? (disputes.data?.items ?? []).map((d) => <DisputeRow key={d.id} d={d} />)
+          : (claims.data?.items ?? []).map((c) => <ClaimRow key={c.id} c={c} />)}
+      </QueryState>
     </ScrollView>
   );
 }

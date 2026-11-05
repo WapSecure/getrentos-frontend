@@ -2,7 +2,7 @@ import { Pressable, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, FileText, PenLine } from 'lucide-react-native';
-import { Badge, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Badge, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import {
   committeeTitleLabel,
@@ -30,13 +30,9 @@ export function GovernanceVersionsSheet({
   });
   return (
     <Sheet open={!!record} onClose={onClose} title="Version history">
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isPending ? (
-        <Skeleton height={120} radius={radius.md} />
-      ) : (
+      <QueryState query={query} skeleton={<Skeleton height={120} radius={radius.md} />}>
         <View>
-          {query.data.map((v) => (
+          {(query.data ?? []).map((v) => (
             <Pressable
               key={v.id}
               onPress={() => WebBrowser.openBrowserAsync(v.url)}
@@ -64,7 +60,7 @@ export function GovernanceVersionsSheet({
             </Pressable>
           ))}
         </View>
-      )}
+      </QueryState>
     </Sheet>
   );
 }
@@ -95,45 +91,43 @@ export function GovernanceSignaturesSheet({
           {record?.status === 'approved' ? ' It’s approved.' : ' It’s approved once all have.'}
         </Text>
       ) : null}
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isPending ? (
-        <Skeleton height={120} radius={radius.md} />
-      ) : !query.data.length ? (
-        <View style={{ alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }}>
-          <PenLine size={28} color={colors.mutedForeground} />
-          <Text variant="callout" color="mutedForeground" center>
-            Nobody has signed yet. Committee members sign from Governance in their resident app.
-          </Text>
-        </View>
-      ) : (
-        <View>
-          {query.data.map((s) => (
-            <View
-              key={s.id}
-              accessible
-              accessibilityLabel={`${s.residentName}, ${s.unitLabel}, ${committeeTitleLabel(s.title)}, signed ${formatDate(s.signedAt, 'medium')} at ${formatTime(s.signedAt)}`}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.md,
-                minHeight: 56,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
-                  {s.residentName}
-                </Text>
-                <Text variant="caption" color="mutedForeground" numberOfLines={1}>
-                  {s.unitLabel} · signed {formatDate(s.signedAt, 'medium')},{' '}
-                  {formatTime(s.signedAt)}
-                </Text>
+      <QueryState query={query} skeleton={<Skeleton height={120} radius={radius.md} />}>
+        {!query.data?.length ? (
+          <View style={{ alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl }}>
+            <PenLine size={28} color={colors.mutedForeground} />
+            <Text variant="callout" color="mutedForeground" center>
+              Nobody has signed yet. Committee members sign from Governance in their resident app.
+            </Text>
+          </View>
+        ) : (
+          <View>
+            {query.data.map((s) => (
+              <View
+                key={s.id}
+                accessible
+                accessibilityLabel={`${s.residentName}, ${s.unitLabel}, ${committeeTitleLabel(s.title)}, signed ${formatDate(s.signedAt, 'medium')} at ${formatTime(s.signedAt)}`}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.md,
+                  minHeight: 56,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
+                    {s.residentName}
+                  </Text>
+                  <Text variant="caption" color="mutedForeground" numberOfLines={1}>
+                    {s.unitLabel} · signed {formatDate(s.signedAt, 'medium')},{' '}
+                    {formatTime(s.signedAt)}
+                  </Text>
+                </View>
+                <Badge label={committeeTitleLabel(s.title)} />
               </View>
-              <Badge label={committeeTitleLabel(s.title)} />
-            </View>
-          ))}
-        </View>
-      )}
+            ))}
+          </View>
+        )}
+      </QueryState>
     </Sheet>
   );
 }

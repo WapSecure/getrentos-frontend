@@ -15,12 +15,10 @@ import {
   Badge,
   Button,
   Card,
-  Chip,
   Divider,
-  ErrorState,
   FormAlert,
-  NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -28,8 +26,8 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { hostShortletsApi, type PayoutSummary } from '@/lib/api/hostShortlets';
-import { COMMON_BANKS } from '@/lib/api/sellerPayout';
-import { ApiError, errorMessage } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
+import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -92,163 +90,164 @@ export default function HostEarnings() {
     >
       <DetailHeader eyebrow="Hosting" title="Earnings & payouts" onBack={() => goBack()} />
 
-      {summary.isError && !summary.data ? (
-        <ErrorState onRetry={() => summary.refetch()} />
-      ) : !summary.data ? (
-        <Skeleton height={200} radius={radius.xl} />
-      ) : (
-        <>
-          <Withdraw
-            s={summary.data}
-            hasAccount={!!account.data}
-            onSetAccount={() => setAccountOpen(true)}
-          />
-          <Breakdown s={summary.data} />
-          <HostFeeNote />
+      <QueryState query={summary} skeleton={<Skeleton height={200} radius={radius.xl} />}>
+        {summary.data ? (
+          <>
+            <Withdraw
+              s={summary.data}
+              hasAccount={!!account.data}
+              onSetAccount={() => setAccountOpen(true)}
+            />
+            <Breakdown s={summary.data} />
+            <HostFeeNote />
 
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" headingLevel={2}>
-              Payout account
-            </Text>
-            <Card elevated style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Landmark size={22} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                {account.data ? (
-                  <>
-                    <Text variant="bodyStrong">{account.data.bankName}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {account.data.accountNumber} · {account.data.accountName}
-                    </Text>
-                  </>
-                ) : account.isPending ? (
-                  <View style={{ gap: 6 }}>
-                    <Skeleton height={14} width="50%" />
-                    <Skeleton height={11} width="70%" />
-                  </View>
-                ) : (
-                  <Text variant="callout" color="mutedForeground">
-                    No account yet. Add one to withdraw.
-                  </Text>
-                )}
-              </View>
-              <Button
-                label={account.data ? 'Change' : 'Add'}
-                size="sm"
-                variant="secondary"
-                onPress={() => setAccountOpen(true)}
-              />
-            </Card>
-          </View>
-
-          <Performance />
-
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading" headingLevel={2}>
-              Payout history
-            </Text>
-            {payouts.isPending ? (
-              <Skeleton height={64} radius={radius.lg} />
-            ) : !payouts.data?.items.length ? (
-              <Text variant="callout" color="mutedForeground">
-                No payouts yet.
-              </Text>
-            ) : (
-              <Card elevated padding="none">
-                {payouts.data.items.map((p, i) => (
-                  <View key={p.id}>
-                    {i ? <Divider /> : null}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing.md,
-                        padding: spacing.lg,
-                      }}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text variant="callout" style={{ fontWeight: '600' }}>
-                          {formatDate(p.paidAt ?? p.createdAt, 'medium')}
-                        </Text>
-                        <Text variant="caption" color="mutedForeground">
-                          {p.bookingCount} stay{p.bookingCount === 1 ? '' : 's'}
-                          {p.penaltyDeducted ? ` · ${naira(p.penaltyDeducted)} fees taken` : ''}
-                        </Text>
-                      </View>
-                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                        <Price amount={p.amount} variant="callout" />
-                        <Badge
-                          label={
-                            p.status === 'SUCCESS'
-                              ? 'Paid'
-                              : p.status === 'PENDING'
-                                ? 'On its way'
-                                : 'Failed'
-                          }
-                          tone={
-                            p.status === 'SUCCESS'
-                              ? 'success'
-                              : p.status === 'PENDING'
-                                ? 'info'
-                                : 'danger'
-                          }
-                        />
-                      </View>
-                    </View>
-                  </View>
-                ))}
-              </Card>
-            )}
-          </View>
-
-          {penalties.data?.items.length ? (
             <View style={{ gap: spacing.sm }}>
               <Text variant="heading" headingLevel={2}>
-                Cancellation fees
+                Payout account
               </Text>
-              <Card elevated padding="none">
-                {penalties.data.items.map((p, i) => (
-                  <View key={p.id}>
-                    {i ? <Divider /> : null}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing.md,
-                        padding: spacing.lg,
-                      }}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
-                          {p.listingTitle}
-                        </Text>
-                        <Text variant="caption" color="mutedForeground">
-                          Cancelled {p.daysBeforeCheckIn} day{p.daysBeforeCheckIn === 1 ? '' : 's'}{' '}
-                          before · {p.percent}%
-                        </Text>
-                      </View>
-                      <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                        <Text variant="callout" style={{ fontWeight: '700' }}>
-                          {naira(p.status === 'OUTSTANDING' ? p.outstanding : p.amount)}
-                        </Text>
-                        <Badge
-                          label={
-                            p.status === 'OUTSTANDING'
-                              ? 'Owed'
-                              : p.status === 'SETTLED'
-                                ? 'Settled'
-                                : 'Waived'
-                          }
-                          tone={p.status === 'OUTSTANDING' ? 'warning' : 'neutral'}
-                        />
-                      </View>
+              <Card
+                elevated
+                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+              >
+                <Landmark size={22} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  {account.data ? (
+                    <>
+                      <Text variant="bodyStrong">{account.data.bankName}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {account.data.accountNumber} · {account.data.accountName}
+                      </Text>
+                    </>
+                  ) : account.isPending ? (
+                    <View style={{ gap: 6 }}>
+                      <Skeleton height={14} width="50%" />
+                      <Skeleton height={11} width="70%" />
                     </View>
-                  </View>
-                ))}
+                  ) : (
+                    <Text variant="callout" color="mutedForeground">
+                      No account yet. Add one to withdraw.
+                    </Text>
+                  )}
+                </View>
+                <Button
+                  label={account.data ? 'Change' : 'Add'}
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => setAccountOpen(true)}
+                />
               </Card>
             </View>
-          ) : null}
-        </>
-      )}
+
+            <Performance />
+
+            <View style={{ gap: spacing.sm }}>
+              <Text variant="heading" headingLevel={2}>
+                Payout history
+              </Text>
+              {payouts.isPending ? (
+                <Skeleton height={64} radius={radius.lg} />
+              ) : !payouts.data?.items.length ? (
+                <Text variant="callout" color="mutedForeground">
+                  No payouts yet.
+                </Text>
+              ) : (
+                <Card elevated padding="none">
+                  {payouts.data.items.map((p, i) => (
+                    <View key={p.id}>
+                      {i ? <Divider /> : null}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: spacing.md,
+                          padding: spacing.lg,
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text variant="callout" style={{ fontWeight: '600' }}>
+                            {formatDate(p.paidAt ?? p.createdAt, 'medium')}
+                          </Text>
+                          <Text variant="caption" color="mutedForeground">
+                            {p.bookingCount} stay{p.bookingCount === 1 ? '' : 's'}
+                            {p.penaltyDeducted ? ` · ${naira(p.penaltyDeducted)} fees taken` : ''}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                          <Price amount={p.amount} variant="callout" />
+                          <Badge
+                            label={
+                              p.status === 'SUCCESS'
+                                ? 'Paid'
+                                : p.status === 'PENDING'
+                                  ? 'On its way'
+                                  : 'Failed'
+                            }
+                            tone={
+                              p.status === 'SUCCESS'
+                                ? 'success'
+                                : p.status === 'PENDING'
+                                  ? 'info'
+                                  : 'danger'
+                            }
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              )}
+            </View>
+
+            {penalties.data?.items.length ? (
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading" headingLevel={2}>
+                  Cancellation fees
+                </Text>
+                <Card elevated padding="none">
+                  {penalties.data.items.map((p, i) => (
+                    <View key={p.id}>
+                      {i ? <Divider /> : null}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: spacing.md,
+                          padding: spacing.lg,
+                        }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={1}>
+                            {p.listingTitle}
+                          </Text>
+                          <Text variant="caption" color="mutedForeground">
+                            Cancelled {p.daysBeforeCheckIn} day
+                            {p.daysBeforeCheckIn === 1 ? '' : 's'} before · {p.percent}%
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                          <Text variant="callout" style={{ fontWeight: '700' }}>
+                            {naira(p.status === 'OUTSTANDING' ? p.outstanding : p.amount)}
+                          </Text>
+                          <Badge
+                            label={
+                              p.status === 'OUTSTANDING'
+                                ? 'Owed'
+                                : p.status === 'SETTLED'
+                                  ? 'Settled'
+                                  : 'Waived'
+                            }
+                            tone={p.status === 'OUTSTANDING' ? 'warning' : 'neutral'}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              </View>
+            ) : null}
+          </>
+        ) : null}
+      </QueryState>
 
       <Sheet open={accountOpen} onClose={() => setAccountOpen(false)} title="Payout account">
         {accountOpen ? <AccountForm onDone={() => setAccountOpen(false)} /> : null}
@@ -466,7 +465,6 @@ function AccountForm({ onDone }: { onDone: () => void }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
-  const [other, setOther] = useState(false);
   const [accountNumber, setAccountNumber] = useState('');
   // Behind "confirm it's you": apiFetch prompts for it automatically.
   const save = useMutation({
@@ -482,59 +480,18 @@ function AccountForm({ onDone }: { onDone: () => void }) {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={{ gap: spacing.md }}>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {COMMON_BANKS.map((b) => (
-            <Chip
-              key={b.code}
-              label={b.name}
-              size="sm"
-              selected={!other && bankCode === b.code}
-              onPress={() => {
-                setOther(false);
-                setBankCode(b.code);
-              }}
-            />
-          ))}
-          <Chip
-            label="Other bank"
-            size="sm"
-            selected={other}
-            onPress={() => {
-              setOther(true);
-              setBankCode('');
-            }}
-          />
-        </View>
-        {other ? (
-          <NumberField
-            label="Bank code"
-            required
-            code
-            value={bankCode}
-            onValueChange={setBankCode}
-            maxLength={6}
-          />
-        ) : null}
-        <NumberField
-          label="Account number"
-          required
-          code
-          value={accountNumber}
-          onValueChange={setAccountNumber}
-          maxLength={10}
+        <BankAccountFields
+          bankCode={bankCode}
+          onBankCode={setBankCode}
+          accountNumber={accountNumber}
+          onAccountNumber={setAccountNumber}
         />
         {save.error ? (
-          <FormAlert
-            message={
-              save.error instanceof ApiError
-                ? save.error.message
-                : 'We couldn’t check that account.'
-            }
-          />
+          <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
         ) : null}
         <Button
           label="Save payout account"
-          disabled={!bankCode || accountNumber.length !== 10}
+          disabled={!bankCode || !accountNumberOk(accountNumber)}
           loading={save.isPending}
           onPress={() => save.mutate()}
         />

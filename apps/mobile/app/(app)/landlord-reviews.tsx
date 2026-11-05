@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Star } from 'lucide-react-native';
-import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, EmptyState, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordReview } from '@/lib/api/landlord';
 import { formatDate } from '@/lib/format';
@@ -37,9 +37,17 @@ export default function LandlordReviews() {
         onBack={() => goBack()}
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={110} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(r) => r.id}
@@ -91,22 +99,14 @@ export default function LandlordReviews() {
             />
           }
           ListEmptyComponent={
-            query.isLoading ? (
-              <View style={{ gap: spacing.sm }}>
-                {[0, 1].map((i) => (
-                  <Skeleton key={i} height={110} radius={radius.lg} />
-                ))}
-              </View>
-            ) : (
-              <EmptyState
-                icon={<Star size={32} color={colors.mutedForeground} />}
-                title="No reviews yet"
-                description="Tenants can review you after a tenancy ends. Reviews feed your trust score."
-              />
-            )
+            <EmptyState
+              icon={<Star size={32} color={colors.mutedForeground} />}
+              title="No reviews yet"
+              description="Tenants can review you after a tenancy ends. Reviews feed your trust score."
+            />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

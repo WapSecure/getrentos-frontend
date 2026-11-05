@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AlertCircle, ChevronLeft, EyeOff, Send } from 'lucide-react-native';
 import {
   Avatar,
-  ErrorState,
   IconButton,
   LinkButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -172,14 +172,16 @@ export function ConversationThread<C extends ThreadConversation>({
         </View>
       </View>
 
-      {conversations.isError && !conversations.data ? (
-        <ErrorState onRetry={() => conversations.refetch()} />
-      ) : conversations.isPending ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={40} width="60%" />
-          <Skeleton height={40} width="75%" />
-        </View>
-      ) : (
+      <QueryState
+        query={conversations}
+        style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={40} width="60%" />
+            <Skeleton height={40} width="75%" />
+          </View>
+        }
+      >
         <FlatList
           data={rows}
           inverted
@@ -290,7 +292,7 @@ export function ConversationThread<C extends ThreadConversation>({
             );
           }}
         />
-      )}
+      </QueryState>
 
       <View
         style={{

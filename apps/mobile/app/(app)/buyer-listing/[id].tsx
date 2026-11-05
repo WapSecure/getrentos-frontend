@@ -21,8 +21,8 @@ import {
   Card,
   DetailSkeleton,
   Divider,
-  ErrorState,
   Price,
+  QueryState,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
@@ -108,200 +108,216 @@ export default function BuyerListingDetail() {
         ) : null}
       </View>
 
-      {query.isError && !listing ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !listing ? (
-        <DetailSkeleton style={{ paddingHorizontal: spacing.xl }} />
-      ) : (
-        <>
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 100, gap: spacing.lg }}
-          >
-            <PropertyGallery images={gallery} />
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={<DetailSkeleton />}
+      >
+        {listing ? (
+          <>
+            <ScrollView
+              style={{ flex: 1 }}
+              contentContainerStyle={{ paddingBottom: insets.bottom + 100, gap: spacing.lg }}
+            >
+              <PropertyGallery images={gallery} />
 
-            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-              <View style={{ gap: 4 }}>
-                <Price amount={listing.askingPrice} variant="display" />
-                <Text variant="callout" color="mutedForeground">
-                  {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
-                </Text>
-                {listing.addressHidden ? (
-                  <Text variant="caption" color="mutedForeground">
-                    The exact address is shared once the property is verified.
+              <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+                <View style={{ gap: 4 }}>
+                  <Price amount={listing.askingPrice} variant="display" />
+                  <Text variant="callout" color="mutedForeground">
+                    {[listing.address, listing.city, listing.state].filter(Boolean).join(', ')}
                   </Text>
-                ) : null}
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: spacing.lg, flexWrap: 'wrap' }}>
-                {listing.bedrooms != null ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <Bed size={15} color={colors.mutedForeground} />
-                    <Text variant="callout" color="mutedForeground">
-                      {listing.bedrooms} bed
-                    </Text>
-                  </View>
-                ) : null}
-                {listing.bathrooms != null ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <Bath size={15} color={colors.mutedForeground} />
-                    <Text variant="callout" color="mutedForeground">
-                      {listing.bathrooms} bath
-                    </Text>
-                  </View>
-                ) : null}
-                {listing.propertySize != null ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                    <Ruler size={15} color={colors.mutedForeground} />
-                    <Text variant="callout" color="mutedForeground">
-                      {listing.propertySize} m²
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-
-              <Divider />
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading">About this property</Text>
-                <Text variant="body" color="mutedForeground">
-                  {listing.description}
-                </Text>
-              </View>
-
-              {listing.features?.length ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading">Features</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                    {listing.features.map((f) => (
-                      <Badge key={f} label={f} tone="neutral" />
-                    ))}
-                  </View>
-                </View>
-              ) : null}
-
-              {listing.videoTourUrl ? (
-                <Pressable
-                  onPress={() => setTouring(true)}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    listing.videoTourFilmedOnSite
-                      ? 'Watch the video tour, filmed on site'
-                      : 'Watch the video tour'
-                  }
-                >
-                  <Card
-                    elevated
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-                  >
-                    <View
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: colors.accent,
-                      }}
-                    >
-                      <PlayCircle size={20} color={colors.primary} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text variant="bodyStrong">Video tour</Text>
-                      {listing.videoTourFilmedOnSite ? (
-                        <FilmedOnSite />
-                      ) : (
-                        <Text variant="caption" color="mutedForeground">
-                          Walk through this property on video
-                        </Text>
-                      )}
-                    </View>
-                  </Card>
-                </Pressable>
-              ) : null}
-
-              {listing.latitude != null && listing.longitude != null ? (
-                <View style={{ gap: spacing.sm }}>
-                  <Text variant="heading">Location</Text>
-                  <PropertyMapView
-                    markers={[
-                      { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
-                    ]}
-                    variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
-                    zoom={15}
-                    height={200}
-                  />
-                </View>
-              ) : null}
-
-              <Card elevated>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <View>
-                    <Text variant="bodyStrong">{listing.ownerName}</Text>
+                  {listing.addressHidden ? (
                     <Text variant="caption" color="mutedForeground">
-                      {listing.propertyType} · Listed {formatDate(listing.listedDate, 'short')}
+                      The exact address is shared once the property is verified.
                     </Text>
-                  </View>
-                  {listing.ownerVerified ? <ShieldCheck size={18} color={colors.success} /> : null}
+                  ) : null}
                 </View>
-              </Card>
+
+                <View style={{ flexDirection: 'row', gap: spacing.lg, flexWrap: 'wrap' }}>
+                  {listing.bedrooms != null ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Bed size={15} color={colors.mutedForeground} />
+                      <Text variant="callout" color="mutedForeground">
+                        {listing.bedrooms} bed
+                      </Text>
+                    </View>
+                  ) : null}
+                  {listing.bathrooms != null ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Bath size={15} color={colors.mutedForeground} />
+                      <Text variant="callout" color="mutedForeground">
+                        {listing.bathrooms} bath
+                      </Text>
+                    </View>
+                  ) : null}
+                  {listing.propertySize != null ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Ruler size={15} color={colors.mutedForeground} />
+                      <Text variant="callout" color="mutedForeground">
+                        {listing.propertySize} m²
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+
+                <Divider />
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading">About this property</Text>
+                  <Text variant="body" color="mutedForeground">
+                    {listing.description}
+                  </Text>
+                </View>
+
+                {listing.features?.length ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="heading">Features</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+                      {listing.features.map((f) => (
+                        <Badge key={f} label={f} tone="neutral" />
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
+
+                {listing.videoTourUrl ? (
+                  <Pressable
+                    onPress={() => setTouring(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      listing.videoTourFilmedOnSite
+                        ? 'Watch the video tour, filmed on site'
+                        : 'Watch the video tour'
+                    }
+                  >
+                    <Card
+                      elevated
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                    >
+                      <View
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 20,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: colors.accent,
+                        }}
+                      >
+                        <PlayCircle size={20} color={colors.primary} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text variant="bodyStrong">Video tour</Text>
+                        {listing.videoTourFilmedOnSite ? (
+                          <FilmedOnSite />
+                        ) : (
+                          <Text variant="caption" color="mutedForeground">
+                            Walk through this property on video
+                          </Text>
+                        )}
+                      </View>
+                    </Card>
+                  </Pressable>
+                ) : null}
+
+                {listing.latitude != null && listing.longitude != null ? (
+                  <View style={{ gap: spacing.sm }}>
+                    <Text variant="heading">Location</Text>
+                    <PropertyMapView
+                      markers={[
+                        {
+                          id: listing.id,
+                          latitude: listing.latitude,
+                          longitude: listing.longitude,
+                        },
+                      ]}
+                      variant={listing.locationPrecision === 'approximate' ? 'area' : 'location'}
+                      zoom={15}
+                      height={200}
+                    />
+                  </View>
+                ) : null}
+
+                <Card elevated>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <View>
+                      <Text variant="bodyStrong">{listing.ownerName}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {listing.propertyType} · Listed {formatDate(listing.listedDate, 'short')}
+                      </Text>
+                    </View>
+                    {listing.ownerVerified ? (
+                      <ShieldCheck size={18} color={colors.success} />
+                    ) : null}
+                  </View>
+                </Card>
+              </View>
+            </ScrollView>
+
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: colors.background,
+              }}
+            >
+              <Divider />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: spacing.sm,
+                  padding: spacing.xl,
+                  paddingBottom: insets.bottom + spacing.sm,
+                }}
+              >
+                <Button
+                  label="Request viewing"
+                  variant="outline"
+                  icon={<Calendar size={16} color={colors.foreground} />}
+                  style={{ flex: 1 }}
+                  onPress={() => setViewingOpen(true)}
+                />
+                <Button
+                  label="Make offer"
+                  icon={<FileSignature size={16} color={colors.primaryForeground} />}
+                  style={{ flex: 1 }}
+                  onPress={() => setOfferOpen(true)}
+                />
+              </View>
             </View>
-          </ScrollView>
 
-          <View
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              flexDirection: 'row',
-              gap: spacing.sm,
-              padding: spacing.xl,
-              paddingBottom: insets.bottom + spacing.sm,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
-              backgroundColor: colors.background,
-            }}
-          >
-            <Button
-              label="Request viewing"
-              variant="outline"
-              icon={<Calendar size={16} color={colors.foreground} />}
-              style={{ flex: 1 }}
-              onPress={() => setViewingOpen(true)}
+            <RequestViewingSheet
+              open={viewingOpen}
+              onClose={() => setViewingOpen(false)}
+              listing={listing}
             />
-            <Button
-              label="Make offer"
-              icon={<FileSignature size={16} color={colors.primaryForeground} />}
-              style={{ flex: 1 }}
-              onPress={() => setOfferOpen(true)}
+            <MakeOfferSheet
+              open={offerOpen}
+              onClose={() => setOfferOpen(false)}
+              listing={listing}
             />
-          </View>
-
-          <RequestViewingSheet
-            open={viewingOpen}
-            onClose={() => setViewingOpen(false)}
-            listing={listing}
-          />
-          <MakeOfferSheet open={offerOpen} onClose={() => setOfferOpen(false)} listing={listing} />
-          {listing.videoTourUrl ? (
-            <VideoTourSheet
-              open={touring}
-              onClose={() => setTouring(false)}
-              title={listing.title}
-              videoUrl={listing.videoTourUrl}
-              videoStream={listing.videoTourStream}
-              onExpired={() => void query.refetch()}
-            />
-          ) : null}
-        </>
-      )}
+            {listing.videoTourUrl ? (
+              <VideoTourSheet
+                open={touring}
+                onClose={() => setTouring(false)}
+                title={listing.title}
+                videoUrl={listing.videoTourUrl}
+                videoStream={listing.videoTourStream}
+                onExpired={() => void query.refetch()}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

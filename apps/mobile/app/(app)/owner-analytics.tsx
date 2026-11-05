@@ -6,8 +6,8 @@ import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -64,18 +64,17 @@ export default function OwnerAnalytics() {
           title="Analytics are on the Pro plan"
           description="Upgrade from the web dashboard to see growth and returns per property."
         />
-      ) : query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isPending ? (
-        <Skeleton height={160} radius={radius.lg} />
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<BarChart3 size={34} color={colors.mutedForeground} />}
-          title="Nothing to measure yet"
-          description="Add a property with its purchase price to see how its value changes."
-        />
       ) : (
-        <>
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={160} radius={radius.lg} />}
+          isEmpty={items.length === 0}
+          empty={{
+            icon: <BarChart3 size={34} color={colors.mutedForeground} />,
+            title: 'Nothing to measure yet',
+            description: 'Add a property with its purchase price to see how its value changes.',
+          }}
+        >
           <Card
             elevated
             accessible
@@ -98,7 +97,7 @@ export default function OwnerAnalytics() {
           {items.map((m) => (
             <MetricCard key={m.propertyId} m={m} />
           ))}
-        </>
+        </QueryState>
       )}
     </ScrollView>
   );

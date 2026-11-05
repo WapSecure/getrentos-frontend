@@ -8,10 +8,11 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
+  Divider,
   FormAlert,
   NumberField,
   Progress,
+  QueryState,
   RadioGroup,
   SegmentedControl,
   Skeleton,
@@ -32,7 +33,7 @@ import {
   type PricingMode,
 } from '@/lib/api/hostShortlets';
 import type { ShortletCancellationPolicy } from '@/lib/api/shortlets';
-import { ApiError, errorMessage } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { readGate } from '@/lib/verificationGate';
 import { haptics } from '@/lib/haptics';
@@ -113,7 +114,16 @@ export default function ListingEditor() {
   const existing = id ? listings.data?.items.find((l) => l.id === id) : undefined;
 
   if (id && !existing) {
-    return listings.isPending ? <Loading /> : <EmptyState title="Listing not found" />;
+    return (
+      <QueryState
+        query={listings}
+        skeleton={<Loading />}
+        isEmpty
+        empty={{ title: 'Listing not found' }}
+      >
+        {null}
+      </QueryState>
+    );
   }
   return existing ? <EditForm listing={existing} /> : <CreateFlow />;
 }
@@ -216,15 +226,12 @@ function CreateFlow() {
             <VerificationGateNotice error={create.error} />
           ) : (
             <FormAlert
-              message={
-                create.error instanceof ApiError
-                  ? create.error.message
-                  : 'We couldn’t publish this. Try again.'
-              }
+              message={errorMessage(create.error, 'We couldn’t publish this. Try again.')}
             />
           )
         ) : null}
       </ScrollView>
+      <Divider />
       <View
         style={{
           flexDirection: 'row',
@@ -232,8 +239,6 @@ function CreateFlow() {
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.md,
           paddingBottom: insets.bottom + spacing.md,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
           backgroundColor: colors.card,
         }}
       >
@@ -262,15 +267,16 @@ function HomeStep({ d, patch }: { d: Draft; patch: (p: Partial<Draft>) => void }
       <Text variant="callout" color="mutedForeground">
         Guests will see this home’s photos until you add your own.
       </Text>
-      {homes.isPending ? (
-        <Skeleton height={80} radius={radius.lg} />
-      ) : !homes.data?.length ? (
-        <EmptyState
-          title="No properties yet"
-          description="Add the property first, then come back to host it."
-        />
-      ) : (
-        homes.data.map((h) => {
+      <QueryState
+        query={homes}
+        skeleton={<Skeleton height={80} radius={radius.lg} />}
+        isEmpty={!homes.data?.length}
+        empty={{
+          title: 'No properties yet',
+          description: 'Add the property first, then come back to host it.',
+        }}
+      >
+        {(homes.data ?? []).map((h) => {
           const on = d.propertyId === h.id;
           return (
             <Pressable
@@ -305,8 +311,8 @@ function HomeStep({ d, patch }: { d: Draft; patch: (p: Partial<Draft>) => void }
               {on ? <Check size={20} color={colors.primary} /> : null}
             </Pressable>
           );
-        })
-      )}
+        })}
+      </QueryState>
       {d.propertyId ? (
         <TextField
           label="Listing title"
@@ -599,13 +605,12 @@ function EditForm({ listing }: { listing: HostListing }) {
           <FormAlert message={errorMessage(save.error, 'Could not save. Try again.')} />
         ) : null}
       </ScrollView>
+      <Divider />
       <View
         style={{
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.md,
           paddingBottom: insets.bottom + spacing.md,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
           backgroundColor: colors.card,
         }}
       >

@@ -9,10 +9,9 @@ import {
   Badge,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -112,21 +111,22 @@ export default function LandMarketplace() {
         </ScrollView>
       </View>
 
-      {query.isError && items.length === 0 ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={150} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<LandPlot size={34} color={colors.mutedForeground} />}
-          title="No land listings"
-          description="Only parcels with verified title diligence appear here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={150} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <LandPlot size={34} color={colors.mutedForeground} />,
+          title: 'No land listings',
+          description: 'Only parcels with verified title diligence appear here.',
+        }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -217,7 +217,7 @@ export default function LandMarketplace() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

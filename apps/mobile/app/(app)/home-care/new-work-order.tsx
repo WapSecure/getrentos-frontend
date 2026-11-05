@@ -8,6 +8,7 @@ import {
   Card,
   Chip,
   DateField,
+  Divider,
   FormAlert,
   NumberField,
   SegmentedControl,
@@ -27,7 +28,7 @@ import {
   type Category,
   type Priority,
 } from '@/lib/api/homeCare';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -256,22 +257,15 @@ export default function NewWorkOrder() {
         </Section>
 
         {create.error ? (
-          <FormAlert
-            message={
-              create.error instanceof ApiError
-                ? create.error.message
-                : 'Could not create the work order.'
-            }
-          />
+          <FormAlert message={errorMessage(create.error, 'Could not create the work order.')} />
         ) : null}
       </ScrollView>
+      <Divider />
       <View
         style={{
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.md,
           paddingBottom: insets.bottom + spacing.md,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
           backgroundColor: colors.card,
         }}
       >

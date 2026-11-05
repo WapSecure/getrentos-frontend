@@ -25,10 +25,10 @@ import {
   Chip,
   DetailSkeleton,
   Divider,
-  ErrorState,
   FormAlert,
   NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -44,7 +44,7 @@ import {
   type DisputeCategory,
   type HostBooking,
 } from '@/lib/api/hostShortlets';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -54,7 +54,6 @@ import { goBack } from '@/lib/goBack';
 
 type Panel = 'cancel' | 'claim' | 'dispute' | 'review' | null;
 
-const errText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
 
 export default function HostBookingDetail() {
@@ -89,7 +88,7 @@ export default function HostBookingDetail() {
     },
     onError: (e) => {
       void haptics.error();
-      toast.show(errText(e, 'That didn’t go through.'), 'error');
+      toast.show(errorMessage(e, 'That didn’t go through.'), 'error');
     },
   });
 
@@ -122,57 +121,56 @@ export default function HostBookingDetail() {
           subtitle={b?.propertyTitle}
           onBack={() => goBack()}
         />
-        {query.isError && !b ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !b ? (
-          <DetailSkeleton />
-        ) : (
-          <>
-            <StayHero b={b} />
-            {b.status === 'CANCELLED' || b.status === 'DECLINED' ? <Ended b={b} /> : null}
-            {b.guestSummary ? <GuestCard b={b} /> : null}
-            {b.notes ? (
-              <Card elevated style={{ gap: spacing.xs }}>
-                <Text variant="caption" color="mutedForeground">
-                  Message from {b.guestName ?? 'the guest'}
-                </Text>
-                <Text variant="body">“{b.notes}”</Text>
-              </Card>
-            ) : null}
-            <MoneyCard b={b} />
-            <MoreActions b={b} onPanel={setPanel} />
-          </>
-        )}
+        <QueryState query={query} skeleton={<DetailSkeleton />}>
+          {b ? (
+            <>
+              <StayHero b={b} />
+              {b.status === 'CANCELLED' || b.status === 'DECLINED' ? <Ended b={b} /> : null}
+              {b.guestSummary ? <GuestCard b={b} /> : null}
+              {b.notes ? (
+                <Card elevated style={{ gap: spacing.xs }}>
+                  <Text variant="caption" color="mutedForeground">
+                    Message from {b.guestName ?? 'the guest'}
+                  </Text>
+                  <Text variant="body">“{b.notes}”</Text>
+                </Card>
+              ) : null}
+              <MoneyCard b={b} />
+              <MoreActions b={b} onPanel={setPanel} />
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
 
       {b?.status === 'REQUESTED' ? (
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: spacing.sm,
-            paddingHorizontal: spacing.xl,
-            paddingTop: spacing.md,
-            paddingBottom: insets.bottom + spacing.md,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-            backgroundColor: colors.card,
-          }}
-        >
-          <Button
-            label="Decline"
-            variant="secondary"
-            style={{ flex: 1 }}
-            disabled={decide.isPending}
-            onPress={confirmDecline}
-          />
-          <Button
-            label="Approve"
-            style={{ flex: 2 }}
-            loading={decide.isPending && decide.variables === 'approve'}
-            disabled={decide.isPending}
-            onPress={() => decide.mutate('approve')}
-          />
-        </View>
+        <>
+          <Divider />
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: spacing.sm,
+              paddingHorizontal: spacing.xl,
+              paddingTop: spacing.md,
+              paddingBottom: insets.bottom + spacing.md,
+              backgroundColor: colors.card,
+            }}
+          >
+            <Button
+              label="Decline"
+              variant="secondary"
+              style={{ flex: 1 }}
+              disabled={decide.isPending}
+              onPress={confirmDecline}
+            />
+            <Button
+              label="Approve"
+              style={{ flex: 2 }}
+              loading={decide.isPending && decide.variables === 'approve'}
+              disabled={decide.isPending}
+              onPress={() => decide.mutate('approve')}
+            />
+          </View>
+        </>
       ) : null}
 
       <Sheet
@@ -532,7 +530,7 @@ function CancelForm({ b, onDone }: { b: HostBooking; onDone: (next: HostBooking)
           <Skeleton height={90} radius={radius.md} />
         ) : !p ? (
           <FormAlert
-            message={errText(preview.error, 'Could not work out what cancelling would cost.')}
+            message={errorMessage(preview.error, 'Could not work out what cancelling would cost.')}
           />
         ) : !p.canCancel ? (
           <FormAlert message={p.blockedReason ?? 'This stay can’t be cancelled now.'} />
@@ -575,7 +573,7 @@ function CancelForm({ b, onDone }: { b: HostBooking; onDone: (next: HostBooking)
               hint="At least 10 characters. The guest sees this."
             />
             {cancel.error ? (
-              <FormAlert message={errText(cancel.error, 'Could not cancel.')} />
+              <FormAlert message={errorMessage(cancel.error, 'Could not cancel.')} />
             ) : null}
             <Button
               label="Cancel the stay"
@@ -631,7 +629,7 @@ function ClaimForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
           hint="Be specific: which item, what condition, what it costs to fix."
         />
         {claim.error ? (
-          <FormAlert message={errText(claim.error, 'Could not file the claim.')} />
+          <FormAlert message={errorMessage(claim.error, 'Could not file the claim.')} />
         ) : null}
         <Button
           label="File claim"
@@ -694,7 +692,9 @@ function DisputeForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
           maxLength={2000}
           hint="Dates, what you saw, and what you’d like done."
         />
-        {open.error ? <FormAlert message={errText(open.error, 'Could not report it.')} /> : null}
+        {open.error ? (
+          <FormAlert message={errorMessage(open.error, 'Could not report it.')} />
+        ) : null}
         <Button
           label="Send to support"
           disabled={title.trim().length < 5 || description.trim().length < 20}
@@ -755,7 +755,7 @@ function ReviewForm({ b, onDone }: { b: HostBooking; onDone: () => void }) {
           multiline
           maxLength={1000}
         />
-        {send.error ? <FormAlert message={errText(send.error, 'Could not send it.')} /> : null}
+        {send.error ? <FormAlert message={errorMessage(send.error, 'Could not send it.')} /> : null}
         <Button
           label="Submit rating"
           disabled={!rating}

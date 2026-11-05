@@ -7,8 +7,7 @@ import { Clock, MapPin, Repeat, Siren } from 'lucide-react-native';
 import {
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
+  QueryState,
   SectionHeader,
   SegmentedControl,
   Skeleton,
@@ -86,6 +85,8 @@ export default function EstateDwell() {
   const refusal = planRefusal(board.error) ?? planRefusal(report.error);
 
   const rows = (report.data?.authorisations ?? []).filter((r) => !onlyUsed || r.visits > 0);
+  const b = board.data;
+  const dwell = report.data;
 
   return (
     <ScrollView
@@ -127,43 +128,44 @@ export default function EstateDwell() {
         <>
           <View style={{ gap: spacing.md }}>
             <SectionHeader title="Still inside" />
-            {board.isError && !board.data ? (
-              <ErrorState onRetry={() => board.refetch()} />
-            ) : !board.data ? (
-              <Skeleton height={180} radius={radius.lg} />
-            ) : !board.data.entries.length ? (
-              <EmptyState
-                icon={<Clock size={34} color={colors.mutedForeground} />}
-                title="Nobody is recorded as inside"
-                description="Every visitor the gate let in has been logged out."
-              />
-            ) : (
-              <>
-                <Card elevated style={{ gap: spacing.md }}>
-                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                    <StatTile value={board.data.tally.open} label="Inside" />
-                    <StatTile
-                      value={board.data.tally.overstaying}
-                      label="Past the hours set"
-                      tone={board.data.tally.overstaying ? 'danger' : 'muted'}
-                    />
-                  </View>
-                  <Text variant="callout">{board.data.tally.label}</Text>
+            <QueryState
+              query={board}
+              skeleton={<Skeleton height={180} radius={radius.lg} />}
+              isEmpty={!b?.entries.length}
+              empty={{
+                icon: <Clock size={34} color={colors.mutedForeground} />,
+                title: 'Nobody is recorded as inside',
+                description: 'Every visitor the gate let in has been logged out.',
+              }}
+            >
+              {b ? (
+                <>
+                  <Card elevated style={{ gap: spacing.md }}>
+                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                      <StatTile value={b.tally.open} label="Inside" />
+                      <StatTile
+                        value={b.tally.overstaying}
+                        label="Past the hours set"
+                        tone={b.tally.overstaying ? 'danger' : 'muted'}
+                      />
+                    </View>
+                    <Text variant="callout">{b.tally.label}</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      The office is told once when a visit runs more than {b.graceMinutes} minutes
+                      past the hours the estate set for a regular visitor. Visits with no end time
+                      are listed but nobody is notified.
+                    </Text>
+                  </Card>
+                  {onSiteOrder(b.entries).map((e) => (
+                    <OnSiteCard key={e.passId} entry={e} />
+                  ))}
                   <Text variant="caption" color="mutedForeground">
-                    The office is told once when a visit runs more than {board.data.graceMinutes}{' '}
-                    minutes past the hours the estate set for a regular visitor. Visits with no end
-                    time are listed but nobody is notified.
+                    Counted at {formatTime(b.asOf)}. If somebody left but is still listed, it’s
+                    their exit that wasn’t logged at the gate.
                   </Text>
-                </Card>
-                {onSiteOrder(board.data.entries).map((e) => (
-                  <OnSiteCard key={e.passId} entry={e} />
-                ))}
-                <Text variant="caption" color="mutedForeground">
-                  Counted at {formatTime(board.data.asOf)}. If somebody left but is still listed,
-                  it’s their exit that wasn’t logged at the gate.
-                </Text>
-              </>
-            )}
+                </>
+              ) : null}
+            </QueryState>
           </View>
 
           <View style={{ gap: spacing.md }}>
@@ -194,41 +196,43 @@ export default function EstateDwell() {
                 { value: 'visits', label: 'Most visits' },
               ]}
             />
-            {report.isError && !report.data ? (
-              <ErrorState onRetry={() => report.refetch()} />
-            ) : !report.data ? (
-              <Skeleton height={160} radius={radius.lg} />
-            ) : !report.data.authorisations.length ? (
-              <EmptyState
-                icon={<Repeat size={34} color={colors.mutedForeground} />}
-                title="No regular visitors yet"
-                description="Authorise a cleaner, driver or contractor under Regular visitors and their visits are measured here."
-              />
-            ) : (
-              <>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                    {formatDate(report.data.from, 'short')} to {formatDate(report.data.to, 'short')}
+            <QueryState
+              query={report}
+              skeleton={<Skeleton height={160} radius={radius.lg} />}
+              isEmpty={!dwell?.authorisations.length}
+              empty={{
+                icon: <Repeat size={34} color={colors.mutedForeground} />,
+                title: 'No regular visitors yet',
+                description:
+                  'Authorise a cleaner, driver or contractor under Regular visitors and their visits are measured here.',
+              }}
+            >
+              {dwell ? (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                      {formatDate(dwell.from, 'short')} to {formatDate(dwell.to, 'short')}
+                    </Text>
+                    <Chip
+                      size="sm"
+                      label="Only ones used"
+                      selected={onlyUsed}
+                      onPress={() => setOnlyUsed((v) => !v)}
+                    />
+                  </View>
+                  {rows.length ? (
+                    rows.map((r) => <DwellCard key={r.contractorPassId} row={r} />)
+                  ) : (
+                    <Text variant="callout" color="mutedForeground">
+                      Nobody was let in on a regular-visitor code in this period.
+                    </Text>
+                  )}
+                  <Text variant="caption" color="mutedForeground">
+                    Averages cover finished visits only. A visit still open has no length yet.
                   </Text>
-                  <Chip
-                    size="sm"
-                    label="Only ones used"
-                    selected={onlyUsed}
-                    onPress={() => setOnlyUsed((v) => !v)}
-                  />
-                </View>
-                {rows.length ? (
-                  rows.map((r) => <DwellCard key={r.contractorPassId} row={r} />)
-                ) : (
-                  <Text variant="callout" color="mutedForeground">
-                    Nobody was let in on a regular-visitor code in this period.
-                  </Text>
-                )}
-                <Text variant="caption" color="mutedForeground">
-                  Averages cover finished visits only. A visit still open has no length yet.
-                </Text>
-              </>
-            )}
+                </>
+              ) : null}
+            </QueryState>
           </View>
         </>
       )}
