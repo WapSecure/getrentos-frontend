@@ -94,42 +94,46 @@ export default function EstateHome() {
   };
 
   const header = (
-    <Pressable
-      onPress={() => setSheet('switch')}
+    <DashboardHeader
+      eyebrow="Estate office"
+      title={estate?.name ?? 'Estate management'}
+      roleBadge="EM"
+      subtitle={
+        estate
+          ? `${[estate.city, estate.state].filter(Boolean).join(', ')} · ${estate.householdCount} ${estate.householdCount === 1 ? 'household' : 'households'}`
+          : 'Community operations'
+      }
       // Always openable once there is an estate: the sheet also adds another.
-      disabled={!estate}
-      accessibilityRole={estate ? 'button' : undefined}
-      accessibilityLabel={
+      onTitlePress={estate ? () => setSheet('switch') : undefined}
+      titleAccessibilityLabel={
         estate
           ? `${estate.name}. ${estates.length > 1 ? 'Switch estate' : 'Your estates'}`
-          : 'Estate management'
+          : undefined
       }
-    >
-      <DashboardHeader
-        eyebrow="Estate office"
-        title={estate?.name ?? 'Estate management'}
-        roleBadge="EM"
-        subtitle={
-          estate
-            ? `${[estate.city, estate.state].filter(Boolean).join(', ')} · ${estate.householdCount} ${estate.householdCount === 1 ? 'household' : 'households'}`
-            : 'Community operations'
-        }
-        accessory={
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            {estateId ? (
-              <IconButton
-                onPress={() =>
-                  router.push({ pathname: '/(app)/ask', params: { persona: 'estate', estateId } })
-                }
-                accessibilityLabel="Ask GetRentos"
-                icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
-              />
-            ) : null}
-            {estates.length > 1 ? <ChevronDown size={20} color={colors.mutedForeground} /> : null}
-          </View>
-        }
-      />
-    </Pressable>
+      accessory={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          {estateId ? (
+            <IconButton
+              onPress={() =>
+                router.push({ pathname: '/(app)/ask', params: { persona: 'estate', estateId } })
+              }
+              accessibilityLabel="Ask GetRentos"
+              icon={<MessageCircleQuestion size={21} color={colors.foreground} />}
+            />
+          ) : null}
+          {estates.length > 1 ? (
+            <Pressable
+              onPress={() => setSheet('switch')}
+              accessibilityRole="button"
+              accessibilityLabel="Switch estate"
+              hitSlop={8}
+            >
+              <ChevronDown size={20} color={colors.mutedForeground} />
+            </Pressable>
+          ) : null}
+        </View>
+      }
+    />
   );
 
   if (isError) {
