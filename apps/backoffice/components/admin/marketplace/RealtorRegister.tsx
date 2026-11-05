@@ -29,6 +29,7 @@ import {
   SearchInput,
   Select,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { cn, humaniseEnum } from '@getrentos/shared';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
@@ -95,22 +96,20 @@ export const RealtorRegister = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Realtors</h1>
-          <p className="mt-1 text-muted-foreground">
-            Professional register: licenses, business settings, payout readiness, deals and reviews.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          isLoading={exporting}
-          loadingText="Exporting…"
-        >
-          Export CSV
-        </Button>
-      </div>
+      <PageHeader
+        title="Realtors"
+        description="Professional register: licenses, business settings, payout readiness, deals and reviews."
+        actions={
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            isLoading={exporting}
+            loadingText="Exporting…"
+          >
+            Export CSV
+          </Button>
+        }
+      />
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { Badge, EmptyState, QueryState } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState, PageHeader } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -30,14 +30,10 @@ export default function AdminLandFraudPage() {
   }
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Land fraud signals</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Title or survey files reused from other properties, payout accounts shared between
-          sellers, and bank details changed while land money waits. A signal is a reason to look,
-          not a verdict. Critical signals hold up approval until cleared; high ones once confirmed.
-        </p>
-      </div>
+      <PageHeader
+        title="Land fraud signals"
+        description="Title or survey files reused from other properties, payout accounts shared between sellers, and bank details changed while land money waits. A signal is a reason to look, not a verdict. Critical signals hold up approval until cleared; high ones once confirmed."
+      />
       <QueryState
         isLoading={query.isLoading}
         isError={query.isError && !query.data}

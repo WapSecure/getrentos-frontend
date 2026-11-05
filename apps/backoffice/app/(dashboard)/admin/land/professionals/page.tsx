@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { BadgeCheck, CircleAlert, ClipboardCheck } from 'lucide-react';
-import { Badge, EmptyState, Select } from '@getrentos/ui';
+import { Badge, EmptyState, Select, PageHeader } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -59,22 +59,18 @@ export default function AdminLandProfessionalsPage() {
   const items = query.data ?? [];
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="type-title">Land professionals</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Surveyors, lawyers, valuers and inspectors. Check each licence against the
-            regulator&apos;s register before accrediting; only accredited professionals covering a
-            parcel&apos;s state can be engaged on it.
-          </p>
-        </div>
-        <Link
-          href="/admin/land/professionals/audits"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-        >
-          <ClipboardCheck className="h-4 w-4" aria-hidden /> Review audits
-        </Link>
-      </div>
+      <PageHeader
+        title="Land professionals"
+        description="Surveyors, lawyers, valuers and inspectors. Check each licence against the regulator's register before accrediting; only accredited professionals covering a parcel's state can be engaged on it."
+        actions={
+          <Link
+            href="/admin/land/professionals/audits"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+          >
+            <ClipboardCheck className="h-4 w-4" aria-hidden /> Review audits
+          </Link>
+        }
+      />
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="w-48">
           <Select

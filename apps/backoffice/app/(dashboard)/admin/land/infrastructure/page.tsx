@@ -11,6 +11,7 @@ import {
   EmptyState,
   Toast,
   type ToastVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
@@ -113,13 +114,10 @@ export default function AdminLandInfrastructurePage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Estate infrastructure</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Developers&apos; delivery claims waiting for a check, and changes to promises that buyers
-          objected to. Nothing shows as verified, and no objected change applies, until you decide.
-        </p>
-      </div>
+      <PageHeader
+        title="Estate infrastructure"
+        description="Developers' delivery claims waiting for a check, and changes to promises that buyers objected to. Nothing shows as verified, and no objected change applies, until you decide."
+      />
       {query.isLoading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
       ) : commitments.length === 0 && orders.length === 0 ? (

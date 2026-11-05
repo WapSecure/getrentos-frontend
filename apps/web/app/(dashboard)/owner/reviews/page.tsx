@@ -3,7 +3,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Star, MessageCircle, ShieldCheck, Clock } from 'lucide-react';
-import { Pagination, EmptyState, ListSkeleton, PageErrorState } from '@getrentos/ui';
+import { Pagination, EmptyState, ListSkeleton, PageErrorState, PageHeader } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ownerService, type OwnerReview } from '@/services/ownerService';
 import { ownerKeys } from '@/lib/queryKeys';
@@ -52,10 +52,10 @@ export default function OwnerReviewsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reviews & Reputation</h1>
-        <p className="text-muted-foreground mt-1">See how buyers rate their experience with you</p>
-      </div>
+      <PageHeader
+        title="Reviews & Reputation"
+        description="See how buyers rate their experience with you"
+      />
 
       <div className="grid lg:grid-cols-3 gap-6 mb-6">
         <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center">

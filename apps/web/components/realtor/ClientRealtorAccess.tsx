@@ -12,6 +12,7 @@ import {
   SearchInput,
   Skeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
@@ -114,12 +115,10 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
   return (
     <>
       {showHeader && (
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Realtor access</h1>
-          <p className="mt-1 text-muted-foreground">
-            Approve representatives and choose exactly which properties they may manage.
-          </p>
-        </div>
+        <PageHeader
+          title="Realtor access"
+          description="Approve representatives and choose exactly which properties they may manage."
+        />
       )}
       <div className="mb-6 max-w-md">
         <SearchInput

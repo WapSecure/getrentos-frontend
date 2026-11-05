@@ -7,6 +7,7 @@ import {
   Alert,
   SearchInput,
   useOptimisticMutation,
+  PageHeader,
 } from '@getrentos/ui';
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -131,17 +132,19 @@ export default function LandlordVendorsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Vendors</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Vendors"
+        description={
+          <>
             {total} vendor{total === 1 ? '' : 's'} in your directory
-          </p>
-        </div>
-        <Button variant="primary" onClick={openAddForm} icon={<Plus className="w-4 h-4" />}>
-          Add vendor
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button variant="primary" onClick={openAddForm} icon={<Plus className="w-4 h-4" />}>
+            Add vendor
+          </Button>
+        }
+      />
 
       {notice && (
         <Alert variant="warning" className="mb-4" onDismiss={() => setNotice(null)}>

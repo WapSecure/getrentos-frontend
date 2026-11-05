@@ -8,6 +8,7 @@ import {
   SearchInput,
   Skeleton,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -149,16 +150,18 @@ export default function LandlordOffersPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Offers</h1>
-        <div className="text-muted-foreground mt-1">
-          {isLoading || (isError && !data) ? (
-            <Skeleton className="h-5 w-48" />
-          ) : (
-            `${total} offer${total === 1 ? '' : 's'} across your sale listings`
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Offers"
+        description={
+          <>
+            {isLoading || (isError && !data) ? (
+              <Skeleton className="h-5 w-48" />
+            ) : (
+              `${total} offer${total === 1 ? '' : 's'} across your sale listings`
+            )}
+          </>
+        }
+      />
 
       <OfferComparisonPanel />
 

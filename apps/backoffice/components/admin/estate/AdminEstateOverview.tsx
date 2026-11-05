@@ -28,6 +28,7 @@ import {
   StatCard,
   StatGridSkeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap, formatCurrency } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
@@ -160,21 +161,12 @@ export const AdminEstateOverview = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-            <Landmark className="h-3 w-3" />
-            Estate administration
-          </span>
-          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
-            Estates, households &amp; community ops
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Platform-wide gated communities: households, dues, incidents, polls and governance.
-          </p>
-        </div>
-        {canScan && (
-          <div className="flex flex-col items-stretch gap-1 sm:items-end">
+      <PageHeader
+        eyebrow="Estate administration"
+        title="Estates, households & community ops"
+        description="Platform-wide gated communities: households, dues, incidents, polls and governance."
+        actions={
+          canScan && (
             <Button
               type="button"
               variant="outline"
@@ -186,9 +178,9 @@ export const AdminEstateOverview = () => {
             >
               Run due scan
             </Button>
-          </div>
-        )}
-      </div>
+          )
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard

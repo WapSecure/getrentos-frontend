@@ -10,6 +10,7 @@ import {
   PageErrorState,
   PageLoadingState,
   clearSessionDraft,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   ApplicationWizard,
@@ -213,12 +214,14 @@ export default function PropertyApplyPage() {
         Back to property
       </Button>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Apply to rent</h1>
-        <p className="text-muted-foreground mt-1">
-          {property.title} · {property.location}
-        </p>
-      </div>
+      <PageHeader
+        title="Apply to rent"
+        description={
+          <>
+            {property.title} · {property.location}
+          </>
+        }
+      />
 
       <div className="max-w-2xl space-y-4">
         {identityApproved ? (

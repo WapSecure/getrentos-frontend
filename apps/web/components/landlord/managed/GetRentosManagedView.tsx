@@ -28,6 +28,7 @@ import {
   ListSkeleton,
   Select,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 
 import { landlordService } from '@/services/landlordService';
@@ -293,21 +294,23 @@ export const GetRentosManagedView = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Get your property managed</h1>
-        <p className="mt-1 text-muted-foreground">
-          Two ways to hand over the day-to-day. Either way, GetRentos holds the money and keeps the
-          record, so the property&rsquo;s history stays with you.
-        </p>
-        <p className="mt-2 text-sm">
+      <PageHeader
+        title="Get your property managed"
+        description={
+          <>
+            Two ways to hand over the day-to-day. Either way, GetRentos holds the money and keeps
+            the record, so the property&rsquo;s history stays with you.
+          </>
+        }
+        meta={
           <Link
             href="/landlord/change-manager"
             className="font-medium text-primary hover:underline"
           >
             Already managed and want to move to someone else? Change manager →
           </Link>
-        </p>
-      </div>
+        }
+      />
 
       {/* Positioning: the two routes */}
       <div className="mb-8 grid gap-4 md:grid-cols-2">

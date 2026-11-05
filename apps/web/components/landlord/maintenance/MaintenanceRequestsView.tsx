@@ -13,6 +13,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { MaintenanceRequestCard } from '@/components/landlord/maintenance/MaintenanceRequestCard';
 import { AssignVendorModal } from '@/components/landlord/maintenance/AssignVendorModal';
@@ -141,18 +142,17 @@ export function MaintenanceRequestsView() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Maintenance</h1>
-        {/* Zero is a claim about the portfolio, so wait until it has been read
-            before making it. */}
-        {isLoadingSummary ? (
-          <Skeleton className="mt-2 h-4 w-64 max-w-full" />
-        ) : summary ? (
-          <p className="text-muted-foreground mt-1">
-            {`${openCount} open ticket${openCount === 1 ? '' : 's'} across your portfolio`}
-          </p>
-        ) : null}
-      </div>
+      {/* Zero is a claim about the portfolio, so wait until it has been read
+          before making it. */}
+      <PageHeader
+        title="Maintenance"
+        description={
+          !isLoadingSummary && summary
+            ? `${openCount} open ticket${openCount === 1 ? '' : 's'} across your portfolio`
+            : null
+        }
+        meta={isLoadingSummary ? <Skeleton className="h-4 w-64 max-w-full" /> : null}
+      />
 
       <Tabs
         value={filter}

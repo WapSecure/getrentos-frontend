@@ -5,7 +5,15 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, FileText, PauseCircle, Upload } from 'lucide-react';
-import { Badge, Button, Input, Textarea, DocumentUpload, type PendingUpload } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Input,
+  Textarea,
+  DocumentUpload,
+  type PendingUpload,
+  PageHeader,
+} from '@getrentos/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { unwrap } from '@/lib/apiHelpers';
@@ -74,23 +82,27 @@ export default function LandDisputePage() {
           </p>
         ) : (
           <>
-            <header>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-mono text-2xl font-semibold text-foreground">{d.reference}</h1>
-                <Badge variant="info">{words(d.status)}</Badge>
-                {d.holdActive && (
-                  <Badge variant="warning" icon={<PauseCircle className="h-3.5 w-3.5" />}>
-                    Land on hold
-                  </Badge>
-                )}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {LAND_DISPUTE_KINDS.find((k) => k.value === d.kind)?.label ?? d.kind} ·{' '}
-                {d.propertyTitle}
-                {d.purchaseReference && ` · purchase ${d.purchaseReference}`} · opened{' '}
-                {formatDate(d.createdAt)}
-              </p>
-            </header>
+            <PageHeader
+              title={<span className="font-mono">{d.reference}</span>}
+              description={
+                <>
+                  {LAND_DISPUTE_KINDS.find((k) => k.value === d.kind)?.label ?? d.kind} ·{' '}
+                  {d.propertyTitle}
+                  {d.purchaseReference && ` · purchase ${d.purchaseReference}`} · opened{' '}
+                  {formatDate(d.createdAt)}
+                </>
+              }
+              meta={
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="info">{words(d.status)}</Badge>
+                  {d.holdActive && (
+                    <Badge variant="warning" icon={<PauseCircle className="h-3.5 w-3.5" />}>
+                      Land on hold
+                    </Badge>
+                  )}
+                </div>
+              }
+            />
 
             {message && (
               <p

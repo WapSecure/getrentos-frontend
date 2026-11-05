@@ -1,7 +1,7 @@
 'use client';
 
 import { BadgeCheck } from 'lucide-react';
-import { Alert, Card, TableSkeleton } from '@getrentos/ui';
+import { Alert, Card, TableSkeleton, PageHeader } from '@getrentos/ui';
 import { usePlanTier } from '@/hooks/usePlanTier';
 import { usePlanPricing } from '@/hooks/usePlanPricing';
 import { useProCheckout } from '@/hooks/useProCheckout';
@@ -44,10 +44,7 @@ export function BillingPage({
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-        <p className="text-muted-foreground mt-1">{description}</p>
-      </div>
+      <PageHeader title={title} description={description} />
 
       <Card className="p-6">
         <div className="flex items-center gap-3">
@@ -78,9 +75,7 @@ export function BillingPage({
             onUpgrade={upgrade}
             upgrading={isUpgrading}
           />
-          {checkout.error && !onUpgrade && (
-            <Alert variant="danger">{checkout.error}</Alert>
-          )}
+          {checkout.error && !onUpgrade && <Alert variant="danger">{checkout.error}</Alert>}
         </>
       )}
 

@@ -14,10 +14,10 @@ import {
   ListSkeleton,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   CalendarX,
-  CalendarDays,
   CreditCard,
   Gavel,
   Heart,
@@ -216,33 +216,24 @@ export const GuestBookingsWorkspace = () => {
 
   return (
     <div className="mx-auto max-w-[90rem]">
-      <header className="mb-7 rounded-2xl border border-border bg-card px-5 py-6 shadow-sm sm:px-7 sm:py-7">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                <CalendarDays className="h-4 w-4" aria-hidden="true" />
+      <PageHeader
+        eyebrow="Shortlet stays"
+        title="My shortlet bookings"
+        description="Track upcoming stays, payment status, deposits, messages, and booking requests."
+        meta={
+          guestRatingAverage != null && (
+            <span className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-warning text-warning" />
+              Your guest rating:{' '}
+              <span className="font-medium text-foreground">{guestRatingAverage.toFixed(1)}</span>
+              <span>
+                ({guestRatingCount} review{guestRatingCount === 1 ? '' : 's'})
               </span>
-              Shortlet stays
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              My shortlet bookings
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground sm:text-base">
-              Track upcoming stays, payment status, deposits, messages, and booking requests.
-            </p>
-            {guestRatingAverage != null && (
-              <p className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
-                <Star className="h-4 w-4 fill-warning text-warning" />
-                Your guest rating:{' '}
-                <span className="font-medium text-foreground">{guestRatingAverage.toFixed(1)}</span>
-                <span>
-                  ({guestRatingCount} review{guestRatingCount === 1 ? '' : 's'})
-                </span>
-              </p>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+            </span>
+          )
+        }
+        actions={
+          <>
             <Button
               variant="outline"
               size="sm"
@@ -275,9 +266,9 @@ export const GuestBookingsWorkspace = () => {
             >
               Saved
             </Button>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       {isLoading ? (
         <ListSkeleton variant="cards" rows={3} label="Loading bookings" />

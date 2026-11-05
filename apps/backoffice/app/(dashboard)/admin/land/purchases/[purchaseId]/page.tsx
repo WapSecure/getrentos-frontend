@@ -4,7 +4,15 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CircleAlert, HandCoins, RefreshCw } from 'lucide-react';
-import { Alert, Button, CardSkeleton, EmptyState, Skeleton, useToast } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  CardSkeleton,
+  EmptyState,
+  Skeleton,
+  useToast,
+  PageHeader,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -174,17 +182,17 @@ export default function AdminLandPurchaseDetailPage() {
         <ArrowLeft className="h-4 w-4" /> Land purchases
       </Link>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="type-title font-mono">{purchase.reference}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={<span className="font-mono">{purchase.reference}</span>}
+        description={
+          <>
             {purchase.layoutName} · Plot {purchase.plotNumber}
             {purchase.block && ` · Block ${purchase.block}`} ·{' '}
             {purchase.buyerName ?? 'Unknown buyer'} · {purchase.planName}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <LandPurchaseStatusBadge status={purchase.status} />
+          </>
+        }
+        meta={<LandPurchaseStatusBadge status={purchase.status} />}
+        actions={
           <Button
             variant="outline"
             size="sm"
@@ -194,8 +202,8 @@ export default function AdminLandPurchaseDetailPage() {
           >
             Reload
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="space-y-5">
         {terminated && (

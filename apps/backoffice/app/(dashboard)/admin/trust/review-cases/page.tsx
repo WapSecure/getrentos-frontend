@@ -5,7 +5,14 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Fingerprint } from 'lucide-react';
 import { ReviewCaseCard } from '@/components/admin/trust/ReviewCaseCard';
 import { ReviewCaseModal } from '@/components/admin/trust/ReviewCaseModal';
-import { CardSkeleton, EmptyState, PageErrorState, Pagination, Select } from '@getrentos/ui';
+import {
+  CardSkeleton,
+  EmptyState,
+  PageErrorState,
+  Pagination,
+  Select,
+  PageHeader,
+} from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { trustService } from '@/services/trustService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -66,16 +73,10 @@ export default function TrustReviewCasesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Fingerprint className="h-6 w-6 text-primary" />
-          Trust Review Cases
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Verifications flagged for a human decision. Blocking decisions (reject / restrict) are
-          four-eyes: they need a second officer.
-        </p>
-      </div>
+      <PageHeader
+        title="Trust Review Cases"
+        description="Verifications flagged for a human decision. Blocking decisions (reject / restrict) are four-eyes: they need a second officer."
+      />
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row">
         <Select

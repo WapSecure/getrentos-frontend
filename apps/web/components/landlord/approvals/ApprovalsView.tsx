@@ -16,6 +16,7 @@ import {
   TabsTrigger,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   spendApprovalService,
@@ -91,12 +92,10 @@ export function ApprovalsView() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Approvals</h1>
-        <p className="mt-1 text-muted-foreground">
-          Spend your manager wants to make above your approval limit.
-        </p>
-      </div>
+      <PageHeader
+        title="Approvals"
+        description="Spend your manager wants to make above your approval limit."
+      />
 
       <MandateCountersignSection />
 

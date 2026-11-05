@@ -13,6 +13,7 @@ import {
   SearchInput,
   Select,
   type Column,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
@@ -188,30 +189,22 @@ export default function AdminLandPurchasesPage() {
 
   return (
     <>
-      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-accent p-2.5 text-primary">
-            <FileSignature className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="type-title">Land purchases</h1>
-            <p className="mt-1 max-w-2xl text-muted-foreground">
-              Every developer plot purchase: what buyers have paid, what is overdue, conveyance
-              progress, and what is owed back on revoked or cancelled contracts.
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          isLoading={isFetching && !isLoading}
-          icon={<RefreshCw className="h-4 w-4" />}
-        >
-          Refresh
-        </Button>
-      </div>
+      <PageHeader
+        title="Land purchases"
+        description="Every developer plot purchase: what buyers have paid, what is overdue, conveyance progress, and what is owed back on revoked or cancelled contracts."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            isLoading={isFetching && !isLoading}
+            icon={<RefreshCw className="h-4 w-4" />}
+          >
+            Refresh
+          </Button>
+        }
+      />
 
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="w-full max-w-lg">

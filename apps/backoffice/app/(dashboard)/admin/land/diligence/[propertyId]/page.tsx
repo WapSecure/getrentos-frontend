@@ -13,6 +13,7 @@ import {
   EmptyState,
   Skeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -137,10 +138,10 @@ export default function AdminLandDiligenceCasePage() {
         <ArrowLeft className="h-4 w-4" /> Diligence queue
       </Link>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="type-title">{detail.propertyTitle}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={detail.propertyTitle}
+        meta={
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {detail.ownerName && (
               <span className="flex items-center gap-1.5">
                 <UserRound className="h-3.5 w-3.5" /> {detail.ownerName}
@@ -151,10 +152,10 @@ export default function AdminLandDiligenceCasePage() {
                 <MapPin className="h-3.5 w-3.5" /> {location}
               </span>
             )}
+            <LandDiligenceStatusBadge status={detail.diligence.status} />
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <LandDiligenceStatusBadge status={detail.diligence.status} />
+        }
+        actions={
           <Button
             variant="outline"
             size="sm"
@@ -164,8 +165,8 @@ export default function AdminLandDiligenceCasePage() {
           >
             Reload
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="space-y-5">
         {stale && <LandStaleCaseBanner onReload={reload} isReloading={detailQuery.isFetching} />}

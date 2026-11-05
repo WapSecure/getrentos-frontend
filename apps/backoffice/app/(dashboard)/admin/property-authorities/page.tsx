@@ -17,6 +17,7 @@ import {
   Select,
   Textarea,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, type ApiResponse } from '@getrentos/shared';
 import {
@@ -163,21 +164,19 @@ export default function PropertyAuthoritiesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Property Authorities</h1>
-          <p className="text-muted-foreground mt-1">
-            People acting for a property they do not own: managers, agents, co-owners, POA holders.
-          </p>
-        </div>
-        <Field label="Status" className="w-full sm:w-56">
-          <Select
-            value={status}
-            onValueChange={(value) => setStatus(value as StatusFilter)}
-            options={STATUS_OPTIONS}
-          />
-        </Field>
-      </div>
+      <PageHeader
+        title="Property Authorities"
+        description="People acting for a property they do not own: managers, agents, co-owners, POA holders."
+        actions={
+          <Field label="Status" className="w-full sm:w-56">
+            <Select
+              value={status}
+              onValueChange={(value) => setStatus(value as StatusFilter)}
+              options={STATUS_OPTIONS}
+            />
+          </Field>
+        }
+      />
 
       {notice && (
         <Alert variant="success" onDismiss={() => setNotice(null)}>
@@ -258,9 +257,7 @@ export default function PropertyAuthoritiesPage() {
                       </p>
                     )}
                     {claim.status === 'ACTIVE' && claim.effective && (
-                      <p className="text-xs text-success">
-                        Counts for publication right now
-                      </p>
+                      <p className="text-xs text-success">Counts for publication right now</p>
                     )}
                   </div>
                 </div>

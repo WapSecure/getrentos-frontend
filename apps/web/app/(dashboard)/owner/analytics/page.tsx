@@ -16,6 +16,7 @@ import {
   DialogTitle,
   Skeleton,
   TableSkeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -81,42 +82,40 @@ export default function OwnerAnalyticsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Investment analytics</h1>
-          <p className="text-muted-foreground mt-1">
-            Performance and ROI across your property portfolio
-          </p>
-        </div>
-        {isPro && (
-          <div className="flex gap-2">
-            <Button
-              variant={isComparing ? 'primary' : 'outline'}
-              onClick={() => setIsComparing((v) => !v)}
-              aria-pressed={isComparing}
-              icon={<BarChart3 className="w-4 h-4" />}
-            >
-              Compare
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setExported(true);
-                window.setTimeout(() => setExported(false), 2500);
-              }}
-              icon={
-                exported ? (
-                  <Check className="w-4 h-4 text-success" />
-                ) : (
-                  <Download className="w-4 h-4" />
-                )
-              }
-            >
-              {exported ? 'Exported' : 'Export'}
-            </Button>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Investment analytics"
+        description="Performance and ROI across your property portfolio"
+        actions={
+          isPro ? (
+            <div className="flex gap-2">
+              <Button
+                variant={isComparing ? 'primary' : 'outline'}
+                onClick={() => setIsComparing((v) => !v)}
+                aria-pressed={isComparing}
+                icon={<BarChart3 className="w-4 h-4" />}
+              >
+                Compare
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setExported(true);
+                  window.setTimeout(() => setExported(false), 2500);
+                }}
+                icon={
+                  exported ? (
+                    <Check className="w-4 h-4 text-success" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )
+                }
+              >
+                {exported ? 'Exported' : 'Export'}
+              </Button>
+            </div>
+          ) : undefined
+        }
+      />
 
       <ProFeatureGate
         title="Investment analytics is a Pro feature"

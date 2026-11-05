@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, FileCheck2 } from 'lucide-react';
-import { Badge, EmptyState, QueryState } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState, PageHeader } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -30,13 +30,10 @@ export default function AdminLandPerfectionPage() {
   const items = query.data ?? [];
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Title perfection</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Completed plot sales whose title is not yet registered in the buyer&apos;s name.
-          Exceptions (a rejected step, or one more than 30 days late) come first.
-        </p>
-      </div>
+      <PageHeader
+        title="Title perfection"
+        description="Completed plot sales whose title is not yet registered in the buyer's name. Exceptions (a rejected step, or one more than 30 days late) come first."
+      />
       <QueryState
         isLoading={query.isLoading}
         isError={query.isError && !query.data}

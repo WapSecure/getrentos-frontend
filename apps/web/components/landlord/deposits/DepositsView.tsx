@@ -13,6 +13,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { DepositCard } from '@/components/landlord/deposits/DepositCard';
 import { RecordDepositModal } from '@/components/landlord/deposits/RecordDepositModal';
@@ -82,18 +83,16 @@ export function DepositsView() {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Deposits</h1>
-          <p className="mt-1 text-muted-foreground">
-            Hold, deduct against, and return tenant security deposits.
-          </p>
-        </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsRecordOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Record deposit
-        </Button>
-      </div>
+      <PageHeader
+        title="Deposits"
+        description="Hold, deduct against, and return tenant security deposits."
+        actions={
+          <Button variant="primary" className="gap-2" onClick={() => setIsRecordOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Record deposit
+          </Button>
+        }
+      />
 
       <Tabs
         value={filter}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Badge } from '@getrentos/ui';
+import { Badge, PageHeader } from '@getrentos/ui';
 import { Footer } from '@/components/layout/Footer';
 import { Navigation } from '@/components/layout/Navigation';
 import { unwrap } from '@/lib/apiHelpers';
@@ -23,10 +23,10 @@ export default function MyLandDisputesPage() {
     <>
       <Navigation />
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-24">
-        <h1 className="text-2xl font-semibold text-foreground">Land disputes</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Cases you raised, cases about your land, and cases on your plot purchases.
-        </p>
+        <PageHeader
+          title="Land disputes"
+          description="Cases you raised, cases about your land, and cases on your plot purchases."
+        />
         {query.isLoading ? (
           <div className="mt-6 h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
         ) : query.isError ? (

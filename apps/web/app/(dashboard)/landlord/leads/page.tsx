@@ -14,6 +14,7 @@ import {
   SearchInput,
   ToggleChip,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { LeadCard } from '@/components/landlord/leads/LeadCard';
 import { ConfirmViewingModal } from '@/components/landlord/leads/ConfirmViewingModal';
@@ -158,12 +159,14 @@ export default function LandlordLeadsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Leads</h1>
-        <p className="text-muted-foreground mt-1">
-          {total} lead{total === 1 ? '' : 's'} across your properties
-        </p>
-      </div>
+      <PageHeader
+        title="Leads"
+        description={
+          <>
+            {total} lead{total === 1 ? '' : 's'} across your properties
+          </>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <SearchInput

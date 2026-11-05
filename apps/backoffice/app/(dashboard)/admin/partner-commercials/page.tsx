@@ -14,6 +14,7 @@ import {
   NumberInput,
   PageErrorState,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, unwrap } from '@getrentos/shared';
 import {
@@ -66,16 +67,10 @@ export default function PartnerCommercialsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          Partner commercials
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          For GetRentos-managed engagements handed to a delivery partner, set the partner&rsquo;s
-          share of the management fee. The platform keeps the rest. The split is recorded when each
-          owner statement is issued.
-        </p>
-      </div>
+      <PageHeader
+        title="Partner commercials"
+        description="For GetRentos-managed engagements handed to a delivery partner, set the partner’s share of the management fee. The platform keeps the rest. The split is recorded when each owner statement is issued."
+      />
 
       {isLoading ? (
         <ListSkeleton variant="cards" rows={3} />

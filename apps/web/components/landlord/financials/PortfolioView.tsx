@@ -12,6 +12,7 @@ import {
   StatCard,
   StatGridSkeleton,
   TableSkeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { PropertyValueModal } from '@/components/landlord/properties/PropertyValueModal';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
@@ -280,13 +281,15 @@ export function PortfolioView() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Portfolio</h1>
-        <p className="text-muted-foreground mt-1">
-          How each property earns, side by side. Figures cover the last{' '}
-          {summary?.windowMonths ?? 12} months.
-        </p>
-      </div>
+      <PageHeader
+        title="Portfolio"
+        description={
+          <>
+            How each property earns, side by side. Figures cover the last{' '}
+            {summary?.windowMonths ?? 12} months.
+          </>
+        }
+      />
 
       <ProFeatureGate
         title="Portfolio analytics is a Pro feature"

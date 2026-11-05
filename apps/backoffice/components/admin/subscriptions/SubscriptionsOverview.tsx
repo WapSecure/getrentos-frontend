@@ -16,6 +16,7 @@ import {
   StatGridSkeleton,
   TableSkeleton,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminSubscriptionService } from '@/services/adminSubscriptionService';
@@ -95,12 +96,10 @@ export const SubscriptionsOverview = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Subscriptions</h1>
-        <p className="text-muted-foreground mt-1">
-          Pro plan lifecycle: trials, renewals, failed payments and cancellations.
-        </p>
-      </div>
+      <PageHeader
+        title="Subscriptions"
+        description="Pro plan lifecycle: trials, renewals, failed payments and cancellations."
+      />
 
       {overview.isLoading ? (
         <StatGridSkeleton />

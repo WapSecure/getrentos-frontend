@@ -17,6 +17,7 @@ import {
   TabsList,
   TabsTrigger,
   type Column,
+  PageHeader,
 } from '@getrentos/ui';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
 import { EmptyState } from '@getrentos/ui';
@@ -140,12 +141,10 @@ export default function AdminAuditLogsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Audit Logs</h1>
-        <p className="text-muted-foreground mt-1">
-          A record of sensitive actions taken across the platform
-        </p>
-      </div>
+      <PageHeader
+        title="Audit Logs"
+        description="A record of sensitive actions taken across the platform"
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <SearchInput

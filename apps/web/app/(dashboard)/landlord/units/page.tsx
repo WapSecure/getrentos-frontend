@@ -1,6 +1,14 @@
 'use client';
 
-import { Button, EmptyState, Pagination, SearchInput, Select, useToast } from '@getrentos/ui';
+import {
+  Button,
+  EmptyState,
+  Pagination,
+  SearchInput,
+  Select,
+  useToast,
+  PageHeader,
+} from '@getrentos/ui';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -199,41 +207,43 @@ function LandlordUnitsPageContent() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Units</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Units"
+        description={
+          <>
             {pluralize(totalUnits, 'unit')} across{' '}
             {pluralize(totalProperties, 'property', 'properties')}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsBulkPricingOpen(true)}
-            disabled={totalUnits === 0}
-            icon={<Tag className="w-4 h-4" />}
-          >
-            Bulk pricing
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsBulkChargeOpen(true)}
-            disabled={totalUnits === 0}
-            icon={<ReceiptText className="w-4 h-4" />}
-          >
-            Bulk charge
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => setIsAddModalOpen(true)}
-            disabled={properties.length === 0}
-            icon={<Plus className="w-4 h-4" />}
-          >
-            Add unit
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setIsBulkPricingOpen(true)}
+              disabled={totalUnits === 0}
+              icon={<Tag className="w-4 h-4" />}
+            >
+              Bulk pricing
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsBulkChargeOpen(true)}
+              disabled={totalUnits === 0}
+              icon={<ReceiptText className="w-4 h-4" />}
+            >
+              Bulk charge
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setIsAddModalOpen(true)}
+              disabled={properties.length === 0}
+              icon={<Plus className="w-4 h-4" />}
+            >
+              Add unit
+            </Button>
+          </>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

@@ -12,6 +12,7 @@ import {
   SearchInput,
   Select,
   type Column,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import type { ApiResponse } from '@getrentos/shared';
@@ -48,7 +49,6 @@ export function EstateQueuePage<T>({ config }: { config: EstateQueueConfig<T> })
   const [filters, setFilters] = useState<Record<string, string>>(() =>
     Object.fromEntries((config.filters ?? []).map((filter) => [filter.key, 'all']))
   );
-  const Icon = config.icon;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -114,45 +114,38 @@ export function EstateQueuePage<T>({ config }: { config: EstateQueueConfig<T> })
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-            <Icon className="h-3 w-3" aria-hidden="true" />
-            {config.eyebrow}
-          </span>
-          <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
-            {config.title}
-          </h1>
-          {config.description && (
-            <p className="mt-1 max-w-xl text-sm text-muted-foreground">{config.description}</p>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchInput
-            value={search}
-            onValueChange={setSearch}
-            placeholder="Search…"
-            label={`Search ${config.eyebrow.toLowerCase()}`}
-            className="w-full sm:w-56"
-          />
-          {config.filters?.map((filter) => (
-            <div key={filter.key} className="w-full sm:w-44">
-              <Select
-                value={filters[filter.key]}
-                onValueChange={(value) => {
-                  setFilters((prev) => ({ ...prev, [filter.key]: value }));
-                  setPage(1);
-                }}
-                options={[
-                  { value: 'all', label: `All ${filter.label.toLowerCase()}` },
-                  ...filter.options,
-                ]}
-                ariaLabel={filter.label}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        eyebrow={config.eyebrow}
+        title={config.title}
+        description={config.description}
+        actions={
+          <>
+            <SearchInput
+              value={search}
+              onValueChange={setSearch}
+              placeholder="Search…"
+              label={`Search ${config.eyebrow.toLowerCase()}`}
+              className="w-full sm:w-56"
+            />
+            {config.filters?.map((filter) => (
+              <div key={filter.key} className="w-full sm:w-44">
+                <Select
+                  value={filters[filter.key]}
+                  onValueChange={(value) => {
+                    setFilters((prev) => ({ ...prev, [filter.key]: value }));
+                    setPage(1);
+                  }}
+                  options={[
+                    { value: 'all', label: `All ${filter.label.toLowerCase()}` },
+                    ...filter.options,
+                  ]}
+                  ariaLabel={filter.label}
+                />
+              </div>
+            ))}
+          </>
+        }
+      />
 
       <DataTable<T>
         columns={columns}

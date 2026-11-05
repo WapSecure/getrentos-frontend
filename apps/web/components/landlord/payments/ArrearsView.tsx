@@ -11,6 +11,7 @@ import {
   PageErrorState,
   Pagination,
   Skeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
@@ -64,12 +65,10 @@ export function ArrearsView() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Arrears</h1>
-        <p className="text-muted-foreground mt-1">
-          Rent payments flagged overdue by the automatic arrears check, oldest first
-        </p>
-      </div>
+      <PageHeader
+        title="Arrears"
+        description="Rent payments flagged overdue by the automatic arrears check, oldest first"
+      />
 
       {summaryQuery.isLoading ? (
         <Skeleton className="mb-6 h-[86px] w-full rounded-xl" />

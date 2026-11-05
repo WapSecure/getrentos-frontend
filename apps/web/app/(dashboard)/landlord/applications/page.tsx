@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
-import { Pagination, EmptyState, ToggleChip, useToast } from '@getrentos/ui';
+import { Pagination, EmptyState, ToggleChip, useToast, PageHeader } from '@getrentos/ui';
 import { ApplicationCard } from '@/components/landlord/applications/ApplicationCard';
 import { ApplicationDetailsModal } from '@/components/landlord/applications/ApplicationDetailsModal';
 import { RequestInfoDialog } from '@/components/landlord/applications/RequestInfoDialog';
@@ -92,12 +92,14 @@ export default function LandlordApplicationsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Applications</h1>
-        <p className="text-muted-foreground mt-1">
-          {awaitingCount} application{awaitingCount === 1 ? '' : 's'} awaiting a decision
-        </p>
-      </div>
+      <PageHeader
+        title="Applications"
+        description={
+          <>
+            {awaitingCount} application{awaitingCount === 1 ? '' : 's'} awaiting a decision
+          </>
+        }
+      />
 
       <div
         className="mb-6 flex w-full max-w-full gap-2 overflow-x-auto pb-1"

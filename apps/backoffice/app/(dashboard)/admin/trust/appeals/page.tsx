@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Gavel } from 'lucide-react';
-import { CardSkeleton, EmptyState, PageErrorState } from '@getrentos/ui';
+import { CardSkeleton, EmptyState, PageErrorState, PageHeader } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { AppealCard } from '@/components/admin/trust/AppealCard';
 import { AppealResolveModal } from '@/components/admin/trust/AppealResolveModal';
@@ -22,17 +22,10 @@ export default function TrustAppealsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Gavel className="h-6 w-6 text-primary" />
-          Trust Appeals
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Subjects contesting a rejected property-authority claim or a failed verification. An
-          appeal must be resolved by someone other than the officer who made the original decision;
-          overturning it reopens the decision for re-review.
-        </p>
-      </div>
+      <PageHeader
+        title="Trust Appeals"
+        description="Subjects contesting a rejected property-authority claim or a failed verification. An appeal must be resolved by someone other than the officer who made the original decision; overturning it reopens the decision for re-review."
+      />
 
       {isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

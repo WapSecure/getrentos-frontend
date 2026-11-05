@@ -12,6 +12,7 @@ import {
   PageErrorState,
   Skeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
@@ -78,13 +79,10 @@ export const RealtorCommissionRates = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Commission split</h1>
-        <p className="mt-1 text-muted-foreground">
-          What the platform pays out of a sale that settles, split by which side of the deal a
-          realtor stood on.
-        </p>
-      </div>
+      <PageHeader
+        title="Commission split"
+        description="What the platform pays out of a sale that settles, split by which side of the deal a realtor stood on."
+      />
 
       <Card className="max-w-xl p-5">
         <div className="flex items-center gap-2">

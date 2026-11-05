@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { CircleAlert, UserCheck } from 'lucide-react';
-import { Badge, EmptyState, QueryState, Select } from '@getrentos/ui';
+import { Badge, EmptyState, QueryState, Select, PageHeader } from '@getrentos/ui';
 import {
   formatDate,
   LAND_AUTHORITY_STATUS_LABELS,
@@ -55,13 +55,10 @@ export default function AdminLandAuthorityQueuePage() {
   );
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Seller authority</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Who claims the right to sell each parcel, on what instrument, and whether everyone whose
-          consent it needs has given it. Land review cannot be approved until the claim is verified.
-        </p>
-      </div>
+      <PageHeader
+        title="Seller authority"
+        description="Who claims the right to sell each parcel, on what instrument, and whether everyone whose consent it needs has given it. Land review cannot be approved until the claim is verified."
+      />
       <div className="mb-4 w-56">
         <Select
           value={filter}

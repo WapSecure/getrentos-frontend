@@ -30,6 +30,7 @@ import {
   Select,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
@@ -82,22 +83,20 @@ export const AgentRegister = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Agents</h1>
-          <p className="mt-1 text-muted-foreground">
-            Field-agent register: clients, assigned properties, tasks, inspections and reviews.
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          isLoading={exporting}
-          loadingText="Exporting…"
-        >
-          Export CSV
-        </Button>
-      </div>
+      <PageHeader
+        title="Agents"
+        description="Field-agent register: clients, assigned properties, tasks, inspections and reviews."
+        actions={
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            isLoading={exporting}
+            loadingText="Exporting…"
+          >
+            Export CSV
+          </Button>
+        }
+      />
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">

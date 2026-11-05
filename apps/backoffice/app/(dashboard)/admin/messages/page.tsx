@@ -10,6 +10,7 @@ import {
   Pagination,
   useOptimisticMutation,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { ConversationList } from '@/components/admin/messages/ConversationList';
 import { MessageThread } from '@/components/admin/messages/MessageThread';
@@ -129,13 +130,11 @@ export default function AdminMessagesPage() {
   const activeConversation = conversations.find((c) => c.id === activeId);
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] lg:h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-1">
-          Support conversations with users across the platform
-        </p>
-      </div>
+    <div className="flex min-h-[calc(100vh-8rem)] flex-col lg:h-[calc(100vh-8rem)]">
+      <PageHeader
+        title="Messages"
+        description="Support conversations with users across the platform"
+      />
 
       {isError && !data ? (
         <PageErrorState
@@ -145,7 +144,7 @@ export default function AdminMessagesPage() {
           isRetrying={isFetching}
         />
       ) : (
-        <div className="flex min-h-[calc(100dvh-12rem)] gap-4 lg:h-[calc(100%-4.5rem)] lg:min-h-0">
+        <div className="flex min-h-[calc(100dvh-12rem)] gap-4 lg:min-h-0 lg:flex-1">
           <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
             <div className="flex flex-col gap-2">
               <ConversationList

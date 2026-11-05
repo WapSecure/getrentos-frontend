@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpenCheck, CheckCircle2, TriangleAlert } from 'lucide-react';
+import { CheckCircle2, TriangleAlert } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -12,6 +12,7 @@ import {
   TableSkeleton,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -157,29 +158,22 @@ export default function RentJournalPage() {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-            <BookOpenCheck className="h-6 w-6 text-primary" aria-hidden />
-            Rent journal
-          </h1>
-          <p className="mt-1 max-w-2xl text-muted-foreground">
-            Double-entry books for rent held by GetRentos, posted from every charge, payment,
-            credit, refund and release. Every hour they are checked against the live rent records; a
-            mismatch means money changed outside those flows.
-          </p>
-        </div>
-        {canRun && (
-          <Button
-            variant="primary"
-            isLoading={run.isPending}
-            loadingText="Checking…"
-            onClick={() => run.mutate()}
-          >
-            Run check now
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Rent journal"
+        description="Double-entry books for rent held by GetRentos, posted from every charge, payment, credit, refund and release. Every hour they are checked against the live rent records; a mismatch means money changed outside those flows."
+        actions={
+          canRun && (
+            <Button
+              variant="primary"
+              isLoading={run.isPending}
+              loadingText="Checking…"
+              onClick={() => run.mutate()}
+            >
+              Run check now
+            </Button>
+          )
+        }
+      />
 
       {check.isError && !c ? (
         <PageErrorState

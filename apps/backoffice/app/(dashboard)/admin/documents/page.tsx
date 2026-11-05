@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Upload, FolderOpen } from 'lucide-react';
-import { Button } from '@getrentos/ui';
+import { Button, PageHeader } from '@getrentos/ui';
 import {
   EmptyState,
   ListSkeleton,
@@ -120,23 +120,23 @@ export default function AdminDocumentsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Documents</h1>
-          <p className="text-muted-foreground mt-1">
-            {isError && !data
-              ? 'Platform policies, compliance filings, and legal agreements · file count unavailable'
-              : `Platform policies, compliance filings, and legal agreements · ${total} file${total === 1 ? '' : 's'}`}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Upload className="w-4 h-4" />}
-          onClick={() => setUploadOpen(true)}
-        >
-          Upload Document
-        </Button>
-      </div>
+      <PageHeader
+        title="Documents"
+        description={
+          isError && !data
+            ? 'Platform policies, compliance filings, and legal agreements · file count unavailable'
+            : `Platform policies, compliance filings, and legal agreements · ${total} file${total === 1 ? '' : 's'}`
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Upload className="w-4 h-4" />}
+            onClick={() => setUploadOpen(true)}
+          >
+            Upload Document
+          </Button>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

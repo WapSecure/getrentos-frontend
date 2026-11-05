@@ -14,6 +14,7 @@ import {
   PageErrorState,
   Skeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -101,17 +102,10 @@ export default function PayoutRunsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Landmark className="h-6 w-6 text-primary" aria-hidden />
-          Payout runs
-        </h1>
-        <p className="mt-1 max-w-2xl text-muted-foreground">
-          Pay every owner for a month at once. Drafting writes each owner&apos;s statement (fees and
-          expenses as usual); someone other than the person who drafted it issues the run, and each
-          statement then pays out, or waits for approval above the release threshold.
-        </p>
-      </div>
+      <PageHeader
+        title="Payout runs"
+        description="Pay every owner for a month at once. Drafting writes each owner's statement (fees and expenses as usual); someone other than the person who drafted it issues the run, and each statement then pays out, or waits for approval above the release threshold."
+      />
 
       {canAct && (
         <Card className="mb-6 flex flex-wrap items-end gap-3 p-5">

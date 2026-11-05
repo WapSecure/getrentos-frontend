@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   UserCheck,
 } from 'lucide-react';
-import { PageErrorState, StatGridSkeleton, Skeleton } from '@getrentos/ui';
+import { PageErrorState, StatGridSkeleton, Skeleton, PageHeader } from '@getrentos/ui';
 import { StatCard, type StatCardAccent } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminService } from '@/services/adminService';
@@ -70,13 +70,10 @@ export default function AdminAiUsagePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Automation usage &amp; controls</h1>
-        <p className="mt-1 text-muted-foreground">
-          Today&apos;s automated-check spend, volume and per-capability breakdown, with the live
-          kill-switch and budget controls. All figures reset at 00:00 UTC.
-        </p>
-      </div>
+      <PageHeader
+        title="Automation usage & controls"
+        description="Today's automated-check spend, volume and per-capability breakdown, with the live kill-switch and budget controls. All figures reset at 00:00 UTC."
+      />
 
       {/* Control state */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

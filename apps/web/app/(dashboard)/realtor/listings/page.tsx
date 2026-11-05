@@ -21,6 +21,7 @@ import {
   useToast,
   clearSessionDraft,
   hasSessionDraft,
+  PageHeader,
 } from '@getrentos/ui';
 import type { RealtorListing, RealtorListingStatus } from '@/types/realtor';
 import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
@@ -124,17 +125,19 @@ export default function RealtorListingsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Listings</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Listings"
+        description={
+          <>
             {total} listing{total === 1 ? '' : 's'} across your clients
-          </p>
-        </div>
-        <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
-          Add listing
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
+            Add listing
+          </Button>
+        }
+      />
 
       <IdentityNudge
         verificationHref={ROUTES.REALTOR_VERIFICATION}

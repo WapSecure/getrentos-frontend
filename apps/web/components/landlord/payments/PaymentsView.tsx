@@ -9,6 +9,7 @@ import {
   StatGridSkeleton,
   TableSkeleton,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { RentCollectionStats } from '@/components/landlord/payments/RentCollectionStats';
 import { PaymentsTable } from '@/components/landlord/payments/PaymentsTable';
@@ -86,12 +87,10 @@ export function PaymentsView() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Payments</h1>
-        <p className="text-muted-foreground mt-1">
-          Track rent collection and when it is paid out to you
-        </p>
-      </div>
+      <PageHeader
+        title="Payments"
+        description="Track rent collection and when it is paid out to you"
+      />
 
       {statsQuery.isLoading ? (
         <StatGridSkeleton className="mb-6 grid-cols-2" />

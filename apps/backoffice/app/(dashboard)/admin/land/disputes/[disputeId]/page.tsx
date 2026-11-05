@@ -28,6 +28,7 @@ import {
   type ToastVariant,
   DocumentUpload,
   type PendingUpload,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -168,10 +169,10 @@ export default function AdminLandDisputePage() {
         <ArrowLeft className="h-4 w-4" /> Land disputes
       </Link>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="type-title font-mono">{d.reference}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={<span className="font-mono">{d.reference}</span>}
+        description={
+          <>
             {LAND_DISPUTE_KIND_LABELS[d.kind] ?? d.kind} ·{' '}
             <Link
               href={`/admin/land/diligence/${encodeURIComponent(d.propertyId)}`}
@@ -180,15 +181,19 @@ export default function AdminLandDisputePage() {
               {d.propertyTitle}
             </Link>
             {d.purchaseReference && ` · purchase ${d.purchaseReference}`}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {d.holdActive && (
-            <Badge variant="danger" icon={<PauseCircle className="h-3.5 w-3.5" />}>
-              Land on hold
-            </Badge>
-          )}
-          <Badge variant="info">{humaniseEnum(d.status)}</Badge>
+          </>
+        }
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            {d.holdActive && (
+              <Badge variant="danger" icon={<PauseCircle className="h-3.5 w-3.5" />}>
+                Land on hold
+              </Badge>
+            )}
+            <Badge variant="info">{humaniseEnum(d.status)}</Badge>
+          </div>
+        }
+        actions={
           <Button
             variant="outline"
             size="sm"
@@ -198,8 +203,8 @@ export default function AdminLandDisputePage() {
           >
             Reload
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-5">

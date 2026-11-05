@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
-import { Button, Pagination, EmptyState } from '@getrentos/ui';
+import { Button, Pagination, EmptyState, PageHeader } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/owner/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/owner/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -119,13 +119,10 @@ export default function OwnerMessagesPage() {
   const threadMessages: ThreadMessage[] = activeMessages.map(toThreadMessage);
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Messages</h1>
-        <p className="text-muted-foreground mt-1">Communicate with buyers, realtors, and support</p>
-      </div>
+    <div className="flex h-[calc(100vh-8rem)] flex-col">
+      <PageHeader title="Messages" description="Communicate with buyers, realtors, and support" />
 
-      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
+      <div className="flex min-h-0 flex-1 gap-4">
         <div
           className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto flex-col gap-3')}
         >

@@ -20,6 +20,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, recentMonthOptions, unwrap } from '@getrentos/shared';
 
@@ -251,17 +252,10 @@ export default function ManagedPnlPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <TrendingUp className="h-6 w-6 text-primary" aria-hidden />
-          Managed P&amp;L
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          GetRentos Managed&rsquo;s contribution margin: its own fees, less delivery partners&rsquo;
-          share and direct costs. Read from the journal&rsquo;s Managed-tagged lines, so it is kept
-          apart from platform revenue. Fees count when the owner&rsquo;s statement pays out.
-        </p>
-      </div>
+      <PageHeader
+        title="Managed P&L"
+        description="GetRentos Managed’s contribution margin: its own fees, less delivery partners’ share and direct costs. Read from the journal’s Managed-tagged lines, so it is kept apart from platform revenue. Fees count when the owner’s statement pays out."
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <Field label="From" className="sm:w-56">

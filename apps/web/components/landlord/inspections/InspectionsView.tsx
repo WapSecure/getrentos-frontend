@@ -13,6 +13,7 @@ import {
   TabsList,
   TabsTrigger,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { InspectionCard } from '@/components/landlord/inspections/InspectionCard';
 import { CreateInspectionModal } from '@/components/landlord/inspections/CreateInspectionModal';
@@ -79,18 +80,16 @@ export function InspectionsView() {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Inspections</h1>
-          <p className="mt-1 text-muted-foreground">
-            Condition reports at move-in, move-out, and routine checks.
-          </p>
-        </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>
-          <Plus className="h-4 w-4" />
-          New inspection
-        </Button>
-      </div>
+      <PageHeader
+        title="Inspections"
+        description="Condition reports at move-in, move-out, and routine checks."
+        actions={
+          <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>
+            <Plus className="h-4 w-4" />
+            New inspection
+          </Button>
+        }
+      />
 
       <Tabs
         value={filter}

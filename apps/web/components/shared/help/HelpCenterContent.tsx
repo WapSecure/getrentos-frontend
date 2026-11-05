@@ -2,16 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  HelpCircle,
-  ChevronDown,
-  Mail,
-  Phone,
-  MessageCircle,
-  Clock,
-  ArrowRight,
-} from 'lucide-react';
-import { Button, Card } from '@getrentos/ui';
+import { ChevronDown, Mail, Phone, MessageCircle, Clock, ArrowRight } from 'lucide-react';
+import { Button, Card, PageHeader } from '@getrentos/ui';
 import { SUPPORT, hasSupportLine, telLink, whatsappLink } from '@/lib/support';
 
 interface FAQItem {
@@ -53,15 +45,10 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
 
   return (
     <>
-      <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Help centre</h1>
-        </div>
-        <p className="text-muted-foreground mt-1">
-          Answers and support for your GetRentos {roleLabel} account
-        </p>
-      </div>
+      <PageHeader
+        title="Help centre"
+        description={`Answers and support for your GetRentos ${roleLabel} account`}
+      />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">

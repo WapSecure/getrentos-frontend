@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
-import { Bot, Building2, History, ShieldCheck, UserRound, Wrench } from 'lucide-react';
+import { Bot, Building2, ShieldCheck, UserRound, Wrench } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -13,6 +13,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  PageHeader,
 } from '@getrentos/ui';
 
 import { unwrap } from '@/lib/apiHelpers';
@@ -77,16 +78,10 @@ export const PropertyActivityLog = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <History className="h-6 w-6 text-primary" aria-hidden />
-          Activity log
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          What your managers, GetRentos, tenants and automatic jobs have done on your properties.
-          Your own actions are not listed.
-        </p>
-      </div>
+      <PageHeader
+        title="Activity log"
+        description="What your managers, GetRentos, tenants and automatic jobs have done on your properties. Your own actions are not listed."
+      />
 
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="sm:w-72">
