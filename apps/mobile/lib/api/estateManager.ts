@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { VisitorPass } from './visitor-pass';
 import type { Paginated } from './properties';
@@ -261,16 +261,6 @@ export interface AmenityBooking {
 
 /* ----------------------------------- api ---------------------------------- */
 
-function q(params: Record<string, string | number | boolean | undefined | null>): string {
-  const s = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    s.set(k, String(v));
-  }
-  const out = s.toString();
-  return out ? `?${out}` : '';
-}
-
 /** Per-row outcome of a CSV import; row numbers are the spreadsheet's own lines. */
 export interface CsvImportResult {
   created: number;
@@ -335,7 +325,7 @@ export const estateManagerApi = {
     opts: { page?: number; search?: string; status?: 'ACTIVE' | 'INACTIVE' } = {}
   ) =>
     apiFetch<Paginated<Household>>(
-      `/estate/${estateId}/households${q({ page: opts.page ?? 1, pageSize: 30, search: opts.search, status: opts.status })}`
+      `/estate/${estateId}/households${toQuery({ page: opts.page ?? 1, pageSize: 30, search: opts.search, status: opts.status })}`
     ),
   household: (estateId: string, householdId: string) =>
     apiFetch<Household>(`/estate/${estateId}/households/${householdId}`),
@@ -377,7 +367,7 @@ export const estateManagerApi = {
     } = {}
   ) =>
     apiFetch<Paginated<Due>>(
-      `/estate/${estateId}/dues${q({ page: opts.page ?? 1, pageSize: opts.pageSize ?? 30, status: opts.status, householdId: opts.householdId })}`
+      `/estate/${estateId}/dues${toQuery({ page: opts.page ?? 1, pageSize: opts.pageSize ?? 30, status: opts.status, householdId: opts.householdId })}`
     ),
   charge: (estateId: string, body: NewCharge) =>
     apiFetch<{ created: number }>(`/estate/${estateId}/dues`, { method: 'POST', body }),
@@ -386,7 +376,7 @@ export const estateManagerApi = {
 
   announcements: (estateId: string, page = 1) =>
     apiFetch<Paginated<Announcement>>(
-      `/estate/${estateId}/announcements${q({ page, pageSize: 30 })}`
+      `/estate/${estateId}/announcements${toQuery({ page, pageSize: 30 })}`
     ),
   announce: (
     estateId: string,
@@ -406,11 +396,11 @@ export const estateManagerApi = {
     apiFetch<void>(`/estate/${estateId}/announcements/${id}`, { method: 'DELETE' }),
 
   incidents: (estateId: string, status?: string) =>
-    apiFetch<Incident[]>(`/estate/${estateId}/incidents${q({ status })}`),
+    apiFetch<Incident[]>(`/estate/${estateId}/incidents${toQuery({ status })}`),
   maintenance: (estateId: string, status?: string) =>
-    apiFetch<MaintenanceTicket[]>(`/estate/${estateId}/maintenance${q({ status })}`),
+    apiFetch<MaintenanceTicket[]>(`/estate/${estateId}/maintenance${toQuery({ status })}`),
   violations: (estateId: string, status?: string) =>
-    apiFetch<Violation[]>(`/estate/${estateId}/violations${q({ status })}`),
+    apiFetch<Violation[]>(`/estate/${estateId}/violations${toQuery({ status })}`),
 
   closeIncident: (estateId: string, id: string, how: 'resolve' | 'dismiss', notes?: string) =>
     apiFetch<Incident>(`/estate/${estateId}/incidents/${id}/${how}`, {
@@ -440,7 +430,7 @@ export const estateManagerApi = {
     apiFetchOrNull<EmergencyMuster>(`/estate/${estateId}/emergency-musters/active`),
   musters: (estateId: string) =>
     apiFetch<Paginated<MusterSummary>>(
-      `/estate/${estateId}/emergency-musters${q({ page: 1, pageSize: 20 })}`
+      `/estate/${estateId}/emergency-musters${toQuery({ page: 1, pageSize: 20 })}`
     ),
   muster: (estateId: string, musterId: string) =>
     apiFetch<EmergencyMuster>(`/estate/${estateId}/emergency-musters/${musterId}`),
@@ -471,7 +461,7 @@ export const estateManagerApi = {
 
   visitorPasses: (estateId: string, opts: { page?: number; status?: string } = {}) =>
     apiFetch<Paginated<VisitorPass>>(
-      `/estate/${estateId}/visitor-passes${q({ page: opts.page ?? 1, pageSize: 30, status: opts.status })}`
+      `/estate/${estateId}/visitor-passes${toQuery({ page: opts.page ?? 1, pageSize: 30, status: opts.status })}`
     ),
   issueVisitorPass: (
     estateId: string,
@@ -509,7 +499,7 @@ export const estateManagerApi = {
   /** No status lists every entry, lifted ones included. */
   watchlist: (estateId: string, status: 'ACTIVE' | 'LIFTED' | undefined, page = 1) =>
     apiFetch<Paginated<WatchlistEntry>>(
-      `/estate/${estateId}/watchlist${q({ page, pageSize: 30, status })}`
+      `/estate/${estateId}/watchlist${toQuery({ page, pageSize: 30, status })}`
     ),
   addToWatchlist: (
     estateId: string,

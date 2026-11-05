@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { Paginated } from './buyer';
 
 export type LandAreaUnit = 'SQUARE_METERS' | 'ACRE' | 'HECTARE';
@@ -141,16 +141,6 @@ export interface LandFilters {
   maxPrice?: number;
   sort?: 'newest' | 'price_asc' | 'price_desc';
   search?: string;
-}
-
-function toQuery(params: Record<string, string | number | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 /** Formats an area as e.g. `600 sqm` / `2 hectares`. */

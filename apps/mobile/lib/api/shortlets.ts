@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiUpload, toQuery } from './client';
 import type { Paginated } from './buyer';
 import { appendFile, type PickedFile } from './documents';
 import type {
@@ -349,22 +349,6 @@ export interface OpenDisputeInput {
   title: string;
   /** Up to 2000 characters. */
   description: string;
-}
-
-type QueryValue = string | number | boolean | string[] | undefined;
-
-function toQuery(params: Record<string, QueryValue>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '' || v === false) continue;
-    if (Array.isArray(v)) {
-      if (v.length) q.set(k, v.join(','));
-      continue;
-    }
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export const shortletsApi = {

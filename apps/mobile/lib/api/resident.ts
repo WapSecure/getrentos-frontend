@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { IssuedVisitorPass, VisitorPass } from './visitor-pass';
 
@@ -330,16 +330,6 @@ export interface ResidentMuster {
 export interface ResidentEmergency {
   muster: ResidentMuster;
   myEntries: MusterRollEntry[];
-}
-
-function toQuery(params: Record<string, string | number | boolean | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export const residentApi = {

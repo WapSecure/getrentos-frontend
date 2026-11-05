@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { BadgeTone } from '@getrentos/ui-native';
@@ -9,13 +9,6 @@ import type { BadgeTone } from '@getrentos/ui-native';
  * condition inspections. Every route here is role-agnostic on the API (it
  * answers for whatever the caller controls), so both portals use one client.
  */
-
-const qs = (params: Record<string, string | number | null | undefined>) => {
-  const parts = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null && v !== '')
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
-  return parts.length ? `?${parts.join('&')}` : '';
-};
 
 /* ----------------------------- activity log ---------------------------- */
 
@@ -376,7 +369,7 @@ export interface InspectionDetail extends InspectionListItem {
 export const managementApi = {
   activity: (input: { propertyId?: string; who: ActivityWho; before?: string | null }) =>
     apiFetch<ActivityPage>(
-      `/owner-activity${qs({ who: input.who, propertyId: input.propertyId, before: input.before })}`
+      `/owner-activity${toQuery({ who: input.who, propertyId: input.propertyId, before: input.before })}`
     ),
 
   queries: (as: 'owner' | 'manager') => apiFetch<QuerySummary[]>(`/owner-queries?as=${as}`),
@@ -397,7 +390,9 @@ export const managementApi = {
   myMandates: () => apiFetch<OwnerMandate[]>('/management-mandates/mine'),
 
   spendApprovals: (role: SpendApprovalRole, page = 1, pageSize = 20) =>
-    apiFetch<Paginated<SpendApproval>>(`/landlord/spend-approvals${qs({ role, page, pageSize })}`),
+    apiFetch<Paginated<SpendApproval>>(
+      `/landlord/spend-approvals${toQuery({ role, page, pageSize })}`
+    ),
   approveSpend: (id: string) =>
     apiFetch<SpendApproval>(`/landlord/spend-approvals/${id}/approve`, { method: 'POST' }),
   rejectSpend: (id: string, reason: string) =>
@@ -422,7 +417,7 @@ export const managementApi = {
     }),
 
   deposits: (status?: DepositStatus, page = 1, pageSize = 20) =>
-    apiFetch<Paginated<DepositListItem>>(`/deposits${qs({ status, page, pageSize })}`),
+    apiFetch<Paginated<DepositListItem>>(`/deposits${toQuery({ status, page, pageSize })}`),
   deposit: (id: string) => apiFetch<DepositHold>(`/deposits/${id}`),
   createDeposit: (input: { leaseId: string; amount?: number }) =>
     apiFetch<DepositHold>('/deposits', { method: 'POST', body: input }),
@@ -447,7 +442,7 @@ export const managementApi = {
     apiFetch<DepositHold>(`/deposits/${id}/return`, { method: 'POST' }),
 
   inspections: (status?: InspectionStatus, page = 1, pageSize = 20) =>
-    apiFetch<Paginated<InspectionListItem>>(`/inspections${qs({ status, page, pageSize })}`),
+    apiFetch<Paginated<InspectionListItem>>(`/inspections${toQuery({ status, page, pageSize })}`),
   inspection: (id: string) => apiFetch<InspectionDetail>(`/inspections/${id}`),
   createInspection: (input: {
     propertyId: string;
