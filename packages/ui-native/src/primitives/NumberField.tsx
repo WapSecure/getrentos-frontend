@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import type { TextInput } from 'react-native';
 import { Text } from './Text';
 import { TextField, type TextFieldProps } from './TextField';
-import { group, sanitizeNumber } from './numberFormat';
+import { group, sanitizeNumber, wholeNumber } from './numberFormat';
 
 export { sanitizeNumber };
 
@@ -59,7 +59,8 @@ export const NumberField = forwardRef<TextInput, NumberFieldProps>(function Numb
       {...rest}
       value={display}
       onChangeText={(text) => {
-        const clean = sanitizeNumber(text, places);
+        // Codes strip every non-digit; amounts and counts stop at a decimal point.
+        const clean = places > 0 || code ? sanitizeNumber(text, places) : wholeNumber(text);
         // Amounts drop leading zeros ("007" is 7); codes keep them.
         const next = symbol ? clean.replace(/^0+(?=\d)/, '') : clean;
         // The limit counts digits, not the dashes or spaces in a pasted

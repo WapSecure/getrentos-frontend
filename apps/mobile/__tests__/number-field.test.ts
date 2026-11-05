@@ -1,4 +1,8 @@
-import { group, sanitizeNumber } from '../../../packages/ui-native/src/primitives/numberFormat';
+import {
+  group,
+  sanitizeNumber,
+  wholeNumber,
+} from '../../../packages/ui-native/src/primitives/numberFormat';
 
 describe('sanitizeNumber', () => {
   it('keeps only digits for whole numbers', () => {
@@ -20,5 +24,15 @@ describe('group', () => {
   it('adds thousand separators', () => {
     expect(group('1250000')).toBe('1,250,000');
     expect(group('999')).toBe('999');
+  });
+});
+
+describe('wholeNumber', () => {
+  it('drops what follows a decimal point instead of merging the digits', () => {
+    expect(wholeNumber('7.5')).toBe('7');
+    expect(wholeNumber('₦1,250.50')).toBe('1250');
+    expect(wholeNumber('1,250,000')).toBe('1250000');
+    expect(wholeNumber('12a')).toBe('12');
+    expect(wholeNumber('.5')).toBe('');
   });
 });

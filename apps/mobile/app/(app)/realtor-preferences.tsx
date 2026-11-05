@@ -87,7 +87,11 @@ function PreferencesForm({ initial }: { initial: RealtorBusinessPreferences }) {
         label="Default commission rate (%)"
         value={rate}
         onValueChange={setRate}
+        decimals={2}
         hint="A whole number between 1 and 100."
+        error={
+          rate && !commissionRateOk(rateNumber) ? 'Use a whole number between 1 and 100.' : null
+        }
       />
       <View style={{ gap: spacing.sm }}>
         <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
