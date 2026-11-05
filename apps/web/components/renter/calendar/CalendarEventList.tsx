@@ -66,7 +66,7 @@ export const CalendarEventList = ({
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Upcoming Events</h3>
+            <h3 className="font-semibold text-foreground">Upcoming events</h3>
             <p className="text-xs text-muted-foreground">{events.length} events</p>
           </div>
         </div>

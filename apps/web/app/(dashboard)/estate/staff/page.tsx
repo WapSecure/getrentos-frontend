@@ -89,7 +89,7 @@ export default function EstateStaffPage() {
             }}
           >
             <Plus className="w-4 h-4" />
-            Add Gateman
+            Add gateman
           </Button>
         }
       />

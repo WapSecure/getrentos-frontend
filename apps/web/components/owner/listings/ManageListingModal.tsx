@@ -34,7 +34,7 @@ export const ManageListingModal = ({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md p-0">
         <div className="border-b border-border p-4 pr-12">
-          <DialogTitle className="font-semibold text-foreground">Manage Listing</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Manage listing</DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
             {listing.listingTitle}
           </DialogDescription>

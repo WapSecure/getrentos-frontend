@@ -404,7 +404,7 @@ export const AddOwnerPropertyModal = ({
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-warning-subtle">
                 <Clock className="h-8 w-8 text-warning" />
               </div>
-              <h4 className="text-lg font-semibold text-foreground">Pending Review</h4>
+              <h4 className="text-lg font-semibold text-foreground">Pending review</h4>
               <p className="mx-auto mt-1 max-w-xs text-sm text-muted-foreground">
                 Your ownership documents for <strong>{form.name}</strong> have been submitted. Our
                 compliance team typically completes review within 24–48 hours.

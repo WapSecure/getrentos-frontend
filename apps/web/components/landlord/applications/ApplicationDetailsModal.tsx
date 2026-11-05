@@ -61,7 +61,7 @@ export const ApplicationDetailsModal = ({
 
             <div>
               <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
-                Personal Information
+                Personal information
               </h4>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-foreground">

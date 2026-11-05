@@ -44,7 +44,7 @@ export const VehicleLogRow = ({ log, onMarkExited, isMarkingExited }: VehicleLog
         <Badge variant={isInside ? 'success' : 'neutral'}>{isInside ? 'Inside' : 'Exited'}</Badge>
         {isInside && (
           <Button variant="outline" size="sm" disabled={isMarkingExited} onClick={onMarkExited}>
-            Mark Exited
+            Mark exited
           </Button>
         )}
       </div>

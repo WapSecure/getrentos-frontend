@@ -128,7 +128,7 @@ export default function EstateAnnouncementsPage() {
             }}
           >
             <Plus className="w-4 h-4" />
-            New Announcement
+            New announcement
           </Button>
         }
       />

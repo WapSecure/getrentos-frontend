@@ -56,7 +56,7 @@ export const PostSwitcher = () => {
         {estates.length > 1 && (
           <>
             <DropdownMenuLabel className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              Your Estates
+              Your estates
             </DropdownMenuLabel>
             <div className="max-h-56 overflow-y-auto">
               {estates.map((option) => (
@@ -82,7 +82,7 @@ export const PostSwitcher = () => {
         )}
 
         <DropdownMenuLabel className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          This Gate
+          This gate
         </DropdownMenuLabel>
         <div className="max-h-56 overflow-y-auto">
           {gates.length === 0 ? (

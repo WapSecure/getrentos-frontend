@@ -171,7 +171,7 @@ export default function GatemanIncidentsPage() {
             })
           }
         >
-          Report Incident
+          Report incident
         </Button>
       </Card>
 

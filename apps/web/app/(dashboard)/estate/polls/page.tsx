@@ -73,7 +73,7 @@ export default function EstatePollsPage() {
         actions={
           <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>
             <Plus className="w-4 h-4" />
-            New Poll
+            New poll
           </Button>
         }
       />

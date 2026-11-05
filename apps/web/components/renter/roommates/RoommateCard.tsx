@@ -189,7 +189,7 @@ export const RoommateCard = ({ roommate, onRemove, onUpdateShare }: RoommateCard
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onSelect={() => onRemove(roommate.id)} className="text-destructive">
                 <Trash2 className="w-3 h-3" aria-hidden="true" />
-                Remove Roommate
+                Remove roommate
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

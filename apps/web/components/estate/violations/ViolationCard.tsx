@@ -67,7 +67,7 @@ export const ViolationCard = ({
           <div className="flex items-center gap-2 shrink-0">
             {violation.status === 'reported' && (
               <Button variant="outline" size="sm" disabled={isUpdating} onClick={onWarn}>
-                Issue Warning
+                Issue warning
               </Button>
             )}
             <Button variant="outline" size="sm" disabled={isUpdating} onClick={onResolve}>

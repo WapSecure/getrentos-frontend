@@ -2,7 +2,7 @@
 
 import { Clock, RefreshCcw, CheckCircle2, XCircle, Archive, Undo2, Hourglass } from 'lucide-react';
 import { Badge, Card, type BadgeVariant } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@/lib/format';
+import { formatCurrency, formatDate, formatAskingDifference } from '@/lib/format';
 import type { RealtorOffer, RealtorOfferStatus } from '@/types/realtor';
 
 const statusConfig: Record<
@@ -59,14 +59,14 @@ export const RealtorOfferCard = ({ offer, onClick }: RealtorOfferCardProps) => {
       </div>
 
       <div className="mt-4">
-        <p className="text-xs text-muted-foreground">Offer Amount</p>
+        <p className="text-xs text-muted-foreground">Offer amount</p>
         <p className="text-sm font-bold text-foreground">
           {formatCurrency(offer.offerAmount, { compact: true })}
         </p>
         <p
           className={`text-xs ${diffPct !== null && diffPct >= 0 ? 'text-success' : 'text-destructive'}`}
         >
-          {diffPct === null ? '—' : `${diffPct >= 0 ? '+' : ''}${diffPct.toFixed(1)}% vs asking`}
+          {diffPct === null ? '—' : formatAskingDifference(diffPct)}
         </p>
       </div>
 

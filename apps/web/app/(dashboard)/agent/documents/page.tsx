@@ -121,7 +121,7 @@ export default function AgentDocumentsPage() {
             icon={<Upload className="w-4 h-4" />}
             onClick={() => setIsUploadOpen(true)}
           >
-            Upload Document
+            Upload document
           </Button>
         }
       />

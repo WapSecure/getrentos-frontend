@@ -267,7 +267,7 @@ export const CreateSaleListingModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg">
         <div className="shrink-0 border-b border-border p-4 pr-12">
-          <DialogTitle className="font-semibold text-foreground">Create Sale Listing</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Create sale listing</DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
             Step {step + 1} of {steps.length}: {steps[step]}
           </DialogDescription>
@@ -432,7 +432,7 @@ export const CreateSaleListingModal = ({
               </div>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-foreground">
-                  Video Tour <span className="font-normal text-muted-foreground">(optional)</span>
+                  Video tour <span className="font-normal text-muted-foreground">(optional)</span>
                 </p>
                 <MediaPicker
                   accept="video/*"

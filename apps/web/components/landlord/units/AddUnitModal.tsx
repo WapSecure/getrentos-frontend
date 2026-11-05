@@ -78,7 +78,7 @@ export const AddUnitModal = ({
       <DialogContent padded={false}>
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Add Unit</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Add unit</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Define a new unit within a property
             </DialogDescription>

@@ -111,7 +111,7 @@ export default function GatemanDeliveriesPage() {
         }}
       >
         <Plus className="w-4 h-4" />
-        Log Delivery
+        Log delivery
       </Button>
 
       <div>

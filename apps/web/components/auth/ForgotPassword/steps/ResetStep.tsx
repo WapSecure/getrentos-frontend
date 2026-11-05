@@ -20,7 +20,7 @@ export const ResetStep = ({
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-foreground mb-1.5">
-          New Password
+          New password
         </label>
         <Input
           type="password"
@@ -33,7 +33,7 @@ export const ResetStep = ({
 
       <div>
         <label className="block text-sm font-medium text-foreground mb-1.5">
-          Confirm Password
+          Confirm password
         </label>
         <Input
           type="password"

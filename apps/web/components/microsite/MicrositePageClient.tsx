@@ -141,7 +141,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
       {profile.bio && <p className="text-sm text-muted-foreground mt-6 max-w-2xl">{profile.bio}</p>}
 
       <div className="mt-10">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Available Listings</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Available listings</h2>
         {listings.length === 0 ? (
           <div className="bg-card rounded-2xl border border-border p-12 text-center text-muted-foreground">
             No active listings right now.

@@ -86,7 +86,7 @@ export const ApplicationChecklist = ({ onComplete }: ApplicationChecklistProps) 
         <div className="flex min-w-0 items-center gap-3">
           <FileCheck className="w-5 h-5 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Application Checklist</h3>
+            <h3 className="font-semibold text-foreground">Application checklist</h3>
             <p className="text-xs text-muted-foreground">
               {completedCount}/{totalCount} items completed
             </p>

@@ -110,7 +110,7 @@ export const PreferencesSettings = () => {
           disabled={!minOfferPct}
           onClick={() => save.mutate()}
         >
-          Save Preferences
+          Save preferences
         </Button>
       </QueryState>
     </div>

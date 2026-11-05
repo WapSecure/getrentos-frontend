@@ -126,7 +126,7 @@ export default function LandlordDocumentsPage() {
           onClick={() => setIsUploadOpen(true)}
           icon={<Upload className="w-4 h-4" />}
         >
-          Upload Document
+          Upload document
         </Button>
       </div>
 

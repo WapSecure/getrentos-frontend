@@ -77,7 +77,7 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
           {moveInLabel} {formatDate(tenant.moveInDate)}
         </p>
         <div className="flex items-center gap-1">
-          <span className="text-xs font-medium text-muted-foreground">Trust Score</span>
+          <span className="text-xs font-medium text-muted-foreground">Trust score</span>
           <span className="text-xs font-bold text-primary">{tenant.trustScore}</span>
         </div>
       </div>

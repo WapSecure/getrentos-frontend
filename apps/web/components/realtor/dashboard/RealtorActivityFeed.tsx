@@ -51,7 +51,7 @@ export const RealtorActivityFeed = () => {
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Recent Activity</h3>
+        <h3 className="font-semibold text-foreground">Recent activity</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
           Leads, viewings, offers, and commission updates
         </p>

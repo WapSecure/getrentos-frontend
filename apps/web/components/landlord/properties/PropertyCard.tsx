@@ -113,7 +113,7 @@ export const PropertyCard = ({
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onSelect={() => onEdit?.()}>
               <Pencil className="w-4 h-4" />
-              Edit Property
+              Edit property
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => onToggleArchive?.()}>
               {property.archived ? (
@@ -125,7 +125,7 @@ export const PropertyCard = ({
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => onDelete?.()} className="text-destructive">
               <Trash2 className="w-4 h-4" />
-              Delete Property
+              Delete property
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

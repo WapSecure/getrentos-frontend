@@ -111,7 +111,7 @@ export const ScheduleViewingModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="p-0 sm:max-w-sm sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Schedule Viewing</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Schedule viewing</DialogTitle>
         </div>
 
         <div className="p-4 space-y-4">

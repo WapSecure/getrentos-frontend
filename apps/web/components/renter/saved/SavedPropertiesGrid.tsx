@@ -48,7 +48,7 @@ export const SavedPropertiesGrid = ({
         action={
           !isFiltered && (
             <Button href={ROUTES.RENTER_DISCOVER} variant="primary">
-              Discover Properties
+              Discover properties
             </Button>
           )
         }

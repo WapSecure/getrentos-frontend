@@ -87,7 +87,7 @@ export const ViewingRequestCard = ({ request, onCancel, delay = 0 }: ViewingRequ
             icon={<X className="w-3.5 h-3.5" />}
             onClick={onCancel}
           >
-            Cancel Request
+            Cancel request
           </Button>
         </div>
       )}

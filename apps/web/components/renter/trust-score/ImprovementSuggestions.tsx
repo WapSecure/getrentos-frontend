@@ -59,7 +59,7 @@ export const ImprovementSuggestions = ({ verifications }: ImprovementSuggestions
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BadgeCheck className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Improve Your Score</h3>
+          <h3 className="font-semibold text-foreground">Improve your score</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
           Complete these actions to increase your trust score

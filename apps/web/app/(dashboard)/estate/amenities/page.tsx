@@ -146,7 +146,7 @@ export default function EstateAmenitiesPage() {
           loadingText="Adding…"
           onClick={() => createAmenity.mutate()}
         >
-          Add Amenity
+          Add amenity
         </Button>
       </div>
 

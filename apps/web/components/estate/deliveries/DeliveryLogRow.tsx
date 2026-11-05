@@ -54,7 +54,7 @@ export const DeliveryLogRow = ({
             disabled={isMarkingCollected}
             onClick={onMarkCollected}
           >
-            Mark Collected
+            Mark collected
           </Button>
         )}
       </div>

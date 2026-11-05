@@ -212,7 +212,7 @@ function MicrositeForm({ estateId, estateName, settings }: MicrositeFormProps) {
             isLoading={saveSettings.isPending}
             disabled={!slugIsValid}
           >
-            Save Changes
+            Save changes
           </Button>
         </div>
       </Card>

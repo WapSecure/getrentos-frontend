@@ -124,7 +124,7 @@ function AgentInspectionsPageContent() {
             icon={<Plus className="w-4 h-4" />}
             onClick={() => setIsModalOpen(true)}
           >
-            New Inspection
+            New inspection
           </Button>
         }
       />

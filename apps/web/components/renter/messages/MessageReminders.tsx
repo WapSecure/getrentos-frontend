@@ -119,7 +119,7 @@ export const MessageReminders = ({
                   onClick={handleAddReminder}
                   disabled={!newReminder.message || !newReminder.date || !newReminder.time}
                 >
-                  Add Reminder
+                  Add reminder
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setIsAdding(false)}>
                   Cancel

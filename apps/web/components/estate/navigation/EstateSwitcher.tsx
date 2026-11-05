@@ -34,7 +34,7 @@ export const EstateSwitcher = () => {
 
       <DropdownMenuContent align="start">
         <DropdownMenuLabel className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          Your Estates
+          Your estates
         </DropdownMenuLabel>
         <div className="max-h-64 overflow-y-auto">
           {estates.map((option) => (
@@ -54,7 +54,7 @@ export const EstateSwitcher = () => {
         <DropdownMenuItem asChild className="text-primary">
           <Link href={ROUTES.ESTATE_SETUP}>
             <Plus className="w-4 h-4" aria-hidden="true" />
-            Add Another Estate
+            Add another estate
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -131,7 +131,7 @@ export const EscrowTransactionDetailModal = ({
 
         <div className="flex-1 space-y-5 overflow-y-auto p-4">
           <div className="flex items-center justify-between rounded-lg bg-secondary/60 p-3">
-            <span className="text-sm text-muted-foreground">Sale Price</span>
+            <span className="text-sm text-muted-foreground">Sale price</span>
             <span className="text-lg font-bold text-primary">
               {formatCurrency(transaction.salePrice)}
             </span>

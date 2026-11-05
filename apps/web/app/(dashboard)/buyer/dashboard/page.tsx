@@ -56,7 +56,7 @@ export default function BuyerDashboardPage() {
           description="Browse verified for-sale properties, save your favorites, and track offers all in one place."
           action={
             <Button href={ROUTES.BUYER_DISCOVER} variant="primary">
-              Discover Properties
+              Discover properties
             </Button>
           }
         />

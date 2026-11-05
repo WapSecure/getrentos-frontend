@@ -46,7 +46,7 @@ export const ClientCard = ({ client, onMessage }: ClientCardProps) => {
           <p className="text-sm font-medium text-foreground">{client.propertiesRepresented}</p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Client Since</p>
+          <p className="text-xs text-muted-foreground">Client since</p>
           <p className="text-sm font-medium text-foreground">{formatDate(client.joinedDate)}</p>
         </div>
       </div>

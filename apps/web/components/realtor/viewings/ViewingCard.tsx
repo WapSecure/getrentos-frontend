@@ -85,7 +85,7 @@ export const ViewingCard = ({
               onClick={onComplete}
               isLoading={isUpdating}
             >
-              Mark Completed
+              Mark completed
             </Button>
           )}
         </div>

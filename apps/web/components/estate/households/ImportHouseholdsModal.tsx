@@ -42,7 +42,7 @@ export const ImportHouseholdsModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
         <DialogTitle className="text-lg font-semibold text-foreground">
-          Import Households
+          Import households
         </DialogTitle>
 
         <div className="mt-4 space-y-4">

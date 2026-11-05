@@ -110,7 +110,7 @@ export default function RealtorClientsPage() {
             icon={<Plus className="w-4 h-4" />}
             onClick={() => setIsAddModalOpen(true)}
           >
-            Add Client
+            Add client
           </Button>
         }
       />

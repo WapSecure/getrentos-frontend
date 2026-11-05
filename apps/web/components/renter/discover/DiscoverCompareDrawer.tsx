@@ -41,7 +41,7 @@ export const DiscoverCompareDrawer = ({
       <DialogContent size="xl" padded={false}>
         <div className="sticky top-0 z-[1] bg-card border-b border-border p-4 pr-12">
           <DialogTitle className="text-xl font-semibold text-foreground">
-            Compare Properties
+            Compare properties
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             {properties.length} of 4 properties selected

@@ -25,8 +25,8 @@ export const PaymentsTable = ({ payments, onViewDetails }: PaymentsTableProps) =
               <th className="px-4 py-3 font-medium text-muted-foreground">Tenant</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Property</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Due Date</th>
-              <th className="px-4 py-3 font-medium text-muted-foreground">Payment Status</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Due date</th>
+              <th className="px-4 py-3 font-medium text-muted-foreground">Payment status</th>
               <th className="px-4 py-3 font-medium text-muted-foreground">Payout</th>
               <th className="px-4 py-3" />
             </tr>
