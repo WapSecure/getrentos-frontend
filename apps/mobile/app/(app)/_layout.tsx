@@ -101,6 +101,7 @@ export default function AppLayout() {
         <Stack.Screen name="license-verification" options={DETAIL_OPTIONS} />
         <Stack.Screen name="realtor-preferences" options={DETAIL_OPTIONS} />
         <Stack.Screen name="agency-share" options={DETAIL_OPTIONS} />
+        <Stack.Screen name="agency-import" options={DETAIL_OPTIONS} />
         <Stack.Screen name="agent-notification-settings" options={DETAIL_OPTIONS} />
         <Stack.Screen name="report-maintenance" options={DETAIL_OPTIONS} />
         <Stack.Screen name="documents" options={DETAIL_OPTIONS} />
