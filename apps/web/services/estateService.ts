@@ -1,3 +1,4 @@
+import type { AnnouncementDraft, PollDraft, ReportDigest } from '@/types/estateOps';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authDownload, authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
@@ -1289,6 +1290,35 @@ export const estateService = {
       authFetch(`/estate/${estateId}/maintenance/${ticketId}/dismiss`, {
         method: 'PATCH',
         body: JSON.stringify({ resolutionNotes }),
+      })
+    );
+  },
+
+  /** Open incidents and repair tickets grouped by shared problem. Managers only. */
+  async getReportDigest(estateId: string): Promise<ApiResponse<ReportDigest>> {
+    return safeCall(() => authFetch(`/estate/${estateId}/reports/digest`));
+  },
+
+  /** Draft an announcement from the manager's notes. Nothing is posted. */
+  async draftAnnouncement(
+    estateId: string,
+    notes: string,
+    language: ReplyLanguage = 'en'
+  ): Promise<ApiResponse<AnnouncementDraft>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/announcements/draft`, {
+        method: 'POST',
+        body: JSON.stringify({ notes, ...(language === 'en' ? {} : { language }) }),
+      })
+    );
+  },
+
+  /** Draft a neutral poll question and options from a topic. Nothing is posted. */
+  async draftPoll(estateId: string, topic: string): Promise<ApiResponse<PollDraft>> {
+    return safeCall(() =>
+      authFetch(`/estate/${estateId}/polls/draft`, {
+        method: 'POST',
+        body: JSON.stringify({ topic }),
       })
     );
   },

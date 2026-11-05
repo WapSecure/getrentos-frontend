@@ -17,6 +17,7 @@ import type { PickedFile } from '@/lib/api/documents';
 import { gatemanApi, type IncidentCategory, type IncidentPriority } from '@/lib/api/gateman';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
+import { ReportDigestCard } from '@/components/estate/ReportDigestCard';
 import { useEstate } from '@/hooks/useEstate';
 import {
   INCIDENT_PRIORITY_TONE,
@@ -62,11 +63,13 @@ export default function EstateIncidents() {
     onSuccess: (_i, v) => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: qk.estateManager.incidents(estateId) });
+      qc.invalidateQueries({ queryKey: qk.estateManager.reportDigest(estateId) });
       toast.show(v.how === 'resolve' ? 'Incident resolved.' : 'Incident dismissed.', 'success');
       setClosing(null);
     },
     onError: (e) => {
       qc.invalidateQueries({ queryKey: qk.estateManager.incidents(estateId) });
+      qc.invalidateQueries({ queryKey: qk.estateManager.reportDigest(estateId) });
       toast.show(errorMessage(e, 'Could not close this incident.'), 'error');
     },
   });
@@ -91,6 +94,7 @@ export default function EstateIncidents() {
         onView={setView}
         openCount={open.length}
         icon={<ShieldAlert size={34} color={colors.mutedForeground} />}
+        header={view === 'open' && estateId ? <ReportDigestCard estateId={estateId} /> : undefined}
         emptyOpen={{
           title: 'No open incidents',
           description: 'Anything a resident or guard reports shows up here straight away.',
@@ -191,6 +195,7 @@ function ReportForm({ estateId, onDone }: { estateId: string; onDone: () => void
     onSuccess: () => {
       void haptics.success();
       qc.invalidateQueries({ queryKey: qk.estateManager.incidents(estateId) });
+      qc.invalidateQueries({ queryKey: qk.estateManager.reportDigest(estateId) });
       toast.show('Incident reported.', 'success');
       onDone();
     },

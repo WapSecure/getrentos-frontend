@@ -31,6 +31,8 @@ import {
 import { errorMessage } from '@/lib/api/client';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
+import { WriteItForMe } from './WriteItForMe';
+import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
@@ -471,11 +473,14 @@ export function AnnouncementSheet({
   estateId,
   announcement,
   households,
+  initialNotes,
 }: {
   open: boolean;
   onClose: () => void;
   estateId: string;
   announcement?: Announcement;
+  /** Notes to draft from, e.g. a shared problem from the reports digest. */
+  initialNotes?: string;
   /** How many households will be told, for the confirmation line. */
   households?: number;
 }) {
@@ -490,6 +495,7 @@ export function AnnouncementSheet({
           estateId={estateId}
           announcement={announcement}
           households={households}
+          initialNotes={initialNotes}
           onDone={onClose}
         />
       ) : null}
@@ -501,11 +507,13 @@ function AnnouncementForm({
   estateId,
   announcement,
   households,
+  initialNotes = '',
   onDone,
 }: {
   estateId: string;
   announcement?: Announcement;
   households?: number;
+  initialNotes?: string;
   onDone: () => void;
 }) {
   const { spacing } = useTheme();
@@ -517,6 +525,16 @@ function AnnouncementForm({
     announcement?.priority === 'urgent' ? 'URGENT' : 'NORMAL'
   );
   const [channels, setChannels] = useState<('SMS' | 'WHATSAPP')[]>([]);
+  const [notes, setNotes] = useState(initialNotes);
+  const [language, setLanguage] = useState<ReplyLanguage>('en');
+  const draft = useMutation({
+    mutationFn: () => estateManagerApi.draftAnnouncement(estateId, notes.trim(), language),
+    onSuccess: (d) => {
+      setTitle(d.title);
+      setBody(d.body);
+      setPriority(d.priority);
+    },
+  });
   const toggle = (c: 'SMS' | 'WHATSAPP') =>
     setChannels((list) => (list.includes(c) ? list.filter((x) => x !== c) : [...list, c]));
 
@@ -540,13 +558,37 @@ function AnnouncementForm({
 
   return (
     <View style={{ gap: spacing.md }}>
+      {!announcement ? (
+        <WriteItForMe
+          hint="Say what is happening and what residents should do. Edit the draft before sending."
+          placeholder="e.g. Pump broken in Block C, vendor fixing it tomorrow, store water tonight"
+          value={notes}
+          onChange={setNotes}
+          draftLabel="Draft announcement"
+          onDraft={() => draft.mutate()}
+          loading={draft.isPending}
+          error={draft.error ? errorMessage(draft.error, 'Could not draft it. Try again.') : null}
+        >
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+            {REPLY_LANGUAGES.map((l) => (
+              <Chip
+                key={l.value}
+                size="sm"
+                label={l.label}
+                selected={language === l.value}
+                onPress={() => setLanguage(l.value)}
+              />
+            ))}
+          </View>
+        </WriteItForMe>
+      ) : null}
       <TextField
         label="Title"
         required
         value={title}
         onChangeText={setTitle}
         maxLength={150}
-        autoFocus={!announcement}
+        autoFocus={!announcement && !initialNotes}
       />
       <TextField
         label="Message"

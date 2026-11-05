@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Sparkles } from 'lucide-react';
 import {
+  Alert,
   Button,
   Checkbox,
   Dialog,
@@ -12,9 +15,16 @@ import {
   Select,
   Textarea,
 } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { REPLY_LANGUAGES, type ReplyLanguage } from '@/lib/replyLanguage';
+import { estateService } from '@/services/estateService';
 import type { Announcement } from '@/types/estate';
 
 interface AnnouncementModalProps {
+  /** For "Write it for me": drafts from the manager's notes. */
+  estateId?: string;
+  /** Notes to start from, e.g. a shared problem from the reports digest. */
+  initialNotes?: string;
   isOpen: boolean;
   announcement: Announcement | null;
   onClose: () => void;
@@ -33,6 +43,8 @@ const priorityOptions = [
 ];
 
 export const AnnouncementModal = ({
+  estateId,
+  initialNotes = '',
   isOpen,
   announcement,
   onClose,
@@ -44,6 +56,16 @@ export const AnnouncementModal = ({
   const [priority, setPriority] = useState(
     announcement ? announcement.priority.toUpperCase() : 'NORMAL'
   );
+  const [notes, setNotes] = useState(initialNotes);
+  const [language, setLanguage] = useState<ReplyLanguage>('en');
+  const draft = useMutation({
+    mutationFn: () => unwrap(estateService.draftAnnouncement(estateId!, notes.trim(), language)),
+    onSuccess: (d) => {
+      setTitle(d.title);
+      setBody(d.body);
+      setPriority(d.priority);
+    },
+  });
   const [sendSms, setSendSms] = useState(false);
   const [sendWhatsApp, setSendWhatsApp] = useState(false);
 
@@ -63,6 +85,52 @@ export const AnnouncementModal = ({
         </DialogTitle>
 
         <div className="mt-4 space-y-4">
+          {!announcement && estateId && (
+            <div className="space-y-2 rounded-lg border border-border p-3">
+              <Field
+                label="Write it for me"
+                hint="Say what is happening and what residents should do. You can edit the draft before posting."
+              >
+                <Textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="e.g. Pump broken in Block C, vendor fixing it tomorrow morning, store water tonight"
+                />
+              </Field>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  icon={<Sparkles className="h-4 w-4" aria-hidden />}
+                  disabled={notes.trim().length < 5}
+                  isLoading={draft.isPending}
+                  loadingText="Drafting…"
+                  onClick={() => draft.mutate()}
+                >
+                  Draft announcement
+                </Button>
+                <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+                  <span aria-hidden="true">Write in</span>
+                  <Select
+                    value={language}
+                    onValueChange={(value) => setLanguage(value as ReplyLanguage)}
+                    options={REPLY_LANGUAGES.map((l) => ({ value: l.value, label: l.label }))}
+                    ariaLabel="Announcement language"
+                    controlSize="sm"
+                    searchable={false}
+                    className="w-32"
+                  />
+                </span>
+              </div>
+              {draft.isError && (
+                <Alert variant="danger">
+                  {draft.error.message || 'Could not draft it. Try again.'}
+                </Alert>
+              )}
+            </div>
+          )}
+
           <Field label="Title" required>
             <Input
               type="text"

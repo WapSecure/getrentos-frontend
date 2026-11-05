@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '../replyLanguage';
 import { apiFetch, apiFetchOrNull, apiUpload } from './client';
 import { toQuery } from './query';
 import { appendFile, type PickedFile } from './documents';
@@ -296,6 +297,46 @@ export function deadlineIso(date: string, time: string): string | null {
   return Number.isNaN(at.getTime()) ? null : at.toISOString();
 }
 
+/** Open reports that describe the same problem, with code-worked counts. */
+export interface ReportGroup {
+  title: string;
+  summary: string;
+  action: string;
+  reports: number;
+  households: number;
+  oldestDays: number;
+  priority: string;
+  line: string;
+  items: {
+    id: string;
+    kind: 'incident' | 'ticket';
+    description: string;
+    unit: string | null;
+    ageDays: number;
+  }[];
+}
+
+export interface ReportDigest {
+  overview: string;
+  groups: ReportGroup[];
+  ungrouped: number;
+  total: number;
+  source: 'ai' | 'heuristic';
+  disclaimer: string;
+}
+
+export interface AnnouncementDraft {
+  title: string;
+  body: string;
+  priority: 'NORMAL' | 'URGENT';
+  language: ReplyLanguage;
+}
+
+export interface PollDraft {
+  question: string;
+  options: string[];
+}
+
 export const estateManagerApi = {
   importHouseholds: (estateId: string, file: PickedFile) => {
     const form = new FormData();
@@ -479,6 +520,16 @@ export const estateManagerApi = {
       method: 'PATCH',
     }),
 
+  /** Open incidents and repair tickets grouped by shared problem. Managers only. */
+  reportDigest: (estateId: string) => apiFetch<ReportDigest>(`/estate/${estateId}/reports/digest`),
+  /** Drafts to edit before posting; nothing is posted. */
+  draftAnnouncement: (estateId: string, notes: string, language: ReplyLanguage = 'en') =>
+    apiFetch<AnnouncementDraft>(`/estate/${estateId}/announcements/draft`, {
+      method: 'POST',
+      body: { notes, ...(language === 'en' ? {} : { language }) },
+    }),
+  draftPoll: (estateId: string, topic: string) =>
+    apiFetch<PollDraft>(`/estate/${estateId}/polls/draft`, { method: 'POST', body: { topic } }),
   polls: (estateId: string) => apiFetch<Poll[]>(`/estate/${estateId}/polls`),
   createPoll: (estateId: string, body: { question: string; options: string[] }) =>
     apiFetch<Poll>(`/estate/${estateId}/polls`, { method: 'POST', body }),

@@ -42,6 +42,7 @@ export function QueueScreen<T extends { id: string }>({
   emptyOpen,
   emptyClosed,
   icon,
+  header,
 }: {
   eyebrow: string;
   title: string;
@@ -62,6 +63,8 @@ export function QueueScreen<T extends { id: string }>({
   emptyOpen: { title: string; description: string };
   emptyClosed: { title: string; description: string };
   icon: ReactNode;
+  /** Shown above the list, such as a summary card. */
+  header?: ReactNode;
 }) {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
@@ -121,6 +124,9 @@ export function QueueScreen<T extends { id: string }>({
           }}
           ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
           renderItem={({ item }) => <>{renderItem(item as T)}</>}
+          ListHeaderComponent={
+            header ? <View style={{ paddingBottom: spacing.md }}>{header}</View> : null
+          }
           ListEmptyComponent={
             <EmptyState icon={icon} title={empty.title} description={empty.description} />
           }

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wrench } from 'lucide-react-native';
 import { Button, useTheme, useToast } from '@getrentos/ui-native';
 import { CloseSheet, QueueCard, QueueScreen, type QueueView } from '@/components/estate/Triage';
+import { ReportDigestCard } from '@/components/estate/ReportDigestCard';
 import { useEstate } from '@/hooks/useEstate';
 import {
   TICKET_PRIORITY_TONE,
@@ -44,6 +45,7 @@ export default function EstateMaintenance() {
 
   const refreshQueue = () =>
     qc.invalidateQueries({ queryKey: qk.estateManager.maintenance(estateId) });
+  qc.invalidateQueries({ queryKey: qk.estateManager.reportDigest(estateId) });
   const start = useMutation({
     mutationFn: (t: MaintenanceTicket) => estateManagerApi.startMaintenance(estateId, t.id),
     onSuccess: () => {
@@ -88,6 +90,7 @@ export default function EstateMaintenance() {
         onView={setView}
         openCount={open.length}
         icon={<Wrench size={34} color={colors.mutedForeground} />}
+        header={view === 'open' && estateId ? <ReportDigestCard estateId={estateId} /> : undefined}
         emptyOpen={{
           title: 'No open tickets',
           description:
