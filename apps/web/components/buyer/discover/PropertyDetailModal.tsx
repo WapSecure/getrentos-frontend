@@ -17,6 +17,7 @@ import {
 import { Badge, Button, Dialog, DialogContent, DialogTitle, IconButton } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import type { BuyerPropertyListing } from '@/types/buyer';
+import { DiligenceChecklist } from './DiligenceChecklist';
 
 interface PropertyDetailModalProps {
   listing: BuyerPropertyListing | null;
@@ -167,6 +168,8 @@ export const PropertyDetailModal = ({
               </div>
             </div>
           )}
+
+          <DiligenceChecklist listingId={listing.id} />
 
           <div className="rounded-lg border border-border p-3 flex items-center justify-between">
             <div>

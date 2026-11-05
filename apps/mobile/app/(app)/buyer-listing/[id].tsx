@@ -33,6 +33,7 @@ import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
+import { DiligenceCard } from '@/components/buyer/DiligenceCard';
 import { formatDate } from '@/lib/format';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { useAskSeller } from '@/hooks/useAskSeller';
@@ -238,6 +239,8 @@ export default function BuyerListingDetail() {
                     />
                   </View>
                 ) : null}
+
+                <DiligenceCard listingId={listing.id} />
 
                 <Card elevated>
                   <View
