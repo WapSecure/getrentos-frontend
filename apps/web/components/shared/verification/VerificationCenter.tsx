@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Camera,
   CheckCircle2,
+  ChevronDown,
   FileCheck2,
   Fingerprint,
   Landmark,
@@ -15,7 +16,17 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Alert, Button, Field, Input, NumberInput, Select, Skeleton } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  Field,
+  Input,
+  NumberInput,
+  Progress,
+  Select,
+  Skeleton,
+} from '@getrentos/ui';
+import { TIER_LABELS } from './trustTiers';
 import { cn, unwrap } from '@/lib/apiHelpers';
 import { useRealtimeEvent } from '@/hooks/useRealtime';
 import { AppealControl } from '@/components/shared/trust/AppealControl';
@@ -26,76 +37,6 @@ import {
   type TrustIdType,
   type TrustPurpose,
 } from '@/services/trustService';
-
-const KYC_STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  APPROVED: {
-    label: 'Verified',
-    color: 'text-success',
-    bg: 'bg-success-subtle',
-  },
-  PENDING_REVIEW: {
-    label: 'Pending review',
-    color: 'text-warning',
-    bg: 'bg-warning-subtle',
-  },
-  NEEDS_CLARIFICATION: {
-    label: 'Needs clarification',
-    color: 'text-warning',
-    bg: 'bg-warning-subtle',
-  },
-  REJECTED: {
-    label: 'Rejected',
-    color: 'text-destructive',
-    bg: 'bg-destructive-subtle',
-  },
-};
-
-const STEP_STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  PASSED: {
-    label: 'Done',
-    color: 'text-success',
-    bg: 'bg-success-subtle',
-  },
-  FAILED: {
-    label: 'Failed',
-    color: 'text-destructive',
-    bg: 'bg-destructive-subtle',
-  },
-  REVIEW_REQUIRED: {
-    label: 'Needs review',
-    color: 'text-warning',
-    bg: 'bg-warning-subtle',
-  },
-  NOT_STARTED: { label: 'Not started', color: 'text-muted-foreground', bg: 'bg-secondary' },
-  IN_PROGRESS: {
-    label: 'In progress',
-    color: 'text-info',
-    bg: 'bg-info-subtle',
-  },
-  SKIPPED: { label: 'Skipped', color: 'text-muted-foreground', bg: 'bg-secondary' },
-  WAITING_FOR_USER: {
-    label: 'Waiting on you',
-    color: 'text-warning',
-    bg: 'bg-warning-subtle',
-  },
-  WAITING_FOR_PROVIDER: {
-    label: 'Waiting on provider',
-    color: 'text-primary',
-    bg: 'bg-accent',
-  },
-};
-
-const STEP_LABEL: Record<string, string> = {
-  PHONE_OTP: 'Phone verification',
-  NIN_CHECK: 'National ID (NIN) check',
-  BVN_CHECK: 'Bank verification (BVN) check',
-  SELFIE_CAPTURE: 'Selfie capture',
-  LIVENESS_CHECK: 'Liveness check',
-  FACE_MATCH: 'Face match',
-  DOCUMENT_CHECK: 'Document check',
-  BANK_ACCOUNT_CHECK: 'Bank account check',
-  AML_CHECK: 'AML screening',
-};
 
 const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
 const IDENTITY_STEP_TYPES = ['NIN_CHECK', 'BVN_CHECK'];
@@ -143,6 +84,8 @@ export const VerificationCenter = ({
   const [documentHolder, setDocumentHolder] = useState('');
   const selfieInputRef = useRef<HTMLInputElement>(null);
   const autoStarted = useRef(false);
+  // Which stage the person opened; null follows the first stage that needs them.
+  const [openStage, setOpenStage] = useState<string | null>(null);
 
   const invalidateVerification = () =>
     queryClient.invalidateQueries({ queryKey: ['trust-verification', verificationId] });
@@ -378,10 +321,11 @@ export const VerificationCenter = ({
       setError(reason instanceof Error ? reason.message : 'Unable to run the document check.'),
   });
 
-  const isVerified = Boolean(kyc?.isVerified) || kyc?.verificationStatus === 'APPROVED';
-  const kycMeta =
-    KYC_STATUS_META[kyc?.verificationStatus ?? 'PENDING_REVIEW'] ?? KYC_STATUS_META.PENDING_REVIEW;
-
+  // Identity, specifically: `isVerified` on the KYC row is broader (an account
+  // can carry it while the listing and lease gates still ask for identity).
+  const isVerified =
+    kyc?.identityVerified ??
+    (kyc?.identity?.status === 'APPROVED' || kyc?.verificationStatus === 'APPROVED');
   const steps = verification?.steps ?? [];
   const actionable = (status: string) => ACTIONABLE.includes(status);
   const runnableIdentity = steps.find(
@@ -430,54 +374,376 @@ export const VerificationCenter = ({
     Boolean(docConsent) &&
     !documentMutation.isPending;
 
-  const renderConsentRow = (opts: {
+  // One ordered path. Each stage carries its own consent, so nothing has to be
+  // agreed "above" before it can be used below; the first stage that still
+  // needs the person is open, the rest are folded to a line.
+  type StageStatus = 'done' | 'todo' | 'failed' | 'review' | 'waiting' | 'pending';
+  const stageStatus = (types: string[]): StageStatus => {
+    const own = steps.filter((s) => types.includes(s.stepType));
+    if (!verification || own.length === 0) return 'pending';
+    if (own.every((s) => s.status === 'PASSED' || s.status === 'SKIPPED')) return 'done';
+    if (own.some((s) => s.status === 'FAILED')) return 'failed';
+    if (own.some((s) => s.status === 'REVIEW_REQUIRED')) return 'review';
+    if (own.some((s) => s.status === 'WAITING_FOR_PROVIDER' || s.status === 'IN_PROGRESS'))
+      return 'waiting';
+    return 'todo';
+  };
+  const consentActive = (c?: { revokedAt?: string }) => Boolean(c && !c.revokedAt);
+
+  const consentBlock = (opts: {
     consent?: { id: string; revokedAt?: string; grantedAt: string };
-    icon: React.ElementType;
-    title: string;
-    body: string;
+    text: string;
     onGrant: () => void;
     granting: boolean;
-    revoking: boolean;
-  }) => {
-    const consent = opts.consent;
-    const active = Boolean(consent && !consent.revokedAt);
-    const Icon = opts.icon;
-    return (
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Icon className="h-5 w-5 text-primary" />
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">{opts.title}</h3>
-            <p className="text-xs text-muted-foreground">{opts.body}</p>
-          </div>
-        </div>
-        {active && consent ? (
-          <Button
-            variant="outline"
-            size="sm"
-            isLoading={opts.revoking}
-            loadingText="Revoking…"
-            onClick={() => revokeConsentMutation.mutate(consent.id)}
-          >
-            Revoke consent
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            isLoading={opts.granting}
-            loadingText="Recording…"
-            onClick={opts.onGrant}
-          >
-            Grant consent
-          </Button>
-        )}
-        {active && consent && (
-          <p className="w-full text-xs text-success">
-            Active · granted {new Date(consent.grantedAt).toLocaleDateString()}
-          </p>
-        )}
+  }) =>
+    consentActive(opts.consent) ? (
+      <p className="text-xs text-muted-foreground">
+        Consent given {new Date(opts.consent!.grantedAt).toLocaleDateString()} ·{' '}
+        <button
+          type="button"
+          className="underline hover:no-underline"
+          onClick={() => revokeConsentMutation.mutate(opts.consent!.id)}
+          disabled={revokeConsentMutation.isPending}
+        >
+          withdraw
+        </button>
+      </p>
+    ) : (
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3">
+        <p className="min-w-0 flex-1 text-xs text-muted-foreground">{opts.text}</p>
+        <Button size="sm" isLoading={opts.granting} loadingText="Recording…" onClick={opts.onGrant}>
+          Agree and continue
+        </Button>
       </div>
     );
+
+  const stages: {
+    key: string;
+    title: string;
+    hint: string;
+    icon: React.ElementType;
+    status: StageStatus;
+    needsConsent: boolean;
+    body: React.ReactNode;
+  }[] = [
+    {
+      key: 'phone',
+      title: 'Confirm your phone number',
+      hint: 'A code by SMS. Takes a minute.',
+      icon: Smartphone,
+      status: stageStatus(['PHONE_OTP']),
+      needsConsent: false,
+      body: !phoneRef ? (
+        <Button
+          size="sm"
+          icon={<Smartphone className="h-4 w-4" />}
+          isLoading={sendOtpMutation.isPending}
+          loadingText="Sending…"
+          onClick={() => sendOtpMutation.mutate()}
+          disabled={!runnablePhone}
+        >
+          Send code to my phone
+        </Button>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Enter the 6-digit code we sent. In development it is printed to the backend log.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <div className="w-40">
+              <NumberInput
+                aria-label="Verification code"
+                value={otpCode}
+                onValueChange={(value) => setOtpCode(value.slice(0, 6))}
+                placeholder="6-digit code"
+                maxLength={6}
+                autoComplete="one-time-code"
+              />
+            </div>
+            <Button
+              size="sm"
+              disabled={!otpVerifyEnabled}
+              onClick={() => verifyOtpMutation.mutate()}
+              isLoading={verifyOtpMutation.isPending}
+              loadingText="Verifying…"
+            >
+              Verify code
+            </Button>
+          </div>
+        </>
+      ),
+    },
+    {
+      key: 'identity',
+      title: 'Check your national ID',
+      hint: 'Your NIN or BVN, checked against official records. Never shown to other users.',
+      icon: Fingerprint,
+      status: stageStatus(IDENTITY_STEP_TYPES),
+      needsConsent: !consentActive(idCheckConsent),
+      body: (
+        <>
+          {consentBlock({
+            consent: idCheckConsent,
+            text: 'We check the number you enter against NIMC/BVN records to confirm it is yours. Nothing is shared with other users.',
+            onGrant: () => grantIdMutation.mutate(),
+            granting: grantIdMutation.isPending,
+          })}
+          {consentActive(idCheckConsent) && (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="ID type" className="sm:col-span-2">
+                  <Select
+                    value={idType}
+                    onValueChange={(value) => setIdType(value as TrustIdType)}
+                    options={TRUST_ID_TYPES.map((type) => ({ value: type, label: type }))}
+                    className="w-full"
+                  />
+                </Field>
+                <Field
+                  label={
+                    idType === 'NIN' ? 'NIN number' : idType === 'BVN' ? 'BVN number' : 'ID number'
+                  }
+                  className="sm:col-span-2"
+                >
+                  <Input
+                    value={idNumber}
+                    onChange={(e) => setIdNumber(e.target.value)}
+                    placeholder={idType === 'NIN' || idType === 'BVN' ? '11 digits' : 'Number'}
+                    className="w-full"
+                    inputMode="numeric"
+                  />
+                </Field>
+                <Field label="First name (optional)">
+                  <Input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full"
+                  />
+                </Field>
+                <Field label="Last name (optional)">
+                  <Input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full"
+                  />
+                </Field>
+              </div>
+              <Button
+                size="sm"
+                disabled={!identityEnabled}
+                onClick={() => identityMutation.mutate()}
+                isLoading={identityMutation.isPending}
+                loadingText="Checking…"
+              >
+                Run identity check
+              </Button>
+            </>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'selfie',
+      title: 'Take a selfie',
+      hint: 'Matched to your ID and checked for liveness, in one step.',
+      icon: Camera,
+      status: stageStatus(BIO_STEP_TYPES),
+      needsConsent: !consentActive(bioConsent),
+      body: (
+        <>
+          {consentBlock({
+            consent: bioConsent,
+            text: 'We use the selfie for a liveness check and to match it to your ID, then keep it only for this verification.',
+            onGrant: () => grantBioMutation.mutate(),
+            granting: grantBioMutation.isPending,
+          })}
+          {consentActive(bioConsent) && (
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                ref={selfieInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setSelfie(e.target.files?.[0] ?? null)}
+              />
+              <Button variant="outline" size="sm" onClick={() => selfieInputRef.current?.click()}>
+                <Camera className="mr-2 h-4 w-4" />
+                {selfie ? selfie.name.slice(0, 30) : 'Choose a selfie'}
+              </Button>
+              <Button
+                size="sm"
+                disabled={!bioEnabled || !runnableBio}
+                isLoading={bioMutation.isPending}
+                loadingText="Running…"
+                onClick={() => bioMutation.mutate()}
+              >
+                Run selfie check
+              </Button>
+            </div>
+          )}
+        </>
+      ),
+    },
+    ...(bankRequired
+      ? [
+          {
+            key: 'bank',
+            title: 'Confirm your bank account',
+            hint: 'A name enquiry on the account that receives your payouts. Lifts you to trust tier 3.',
+            icon: Landmark,
+            status: stageStatus(['BANK_ACCOUNT_CHECK']),
+            needsConsent: !consentActive(bankConsent),
+            body: (
+              <>
+                {consentBlock({
+                  consent: bankConsent,
+                  text: 'We run a name enquiry with the bank to confirm the account is yours. No money moves.',
+                  onGrant: () => grantBankMutation.mutate(),
+                  granting: grantBankMutation.isPending,
+                })}
+                {consentActive(bankConsent) && (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="Account number (10 digits)">
+                        <NumberInput
+                          value={accountNumber}
+                          onValueChange={(value) => setAccountNumber(value.slice(0, 10))}
+                          placeholder="0123456789"
+                          maxLength={10}
+                        />
+                      </Field>
+                      <Field label="Bank code (optional)">
+                        <NumberInput
+                          value={bankCode}
+                          onValueChange={setBankCode}
+                          placeholder="e.g. 058"
+                        />
+                      </Field>
+                      <Field
+                        label="Account holder name (optional: compared for a match)"
+                        className="sm:col-span-2"
+                      >
+                        <Input
+                          value={accountName}
+                          onChange={(e) => setAccountName(e.target.value)}
+                          placeholder="e.g. ACCT HOLDER 6789"
+                          className="w-full"
+                        />
+                      </Field>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={!bankEnabled}
+                      onClick={() => bankMutation.mutate()}
+                      isLoading={bankMutation.isPending}
+                      loadingText="Checking…"
+                    >
+                      Run bank check
+                    </Button>
+                  </>
+                )}
+              </>
+            ),
+          },
+        ]
+      : []),
+    ...(documentRequired
+      ? [
+          {
+            key: 'document',
+            title: 'Verify your professional document',
+            hint: 'Your agent licence or letter of authority, checked with the issuer.',
+            icon: FileCheck2,
+            status: stageStatus(['DOCUMENT_CHECK']),
+            needsConsent: !consentActive(docConsent),
+            body: (
+              <>
+                {consentBlock({
+                  consent: docConsent,
+                  text: 'We verify the document number with its issuer. Required to finish agent onboarding.',
+                  onGrant: () => grantDocumentMutation.mutate(),
+                  granting: grantDocumentMutation.isPending,
+                })}
+                {consentActive(docConsent) && (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Field label="Document type">
+                        <Select
+                          value={documentType}
+                          onValueChange={(value) => setDocumentType(value)}
+                          options={[
+                            'AGENT_LICENSE',
+                            'CERTIFICATE',
+                            'LETTER_OF_AUTHORITY',
+                            'PROFESSIONAL_ID',
+                          ].map((t) => ({ value: t, label: t.replace(/_/g, ' ') }))}
+                          className="w-full"
+                        />
+                      </Field>
+                      <Field label="Document number">
+                        <Input
+                          value={documentNumber}
+                          onChange={(e) => setDocumentNumber(e.target.value)}
+                          placeholder="e.g. GR-2026-00123"
+                          className="w-full"
+                        />
+                      </Field>
+                      <Field
+                        label="Holder name (optional: compared for a match)"
+                        className="sm:col-span-2"
+                      >
+                        <Input
+                          value={documentHolder}
+                          onChange={(e) => setDocumentHolder(e.target.value)}
+                          placeholder="e.g. HOLDER 0123"
+                          className="w-full"
+                        />
+                      </Field>
+                    </div>
+                    <Button
+                      size="sm"
+                      disabled={!documentEnabled}
+                      onClick={() => documentMutation.mutate()}
+                      isLoading={documentMutation.isPending}
+                      loadingText="Checking…"
+                    >
+                      Run document check
+                    </Button>
+                  </>
+                )}
+              </>
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  const doneCount = stages.filter((s) => s.status === 'done').length;
+  const currentKey =
+    stages.find((s) => s.status === 'todo' || s.status === 'failed')?.key ??
+    stages.find((s) => s.status === 'review' || s.status === 'waiting')?.key ??
+    null;
+  const openKey = openStage ?? currentKey;
+
+  // One chip for the whole picture: the KYC row and the orchestrator each had
+  // their own vocabulary ("Pending review" beside "0 of 6 passed · PROCESSING").
+  const overall = isVerified
+    ? { label: 'Verified', cls: 'bg-success-subtle text-success' }
+    : kyc?.verificationStatus === 'REJECTED' || verification?.decision === 'REJECT'
+      ? { label: 'Rejected', cls: 'bg-destructive-subtle text-destructive' }
+      : stages.some((s) => s.status === 'review' || s.status === 'waiting')
+        ? { label: 'In review', cls: 'bg-warning-subtle text-warning' }
+        : doneCount === 0
+          ? { label: 'Not started', cls: 'bg-secondary text-muted-foreground' }
+          : { label: `${doneCount} of ${stages.length} done`, cls: 'bg-accent text-primary' };
+
+  const STAGE_CHIP: Record<StageStatus, { label: string; cls: string }> = {
+    done: { label: 'Done', cls: 'bg-success-subtle text-success' },
+    todo: { label: 'Needs you', cls: 'bg-accent text-primary' },
+    failed: { label: 'Did not pass', cls: 'bg-destructive-subtle text-destructive' },
+    review: { label: 'In review', cls: 'bg-warning-subtle text-warning' },
+    waiting: { label: 'Checking…', cls: 'bg-info-subtle text-info' },
+    pending: { label: '', cls: '' },
   };
 
   return (
@@ -493,91 +759,46 @@ export const VerificationCenter = ({
               )}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Verification center</h2>
+              <h2 className="text-lg font-bold text-foreground">Verification centre</h2>
               <p className="text-sm text-muted-foreground">
                 {description ??
                   'Verify your identity to unlock renting, payments and higher trust limits.'}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                'rounded-full px-3 py-1 text-xs font-semibold',
-                kycMeta.bg,
-                kycMeta.color
-              )}
-            >
-              {kycMeta.label}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={cn('rounded-full px-3 py-1 text-xs font-semibold', overall.cls)}>
+              {overall.label}
             </span>
-            {kyc?.trustScore !== undefined && (
-              <span className="rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-foreground">
-                Trust score {kyc.trustScore}
-              </span>
-            )}
             {kyc?.tier !== undefined && (
-              <span className="rounded-full border border-primary/40 px-3 py-1 text-xs font-semibold text-primary">
-                Tier {kyc.tier}
+              <span
+                className="rounded-full border border-primary/40 px-3 py-1 text-xs font-semibold text-primary"
+                title={`${TIER_LABELS[kyc.tier] ?? ''}${kyc.trustScore !== undefined ? ` · trust score ${kyc.trustScore}` : ''}`}
+              >
+                Trust tier {kyc.tier}
               </span>
             )}
           </div>
         </div>
-
+        {!isVerified && stages.length > 0 && (
+          <div className="mt-4">
+            <Progress
+              value={doneCount}
+              max={stages.length}
+              label="Steps done"
+              showValue="fraction"
+            />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {doneCount === stages.length
+                ? 'All steps done. We are finishing the review.'
+                : `${stages.length - doneCount} ${stages.length - doneCount === 1 ? 'step' : 'steps'} to go, each takes a minute or two.`}
+            </p>
+          </div>
+        )}
         {kyc?.verificationStatus === 'REJECTED' && (
           <Alert variant="danger" icon={XCircle} className="mt-3">
             Your previous verification was rejected. Please review your details and try again.
           </Alert>
-        )}
-      </div>
-
-      {/* Consents */}
-      <div className="space-y-4 rounded-2xl border border-border bg-card p-5">
-        {renderConsentRow({
-          consent: idCheckConsent,
-          icon: Fingerprint,
-          title: 'Identity-check consent',
-          body: 'We check your NIN/BVN against official records. Your number is never shown to other users.',
-          onGrant: () => grantIdMutation.mutate(),
-          granting: grantIdMutation.isPending,
-          revoking: revokeConsentMutation.isPending,
-        })}
-        <div className="border-t border-border" />
-        {renderConsentRow({
-          consent: bioConsent,
-          icon: Camera,
-          title: 'Biometric consent',
-          body: 'We capture a selfie and run liveness + face checks. Used only for this verification.',
-          onGrant: () => grantBioMutation.mutate(),
-          granting: grantBioMutation.isPending,
-          revoking: revokeConsentMutation.isPending,
-        })}
-        {bankRequired && (
-          <>
-            <div className="border-t border-border" />
-            {renderConsentRow({
-              consent: bankConsent,
-              icon: Landmark,
-              title: 'Bank-account consent',
-              body: 'We check the account is yours via a name enquiry. Completing this lifts you to Trust Tier 3 (financially verified).',
-              onGrant: () => grantBankMutation.mutate(),
-              granting: grantBankMutation.isPending,
-              revoking: revokeConsentMutation.isPending,
-            })}
-          </>
-        )}
-        {documentRequired && (
-          <>
-            <div className="border-t border-border" />
-            {renderConsentRow({
-              consent: docConsent,
-              icon: FileCheck2,
-              title: 'Document-processing consent',
-              body: 'We verify your professional/authority documents (e.g. agent licence). Required to finish agent onboarding.',
-              onGrant: () => grantDocumentMutation.mutate(),
-              granting: grantDocumentMutation.isPending,
-              revoking: revokeConsentMutation.isPending,
-            })}
-          </>
         )}
       </div>
 
@@ -587,369 +808,110 @@ export const VerificationCenter = ({
         </Alert>
       )}
 
-      {/* Step checklist */}
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="text-sm font-semibold text-foreground">Identity checklist</h3>
-          {verification && (
-            <span className="text-xs text-muted-foreground">
-              {verification.passedSteps} of {verification.stepCount} passed · {verification.status}
-            </span>
+      {isVerified && !verification ? (
+        <p className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+          Your identity checks are complete. Nothing more is needed here.
+        </p>
+      ) : verificationLoading || !verification ? (
+        <div role="status" aria-label="Loading" className="space-y-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-16 w-full rounded-2xl" />
+          ))}
+          {!verificationLoading && !startMutation.isPending && (
+            <p className="text-center text-xs text-muted-foreground">
+              Your verification is ready to start. Reload if it does not appear.
+            </p>
           )}
         </div>
-
-        {verificationLoading ? (
-          <div role="status" aria-label="Loading" className="space-y-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-14 w-full rounded-xl" />
-            ))}
-          </div>
-        ) : verification ? (
-          <>
-            <div className="space-y-2">
-              {steps.map((step) => {
-                const meta = STEP_STATUS_META[step.status] ?? {
-                  label: step.status,
-                  color: 'text-muted-foreground',
-                  bg: 'bg-secondary',
-                };
-                const runnable =
-                  [
-                    ...IDENTITY_STEP_TYPES,
-                    ...BIO_STEP_TYPES,
-                    'PHONE_OTP',
-                    'BANK_ACCOUNT_CHECK',
-                    'DOCUMENT_CHECK',
-                  ].includes(step.stepType) && actionable(step.status);
-                return (
-                  <div
-                    key={step.id}
+      ) : (
+        <ol className="space-y-3" aria-label="Verification steps">
+          {stages.map((stage, index) => {
+            const open = openKey === stage.key && stage.status !== 'done';
+            const chip = STAGE_CHIP[stage.status];
+            const Icon = stage.icon;
+            const bodyId = `verification-stage-${stage.key}`;
+            return (
+              <li
+                key={stage.key}
+                className={cn(
+                  'rounded-2xl border bg-card',
+                  open ? 'border-primary/40' : 'border-border'
+                )}
+              >
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-3 p-4 text-left"
+                  aria-expanded={open}
+                  aria-controls={bodyId}
+                  onClick={() => setOpenStage(open ? '' : stage.key)}
+                >
+                  <span
                     className={cn(
-                      'flex items-center justify-between gap-3 rounded-xl border px-4 py-3',
-                      runnable ? 'border-primary/40 bg-primary/5' : 'border-border'
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
+                      stage.status === 'done'
+                        ? 'bg-success-subtle text-success'
+                        : 'bg-primary/10 text-primary'
                     )}
                   >
-                    <div className="flex items-center gap-3">
-                      {step.status === 'PASSED' ? (
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                      ) : (
-                        <Fingerprint className="h-5 w-5 text-primary" />
-                      )}
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {STEP_LABEL[step.stepType] ?? step.stepType}
-                        </p>
-                        {step.provider && (
-                          <p className="text-[11px] text-muted-foreground">via {step.provider}</p>
-                        )}
-                      </div>
-                    </div>
+                    {stage.status === 'done' ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                      <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                      {stage.title}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{stage.hint}</span>
+                  </span>
+                  {chip.label && (
                     <span
                       className={cn(
                         'shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                        meta.bg,
-                        meta.color
+                        chip.cls
                       )}
                     >
-                      {meta.label}
+                      {chip.label}
                     </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Identity (NIN/BVN) runner */}
-            {runnableIdentity && (
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
-                <p className="text-sm font-semibold text-foreground">
-                  Complete: {STEP_LABEL[runnableIdentity.stepType]}
-                </p>
-                {!idCheckConsent && (
-                  <p className="mt-1 text-xs text-warning">
-                    Grant identity-check consent above before running this check.
-                  </p>
-                )}
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      ID type
-                    </label>
-                    <Select
-                      value={idType}
-                      onValueChange={(value) => setIdType(value as TrustIdType)}
-                      options={TRUST_ID_TYPES.map((type) => ({ value: type, label: type }))}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      {idType === 'NIN'
-                        ? 'NIN number'
-                        : idType === 'BVN'
-                          ? 'BVN number'
-                          : 'ID number'}
-                    </label>
-                    <Input
-                      value={idNumber}
-                      onChange={(e) => setIdNumber(e.target.value)}
-                      placeholder={idType === 'NIN' || idType === 'BVN' ? '11 digits' : 'Number'}
-                      className="w-full"
-                      inputMode="numeric"
-                    />
-                  </div>
-                  <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First name (optional)"
-                    className="w-full"
+                  )}
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
+                      open ? '' : '-rotate-90'
+                    )}
+                    aria-hidden="true"
                   />
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name (optional)"
-                    className="w-full"
-                  />
-                </div>
-                <Button
-                  className="mt-4"
-                  size="sm"
-                  disabled={!identityEnabled}
-                  onClick={() => identityMutation.mutate()}
-                  isLoading={identityMutation.isPending}
-                  loadingText="Checking…"
-                >
-                  Run identity check
-                </Button>
-              </div>
-            )}
-
-            {/* Phone OTP runner */}
-            {runnablePhone && (
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
-                <p className="text-sm font-semibold text-foreground">
-                  Complete: Phone verification
-                </p>
-                {!phoneRef ? (
-                  <Button
-                    className="mt-3"
-                    size="sm"
-                    icon={<Smartphone className="h-4 w-4" />}
-                    isLoading={sendOtpMutation.isPending}
-                    loadingText="Sending…"
-                    onClick={() => sendOtpMutation.mutate()}
-                  >
-                    Send code to my phone
-                  </Button>
-                ) : (
-                  <>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Code sent: in development it is printed to the backend log.
+                </button>
+                <div id={bodyId} hidden={!open} className="space-y-3 border-t border-border p-4">
+                  {stage.status === 'failed' && (
+                    <p className="text-xs text-destructive">
+                      This check did not pass. Check the details and run it again.
                     </p>
-                    <div className="mt-3 flex gap-2">
-                      <div className="w-40">
-                        <NumberInput
-                          aria-label="Verification code"
-                          value={otpCode}
-                          onValueChange={(value) => setOtpCode(value.slice(0, 6))}
-                          placeholder="6-digit code"
-                          maxLength={6}
-                          autoComplete="one-time-code"
-                        />
-                      </div>
-                      <Button
-                        size="sm"
-                        disabled={!otpVerifyEnabled}
-                        onClick={() => verifyOtpMutation.mutate()}
-                        isLoading={verifyOtpMutation.isPending}
-                        loadingText="Verifying…"
-                      >
-                        Verify code
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Biometrics runner */}
-            {runnableBio && (
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
-                <p className="text-sm font-semibold text-foreground">
-                  Complete: Selfie + biometric check
-                </p>
-                {!bioConsent && (
-                  <p className="mt-1 text-xs text-warning">
-                    Grant biometric consent above before running this check.
-                  </p>
-                )}
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <input
-                    ref={selfieInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => setSelfie(e.target.files?.[0] ?? null)}
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => selfieInputRef.current?.click()}
-                  >
-                    <Camera className="mr-2 h-4 w-4" />
-                    {selfie ? selfie.name.slice(0, 30) : 'Choose a selfie'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    disabled={!bioEnabled}
-                    isLoading={bioMutation.isPending}
-                    loadingText="Running…"
-                    onClick={() => bioMutation.mutate()}
-                  >
-                    Run biometric check
-                  </Button>
+                  )}
+                  {stage.status === 'review' && (
+                    <p className="text-xs text-warning">
+                      A reviewer is looking at this. You can carry on with the other steps.
+                    </p>
+                  )}
+                  {stage.body}
                 </div>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Runs selfie capture, liveness and face-match in one step.
-                </p>
-              </div>
-            )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
 
-            {/* Bank account runner */}
-            {runnableBank && (
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
-                <p className="text-sm font-semibold text-foreground">
-                  Complete: Bank account check
-                </p>
-                {!bankConsent && (
-                  <p className="mt-1 text-xs text-warning">
-                    Grant bank-account consent above before running this check.
-                  </p>
-                )}
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <Field label="Account number (10 digits)">
-                    <NumberInput
-                      value={accountNumber}
-                      onValueChange={(value) => setAccountNumber(value.slice(0, 10))}
-                      placeholder="0123456789"
-                      maxLength={10}
-                    />
-                  </Field>
-                  <Field label="Bank code (optional)">
-                    <NumberInput
-                      value={bankCode}
-                      onValueChange={setBankCode}
-                      placeholder="e.g. 058"
-                    />
-                  </Field>
-                  <Field
-                    label="Account holder name (optional: compared for a match)"
-                    className="sm:col-span-2"
-                  >
-                    <Input
-                      value={accountName}
-                      onChange={(e) => setAccountName(e.target.value)}
-                      placeholder="e.g. ACCT HOLDER 6789"
-                      className="w-full"
-                    />
-                  </Field>
-                </div>
-                <Button
-                  className="mt-4"
-                  size="sm"
-                  disabled={!bankEnabled}
-                  onClick={() => bankMutation.mutate()}
-                  isLoading={bankMutation.isPending}
-                  loadingText="Checking…"
-                >
-                  Run bank check
-                </Button>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Passing this step marks you financially verified (Trust Tier 3).
-                </p>
-              </div>
-            )}
-
-            {/* Document runner */}
-            {runnableDocument && (
-              <div className="mt-4 rounded-xl border border-border bg-muted/40 p-4">
-                <p className="text-sm font-semibold text-foreground">Complete: Document check</p>
-                {!docConsent && (
-                  <p className="mt-1 text-xs text-warning">
-                    Grant document-processing consent above before running this check.
-                  </p>
-                )}
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Document type
-                    </label>
-                    <Select
-                      value={documentType}
-                      onValueChange={(value) => setDocumentType(value)}
-                      options={[
-                        'AGENT_LICENSE',
-                        'CERTIFICATE',
-                        'LETTER_OF_AUTHORITY',
-                        'PROFESSIONAL_ID',
-                      ].map((t) => ({ value: t, label: t.replace(/_/g, ' ') }))}
-                      className="w-full"
-                    />
-                  </div>
-                  <Field label="Document number">
-                    <Input
-                      value={documentNumber}
-                      onChange={(e) => setDocumentNumber(e.target.value)}
-                      placeholder="e.g. GR-2026-00123"
-                      className="w-full"
-                    />
-                  </Field>
-                  <Field
-                    label="Holder name (optional: compared for a match)"
-                    className="sm:col-span-2"
-                  >
-                    <Input
-                      value={documentHolder}
-                      onChange={(e) => setDocumentHolder(e.target.value)}
-                      placeholder="e.g. HOLDER 0123"
-                      className="w-full"
-                    />
-                  </Field>
-                </div>
-                <Button
-                  className="mt-4"
-                  size="sm"
-                  disabled={!documentEnabled}
-                  onClick={() => documentMutation.mutate()}
-                  isLoading={documentMutation.isPending}
-                  loadingText="Checking…"
-                >
-                  Run document check
-                </Button>
-              </div>
-            )}
-
-            {verification.decision === 'REJECT' && (
-              <div className="mt-3">
-                <p className="text-sm text-destructive">
-                  This verification was rejected. If you believe this is a mistake, you can appeal
-                  it for a fresh review.
-                </p>
-                <AppealControl
-                  targetType="TRUST_VERIFICATION"
-                  targetId={verification.id}
-                  subject="this verification"
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            {startMutation.isPending
-              ? 'Preparing your verification…'
-              : 'Your verification is ready to start. Reload if it does not appear.'}
-          </div>
-        )}
-      </div>
+      {verification?.decision === 'REJECT' && (
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="text-sm text-destructive">
+            This verification was rejected. If you believe this is a mistake, you can appeal it for
+            a fresh review.
+          </p>
+          <AppealControl
+            targetType="TRUST_VERIFICATION"
+            targetId={verification.id}
+            subject="this verification"
+          />
+        </div>
+      )}
 
       {/* Document path + trust score links: role-aware per mounting page */}
       {(documentsHref || trustScoreHref) && (
@@ -961,7 +923,9 @@ export const VerificationCenter = ({
             >
               <FileCheck2 className="h-5 w-5 text-primary" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground">Upload an identity document</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Or upload an identity document
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Scan your national ID or passport for a human-reviewed verification.
                 </p>
