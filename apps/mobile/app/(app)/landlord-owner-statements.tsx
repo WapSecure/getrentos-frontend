@@ -4,7 +4,7 @@ import { RefreshControl, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RotateCcw, Send, Wallet, Plus } from 'lucide-react-native';
+import { RotateCcw, Send, Sparkles, Wallet, Plus } from 'lucide-react-native';
 import {
   Badge,
   Button,
@@ -27,6 +27,7 @@ import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 import { planRefusal, retryUnlessPlanGate } from '@/lib/api/estateGate';
+import { StatementExplainer } from '@/components/landlord/StatementExplainer';
 import { ProUpsell } from '@/components/estate/governance/ProUpsell';
 
 export default function LandlordOwnerStatements() {
@@ -176,6 +177,7 @@ function StatementCard({
   onRetry: () => void;
 }) {
   const { colors, spacing } = useTheme();
+  const [explaining, setExplaining] = useState(false);
 
   return (
     <Card padding={spacing.lg} style={{ marginBottom: spacing.sm }}>
@@ -209,6 +211,16 @@ function StatementCard({
             {s.transferRef ? ` · ref ${s.transferRef}` : ''}
           </Text>
         ) : null}
+
+        <Button
+          label={explaining ? 'Hide explanation' : 'Explain this statement'}
+          variant="ghost"
+          size="sm"
+          onPress={() => setExplaining((v) => !v)}
+          icon={<Sparkles size={14} color={colors.primary} />}
+          accessibilityState={{ expanded: explaining }}
+        />
+        {explaining ? <StatementExplainer statementId={s.id} /> : null}
 
         {s.status === 'draft' || s.payoutStatus === 'failed' ? (
           <Button
