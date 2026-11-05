@@ -270,6 +270,11 @@ export const qk = {
     detail: (kind: string, id: string) => ['market', 'detail', kind, id] as const,
     estates: (search?: string) => ['market', 'estates', search ?? null] as const,
     saved: ['market', 'saved'] as const,
+    microsite: (slug: string) => ['market', 'microsite', slug] as const,
+    micrositeListings: (slug: string) => ['market', 'microsite', slug, 'listings'] as const,
+    storefront: (slug: string) => ['market', 'storefront', slug] as const,
+    storefrontListings: (slug: string, type: string) =>
+      ['market', 'storefront', slug, 'listings', type] as const,
   },
   realtor: {
     dashboard: ['realtor', 'dashboard'] as const,

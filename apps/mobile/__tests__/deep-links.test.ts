@@ -43,6 +43,19 @@ describe('links into the app', () => {
     });
   });
 
+  it('opens landlord and estate public pages', () => {
+    expect(go('https://getrentos.com/l/ada-homes')).toEqual({
+      route: '/(public)/landlord/ada-homes',
+    });
+    expect(go('https://getrentos.com/e/palm-court-estate')).toEqual({
+      route: '/(public)/estate/palm-court-estate',
+    });
+    expect(go('https://getrentos.com/l/ada-homes/extra')).toEqual({
+      web: 'https://getrentos.com/l/ada-homes/extra',
+    });
+    expect(go('https://getrentos.com/login')).toBeNull();
+  });
+
   it('sends a dashboard page the app lacks to the home screen', () => {
     expect(go('https://getrentos.com/landlord/some-new-page')).toEqual({ route: '/' });
   });

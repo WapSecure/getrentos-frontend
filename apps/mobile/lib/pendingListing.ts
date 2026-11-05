@@ -1,4 +1,4 @@
-import type { Href } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import type { MarketKind } from './api/publicMarket';
 import type { Portal } from './roles';
 
@@ -85,4 +85,19 @@ export function takeListingIntent(
   if (!intent) return { href: null, blockedKind: null };
   const href = inAppListingHref(intent.kind, intent.id, portal);
   return { href, blockedKind: href ? null : intent.kind };
+}
+
+/**
+ * Opens a listing from a page anyone can see (a landlord's or estate's public
+ * page): straight into the person's workspace when it shows this kind, else
+ * the public listing, remembered so signing in lands back on it.
+ */
+export function openMarketListing(kind: MarketKind, id: string, portal: Portal | null) {
+  const inApp = portal && inAppListingHref(kind, id, portal);
+  if (inApp) {
+    router.push(inApp as never);
+    return;
+  }
+  rememberListing(kind, id);
+  router.push({ pathname: '/(market)/listing/[kind]/[id]', params: { kind, id } });
 }

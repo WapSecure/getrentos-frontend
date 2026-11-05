@@ -47,8 +47,9 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     // sees onboarding flash before the welcome screen.
     if (status === 'loading' || onboardingSeen === null) return;
 
-    // '(auth)' | '(market)' | '(app)' | undefined (index). The public market is
-    // open to signed-out visitors; signed-in users fall through to their portal.
+    // '(auth)' | '(market)' | '(public)' | '(app)' | undefined (index). The
+    // public market is open to signed-out visitors; signed-in users fall through
+    // to their portal. '(public)' profile pages are open to both.
     const root = segments[0];
     const inApp = root === '(app)';
     // Route on the portal we can OPEN, not on the user's most senior role:
@@ -70,8 +71,8 @@ function useProtectedRoute(onboardingSeen: boolean | null) {
     if (status === 'unauthenticated') {
       if (inApp || root === undefined)
         target = onboardingSeen ? '/(auth)/welcome' : '/(auth)/onboarding';
-    } else {
-      // authenticated
+    } else if (root !== '(public)') {
+      // authenticated (public profile pages, a landlord's or estate's, stay open)
       const group = (segments as string[])[1];
       if (!inApp) {
         target = portalReady ? portalHref(usablePortal) : '/(app)/portal-unavailable';
@@ -142,6 +143,7 @@ function Gate() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(market)" />
+        <Stack.Screen name="(public)" />
         <Stack.Screen name="(app)" />
       </Stack>
       <AppLockGate />

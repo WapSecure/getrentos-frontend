@@ -36,11 +36,12 @@ function withAppLinks(config, domain) {
           action: 'VIEW',
           autoVerify: true,
           category: ['BROWSABLE', 'DEFAULT'],
-          data: appLinks.claimed.map((pathPrefix) => ({
-            scheme: 'https',
-            host: domain,
-            pathPrefix,
-          })),
+          // Each path exactly, and everything below it. A bare pathPrefix is a
+          // plain string match, so "/l" alone would also catch "/login".
+          data: appLinks.claimed.flatMap((path) => [
+            { scheme: 'https', host: domain, path },
+            { scheme: 'https', host: domain, pathPrefix: `${path}/` },
+          ]),
         },
       ],
     },
