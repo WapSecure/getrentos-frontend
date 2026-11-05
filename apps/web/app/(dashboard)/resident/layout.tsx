@@ -70,7 +70,11 @@ export default function ResidentLayout({ children }: { children: ReactNode }) {
         <ResidentNavbar user={user} />
         <div className="flex">
           <ResidentSidebar />
-          <main className="min-w-0 flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="min-w-0 flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8"
+          >
             <div className="max-w-7xl mx-auto">{children}</div>
           </main>
         </div>
