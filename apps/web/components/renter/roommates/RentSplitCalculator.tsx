@@ -75,7 +75,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Calculator className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Rent Split Calculator</h3>
+          <h3 className="font-semibold text-foreground">Rent split calculator</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Calculate fair rent splits</p>
       </div>
@@ -87,16 +87,16 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
 
         <div>
           <p className="block text-sm font-medium text-foreground mb-1" id="split-method-label">
-            Split Method
+            Split method
           </p>
           <SegmentedControl
-            aria-label="Split Method"
+            aria-label="Split method"
             value={splitMethod}
             onValueChange={handleSplitMethodChange}
             size="sm"
             segments={[
               { value: 'equal', label: 'Equal' },
-              { value: 'percentage', label: 'By Share %' },
+              { value: 'percentage', label: 'By share %' },
               { value: 'custom', label: 'Custom' },
             ]}
           />
@@ -120,7 +120,7 @@ export const RentSplitCalculator = ({ roommates }: RentSplitCalculatorProps) => 
         )}
 
         <div className="pt-3 border-t border-border">
-          <p className="text-sm font-medium text-foreground mb-2">Split Results</p>
+          <p className="text-sm font-medium text-foreground mb-2">Split results</p>
           <div className="space-y-2">
             {splits.map((split) => (
               <div key={split.id} className="flex justify-between items-center text-sm">

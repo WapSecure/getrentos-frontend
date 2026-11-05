@@ -30,7 +30,7 @@ const formatCurrency = (amount: number) =>
 
 const quickLinks = [
   {
-    label: 'Visitor Passes',
+    label: 'Visitor passes',
     description: 'Invite guests',
     href: ROUTES.RESIDENT_VISITOR_PASSES,
     icon: KeyRound,

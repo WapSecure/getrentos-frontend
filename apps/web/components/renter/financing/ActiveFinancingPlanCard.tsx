@@ -16,7 +16,7 @@ const statusConfig: Record<
   { label: string; variant: BadgeVariant; icon: React.ElementType }
 > = {
   paid: { label: 'Paid', variant: 'success', icon: CheckCircle2 },
-  due: { label: 'Due Now', variant: 'warning', icon: Clock },
+  due: { label: 'Due now', variant: 'warning', icon: Clock },
   overdue: { label: 'Overdue', variant: 'danger', icon: AlertCircle },
   upcoming: { label: 'Upcoming', variant: 'neutral', icon: Clock },
 };
@@ -39,7 +39,7 @@ export const ActiveFinancingPlanCard = ({
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-4 h-4 text-primary" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                  Active Flex Plan
+                  Active Flex plan
                 </span>
               </div>
               <h1 className="text-xl font-bold text-foreground">{plan.propertyName}</h1>
@@ -57,15 +57,15 @@ export const ActiveFinancingPlanCard = ({
         <div className="p-6 sm:p-7">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
             <Stat
-              label="Financed Amount"
+              label="Financed amount"
               value={formatCurrency(plan.rentAmount, { compact: true })}
             />
             <Stat
-              label="Monthly Installment"
+              label="Monthly installment"
               value={formatCurrency(plan.monthlyInstallment, { compact: true })}
             />
             <Stat label="Term" value={`${plan.planLengthMonths} months`} />
-            <Stat label="Service Fee" value={`${plan.feePercent}%`} />
+            <Stat label="Service fee" value={`${plan.feePercent}%`} />
           </div>
 
           <div className="mb-6">
@@ -97,13 +97,13 @@ export const ActiveFinancingPlanCard = ({
                 onClick={() => onPayInstallment(nextDue.id)}
                 isLoading={isPaying}
               >
-                Pay Installment
+                Pay installment
               </Button>
             </div>
           )}
 
           <div>
-            <p className="text-sm font-medium text-foreground mb-3">Installment Schedule</p>
+            <p className="text-sm font-medium text-foreground mb-3">Installment schedule</p>
             <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
               {plan.installments.map((installment) => (
                 <InstallmentRow key={installment.id} installment={installment} />

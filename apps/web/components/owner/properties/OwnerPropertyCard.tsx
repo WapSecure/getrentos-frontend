@@ -35,12 +35,12 @@ const verificationConfig: Record<
     variant: 'success',
   },
   pending_review: {
-    label: 'Pending Review',
+    label: 'Pending review',
     icon: ShieldAlert,
     variant: 'warning',
   },
   needs_clarification: {
-    label: 'Needs Clarification',
+    label: 'Needs clarification',
     icon: HelpCircle,
     variant: 'warning',
   },
@@ -121,11 +121,11 @@ export const OwnerPropertyCard = ({
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onSelect={() => onEdit?.()}>
               <Pencil className="w-4 h-4" />
-              Edit Property
+              Edit property
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => onDelete?.()} className="text-destructive">
               <Trash2 className="w-4 h-4" />
-              Delete Property
+              Delete property
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

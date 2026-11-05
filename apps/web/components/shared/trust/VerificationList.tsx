@@ -37,7 +37,7 @@ export const VerificationList = ({ verifications }: VerificationListProps) => {
     <div className="bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-4 border-b border-border flex justify-between items-center">
         <div>
-          <h3 className="font-semibold text-foreground">Verification Status</h3>
+          <h3 className="font-semibold text-foreground">Verification status</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {verifiedCount} of {totalCount} verifications completed
           </p>

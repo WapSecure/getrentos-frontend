@@ -44,7 +44,7 @@ export const DocumentShareModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && !isSharing && onClose()}>
       <DialogContent padded={false} showClose={!isSharing}>
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Share Document</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Share document</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {documentName}
           </DialogDescription>

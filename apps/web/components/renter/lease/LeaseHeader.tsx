@@ -45,7 +45,7 @@ export const LeaseHeader = ({ lease, renewalOffer }: LeaseHeaderProps) => {
         };
       case 'expiring':
         return {
-          label: 'Expiring Soon',
+          label: 'Expiring soon',
           variant: 'warning' as BadgeVariant,
           icon: AlertCircle,
         };

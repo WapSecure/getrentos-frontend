@@ -25,7 +25,7 @@ export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => 
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-foreground">Maintenance Analytics</h2>
+          <h2 className="font-semibold text-foreground">Maintenance analytics</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Performance insights</p>
       </div>
@@ -35,14 +35,14 @@ export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => 
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <CheckCircle className="w-3 h-3 text-success" />
-              <span className="text-xs text-muted-foreground">Resolution Rate</span>
+              <span className="text-xs text-muted-foreground">Resolution rate</span>
             </div>
             <p className="text-lg font-bold text-foreground">{resolutionRate}%</p>
           </div>
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-info" />
-              <span className="text-xs text-muted-foreground">Avg Response</span>
+              <span className="text-xs text-muted-foreground">Avg response</span>
             </div>
             <p className="text-lg font-bold text-foreground">{avgResponseTime}h</p>
           </div>
@@ -51,7 +51,7 @@ export const MaintenanceAnalytics = ({ summary }: MaintenanceAnalyticsProps) => 
         <div className="p-3 rounded-lg bg-secondary">
           <div className="flex items-center gap-1">
             <AlertCircle className="w-3 h-3 text-destructive" />
-            <span className="text-xs text-muted-foreground">Urgent Requests</span>
+            <span className="text-xs text-muted-foreground">Urgent requests</span>
           </div>
           <p className="text-lg font-bold text-destructive">{urgentRequests}</p>
         </div>

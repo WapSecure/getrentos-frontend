@@ -54,12 +54,12 @@ const actorConfig: Record<
 const escrowSteps: { key: SaleEscrowStatus; label: string; description: string }[] = [
   {
     key: 'deposit_pending',
-    label: 'Deposit Pending',
+    label: 'Deposit pending',
     description: 'Waiting for the buyer to pay their deposit to GetRentos.',
   },
   {
     key: 'funds_held',
-    label: 'Funds Held',
+    label: 'Funds held',
     description:
       'Deposit received and held safely by GetRentos. It is released to you when the buyer confirms receipt.',
   },
@@ -225,7 +225,7 @@ export const EscrowTransactionDetailModal = ({
             >
               <span className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <ScrollText className="h-4 w-4 text-muted-foreground" />
-                Activity Log
+                Activity log
                 <span className="text-xs font-normal text-muted-foreground">
                   ({transaction.activityLog.length} events)
                 </span>
@@ -269,7 +269,7 @@ export const EscrowTransactionDetailModal = ({
             onClick={() => router.push(ROUTES.OWNER_MESSAGES)}
             icon={<LifeBuoy className="h-4 w-4" />}
           >
-            Contact Support
+            Contact support
           </Button>
         </div>
       </DialogContent>

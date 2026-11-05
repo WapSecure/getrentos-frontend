@@ -137,7 +137,7 @@ export const BuyerOfferNegotiationModal = ({
 
         {isCountering ? (
           <div className="p-4 border-t border-border space-y-3 shrink-0">
-            <Field label="New Offer Amount">
+            <Field label="New offer amount">
               <CurrencyInput
                 prefix="₦"
                 min={0}
@@ -163,7 +163,7 @@ export const BuyerOfferNegotiationModal = ({
                 disabled={!counterAmount || isSubmitting}
                 isLoading={isSubmitting}
               >
-                Send Counter
+                Send counter
               </Button>
             </div>
             {errorMessage && (

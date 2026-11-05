@@ -16,7 +16,7 @@ import type { ApplicationStatus, RentalApplication } from '@/types/landlord';
 const statusFilters: { value: 'all' | ApplicationStatus; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'pending', label: 'Pending' },
-  { value: 'under_review', label: 'Under Review' },
+  { value: 'under_review', label: 'Under review' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
 ];

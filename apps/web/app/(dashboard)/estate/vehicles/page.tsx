@@ -26,7 +26,7 @@ type StatusFilter = 'all' | 'inside' | 'exited';
 
 const statusFilters: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'inside', label: 'Currently Inside' },
+  { value: 'inside', label: 'Currently inside' },
   { value: 'exited', label: 'Exited' },
 ];
 
@@ -119,11 +119,11 @@ export default function EstateVehiclesPage() {
           <>
             <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
               <Settings2 className="w-4 h-4" />
-              Manage Gates
+              Manage gates
             </Button>
             <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
               <Plus className="w-4 h-4" />
-              Log Vehicle
+              Log vehicle
             </Button>
           </>
         }

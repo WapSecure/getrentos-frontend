@@ -20,7 +20,7 @@ const statusConfig: Record<
   { label: string; icon: React.ElementType; variant: BadgeVariant }
 > = {
   draft: { label: 'Draft', icon: FileEdit, variant: 'neutral' },
-  pending_approval: { label: 'Pending Approval', icon: ShieldAlert, variant: 'warning' },
+  pending_approval: { label: 'Pending approval', icon: ShieldAlert, variant: 'warning' },
   published: { label: 'Published', icon: Megaphone, variant: 'success' },
   paused: { label: 'Paused', icon: Pause, variant: 'warning' },
   closed: { label: 'Closed', icon: XCircle, variant: 'danger' },
@@ -51,7 +51,7 @@ export const RealtorListingPreviewModal = ({
                 {statusConfig[listing.status].label}
               </Badge>
               <div className="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-primary bg-accent">
-                {listing.category === 'sale' ? 'For Sale' : 'For Rent'}
+                {listing.category === 'sale' ? 'For sale' : 'For rent'}
               </div>
             </div>
 

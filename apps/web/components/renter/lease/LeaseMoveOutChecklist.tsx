@@ -53,10 +53,10 @@ export const LeaseMoveOutChecklist = () => {
       )
       .join('');
     printHtml(
-      'Move-Out Condition Report',
-      `<h1>Move-Out Condition Report</h1>
+      'Move-out condition report',
+      `<h1>Move-out condition report</h1>
        <p class="meta">Generated ${date} · ${completedCount}/${totalCount} items completed</p>
-       <h2>Checklist Status</h2>
+       <h2>Checklist status</h2>
        <table><thead><tr><th>Item</th><th>Description</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`
     );
   };
@@ -73,7 +73,7 @@ export const LeaseMoveOutChecklist = () => {
           <div className="flex items-center gap-3">
             <FileText className="w-5 h-5 text-primary" />
             <div className="text-left">
-              <h3 className="font-semibold text-foreground">Move-Out Checklist</h3>
+              <h3 className="font-semibold text-foreground">Move-out checklist</h3>
               <p className="text-xs text-muted-foreground">
                 {completedCount}/{totalCount} items completed
               </p>
@@ -124,7 +124,7 @@ export const LeaseMoveOutChecklist = () => {
               onClick={handleDocumentCondition}
             >
               <Camera className="w-4 h-4" />
-              Document Condition
+              Document condition
             </Button>
           </div>
         )}

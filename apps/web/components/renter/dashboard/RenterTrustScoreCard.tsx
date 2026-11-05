@@ -134,7 +134,7 @@ export const RenterTrustScoreCard = () => {
 
         <div className="mb-5">
           <div className="mb-2 flex justify-between text-xs text-muted-foreground">
-            <span>Verification Progress</span>
+            <span>Verification progress</span>
             <span>
               {verifiedCount}/{totalCount} completed
             </span>

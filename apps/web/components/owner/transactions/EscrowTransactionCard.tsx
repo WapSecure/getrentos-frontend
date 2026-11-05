@@ -8,14 +8,14 @@ import type { EscrowSaleTransaction, SaleEscrowStatus } from '@/types/owner';
 
 // Only the states the backend drives a sale through: deposit → held → released.
 const escrowSteps: { key: SaleEscrowStatus; label: string }[] = [
-  { key: 'deposit_pending', label: 'Deposit Pending' },
-  { key: 'funds_held', label: 'Funds Held' },
+  { key: 'deposit_pending', label: 'Deposit pending' },
+  { key: 'funds_held', label: 'Funds held' },
   { key: 'released', label: 'Released' },
 ];
 
 const statusLabels: Record<SaleEscrowStatus, string> = {
-  deposit_pending: 'Deposit Pending',
-  funds_held: 'Funds Held',
+  deposit_pending: 'Deposit pending',
+  funds_held: 'Funds held',
   released: 'Released',
   frozen: 'Frozen: Dispute',
   refunded: 'Refunded',

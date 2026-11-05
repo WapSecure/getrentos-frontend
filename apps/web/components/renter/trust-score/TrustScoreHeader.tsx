@@ -24,7 +24,7 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold text-foreground">Trust Score</h1>
+            <h1 className="text-2xl font-bold text-foreground">Trust score</h1>
             <Badge variant={bandVariant} icon={<Shield className="w-4 h-4" aria-hidden="true" />}>
               {scoreInfo.label}
             </Badge>
@@ -35,7 +35,7 @@ export const TrustScoreHeader = ({ trustScore }: TrustScoreHeaderProps) => {
         </div>
 
         <Button variant="primary" size="sm" icon={<TrendingUp className="w-4 h-4" />}>
-          Improve Score
+          Improve score
         </Button>
       </div>
 

@@ -18,18 +18,18 @@ const statusOptions: {
   value: 'all' | 'pending' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
   label: string;
 }[] = [
-  { value: 'all', label: 'All Applications' },
+  { value: 'all', label: 'All applications' },
   { value: 'pending', label: 'Pending' },
-  { value: 'under_review', label: 'Under Review' },
+  { value: 'under_review', label: 'Under review' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
   { value: 'withdrawn', label: 'Withdrawn' },
 ];
 
 const sortOptions: { value: 'recent' | 'property' | 'status'; label: string }[] = [
-  { value: 'recent', label: 'Most Recent' },
-  { value: 'property', label: 'By Property' },
-  { value: 'status', label: 'By Status' },
+  { value: 'recent', label: 'Most recent' },
+  { value: 'property', label: 'By property' },
+  { value: 'status', label: 'By status' },
 ];
 
 export const ApplicationsFilterSort = ({

@@ -25,7 +25,7 @@ import type { IncidentStatus } from '@/types/estate';
 const statusFilters: { value: IncidentStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In Progress' },
+  { value: 'in_progress', label: 'In progress' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'dismissed', label: 'Dismissed' },
 ];
@@ -119,7 +119,7 @@ export default function EstateIncidentsPage() {
         actions={
           <Button variant="primary" className="gap-2" onClick={() => setIsReportOpen(true)}>
             <Plus className="w-4 h-4" />
-            Report Incident
+            Report incident
           </Button>
         }
       />

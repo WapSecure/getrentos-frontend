@@ -21,12 +21,12 @@ import { unwrap } from '@/lib/apiHelpers';
 import type { BuyerDocument } from '@/types/buyer';
 
 const categoryLabels: Record<BuyerDocument['category'], string> = {
-  proof_of_funds: 'Proof of Funds',
-  mortgage_preapproval: 'Mortgage Pre-Approval',
-  identity: 'Identity Document',
-  transfer_agreement: 'Transfer Agreement',
-  title_deed: 'Title Deed',
-  payment_receipt: 'Payment Receipt',
+  proof_of_funds: 'Proof of funds',
+  mortgage_preapproval: 'Mortgage pre-approval',
+  identity: 'Identity document',
+  transfer_agreement: 'Transfer agreement',
+  title_deed: 'Title deed',
+  payment_receipt: 'Payment receipt',
 };
 
 type CategoryFilter = 'all' | BuyerDocument['category'];
@@ -71,11 +71,11 @@ export default function BuyerDocumentsPage() {
 
   const categoryFilters: { value: CategoryFilter; label: string }[] = [
     { value: 'all', label: 'All' },
-    { value: 'proof_of_funds', label: 'Proof of Funds' },
+    { value: 'proof_of_funds', label: 'Proof of funds' },
     { value: 'mortgage_preapproval', label: 'Mortgage' },
     { value: 'identity', label: 'Identity' },
     { value: 'transfer_agreement', label: 'Transfer' },
-    { value: 'title_deed', label: 'Title Deeds' },
+    { value: 'title_deed', label: 'Title deeds' },
     { value: 'payment_receipt', label: 'Receipts' },
   ];
 
@@ -95,7 +95,7 @@ export default function BuyerDocumentsPage() {
             className="w-fit"
             onClick={() => setIsUploadOpen(true)}
           >
-            Upload Document
+            Upload document
           </Button>
         }
       />

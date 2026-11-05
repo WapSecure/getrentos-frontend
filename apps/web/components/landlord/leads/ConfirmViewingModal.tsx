@@ -51,7 +51,7 @@ export const ConfirmViewingModal = ({
       <DialogContent size="sm" padded={false}>
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Confirm Viewing</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Confirm viewing</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               {lead.leadName} · {lead.propertyName}
             </DialogDescription>

@@ -33,7 +33,7 @@ export const ScoreFactors = ({ verifications }: ScoreFactorsProps) => {
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Score Factors</h3>
+        <h3 className="font-semibold text-foreground">Score factors</h3>
         <p className="text-xs text-muted-foreground mt-0.5">What impacts your trust score</p>
       </div>
 

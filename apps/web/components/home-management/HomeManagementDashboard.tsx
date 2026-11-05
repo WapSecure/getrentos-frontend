@@ -9,10 +9,10 @@ const cards = [
   // This is the count of assets in ACTIVE service, not the register size, so
   // the label has to say so: otherwise "0" next to a full asset register reads
   // as a broken number rather than as every asset needing attention.
-  { key: 'assets', label: 'Assets in Service', icon: Boxes },
-  { key: 'plansDue', label: 'Care Plans Due', icon: CalendarClock },
-  { key: 'openWorkOrders', label: 'Open Work Orders', icon: ClipboardList },
-  { key: 'approvalQueue', label: 'Awaiting Approval', icon: ShieldCheck },
+  { key: 'assets', label: 'Assets in service', icon: Boxes },
+  { key: 'plansDue', label: 'Care plans due', icon: CalendarClock },
+  { key: 'openWorkOrders', label: 'Open work orders', icon: ClipboardList },
+  { key: 'approvalQueue', label: 'Awaiting approval', icon: ShieldCheck },
   { key: 'overdue', label: 'Overdue', icon: TriangleAlert },
 ];
 export function HomeManagementDashboard() {

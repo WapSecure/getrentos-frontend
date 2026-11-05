@@ -40,7 +40,7 @@ interface CreateDuesModalProps {
 
 const categoryOptions = [
   { value: 'LEVY', label: 'Levy' },
-  { value: 'SERVICE_CHARGE', label: 'Service Charge' },
+  { value: 'SERVICE_CHARGE', label: 'Service charge' },
   { value: 'DEPOSIT', label: 'Deposit' },
 ];
 
@@ -99,7 +99,7 @@ export const CreateDuesModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Charge Dues</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Charge dues</DialogTitle>
 
         <div className="mt-4 space-y-4">
           <Field label="Amount" required>
@@ -111,7 +111,7 @@ export const CreateDuesModal = ({
             />
           </Field>
 
-          <Field label="Due Date" required>
+          <Field label="Due date" required>
             <DatePicker value={dueDate} onChange={setDueDate} />
           </Field>
 
@@ -119,7 +119,7 @@ export const CreateDuesModal = ({
             <Field label="Category">
               <Select value={category} onValueChange={setCategory} options={categoryOptions} />
             </Field>
-            <Field label="Billing Cycle">
+            <Field label="Billing cycle">
               <Select
                 value={billingCycle}
                 onValueChange={setBillingCycle}
@@ -213,7 +213,7 @@ export const CreateDuesModal = ({
               })
             }
           >
-            Charge Dues
+            Charge dues
           </Button>
         </div>
       </DialogContent>

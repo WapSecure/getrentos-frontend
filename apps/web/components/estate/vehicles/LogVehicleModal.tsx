@@ -66,7 +66,7 @@ export const LogVehicleModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Log Vehicle</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Log vehicle</DialogTitle>
 
         <div className="mt-5 space-y-4">
           <Field label="Plate number" required>
@@ -143,7 +143,7 @@ export const LogVehicleModal = ({
               })
             }
           >
-            Log Vehicle
+            Log vehicle
           </Button>
         </div>
       </DialogContent>

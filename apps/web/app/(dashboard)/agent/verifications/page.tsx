@@ -108,7 +108,7 @@ function AgentVerificationsPageContent() {
           agent?.id
         );
         toast.info(
-          'Verification saved on this device. Upload it from the Sync Center when connected.'
+          'Verification saved on this device. Upload it from the Sync center when connected.'
         );
         return true;
       } catch {
@@ -120,7 +120,7 @@ function AgentVerificationsPageContent() {
   return (
     <>
       <PageHeader
-        title="Verification Visits"
+        title="Verification visits"
         description={
           <>
             {total} visit{total === 1 ? '' : 's'} recorded
@@ -132,7 +132,7 @@ function AgentVerificationsPageContent() {
             icon={<Plus className="w-4 h-4" />}
             onClick={() => setIsModalOpen(true)}
           >
-            Log Verification
+            Log verification
           </Button>
         }
       />

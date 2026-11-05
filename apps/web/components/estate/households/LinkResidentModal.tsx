@@ -37,7 +37,7 @@ export const LinkResidentModal = ({
   return (
     <Dialog open={!!household} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="sm">
-        <DialogTitle className="text-lg font-semibold text-foreground">Link Resident</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Link resident</DialogTitle>
         <DialogDescription className="mt-1 text-sm text-muted-foreground">
           {household?.unitLabel}
         </DialogDescription>
@@ -69,7 +69,7 @@ export const LinkResidentModal = ({
             loadingText="Linking…"
             onClick={() => onSubmit(email.trim())}
           >
-            Link Resident
+            Link resident
           </Button>
         </div>
       </DialogContent>

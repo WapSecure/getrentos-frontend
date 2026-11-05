@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck, ShieldAlert, ShieldX, HelpCircle } from 'lucide-react';
@@ -19,13 +18,13 @@ const statusConfig: Record<
     bg: 'bg-success-subtle',
   },
   PENDING_REVIEW: {
-    label: 'Pending Review',
+    label: 'Pending review',
     icon: ShieldAlert,
     color: 'text-warning',
     bg: 'bg-warning-subtle',
   },
   NEEDS_CLARIFICATION: {
-    label: 'Needs Clarification',
+    label: 'Needs clarification',
     icon: HelpCircle,
     color: 'text-warning',
     bg: 'bg-warning-subtle',
@@ -74,7 +73,7 @@ export const LicenseVerificationSettings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">License Verification</h3>
+        <h3 className="text-lg font-semibold text-foreground">License verification</h3>
         <p className="text-sm text-muted-foreground mt-1">
           Verify your realtor/agent license to unlock inviting owners and landlords as clients.
         </p>
@@ -126,7 +125,7 @@ export const LicenseVerificationSettings = () => {
             isLoading={submitMutation.isPending}
             loadingText="Submitting…"
           >
-            Submit for Verification
+            Submit for verification
           </Button>
         </div>
       )}

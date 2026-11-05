@@ -71,7 +71,7 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="sm">
-        <DialogTitle className="text-lg font-semibold text-foreground">Manage Gates</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Manage gates</DialogTitle>
 
         <div className="mt-4">
           {isLoading ? (
@@ -114,7 +114,7 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Main Gate"
+                placeholder="e.g. Main gate"
               />
             </Field>
             <Field label="Location" optionalLabel="(optional)">
@@ -134,7 +134,7 @@ export const ManageGatesModal = ({ isOpen, estateId, onClose }: ManageGatesModal
             loadingText="Adding…"
             onClick={() => createGate.mutate()}
           >
-            Add Gate
+            Add gate
           </Button>
         </div>
       </DialogContent>

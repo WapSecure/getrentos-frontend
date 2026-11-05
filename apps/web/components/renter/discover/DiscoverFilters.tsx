@@ -156,7 +156,7 @@ export const DiscoverFilters = ({ onApplyFilters }: DiscoverFiltersProps) => {
             </div>
 
             {/* Property Type */}
-            <Field label="Property Type">
+            <Field label="Property type">
               <Select
                 value={filters.propertyType}
                 onValueChange={(v) => handleChange('propertyType', v)}

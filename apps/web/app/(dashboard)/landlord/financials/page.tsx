@@ -13,8 +13,8 @@ const TABS: HubTab[] = [
   { id: 'overview', label: 'Overview', icon: PieChart },
   { id: 'portfolio', label: 'Portfolio', icon: Building2 },
   { id: 'budgets', label: 'Budgets', icon: Target },
-  { id: 'statements', label: 'Owner Statements', icon: FileBarChart },
-  { id: 'payouts', label: 'Auto Payouts', icon: Repeat },
+  { id: 'statements', label: 'Owner statements', icon: FileBarChart },
+  { id: 'payouts', label: 'Auto payouts', icon: Repeat },
   { id: 'reports', label: 'Reports', icon: ClipboardList },
 ];
 

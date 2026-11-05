@@ -190,7 +190,7 @@ export const AddClientModal = ({
             isLoading={isSubmitting || check.isPending}
             disabled={!email.trim()}
           >
-            {verifiedEligible ? 'Send Invitation' : 'Verify & Send Invitation'}
+            {verifiedEligible ? 'Send invitation' : 'Verify & send invitation'}
           </Button>
         </div>
       </DialogContent>

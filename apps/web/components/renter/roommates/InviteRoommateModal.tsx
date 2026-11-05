@@ -46,13 +46,13 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
-        <DialogTitle className="pr-8 font-semibold text-foreground">Invite Roommate</DialogTitle>
+        <DialogTitle className="pr-8 font-semibold text-foreground">Invite roommate</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           Send an invitation to join your household
         </DialogDescription>
 
         <div className="mt-4 space-y-4">
-          <Field label="Email Address" required>
+          <Field label="Email address" required>
             <Input
               type="email"
               value={email}
@@ -61,7 +61,7 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
             />
           </Field>
 
-          <Field label="Personal Message" optionalLabel="(Optional)">
+          <Field label="Personal message" optionalLabel="(Optional)">
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -85,7 +85,7 @@ export const InviteRoommateModal = ({ isOpen, onClose, onInvite }: InviteRoommat
             isLoading={isSubmitting}
             icon={<Send className="w-4 h-4" />}
           >
-            Send Invitation
+            Send invitation
           </Button>
         </div>
       </DialogContent>

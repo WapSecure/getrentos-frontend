@@ -159,7 +159,8 @@ function PropertyCardBase({
     <View
       style={{
         width: row ? 116 : '100%',
-        height: row ? 116 : 196,
+        // A photo gets a photo's height; "no photo yet" gets a short strip.
+        height: row ? 116 : property.image ? 196 : 96,
         backgroundColor: colors.secondary,
       }}
     >

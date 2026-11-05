@@ -41,8 +41,8 @@ const statusLabels: Record<VisitorPass['status'], string> = {
   pending: 'Pending',
   awaiting_approval: 'Needs your answer',
   approved: 'Approved',
-  checked_in: 'Checked In',
-  checked_out: 'Checked Out',
+  checked_in: 'Checked in',
+  checked_out: 'Checked out',
   expired: 'Expired',
   revoked: 'Revoked',
   denied: 'Refused',
@@ -131,7 +131,7 @@ export default function ResidentVisitorPassesPage() {
   return (
     <>
       <PageHeader
-        title="Visitor Passes"
+        title="Visitor passes"
         description={
           <>
             {data
@@ -145,7 +145,7 @@ export default function ResidentVisitorPassesPage() {
             icon={<Plus className="w-4 h-4" />}
             onClick={() => setIsIssueModalOpen(true)}
           >
-            Issue Pass
+            Issue pass
           </Button>
         }
       />

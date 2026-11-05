@@ -23,7 +23,7 @@ import type { CommitteeTitle } from '@/types/estate';
 
 const titleOptions: { value: CommitteeTitle; label: string }[] = [
   { value: 'president', label: 'President' },
-  { value: 'vice_president', label: 'Vice President' },
+  { value: 'vice_president', label: 'Vice president' },
   { value: 'secretary', label: 'Secretary' },
   { value: 'treasurer', label: 'Treasurer' },
   { value: 'member', label: 'Member' },
@@ -31,7 +31,7 @@ const titleOptions: { value: CommitteeTitle; label: string }[] = [
 
 const titleLabel: Record<CommitteeTitle, string> = {
   president: 'President',
-  vice_president: 'Vice President',
+  vice_president: 'Vice president',
   secretary: 'Secretary',
   treasurer: 'Treasurer',
   member: 'Member',

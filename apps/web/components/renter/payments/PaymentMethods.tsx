@@ -58,7 +58,7 @@ export const PaymentMethods = ({ methods, onSetDefault, onRemove, onAdd }: Payme
       <div className="p-4 border-b border-border">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="font-semibold text-foreground">Payment Methods</h2>
+            <h2 className="font-semibold text-foreground">Payment methods</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Manage your payment options</p>
           </div>
           <Button

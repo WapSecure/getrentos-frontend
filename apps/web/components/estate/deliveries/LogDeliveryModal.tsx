@@ -137,7 +137,7 @@ const LogDeliveryForm = ({
 
   return (
     <DialogContent size="md">
-      <DialogTitle className="text-lg font-semibold text-foreground">Log Delivery</DialogTitle>
+      <DialogTitle className="text-lg font-semibold text-foreground">Log delivery</DialogTitle>
 
       <div className="mt-4 space-y-4">
         <div className="rounded-lg border border-border p-3">
@@ -301,7 +301,7 @@ const LogDeliveryForm = ({
           loadingText="Logging…"
           onClick={handleSubmit}
         >
-          Log Delivery
+          Log delivery
         </Button>
       </div>
     </DialogContent>

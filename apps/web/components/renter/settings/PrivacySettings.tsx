@@ -67,25 +67,25 @@ export const PrivacySettings = () => {
   const visibilityOptions = [
     { value: 'public', label: 'Public', icon: <Globe className="w-5 h-5" /> },
     { value: 'private', label: 'Private', icon: <Lock className="w-5 h-5" /> },
-    { value: 'contacts', label: 'Contacts Only', icon: <Users className="w-5 h-5" /> },
+    { value: 'contacts', label: 'Contacts only', icon: <Users className="w-5 h-5" /> },
   ] as const;
 
   const visibilityRows = [
-    { key: 'showEmail', label: 'Show Email Address', icon: Eye },
-    { key: 'showPhone', label: 'Show Phone Number', icon: Phone },
-    { key: 'showActivity', label: 'Show Activity Status', icon: User },
+    { key: 'showEmail', label: 'Show email address', icon: Eye },
+    { key: 'showPhone', label: 'Show phone number', icon: Phone },
+    { key: 'showActivity', label: 'Show activity status', icon: User },
   ] as const;
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Privacy Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Privacy settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Control who can see your information and activity
       </p>
 
       <div className="space-y-6">
         <div>
-          <p className="block text-sm font-medium text-foreground mb-2">Profile Visibility</p>
+          <p className="block text-sm font-medium text-foreground mb-2">Profile visibility</p>
           <RadioGroup
             value={privacy.profileVisibility}
             onValueChange={(value) => setPrivacy({ ...privacy, profileVisibility: value })}
@@ -139,7 +139,7 @@ export const PrivacySettings = () => {
           onClick={() => saveMutation.mutate()}
           isLoading={saveMutation.isPending}
         >
-          Save Privacy Settings
+          Save privacy settings
         </Button>
       </div>
     </div>

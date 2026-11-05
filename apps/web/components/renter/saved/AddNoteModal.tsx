@@ -44,7 +44,7 @@ export const AddNoteModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isSaving && onClose()}>
       <DialogContent>
-        <DialogTitle className="pr-8 font-semibold text-foreground">Add Note</DialogTitle>
+        <DialogTitle className="pr-8 font-semibold text-foreground">Add note</DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           For: {propertyTitle}
         </DialogDescription>
@@ -71,7 +71,7 @@ export const AddNoteModal = ({
               isLoading={isSaving}
               icon={<Save className="w-4 h-4" />}
             >
-              Save Note
+              Save note
             </Button>
             <Button variant="ghost" onClick={onClose} fullWidth disabled={isSaving}>
               Cancel

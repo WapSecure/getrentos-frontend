@@ -60,7 +60,7 @@ export const RenterHomeManagement = () => {
             <House className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-foreground">My Home</h2>
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-foreground">My home</h2>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
               Your home record will appear here once you have an active lease.
             </p>
@@ -91,7 +91,7 @@ export const RenterHomeManagement = () => {
               </div>
               <div>
                 <h2 className="text-lg font-semibold tracking-[-0.02em] text-foreground">
-                  My Home
+                  My home
                 </h2>
                 <p className="truncate text-sm text-muted-foreground">{lease.propertyName}</p>
               </div>
@@ -136,7 +136,7 @@ export const RenterHomeManagement = () => {
           <span className="font-medium text-foreground">{formatShortDate(lease.endDate)}</span>
         </p>
         <Button href={ROUTES.RENTER_HOME} variant="ghost" size="sm" rounded="lg">
-          Open My Home
+          Open my home
           <ArrowRight className="h-4 w-4" />
         </Button>
       </div>

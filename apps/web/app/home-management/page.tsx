@@ -64,7 +64,7 @@ const audiences = [
     title: 'Residents',
     description:
       'See one trusted place for your lease, home-care requests, records, payments, and support.',
-    action: 'Open My Home',
+    action: 'Open my home',
     href: ROUTES.RENTER_HOME,
   },
 ];
@@ -116,7 +116,7 @@ const operatingPlans = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Home Management: Assets, Care, Vendors',
+  title: 'Home Management: assets, care, vendors',
   description:
     'Track assets, schedule preventive care, and control work orders for your property with GetRentos home management.',
   alternates: { canonical: '/home-management' },

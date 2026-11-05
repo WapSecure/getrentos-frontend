@@ -50,7 +50,7 @@ const modules = [
     icon: ReceiptText,
   },
   {
-    label: 'Visitor Passes',
+    label: 'Visitor passes',
     description: 'Issue entry passes',
     href: ROUTES.ESTATE_VISITOR_PASSES,
     icon: KeyRound,

@@ -74,7 +74,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
 
             <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-border">
               <div>
-                <p className="text-xs text-muted-foreground">Lease Start</p>
+                <p className="text-xs text-muted-foreground">Lease start</p>
                 <p className="text-sm font-medium text-foreground">
                   {new Date(lease.startDate).toLocaleDateString('en-US', {
                     month: 'short',
@@ -84,7 +84,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Lease End</p>
+                <p className="text-xs text-muted-foreground">Lease end</p>
                 <p className="text-sm font-medium text-foreground">
                   {new Date(lease.endDate).toLocaleDateString('en-US', {
                     month: 'short',
@@ -94,7 +94,7 @@ export const LeaseSummaryCard = ({ lease }: LeaseSummaryCardProps) => {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Security Deposit</p>
+                <p className="text-xs text-muted-foreground">Security deposit</p>
                 <p className="text-sm font-medium text-foreground">
                   {formatCurrency(lease.securityDeposit)}
                 </p>

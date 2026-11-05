@@ -82,9 +82,9 @@ export const RenterLeaseRenewal = () => {
             layout="rows"
             items={[
               { label: 'Property', value: lease.propertyName },
-              { label: 'Current Lease Ends', value: formatDate(lease.endDate) },
+              { label: 'Current lease ends', value: formatDate(lease.endDate) },
               {
-                label: 'Current Rent',
+                label: 'Current rent',
                 value: (
                   <>
                     {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(
@@ -97,7 +97,7 @@ export const RenterLeaseRenewal = () => {
               ...(renewalOffer
                 ? [
                     {
-                      label: 'Expected Increase',
+                      label: 'Expected increase',
                       value: (
                         <span className="text-warning">
                           {formatPercent(renewalOffer.increasePercentage)}% (

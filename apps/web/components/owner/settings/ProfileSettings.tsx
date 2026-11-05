@@ -89,7 +89,7 @@ const ProfileSettingsForm = ({
           </div>
         </div>
 
-        <Field label="Full Name">
+        <Field label="Full name">
           <Input
             type="text"
             value={formData.fullName}
@@ -101,7 +101,7 @@ const ProfileSettingsForm = ({
         <div>
           {/* The API doesn't change email here; sending it made every save fail validation. */}
           <Field
-            label="Email Address"
+            label="Email address"
             hint="Your sign-in email. Changing it sends a code to the new address."
           >
             <Input
@@ -115,7 +115,7 @@ const ProfileSettingsForm = ({
           <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
         </div>
 
-        <Field label="Phone Number">
+        <Field label="Phone number">
           <Input
             type="tel"
             value={formData.phone}
@@ -124,7 +124,7 @@ const ProfileSettingsForm = ({
           />
         </Field>
 
-        <Field label="Company / Agency Name">
+        <Field label="Company / agency name">
           <Input
             type="text"
             value={formData.companyName}
@@ -134,7 +134,7 @@ const ProfileSettingsForm = ({
         </Field>
 
         <Button type="submit" variant="primary" isLoading={updateMutation.isPending}>
-          Save Changes
+          Save changes
         </Button>
       </form>
     </div>

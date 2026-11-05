@@ -30,7 +30,7 @@ export const TrustScoreHistory = ({ history }: TrustScoreHistoryProps) => {
         className="w-full p-4 flex items-center justify-between gap-3 text-left hover:bg-secondary transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-ring/20"
       >
         <div className="min-w-0">
-          <h3 className="font-semibold text-foreground">Score History</h3>
+          <h3 className="font-semibold text-foreground">Score history</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Track your trust score changes</p>
         </div>
         <span className="rounded-md p-1 text-muted-foreground" aria-hidden="true">

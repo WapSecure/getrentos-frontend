@@ -41,7 +41,7 @@ export default function LandlordReviewsPage() {
   const categories = [
     { label: 'Communication', icon: MessageCircle, value: summary?.averageCommunication ?? 0 },
     {
-      label: 'Property Condition',
+      label: 'Property condition',
       icon: Home,
       value: summary?.averagePropertyCondition ?? 0,
     },
@@ -51,7 +51,7 @@ export default function LandlordReviewsPage() {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reviews & Reputation</h1>
+        <h1 className="text-2xl font-bold text-foreground">Reviews & reputation</h1>
         <p className="text-muted-foreground mt-1">See how tenants rate their experience with you</p>
       </div>
 

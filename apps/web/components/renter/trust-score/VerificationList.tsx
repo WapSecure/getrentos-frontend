@@ -53,7 +53,7 @@ export const VerificationList = ({ verifications }: VerificationListProps) => {
     <Card>
       <div className="p-4 border-b border-border flex flex-wrap justify-between items-center gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-foreground">Verification Status</h3>
+          <h3 className="font-semibold text-foreground">Verification status</h3>
           <p className="text-xs text-muted-foreground mt-0.5">
             {verifiedCount} of {totalCount} verifications completed
           </p>
@@ -113,7 +113,7 @@ export const VerificationList = ({ verifications }: VerificationListProps) => {
               </div>
               {!item.verified && (
                 <Button size="sm" variant="primary" onClick={() => handleVerify(item.id)}>
-                  Verify Now
+                  Verify now
                 </Button>
               )}
             </div>

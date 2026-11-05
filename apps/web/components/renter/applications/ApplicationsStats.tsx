@@ -10,12 +10,12 @@ interface ApplicationsStatsProps {
 export const ApplicationsStats = ({ applications }: ApplicationsStatsProps) => {
   const stats = [
     {
-      label: 'Total Applications',
+      label: 'Total applications',
       value: applications.length,
       color: 'text-info',
     },
     {
-      label: 'Under Review',
+      label: 'Under review',
       value: applications.filter((a) => a.status === 'under_review').length,
       color: 'text-warning',
     },

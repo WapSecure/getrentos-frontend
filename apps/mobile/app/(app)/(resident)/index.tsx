@@ -42,7 +42,7 @@ import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const QUICK_LINKS = [
   { href: '/(app)/maintenance', label: 'Maintenance', icon: Wrench },
-  { href: '/(app)/visitor-passes', label: 'Visitor Passes', icon: KeyRound },
+  { href: '/(app)/visitor-passes', label: 'Visitor passes', icon: KeyRound },
   { href: '/(app)/amenities', label: 'Amenities', icon: CalendarCheck },
   { href: '/(app)/violations', label: 'Violations', icon: TriangleAlert },
   { href: '/(app)/deliveries', label: 'Deliveries', icon: Package },

@@ -17,7 +17,7 @@ import type { MaintenanceTicketStatus } from '@/types/estate';
 const statusFilters: { value: MaintenanceTicketStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In Progress' },
+  { value: 'in_progress', label: 'In progress' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'dismissed', label: 'Dismissed' },
 ];

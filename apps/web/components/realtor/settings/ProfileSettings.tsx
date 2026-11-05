@@ -109,12 +109,12 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           isLoading={uploadAvatar.isPending}
           loadingText="Uploading…"
         >
-          Change Photo
+          Change photo
         </Button>
       </div>
 
       <div className="space-y-4">
-        <Field label="Full Name">
+        <Field label="Full name">
           <Input
             type="text"
             value={fullName}
@@ -122,15 +122,15 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           />
         </Field>
         <div>
-          <Field label="Email Address">
+          <Field label="Email address">
             <Input type="email" value={email} readOnly />
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone Number">
+        <Field label="Phone number">
           <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </Field>
-        <Field label="Agency / Business Name" optionalLabel="(optional)">
+        <Field label="Agency / business name" optionalLabel="(optional)">
           <Input
             type="text"
             value={companyName}
@@ -146,7 +146,7 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
         isLoading={save.isPending}
         onClick={() => save.mutate()}
       >
-        Save Changes
+        Save changes
       </Button>
     </div>
   );

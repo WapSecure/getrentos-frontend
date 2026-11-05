@@ -97,7 +97,7 @@ export const DocumentsList = ({
             aria-label="Select all documents on this page"
           />
           <div>
-            <h3 className="font-semibold text-foreground">All Documents</h3>
+            <h3 className="font-semibold text-foreground">All documents</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               Showing {documents.length} of {total} documents • {selectedDocuments.length} selected
             </p>
@@ -112,16 +112,18 @@ export const DocumentsList = ({
             controlSize="sm"
             className="w-40"
             options={[
-              { value: 'name', label: 'Sort by Name' },
-              { value: 'date', label: 'Sort by Date' },
-              { value: 'size', label: 'Sort by Size' },
+              { value: 'name', label: 'Sort by name' },
+              { value: 'date', label: 'Sort by date' },
+              { value: 'size', label: 'Sort by size' },
             ]}
           />
 
           <SegmentedControl
             aria-label="Layout"
             value={viewMode}
-            onValueChange={(mode) => (mode === 'grid' ? handleViewModeGrid() : handleViewModeList())}
+            onValueChange={(mode) =>
+              mode === 'grid' ? handleViewModeGrid() : handleViewModeList()
+            }
             iconOnly
             size="sm"
             segments={[

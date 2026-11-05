@@ -63,7 +63,7 @@ export default function EstateSetupPage() {
       </div>
 
       <Card className="p-6 space-y-4">
-        <Field label="Estate Name" required>
+        <Field label="Estate name" required>
           <Input
             type="text"
             value={name}
@@ -90,7 +90,7 @@ export default function EstateSetupPage() {
           </Field>
         </div>
 
-        <Field label="Number of Gates" optionalLabel="(optional)">
+        <Field label="Number of gates" optionalLabel="(optional)">
           <NumberInput value={gateCount} onValueChange={setGateCount} min={1} max={50} />
         </Field>
 
@@ -106,7 +106,7 @@ export default function EstateSetupPage() {
           loadingText="Creating…"
           onClick={() => createEstate.mutate()}
         >
-          Create Estate
+          Create estate
         </Button>
       </Card>
 

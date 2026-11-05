@@ -245,7 +245,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Field label="Bank Code">
+                <Field label="Bank code">
                   <NumberInput
                     value={bankCode}
                     onValueChange={setBankCode}
@@ -254,7 +254,7 @@ export const VendorDetailModal = ({ vendor, onClose }: VendorDetailModalProps) =
                     leadingIcon={<Landmark className="w-4 h-4" />}
                   />
                 </Field>
-                <Field label="Account Number">
+                <Field label="Account number">
                   <NumberInput
                     value={accountNumber}
                     onValueChange={setAccountNumber}

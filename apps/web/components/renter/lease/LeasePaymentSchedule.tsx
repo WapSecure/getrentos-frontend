@@ -60,7 +60,7 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Payment Schedule</h3>
+            <h3 className="font-semibold text-foreground">Payment schedule</h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">Rent payment history</p>
         </div>
@@ -98,7 +98,7 @@ export const LeasePaymentSchedule = ({ payments }: LeasePaymentScheduleProps) =>
 
         <div className="p-3 border-t border-border">
           <Button variant="ghost" size="sm" fullWidth className="gap-1">
-            View All Payments
+            View all payments
           </Button>
         </div>
       </Card>

@@ -193,7 +193,6 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
       <Button
         type="submit"
         disabled={!isValid || !agreedToTerms}
-
         isLoading={isLoading}
         fullWidth
         size="lg"
@@ -201,7 +200,7 @@ export const PhoneSignup = ({ onSubmit, isLoading }: PhoneSignupProps) => {
         icon={<ArrowRight className="w-4 h-4" />}
         iconPosition="right"
       >
-        Create Account
+        Create account
       </Button>
     </form>
   );

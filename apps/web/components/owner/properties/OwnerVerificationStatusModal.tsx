@@ -41,7 +41,7 @@ const statusConfig: Record<
       'Ownership has been confirmed. This property is eligible for sale listing and ownership transfer.',
   },
   pending_review: {
-    label: 'Pending Review',
+    label: 'Pending review',
     icon: ShieldAlert,
     bg: 'bg-warning-subtle',
     color: 'text-warning',
@@ -49,7 +49,7 @@ const statusConfig: Record<
       'Our compliance team is reviewing your submitted documents. This typically takes 24–48 hours.',
   },
   needs_clarification: {
-    label: 'Needs Clarification',
+    label: 'Needs clarification',
     icon: HelpCircle,
     bg: 'bg-warning-subtle',
     color: 'text-warning',
@@ -175,9 +175,7 @@ export const OwnerVerificationStatusModal = ({
               <Icon className={`w-7 h-7 ${config.color}`} />
             </div>
             <h4 className="font-semibold text-foreground">{config.label}</h4>
-            <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
-              {config.message}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">{config.message}</p>
           </div>
 
           {property.rejectionReason && (
@@ -202,9 +200,7 @@ export const OwnerVerificationStatusModal = ({
 
           {canResubmit && (
             <div>
-              <p className="mb-1 text-sm font-medium text-foreground">
-                Upload ownership evidence
-              </p>
+              <p className="mb-1 text-sm font-medium text-foreground">Upload ownership evidence</p>
               <DocumentUpload
                 value={resubmitFile ? [{ id: 'file', file: resubmitFile }] : []}
                 onChange={(items) => setResubmitFile(items[0]?.file ?? null)}
@@ -250,8 +246,8 @@ export const OwnerVerificationStatusModal = ({
               <div>
                 <p className="text-sm font-medium text-foreground">Automated verification</p>
                 <p className="text-xs text-muted-foreground">
-                  Runs the address, title-document and ownership checks. Passing all three
-                  verifies this property immediately.
+                  Runs the address, title-document and ownership checks. Passing all three verifies
+                  this property immediately.
                 </p>
               </div>
             </div>
@@ -313,7 +309,7 @@ export const OwnerVerificationStatusModal = ({
               loadingText="Submitting…"
               className="flex-1"
             >
-              Submit Documents
+              Submit documents
             </Button>
           )}
         </div>

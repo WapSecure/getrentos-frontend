@@ -78,7 +78,7 @@ export const navItems: NavItem[] = [
   { label: 'Announcements', href: ROUTES.ESTATE_ANNOUNCEMENTS, icon: Megaphone },
   { label: 'Households', href: ROUTES.ESTATE_HOUSEHOLDS, icon: Users },
   { label: 'Dues', href: ROUTES.ESTATE_DUES, icon: ReceiptText },
-  { label: 'Visitor Passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
+  { label: 'Visitor passes', href: ROUTES.ESTATE_VISITOR_PASSES, icon: KeyRound },
   // Directly after the passes it reads, because it is the outstanding half of
   // the same thing: Visitor Passes lists what was issued, and this answers the
   // question a guard actually asks — who is due today — across invitations,

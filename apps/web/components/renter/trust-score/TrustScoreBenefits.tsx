@@ -15,7 +15,7 @@ import { Badge, Card } from '@getrentos/ui';
 const benefits = [
   {
     icon: Shield,
-    title: 'Higher Visibility',
+    title: 'Higher visibility',
     description: 'Your listings and applications get priority',
     level: '70+',
   },
@@ -27,25 +27,25 @@ const benefits = [
   },
   {
     icon: Star,
-    title: 'Trust Badge',
+    title: 'Trust badge',
     description: 'Verified badge on your profile',
     level: '50+',
   },
   {
     icon: Users,
-    title: 'More Trust',
+    title: 'More trust',
     description: 'Landlords prefer high-trust renters',
     level: '75+',
   },
   {
     icon: TrendingUp,
-    title: 'Better Offers',
+    title: 'Better offers',
     description: 'Access to premium property listings',
     level: '80+',
   },
   {
     icon: Award,
-    title: 'Exclusive Benefits',
+    title: 'Exclusive benefits',
     description: 'Special promotions and offers',
     level: '85+',
   },
@@ -57,7 +57,7 @@ export const TrustScoreBenefits = () => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BadgeCheck className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Trust Score Benefits</h3>
+          <h3 className="font-semibold text-foreground">Trust score benefits</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
           Unlock more features with higher trust scores

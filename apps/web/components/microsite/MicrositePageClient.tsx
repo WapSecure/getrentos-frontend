@@ -134,7 +134,7 @@ export const MicrositePageClient = ({ slug, initialProfile }: MicrositePageClien
           isLoading={contactMutation.isPending}
         >
           <MessageCircle className="w-4 h-4" />
-          Contact Agency
+          Contact agency
         </Button>
       </div>
 

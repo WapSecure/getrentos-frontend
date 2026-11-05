@@ -20,11 +20,11 @@ const stageConfig: Record<BuyerLeadStage, { label: string; variant: BadgeVariant
     variant: 'info',
   },
   viewing_scheduled: {
-    label: 'Viewing Scheduled',
+    label: 'Viewing scheduled',
     variant: 'warning',
   },
   offer_made: {
-    label: 'Offer Made',
+    label: 'Offer made',
     variant: 'success',
   },
   closed: {
@@ -62,9 +62,15 @@ export const BuyerLeadCard = ({ lead, delay = 0, onMessage }: BuyerLeadCardProps
               <div className="flex items-center gap-1.5">
                 <h3 className="font-semibold text-foreground truncate">{lead.buyerName}</h3>
                 {lead.verified ? (
-                  <ShieldCheck className="w-3.5 h-3.5 text-success shrink-0" aria-label="Verified" />
+                  <ShieldCheck
+                    className="w-3.5 h-3.5 text-success shrink-0"
+                    aria-label="Verified"
+                  />
                 ) : (
-                  <ShieldAlert className="w-3.5 h-3.5 text-warning shrink-0" aria-label="Not verified" />
+                  <ShieldAlert
+                    className="w-3.5 h-3.5 text-warning shrink-0"
+                    aria-label="Not verified"
+                  />
                 )}
               </div>
               <p className="text-xs text-muted-foreground truncate">{lead.propertyName}</p>
@@ -91,7 +97,7 @@ export const BuyerLeadCard = ({ lead, delay = 0, onMessage }: BuyerLeadCardProps
             variant="secondary"
             size="sm"
             className="w-full"
-            title="Message Buyer"
+            title="Message buyer"
             onClick={onMessage}
             icon={<MessageSquare className="w-4 h-4" />}
           >

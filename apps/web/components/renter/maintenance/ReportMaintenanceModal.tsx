@@ -214,7 +214,7 @@ export const ReportMaintenanceModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent size="lg">
         <DialogTitle className="pr-8 font-semibold text-foreground">
-          Report Maintenance Issue
+          Report maintenance issue
         </DialogTitle>
         <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
           Provide details about the issue you&apos;re experiencing
@@ -273,7 +273,7 @@ export const ReportMaintenanceModal = ({
             )}
           </section>
 
-          <Field label="Issue Title" required error={errors.title}>
+          <Field label="Issue title" required error={errors.title}>
             <Input
               type="text"
               value={formData.title}
@@ -403,7 +403,7 @@ export const ReportMaintenanceModal = ({
               isLoading={isSubmitting}
               icon={<FileText className="w-4 h-4" />}
             >
-              {formData.isEmergency ? 'Submit Emergency Request' : 'Submit Request'}
+              {formData.isEmergency ? 'Submit emergency request' : 'Submit request'}
             </Button>
             <Button variant="ghost" fullWidth onClick={handleClose} disabled={isSubmitting}>
               Cancel

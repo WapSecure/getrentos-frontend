@@ -77,12 +77,12 @@ const VendorForm = ({
     <>
       <div className="p-4 pr-12 border-b border-border">
         <DialogTitle className="font-semibold text-foreground">
-          {vendor ? 'Edit Vendor' : 'Add Vendor'}
+          {vendor ? 'Edit vendor' : 'Add vendor'}
         </DialogTitle>
       </div>
 
       <div className="p-4 space-y-4">
-        <Field label="Vendor Name" required>
+        <Field label="Vendor name" required>
           <Input
             type="text"
             value={name}
@@ -90,7 +90,7 @@ const VendorForm = ({
             placeholder="e.g. AquaFlow Plumbers"
           />
         </Field>
-        <Field label="Service Type">
+        <Field label="Service type">
           <Select
             value={serviceType}
             onValueChange={setServiceType}
@@ -134,7 +134,7 @@ const VendorForm = ({
 
       <div className="p-4 border-t border-border flex gap-3">
         <Button variant="primary" fullWidth onClick={handleSubmit} disabled={!isValid}>
-          {vendor ? 'Save Changes' : 'Add Vendor'}
+          {vendor ? 'Save changes' : 'Add vendor'}
         </Button>
         <Button variant="ghost" fullWidth onClick={handleClose}>
           Cancel

@@ -83,7 +83,7 @@ export default function OwnerAnalyticsPage() {
     <>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Investment Analytics</h1>
+          <h1 className="text-2xl font-bold text-foreground">Investment analytics</h1>
           <p className="text-muted-foreground mt-1">
             Performance and ROI across your property portfolio
           </p>
@@ -173,10 +173,10 @@ export default function OwnerAnalyticsPage() {
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
                     {isComparing && <th className="p-4 font-medium w-10"></th>}
                     <th className="p-4 font-medium">Property</th>
-                    <th className="p-4 font-medium">Purchase Price</th>
-                    <th className="p-4 font-medium">Current Value</th>
+                    <th className="p-4 font-medium">Purchase price</th>
+                    <th className="p-4 font-medium">Current value</th>
                     <th className="p-4 font-medium">Appreciation</th>
-                    <th className="p-4 font-medium">Rental Yield</th>
+                    <th className="p-4 font-medium">Rental yield</th>
                     <th className="p-4 font-medium">ROI</th>
                     <th className="p-4 font-medium text-right">Actions</th>
                   </tr>

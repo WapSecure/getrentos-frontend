@@ -31,7 +31,7 @@ const ROWS = [
   },
   {
     href: '/(app)/visitor-passes',
-    label: 'Visitor Passes',
+    label: 'Visitor passes',
     description: 'Issue a gate pass for your guests',
     icon: KeyRound,
   },

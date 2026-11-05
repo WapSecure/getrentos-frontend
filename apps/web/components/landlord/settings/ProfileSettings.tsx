@@ -85,12 +85,12 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           onClick={() => fileInputRef.current?.click()}
           isLoading={isUploadingAvatar}
         >
-          Change Photo
+          Change photo
         </Button>
       </div>
 
       <div className="space-y-4">
-        <Field label="Full Name">
+        <Field label="Full name">
           <Input
             type="text"
             value={fullName}
@@ -98,15 +98,15 @@ export const ProfileSettings = ({ user }: ProfileSettingsProps) => {
           />
         </Field>
         <div>
-          <Field label="Email Address">
+          <Field label="Email address">
             <Input type="email" value={email} readOnly />
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone Number">
+        <Field label="Phone number">
           <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </Field>
-        <Field label="Company / Business Name" optionalLabel="(optional)">
+        <Field label="Company / business name" optionalLabel="(optional)">
           <Input
             type="text"
             value={companyName}

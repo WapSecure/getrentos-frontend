@@ -12,7 +12,7 @@ export const LegalResourcesView = () => {
           <Scale className="h-5 w-5" />
         </span>
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-foreground">Legal Resources</h1>
+          <h1 className="text-2xl font-bold text-foreground">Legal resources</h1>
           <p className="text-muted-foreground mt-1">
             General reference guidance on tenant rights, notice periods, deposits, and the eviction
             process.

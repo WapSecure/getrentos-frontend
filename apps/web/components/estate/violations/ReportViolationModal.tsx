@@ -18,9 +18,9 @@ interface ReportViolationModalProps {
 
 const categoryOptions = [
   { value: 'NOISE', label: 'Noise' },
-  { value: 'UNAUTHORIZED_PARKING', label: 'Unauthorized Parking' },
-  { value: 'PET_VIOLATION', label: 'Pet Violation' },
-  { value: 'PROPERTY_MAINTENANCE', label: 'Property Maintenance' },
+  { value: 'UNAUTHORIZED_PARKING', label: 'Unauthorized parking' },
+  { value: 'PET_VIOLATION', label: 'Pet violation' },
+  { value: 'PROPERTY_MAINTENANCE', label: 'Property maintenance' },
   { value: 'OTHER', label: 'Other' },
 ];
 
@@ -54,7 +54,9 @@ export const ReportViolationModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Report Violation</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">
+          Report violation
+        </DialogTitle>
 
         <div className="mt-4 space-y-4">
           <Field label="Household" required>
@@ -103,7 +105,7 @@ export const ReportViolationModal = ({
               })
             }
           >
-            Report Violation
+            Report violation
           </Button>
         </div>
       </DialogContent>

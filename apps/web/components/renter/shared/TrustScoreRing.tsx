@@ -66,7 +66,7 @@ export const TrustScoreRing = ({ score, size = 120, strokeWidth = 8 }: TrustScor
         >
           {displayScore}
         </motion.span>
-        <span className="text-xs text-muted-foreground">Trust Score</span>
+        <span className="text-xs text-muted-foreground">Trust score</span>
       </div>
     </div>
   );

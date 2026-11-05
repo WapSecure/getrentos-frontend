@@ -52,8 +52,8 @@ const tabs: { id: SettingsTab; label: string; icon: React.ElementType }[] = [
   { id: 'payments', label: 'Payments', icon: CreditCard },
   { id: 'theme', label: 'Theme', icon: Palette },
   { id: 'language', label: 'Language', icon: Globe },
-  { id: 'export', label: 'Data Export', icon: Download },
-  { id: 'delete', label: 'Delete Account', icon: Trash2 },
+  { id: 'export', label: 'Data export', icon: Download },
+  { id: 'delete', label: 'Delete account', icon: Trash2 },
 ];
 
 export default function SettingsPage() {

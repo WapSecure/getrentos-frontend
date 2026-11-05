@@ -17,10 +17,10 @@ export const FinancialStats = ({
   netProfit,
 }: FinancialStatsProps) => {
   const stats = [
-    { icon: TrendingUp, label: 'Rental Income', value: rentalIncome, accent: 'emerald' },
-    { icon: AlertCircle, label: 'Outstanding Rent', value: outstandingRent, accent: 'red' },
-    { icon: Wrench, label: 'Maintenance Costs', value: maintenanceCosts, accent: 'orange' },
-    { icon: PiggyBank, label: 'Net Profit', value: netProfit, accent: 'blue' },
+    { icon: TrendingUp, label: 'Rental income', value: rentalIncome, accent: 'emerald' },
+    { icon: AlertCircle, label: 'Outstanding rent', value: outstandingRent, accent: 'red' },
+    { icon: Wrench, label: 'Maintenance costs', value: maintenanceCosts, accent: 'orange' },
+    { icon: PiggyBank, label: 'Net profit', value: netProfit, accent: 'blue' },
   ] as const;
 
   return (

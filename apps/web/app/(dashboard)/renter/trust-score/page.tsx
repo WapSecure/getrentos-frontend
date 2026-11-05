@@ -10,9 +10,9 @@ import { CreditReportingView } from '@/components/renter/credit-reporting/Credit
 import { HubTabs, useHubTab, type HubTab } from '@/components/shared/navigation/HubTabs';
 
 const TABS: HubTab[] = [
-  { id: 'trust', label: 'Trust Score', icon: Star },
+  { id: 'trust', label: 'Trust score', icon: Star },
   { id: 'verification', label: 'Verification', icon: ShieldCheck },
-  { id: 'credit', label: 'Credit Report', icon: TrendingUp },
+  { id: 'credit', label: 'Credit report', icon: TrendingUp },
 ];
 
 export default function RenterStandingPage() {

@@ -37,7 +37,7 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
     }
     if (status === 'due' || daysRemaining <= 3) {
       return {
-        label: 'Due Soon',
+        label: 'Due soon',
         variant: 'warning' as const,
         icon: Bell,
       };
@@ -63,7 +63,7 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Bell className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Payment Reminders</h3>
+            <h3 className="font-semibold text-foreground">Payment reminders</h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">Upcoming rent payments</p>
         </div>
@@ -108,12 +108,12 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
                 </div>
                 {reminder.status === 'overdue' && (
                   <Button variant="danger" size="sm" className="mt-2 w-full">
-                    Pay Now
+                    Pay now
                   </Button>
                 )}
                 {reminder.status !== 'overdue' && reminder.daysRemaining <= 5 && (
                   <Button variant="primary" size="sm" className="mt-2 w-full">
-                    Pay Now
+                    Pay now
                   </Button>
                 )}
               </motion.div>
@@ -123,7 +123,7 @@ export const UpcomingPaymentReminders = ({ reminders }: UpcomingPaymentReminders
 
         <div className="p-3 border-t border-border">
           <Button variant="ghost" size="sm" fullWidth className="gap-1">
-            View All Payments
+            View all payments
           </Button>
         </div>
       </Card>

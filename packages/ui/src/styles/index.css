@@ -314,6 +314,13 @@
 
   .workspace-sidebar {
     background-color: var(--background);
+    /* The list is longer than most screens: fade the bottom edge so a cut-off
+       item reads as "more below", not as the end. Extra padding lets the last
+       item scroll clear of the fade. */
+    padding-bottom: 3rem;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+    scrollbar-width: thin;
   }
 
   .sidebar-label {

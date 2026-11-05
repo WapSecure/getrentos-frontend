@@ -14,6 +14,7 @@ import {
   MapPin,
   Ruler,
   SlidersHorizontal,
+  ImageOff,
 } from 'lucide-react';
 import {
   Alert,
@@ -206,9 +207,11 @@ function mapMedia(listing: PublicListingCard) {
       />
     );
   }
+  // No photo: a short strip that says so, not a photo-sized block of grey.
   return (
-    <div className="flex h-52 w-full items-center justify-center bg-muted">
-      <Home className="h-8 w-8 text-primary/40" />
+    <div className="flex h-24 w-full items-center justify-center gap-2 bg-muted text-sm text-muted-foreground">
+      <ImageOff className="h-4 w-4" aria-hidden />
+      No photos yet
     </div>
   );
 }

@@ -68,10 +68,10 @@ export const RenterMoveInChecklist = () => {
       )
       .join('');
     printHtml(
-      'Move-In Report',
-      `<h1>Move-In Report</h1>
+      'Move-in report',
+      `<h1>Move-in report</h1>
        <p class="meta">Generated ${date} · ${completedCount}/${items.length} items completed</p>
-       <h2>Checklist Status</h2>
+       <h2>Checklist status</h2>
        <table><thead><tr><th>Item</th><th>Description</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`
     );
   };
@@ -95,7 +95,7 @@ export const RenterMoveInChecklist = () => {
         <div className="p-4 border-b border-border">
           <div className="flex justify-between items-center gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Move-In Checklist</h2>
+              <h2 className="text-lg font-semibold text-foreground">Move-in checklist</h2>
               <p className="text-sm text-muted-foreground">Complete these steps before moving in</p>
             </div>
             <div className="text-right">
@@ -159,7 +159,7 @@ export const RenterMoveInChecklist = () => {
         <div className="p-4 border-t border-border">
           <Button variant="primary" fullWidth className="gap-2" onClick={handleGenerateReport}>
             <FileText className="w-4 h-4" />
-            Generate Move-In Report
+            Generate move-in report
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-2">
             This report will be shared with your landlord

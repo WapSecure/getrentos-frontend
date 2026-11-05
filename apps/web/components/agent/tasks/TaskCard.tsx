@@ -19,7 +19,7 @@ const typeConfig: Record<TaskType, { icon: React.ElementType; label: string }> =
   inspection: { icon: ClipboardCheck, label: 'Inspection' },
   verification: { icon: UserCheck, label: 'Verification' },
   valuation: { icon: Home, label: 'Valuation' },
-  document_pickup: { icon: FileText, label: 'Document Pickup' },
+  document_pickup: { icon: FileText, label: 'Document pickup' },
 };
 
 const priorityConfig: Record<TaskPriority, { label: string; className: string }> = {
@@ -70,7 +70,7 @@ export const TaskCard = ({
 
         <div className="grid grid-cols-2 gap-3 mt-4">
           <div>
-            <p className="text-xs text-muted-foreground">Assigned By</p>
+            <p className="text-xs text-muted-foreground">Assigned by</p>
             <p className="text-sm font-medium text-foreground truncate">{task.assignedBy}</p>
           </div>
           <div>

@@ -59,7 +59,7 @@ export const AssignVendorModal = ({
         <DialogContent padded={false} className="flex flex-col">
           <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
             <div className="min-w-0">
-              <DialogTitle className="font-semibold text-foreground">Assign Vendor</DialogTitle>
+              <DialogTitle className="font-semibold text-foreground">Assign vendor</DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                 {request.issueTitle}
               </DialogDescription>

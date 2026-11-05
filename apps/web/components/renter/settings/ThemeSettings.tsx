@@ -15,7 +15,7 @@ export const ThemeSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Theme Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Theme settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Choose your preferred theme for the application
       </p>

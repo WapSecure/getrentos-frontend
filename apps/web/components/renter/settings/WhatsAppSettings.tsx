@@ -23,11 +23,11 @@ const DEFAULT_PREFERENCES: Record<string, boolean> = {
 };
 
 const PREFERENCE_LABELS: { id: string; label: string }[] = [
-  { id: 'payments', label: 'Rent & Flex Payment Reminders' },
-  { id: 'maintenance', label: 'Maintenance Updates' },
-  { id: 'messages', label: 'New Messages from Landlord' },
-  { id: 'lease', label: 'Lease Renewal Alerts' },
-  { id: 'credit', label: 'Credit Reporting Confirmations' },
+  { id: 'payments', label: 'Rent & Flex payment reminders' },
+  { id: 'maintenance', label: 'Maintenance updates' },
+  { id: 'messages', label: 'New messages from landlord' },
+  { id: 'lease', label: 'Lease renewal alerts' },
+  { id: 'credit', label: 'Credit reporting confirmations' },
 ];
 
 export const WhatsAppSettings = () => {
@@ -84,7 +84,7 @@ export const WhatsAppSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">WhatsApp Notifications</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">WhatsApp notifications</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Get rent reminders, maintenance updates, and messages on WhatsApp instead of relying on
         email or push alerts.
@@ -102,7 +102,7 @@ export const WhatsAppSettings = () => {
             </p>
           </div>
 
-          <Field label="WhatsApp Number">
+          <Field label="WhatsApp number">
             <Input
               leadingIcon={<Smartphone className="w-4 h-4" />}
               type="tel"
@@ -163,7 +163,7 @@ export const WhatsAppSettings = () => {
             onClick={() => saveMutation.mutate(state)}
             isLoading={saveMutation.isPending}
           >
-            Save WhatsApp Settings
+            Save WhatsApp settings
           </Button>
         </div>
       )}

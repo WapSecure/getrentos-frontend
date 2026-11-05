@@ -34,7 +34,7 @@ export const ScoreForecast = ({ currentScore, verifications }: ScoreForecastProp
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Score Forecast</h3>
+        <h3 className="font-semibold text-foreground">Score forecast</h3>
         <p className="text-xs text-muted-foreground mt-0.5">
           Potential score after completing verifications
         </p>
@@ -43,12 +43,12 @@ export const ScoreForecast = ({ currentScore, verifications }: ScoreForecastProp
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Current Score</p>
+            <p className="text-sm text-muted-foreground">Current score</p>
             <p className="text-2xl font-bold text-foreground">{currentScore}</p>
           </div>
           <TrendingUp className="w-6 h-6 text-success" aria-hidden="true" />
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Forecast Score</p>
+            <p className="text-sm text-muted-foreground">Forecast score</p>
             <p className="text-2xl font-bold text-success">{forecastScore}</p>
           </div>
         </div>

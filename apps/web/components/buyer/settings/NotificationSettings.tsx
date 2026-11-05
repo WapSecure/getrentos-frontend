@@ -12,11 +12,11 @@ import { buyerService, type BuyerNotificationPreference } from '@/services/buyer
 import { categorySendsEmail } from '@getrentos/shared';
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType }> = {
-  offers: { label: 'Offer Updates & Counters', icon: Handshake },
+  offers: { label: 'Offer updates & counters', icon: Handshake },
   escrow: { label: 'Purchase payment updates', icon: ShieldCheck },
-  viewings: { label: 'Viewing Confirmations', icon: CalendarClock },
-  messages: { label: 'New Messages', icon: MessageCircle },
-  saved: { label: 'Price Drops on Saved Properties', icon: Heart },
+  viewings: { label: 'Viewing confirmations', icon: CalendarClock },
+  messages: { label: 'New messages', icon: MessageCircle },
+  saved: { label: 'Price drops on saved properties', icon: Heart },
 };
 
 export const NotificationSettings = () => {
@@ -105,7 +105,7 @@ export const NotificationSettings = () => {
         disabled={preferences.length === 0 || save.isPending}
         onClick={() => save.mutate()}
       >
-        Save Preferences
+        Save preferences
       </Button>
     </div>
   );

@@ -48,7 +48,7 @@ const PRIORITY_LABEL: Record<MaintenanceTicketPriority, string> = {
 
 const STATUS_LABEL: Record<MaintenanceTicketStatus, string> = {
   open: 'Open',
-  in_progress: 'In Progress',
+  in_progress: 'In progress',
   resolved: 'Resolved',
   dismissed: 'Dismissed',
 };
@@ -143,7 +143,7 @@ export default function ResidentMaintenance() {
             icon: <Wrench size={34} color={colors.mutedForeground} />,
             title: 'No maintenance tickets',
             description: 'Report an issue and your estate manager will be notified.',
-            action: <Button label="Report Issue" onPress={() => setReportOpen(true)} />,
+            action: <Button label="Report issue" onPress={() => setReportOpen(true)} />,
           }}
         >
           {tickets.map((t) => (
@@ -229,7 +229,7 @@ function ReportSheet({
   submitting: boolean;
 }) {
   return (
-    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Report an Issue">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Report an issue">
       <ReportForm key={open ? 'open' : 'closed'} onSubmit={onSubmit} submitting={submitting} />
     </Sheet>
   );
@@ -318,7 +318,7 @@ function ReportForm({
         ) : (
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <Button
-              label="Take Photo"
+              label="Take photo"
               variant="outline"
               size="sm"
               fullWidth={false}
@@ -327,7 +327,7 @@ function ReportForm({
               disabled={submitting}
             />
             <Button
-              label="Choose Photo"
+              label="Choose photo"
               variant="outline"
               size="sm"
               fullWidth={false}
@@ -339,7 +339,7 @@ function ReportForm({
         )}
       </Field>
       <Button
-        label="Submit Report"
+        label="Submit report"
         disabled={!canSubmit}
         loading={submitting}
         fullWidth

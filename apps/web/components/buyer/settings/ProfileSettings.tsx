@@ -76,12 +76,12 @@ const ProfileSettingsForm = ({
             />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Profile Photo</p>
+            <p className="text-sm font-medium text-foreground">Profile photo</p>
             <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max 5MB.</p>
           </div>
         </div>
 
-        <Field label="Full Name">
+        <Field label="Full name">
           <Input
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: nameOnly(e.target.value) })}
@@ -89,7 +89,7 @@ const ProfileSettingsForm = ({
           />
         </Field>
 
-        <Field label="Email Address">
+        <Field label="Email address">
           <Input
             type="email"
             value={formData.email}
@@ -99,7 +99,7 @@ const ProfileSettingsForm = ({
         </Field>
         <ChangeEmailButton onChanged={(email) => setFormData((f) => ({ ...f, email }))} />
 
-        <Field label="Phone Number">
+        <Field label="Phone number">
           <Input
             type="tel"
             value={formData.phone}
@@ -108,7 +108,7 @@ const ProfileSettingsForm = ({
           />
         </Field>
 
-        <SaveButton type="submit" label="Save Changes" />
+        <SaveButton type="submit" label="Save changes" />
       </form>
     </div>
   );

@@ -108,7 +108,7 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-muted-foreground">Your Offer</p>
+          <p className="text-xs text-muted-foreground">Your offer</p>
           <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>

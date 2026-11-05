@@ -90,7 +90,7 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
     onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.assignableProperties(id) });
       refreshInvitations();
-      toast.success('Property assigned to Realtor.');
+      toast.success('Property assigned to realtor.');
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -100,7 +100,7 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
     onSuccess: (_result, { id }) => {
       queryClient.invalidateQueries({ queryKey: realtorKeys.assignableProperties(id) });
       refreshInvitations();
-      toast.success('Property taken back from the Realtor.');
+      toast.success('Property taken back from the realtor.');
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -129,8 +129,8 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
             setPage(1);
             setPropertiesFor(null);
           }}
-          placeholder="Search Realtors..."
-          label="Search Realtor invitations"
+          placeholder="Search realtors..."
+          label="Search realtor invitations"
         />
       </div>
       {isLoading ? (
@@ -140,8 +140,8 @@ export function ClientRealtorAccess({ showHeader = true }: { showHeader?: boolea
           icon={Users}
           title={
             invitationTotal === 0 && invitationSearch
-              ? 'No Realtor invitations match your search.'
-              : 'No Realtor invitations.'
+              ? 'No realtor invitations match your search.'
+              : 'No realtor invitations.'
           }
         />
       ) : (

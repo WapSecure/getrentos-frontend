@@ -48,7 +48,7 @@ export const BuyerActivityFeed = ({ activity }: BuyerActivityFeedProps) => {
   return (
     <Card>
       <CardHeader className="border-b border-border pb-4">
-        <CardTitle as="h3">Recent Activity</CardTitle>
+        <CardTitle as="h3">Recent activity</CardTitle>
         <CardDescription>Offers, viewings, payments, and saved property updates</CardDescription>
       </CardHeader>
 

@@ -76,7 +76,7 @@ function BuyerViewingsPageContent() {
   return (
     <>
       <PageHeader
-        title="Viewing Requests"
+        title="Viewing requests"
         description={
           viewingsQuery.isLoading ? (
             <Skeleton className="inline-block h-4 w-24 align-middle" />
@@ -91,7 +91,7 @@ function BuyerViewingsPageContent() {
             className="w-fit"
             onClick={() => setIsModalOpen(true)}
           >
-            Request Viewing
+            Request viewing
           </Button>
         }
       />

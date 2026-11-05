@@ -70,7 +70,7 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-foreground">Receipts Gallery</h2>
+              <h2 className="font-semibold text-foreground">Receipts gallery</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {receipts.length} receipts available
               </p>
@@ -157,7 +157,7 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
         {selectedReceipt && (
           <DialogContent className="p-0 sm:p-0">
             <div className="p-4 pr-12 border-b border-border">
-              <DialogTitle className="font-semibold text-foreground">Receipt Preview</DialogTitle>
+              <DialogTitle className="font-semibold text-foreground">Receipt preview</DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                 {selectedReceipt.fileName}
               </DialogDescription>
@@ -185,7 +185,7 @@ export const PaymentReceiptsGallery = ({ receipts, onDownload }: PaymentReceipts
                 icon={<Download className="w-4 h-4" />}
                 onClick={() => onDownload(selectedReceipt.id)}
               >
-                Download Receipt
+                Download receipt
               </Button>
             </div>
           </DialogContent>

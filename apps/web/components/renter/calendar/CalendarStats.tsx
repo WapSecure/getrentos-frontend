@@ -16,7 +16,7 @@ export const CalendarStats = ({ events }: CalendarStatsProps) => {
   const stats = [
     {
       icon: Calendar,
-      label: 'Total Events',
+      label: 'Total events',
       value: total,
       color: 'text-info',
       bg: 'bg-info-subtle',

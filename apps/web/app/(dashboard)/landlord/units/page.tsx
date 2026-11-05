@@ -229,7 +229,7 @@ function LandlordUnitsPageContent() {
             disabled={properties.length === 0}
             icon={<Plus className="w-4 h-4" />}
           >
-            Add Unit
+            Add unit
           </Button>
         </div>
       </div>
@@ -249,7 +249,7 @@ function LandlordUnitsPageContent() {
             setPage(1);
           }}
           options={[
-            { value: 'all', label: 'All Properties' },
+            { value: 'all', label: 'All properties' },
             ...properties.map((p) => ({ value: p.id, label: p.name })),
           ]}
           searchable={properties.length > 8}

@@ -60,7 +60,7 @@ export const DocumentSearch = ({
             ariaLabel="Document type"
             className="w-full sm:w-44"
             options={[
-              { value: 'all', label: 'All Types' },
+              { value: 'all', label: 'All types' },
               { value: 'lease', label: 'Lease' },
               { value: 'receipt', label: 'Receipt' },
               { value: 'inspection', label: 'Inspection' },
@@ -73,14 +73,14 @@ export const DocumentSearch = ({
             ariaLabel="Document status"
             className="w-full sm:w-44"
             options={[
-              { value: 'all', label: 'All Status' },
+              { value: 'all', label: 'All status' },
               { value: 'active', label: 'Active' },
               { value: 'expiring', label: 'Expiring' },
               { value: 'expired', label: 'Expired' },
             ]}
           />
           <Button size="sm" variant="ghost" onClick={handleClear}>
-            Clear Search
+            Clear search
           </Button>
         </div>
       )}

@@ -16,7 +16,7 @@ export const TrustScoreComparison = ({ currentScore, averageScore }: TrustScoreC
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Score Comparison</h3>
+          <h3 className="font-semibold text-foreground">Score comparison</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">How you compare to other renters</p>
       </div>
@@ -24,11 +24,11 @@ export const TrustScoreComparison = ({ currentScore, averageScore }: TrustScoreC
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Your Score</p>
+            <p className="text-sm text-muted-foreground">Your score</p>
             <p className="text-2xl font-bold text-foreground">{currentScore}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-muted-foreground">Average Score</p>
+            <p className="text-sm text-muted-foreground">Average score</p>
             <p className="text-2xl font-bold text-foreground">{averageScore}</p>
           </div>
         </div>

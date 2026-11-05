@@ -35,7 +35,7 @@ export const RecentlyViewed = () => {
       <div className="p-3 border-b border-border">
         <div className="flex items-center gap-2">
           <History className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-semibold text-foreground">Recently Viewed</h3>
+          <h3 className="text-sm font-semibold text-foreground">Recently viewed</h3>
         </div>
       </div>
 

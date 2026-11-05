@@ -23,7 +23,7 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Notification Analytics</h3>
+          <h3 className="font-semibold text-foreground">Notification analytics</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Your notification engagement</p>
       </div>
@@ -33,7 +33,7 @@ export const NotificationAnalytics = ({ notifications }: NotificationAnalyticsPr
           <div className="p-3 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <CheckCircle className="w-3 h-3 text-success" />
-              <span className="text-xs text-muted-foreground">Read Rate</span>
+              <span className="text-xs text-muted-foreground">Read rate</span>
             </div>
             <p className="text-lg font-bold text-foreground">{readRate}%</p>
           </div>

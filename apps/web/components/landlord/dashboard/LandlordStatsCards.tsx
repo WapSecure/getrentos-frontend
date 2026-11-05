@@ -45,21 +45,21 @@ export const LandlordStatsCards = ({
   }[] = [
     {
       icon: Building2,
-      label: 'Total Properties',
+      label: 'Total properties',
       value: totalProperties,
       subtitle: 'Across your portfolio',
       accent: 'blue',
     },
     {
       icon: DoorOpen,
-      label: 'Occupied Units',
+      label: 'Occupied units',
       value: occupiedUnits,
       subtitle: 'Signed and let',
       accent: 'green',
     },
     {
       icon: Clock,
-      label: 'Reserved Units',
+      label: 'Reserved units',
       value: reservedUnits,
       // Off the market but not let: a lease is out for signature or the first
       // payment is still due. Counting these as rented overstated the tenancy.
@@ -68,14 +68,14 @@ export const LandlordStatsCards = ({
     },
     {
       icon: DoorClosed,
-      label: 'Vacant Units',
+      label: 'Vacant units',
       value: vacantUnits,
       subtitle: 'Available now',
       accent: 'blue',
     },
     {
       icon: Banknote,
-      label: 'Annual Rent Roll',
+      label: 'Annual rent roll',
       // Rent here is contracted and paid by the year. A "monthly revenue"
       // figure invited the reader to expect twelve payments and understated
       // the tenancy twelvefold.
@@ -86,7 +86,7 @@ export const LandlordStatsCards = ({
     },
     {
       icon: AlertTriangle,
-      label: 'Outstanding Rent',
+      label: 'Outstanding rent',
       value: moneyVisible ? outstandingAmount : '••••••',
       subtitle:
         outstandingPayments === 1
@@ -97,7 +97,7 @@ export const LandlordStatsCards = ({
     },
     {
       icon: Wrench,
-      label: 'Active Maintenance',
+      label: 'Active maintenance',
       value: activeMaintenanceRequests,
       subtitle: 'Open tickets',
       accent: 'orange',

@@ -20,7 +20,7 @@ export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
     if (score >= 80) return 'Excellent';
     if (score >= 60) return 'Good';
     if (score >= 40) return 'Average';
-    return 'Below Average';
+    return 'Below average';
   };
 
   const sizes = {
@@ -68,7 +68,7 @@ export const PropertyScore = ({ score, size = 'md' }: PropertyScoreProps) => {
       </div>
       <div>
         <div className={`font-medium ${currentSize.text} text-foreground`}>{getScoreLabel()}</div>
-        <div className={`${currentSize.label} text-muted-foreground`}>Property Score</div>
+        <div className={`${currentSize.label} text-muted-foreground`}>Property score</div>
       </div>
     </motion.div>
   );

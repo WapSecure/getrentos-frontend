@@ -26,12 +26,12 @@ interface NotificationPreference {
 }
 
 const CATEGORY_META: { category: string; id: string; label: string; icon: React.ElementType }[] = [
-  { category: 'application', id: 'applications', label: 'Application Updates', icon: FileText },
+  { category: 'application', id: 'applications', label: 'Application updates', icon: FileText },
   { category: 'message', id: 'messages', label: 'Messages', icon: MessageCircle },
-  { category: 'payment', id: 'payments', label: 'Payment Alerts', icon: CreditCard },
-  { category: 'maintenance', id: 'maintenance', label: 'Maintenance Updates', icon: Wrench },
-  { category: 'lease', id: 'lease', label: 'Lease Reminders', icon: Home },
-  { category: 'system', id: 'system', label: 'System & Trust Score', icon: Bell },
+  { category: 'payment', id: 'payments', label: 'Payment alerts', icon: CreditCard },
+  { category: 'maintenance', id: 'maintenance', label: 'Maintenance updates', icon: Wrench },
+  { category: 'lease', id: 'lease', label: 'Lease reminders', icon: Home },
+  { category: 'system', id: 'system', label: 'System & trust score', icon: Bell },
 ];
 
 const buildPreferences = (fetched?: FetchedPreference[]): NotificationPreference[] => {
@@ -171,7 +171,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Notification Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Notification settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage how and when you receive notifications
       </p>
@@ -212,7 +212,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
                   <Checkbox
                     checked={pref.channels.inApp}
                     onCheckedChange={() => toggleChannel(pref.id, 'inApp')}
-                    label="In-App"
+                    label="In-app"
                   />
                 </div>
               )}
@@ -221,7 +221,7 @@ const NotificationSettingsForm = ({ initial }: { initial: NotificationPreference
         })}
       </div>
 
-      <SaveButton label="Save Preferences" className="mt-4" />
+      <SaveButton label="Save preferences" className="mt-4" />
     </div>
   );
 };

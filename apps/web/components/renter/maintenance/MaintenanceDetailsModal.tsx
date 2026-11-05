@@ -43,7 +43,7 @@ const priorityConfig: Record<MaintenanceRequest['priority'], BadgeConfig> = {
 const statusConfig: Record<MaintenanceRequest['status'], BadgeConfig> = {
   submitted: { label: 'Submitted', variant: 'info', icon: Clock },
   assigned: { label: 'Assigned', variant: 'info', icon: User },
-  in_progress: { label: 'In Progress', variant: 'warning', icon: Wrench },
+  in_progress: { label: 'In progress', variant: 'warning', icon: Wrench },
   resolved: { label: 'Resolved', variant: 'success', icon: CheckCircle },
   cancelled: { label: 'Cancelled', variant: 'neutral', icon: XCircle },
 };
@@ -87,7 +87,7 @@ export const MaintenanceDetailsModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent size="lg">
         <DialogTitle className="pr-8 font-semibold text-foreground">
-          Maintenance Details
+          Maintenance details
         </DialogTitle>
         <DialogDescription className="text-xs text-muted-foreground mt-0.5">
           {request.propertyName}
@@ -176,7 +176,7 @@ export const MaintenanceDetailsModal = ({
             <div className="p-3 rounded-lg bg-purple-subtle border border-purple/20">
               <div className="flex items-center gap-2 mb-2">
                 <User className="w-4 h-4 text-purple" />
-                <span className="text-sm font-medium text-purple">Assigned Vendor</span>
+                <span className="text-sm font-medium text-purple">Assigned vendor</span>
               </div>
               <p className="text-sm font-medium text-foreground">{request.assignedVendorName}</p>
               {request.scheduledFor && request.status !== 'resolved' && (
@@ -213,7 +213,7 @@ export const MaintenanceDetailsModal = ({
 
           {/* SLA Info */}
           {request.slaResponseTime !== undefined && (
-            <Alert variant="info" icon={Clock} title="SLA Response Time">
+            <Alert variant="info" icon={Clock} title="SLA response time">
               {request.slaResponseTime} hours
             </Alert>
           )}

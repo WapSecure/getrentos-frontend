@@ -91,7 +91,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
       >
         <div className="p-4 pr-12 border-b border-border shrink-0">
           <DialogTitle className="font-semibold text-foreground">
-            {event ? 'Edit Event' : 'Add Event'}
+            {event ? 'Edit event' : 'Add event'}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             {event ? 'Update event details' : 'Create a new event'}
@@ -125,13 +125,13 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Start Time">
+            <Field label="Start time">
               <TimePicker
                 value={formData.startTime}
                 onChange={(v) => setFormData({ ...formData, startTime: v })}
               />
             </Field>
-            <Field label="End Time">
+            <Field label="End time">
               <TimePicker
                 value={formData.endTime}
                 onChange={(v) => setFormData({ ...formData, endTime: v })}
@@ -139,7 +139,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             </Field>
           </div>
 
-          <Field label="Event Type">
+          <Field label="Event type">
             <Select
               value={formData.type}
               onValueChange={(value) =>
@@ -190,7 +190,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
               label={
                 <span className="inline-flex items-center gap-2">
                   <Bell className="w-4 h-4" />
-                  Set Reminder
+                  Set reminder
                 </span>
               }
             />
@@ -228,7 +228,7 @@ export const CalendarEventModal = ({ isOpen, onClose, onSave, event }: CalendarE
             disabled={!formData.title || !formData.date || isSaving}
             isLoading={isSaving}
           >
-            {event ? 'Update Event' : 'Add Event'}
+            {event ? 'Update event' : 'Add event'}
           </Button>
           <Button variant="ghost" fullWidth onClick={onClose} disabled={isSaving}>
             Cancel

@@ -50,7 +50,7 @@ export const CreatePollModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">New Poll</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">New poll</DialogTitle>
 
         <div className="mt-5 space-y-4">
           <Field label="Question" required>
@@ -114,7 +114,7 @@ export const CreatePollModal = ({
             loadingText="Creating…"
             onClick={() => onSubmit({ question: question.trim(), options: trimmedOptions })}
           >
-            Create Poll
+            Create poll
           </Button>
         </div>
       </DialogContent>

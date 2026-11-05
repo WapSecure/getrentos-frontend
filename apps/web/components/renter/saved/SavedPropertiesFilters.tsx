@@ -13,19 +13,19 @@ interface SavedPropertiesFiltersProps {
 }
 
 const statusOptions: { value: 'all' | 'applied' | 'viewed'; label: string }[] = [
-  { value: 'all', label: 'All Properties' },
+  { value: 'all', label: 'All properties' },
   { value: 'applied', label: 'Applied' },
-  { value: 'viewed', label: 'Recently Viewed' },
+  { value: 'viewed', label: 'Recently viewed' },
 ];
 
 const sortOptions: {
   value: 'recent' | 'price-low' | 'price-high' | 'trust-score';
   label: string;
 }[] = [
-  { value: 'recent', label: 'Recently Saved' },
-  { value: 'price-low', label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' },
-  { value: 'trust-score', label: 'Highest Landlord Trust' },
+  { value: 'recent', label: 'Recently saved' },
+  { value: 'price-low', label: 'Price: low to high' },
+  { value: 'price-high', label: 'Price: high to low' },
+  { value: 'trust-score', label: 'Highest landlord trust' },
 ];
 
 export const SavedPropertiesFilters = ({

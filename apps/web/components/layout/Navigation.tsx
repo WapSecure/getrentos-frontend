@@ -42,7 +42,7 @@ const MARKETPLACE_LINKS: NavLink[] = [
 // The two in-page anchors are written as `/#…` so they work from every page that
 // shows this bar, not only from the landing page.
 const PAGE_LINKS: NavLink[] = [
-  { label: 'Home Management', href: ROUTES.HOME_MANAGEMENT },
+  { label: 'Home management', href: ROUTES.HOME_MANAGEMENT },
   { label: 'Roles', href: '/#roles' },
   { label: 'How it works', href: '/#how-it-works' },
   { label: 'Pricing', href: ROUTES.PRICING },

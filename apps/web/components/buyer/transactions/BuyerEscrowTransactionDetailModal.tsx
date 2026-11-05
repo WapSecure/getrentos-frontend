@@ -52,12 +52,12 @@ const actorConfig: Record<
 const escrowSteps: { key: BuyerEscrowStatus; label: string; description: string }[] = [
   {
     key: 'deposit_pending',
-    label: 'Deposit Pending',
+    label: 'Deposit pending',
     description: 'Pay your deposit to GetRentos, which holds it safely until you confirm receipt.',
   },
   {
     key: 'funds_held',
-    label: 'Funds Held',
+    label: 'Funds held',
     description:
       'Your payment is held safely by GetRentos. Once you have received the property and its documents, confirm receipt to release the funds to the owner.',
   },
@@ -105,7 +105,7 @@ export const BuyerEscrowTransactionDetailModal = ({
 
         <div className="p-4 space-y-5 overflow-y-auto flex-1 min-h-0">
           <div className="p-3 rounded-lg bg-secondary flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Purchase Price</span>
+            <span className="text-sm text-muted-foreground">Purchase price</span>
             <span className="text-lg font-bold text-primary">
               {formatCurrency(transaction.purchasePrice)}
             </span>
@@ -170,7 +170,7 @@ export const BuyerEscrowTransactionDetailModal = ({
                             isLoading={isPaying}
                             onClick={() => onMakePayment(transaction.id, 'deposit')}
                           >
-                            Make Deposit Payment
+                            Make deposit payment
                           </Button>
                         )}
                         {isActive &&
@@ -247,7 +247,7 @@ export const BuyerEscrowTransactionDetailModal = ({
             >
               <span className="flex items-center gap-2 text-sm font-medium text-foreground">
                 <ScrollText className="w-4 h-4 text-muted-foreground" />
-                Activity Log
+                Activity log
                 <span className="text-xs font-normal text-muted-foreground">
                   ({transaction.activityLog.length} events)
                 </span>
@@ -291,7 +291,7 @@ export const BuyerEscrowTransactionDetailModal = ({
             icon={<LifeBuoy className="w-4 h-4" />}
             onClick={() => router.push(ROUTES.BUYER_MESSAGES)}
           >
-            Contact Support
+            Contact support
           </Button>
         </div>
       </DialogContent>

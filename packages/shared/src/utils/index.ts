@@ -13,3 +13,4 @@ export * from './months';
 export * from './coordinateSystems';
 export * from './landTrust';
 export * from './deposit';
+export * from './trend';

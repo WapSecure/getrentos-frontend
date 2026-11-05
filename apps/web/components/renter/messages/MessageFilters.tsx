@@ -58,27 +58,27 @@ export const MessageFilters = ({
 
       {isExpanded && (
         <div className="p-3 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="Message Type">
+          <Field label="Message type">
             <Select
               value={filters.type}
               onValueChange={(value) => handleFilterChange('type', value)}
               options={[
-                { value: 'all', label: 'All Messages' },
+                { value: 'all', label: 'All messages' },
                 { value: 'unread', label: 'Unread' },
                 { value: 'read', label: 'Read' },
-                { value: 'sent', label: 'Sent by Me' },
+                { value: 'sent', label: 'Sent by me' },
               ]}
             />
           </Field>
-          <Field label="Sort By">
+          <Field label="Sort by">
             <Select
               value={filters.sortBy}
               onValueChange={(value) => handleFilterChange('sortBy', value)}
               options={[
-                { value: 'recent', label: 'Most Recent' },
+                { value: 'recent', label: 'Most recent' },
                 { value: 'oldest', label: 'Oldest' },
-                { value: 'unread', label: 'Unread First' },
-                { value: 'property', label: 'By Property' },
+                { value: 'unread', label: 'Unread first' },
+                { value: 'property', label: 'By property' },
               ]}
             />
           </Field>

@@ -12,7 +12,7 @@ export const HelpSupport = () => {
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Contact Support</h3>
+        <h3 className="font-semibold text-foreground">Contact support</h3>
         <p className="text-xs text-muted-foreground mt-0.5">We&apos;re here to help</p>
       </div>
 
@@ -22,7 +22,7 @@ export const HelpSupport = () => {
             <MessageCircle className="h-5 w-5 text-info" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-foreground">Live Chat</p>
+            <p className="text-sm font-medium text-foreground">Live chat</p>
             <p className="text-xs text-muted-foreground">Message us anytime</p>
             <Button
               variant="primary"
@@ -32,7 +32,7 @@ export const HelpSupport = () => {
               icon={<ArrowRight className="h-3 w-3" />}
               iconPosition="right"
             >
-              Start Chat
+              Start chat
             </Button>
           </div>
         </div>
@@ -54,7 +54,7 @@ export const HelpSupport = () => {
               icon={<ArrowRight className="h-3 w-3" />}
               iconPosition="right"
             >
-              Open Support
+              Open support
             </Button>
           </div>
         </div>
@@ -64,7 +64,7 @@ export const HelpSupport = () => {
             <Mail className="h-5 w-5 text-muted-foreground" />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Email Support</p>
+            <p className="text-sm font-medium text-foreground">Email support</p>
             <a href={`mailto:${SUPPORT.email}`} className="text-xs text-primary">
               {SUPPORT.email}
             </a>

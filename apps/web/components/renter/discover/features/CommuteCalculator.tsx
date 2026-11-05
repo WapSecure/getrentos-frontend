@@ -71,7 +71,7 @@ export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalcul
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="p-0">
           <div className="p-4 pr-12 border-b border-border">
-            <DialogTitle className="font-semibold text-foreground">Commute Calculator</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Commute calculator</DialogTitle>
           </div>
 
           <div className="p-4 space-y-4">
@@ -107,7 +107,7 @@ export const CommuteCalculator = ({ listingId, propertyLocation }: CommuteCalcul
               isLoading={isCalculating}
               fullWidth
             >
-              Calculate Commute
+              Calculate commute
             </Button>
 
             {commuteTime && (

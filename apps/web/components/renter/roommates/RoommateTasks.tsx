@@ -74,7 +74,7 @@ export const RoommateTasks = ({ roommates, onAddTask, onCompleteTask }: Roommate
         <div className="flex items-center gap-2">
           <Clipboard className="w-4 h-4 text-primary" />
           <div className="text-left">
-            <h3 className="font-semibold text-foreground">Roommate Tasks</h3>
+            <h3 className="font-semibold text-foreground">Roommate tasks</h3>
             <p className="text-xs text-muted-foreground">{allTasks.length} active tasks</p>
           </div>
         </div>

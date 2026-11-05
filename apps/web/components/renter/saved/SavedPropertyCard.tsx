@@ -112,11 +112,11 @@ export const SavedPropertyCard = ({
       case 'pending':
         return { label: 'Pending', variant: 'warning' };
       case 'under_review':
-        return { label: 'Under Review', variant: 'info' };
+        return { label: 'Under review', variant: 'info' };
       case 'approved':
         return { label: 'Approved!', variant: 'success' };
       case 'rejected':
-        return { label: 'Not Selected', variant: 'danger' };
+        return { label: 'Not selected', variant: 'danger' };
       default:
         return null;
     }
@@ -160,12 +160,12 @@ export const SavedPropertyCard = ({
         {includeNote && (
           <DropdownMenuItem onSelect={() => setShowNoteModal(true)}>
             <BookmarkPlus className="w-3 h-3" aria-hidden="true" />
-            Add Note
+            Add note
           </DropdownMenuItem>
         )}
         <DropdownMenuItem onSelect={() => setShowShareModal(true)}>
           <ExternalLink className="w-3 h-3" aria-hidden="true" />
-          Share Property
+          Share property
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="text-xs text-muted-foreground">
@@ -275,10 +275,10 @@ export const SavedPropertyCard = ({
                   variant="primary"
                   onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
                 >
-                  View Details
+                  View details
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => setShowNoteModal(true)}>
-                  Add Note
+                  Add note
                 </Button>
                 {actionsMenu(false)}
               </div>
@@ -356,7 +356,7 @@ export const SavedPropertyCard = ({
               onClick={() => router.push(buildRoute.renterPropertyDetail(property.id))}
               className="flex-1"
             >
-              View Details
+              View details
             </Button>
             {actionsMenu(true)}
           </div>

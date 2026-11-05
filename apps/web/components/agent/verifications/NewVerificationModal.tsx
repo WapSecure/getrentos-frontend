@@ -85,7 +85,7 @@ export const NewVerificationModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="p-0 sm:max-w-sm sm:p-0">
         <div className="p-4 pr-12 border-b border-border">
-          <DialogTitle className="font-semibold text-foreground">Log Verification</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Log verification</DialogTitle>
         </div>
 
         <div className="p-4 space-y-4">
@@ -101,7 +101,7 @@ export const NewVerificationModal = ({
             />
           </Field>
 
-          <Field label="Subject Name" required>
+          <Field label="Subject name" required>
             <Input
               type="text"
               value={subjectName}
@@ -109,7 +109,7 @@ export const NewVerificationModal = ({
             />
           </Field>
 
-          <Field label="Subject Type">
+          <Field label="Subject type">
             <RadioGroup
               value={subjectType}
               onValueChange={setSubjectType}
@@ -145,7 +145,7 @@ export const NewVerificationModal = ({
             loadingText="Saving…"
             disabled={!taskId || !subjectName}
           >
-            Save Verification
+            Save verification
           </Button>
           {errorMessage && (
             <Alert variant="danger" className="mt-2">

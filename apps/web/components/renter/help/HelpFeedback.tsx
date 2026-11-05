@@ -48,7 +48,7 @@ export const HelpFeedback = () => {
   return (
     <Card>
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Send Feedback</h3>
+        <h3 className="font-semibold text-foreground">Send feedback</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Help us improve</p>
       </div>
 
@@ -83,7 +83,7 @@ export const HelpFeedback = () => {
 
         {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
 
-        <Field label="Your Feedback">
+        <Field label="Your feedback">
           <Textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
@@ -101,7 +101,7 @@ export const HelpFeedback = () => {
           loadingText="Sending feedback"
           icon={<Send className="h-4 w-4" />}
         >
-          Submit Feedback
+          Submit feedback
         </Button>
       </div>
     </Card>

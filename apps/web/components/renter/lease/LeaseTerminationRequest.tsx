@@ -69,12 +69,12 @@ export const LeaseTerminationRequest = ({
               <AlertTriangle className="w-5 h-5 text-destructive" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground">Early Lease Termination</h3>
+              <h3 className="font-semibold text-foreground">Early lease termination</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Request to terminate your lease before the end date
               </p>
               <Button variant="danger" size="sm" className="mt-2" onClick={open}>
-                Request Termination
+                Request termination
               </Button>
             </div>
           </div>
@@ -89,7 +89,7 @@ export const LeaseTerminationRequest = ({
         <DialogContent className="p-0">
           <div className="p-4 pr-12 border-b border-border">
             <DialogTitle className="font-semibold text-foreground">
-              Request Early Termination
+              Request early termination
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               {propertyName}
@@ -97,7 +97,7 @@ export const LeaseTerminationRequest = ({
           </div>
 
           <div className="p-4 space-y-4">
-            <Field label="Proposed Move-Out Date" required>
+            <Field label="Proposed move-out date" required>
               <DatePicker
                 value={noticeDate}
                 onChange={setNoticeDate}
@@ -105,7 +105,7 @@ export const LeaseTerminationRequest = ({
               />
             </Field>
 
-            <Field label="Reason for Termination" required>
+            <Field label="Reason for termination" required>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
@@ -124,7 +124,7 @@ export const LeaseTerminationRequest = ({
                 disabled={!noticeDate || !reason || isSubmitting}
                 isLoading={isSubmitting}
               >
-                Submit Request
+                Submit request
               </Button>
               <Button variant="ghost" fullWidth onClick={close}>
                 Cancel

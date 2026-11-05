@@ -68,9 +68,9 @@ export default function RealtorCommissionsPage() {
       'Property',
       'Side',
       'Client',
-      'Deal Value',
+      'Deal value',
       'Rate (%)',
-      'Commission Amount',
+      'Commission amount',
       'Status',
       'Earned',
     ];
@@ -121,7 +121,7 @@ export default function RealtorCommissionsPage() {
     },
     {
       icon: TrendingUp,
-      label: 'Deals Closed',
+      label: 'Deals closed',
       value: summary?.dealsClosed ?? 0,
       accent: 'emerald',
     },
@@ -200,7 +200,7 @@ export default function RealtorCommissionsPage() {
                   <th className="p-4 font-medium">Property</th>
                   <th className="p-4 font-medium">Side</th>
                   <th className="p-4 font-medium">Client</th>
-                  <th className="p-4 font-medium">Deal Value</th>
+                  <th className="p-4 font-medium">Deal value</th>
                   <th className="p-4 font-medium">Rate</th>
                   <th className="p-4 font-medium">Commission</th>
                   <th className="p-4 font-medium">Status</th>

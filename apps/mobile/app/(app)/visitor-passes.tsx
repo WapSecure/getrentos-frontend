@@ -36,8 +36,8 @@ const STATUS_LABEL: Record<VisitorPassStatus, string> = {
   // A walk-in the gate raised: this household is being asked to decide.
   awaiting_approval: 'Needs your answer',
   approved: 'Approved',
-  checked_in: 'Checked In',
-  checked_out: 'Checked Out',
+  checked_in: 'Checked in',
+  checked_out: 'Checked out',
   expired: 'Expired',
   revoked: 'Revoked',
   denied: 'Refused',
@@ -166,7 +166,7 @@ export default function ResidentVisitorPasses() {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <DetailScreenHeader
         eyebrow="Access control"
-        title="Visitor Passes"
+        title="Visitor passes"
         subtitle="Invite guests and approve gate arrivals"
         onBack={() => goBack()}
         accessory={
@@ -265,7 +265,7 @@ export default function ResidentVisitorPasses() {
             icon={<KeyRound size={34} color={colors.mutedForeground} />}
             title="No visitor passes yet"
             description="Issue a pass so your visitor can check in at the gate."
-            action={<Button label="Issue Pass" onPress={() => setIssueOpen(true)} />}
+            action={<Button label="Issue pass" onPress={() => setIssueOpen(true)} />}
           />
         )}
       </Screen>
@@ -382,7 +382,7 @@ function IssuePassSheet({
   submitting: boolean;
 }) {
   return (
-    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Issue Visitor Pass">
+    <Sheet open={open} onClose={submitting ? () => undefined : onClose} title="Issue visitor pass">
       <IssuePassForm key={open ? 'open' : 'closed'} onSubmit={onSubmit} submitting={submitting} />
     </Sheet>
   );
@@ -447,7 +447,7 @@ function IssuePassForm({
         </View>
       </Field>
       <Button
-        label="Issue Pass"
+        label="Issue pass"
         loadingLabel="Issuing…"
         disabled={submitting || !canSubmit}
         loading={submitting}
@@ -476,7 +476,7 @@ function PassIssuedSheet({
 }) {
   const { colors, spacing, radius } = useTheme();
   return (
-    <Sheet open={!!pass} onClose={onClose} title="Visitor Pass Issued">
+    <Sheet open={!!pass} onClose={onClose} title="Visitor pass issued">
       {pass ? (
         <View style={{ alignItems: 'center', gap: spacing.md }}>
           <Text variant="body" color="mutedForeground" center>

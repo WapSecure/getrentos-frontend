@@ -78,7 +78,7 @@ export const PaymentSchedule = ({
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
-            <h2 className="font-semibold text-foreground">Upcoming Payments</h2>
+            <h2 className="font-semibold text-foreground">Upcoming payments</h2>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">No upcoming payments</p>
         </div>
@@ -92,7 +92,7 @@ export const PaymentSchedule = ({
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-foreground">Upcoming Payments</h2>
+          <h2 className="font-semibold text-foreground">Upcoming payments</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">
           {upcomingPayments.length} payments pending
@@ -143,7 +143,7 @@ export const PaymentSchedule = ({
           disabled={isPayingAll}
           isLoading={isPayingAll}
         >
-          Pay All Now
+          Pay all now
         </Button>
       </div>
     </Card>

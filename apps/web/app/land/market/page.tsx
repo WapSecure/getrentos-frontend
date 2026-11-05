@@ -8,7 +8,7 @@ import { MarketInsightsView } from '@/components/land/market/MarketInsightsView'
 import { LAND_BUYER_ROUTES } from '@/lib/constants/landBuyerRoutes';
 
 export const metadata: Metadata = {
-  title: 'Land Prices: Price per Square Metre by Area',
+  title: 'Land prices: price per square metre by area',
   description:
     'Asking prices per square metre for verified land in Nigeria, by state, city, estate and title document.',
   alternates: { canonical: LAND_BUYER_ROUTES.MARKET_INSIGHTS },

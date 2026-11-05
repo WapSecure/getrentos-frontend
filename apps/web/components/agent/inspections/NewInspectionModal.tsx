@@ -210,7 +210,7 @@ export const NewInspectionModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-lg sm:p-0">
         <div className="p-4 pr-12 border-b border-border shrink-0">
-          <DialogTitle className="font-semibold text-foreground">New Inspection</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">New inspection</DialogTitle>
         </div>
 
         <div className="p-4 space-y-4 overflow-y-auto flex-1">
@@ -226,7 +226,7 @@ export const NewInspectionModal = ({
             />
           </Field>
 
-          <Field label="Inspection Type" required>
+          <Field label="Inspection type" required>
             <Select
               value={type}
               onValueChange={(value) => setType(value as InspectionType)}
@@ -234,7 +234,7 @@ export const NewInspectionModal = ({
             />
           </Field>
 
-          <Field label="Client Name" optionalLabel="(optional)">
+          <Field label="Client name" optionalLabel="(optional)">
             <Input
               type="text"
               value={clientName}
@@ -252,7 +252,7 @@ export const NewInspectionModal = ({
                 icon={<Plus className="w-3 h-3" />}
                 onClick={addRoom}
               >
-                Add Room
+                Add room
               </Button>
             </div>
             <div className="space-y-3">
@@ -263,7 +263,7 @@ export const NewInspectionModal = ({
                       type="text"
                       value={room.room}
                       onChange={(e) => updateRoom(index, 'room', e.target.value)}
-                      placeholder="e.g. Living Room"
+                      placeholder="e.g. Living room"
                       aria-label={`Room ${index + 1} name`}
                       className="min-w-0 flex-1"
                       inputClassName="py-1.5"
@@ -381,7 +381,7 @@ export const NewInspectionModal = ({
             loadingText="Saving…"
             disabled={!canSubmit}
           >
-            Save Inspection
+            Save inspection
           </Button>
           {submitError && (
             <Alert variant="danger" className="mt-2">

@@ -28,7 +28,7 @@ export const InviteGatemanModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="sm">
-        <DialogTitle className="text-lg font-semibold text-foreground">Add Gateman</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Add gateman</DialogTitle>
 
         <div className="mt-5 space-y-3">
           <Field
@@ -57,7 +57,7 @@ export const InviteGatemanModal = ({
             loadingText="Adding…"
             onClick={() => onSubmit(email.trim())}
           >
-            Add Gateman
+            Add gateman
           </Button>
         </div>
       </DialogContent>

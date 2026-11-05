@@ -67,11 +67,11 @@ export const HouseholdModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && onClose()}>
       <DialogContent size="md">
         <DialogTitle className="text-lg font-semibold text-foreground">
-          {household ? 'Edit Household' : 'Add Household'}
+          {household ? 'Edit household' : 'Add household'}
         </DialogTitle>
 
         <div className="mt-5 space-y-4">
-          <Field label="Unit / Plot Label" required>
+          <Field label="Unit / plot label" required>
             <Input
               type="text"
               value={unitLabel}
@@ -80,7 +80,7 @@ export const HouseholdModal = ({
             />
           </Field>
 
-          <Field label="Resident Name" required>
+          <Field label="Resident name" required>
             <Input
               type="text"
               value={residentName}
@@ -133,7 +133,7 @@ export const HouseholdModal = ({
             loadingText="Saving…"
             onClick={handleSave}
           >
-            {household ? 'Save Changes' : 'Add Household'}
+            {household ? 'Save changes' : 'Add household'}
           </Button>
         </div>
       </DialogContent>

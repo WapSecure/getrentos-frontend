@@ -63,7 +63,7 @@ export const PropertyCard = ({
 
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-shadow hover:shadow-md">
-      <div className="relative aspect-[16/10] bg-muted">
+      <div className={`relative bg-muted ${showCover ? 'aspect-[16/10]' : 'h-24'}`}>
         {showCover ? (
           // Signed storage URLs are not in next.config's remotePatterns, so
           // next/image cannot optimise these; the same escape hatch is used by
@@ -77,8 +77,9 @@ export const PropertyCard = ({
             className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Building2 className="w-12 h-12 text-muted-foreground/40" />
+          <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Building2 className="h-4 w-4" aria-hidden />
+            No cover photo yet
           </div>
         )}
         <button

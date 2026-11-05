@@ -36,7 +36,7 @@ export const DocumentAnalytics = ({ summary }: DocumentAnalyticsProps) => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Document Analytics</h3>
+          <h3 className="font-semibold text-foreground">Document analytics</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Storage & usage insights</p>
       </div>
@@ -46,7 +46,7 @@ export const DocumentAnalytics = ({ summary }: DocumentAnalyticsProps) => {
           <div className="p-2 rounded-lg bg-secondary">
             <div className="flex items-center gap-1">
               <Database className="w-3 h-3 text-primary" />
-              <span className="text-xs text-muted-foreground">Storage Used</span>
+              <span className="text-xs text-muted-foreground">Storage used</span>
             </div>
             <p className="text-sm font-bold text-foreground">
               {formatBytes(summary.storageUsedBytes)}
@@ -66,7 +66,7 @@ export const DocumentAnalytics = ({ summary }: DocumentAnalyticsProps) => {
         <div className="p-2 rounded-lg bg-secondary">
           <div className="flex items-center gap-1">
             <PieChart className="w-3 h-3 text-primary" />
-            <span className="text-xs text-muted-foreground">Type Distribution</span>
+            <span className="text-xs text-muted-foreground">Type distribution</span>
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {Object.entries(typeDistribution).map(([type, count]) => (
@@ -77,7 +77,7 @@ export const DocumentAnalytics = ({ summary }: DocumentAnalyticsProps) => {
           </div>
         </div>
 
-        <Alert variant="info" icon={TrendingUp} title="Most Common Type">
+        <Alert variant="info" icon={TrendingUp} title="Most common type">
           {getMostUsedType()}
         </Alert>
       </div>

@@ -170,7 +170,7 @@ export default function OwnerPropertiesPage() {
     { value: 'all', label: 'All' },
     { value: 'verified', label: 'Verified' },
     { value: 'pending_review', label: 'Pending' },
-    { value: 'needs_clarification', label: 'Needs Info' },
+    { value: 'needs_clarification', label: 'Needs info' },
     { value: 'rejected', label: 'Rejected' },
   ];
 
@@ -192,7 +192,7 @@ export default function OwnerPropertiesPage() {
           onClick={() => setIsAddModalOpen(true)}
           icon={<Plus className="w-4 h-4" />}
         >
-          Add Property
+          Add property
         </Button>
       </div>
 
@@ -236,7 +236,7 @@ export default function OwnerPropertiesPage() {
           action={
             total === 0 ? (
               <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
-                Add Your First Property
+                Add your first property
               </Button>
             ) : undefined
           }

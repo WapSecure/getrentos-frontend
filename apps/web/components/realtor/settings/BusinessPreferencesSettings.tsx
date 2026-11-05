@@ -75,7 +75,7 @@ export const BusinessPreferencesSettings = () => {
       </p>
 
       <div className="space-y-4">
-        <Field label="Default Commission Rate (%)">
+        <Field label="Default commission rate (%)">
           <NumberInput
             min={1}
             max={100}
@@ -86,7 +86,7 @@ export const BusinessPreferencesSettings = () => {
 
         <div>
           <p id="business-service-areas" className="block text-sm font-medium text-foreground mb-2">
-            Service Areas
+            Service areas
           </p>
           <div
             role="group"
@@ -110,7 +110,7 @@ export const BusinessPreferencesSettings = () => {
             id="business-property-types"
             className="block text-sm font-medium text-foreground mb-2"
           >
-            Property Types
+            Property types
           </p>
           <div
             role="group"
@@ -136,7 +136,7 @@ export const BusinessPreferencesSettings = () => {
         isLoading={save.isPending}
         onClick={() => save.mutate()}
       >
-        Save Preferences
+        Save preferences
       </Button>
     </div>
   );

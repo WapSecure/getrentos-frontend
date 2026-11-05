@@ -41,7 +41,7 @@ export const AccountDeletion = () => {
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive-subtle flex items-center justify-center">
           <Check className="w-8 h-8 text-destructive" aria-hidden="true" />
         </div>
-        <h3 className="text-xl font-semibold text-foreground">Account Deleted</h3>
+        <h3 className="text-xl font-semibold text-foreground">Account deleted</h3>
         <p className="text-sm text-muted-foreground mt-2">
           Your account has been successfully deleted. We&apos;re sorry to see you go.
         </p>
@@ -51,7 +51,7 @@ export const AccountDeletion = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-destructive mb-4">Delete Account</h2>
+      <h2 className="text-xl font-semibold text-destructive mb-4">Delete account</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Permanently delete your account and all associated data
       </p>
@@ -96,7 +96,7 @@ export const AccountDeletion = () => {
         loadingText="Deleting..."
         icon={<Trash2 className="w-4 h-4" />}
       >
-        Delete Account
+        Delete account
       </Button>
     </div>
   );

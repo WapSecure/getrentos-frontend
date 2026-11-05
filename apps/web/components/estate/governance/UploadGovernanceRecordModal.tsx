@@ -35,7 +35,7 @@ interface UploadGovernanceRecordModalProps {
 
 const typeOptions = [
   { value: 'BYLAWS', label: 'Bylaws' },
-  { value: 'MEETING_MINUTES', label: 'Meeting Minutes' },
+  { value: 'MEETING_MINUTES', label: 'Meeting minutes' },
   { value: 'OTHER', label: 'Other' },
 ];
 
@@ -68,7 +68,7 @@ export const UploadGovernanceRecordModal = ({
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
         <DialogTitle className="text-lg font-semibold text-foreground">
-          {newVersionOf ? 'Upload New Version' : 'Upload Governance Record'}
+          {newVersionOf ? 'Upload new version' : 'Upload governance record'}
         </DialogTitle>
         {newVersionOf && (
           <DialogDescription className="mt-1 text-sm text-muted-foreground">
@@ -83,7 +83,7 @@ export const UploadGovernanceRecordModal = ({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. 2026 Bylaws Amendment"
+              placeholder="e.g. 2026 bylaws amendment"
             />
           </Field>
 
@@ -92,7 +92,7 @@ export const UploadGovernanceRecordModal = ({
           </Field>
 
           {type === 'MEETING_MINUTES' && (
-            <Field label="Meeting Date" optionalLabel="(optional)">
+            <Field label="Meeting date" optionalLabel="(optional)">
               <DatePicker value={meetingDate} onChange={setMeetingDate} clearable />
             </Field>
           )}

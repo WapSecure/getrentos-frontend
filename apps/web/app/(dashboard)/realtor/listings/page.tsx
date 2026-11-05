@@ -114,7 +114,7 @@ export default function RealtorListingsPage() {
   const filterOptions: { value: StatusFilter; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'draft', label: 'Draft' },
-    { value: 'pending_approval', label: 'Pending Approval' },
+    { value: 'pending_approval', label: 'Pending approval' },
     { value: 'published', label: 'Published' },
     { value: 'paused', label: 'Paused' },
     { value: 'closed', label: 'Closed' },
@@ -130,7 +130,7 @@ export default function RealtorListingsPage() {
           </p>
         </div>
         <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={openCreateModal}>
-          Add Listing
+          Add listing
         </Button>
       </div>
 

@@ -23,7 +23,7 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
       'Property',
       'Address',
       'Status',
-      'Applied Date',
+      'Applied date',
       'Price',
       'Bedrooms',
       'Bathrooms',
@@ -65,8 +65,8 @@ export const ApplicationExport = ({ isOpen, onClose, applications }: Application
       .join('');
 
     printHtml(
-      'Applications Export',
-      `<h1>Applications Export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${applications.length} application${applications.length === 1 ? '' : 's'}</p><table><thead><tr><th>Property</th><th>Address</th><th>Status</th><th>Applied</th><th>Price</th><th>Beds</th><th>Baths</th><th>Size</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No applications</td></tr>'}</tbody></table>`
+      'Applications export',
+      `<h1>Applications export</h1><p class="meta">Exported on ${new Date().toLocaleDateString()} · ${applications.length} application${applications.length === 1 ? '' : 's'}</p><table><thead><tr><th>Property</th><th>Address</th><th>Status</th><th>Applied</th><th>Price</th><th>Beds</th><th>Baths</th><th>Size</th></tr></thead><tbody>${rows || '<tr><td colspan="8">No applications</td></tr>'}</tbody></table>`
     );
 
     setCompleted(true);

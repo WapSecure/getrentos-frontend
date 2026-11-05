@@ -98,7 +98,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Payout Account</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Payout account</h2>
       <p className="text-sm text-muted-foreground mb-6">{description}</p>
 
       {account?.accountNumber ? (
@@ -140,7 +140,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
           />
         </Field>
         {bank === OTHER_BANK && (
-          <Field label="Bank Code" htmlFor="seller-payout-bank-code">
+          <Field label="Bank code" htmlFor="seller-payout-bank-code">
             <NumberInput
               value={otherBankCode}
               onValueChange={setOtherBankCode}
@@ -151,7 +151,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
           </Field>
         )}
         <Field
-          label="Account Number"
+          label="Account number"
           htmlFor="seller-payout-account-number"
           hint="Your 10-digit NUBAN account number."
           error={accountNumberError}
@@ -173,7 +173,7 @@ export const SellerPayoutSettings = ({ description }: SellerPayoutSettingsProps)
           disabled={!canSave}
           onClick={() => save.mutate()}
         >
-          Update Payout Account
+          Update payout account
         </Button>
       </div>
 

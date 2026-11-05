@@ -47,7 +47,7 @@ export const PaymentsStats = ({ payments }: PaymentsStatsProps) => {
   const stats = [
     {
       icon: CheckCircle,
-      label: 'Total Paid',
+      label: 'Total paid',
       value: formatCurrency(totalPaid),
       accent: 'green' as StatCardAccent,
     },

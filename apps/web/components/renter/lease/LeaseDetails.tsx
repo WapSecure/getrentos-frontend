@@ -33,7 +33,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
         <div className="p-4 border-b border-border">
-          <h3 className="font-semibold text-foreground">Lease Details</h3>
+          <h3 className="font-semibold text-foreground">Lease details</h3>
           <p className="text-xs text-muted-foreground">Full lease agreement information</p>
         </div>
 
@@ -51,7 +51,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
             <div className="p-3 rounded-lg bg-secondary">
               <div className="flex items-center gap-2 mb-1">
                 <Calendar className="w-4 h-4 text-primary" />
-                <span className="text-xs text-muted-foreground">Lease Period</span>
+                <span className="text-xs text-muted-foreground">Lease period</span>
               </div>
               <p className="text-sm font-medium text-foreground">
                 {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
@@ -73,7 +73,7 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
             <div className="p-3 rounded-lg bg-secondary">
               <div className="flex items-center gap-2 mb-1">
                 <FileText className="w-4 h-4 text-primary" />
-                <span className="text-xs text-muted-foreground">Security Deposit</span>
+                <span className="text-xs text-muted-foreground">Security deposit</span>
               </div>
               <p className="text-sm font-medium text-foreground">
                 {formatCurrency(lease.securityDeposit)}
@@ -82,12 +82,12 @@ export const LeaseDetails = ({ lease }: LeaseDetailsProps) => {
           </div>
 
           <div className="p-3 rounded-lg bg-secondary">
-            <span className="text-xs text-muted-foreground">Renewal Terms</span>
+            <span className="text-xs text-muted-foreground">Renewal terms</span>
             <p className="text-sm text-foreground mt-1">{lease.renewalTerms}</p>
           </div>
 
           <div>
-            <h4 className="text-sm font-medium text-foreground mb-2">Landlord Information</h4>
+            <h4 className="text-sm font-medium text-foreground mb-2">Landlord information</h4>
             <div className="p-3 rounded-lg bg-secondary">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">

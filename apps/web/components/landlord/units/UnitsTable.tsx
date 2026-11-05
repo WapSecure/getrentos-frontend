@@ -20,7 +20,7 @@ import type { Unit, UnitOccupancyStatus } from '@/types/landlord';
 const statusConfig: Record<UnitOccupancyStatus, { label: string; variant: BadgeVariant }> = {
   occupied: { label: 'Occupied', variant: 'success' },
   vacant: { label: 'Vacant', variant: 'warning' },
-  notice_given: { label: 'Notice Given', variant: 'info' },
+  notice_given: { label: 'Notice given', variant: 'info' },
 };
 
 interface UnitsTableProps {
@@ -122,7 +122,7 @@ export const UnitsTable = ({
                         ) : (
                           <DropdownMenuItem onSelect={() => setVacatingUnit(unit)}>
                             <DoorClosed className="w-3.5 h-3.5" />
-                            Mark Vacant
+                            Mark vacant
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

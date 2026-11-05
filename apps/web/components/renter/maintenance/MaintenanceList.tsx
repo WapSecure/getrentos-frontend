@@ -18,13 +18,13 @@ const statusOptions = [
   { value: 'all', label: 'All' },
   { value: 'submitted', label: 'Submitted' },
   { value: 'assigned', label: 'Assigned' },
-  { value: 'in_progress', label: 'In Progress' },
+  { value: 'in_progress', label: 'In progress' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
 const priorityOptions = [
-  { value: 'all', label: 'All Priorities' },
+  { value: 'all', label: 'All priorities' },
   { value: 'urgent', label: 'Urgent' },
   { value: 'high', label: 'High' },
   { value: 'medium', label: 'Medium' },
@@ -80,7 +80,7 @@ export const MaintenanceList = ({
         <div className="p-4 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-foreground">Maintenance Requests</h2>
+              <h2 className="font-semibold text-foreground">Maintenance requests</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {filteredRequests.length} requests found
               </p>

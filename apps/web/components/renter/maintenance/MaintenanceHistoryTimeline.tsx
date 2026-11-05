@@ -43,7 +43,7 @@ export const MaintenanceHistoryTimeline = ({ events }: MaintenanceHistoryTimelin
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Request Timeline</h3>
+        <h3 className="font-semibold text-foreground">Request timeline</h3>
         <p className="text-xs text-muted-foreground mt-0.5">Complete history of this request</p>
       </div>
 

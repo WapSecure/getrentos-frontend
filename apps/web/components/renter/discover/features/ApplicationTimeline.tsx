@@ -31,28 +31,28 @@ const getSteps = (status: string): ApplicationStep[] => {
   const baseSteps = [
     {
       id: 'submitted',
-      title: 'Application Submitted',
+      title: 'Application submitted',
       description: 'Your application has been received',
       icon: FileText,
       status: 'pending' as const,
     },
     {
       id: 'reviewing',
-      title: 'Under Review',
+      title: 'Under review',
       description: 'Landlord is reviewing your application',
       icon: UserCheck,
       status: 'pending' as const,
     },
     {
       id: 'approved',
-      title: 'Application Approved',
+      title: 'Application approved',
       description: 'Congratulations! Your application was approved',
       icon: CheckCircle,
       status: 'pending' as const,
     },
     {
       id: 'move-in',
-      title: 'Move-In Ready',
+      title: 'Move-in ready',
       description: 'Complete paperwork and schedule move-in',
       icon: Key,
       status: 'pending' as const,
@@ -96,7 +96,7 @@ export const ApplicationTimeline = ({
       className="bg-card rounded-xl border border-border overflow-hidden"
     >
       <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-foreground">Application Timeline</h3>
+        <h3 className="font-semibold text-foreground">Application timeline</h3>
         <p className="text-xs text-muted-foreground mt-1">Track your application progress</p>
       </div>
 
@@ -104,7 +104,7 @@ export const ApplicationTimeline = ({
         {/* Progress Bar */}
         <div className="mb-4">
           <div className="flex justify-between text-xs text-muted-foreground mb-1">
-            <span>Overall Progress</span>
+            <span>Overall progress</span>
             <span>
               {completedCount}/{totalSteps} steps
             </span>
@@ -163,7 +163,7 @@ export const ApplicationTimeline = ({
                   <h4 className={`text-sm font-semibold ${getStatusColor(step.status)}`}>
                     {step.title}
                   </h4>
-                  {step.status === 'current' && <Badge variant="info">In Progress</Badge>}
+                  {step.status === 'current' && <Badge variant="info">In progress</Badge>}
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">{step.description}</p>
 
@@ -185,13 +185,13 @@ export const ApplicationTimeline = ({
 
         {/* Next Steps */}
         {currentStatus === 'approved' && (
-          <Alert variant="success" icon={CalendarDays} title="Next Steps" className="mt-4">
+          <Alert variant="success" icon={CalendarDays} title="Next steps" className="mt-4">
             Schedule your move-in inspection and complete the lease agreement
           </Alert>
         )}
 
         {currentStatus === 'rejected' && (
-          <Alert variant="danger" title="Application Not Approved" className="mt-4">
+          <Alert variant="danger" title="Application not approved" className="mt-4">
             Contact the landlord for feedback or continue exploring other properties
           </Alert>
         )}

@@ -32,7 +32,7 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Lease Documents</h3>
+            <h3 className="font-semibold text-foreground">Lease documents</h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">All lease-related documents</p>
         </div>
@@ -82,7 +82,7 @@ export const LeaseDocuments = ({ documents }: LeaseDocumentsProps) => {
 
         <div className="p-3 border-t border-border">
           <Button variant="ghost" size="sm" fullWidth className="gap-1">
-            View All Documents
+            View all documents
           </Button>
         </div>
         <FilePreviewDialog

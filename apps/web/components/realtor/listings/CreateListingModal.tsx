@@ -268,24 +268,24 @@ export const CreateListingModal = ({
               value={category}
               onValueChange={setCategory}
               options={[
-                { value: 'sale', label: 'For Sale' },
-                { value: 'rental', label: 'For Rent' },
+                { value: 'sale', label: 'For sale' },
+                { value: 'rental', label: 'For rent' },
               ]}
               variant="card"
               columns={2}
             />
           </Field>
 
-          <Field label="Listing Title" required>
+          <Field label="Listing title" required>
             <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
+              placeholder="e.g. Elegant 4-bed duplex in Lekki"
             />
           </Field>
 
-          <Field label={category === 'sale' ? 'Asking Price (₦)' : 'Annual Rent (₦)'} required>
+          <Field label={category === 'sale' ? 'Asking price (₦)' : 'Annual rent (₦)'} required>
             <CurrencyInput
               prefix="₦"
               min={0}

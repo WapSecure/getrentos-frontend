@@ -35,7 +35,7 @@ interface CreateSaleListingModalProps {
   ) => Promise<unknown>;
 }
 
-const steps = ['Listing Info', 'Media', 'Features', 'Publish'];
+const steps = ['Listing info', 'Media', 'Features', 'Publish'];
 const PROPERTY_PAGE_SIZE = 10;
 
 const featureOptions = [
@@ -319,16 +319,16 @@ export const CreateSaleListingModal = ({
                 />
               </Field>
 
-              <Field label="Listing Title" required>
+              <Field label="Listing title" required>
                 <Input
                   type="text"
                   value={form.listingTitle}
                   onChange={(e) => update('listingTitle', e.target.value)}
-                  placeholder="e.g. Elegant 4-Bed Duplex in Lekki"
+                  placeholder="e.g. Elegant 4-bed duplex in Lekki"
                 />
               </Field>
 
-              <Field label="Asking Price" required>
+              <Field label="Asking price" required>
                 <CurrencyInput
                   prefix="₦"
                   min={0}
@@ -387,7 +387,7 @@ export const CreateSaleListingModal = ({
               </p>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-foreground">
-                  Cover Image{' '}
+                  Cover image{' '}
                   {!existingCover && (
                     <span className="text-destructive" aria-hidden="true">
                       *
@@ -411,7 +411,7 @@ export const CreateSaleListingModal = ({
               </div>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-foreground">
-                  Gallery Images{' '}
+                  Gallery images{' '}
                   <span className="font-normal text-muted-foreground">(optional)</span>
                 </p>
                 <MediaPicker
@@ -483,15 +483,15 @@ export const CreateSaleListingModal = ({
                 <SummaryRow label="Property" value={propertyForForm?.name || '—'} />
                 <SummaryRow label="Title" value={form.listingTitle || '—'} />
                 <SummaryRow
-                  label="Asking Price"
+                  label="Asking price"
                   value={form.askingPrice ? `₦${form.askingPrice}` : '—'}
                 />
                 <SummaryRow
-                  label="Cover Image"
+                  label="Cover image"
                   value={media.cover?.name ?? (existingCover ? 'The property’s cover' : '—')}
                 />
                 <SummaryRow
-                  label="Video Tour"
+                  label="Video tour"
                   value={
                     media.video?.name ??
                     (propertyForForm?.videoTourKey ? 'The property’s video' : 'None')
@@ -539,7 +539,7 @@ export const CreateSaleListingModal = ({
                 disabled={creating}
                 onClick={() => void handleCreate('draft')}
               >
-                Save Draft
+                Save draft
               </Button>
               <Button
                 variant="primary"

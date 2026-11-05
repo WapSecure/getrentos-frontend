@@ -11,6 +11,7 @@ import {
   TooltipProps,
 } from 'recharts';
 import { TrendingUp } from 'lucide-react';
+import { formatTrend, monthTrend } from '@getrentos/shared';
 import { Badge, Card, EmptyState, Skeleton } from '@getrentos/ui';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/format';
@@ -44,9 +45,7 @@ export const OwnerPortfolioChart = () => {
   const portfolioData: ValuePoint[] = data.map((p) => ({ month: p.label, value: p.value }));
   const hasData = portfolioData.some((p) => p.value > 0);
 
-  const currentValue = portfolioData[portfolioData.length - 1]?.value ?? 0;
-  const previousValue = portfolioData[portfolioData.length - 2]?.value ?? 0;
-  const change = previousValue > 0 ? ((currentValue - previousValue) / previousValue) * 100 : null;
+  const trend = monthTrend(data);
 
   return (
     <Card className="p-6">
@@ -59,13 +58,13 @@ export const OwnerPortfolioChart = () => {
             Estimated market value, last 6 months
           </p>
         </div>
-        {change !== null && (
+        {trend && (
           <Badge
-            variant={change >= 0 ? 'success' : 'danger'}
-            icon={<TrendingUp className={`w-3 h-3 ${change < 0 ? 'rotate-180' : ''}`} />}
+            variant={trend.change >= 0 ? 'success' : 'danger'}
+            icon={<TrendingUp className={`w-3 h-3 ${trend.change < 0 ? 'rotate-180' : ''}`} />}
+            title={`${trend.months[1]} against ${trend.months[0]}`}
           >
-            {change >= 0 ? '+' : ''}
-            {change.toFixed(1)}%
+            {formatTrend(trend.change)}
           </Badge>
         )}
       </div>

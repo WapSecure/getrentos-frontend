@@ -63,14 +63,14 @@ export const SearchPreferencesSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Search Preferences</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Search preferences</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Used to personalize recommendations and match alerts
       </p>
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Min Budget">
+          <Field label="Min budget">
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -79,7 +79,7 @@ export const SearchPreferencesSettings = () => {
               placeholder="e.g. 50,000,000"
             />
           </Field>
-          <Field label="Max Budget">
+          <Field label="Max budget">
             <CurrencyInput
               prefix="₦"
               min={0}
@@ -91,8 +91,8 @@ export const SearchPreferencesSettings = () => {
         </div>
 
         <div>
-          <p className="block text-sm font-medium text-foreground mb-2">Preferred Property Types</p>
-          <div role="group" aria-label="Preferred Property Types" className="flex flex-wrap gap-2">
+          <p className="block text-sm font-medium text-foreground mb-2">Preferred property types</p>
+          <div role="group" aria-label="Preferred property types" className="flex flex-wrap gap-2">
             {propertyTypeOptions.map((type) => (
               <ToggleChip
                 key={type}
@@ -105,7 +105,7 @@ export const SearchPreferencesSettings = () => {
           </div>
         </div>
 
-        <Field label="Preferred Locations">
+        <Field label="Preferred locations">
           <Input
             value={preferredLocations}
             onChange={(e) => setPreferredLocations(e.target.value)}
@@ -130,7 +130,7 @@ export const SearchPreferencesSettings = () => {
         disabled={save.isPending}
         onClick={() => save.mutate()}
       >
-        Save Preferences
+        Save preferences
       </Button>
     </div>
   );

@@ -30,7 +30,7 @@ export const EmergencyContact = ({ contacts, onCall, onMessage }: EmergencyConta
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-destructive" />
           <div>
-            <h2 className="font-semibold text-destructive">Emergency Contacts</h2>
+            <h2 className="font-semibold text-destructive">Emergency contacts</h2>
             <p className="text-xs text-destructive/80">
               For urgent issues requiring immediate attention
             </p>

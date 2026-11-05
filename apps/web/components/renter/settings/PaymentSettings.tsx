@@ -49,7 +49,7 @@ export const PaymentSettings = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-foreground mb-4">Payment Settings</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">Payment settings</h2>
       <p className="text-sm text-muted-foreground mb-6">
         Manage your payment methods and billing information
       </p>
@@ -86,7 +86,7 @@ export const PaymentSettings = () => {
                       setDefaultMutation.isPending && setDefaultMutation.variables === method.id
                     }
                   >
-                    Set Default
+                    Set default
                   </Button>
                 )}
                 <IconButton
@@ -109,7 +109,7 @@ export const PaymentSettings = () => {
           fullWidth
           icon={<Plus className="w-4 h-4" />}
         >
-          Add Payment Method
+          Add payment method
         </Button>
       </div>
     </div>

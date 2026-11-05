@@ -31,7 +31,7 @@ export const ClientCard = ({ client, onMessage }: ClientCardProps) => {
             <h3 className="font-semibold text-foreground truncate">{client.clientName}</h3>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <RoleIcon className="w-3 h-3" />
-              {client.role === 'owner' ? 'Property Owner' : 'Landlord'}
+              {client.role === 'owner' ? 'Property owner' : 'Landlord'}
             </p>
           </div>
         </div>

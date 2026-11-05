@@ -462,7 +462,12 @@ export const VerificationCenter = ({
             Revoke consent
           </Button>
         ) : (
-          <Button size="sm" isLoading={opts.granting} loadingText="Recording…" onClick={opts.onGrant}>
+          <Button
+            size="sm"
+            isLoading={opts.granting}
+            loadingText="Recording…"
+            onClick={opts.onGrant}
+          >
             Grant consent
           </Button>
         )}
@@ -488,7 +493,7 @@ export const VerificationCenter = ({
               )}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Verification Center</h2>
+              <h2 className="text-lg font-bold text-foreground">Verification center</h2>
               <p className="text-sm text-muted-foreground">
                 {description ??
                   'Verify your identity to unlock renting, payments and higher trust limits.'}
@@ -836,7 +841,10 @@ export const VerificationCenter = ({
                       placeholder="e.g. 058"
                     />
                   </Field>
-                  <Field label="Account holder name (optional: compared for a match)" className="sm:col-span-2">
+                  <Field
+                    label="Account holder name (optional: compared for a match)"
+                    className="sm:col-span-2"
+                  >
                     <Input
                       value={accountName}
                       onChange={(e) => setAccountName(e.target.value)}
@@ -895,7 +903,10 @@ export const VerificationCenter = ({
                       className="w-full"
                     />
                   </Field>
-                  <Field label="Holder name (optional: compared for a match)" className="sm:col-span-2">
+                  <Field
+                    label="Holder name (optional: compared for a match)"
+                    className="sm:col-span-2"
+                  >
                     <Input
                       value={documentHolder}
                       onChange={(e) => setDocumentHolder(e.target.value)}

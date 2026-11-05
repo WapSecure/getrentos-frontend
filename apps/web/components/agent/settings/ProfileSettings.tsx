@@ -68,7 +68,7 @@ const ProfileForm = ({
       </div>
 
       <div className="space-y-4">
-        <Field label="Full Name">
+        <Field label="Full name">
           <Input
             type="text"
             value={fullName}
@@ -76,12 +76,12 @@ const ProfileForm = ({
           />
         </Field>
         <div>
-          <Field label="Email Address">
+          <Field label="Email address">
             <Input type="email" value={email} readOnly />
           </Field>
           <ChangeEmailButton onChanged={setEmail} />
         </div>
-        <Field label="Phone Number" hint="A new number has to be verified again.">
+        <Field label="Phone number" hint="A new number has to be verified again.">
           <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </Field>
       </div>
@@ -92,7 +92,7 @@ const ProfileForm = ({
         disabled={!dirty || fullName.trim().length < 2}
         isLoading={save.isPending}
       >
-        Save Changes
+        Save changes
       </Button>
     </div>
   );

@@ -21,21 +21,21 @@ export const EstateFinancialStats = ({
     <StatCard
       icon={Wallet}
       accent="emerald"
-      label="Dues Collected"
+      label="Dues collected"
       value={formatCurrency(duesCollected, { compact: true })}
     />
     <StatCard
       icon={AlertCircle}
       accent="red"
-      label="Dues Outstanding"
+      label="Dues outstanding"
       value={formatCurrency(duesOutstanding, { compact: true })}
     />
     <StatCard
       icon={ReceiptText}
       accent="orange"
-      label="Late Fees Collected"
+      label="Late fees collected"
       value={formatCurrency(lateFeesCollected, { compact: true })}
     />
-    <StatCard icon={Users} label="Households Billed" value={String(householdsBilled)} />
+    <StatCard icon={Users} label="Households billed" value={String(householdsBilled)} />
   </div>
 );

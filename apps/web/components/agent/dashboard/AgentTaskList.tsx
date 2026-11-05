@@ -9,7 +9,7 @@ const typeConfig: Record<TaskType, { icon: React.ElementType; label: string }> =
   inspection: { icon: ClipboardCheck, label: 'Inspection' },
   verification: { icon: UserCheck, label: 'Verification' },
   valuation: { icon: Home, label: 'Valuation' },
-  document_pickup: { icon: FileText, label: 'Document Pickup' },
+  document_pickup: { icon: FileText, label: 'Document pickup' },
 };
 
 interface AgentTaskListProps {
@@ -26,12 +26,7 @@ export const AgentTaskList = ({ tasks }: AgentTaskListProps) => {
 
       <div className="divide-y divide-border">
         {tasks.length === 0 ? (
-          <EmptyState
-            icon={ClipboardCheck}
-            title="No upcoming tasks"
-            size="compact"
-            bare
-          />
+          <EmptyState icon={ClipboardCheck} title="No upcoming tasks" size="compact" bare />
         ) : (
           tasks.map((task) => {
             const config = typeConfig[task.type];

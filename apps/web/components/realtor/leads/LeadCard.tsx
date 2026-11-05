@@ -8,10 +8,10 @@ import type { RealtorLead, LeadStage } from '@/types/realtor';
 const stageConfig: Record<LeadStage, { label: string; variant: BadgeVariant }> = {
   new: { label: 'New', variant: 'info' },
   contacted: { label: 'Contacted', variant: 'info' },
-  viewing_scheduled: { label: 'Viewing Scheduled', variant: 'warning' },
-  offer_made: { label: 'Offer Made', variant: 'warning' },
-  closed_won: { label: 'Closed Won', variant: 'success' },
-  closed_lost: { label: 'Closed Lost', variant: 'neutral' },
+  viewing_scheduled: { label: 'Viewing scheduled', variant: 'warning' },
+  offer_made: { label: 'Offer made', variant: 'warning' },
+  closed_won: { label: 'Closed won', variant: 'success' },
+  closed_lost: { label: 'Closed lost', variant: 'neutral' },
 };
 
 interface LeadCardProps {
@@ -79,13 +79,13 @@ export const LeadCard = ({
         {!isClosed && (
           <>
             <IconButton
-              label="Schedule Viewing"
+              label="Schedule viewing"
               icon={<CalendarClock />}
               size="sm"
               onClick={onScheduleViewing}
             />
             <IconButton
-              label="Mark Closed Lost"
+              label="Mark closed lost"
               icon={<XCircle />}
               size="sm"
               variant="danger"
@@ -93,7 +93,7 @@ export const LeadCard = ({
               disabled={isUpdating}
             />
             <IconButton
-              label="Mark Closed Won"
+              label="Mark closed won"
               icon={<CheckCircle2 />}
               size="sm"
               className="text-success"

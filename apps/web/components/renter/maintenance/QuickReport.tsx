@@ -30,28 +30,28 @@ const quickOptions: {
   {
     id: 'leaking_faucet',
     icon: Droplets,
-    label: 'Leaking Faucet',
+    label: 'Leaking faucet',
     category: 'plumbing',
     description: 'Water leaking from faucet or pipe',
   },
   {
     id: 'power_outage',
     icon: Zap,
-    label: 'Power Outage',
+    label: 'Power outage',
     category: 'electrical',
     description: 'No electricity in some or all rooms',
   },
   {
     id: 'internet_down',
     icon: Wifi,
-    label: 'Internet Down',
+    label: 'Internet down',
     category: 'internet',
     description: 'No internet connection',
   },
   {
     id: 'security_issue',
     icon: Shield,
-    label: 'Security Issue',
+    label: 'Security issue',
     category: 'security',
     description: 'Lock, alarm, or security concern',
   },
@@ -92,7 +92,7 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Wrench className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-foreground">Quick Report</h2>
+          <h2 className="font-semibold text-foreground">Quick report</h2>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5">Report common issues in one click</p>
       </div>
@@ -138,7 +138,7 @@ export const QuickReport = ({ onQuickReport }: QuickReportProps) => {
 
         <Button variant="ghost" size="sm" fullWidth className="gap-1 mt-2">
           <Plus className="w-3 h-3" />
-          Custom Report
+          Custom report
         </Button>
       </div>
     </motion.div>

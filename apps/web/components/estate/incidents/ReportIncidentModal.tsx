@@ -62,7 +62,7 @@ export const ReportIncidentModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
       <DialogContent size="md">
-        <DialogTitle className="text-lg font-semibold text-foreground">Report Incident</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-foreground">Report incident</DialogTitle>
 
         <div className="mt-5 space-y-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -112,7 +112,7 @@ export const ReportIncidentModal = ({
               })
             }
           >
-            Report Incident
+            Report incident
           </Button>
         </div>
       </DialogContent>
