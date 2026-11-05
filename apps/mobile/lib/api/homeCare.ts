@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { Paginated } from './properties';
 
 /**
@@ -169,21 +169,13 @@ export interface Unit {
 
 export type WorkOrderView = 'open' | 'resolved' | 'cancelled';
 
-const q = (params: Record<string, string | number | undefined>) => {
-  const s = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== '')
-    .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
-    .join('&');
-  return s ? `?${s}` : '';
-};
-
 export const homeCareApi = {
   dashboard: () => apiFetch<HomeCareDashboard>('/home-management/dashboard'),
 
   // ---- work orders ----
   workOrders: (status?: WorkOrderStatus, page = 1, pageSize = 30, propertyId?: string) =>
     apiFetch<Paginated<WorkOrder>>(
-      `/home-management/work-orders${q({ status, page, pageSize, propertyId })}`
+      `/home-management/work-orders${toQuery({ status, page, pageSize, propertyId })}`
     ),
   workOrder: (id: string) => apiFetch<WorkOrder>(`/home-management/work-orders/${id}`),
   createWorkOrder: (input: {
@@ -293,14 +285,15 @@ export const homeCareApi = {
     apiFetch<Vendor>('/landlord/vendors', { method: 'POST', body: input }),
 
   // ---- homes ----
-  units: (propertyId: string) => apiFetch<Unit[]>(`/home-management/units${q({ propertyId })}`),
+  units: (propertyId: string) =>
+    apiFetch<Unit[]>(`/home-management/units${toQuery({ propertyId })}`),
   addUnit: (propertyId: string, unitName: string) =>
     apiFetch<Unit>('/home-management/units', { method: 'POST', body: { propertyId, unitName } }),
 
   // ---- assets ----
   assets: (propertyId?: string, status?: AssetStatus) =>
     apiFetch<Paginated<Asset>>(
-      `/home-management/assets${q({ propertyId, status, page: 1, pageSize: 100 })}`
+      `/home-management/assets${toQuery({ propertyId, status, page: 1, pageSize: 100 })}`
     ),
   addAsset: (input: {
     propertyId: string;
@@ -318,7 +311,9 @@ export const homeCareApi = {
 
   // ---- preventive plans ----
   plans: (propertyId?: string) =>
-    apiFetch<Paginated<Plan>>(`/home-management/plans${q({ propertyId, page: 1, pageSize: 100 })}`),
+    apiFetch<Paginated<Plan>>(
+      `/home-management/plans${toQuery({ propertyId, page: 1, pageSize: 100 })}`
+    ),
   addPlan: (input: {
     propertyId: string;
     assetId?: string;
@@ -334,7 +329,7 @@ export const homeCareApi = {
   // ---- service targets ----
   slaPolicies: (propertyId: string) =>
     apiFetch<Paginated<SlaPolicy>>(
-      `/home-management/sla-policies${q({ propertyId, page: 1, pageSize: 20 })}`
+      `/home-management/sla-policies${toQuery({ propertyId, page: 1, pageSize: 20 })}`
     ),
   addSlaPolicy: (input: Omit<SlaPolicy, 'id'>) =>
     apiFetch<SlaPolicy>('/home-management/sla-policies', { method: 'POST', body: input }),
@@ -342,12 +337,12 @@ export const homeCareApi = {
     apiFetch<SlaPolicy>(`/home-management/sla-policies/${id}`, { method: 'PATCH', body: input }),
   escalations: (propertyId: string) =>
     apiFetch<Paginated<Escalation>>(
-      `/home-management/escalations${q({ propertyId, page: 1, pageSize: 50 })}`
+      `/home-management/escalations${toQuery({ propertyId, page: 1, pageSize: 50 })}`
     ),
 
   timeline: (propertyId?: string, limit = 50) =>
     apiFetch<TimelineEvent[] | { events: TimelineEvent[] }>(
-      `/home-management/timeline${q({ propertyId, limit })}`
+      `/home-management/timeline${toQuery({ propertyId, limit })}`
     ),
 };
 

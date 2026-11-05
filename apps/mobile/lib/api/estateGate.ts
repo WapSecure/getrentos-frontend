@@ -1,5 +1,5 @@
 import { tierAtLeast } from '@getrentos/shared';
-import { ApiError, apiFetch } from './client';
+import { ApiError, apiFetch, toQuery } from './client';
 import type { PickedFile } from './documents';
 import type { PlanTier, Tone } from './estateManager';
 import {
@@ -257,16 +257,6 @@ export interface PatrolReport {
 
 const PAGE_SIZE = 30;
 
-function q(params: Record<string, string | number | boolean | undefined | null>): string {
-  const s = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    s.set(k, String(v));
-  }
-  const out = s.toString();
-  return out ? `?${out}` : '';
-}
-
 export const estateGateApi = {
   /* gates */
   gates: (estateId: string) => apiFetch<Gate[]>(`/estate/${estateId}/gates`),
@@ -278,7 +268,7 @@ export const estateGateApi = {
   /* vehicles: `open` only narrows to vehicles still inside; omitted is every log. */
   vehicleLogs: (estateId: string, opts: { open?: boolean; page?: number } = {}) =>
     apiFetch<Paginated<VehicleLog>>(
-      `/estate/${estateId}/vehicle-logs${q({ open: opts.open || undefined, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
+      `/estate/${estateId}/vehicle-logs${toQuery({ open: opts.open || undefined, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
     ),
   logVehicle: (
     estateId: string,
@@ -297,7 +287,7 @@ export const estateGateApi = {
   /* deliveries */
   deliveries: (estateId: string, opts: { status?: DeliveryLogStatus; page?: number } = {}) =>
     apiFetch<Paginated<DeliveryLog>>(
-      `/estate/${estateId}/deliveries${q({ status: opts.status, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
+      `/estate/${estateId}/deliveries${toQuery({ status: opts.status, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
     ),
   /** Writes nothing: checking a code does not use it up. */
   verifyDeliveryCode: (estateId: string, code: string) =>
@@ -325,7 +315,7 @@ export const estateGateApi = {
     opts: { status?: ContractorPassStatus; page?: number } = {}
   ) =>
     apiFetch<Paginated<ContractorPass>>(
-      `/estate/${estateId}/contractor-passes${q({ status: opts.status, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
+      `/estate/${estateId}/contractor-passes${toQuery({ status: opts.status, page: opts.page ?? 1, pageSize: PAGE_SIZE })}`
     ),
   createContractorPass: (estateId: string, body: NewContractorPass) =>
     apiFetch<IssuedContractorPass>(`/estate/${estateId}/contractor-passes`, {
@@ -342,7 +332,7 @@ export const estateGateApi = {
   onSiteBoard: (estateId: string) => apiFetch<OnSiteBoard>(`/estate/${estateId}/dwell/on-site`),
   authorisationDwell: (estateId: string, opts: { from?: string; sort?: DwellSort } = {}) =>
     apiFetch<AuthorisationDwellReport>(
-      `/estate/${estateId}/dwell/authorisations${q({ from: opts.from, sort: opts.sort })}`
+      `/estate/${estateId}/dwell/authorisations${toQuery({ from: opts.from, sort: opts.sort })}`
     ),
 
   /* patrols (Enterprise) */
@@ -380,7 +370,7 @@ export const estateGateApi = {
       body,
     }),
   patrolReport: (estateId: string, opts: { from?: string } = {}) =>
-    apiFetch<PatrolReport>(`/estate/${estateId}/patrols/rounds${q({ from: opts.from })}`),
+    apiFetch<PatrolReport>(`/estate/${estateId}/patrols/rounds${toQuery({ from: opts.from })}`),
 };
 
 /* ------------------------------- query keys ------------------------------- */

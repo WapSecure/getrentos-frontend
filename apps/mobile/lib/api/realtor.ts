@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { TrustProfile } from './agentTrustProfile';
@@ -279,16 +279,6 @@ export interface RealtorProfile {
 
 /* ----------------------------------- api ---------------------------------- */
 
-function q(params: Record<string, string | number | boolean | undefined | null>): string {
-  const s = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    s.set(k, String(v));
-  }
-  const out = s.toString();
-  return out ? `?${out}` : '';
-}
-
 /** Defaults used across a realtor's listings and deals. */
 export interface RealtorBusinessPreferences {
   commissionRate: number;
@@ -328,7 +318,7 @@ export const realtorApi = {
 
   clients: (opts: { status?: RelationshipStatus; search?: string; page?: number } = {}) =>
     apiFetch<Paginated<RealtorClient>>(
-      `/realtor/clients${q({ page: opts.page ?? 1, pageSize: 100, status: opts.status, search: opts.search })}`
+      `/realtor/clients${toQuery({ page: opts.page ?? 1, pageSize: 100, status: opts.status, search: opts.search })}`
     ),
   checkClient: (email: string) =>
     apiFetch<ClientEligibility>('/realtor/clients/check', { method: 'POST', body: { email } }),
@@ -336,12 +326,12 @@ export const realtorApi = {
     apiFetch<RealtorClient>('/realtor/clients', { method: 'POST', body: { email } }),
   assignedProperties: (relationshipId: string) =>
     apiFetch<Paginated<AssignedProperty>>(
-      `/realtor/clients/${relationshipId}/assigned-properties${q({ page: 1, pageSize: 100 })}`
+      `/realtor/clients/${relationshipId}/assigned-properties${toQuery({ page: 1, pageSize: 100 })}`
     ),
 
   listings: (status?: RealtorListingStatus) =>
     apiFetch<Paginated<RealtorListing>>(
-      `/realtor/listings${q({ page: 1, pageSize: 100, status })}`
+      `/realtor/listings${toQuery({ page: 1, pageSize: 100, status })}`
     ),
   createListing: (body: {
     propertyId: string;
@@ -353,7 +343,7 @@ export const realtorApi = {
 
   leads: (opts: { status?: LeadStatus; search?: string; page?: number } = {}) =>
     apiFetch<Paginated<RealtorLead>>(
-      `/realtor/leads${q({ page: opts.page ?? 1, pageSize: 30, status: opts.status, search: opts.search })}`
+      `/realtor/leads${toQuery({ page: opts.page ?? 1, pageSize: 30, status: opts.status, search: opts.search })}`
     ),
   lead: (id: string) => apiFetch<RealtorLead>(`/realtor/leads/${id}`),
   createLead: (body: {
@@ -369,7 +359,7 @@ export const realtorApi = {
 
   viewings: (status?: ViewingStatus) =>
     apiFetch<Paginated<RealtorViewing>>(
-      `/realtor/viewings${q({ page: 1, pageSize: 100, status })}`
+      `/realtor/viewings${toQuery({ page: 1, pageSize: 100, status })}`
     ),
   createViewing: (body: {
     listingId: string;
@@ -381,7 +371,9 @@ export const realtorApi = {
     apiFetch<RealtorViewing>(`/realtor/viewings/${id}`, { method: 'PATCH', body: { status } }),
 
   offers: (status?: RealtorOfferStatus) =>
-    apiFetch<Paginated<RealtorOffer>>(`/realtor/offers${q({ page: 1, pageSize: 100, status })}`),
+    apiFetch<Paginated<RealtorOffer>>(
+      `/realtor/offers${toQuery({ page: 1, pageSize: 100, status })}`
+    ),
   counter: (id: string, amount: number, message?: string) =>
     apiFetch<CounterOffer>(`/realtor/offers/${id}/counter`, {
       method: 'POST',
@@ -389,7 +381,9 @@ export const realtorApi = {
     }),
 
   commissions: (status?: 'AVAILABLE' | 'PAID' | 'VOID', page = 1) =>
-    apiFetch<Paginated<Commission>>(`/realtor/commissions${q({ page, pageSize: 30, status })}`),
+    apiFetch<Paginated<Commission>>(
+      `/realtor/commissions${toQuery({ page, pageSize: 30, status })}`
+    ),
   commissionTrend: () => apiFetch<{ label: string; value: number }[]>('/realtor/commissions/trend'),
   payoutSummary: () => apiFetch<RealtorPayoutSummary>('/realtor/commissions/payouts/summary'),
   payoutAccount: () => apiFetchOrNull<RealtorPayoutAccount>('/realtor/commissions/payout-account'),
@@ -400,20 +394,26 @@ export const realtorApi = {
       body: { bankCode, accountNumber },
     }),
   payouts: (page = 1) =>
-    apiFetch<Paginated<RealtorPayout>>(`/realtor/commissions/payouts${q({ page, pageSize: 30 })}`),
+    apiFetch<Paginated<RealtorPayout>>(
+      `/realtor/commissions/payouts${toQuery({ page, pageSize: 30 })}`
+    ),
   payout: (id: string) => apiFetch<RealtorPayoutDetail>(`/realtor/commissions/payouts/${id}`),
   withdraw: () =>
     apiFetch<RealtorPayout>('/realtor/commissions/payouts/request', { method: 'POST' }),
 
   conversations: () =>
-    apiFetch<Paginated<RealtorConversation>>(`/realtor/messages${q({ page: 1, pageSize: 100 })}`),
+    apiFetch<Paginated<RealtorConversation>>(
+      `/realtor/messages${toQuery({ page: 1, pageSize: 100 })}`
+    ),
   startConversation: (clientId: string, propertyId?: string) =>
     apiFetch<{ id: string }>('/realtor/messages', {
       method: 'POST',
       body: { clientId, ...(propertyId ? { propertyId } : {}) },
     }),
   messages: (id: string) =>
-    apiFetch<Paginated<RealtorMessage>>(`/realtor/messages/${id}${q({ page: 1, pageSize: 100 })}`),
+    apiFetch<Paginated<RealtorMessage>>(
+      `/realtor/messages/${id}${toQuery({ page: 1, pageSize: 100 })}`
+    ),
   send: (id: string, text: string, files: PickedFile[] = []) => {
     const form = new FormData();
     if (text.trim()) form.append('text', text.trim());
@@ -423,7 +423,7 @@ export const realtorApi = {
 
   documents: (category?: DocumentCategory) =>
     apiFetch<Paginated<RealtorDocument>>(
-      `/realtor/documents${q({ page: 1, pageSize: 100, category })}`
+      `/realtor/documents${toQuery({ page: 1, pageSize: 100, category })}`
     ),
   uploadDocument: (file: PickedFile, name: string, category: DocumentCategory) => {
     const form = new FormData();
@@ -436,7 +436,7 @@ export const realtorApi = {
     apiFetch<{ name: string; url: string }>(`/realtor/documents/${id}/download`),
 
   reviews: () =>
-    apiFetch<Paginated<RealtorReview>>(`/realtor/reviews${q({ page: 1, pageSize: 50 })}`),
+    apiFetch<Paginated<RealtorReview>>(`/realtor/reviews${toQuery({ page: 1, pageSize: 50 })}`),
   reviewsSummary: () => apiFetch<RealtorReviewsSummary>('/realtor/reviews/summary'),
 
   trustProfile: () => apiFetch<TrustProfile>('/realtor/trust-profile'),
@@ -466,7 +466,7 @@ export const realtorApi = {
 
   notifications: () =>
     apiFetch<Paginated<RealtorNotification>>(
-      `/realtor/notifications${q({ page: 1, pageSize: 50 })}`
+      `/realtor/notifications${toQuery({ page: 1, pageSize: 50 })}`
     ),
   readNotification: (id: string) =>
     apiFetch<void>(`/realtor/notifications/${id}/read`, { method: 'PATCH' }),

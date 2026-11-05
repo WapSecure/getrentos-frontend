@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { Paginated } from './properties';
 
 export type AgentClientStatus = 'PENDING' | 'ACTIVE' | 'REVOKED';
@@ -15,16 +15,6 @@ export interface AgentClientRelationship {
   properties: {
     property: { id: string; title: string; address: string; city: string; state: string };
   }[];
-}
-
-function toQuery(params: Record<string, string | number | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export const agentClientsApi = {

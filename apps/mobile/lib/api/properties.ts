@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { VideoStream } from '@getrentos/shared';
 
 /** One rental listing as returned by `/renter/listings`. Mirrors `RenterPropertyDto`. */
@@ -108,16 +108,6 @@ export interface ListingFilters {
   propertyType?: PropertyType;
   verifiedOnly?: boolean;
   sortBy?: ListingSort;
-}
-
-function toQuery(params: Record<string, string | number | boolean | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '' || v === false) continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export const propertiesApi = {

@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 import type { WatchlistScreening } from '@/lib/gateman/watchlistRefusal';
@@ -19,16 +19,6 @@ export type { VisitorPass, VisitorPassSource, VisitorPassStatus } from './visito
  * list filters accept either case — the backend normalises with `toUpperCase()`
  * — so these callers send lowercase to match the shapes they read back.
  */
-
-function toQuery(params: Record<string, string | number | boolean | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
-}
 
 /**
  * Builds the body for a gate write, omitting what the gate does not know.

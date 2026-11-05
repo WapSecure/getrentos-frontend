@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { Paginated } from './properties';
 import type { ShortletAvailability, ShortletListing } from './shortlets';
 import { formatLandArea, LAND_TITLE_TYPE_LABEL, type LandListing } from './land';
@@ -340,17 +340,6 @@ const gallery = (cover?: string, images?: string[]) =>
   Array.from(new Set([cover, ...(images ?? [])].filter((x): x is string => !!x)));
 
 /* --------------------------------- query --------------------------------- */
-
-function toQuery(params: Record<string, string | number | boolean | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    // `false` is dropped on purpose: an unticked filter means "don't filter".
-    if (v === undefined || v === '' || v === false) continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
-}
 
 // Each module names its sorts differently; the whitelist rejects unknown params.
 const RENT_SORT: Record<MarketSort, string> = {

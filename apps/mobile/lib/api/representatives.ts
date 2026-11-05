@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { Paginated } from './properties';
 
 /**
@@ -44,8 +44,7 @@ export const AGENT_TASK_TYPES = [
 export type AgentTaskType = (typeof AGENT_TASK_TYPES)[number]['value'];
 export type AgentTaskPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
-const q = (page: number, pageSize: number, search?: string) =>
-  `?page=${page}&pageSize=${pageSize}${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+const q = (page: number, pageSize: number, search?: string) => toQuery({ page, pageSize, search });
 
 export const representativesApi = {
   list: async (kind: RepKind, page = 1, pageSize = 50): Promise<Paginated<Representative>> => {

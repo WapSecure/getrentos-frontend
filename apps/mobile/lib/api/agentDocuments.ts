@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload } from './client';
+import { apiFetch, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 
@@ -32,16 +32,6 @@ export interface AgentDocument {
   createdAt: string;
   property?: { title: string } | null;
   task?: { title: string } | null;
-}
-
-function toQuery(params: Record<string, string | number | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export const agentDocumentsApi = {

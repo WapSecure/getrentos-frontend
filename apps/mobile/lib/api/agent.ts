@@ -1,4 +1,4 @@
-import { apiFetch, apiFetchOrNull, apiUpload } from './client';
+import { apiFetch, apiFetchOrNull, apiUpload, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Paginated } from './properties';
 
@@ -242,16 +242,6 @@ export interface AgentWorkOrder {
   fieldReport: string | null;
   photos: AgentWorkOrderPhoto[];
   createdAt: string;
-}
-
-function toQuery(params: Record<string, string | number | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export interface AgentNotificationPreference {

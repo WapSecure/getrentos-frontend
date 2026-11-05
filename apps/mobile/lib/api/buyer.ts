@@ -1,4 +1,4 @@
-import { apiFetch } from './client';
+import { apiFetch, toQuery } from './client';
 import type { VideoStream } from '@getrentos/shared';
 
 export interface BuyerDashboard {
@@ -75,16 +75,6 @@ export interface ListingFilters {
   propertyType?: string;
   sort?: 'price_asc' | 'price_desc';
   search?: string;
-}
-
-function toQuery(params: Record<string, string | number | undefined>): string {
-  const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === '') continue;
-    q.set(k, String(v));
-  }
-  const s = q.toString();
-  return s ? `?${s}` : '';
 }
 
 export const buyerApi = {

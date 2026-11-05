@@ -1,4 +1,4 @@
-import { apiFetch, apiUpload, ApiError } from './client';
+import { apiFetch, apiUpload, ApiError, toQuery } from './client';
 import { appendFile, type PickedFile } from './documents';
 import type { Tone } from './estateManager';
 import type { Paginated } from './properties';
@@ -175,13 +175,6 @@ export const marketplaceKeys = {
 
 /* ----------------------------------- api ---------------------------------- */
 
-function q(params: Record<string, string | number | undefined>): string {
-  const parts = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== '')
-    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`);
-  return parts.length ? `?${parts.join('&')}` : '';
-}
-
 export const LISTINGS_PAGE_SIZE = 30;
 export const LEADS_PAGE_SIZE = 25;
 /** Photos one listing may hold (the server takes what fits beyond this). */
@@ -194,7 +187,7 @@ export const estateMarketplaceApi = {
     apiFetch<MarketingAgreement[]>(`/estates/${estateId}/agreements`),
   /** Address search for a property to bring in. Excludes ones in another estate. */
   candidates: (estateId: string, search: string) =>
-    apiFetch<PropertyCandidate[]>(`/estates/${estateId}/property-candidates${q({ search })}`),
+    apiFetch<PropertyCandidate[]>(`/estates/${estateId}/property-candidates${toQuery({ search })}`),
   /** Brings the property in and asks its owner for marketing rights. */
   requestAgreement: (estateId: string, body: { propertyId: string; note?: string }) =>
     apiFetch<MarketingAgreement>(`/estates/${estateId}/agreements`, { method: 'POST', body }),
@@ -206,7 +199,7 @@ export const estateMarketplaceApi = {
 
   listings: (estateId: string, page = 1) =>
     apiFetch<Paginated<EstateListing>>(
-      `/estates/${estateId}/listings${q({ page, pageSize: LISTINGS_PAGE_SIZE })}`
+      `/estates/${estateId}/listings${toQuery({ page, pageSize: LISTINGS_PAGE_SIZE })}`
     ),
   createListing: (estateId: string, body: NewListing) =>
     apiFetch<EstateListing>(`/estates/${estateId}/listings`, { method: 'POST', body }),
@@ -244,7 +237,7 @@ export const estateMarketplaceApi = {
 
   leads: (estateId: string, opts: { market?: LeadMarket; search?: string; page?: number } = {}) =>
     apiFetch<Paginated<EstateLead>>(
-      `/estates/${estateId}/leads${q({
+      `/estates/${estateId}/leads${toQuery({
         market: opts.market,
         search: opts.search,
         page: opts.page ?? 1,
