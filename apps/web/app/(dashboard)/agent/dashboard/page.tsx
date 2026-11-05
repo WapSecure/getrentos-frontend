@@ -12,10 +12,16 @@ import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { unwrap } from '@/lib/apiHelpers';
 import { ROUTES } from '@/lib/constants/auth';
+import { PageErrorState, StatGridSkeleton } from '@getrentos/ui';
 
 export default function AgentDashboardPage() {
   const user = useAgentUser();
-  const { data: dashboard } = useQuery({
+  const {
+    data: dashboard,
+    isLoading: dashboardLoading,
+    isError: dashboardError,
+    refetch: refetchDashboard,
+  } = useQuery({
     queryKey: agentKeys.dashboard,
     queryFn: () => unwrap(agentService.getDashboard()),
   });
@@ -36,12 +42,22 @@ export default function AgentDashboardPage() {
       />
       <AttentionFeed persona="agent" />
 
-      <AgentStatsCards
-        todaysTasks={dashboard?.assignedTasks ?? 0}
-        completedThisWeek={dashboard?.completedTasks ?? 0}
-        inProgress={dashboard?.inProgressTasks ?? 0}
-        overdueTasks={dashboard?.overdueTasks ?? 0}
-      />
+      {dashboardLoading ? (
+        <StatGridSkeleton count={4} />
+      ) : dashboardError && !dashboard ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your tasks"
+          onRetry={() => void refetchDashboard()}
+        />
+      ) : (
+        <AgentStatsCards
+          todaysTasks={dashboard?.assignedTasks ?? 0}
+          completedThisWeek={dashboard?.completedTasks ?? 0}
+          inProgress={dashboard?.inProgressTasks ?? 0}
+          overdueTasks={dashboard?.overdueTasks ?? 0}
+        />
+      )}
 
       <div className="grid gap-6 xl:grid-cols-12">
         <div className="space-y-6 xl:col-span-8">
