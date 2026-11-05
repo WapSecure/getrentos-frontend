@@ -1,3 +1,4 @@
+import type { RepairDraft } from '@/types/repairDraft';
 import type { ReplyLanguage } from '@/lib/replyLanguage';
 import type { ChargeCategory } from '@/lib/chargeCategory';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
@@ -1354,6 +1355,16 @@ export const renterService = {
     });
     photos.forEach((photo) => formData.append('files', photo));
     return safeCall(() => authFetch('/renter/maintenance', { method: 'POST', body: formData }));
+  },
+
+  /** A repair request drafted from photos (and a note). Nothing is stored or sent. */
+  async draftRepairFromPhotos(photos: File[], note?: string): Promise<ApiResponse<RepairDraft>> {
+    const formData = new FormData();
+    photos.slice(0, 3).forEach((photo) => formData.append('files', photo));
+    if (note?.trim()) formData.append('note', note.trim());
+    return safeCall(() =>
+      authFetch('/renter/maintenance/photo-draft', { method: 'POST', body: formData })
+    );
   },
 
   async cancelMaintenanceRequest(id: string): Promise<ApiResponse<MaintenanceRequest>> {

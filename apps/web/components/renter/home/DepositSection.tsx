@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PiggyBank, ShieldCheck } from 'lucide-react';
+import { CircleCheck, FileCheck2, PiggyBank, Scale, ShieldCheck } from 'lucide-react';
 import { Alert, Badge, Button, Card, CardSkeleton, EmptyState, Textarea } from '@getrentos/ui';
 
 import { depositHolderText, noDeductionsText } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
 import { formatCurrency, formatDate } from '@/lib/format';
 import {
+  depositPlans,
+  type DepositPlan,
   disputeDeduction,
   myDeposits,
   type TenantDeduction,
@@ -24,7 +27,14 @@ const DEDUCTION: Record<
   REJECTED: { label: 'Dropped', variant: 'neutral' },
 };
 
-const DeductionItem = ({ d }: { d: TenantDeduction }) => {
+const DeductionItem = ({
+  d,
+  suggestion,
+}: {
+  d: TenantDeduction;
+  /** Grounds and a drafted reason from the deposit-back plan. */
+  suggestion?: DepositPlan['disputes'][number];
+}) => {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
@@ -35,7 +45,7 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
       setOpen(false);
       setReason('');
       setError(null);
-      void queryClient.invalidateQueries({ queryKey: ['renter', 'deposits'] });
+      void queryClient.invalidateQueries({ queryKey: renterKeys.deposits });
     },
     onError: (err: Error) => setError(err.message || 'Could not send your dispute.'),
   });
@@ -101,15 +111,65 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
             {error && <Alert variant="danger">{error}</Alert>}
           </div>
         ) : (
-          <Button variant="link" onClick={() => setOpen(true)} className="mt-1 font-medium">
-            Dispute this
-          </Button>
+          <div className="mt-1">
+            {suggestion && (
+              <ul className="mb-1 space-y-0.5 text-xs text-muted-foreground">
+                {suggestion.grounds.map((g) => (
+                  <li key={g}>• {g}</li>
+                ))}
+              </ul>
+            )}
+            <Button
+              variant="link"
+              onClick={() => {
+                // Start from the drafted reason; the tenant edits it before sending.
+                if (suggestion && !reason) setReason(suggestion.draft);
+                setOpen(true);
+              }}
+              className="font-medium"
+            >
+              {suggestion ? 'Dispute this (reason drafted)' : 'Dispute this'}
+            </Button>
+          </div>
         ))}
     </li>
   );
 };
 
-const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
+const STEP_ICON = { do: CircleCheck, keep: FileCheck2, dispute: Scale } as const;
+
+/** "Getting it back": steps, evidence to keep and deductions worth questioning. */
+const DepositPlanPanel = ({ plan, disclaimer }: { plan: DepositPlan; disclaimer: string }) => (
+  <section
+    aria-label="Getting your deposit back"
+    className="mt-4 space-y-2 rounded-lg border border-border p-3"
+  >
+    <p className="text-sm font-semibold text-foreground">Getting it back</p>
+    <p className="text-sm text-foreground">{plan.overview}</p>
+    <ul className="space-y-1.5">
+      {plan.steps.map((st) => {
+        const Icon = STEP_ICON[st.kind];
+        return (
+          <li key={st.text} className="flex items-start gap-2 text-sm text-foreground">
+            <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+            <span>{st.text}</span>
+          </li>
+        );
+      })}
+    </ul>
+    <p className="text-[11px] text-muted-foreground">{disclaimer}</p>
+  </section>
+);
+
+const DepositCard = ({
+  deposit,
+  plan,
+  disclaimer,
+}: {
+  deposit: TenantDeposit;
+  plan?: DepositPlan;
+  disclaimer: string;
+}) => {
   const hold = deposit.hold;
   return (
     <Card className="p-5">
@@ -196,12 +256,17 @@ const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
           ) : (
             <ul className="divide-y divide-border">
               {hold.deductions.map((d) => (
-                <DeductionItem key={d.id} d={d} />
+                <DeductionItem
+                  key={d.id}
+                  d={d}
+                  suggestion={plan?.disputes.find((x) => x.deductionId === d.id)}
+                />
               ))}
             </ul>
           )}
         </>
       )}
+      {plan && <DepositPlanPanel plan={plan} disclaimer={disclaimer} />}
     </Card>
   );
 };
@@ -213,8 +278,15 @@ const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
  */
 export const DepositSection = () => {
   const deposits = useQuery({
-    queryKey: ['renter', 'deposits'],
+    queryKey: renterKeys.deposits,
     queryFn: () => unwrap(myDeposits()),
+  });
+  // Hidden if it fails: the deposit itself is shown either way.
+  const plans = useQuery({
+    queryKey: renterKeys.depositPlan,
+    queryFn: () => unwrap(depositPlans()),
+    staleTime: 5 * 60_000,
+    retry: false,
   });
 
   return (
@@ -241,7 +313,14 @@ export const DepositSection = () => {
           size="compact"
         />
       ) : (
-        (deposits.data ?? []).map((d) => <DepositCard key={d.leaseId} deposit={d} />)
+        (deposits.data ?? []).map((d) => (
+          <DepositCard
+            key={d.leaseId}
+            deposit={d}
+            plan={plans.data?.plans.find((p) => p.leaseId === d.leaseId)}
+            disclaimer={plans.data?.disclaimer ?? ''}
+          />
+        ))
       )}
     </div>
   );

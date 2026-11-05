@@ -56,3 +56,23 @@ export function disputeDeduction(
     })
   );
 }
+
+/** GET /renter/deposits/plan: getting a held deposit back, worked out by GetRentos. */
+export interface DepositPlan {
+  leaseId: string;
+  overview: string;
+  steps: { kind: 'do' | 'keep' | 'dispute'; text: string }[];
+  /** Deductions worth questioning, with the grounds and a drafted reason. */
+  disputes: {
+    deductionId: string;
+    amount: string;
+    reason: string;
+    grounds: string[];
+    draft: string;
+  }[];
+  source: 'ai' | 'heuristic';
+}
+
+export function depositPlans(): Promise<ApiResponse<{ plans: DepositPlan[]; disclaimer: string }>> {
+  return safeCall(() => authFetch('/renter/deposits/plan'));
+}
