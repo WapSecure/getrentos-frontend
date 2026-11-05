@@ -27,6 +27,9 @@ interface PropertyDetailModalProps {
   onRequestViewing: () => void;
   onMakeOffer: () => void;
   onMessageOwner: () => void;
+  /** The buyer's offer still in play on this listing, if any. */
+  openOffer?: { id: string; offerAmount: number; status: string } | null;
+  onViewOffer?: (offerId: string) => void;
 }
 
 export const PropertyDetailModal = ({
@@ -37,6 +40,8 @@ export const PropertyDetailModal = ({
   onRequestViewing,
   onMakeOffer,
   onMessageOwner,
+  openOffer = null,
+  onViewOffer,
 }: PropertyDetailModalProps) => {
   const [watching, setWatching] = useState(false);
   if (!listing) return null;
@@ -186,6 +191,13 @@ export const PropertyDetailModal = ({
           <p className="text-xs text-muted-foreground">Listed {formatDate(listing.listedDate)}</p>
         </div>
 
+        {openOffer && (
+          <p className="px-4 pt-3 text-xs text-muted-foreground" role="status">
+            {openOffer.status === 'countered'
+              ? `Your offer of ${formatCurrency(openOffer.offerAmount)} has a counter waiting.`
+              : `You offered ${formatCurrency(openOffer.offerAmount)}. Waiting for the seller.`}
+          </p>
+        )}
         <div className="p-4 border-t border-border grid grid-cols-3 gap-2 shrink-0">
           <Button
             variant="outline"
@@ -207,10 +219,14 @@ export const PropertyDetailModal = ({
             variant="primary"
             size="sm"
             icon={<Handshake className="w-3.5 h-3.5" />}
-            onClick={onMakeOffer}
-            disabled={listing?.acceptingOffers === false}
+            onClick={() => (openOffer && onViewOffer ? onViewOffer(openOffer.id) : onMakeOffer())}
+            disabled={!openOffer && listing?.acceptingOffers === false}
           >
-            {listing?.acceptingOffers === false ? 'Under offer' : 'Make an offer'}
+            {openOffer
+              ? 'View your offer'
+              : listing?.acceptingOffers === false
+                ? 'Under offer'
+                : 'Make an offer'}
           </Button>
         </div>
       </DialogContent>

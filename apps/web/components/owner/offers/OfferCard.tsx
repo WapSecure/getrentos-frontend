@@ -26,6 +26,11 @@ interface OfferCardProps {
 }
 
 export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
+  // Countered by the owner is still open, but it is the buyer's move.
+  const needsOwner =
+    offer.awaiting !== undefined
+      ? offer.awaiting === 'owner'
+      : offer.status === 'submitted' || offer.status === 'countered';
   const status = offerStatusBadges[offer.status];
   const FinancingIcon = financingIcons[offer.financingType];
   const diffPct = ((offer.offerAmount - offer.askingPrice) / offer.askingPrice) * 100;
@@ -82,14 +87,12 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
         {/* The whole card opens the offer, but a card alone does not say so:
             the button is the visible way in, and names the decision waiting. */}
         <Button
-          variant={
-            offer.status === 'submitted' || offer.status === 'countered' ? 'primary' : 'outline'
-          }
+          variant={needsOwner ? 'primary' : 'outline'}
           size="sm"
           className="relative z-20"
           onClick={onClick}
         >
-          {offer.status === 'submitted' || offer.status === 'countered' ? 'Respond' : 'View'}
+          {needsOwner ? 'Respond' : offer.awaiting === 'buyer' ? "Buyer's turn" : 'View'}
         </Button>
       </div>
     </motion.div>

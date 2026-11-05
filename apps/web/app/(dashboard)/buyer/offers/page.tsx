@@ -96,7 +96,10 @@ function BuyerOffersPageContent() {
   const [isMakeOfferOpen, setIsMakeOfferOpen] = useState(
     () => !!defaultPropertyId || hasSessionDraft(MAKE_OFFER_DRAFT_KEY)
   );
-  const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
+  // ?offer=… (from a listing the buyer already has an offer on) opens that thread.
+  const [activeOfferId, setActiveOfferId] = useState<string | null>(
+    () => searchParams.get('offer') || null
+  );
 
   // Negotiation thread for the currently-open offer.
   const { data: thread = [] } = useQuery({
