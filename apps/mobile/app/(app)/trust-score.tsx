@@ -111,7 +111,7 @@ export default function TrustScore() {
                 <Text variant="heading">History</Text>
                 <Card elevated padding="none">
                   {d.history.map((h, i) => (
-                    <View key={`${h.date}-${h.reason}`}>
+                    <View key={`${h.date}-${h.reason}-${i}`}>
                       {i > 0 ? <Divider /> : null}
                       <View
                         style={{
