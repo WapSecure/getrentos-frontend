@@ -48,6 +48,7 @@ import { openDirections } from '@/lib/directions';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { GeoInsightsPanel } from '@/components/property/GeoInsightsPanel';
 import { ListingCheckCard } from '@/components/property/ListingCheckCard';
+import { AffordabilityCard } from '@/components/property/AffordabilityCard';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
 import { trustChainLabel } from '@getrentos/shared';
@@ -201,6 +202,7 @@ export default function PropertyDetail() {
                 ) : null}
 
                 <ListingCheckCard listingId={p.id} />
+                <AffordabilityCard listingId={p.id} />
 
                 {p.landlordName ? (
                   <View style={{ gap: spacing.sm }}>

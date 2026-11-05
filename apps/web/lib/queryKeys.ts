@@ -102,6 +102,10 @@ export const renterKeys = {
   geoInsights: (id: string) => ['renter', 'listing', id, 'geo-insights'] as const,
   listingCheck: (id: string) => ['renter', 'listing', id, 'check'] as const,
   leaseGuide: ['renter', 'lease', 'guide'] as const,
+  affordability: (listingId: string, input: object) =>
+    ['renter', 'listing', listingId, 'affordability', input] as const,
+  shortlistComparison: (listingIds: string[]) =>
+    ['renter', 'shortlist-comparison', [...listingIds].sort().join(',')] as const,
   savedListings: ['renter', 'savedListings'] as const,
   applications: ['renter', 'applications'] as const,
   viewings: ['renter', 'viewings'] as const,

@@ -2,6 +2,7 @@
 
 import { X, Bed, Bath, Square, MapPin, Star, Shield, ShieldCheck, GitCompare } from 'lucide-react';
 import { Property } from '@/types/renter';
+import { ShortlistComparison } from './ShortlistComparison';
 import { trustChainLabel } from '@getrentos/shared';
 import {
   Dialog,
@@ -185,6 +186,9 @@ export const DiscoverCompareDrawer = ({
                   </tr>
                 </tbody>
               </table>
+              {properties.length >= 2 && (
+                <ShortlistComparison listingIds={properties.map((p) => p.id)} />
+              )}
             </div>
           )}
         </div>

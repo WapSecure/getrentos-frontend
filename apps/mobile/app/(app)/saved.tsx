@@ -24,6 +24,7 @@ import { RecentlyViewedStrip } from '@/components/property/RecentlyViewedStrip';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { withTrustLabel } from '@/lib/trustLabel';
 import { goBack } from '@/lib/goBack';
+import { ShortlistCompareCard } from '@/components/property/ShortlistCompareCard';
 
 export default function Saved() {
   const { colors, spacing } = useTheme();
@@ -161,6 +162,11 @@ export default function Saved() {
           data={items}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          ListHeaderComponent={
+            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+              <ShortlistCompareCard listingIds={items.map((i) => i.id)} />
+            </View>
+          }
           contentContainerStyle={{
             paddingTop: spacing.sm,
             paddingBottom: insets.bottom + spacing['3xl'],

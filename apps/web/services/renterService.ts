@@ -33,6 +33,7 @@ import type { ListingCheck } from '@/types/listingCheck';
 import type { RentalSearchParse } from '@/types/searchParse';
 import type { FinancingOverview, FinancingPlan, FinancingPlanLength } from '@/types/financing';
 import type { LeaseGuide } from '@/types/leaseGuide';
+import type { Affordability, AffordabilityInput, ShortlistComparison } from '@/types/rentDecision';
 
 export interface ViewingRequest {
   id: string;
@@ -521,6 +522,32 @@ export const renterService = {
   },
 
   /** "Should I rent this?": facts, a rule-based level and plain advice for one listing. */
+  /** Rent against income and the cash needed to move in. The figures are used once, never stored. */
+  getAffordability(
+    listingId: string,
+    input: AffordabilityInput = {}
+  ): Promise<ApiResponse<Affordability>> {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(input)) if (v != null && v > 0) params.set(k, String(v));
+    const qs = params.toString();
+    return safeCall(() =>
+      authFetch(`/renter/listings/${listingId}/affordability${qs ? `?${qs}` : ''}`)
+    );
+  },
+
+  /** Two to four rentals side by side, with the trade-offs in plain words. */
+  compareShortlist(
+    listingIds: string[],
+    monthlyIncome?: number
+  ): Promise<ApiResponse<ShortlistComparison>> {
+    return safeCall(() =>
+      authFetch('/renter/listings/compare', {
+        method: 'POST',
+        body: JSON.stringify({ listingIds, ...(monthlyIncome ? { monthlyIncome } : {}) }),
+      })
+    );
+  },
+
   checkListing(id: string): Promise<ApiResponse<ListingCheck>> {
     return safeCall(() => authFetch(`/renter/listings/${id}/check`));
   },
