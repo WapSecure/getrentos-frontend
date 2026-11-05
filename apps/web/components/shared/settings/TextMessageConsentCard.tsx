@@ -76,6 +76,13 @@ export const TextMessageConsentCard = () => {
         {row('SMS', 'Plain text messages.', 'sms')}
         {row('WhatsApp', 'Sent on WhatsApp instead of SMS when both are on.', 'whatsapp')}
       </div>
+      {c.whatsapp && c.whatsappChatNumber && (
+        <Alert variant="info" title="Ask GetRentos on WhatsApp" className="mt-3">
+          Message {c.whatsappChatNumber} on WhatsApp from this number and say &ldquo;hi&rdquo;. Ask
+          about your rent, lease, repairs or listings in English, Pidgin, Yoruba, Hausa or Igbo.
+          Answers come from your account; nothing is changed or paid on WhatsApp.
+        </Alert>
+      )}
       <p className="mt-2 text-xs text-muted-foreground">
         Our texts never contain links or bank details. If a text asks you to pay somewhere, it is
         not from us.

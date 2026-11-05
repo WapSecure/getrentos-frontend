@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { router, useLocalSearchParams, type Href } from 'expo-router';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowRight, ChevronLeft, Mic, Send, Square, Volume2 } from 'lucide-react-native';
 import { Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
@@ -20,6 +20,8 @@ import {
   type ReplyLanguage,
 } from '@/lib/replyLanguage';
 import { useReadAloud, useVoiceInput } from '@/lib/voice';
+import { messagingConsentApi } from '@/lib/api/messagingConsent';
+import { qk } from '@/lib/query/keys';
 import {
   assistantApi,
   mobileRouteFor,
@@ -200,6 +202,14 @@ export default function AskScreen() {
   const voice = useVoiceInput(language, setText);
   const readAloud = useReadAloud();
 
+  // The same assistant on WhatsApp, once it is set up and the person has WhatsApp turned on.
+  const consent = useQuery({
+    queryKey: qk.messagingConsent,
+    queryFn: messagingConsentApi.get,
+    staleTime: 10 * 60_000,
+  });
+  const whatsappNumber = consent.data?.whatsapp ? consent.data.whatsappChatNumber : null;
+
   const lastIndex = messages.length - 1;
   const canSend = !!text.trim() && !ask.isPending;
 
@@ -278,6 +288,12 @@ export default function AskScreen() {
                 <Chip key={s} label={s} onPress={() => send(s)} />
               ))}
             </View>
+            {whatsappNumber ? (
+              <Text variant="caption" color="mutedForeground">
+                You can also ask on WhatsApp: message {whatsappNumber} from your number and say
+                &ldquo;hi&rdquo;.
+              </Text>
+            ) : null}
           </View>
         ) : null}
 
