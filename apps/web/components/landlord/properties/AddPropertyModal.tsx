@@ -33,6 +33,7 @@ import type { LandOwnershipProofInput } from '@/types/land';
 import { LocationPicker } from '@/components/maps/LocationPicker';
 import type { MapPoint } from '@/services/geocodeService';
 import { videoFileProblem } from '@/lib/videoFile';
+import { pluralize } from '@/lib/format';
 
 export interface LandlordPropertySubmission {
   property: Pick<
@@ -156,12 +157,18 @@ export const AddPropertyModal = ({
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  // Closing (the X, Escape, a click outside) keeps what was typed, so reopening
+  // resumes where they left off; only a saved property clears the form.
   const handleClose = () => {
     if (isSubmitting) return;
-    setStep(0);
-    setForm(initialFormState);
     setSubmitError(null);
     onClose();
+  };
+
+  const resetAndClose = () => {
+    setStep(0);
+    setForm(initialFormState);
+    handleClose();
   };
 
   const canProceedFromStep1 =
@@ -202,7 +209,7 @@ export const AddPropertyModal = ({
         publishRequested,
       });
       clearSessionDraft(ADD_PROPERTY_DRAFT_KEY);
-      handleClose();
+      resetAndClose();
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'Unable to create the property.');
     }
@@ -216,7 +223,7 @@ export const AddPropertyModal = ({
       <DialogContent padded={false} className="flex flex-col sm:max-w-lg">
         <div className="p-4 pr-12 border-b border-border flex justify-between items-center gap-3 shrink-0">
           <div className="min-w-0">
-            <DialogTitle className="font-semibold text-foreground">Add Property</DialogTitle>
+            <DialogTitle className="font-semibold text-foreground">Add property</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
               Step {step + 1} of {steps.length}: {steps[step]}
             </DialogDescription>
@@ -342,7 +349,7 @@ export const AddPropertyModal = ({
                   />
                   <Upload className="w-4 h-4" />
                   {form.galleryImages.length > 0
-                    ? `${form.galleryImages.length} image(s) selected: add more`
+                    ? `${pluralize(form.galleryImages.length, 'image')} selected: add more`
                     : 'Add gallery images'}
                 </label>
                 {form.galleryImages.length > 0 && (
@@ -374,8 +381,8 @@ export const AddPropertyModal = ({
           {step === 2 && (
             <>
               <Alert variant="info" icon={ShieldCheck}>
-                Verification documents are optional at this stage, but properties without at least
-                one document will show as unverified to renters and buyers until submitted.
+                Optional for a draft. To submit the property for publishing, add at least one
+                document; without one it shows as unverified to renters and buyers.
               </Alert>
               <UploadField
                 label="Title deed"
@@ -415,8 +422,15 @@ export const AddPropertyModal = ({
                 />
                 <SummaryRow label="Units" value={form.totalUnits} />
                 <SummaryRow label="Cover image" value={form.coverImage?.name || 'Not selected'} />
-                <SummaryRow label="Gallery" value={`${form.galleryImages.length} image(s)`} />
-                <SummaryRow label="Video tour" value={form.videoTour?.name || 'Not selected'} />
+                <SummaryRow
+                  label="Gallery"
+                  value={
+                    form.galleryImages.length
+                      ? pluralize(form.galleryImages.length, 'image')
+                      : 'None'
+                  }
+                />
+                <SummaryRow label="Video tour" value={form.videoTour?.name || 'None'} />
                 <SummaryRow
                   label="Verification docs"
                   value={hasAnyVerificationDoc ? 'Submitted' : 'None uploaded'}
@@ -451,6 +465,12 @@ export const AddPropertyModal = ({
           )}
           {step === steps.length - 1 && (
             <>
+              {!hasAnyVerificationDoc && (
+                <p className="w-full text-xs text-muted-foreground" role="status">
+                  To submit for publishing, add a title deed, C of O or management authorization in
+                  step 3. You can save a draft now and add it later.
+                </p>
+              )}
               <Button
                 variant="outline"
                 onClick={() => handlePublish(false)}

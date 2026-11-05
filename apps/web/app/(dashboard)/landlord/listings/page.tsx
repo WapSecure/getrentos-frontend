@@ -23,6 +23,8 @@ import {
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import type { Listing, ListingStatus } from '@/types/landlord';
 
 const statusFilters: { value: 'all' | ListingStatus; label: string }[] = [
@@ -148,9 +150,15 @@ export default function LandlordListingsPage() {
           onClick={() => setIsCreateModalOpen(true)}
           icon={<Plus className="w-4 h-4" />}
         >
-          Publish Listing
+          Publish listing
         </Button>
       </div>
+
+      <IdentityNudge
+        verificationHref={ROUTES.LANDLORD_VERIFICATION}
+        unlocks="publish listings"
+        className="mb-6"
+      />
 
       <div
         className="mb-6 flex gap-2 overflow-x-auto"

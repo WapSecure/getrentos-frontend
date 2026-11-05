@@ -20,6 +20,7 @@ import { landlordService, type LandlordDashboardStats } from '@/services/landlor
 import { unwrap } from '@/lib/apiHelpers';
 import { landlordKeys } from '@/lib/queryKeys';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { ROUTES } from '@/lib/constants/auth';
 
 // recharts is heavy (~400 KB): load it only when this dashboard mounts.
@@ -73,6 +74,11 @@ export default function LandlordDashboardPage() {
   return (
     <>
       <LandlordDashboardHeader greeting={greeting} firstName={firstName} />
+      <IdentityNudge
+        verificationHref={ROUTES.LANDLORD_VERIFICATION}
+        unlocks="publish listings, sign leases and receive payouts"
+        className="mb-6"
+      />
       <AttentionFeed persona="landlord" />
 
       {/* Defaulting the stats to zeros made this render "Add your first
@@ -100,7 +106,7 @@ export default function LandlordDashboardPage() {
           description="Add your first property to start managing units, tenants, and rent collection in one place."
           action={
             <Button href={ROUTES.LANDLORD_PROPERTIES} variant="primary">
-              Add Your First Property
+              Add your first property
             </Button>
           }
         />

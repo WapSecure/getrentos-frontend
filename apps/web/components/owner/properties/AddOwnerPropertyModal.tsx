@@ -228,7 +228,7 @@ export const AddOwnerPropertyModal = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isSubmitting && handleClose()}>
       <DialogContent className="flex max-h-[90vh] max-w-lg flex-col overflow-hidden p-0">
         <div className="shrink-0 border-b border-border p-4 pr-12">
-          <DialogTitle className="font-semibold text-foreground">Add Property</DialogTitle>
+          <DialogTitle className="font-semibold text-foreground">Add property</DialogTitle>
           <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
             Step {step + 1} of {steps.length}: {steps[step]}
           </DialogDescription>

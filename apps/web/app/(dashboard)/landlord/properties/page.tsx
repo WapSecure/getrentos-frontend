@@ -141,14 +141,16 @@ export default function LandlordPropertiesPage() {
         )
       );
       const failedProofs = proofResults.filter((result) => result.status === 'rejected').length;
-      return { created, failedProofs };
+      return { created, failedProofs, publishRequested: submission.publishRequested };
     },
-    onSuccess: ({ failedProofs }) => {
+    onSuccess: ({ created, failedProofs, publishRequested }) => {
       invalidateProperties();
       toast.show(
         failedProofs
           ? `Property created, but ${failedProofs} verification document${failedProofs === 1 ? '' : 's'} must be retried from Verification Status.`
-          : 'Property media and verification documents uploaded successfully.',
+          : publishRequested
+            ? `${created.name} submitted for publishing. We'll review the documents and let you know.`
+            : `${created.name} saved as a draft. Add a verification document when you're ready to publish.`,
         failedProofs ? 'warning' : 'success'
       );
     },
@@ -222,7 +224,7 @@ export default function LandlordPropertiesPage() {
           onClick={() => setIsAddModalOpen(true)}
           icon={<Plus className="w-4 h-4" />}
         >
-          Add Property
+          Add property
         </Button>
       </div>
 
@@ -281,7 +283,7 @@ export default function LandlordPropertiesPage() {
           action={
             !hasActiveFilters ? (
               <Button variant="primary" onClick={() => setIsAddModalOpen(true)}>
-                Add Your First Property
+                Add your first property
               </Button>
             ) : undefined
           }
