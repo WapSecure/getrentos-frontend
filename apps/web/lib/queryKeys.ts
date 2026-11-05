@@ -85,6 +85,9 @@ export const landlordKeys = {
 };
 
 export const renterKeys = {
+  deposits: ['renter', 'deposits'] as const,
+  // Under deposits, so a dispute refreshes the plan too.
+  depositPlan: ['renter', 'deposits', 'plan'] as const,
   dashboardStats: ['renter', 'dashboardStats'] as const,
   listings: (filters?: RenterListingsFilters) =>
     [

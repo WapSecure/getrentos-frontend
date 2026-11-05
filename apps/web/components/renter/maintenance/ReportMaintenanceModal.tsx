@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Camera, AlertTriangle, FileText } from 'lucide-react';
+import { X, Camera, AlertTriangle, FileText, Sparkles } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -18,6 +18,8 @@ import {
   clearSessionDraft,
   useSessionExpiryDraft,
 } from '@getrentos/ui';
+import { renterService } from '@/services/renterService';
+import type { RepairDraft } from '@/types/repairDraft';
 import type {
   CreateMaintenanceRequestInput,
   MaintenanceCategory,
@@ -79,6 +81,30 @@ export const ReportMaintenanceModal = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  // "Fill in from photos": a draft of the fields below, shown with any safety note.
+  const [repairDraft, setRepairDraft] = useState<RepairDraft | null>(null);
+  const [isDrafting, setIsDrafting] = useState(false);
+  const fillFromPhotos = async () => {
+    setIsDrafting(true);
+    setPhotoError(null);
+    const res = await renterService.draftRepairFromPhotos(photos, formData.description);
+    setIsDrafting(false);
+    if (!res.success || !res.data) {
+      setPhotoError(res.error || 'Could not read the photos. Fill in the form instead.');
+      return;
+    }
+    const d = res.data;
+    setRepairDraft(d);
+    setFormData((prev) => ({
+      ...prev,
+      title: d.title,
+      category: d.category,
+      priority: d.priority,
+      description: d.description,
+      isEmergency: prev.isEmergency || d.isEmergency,
+    }));
+    setErrors({});
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // If the session ends while the renter is writing, keep the report (photos
@@ -358,6 +384,47 @@ export const ReportMaintenanceModal = ({
                 PNG, JPG up to 10MB: up to {MAX_PHOTOS} photos
               </p>
             </button>
+            {photos.length > 0 && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2"
+                icon={<Sparkles className="h-4 w-4" aria-hidden />}
+                isLoading={isDrafting}
+                loadingText="Reading photos…"
+                disabled={isSubmitting}
+                onClick={() => void fillFromPhotos()}
+              >
+                Fill in from photos
+              </Button>
+            )}
+            {repairDraft?.safetyNote && (
+              <Alert variant="danger" title="Do this now" className="mt-2">
+                {repairDraft.safetyNote}
+              </Alert>
+            )}
+            {repairDraft && repairDraft.quickChecks.length > 0 && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">While you wait, you could check</p>
+                <ul className="mt-0.5 list-disc pl-4">
+                  {repairDraft.quickChecks.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {repairDraft?.unclear && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                The photos did not show the problem clearly: check the details above and add what
+                you can see.
+              </p>
+            )}
+            {repairDraft && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Filled in from your photos. Check every field before you submit.
+              </p>
+            )}
             {photoError && <p className="mt-1 text-xs text-destructive">{photoError}</p>}
             {photos.length > 0 && (
               <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4">

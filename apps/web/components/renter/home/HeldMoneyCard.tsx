@@ -29,7 +29,7 @@ export function HeldMoneyCard() {
     queryFn: () => unwrap(renterService.listPayments({ page: 1, pageSize: 100 })),
   });
   const depositsQuery = useQuery({
-    queryKey: ['renter', 'deposits'],
+    queryKey: renterKeys.deposits,
     queryFn: () => unwrap(myDeposits()),
   });
 
