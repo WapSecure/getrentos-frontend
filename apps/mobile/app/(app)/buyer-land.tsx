@@ -50,7 +50,7 @@ export default function BuyerLand() {
   });
   const holds = useQuery({
     queryKey: qk.buyerLand.reservations,
-    queryFn: landBuyerApi.reservationCount,
+    queryFn: landBuyerApi.reservations,
     retry: false,
   });
   const onHold = (holds.data ?? []).filter(
@@ -74,15 +74,36 @@ export default function BuyerLand() {
           keyExtractor={(p) => p.id}
           ListHeaderComponent={
             <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
-              {holds.data ? (
-                <Card padding={spacing.md}>
-                  <Text variant="callout">
-                    {onHold
-                      ? `${onHold} plot${onHold === 1 ? '' : 's'} on hold`
-                      : 'No plot on hold right now'}
-                  </Text>
-                </Card>
-              ) : null}
+              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                <PressableScale
+                  style={{ flex: 1 }}
+                  onPress={() => router.push('/(app)/buyer-land-reservations')}
+                  accessibilityRole="button"
+                >
+                  <Card padding={spacing.md} style={{ gap: 2 }}>
+                    <Text variant="bodyStrong">My reservations</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      {holds.data
+                        ? onHold
+                          ? `${onHold} plot${onHold === 1 ? '' : 's'} on hold`
+                          : 'No plot on hold'
+                        : 'Plots you hold'}
+                    </Text>
+                  </Card>
+                </PressableScale>
+                <PressableScale
+                  style={{ flex: 1 }}
+                  onPress={() => router.push('/(app)/land-estates')}
+                  accessibilityRole="button"
+                >
+                  <Card padding={spacing.md} style={{ gap: 2 }}>
+                    <Text variant="bodyStrong">Estates selling plots</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      Reserve a plot and pay on a plan
+                    </Text>
+                  </Card>
+                </PressableScale>
+              </View>
               <ChipSelect
                 options={[
                   { value: ALL, label: 'All purchases' },
@@ -123,7 +144,12 @@ export default function BuyerLand() {
                 icon={<LandPlot size={32} color={colors.mutedForeground} />}
                 title={filter ? 'No purchases with this status' : 'No plot purchases yet'}
                 description="Reserve a plot in a verified estate, then start a purchase on one of its payment plans."
-                action={<Button label="Browse land" onPress={() => router.push('/(app)/land')} />}
+                action={
+                  <Button
+                    label="Browse estates"
+                    onPress={() => router.push('/(app)/land-estates')}
+                  />
+                }
               />
             )
           }

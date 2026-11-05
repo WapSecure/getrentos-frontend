@@ -3,7 +3,7 @@ import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { ChevronLeft, LandPlot, Search, ShieldCheck } from 'lucide-react-native';
+import { ChevronLeft, LandPlot, LayoutGrid, Search, ShieldCheck } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Badge,
@@ -75,7 +75,15 @@ export default function LandMarketplace() {
           >
             <ChevronLeft size={24} color={colors.foreground} />
           </Pressable>
-          <Text variant="title">Land</Text>
+          <Text variant="title" style={{ flex: 1 }}>
+            Land
+          </Text>
+          <Chip
+            label="Estates selling plots"
+            size="sm"
+            leadingIcon={<LayoutGrid size={14} color={colors.primary} />}
+            onPress={() => router.push('/(app)/land-estates')}
+          />
         </View>
 
         <TextField

@@ -274,6 +274,196 @@ export function cancelDescription(p: BuyerPurchaseDetail, fmt: (n: number) => st
 export const DISPUTE_MIN = 5;
 export const DISPUTE_MAX = 2000;
 
+/* ------------------------------ estates & plots --------------------------- */
+
+export type PlotStatus =
+  | 'AVAILABLE'
+  | 'RESERVED'
+  | 'UNDER_INSTALLMENT'
+  | 'SOLD'
+  | 'ALLOCATED'
+  | 'WITHHELD';
+
+export const PLOT_STATUS_LABEL: Record<PlotStatus, string> = {
+  AVAILABLE: 'Available',
+  RESERVED: 'Reserved',
+  UNDER_INSTALLMENT: 'Under installment',
+  SOLD: 'Sold',
+  ALLOCATED: 'Allocated',
+  WITHHELD: 'Withheld',
+};
+
+/** The colours web uses for plot status, so the two read the same. */
+export const PLOT_STATUS_COLOR: Record<PlotStatus, string> = {
+  AVAILABLE: '#15803d',
+  RESERVED: '#b45309',
+  UNDER_INSTALLMENT: '#1d4ed8',
+  SOLD: '#6b7280',
+  ALLOCATED: '#9ca3af',
+  WITHHELD: '#d1d5db',
+};
+
+export interface EstateSummary {
+  id: string;
+  name: string;
+  city: string;
+  state: string;
+  description?: string | null;
+  availablePlots: number;
+  totalPlots: number;
+  priceFrom?: number;
+  priceTo?: number;
+}
+
+export interface EstatePlot {
+  id: string;
+  plotNumber: string;
+  block?: string | null;
+  areaSqm: number;
+  isCorner: boolean;
+  tags: string[];
+  price: number;
+  pricePerSqm?: number;
+  status: PlotStatus;
+  heldUntil?: string | null;
+}
+
+export interface EstatePlan {
+  id: string;
+  name: string;
+  active: boolean;
+  durationMonths: number;
+  initialDepositBps: number;
+  priceUpliftBps: number;
+  gracePeriodDays: number;
+  lateFeeBps: number;
+  defaultAfterDays: number;
+  revocationChargeBps: number;
+}
+
+export interface EstateDetail extends EstateSummary {
+  propertyTitle: string;
+  layoutApprovalReference?: string | null;
+  fees: { documentationFee: number; surveyFee: number; developmentLevy: number; total: number };
+  reservationHoldHours: number;
+  inspectionHoldDays: number;
+  reservationTerms: { version: string; points: string[]; subjectToInspection?: string | null };
+  notVerified: { key: string; label: string; status?: string }[];
+  openConditions?: { text: string; dueAt?: string | null }[] | null;
+  plots: EstatePlot[];
+  paymentPlans: EstatePlan[];
+}
+
+export interface Reservation {
+  id: string;
+  plotId: string;
+  layoutId: string;
+  layoutName: string;
+  plotNumber: string;
+  block?: string | null;
+  price: number;
+  status: 'ACTIVE' | 'CONVERTED' | 'EXPIRED' | 'CANCELLED';
+  expiresAt: string;
+  createdAt: string;
+}
+
+export const RESERVATION_STATUS: Record<Reservation['status'], { label: string; tone: BadgeTone }> =
+  {
+    ACTIVE: { label: 'Holding', tone: 'info' },
+    CONVERTED: { label: 'Purchase started', tone: 'success' },
+    EXPIRED: { label: 'Expired', tone: 'neutral' },
+    CANCELLED: { label: 'Released', tone: 'neutral' },
+  };
+
+/** What a plot costs on a plan, priced the way the server prices it. */
+export function quotePlot(
+  plotPrice: number,
+  feesTotal: number,
+  plan: Pick<EstatePlan, 'durationMonths' | 'priceUpliftBps' | 'initialDepositBps'>
+) {
+  const months = plan.durationMonths;
+  const priceUplift = months > 0 ? applyBps(plotPrice, plan.priceUpliftBps) : 0;
+  const contract = plotPrice + priceUplift;
+  const totalPrice = contract + feesTotal;
+  const initialPayment =
+    months === 0 ? totalPrice : applyBps(contract, plan.initialDepositBps) + feesTotal;
+  const balance = totalPrice - initialPayment;
+  return {
+    plotPrice,
+    priceUplift,
+    fees: feesTotal,
+    totalPrice,
+    initialPayment,
+    monthlyInstallment: months > 0 && balance > 0 ? Math.floor(balance / months) : 0,
+    durationMonths: months,
+  };
+}
+
+/** Time left on a hold, as web shows it. Urgent under an hour. */
+export function countdownTo(expiresAt: string, now = Date.now()) {
+  const remainingMs = Date.parse(expiresAt) - now;
+  if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+    return { expired: true, remainingMs: 0, label: 'Expired', urgent: true };
+  }
+  const totalSec = Math.floor(remainingMs / 1000);
+  const days = Math.floor(totalSec / 86_400);
+  const hours = Math.floor((totalSec % 86_400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const label =
+    days > 0
+      ? `${days}d ${hours}h`
+      : hours > 0
+        ? `${hours}h ${pad(minutes)}m`
+        : `${minutes}m ${pad(seconds)}s`;
+  return { expired: false, remainingMs, label, urgent: remainingMs < 3_600_000 };
+}
+
+export type PlotFilter = 'available' | 'all' | 'reserved' | 'sold';
+export const PLOT_FILTERS: { value: PlotFilter; label: string }[] = [
+  { value: 'available', label: 'Available' },
+  { value: 'all', label: 'All' },
+  { value: 'reserved', label: 'Reserved' },
+  { value: 'sold', label: 'Sold or paying' },
+];
+
+export function filterPlots(
+  plots: EstatePlot[],
+  { status, block, cornerOnly }: { status: PlotFilter; block?: string; cornerOnly?: boolean }
+) {
+  return plots.filter((p) => {
+    if (status === 'available' && p.status !== 'AVAILABLE') return false;
+    if (status === 'reserved' && p.status !== 'RESERVED') return false;
+    if (status === 'sold' && !['UNDER_INSTALLMENT', 'SOLD', 'ALLOCATED'].includes(p.status))
+      return false;
+    if (block && (p.block ?? '') !== block) return false;
+    if (cornerOnly && !p.isCorner) return false;
+    return true;
+  });
+}
+
+/** A plan's terms in a sentence, as web's plan card puts it. */
+export function planTermsLine(
+  plan: Pick<EstatePlan, 'durationMonths' | 'initialDepositBps' | 'priceUpliftBps'>
+) {
+  if (plan.durationMonths === 0) return 'Pay in full to start. No price uplift.';
+  const uplift =
+    plan.priceUpliftBps > 0
+      ? `${formatBps(plan.priceUpliftBps)} added to the plot price.`
+      : 'No price uplift.';
+  return `${formatBps(plan.initialDepositBps)} deposit, then ${plan.durationMonths} monthly installments. ${uplift}`;
+}
+
+/** Live holds first (soonest to run out), then the past ones. */
+export function splitReservations(list: Reservation[], now = Date.now()) {
+  const live = list
+    .filter((r) => r.status === 'ACTIVE' && !countdownTo(r.expiresAt, now).expired)
+    .sort((a, b) => Date.parse(a.expiresAt) - Date.parse(b.expiresAt));
+  const past = list.filter((r) => !live.includes(r));
+  return { live, past };
+}
+
 /* ----------------------------------- api ---------------------------------- */
 
 export type SaleDocument = 'contract-of-sale' | 'allocation-letter';
@@ -313,6 +503,25 @@ export const landBuyerApi = {
   settleResaleCondition: (txId: string, key: string, how: 'confirm' | 'waive') =>
     post<ClosingCondition[]>(`${tx(txId)}/conditions/${encodeURIComponent(key)}/${how}`),
 
-  reservationCount: () =>
-    apiFetch<{ status: string; expiresAt: string }[]>('/buyer/land/reservations'),
+  reservations: () => apiFetch<Reservation[]>('/buyer/land/reservations'),
+  cancelReservation: (id: string) =>
+    post<Reservation>(`/buyer/land/reservations/${encodeURIComponent(id)}/cancel`),
+  estates: (page: number, pageSize: number, search?: string) =>
+    apiFetch<{ items: EstateSummary[]; total: number; page: number; totalPages: number }>(
+      `/land/layouts?page=${page}&pageSize=${pageSize}${search ? `&search=${encodeURIComponent(search)}` : ''}`
+    ),
+  estate: (id: string) => apiFetch<EstateDetail>(`/land/layouts/${encodeURIComponent(id)}`),
+  reserve: (plotId: string, acceptedTermsVersion: string, subjectToInspectionId?: string) =>
+    post<Reservation>(`/buyer/land/plots/${encodeURIComponent(plotId)}/reserve`, {
+      acceptedTermsVersion,
+      ...(subjectToInspectionId ? { subjectToInspectionId } : {}),
+    }),
+  startPurchase: (reservationId: string, planId: string, acknowledgedNotVerified: string[]) =>
+    post<BuyerPurchaseDetail>('/buyer/land/purchases', {
+      reservationId,
+      planId,
+      acknowledgedNotVerified,
+    }),
+  inspections: () =>
+    apiFetch<{ id: string; plotId?: string | null; status: string }[]>('/buyer/land/inspections'),
 };
