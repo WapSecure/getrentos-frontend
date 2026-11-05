@@ -11,6 +11,7 @@ import {
   CardSkeleton,
   EmptyState,
   PageErrorState,
+  PageHeader,
   Skeleton,
   Textarea,
   useToast,
@@ -82,10 +83,10 @@ export default function AdminLandFraudParcelPage() {
       >
         <ArrowLeft className="h-4 w-4" /> Land fraud signals
       </Link>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="type-title">{a.title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={a.title}
+        description={
+          <>
             {a.seller.name} · {a.city}, {a.state} ·{' '}
             <Link
               href={`/admin/land/diligence/${encodeURIComponent(a.propertyId)}`}
@@ -93,15 +94,19 @@ export default function AdminLandFraudParcelPage() {
             >
               Diligence case
             </Link>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {a.blocking && (
-            <Badge variant="danger" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
-              Blocks approval
-            </Badge>
-          )}
-          <Badge variant={bandTone(a.band)}>Score {a.score}</Badge>
+          </>
+        }
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            {a.blocking && (
+              <Badge variant="danger" icon={<ShieldAlert className="h-3.5 w-3.5" />}>
+                Blocks approval
+              </Badge>
+            )}
+            <Badge variant={bandTone(a.band)}>Score {a.score}</Badge>
+          </div>
+        }
+        actions={
           <Button
             variant="outline"
             size="sm"
@@ -111,8 +116,8 @@ export default function AdminLandFraudParcelPage() {
           >
             Rescan
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-5">

@@ -10,6 +10,7 @@ import {
   SegmentedControl,
   Skeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -126,25 +127,25 @@ export default function OwnerListingsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Sale Listings</h1>
-          <div className="text-muted-foreground mt-1">
-            {isLoading ? (
-              <Skeleton className="h-5 w-48" />
-            ) : (
-              `${total} listing${total === 1 ? '' : 's'} across your portfolio`
-            )}
-          </div>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-          icon={<Plus className="w-4 h-4" />}
-        >
-          New Listing
-        </Button>
-      </div>
+      <PageHeader
+        title="Sale Listings"
+        description={
+          isLoading ? (
+            <Skeleton className="h-5 w-48" />
+          ) : (
+            `${total} listing${total === 1 ? '' : 's'} across your portfolio`
+          )
+        }
+        actions={
+          <Button
+            variant="primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            icon={<Plus className="w-4 h-4" />}
+          >
+            New Listing
+          </Button>
+        }
+      />
 
       {/* Publishing a for-sale listing needs an identity-verified account (tier 2). */}
       {createMutation.error && (

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Vote, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Button, CardSkeleton, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -56,10 +56,10 @@ export default function EstatePollsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Polls</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Polls"
+        description={
+          <>
             {isPollsLoading ? (
               'Loading…'
             ) : (
@@ -68,13 +68,15 @@ export default function EstatePollsPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>
-          <Plus className="w-4 h-4" />
-          New Poll
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button variant="primary" className="gap-2" onClick={() => setIsCreateOpen(true)}>
+            <Plus className="w-4 h-4" />
+            New Poll
+          </Button>
+        }
+      />
 
       {isPollsLoading ? (
         <ListSkeleton rows={3} />

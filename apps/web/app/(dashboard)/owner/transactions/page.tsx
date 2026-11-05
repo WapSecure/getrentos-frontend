@@ -8,6 +8,7 @@ import {
   SearchInput,
   SegmentedControl,
   Skeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -73,16 +74,16 @@ export default function OwnerTransactionsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Sales in progress</h1>
-        <div className="text-muted-foreground mt-1">
-          {isLoading ? (
+      <PageHeader
+        title="Sales in progress"
+        description={
+          isLoading ? (
             <Skeleton className="h-5 w-48" />
           ) : (
             `${total} sale${total === 1 ? '' : 's'} protected by GetRentos`
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput

@@ -14,6 +14,7 @@ import {
   Input,
   ListSkeleton,
   PageErrorState,
+  PageHeader,
   SearchInput,
   Select,
   Tabs,
@@ -804,16 +805,10 @@ export default function AdminManagedMandatesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Sparkles className="h-6 w-6 text-primary" aria-hidden />
-          GetRentos Managed
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Activate accepted engagements and manage live engagements, including assigning, activating
-          and reassigning a portfolio manager, one at a time or several at once.
-        </p>
-      </div>
+      <PageHeader
+        title="GetRentos Managed"
+        description="Activate accepted engagements and manage live engagements, including assigning, activating and reassigning a portfolio manager, one at a time or several at once."
+      />
 
       {!canOperate && (
         <div className="mb-4 rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">

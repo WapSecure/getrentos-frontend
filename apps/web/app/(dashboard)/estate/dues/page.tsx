@@ -12,6 +12,7 @@ import {
   Pagination,
   ToggleChip,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -138,10 +139,10 @@ export default function EstateDuesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Dues</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Dues"
+        description={
+          <>
             {isDuesLoading ? (
               'Loading…'
             ) : (
@@ -150,26 +151,28 @@ export default function EstateDuesPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
-            <Settings className="w-4 h-4" />
-            Due Settings
-          </Button>
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => {
-              setHouseholdPage(1);
-              setIsModalOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Charge Dues
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <Button variant="outline" className="gap-2" onClick={() => setIsSettingsOpen(true)}>
+              <Settings className="w-4 h-4" />
+              Due Settings
+            </Button>
+            <Button
+              variant="primary"
+              className="gap-2"
+              onClick={() => {
+                setHouseholdPage(1);
+                setIsModalOpen(true);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Charge Dues
+            </Button>
+          </>
+        }
+      />
 
       <CollectionPlanPanel path={`/estate/${estate.id}/collections/plan`} />
 

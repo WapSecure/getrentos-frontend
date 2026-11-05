@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   Pagination,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -122,10 +123,10 @@ export default function EstateDeliveriesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Deliveries</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Deliveries"
+        description={
+          <>
             {isLogsLoading ? (
               'Loading…'
             ) : (
@@ -134,26 +135,28 @@ export default function EstateDeliveriesPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
-            <Settings2 className="w-4 h-4" />
-            Manage Gates
-          </Button>
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => {
-              setHouseholdPage(1);
-              setIsModalOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Log Delivery
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
+              <Settings2 className="w-4 h-4" />
+              Manage Gates
+            </Button>
+            <Button
+              variant="primary"
+              className="gap-2"
+              onClick={() => {
+                setHouseholdPage(1);
+                setIsModalOpen(true);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Log Delivery
+            </Button>
+          </>
+        }
+      />
 
       <div
         className="flex flex-wrap gap-2 mb-6"

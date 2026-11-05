@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ShieldCheck } from 'lucide-react';
-import { Pagination, QueryState, SearchInput, SegmentedControl, Skeleton } from '@getrentos/ui';
+import {
+  Pagination,
+  QueryState,
+  SearchInput,
+  SegmentedControl,
+  Skeleton,
+  PageHeader,
+} from '@getrentos/ui';
 import { BuyerEscrowTransactionCard } from '@/components/buyer/transactions/BuyerEscrowTransactionCard';
 import { BuyerEscrowTransactionDetailModal } from '@/components/buyer/transactions/BuyerEscrowTransactionDetailModal';
 import { buyerService } from '@/services/buyerService';
@@ -70,16 +77,16 @@ export default function BuyerTransactionsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Transactions</h1>
-        <p className="text-muted-foreground mt-1">
-          {isLoading ? (
+      <PageHeader
+        title="Transactions"
+        description={
+          isLoading ? (
             <Skeleton className="inline-block h-4 w-56 align-middle" />
           ) : (
             `${total} purchase${total === 1 ? '' : 's'} protected by GetRentos`
-          )}
-        </p>
-      </div>
+          )
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchInput

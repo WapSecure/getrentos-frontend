@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Megaphone, Plus } from 'lucide-react';
-import { Button, CardSkeleton, EmptyState, ListSkeleton, Pagination } from '@getrentos/ui';
+import {
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  PageHeader,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -97,10 +104,10 @@ export default function EstateAnnouncementsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Announcements"
+        description={
+          <>
             {isAnnouncementsLoading ? (
               'Loading…'
             ) : (
@@ -109,20 +116,22 @@ export default function EstateAnnouncementsPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            setEditingAnnouncement(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          New Announcement
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              setEditingAnnouncement(null);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            New Announcement
+          </Button>
+        }
+      />
 
       {isAnnouncementsLoading ? (
         <ListSkeleton rows={3} />
