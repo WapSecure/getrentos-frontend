@@ -1,5 +1,6 @@
 'use client';
 
+import { humaniseEnum } from '@getrentos/shared';
 import { useState } from 'react';
 import {
   FileText,
@@ -113,9 +114,7 @@ export const DocumentCard = ({
       size="sm"
       aria-pressed={document.isFavorite}
       onClick={handleFavoriteClick}
-      icon={
-        document.isFavorite ? <Star className="fill-primary text-primary" /> : <StarOff />
-      }
+      icon={document.isFavorite ? <Star className="fill-primary text-primary" /> : <StarOff />}
     />
   );
 
@@ -160,7 +159,9 @@ export const DocumentCard = ({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="truncate font-medium text-foreground">{document.name}</p>
-                <Badge variant={statusVariants[document.status]}>{document.status}</Badge>
+                <Badge variant={statusVariants[document.status]}>
+                  {humaniseEnum(document.status)}
+                </Badge>
                 {document.isFavorite && <Star className="h-3 w-3 fill-primary text-primary" />}
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -245,7 +246,7 @@ export const DocumentCard = ({
           )}
 
           <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-            <Badge variant={statusVariants[document.status]}>{document.status}</Badge>
+            <Badge variant={statusVariants[document.status]}>{humaniseEnum(document.status)}</Badge>
             {document.sharedWith && document.sharedWith.length > 0 && (
               <Users className="h-3 w-3 text-muted-foreground" />
             )}

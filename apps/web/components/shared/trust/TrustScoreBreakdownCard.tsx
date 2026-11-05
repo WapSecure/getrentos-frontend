@@ -20,13 +20,10 @@ export const TrustScoreBreakdownCard = ({ breakdown }: TrustScoreBreakdownCardPr
 
   return (
     <section className="bg-card rounded-2xl border border-border p-6">
-      <div className="flex items-center justify-between mb-1">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <Layers className="w-5 h-5 text-primary" />
-          Score breakdown
-        </h2>
-        <span className="text-xs text-muted-foreground">{breakdown.version}</span>
-      </div>
+      <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-foreground">
+        <Layers className="w-5 h-5 text-primary" />
+        Score breakdown
+      </h2>
       <p className="text-sm text-muted-foreground mb-4">
         Points are weighted by how hard each signal is to fake: a verified identity outweighs
         activity, which is the easiest to farm.

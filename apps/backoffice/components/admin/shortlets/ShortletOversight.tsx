@@ -56,7 +56,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { NairaSign } from '@getrentos/ui/NairaSign';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+import { formatCurrency, formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
 import { adminShortletService } from '@/services/adminShortletService';
 import { HostCancellationFeesPanel } from './HostCancellationFeesPanel';
 import { GuestPromiseDecisionDialog } from './GuestPromiseDecisionDialog';
@@ -1397,7 +1397,9 @@ function ListingRow({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{listing.title}</p>
-          <Badge variant={LISTING_STATUS_VARIANT[listing.status]}>{listing.status}</Badge>
+          <Badge variant={LISTING_STATUS_VARIANT[listing.status]}>
+            {humaniseEnum(listing.status)}
+          </Badge>
           {listing.instantBooking && <Badge variant="info">Instant</Badge>}
         </div>
         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
@@ -1469,7 +1471,9 @@ function BookingRow({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{booking.propertyTitle}</p>
-          <Badge variant={BOOKING_STATUS_VARIANT[booking.status]}>{booking.status}</Badge>
+          <Badge variant={BOOKING_STATUS_VARIANT[booking.status]}>
+            {humaniseEnum(booking.status)}
+          </Badge>
           <Badge variant={PAYMENT_STATUS_VARIANT[booking.paymentStatus]}>
             {booking.paymentStatus}
           </Badge>
@@ -1556,7 +1560,9 @@ function PayoutRow({ payout, onOpen }: { payout: AdminShortletPayout; onOpen: ()
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{payout.hostName ?? 'Host'}</p>
-          <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>{payout.status}</Badge>
+          <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>
+            {humaniseEnum(payout.status)}
+          </Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {payout.bookingCount} booking{payout.bookingCount === 1 ? '' : 's'} ·{' '}
@@ -1698,7 +1704,9 @@ function PayoutDetailModal({
           <DialogTitle>Payout detail</DialogTitle>
           <DialogDescription>
             <span className="flex flex-wrap items-center gap-2">
-              <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>{payout.status}</Badge>
+              <Badge variant={PAYOUT_STATUS_VARIANT[payout.status]}>
+                {humaniseEnum(payout.status)}
+              </Badge>
               <span className="text-sm text-muted-foreground">
                 {payout.hostName ?? 'Host'} · {formatDate(payout.createdAt, 'short')}
                 {payout.transferRef ? ` · Ref ${payout.transferRef}` : ''}
@@ -1825,7 +1833,9 @@ function DisputeRow({ dispute, onOpen }: { dispute: AdminShortletDispute; onOpen
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium">{dispute.title}</p>
-          <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>{dispute.status}</Badge>
+          <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>
+            {humaniseEnum(dispute.status)}
+          </Badge>
           <Badge variant="neutral">{dispute.category}</Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -1885,7 +1895,9 @@ function DisputeThreadModal({
           <DialogTitle>{dispute.title}</DialogTitle>
           <DialogDescription>
             <span className="flex flex-wrap items-center gap-2">
-              <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>{dispute.status}</Badge>
+              <Badge variant={DISPUTE_STATUS_VARIANT[dispute.status]}>
+                {humaniseEnum(dispute.status)}
+              </Badge>
               {dispute.guestPromise ? (
                 <Badge variant="warning">Guest Promise</Badge>
               ) : (
@@ -2056,7 +2068,7 @@ function DepositClaimRow({
           <p className="truncate font-medium">
             {formatCurrency(claim.amount)} claim · {claim.listingTitle ?? 'Shortlet'}
           </p>
-          <Badge variant={CLAIM_STATUS_VARIANT[claim.status]}>{claim.status}</Badge>
+          <Badge variant={CLAIM_STATUS_VARIANT[claim.status]}>{humaniseEnum(claim.status)}</Badge>
           {resolved && claim.deductedAmount != null && claim.deductedAmount > 0 && (
             <span className="text-xs font-medium text-foreground/70">
               {formatCurrency(claim.deductedAmount)} withheld
