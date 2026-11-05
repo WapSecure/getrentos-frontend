@@ -27,6 +27,9 @@ import {
   UserRound,
   Users,
   Wallet,
+  PiggyBank,
+  Trash2,
+  UsersRound,
   Wrench,
   UserCheck,
 } from 'lucide-react-native';
@@ -64,6 +67,20 @@ export default function Account() {
       description: 'View your lease, pay rent, get receipts',
       icon: FileText,
       onPress: go('/(app)/lease'),
+    },
+    {
+      key: 'deposit',
+      label: 'Deposit',
+      description: 'Who holds it, deductions, what comes back',
+      icon: PiggyBank,
+      onPress: go('/(app)/renter-deposit'),
+    },
+    {
+      key: 'home-team',
+      label: 'Who manages your home',
+      description: 'Verified contacts, and check anyone who calls',
+      icon: UsersRound,
+      onPress: go('/(app)/renter-home-team'),
     },
     {
       key: 'maintenance',
@@ -218,6 +235,13 @@ export default function Account() {
       description: 'Rent alerts without the app',
       icon: MessageCircle,
       onPress: go('/(app)/whatsapp-settings'),
+    },
+    {
+      key: 'delete-account',
+      label: 'Delete account',
+      description: 'Permanently remove your account and data',
+      icon: Trash2,
+      onPress: go('/(app)/delete-account'),
     },
   ];
 
