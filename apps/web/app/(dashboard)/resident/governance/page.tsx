@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen } from 'lucide-react';
-import { EmptyState, ListSkeleton } from '@getrentos/ui';
+import { EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -31,10 +31,7 @@ export default function ResidentGovernancePage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Governance</h1>
-        <p className="text-muted-foreground mt-1">Bylaws and meeting minutes for your estate</p>
-      </div>
+      <PageHeader title="Governance" description="Bylaws and meeting minutes for your estate" />
 
       {isLoading ? (
         <ListSkeleton rows={3} />

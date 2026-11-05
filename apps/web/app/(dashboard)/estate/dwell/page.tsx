@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, CardSkeleton, Select } from '@getrentos/ui';
+import { Button, CardSkeleton, Select, PageHeader } from '@getrentos/ui';
 import { tierAtLeast } from '@getrentos/shared';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -116,26 +116,24 @@ export default function EstateDwellPage() {
   return (
     <EstateFeatureGate feature="Dwell analytics" error={refusal}>
       <>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Dwell analytics</h1>
-            <p className="text-muted-foreground mt-1">
-              Who is still inside, and how long visits run at {estate.name}
-            </p>
-          </div>
-          <Button
-            variant="secondary"
-            className="gap-2"
-            isLoading={boardQuery.isFetching}
-            loadingText="Refreshing…"
-            onClick={() => {
-              void boardQuery.refetch();
-              void reportQuery.refetch();
-            }}
-          >
-            Refresh now
-          </Button>
-        </div>
+        <PageHeader
+          title="Dwell analytics"
+          description={<>Who is still inside, and how long visits run at {estate.name}</>}
+          actions={
+            <Button
+              variant="secondary"
+              className="gap-2"
+              isLoading={boardQuery.isFetching}
+              loadingText="Refreshing…"
+              onClick={() => {
+                void boardQuery.refetch();
+                void reportQuery.refetch();
+              }}
+            >
+              Refresh now
+            </Button>
+          }
+        />
 
         <section className="mb-10">
           <h2 className="text-lg font-semibold text-foreground mb-1">Still inside</h2>

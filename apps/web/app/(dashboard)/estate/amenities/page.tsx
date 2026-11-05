@@ -12,6 +12,7 @@ import {
   Input,
   ListSkeleton,
   Skeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -86,12 +87,10 @@ export default function EstateAmenitiesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Amenities</h1>
-        <p className="text-muted-foreground mt-1">
-          Shared facilities residents can book in {estate.name}
-        </p>
-      </div>
+      <PageHeader
+        title="Amenities"
+        description={<>Shared facilities residents can book in {estate.name}</>}
+      />
 
       <div className="bg-card rounded-2xl border border-border p-4 mb-8">
         <h2 className="text-sm font-semibold text-foreground mb-3">Amenities</h2>

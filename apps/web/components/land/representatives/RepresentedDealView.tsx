@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, Card, ConfirmDialog, PageErrorState, Toast } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  ConfirmDialog,
+  PageErrorState,
+  PageHeader,
+  Toast,
+} from '@getrentos/ui';
 import { ArrowLeft } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { LAND_MILESTONE_STATUS_LABELS, type LandMilestone } from '@/types/landBuyer';
@@ -82,12 +90,14 @@ export const RepresentedDealView = ({ deal }: { deal: LandDealRef }) => {
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Buyers I represent
       </Link>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{detail.data.title}</h1>
-        {detail.data.reference && (
-          <p className="mt-1 font-mono text-sm text-muted-foreground">{detail.data.reference}</p>
-        )}
-      </div>
+      <PageHeader
+        title={detail.data.title}
+        description={
+          detail.data.reference ? (
+            <span className="font-mono">{detail.data.reference}</span>
+          ) : undefined
+        }
+      />
       {iApprove && (
         <p className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
           The buyer asked that money is only released with your approval too. Approve a step only

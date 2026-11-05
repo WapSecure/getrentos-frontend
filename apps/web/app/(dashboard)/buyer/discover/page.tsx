@@ -20,6 +20,7 @@ import {
   SegmentedControl,
   Skeleton,
   useOptimisticMutation,
+  PageHeader,
 } from '@getrentos/ui';
 
 type SortOrder = 'default' | 'price_asc' | 'price_desc';
@@ -92,7 +93,11 @@ export default function BuyerDiscoverPage() {
           const items = page.items.filter((item) => item.id !== listing.id);
           return save
             ? { ...page, items: [listing, ...items], total: page.total + 1 }
-            : { ...page, items, total: items.length < page.items.length ? page.total - 1 : page.total };
+            : {
+                ...page,
+                items,
+                total: items.length < page.items.length ? page.total - 1 : page.total,
+              };
         },
       },
     ],
@@ -120,12 +125,14 @@ export default function BuyerDiscoverPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Discover Properties</h1>
-        <p className="text-muted-foreground mt-1">
-          {total} propert{total === 1 ? 'y' : 'ies'} for sale
-        </p>
-      </div>
+      <PageHeader
+        title="Discover Properties"
+        description={
+          <>
+            {total} propert{total === 1 ? 'y' : 'ies'} for sale
+          </>
+        }
+      />
 
       {estateFromUrl && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/60 px-4 py-3">

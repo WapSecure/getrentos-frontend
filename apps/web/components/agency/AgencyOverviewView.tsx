@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { Building2, Coins, Gauge, Users, Wallet, Wrench } from 'lucide-react';
-import { Card, CardSkeleton, PageErrorState, StatGridSkeleton } from '@getrentos/ui';
+import { Building2, Coins, Users, Wallet, Wrench } from 'lucide-react';
+import { Card, CardSkeleton, PageErrorState, PageHeader, StatGridSkeleton } from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { agencyDashboardService, type AgencyDashboard } from '@/services/agencyDashboardService';
@@ -39,22 +39,21 @@ export function AgencyOverviewView() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Gauge className="h-6 w-6 text-primary" aria-hidden />
-          {d ? d.firmName : 'Firm overview'}
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          How the firm’s book is doing across every property you manage.{' '}
-          <Link href="/agency/performance" className="text-primary hover:underline">
-            Performance over time
-          </Link>
-          {' · '}
-          <Link href="/agency/import" className="text-primary hover:underline">
-            Import units from a CSV
-          </Link>
-        </p>
-      </div>
+      <PageHeader
+        title={d ? d.firmName : 'Firm overview'}
+        description={
+          <>
+            How the firm’s book is doing across every property you manage.{' '}
+            <Link href="/agency/performance" className="text-primary hover:underline">
+              Performance over time
+            </Link>
+            {' · '}
+            <Link href="/agency/import" className="text-primary hover:underline">
+              Import units from a CSV
+            </Link>
+          </>
+        }
+      />
 
       <div className="mb-6">
         <AttentionFeed persona="manager" />

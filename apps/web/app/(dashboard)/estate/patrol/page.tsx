@@ -13,7 +13,7 @@ import { EstateFeatureGate } from '@/components/estate/shared/EstateFeatureGate'
 import { CheckpointRegister } from '@/components/estate/patrol/CheckpointRegister';
 import { RoutePlanner } from '@/components/estate/patrol/RoutePlanner';
 import { RoundReport } from '@/components/estate/patrol/RoundReport';
-import { CardSkeleton, Tabs, TabsContent, TabsList, TabsTrigger } from '@getrentos/ui';
+import { CardSkeleton, Tabs, TabsContent, TabsList, TabsTrigger, PageHeader } from '@getrentos/ui';
 
 const TABS = [
   { value: 'report', label: 'Did it happen' },
@@ -77,12 +77,10 @@ export default function EstatePatrolPage() {
   return (
     <EstateFeatureGate feature="Patrols" error={reportQuery.error}>
       <>
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Patrols</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Checkpoints on the ground, the rounds that walk them, and every night one was due.
-          </p>
-        </div>
+        <PageHeader
+          title="Patrols"
+          description="Checkpoints on the ground, the rounds that walk them, and every night one was due."
+        />
 
         <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
           <TabsList className="mb-6 max-w-full">

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ReceiptText, Repeat } from 'lucide-react';
-import { Badge, Button, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Badge, Button, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -68,10 +68,7 @@ export default function ResidentDuesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Dues</h1>
-        <p className="text-muted-foreground mt-1">{data?.total ?? 0} dues on your household</p>
-      </div>
+      <PageHeader title="Dues" description={<>{data?.total ?? 0} dues on your household</>} />
 
       {isLoading ? (
         <ListSkeleton rows={3} />

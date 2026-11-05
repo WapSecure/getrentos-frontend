@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Card, ConfirmDialog, PageErrorState, Skeleton } from '@getrentos/ui';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  ConfirmDialog,
+  PageErrorState,
+  PageHeader,
+  Skeleton,
+} from '@getrentos/ui';
 import { AlertTriangle, ArrowLeft, Ban, FileDown } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -194,58 +203,57 @@ export const PurchaseDetailView = ({ purchaseId }: { purchaseId: string }) => {
         Plot sales
       </Link>
 
-      <div className="mt-2 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-[-0.03em] text-foreground">
-              {data.reference}
-            </h1>
-            <Badge variant={status.variant}>{status.label}</Badge>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        className="mt-2"
+        title={data.reference}
+        description={
+          <>
             {plotName} · {data.layoutName} · {data.buyerName ?? 'Buyer'} · {data.planName}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            rounded="lg"
-            isLoading={downloading === 'contract-of-sale'}
-            onClick={() => download('contract-of-sale')}
-            icon={<FileDown className="h-4 w-4" />}
-          >
-            Contract of sale
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            rounded="lg"
-            disabled={data.status === 'PENDING_DEPOSIT'}
-            title={
-              data.status === 'PENDING_DEPOSIT'
-                ? 'A letter of allocation is issued once the deposit is paid'
-                : undefined
-            }
-            isLoading={downloading === 'allocation-letter'}
-            onClick={() => download('allocation-letter')}
-            icon={<FileDown className="h-4 w-4" />}
-          >
-            Allocation letter
-          </Button>
-          {data.status === 'DEFAULTED' && (
+          </>
+        }
+        meta={<Badge variant={status.variant}>{status.label}</Badge>}
+        actions={
+          <>
             <Button
-              variant="danger"
+              variant="outline"
               size="sm"
               rounded="lg"
-              onClick={() => setRevokeOpen(true)}
-              icon={<Ban className="h-4 w-4" />}
+              isLoading={downloading === 'contract-of-sale'}
+              onClick={() => download('contract-of-sale')}
+              icon={<FileDown className="h-4 w-4" />}
             >
-              Revoke
+              Contract of sale
             </Button>
-          )}
-        </div>
-      </div>
+            <Button
+              variant="outline"
+              size="sm"
+              rounded="lg"
+              disabled={data.status === 'PENDING_DEPOSIT'}
+              title={
+                data.status === 'PENDING_DEPOSIT'
+                  ? 'A letter of allocation is issued once the deposit is paid'
+                  : undefined
+              }
+              isLoading={downloading === 'allocation-letter'}
+              onClick={() => download('allocation-letter')}
+              icon={<FileDown className="h-4 w-4" />}
+            >
+              Allocation letter
+            </Button>
+            {data.status === 'DEFAULTED' && (
+              <Button
+                variant="danger"
+                size="sm"
+                rounded="lg"
+                onClick={() => setRevokeOpen(true)}
+                icon={<Ban className="h-4 w-4" />}
+              >
+                Revoke
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {data.status === 'DEFAULTED' && (
         <Alert variant="danger" icon={AlertTriangle} className="mt-4">

@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, RefreshCw, Siren, ShieldCheck } from 'lucide-react';
-import { Alert, Button, CardSkeleton, EmptyState, ListSkeleton, Pagination, ToggleChip } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  ToggleChip,
+  PageHeader,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -157,28 +166,30 @@ export default function EstateEmergencyPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Emergency roll call</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Emergency roll call"
+        description={
+          <>
             {active
               ? `${active.kindLabel} at ${estate.name}: ${active.statusLabel.toLowerCase()}`
               : `Nobody is being called at ${estate.name}`}
-          </p>
-        </div>
-        {!active && (
-          <Button
-            variant="primary"
-            icon={<Siren className="w-4 h-4" />}
-            onClick={() => {
-              declareMuster.reset();
-              setIsDeclareOpen(true);
-            }}
-          >
-            Raise the alarm
-          </Button>
-        )}
-      </div>
+          </>
+        }
+        actions={
+          !active && (
+            <Button
+              variant="primary"
+              icon={<Siren className="w-4 h-4" />}
+              onClick={() => {
+                declareMuster.reset();
+                setIsDeclareOpen(true);
+              }}
+            >
+              Raise the alarm
+            </Button>
+          )
+        }
+      />
 
       {!active && !muster && (
         /* The ordinary state, said plainly rather than as an empty table: this

@@ -1,6 +1,7 @@
 'use client';
 
 import { ClientRealtorAccess } from '@/components/realtor/ClientRealtorAccess';
+import { PageHeader } from '@getrentos/ui';
 
 /**
  * Realtor access for the properties a manager operates on an owner's behalf.
@@ -12,12 +13,10 @@ import { ClientRealtorAccess } from '@/components/realtor/ClientRealtorAccess';
 export default function AgencyRealtorAccessPage() {
   return (
     <div className="p-6">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground">Realtor access</h1>
-        <p className="mt-1 text-muted-foreground">
-          Approve realtors and assign them the properties you manage for your clients.
-        </p>
-      </div>
+      <PageHeader
+        title="Realtor access"
+        description="Approve realtors and assign them the properties you manage for your clients."
+      />
       <ClientRealtorAccess showHeader={false} />
     </div>
   );

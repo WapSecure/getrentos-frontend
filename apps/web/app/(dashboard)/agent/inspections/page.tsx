@@ -7,7 +7,15 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { InspectionCard } from '@/components/agent/inspections/InspectionCard';
 import { NewInspectionModal } from '@/components/agent/inspections/NewInspectionModal';
 import { InspectionDetailModal } from '@/components/agent/inspections/InspectionDetailModal';
-import { Alert, Button, EmptyState, ListSkeleton, Pagination, useToast } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  useToast,
+  PageHeader,
+} from '@getrentos/ui';
 import type { PropertyInspection } from '@/types/agent';
 import { agentKeys } from '@/lib/queryKeys';
 import { agentService } from '@/services/agentService';
@@ -103,21 +111,23 @@ function AgentInspectionsPageContent() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Inspections</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Inspections"
+        description={
+          <>
             {total} inspection{total === 1 ? '' : 's'} recorded
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Plus className="w-4 h-4" />}
-          onClick={() => setIsModalOpen(true)}
-        >
-          New Inspection
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Plus className="w-4 h-4" />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            New Inspection
+          </Button>
+        }
+      />
 
       {error && (
         <Alert variant="danger" className="mb-4">

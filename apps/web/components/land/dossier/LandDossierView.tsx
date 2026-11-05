@@ -2,7 +2,7 @@
 
 import { boundarySignOffText } from '@getrentos/shared';
 import { Printer } from 'lucide-react';
-import { Alert, Badge, Button } from '@getrentos/ui';
+import { Alert, Badge, Button, PageHeader } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
 import type { AcquisitionCostItem, LandDossier } from '@/types/landDossier';
@@ -43,27 +43,27 @@ export const LandDossierView = ({ dossier }: { dossier: LandDossier }) => {
   const { subject, parcel, acquisitionCost: cost } = dossier;
   return (
     <article className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-            Decision dossier
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">{subject.title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        eyebrow="Decision dossier"
+        title={subject.title}
+        description={
+          <>
             {subject.city}, {subject.state} · {formatCurrency(subject.price)}
             {subject.planName ? ` · ${subject.planName}` : ''} · generated{' '}
             {formatDate(dossier.generatedAt)}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          onClick={() => window.print()}
-          icon={<Printer className="h-4 w-4" />}
-          className="print:hidden"
-        >
-          Print or save as PDF
-        </Button>
-      </header>
+          </>
+        }
+        actions={
+          <Button
+            variant="outline"
+            onClick={() => window.print()}
+            icon={<Printer className="h-4 w-4" />}
+            className="print:hidden"
+          >
+            Print or save as PDF
+          </Button>
+        }
+      />
 
       <Alert variant="warning">{dossier.freshnessNote}</Alert>
 

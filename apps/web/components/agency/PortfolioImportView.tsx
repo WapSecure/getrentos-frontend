@@ -2,8 +2,18 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Download, FileSpreadsheet, Upload } from 'lucide-react';
-import { Alert, Badge, Button, Card, Field, Select, Skeleton, useToast } from '@getrentos/ui';
+import { Download, Upload } from 'lucide-react';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Field,
+  Select,
+  Skeleton,
+  useToast,
+  PageHeader,
+} from '@getrentos/ui';
 import { formatCurrency } from '@/lib/format';
 import { useCustody } from '@/components/agency/CustodyProvider';
 import {
@@ -64,16 +74,10 @@ export function PortfolioImportView() {
 
   return (
     <div className="mx-auto max-w-4xl p-6">
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <FileSpreadsheet className="h-6 w-6 text-primary" aria-hidden />
-          Import units
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Add a property’s units from a CSV. You’ll see a dry run first; nothing is written until
-          you import, and a file with errors imports nothing.
-        </p>
-      </div>
+      <PageHeader
+        title="Import units"
+        description="Add a property’s units from a CSV. You’ll see a dry run first; nothing is written until you import, and a file with errors imports nothing."
+      />
 
       <Card className="space-y-4 p-5">
         {loading ? (
@@ -159,57 +163,57 @@ export function PortfolioImportView() {
                 </Badge>
               </div>
               <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                    <th className="py-2 pr-3 font-medium">Line</th>
-                    <th className="py-2 pr-3 font-medium">Unit</th>
-                    <th className="py-2 pr-3 font-medium">Beds / baths</th>
-                    <th className="py-2 pr-3 font-medium">Asking rent</th>
-                    <th className="py-2 font-medium">Result</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {[
-                    ...preview.toCreate.map((r) => ({
-                      line: r.line,
-                      unit: r.unitName,
-                      size: `${r.bedrooms} / ${r.bathrooms}`,
-                      rent:
-                        r.askingRent !== null
-                          ? `${formatCurrency(r.askingRent)} ${r.rentPeriod === 'MONTHLY' ? 'monthly' : 'yearly'}`
-                          : '—',
-                      result: <Badge variant="success">Add</Badge>,
-                    })),
-                    ...preview.skipped.map((r) => ({
-                      line: r.line,
-                      unit: r.unitName,
-                      size: '',
-                      rent: '',
-                      result: <span className="text-xs text-muted-foreground">{r.reason}</span>,
-                    })),
-                    ...preview.errors.map((r) => ({
-                      line: r.line,
-                      unit: r.unitName || '—',
-                      size: '',
-                      rent: '',
-                      result: (
-                        <span className="text-xs text-destructive">{r.errors.join('; ')}</span>
-                      ),
-                    })),
-                  ]
-                    .sort((a, b) => a.line - b.line)
-                    .map((r) => (
-                      <tr key={r.line}>
-                        <td className="py-2 pr-3 text-muted-foreground">{r.line}</td>
-                        <td className="py-2 pr-3 text-foreground">{r.unit}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">{r.size}</td>
-                        <td className="py-2 pr-3 text-muted-foreground">{r.rent}</td>
-                        <td className="py-2">{r.result}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                      <th className="py-2 pr-3 font-medium">Line</th>
+                      <th className="py-2 pr-3 font-medium">Unit</th>
+                      <th className="py-2 pr-3 font-medium">Beds / baths</th>
+                      <th className="py-2 pr-3 font-medium">Asking rent</th>
+                      <th className="py-2 font-medium">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {[
+                      ...preview.toCreate.map((r) => ({
+                        line: r.line,
+                        unit: r.unitName,
+                        size: `${r.bedrooms} / ${r.bathrooms}`,
+                        rent:
+                          r.askingRent !== null
+                            ? `${formatCurrency(r.askingRent)} ${r.rentPeriod === 'MONTHLY' ? 'monthly' : 'yearly'}`
+                            : '—',
+                        result: <Badge variant="success">Add</Badge>,
+                      })),
+                      ...preview.skipped.map((r) => ({
+                        line: r.line,
+                        unit: r.unitName,
+                        size: '',
+                        rent: '',
+                        result: <span className="text-xs text-muted-foreground">{r.reason}</span>,
+                      })),
+                      ...preview.errors.map((r) => ({
+                        line: r.line,
+                        unit: r.unitName || '—',
+                        size: '',
+                        rent: '',
+                        result: (
+                          <span className="text-xs text-destructive">{r.errors.join('; ')}</span>
+                        ),
+                      })),
+                    ]
+                      .sort((a, b) => a.line - b.line)
+                      .map((r) => (
+                        <tr key={r.line}>
+                          <td className="py-2 pr-3 text-muted-foreground">{r.line}</td>
+                          <td className="py-2 pr-3 text-foreground">{r.unit}</td>
+                          <td className="py-2 pr-3 text-muted-foreground">{r.size}</td>
+                          <td className="py-2 pr-3 text-muted-foreground">{r.rent}</td>
+                          <td className="py-2">{r.result}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               </div>
               <Button
                 className="mt-4"

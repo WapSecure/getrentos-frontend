@@ -8,6 +8,7 @@ import {
   Button,
   ConfirmDialog,
   PageErrorState,
+  PageHeader,
   Skeleton,
   Textarea,
   useToast,
@@ -182,48 +183,55 @@ export const ReviewSeatDetail = ({ seatId }: { seatId: string }) => {
         <ArrowLeft className="h-4 w-4" aria-hidden /> My reviews
       </Link>
 
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="info">{LAND_REVIEWER_ROLE_LABELS[data.role]}</Badge>
-          <Badge
-            variant={
-              active || undeclared
-                ? data.overdue
-                  ? 'danger'
-                  : 'warning'
-                : data.seatStatus === 'COMPLETED'
-                  ? 'success'
-                  : 'neutral'
-            }
-          >
-            {active || undeclared
-              ? data.overdue
-                ? 'Overdue'
-                : 'In progress'
-              : data.seatStatus === 'COMPLETED'
-                ? 'Report filed'
-                : 'Withdrawn'}
-          </Badge>
-        </div>
-        <h1 className="text-2xl font-bold text-foreground">{data.propertyTitle}</h1>
-        <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="h-4 w-4" aria-hidden /> {p.address}, {p.city}, {p.state}
-          </span>
-          {data.dueAt && (
-            <span
-              className={`inline-flex items-center gap-1 ${data.overdue ? 'font-medium text-destructive' : ''}`}
-            >
-              <CalendarClock className="h-4 w-4" aria-hidden /> Report due {formatDate(data.dueAt)}
+      <div className="space-y-2">
+        <PageHeader
+          title={data.propertyTitle}
+          description={
+            <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <span className="inline-flex items-center gap-1">
+                <MapPin className="h-4 w-4" aria-hidden /> {p.address}, {p.city}, {p.state}
+              </span>
+              {data.dueAt && (
+                <span
+                  className={`inline-flex items-center gap-1 ${data.overdue ? 'font-medium text-destructive' : ''}`}
+                >
+                  <CalendarClock className="h-4 w-4" aria-hidden /> Report due{' '}
+                  {formatDate(data.dueAt)}
+                </span>
+              )}
             </span>
-          )}
-        </p>
+          }
+          meta={
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="info">{LAND_REVIEWER_ROLE_LABELS[data.role]}</Badge>
+              <Badge
+                variant={
+                  active || undeclared
+                    ? data.overdue
+                      ? 'danger'
+                      : 'warning'
+                    : data.seatStatus === 'COMPLETED'
+                      ? 'success'
+                      : 'neutral'
+                }
+              >
+                {active || undeclared
+                  ? data.overdue
+                    ? 'Overdue'
+                    : 'In progress'
+                  : data.seatStatus === 'COMPLETED'
+                    ? 'Report filed'
+                    : 'Withdrawn'}
+              </Badge>
+            </div>
+          }
+        />
         {data.seatStatus === 'REVOKED' && (
           <p className="rounded-xl bg-secondary p-3 text-sm text-foreground">
             GetRentos has withdrawn this engagement. The case is shown for your records only.
           </p>
         )}
-      </header>
+      </div>
 
       {undeclared && (
         <ConflictDeclarationCard

@@ -4,8 +4,16 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Building2, FileText, Lock, ShieldCheck, UserRound } from 'lucide-react';
-import { Alert, Badge, Card, CardSkeleton, PageErrorState, Skeleton } from '@getrentos/ui';
+import { ArrowLeft, FileText, Lock, ShieldCheck, UserRound } from 'lucide-react';
+import {
+  Alert,
+  Badge,
+  Card,
+  CardSkeleton,
+  PageErrorState,
+  PageHeader,
+  Skeleton,
+} from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { mandateKeys } from '@/lib/queryKeys';
 import * as mandateService from '@/services/mandateService';
@@ -83,25 +91,26 @@ export function MandateDetailView() {
         </Link>
       </div>
 
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Building2 className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
-          <h1 className="text-xl font-semibold tracking-[-0.01em]">
-            {mandate.propertyTitle ?? 'Property'}
-          </h1>
-          <MandateStatusBadge status={mandate.status} />
-          {live && <Badge variant="success">In force</Badge>}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {mandate.ownerName ?? 'the owner'}
-          <span aria-hidden> · </span>
-          {mandate.managerIsGetRentos
-            ? 'GetRentos is the manager'
-            : (mandate.managerOrganizationName ?? mandate.managerName ?? 'the manager')}
-          <span aria-hidden> · </span>
-          {noticeSummary(mandate)}
-        </p>
-      </header>
+      <PageHeader
+        title={mandate.propertyTitle ?? 'Property'}
+        description={
+          <>
+            {mandate.ownerName ?? 'the owner'}
+            <span aria-hidden> · </span>
+            {mandate.managerIsGetRentos
+              ? 'GetRentos is the manager'
+              : (mandate.managerOrganizationName ?? mandate.managerName ?? 'the manager')}
+            <span aria-hidden> · </span>
+            {noticeSummary(mandate)}
+          </>
+        }
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <MandateStatusBadge status={mandate.status} />
+            {live && <Badge variant="success">In force</Badge>}
+          </div>
+        }
+      />
 
       {act.isError && <Alert variant="danger">{(act.error as Error).message}</Alert>}
 

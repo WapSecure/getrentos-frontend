@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Contact } from 'lucide-react';
-import { EmptyState, ListSkeleton, Switch, useOptimisticMutation } from '@getrentos/ui';
+import { EmptyState, ListSkeleton, Switch, useOptimisticMutation, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -32,10 +32,10 @@ export default function ResidentDirectoryPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Directory</h1>
-        <p className="text-muted-foreground mt-1">Households in your estate who&apos;ve opted in</p>
-      </div>
+      <PageHeader
+        title="Directory"
+        description={<>Households in your estate who&apos;ve opted in</>}
+      />
 
       <div className="bg-card rounded-2xl border border-border p-4 mb-6 flex items-center justify-between gap-4">
         <div className="min-w-0">

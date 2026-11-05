@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Megaphone } from 'lucide-react';
-import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -21,12 +21,10 @@ export default function ResidentAnnouncementsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
-        <p className="text-muted-foreground mt-1">
-          {data?.total ?? 0} announcements from your estate
-        </p>
-      </div>
+      <PageHeader
+        title="Announcements"
+        description={<>{data?.total ?? 0} announcements from your estate</>}
+      />
 
       {isLoading ? (
         <ListSkeleton rows={3} />

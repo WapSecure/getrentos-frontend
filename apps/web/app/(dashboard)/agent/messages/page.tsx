@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Pagination, Select, useToast } from '@getrentos/ui';
+import { Button, Pagination, Select, useToast, PageHeader } from '@getrentos/ui';
 import { ConversationList, type Conversation } from '@/components/agent/messages/ConversationList';
 import { MessageThread, type ThreadMessage } from '@/components/agent/messages/MessageThread';
 import { cn } from '@/lib/cn';
@@ -130,10 +130,11 @@ export default function AgentMessagesPage() {
   const activeConversation = conversations.find((c) => c.id === activeId);
 
   return (
-    <div className="h-[calc(100vh-8rem)]">
-      <div className="mb-6">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+    <div className="flex h-[calc(100vh-8rem)] flex-col">
+      <PageHeader
+        title="Messages"
+        description="Communicate with dispatch, clients, and support"
+        actions={
           <div className="flex flex-col items-end gap-2">
             <Select
               className="w-56 max-w-full"
@@ -158,13 +159,10 @@ export default function AgentMessagesPage() {
               />
             )}
           </div>
-        </div>
-        <p className="text-muted-foreground mt-1">
-          Communicate with dispatch, clients, and support
-        </p>
-      </div>
+        }
+      />
 
-      <div className="flex gap-4 h-[calc(100%-4.5rem)]">
+      <div className="flex min-h-0 flex-1 gap-4">
         <div className={cn(activeId ? 'hidden sm:flex' : 'flex', 'w-full sm:w-auto')}>
           <ConversationList
             conversations={conversations}

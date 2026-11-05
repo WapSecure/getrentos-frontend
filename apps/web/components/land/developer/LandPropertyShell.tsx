@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { PageErrorState, Skeleton } from '@getrentos/ui';
+import { PageErrorState, PageHeader, Skeleton } from '@getrentos/ui';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
 import { landKeys } from '@/lib/queryKeys';
@@ -57,18 +57,17 @@ export const LandPropertyShell = ({ propertyId, section, children }: LandPropert
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Land portfolio
         </Link>
-        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold tracking-[-0.03em] text-foreground">
-              {data.property.title || 'Land parcel'}
-            </h1>
-            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+        <PageHeader
+          className="mt-2"
+          title={data.property.title || 'Land parcel'}
+          description={
+            <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               {[data.property.city, data.property.state].filter(Boolean).join(', ')}
-            </p>
-          </div>
-          <LandDiligenceBadge status={data.diligence?.status} />
-        </div>
+            </span>
+          }
+          actions={<LandDiligenceBadge status={data.diligence?.status} />}
+        />
       </div>
       <LandPropertyNav propertyId={propertyId} active={section} className="mb-6" />
       {children(data)}

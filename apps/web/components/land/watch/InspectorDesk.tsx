@@ -27,6 +27,7 @@ import {
   Textarea,
   type ToastVariant,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   LAND_BOUNDARY_LABELS,
@@ -84,13 +85,10 @@ const JobList = ({ onOpen }: { onOpen: (id: string) => void }) => {
   });
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Land inspections</h1>
-        <p className="mt-1 max-w-2xl text-muted-foreground">
-          Visits GetRentos has assigned to you. Capture photos on the land with your location on;
-          anything taken away from the land is checked before the owner sees the report.
-        </p>
-      </div>
+      <PageHeader
+        title="Land inspections"
+        description="Visits GetRentos has assigned to you. Capture photos on the land with your location on; anything taken away from the land is checked before the owner sees the report."
+      />
       {jobs.isLoading ? (
         <Skeleton className="h-40 rounded-2xl" />
       ) : jobs.isError && !jobs.data ? (
@@ -183,16 +181,19 @@ const JobDetail = ({
         >
           Land inspections
         </Button>
-        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{j.land.label}</h1>
-            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+        <PageHeader
+          className="mt-2"
+          title={j.land.label}
+          description={
+            <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
               {j.land.address}, {j.land.city}, {j.land.state}
-            </p>
-          </div>
-          <Badge variant={open ? 'info' : 'neutral'}>{STATUS_WORDS[j.status] ?? j.status}</Badge>
-        </div>
+            </span>
+          }
+          actions={
+            <Badge variant={open ? 'info' : 'neutral'}>{STATUS_WORDS[j.status] ?? j.status}</Badge>
+          }
+        />
       </div>
       {j.staffNote && <Alert variant="warning">GetRentos asks: {j.staffNote}</Alert>}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">

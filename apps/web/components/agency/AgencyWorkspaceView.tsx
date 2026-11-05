@@ -11,6 +11,7 @@ import {
   CardSkeleton,
   EmptyState,
   PageErrorState,
+  PageHeader,
   Skeleton,
 } from '@getrentos/ui';
 import { useCustody } from '@/components/agency/CustodyProvider';
@@ -118,19 +119,19 @@ export function AgencyWorkspaceView() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold tracking-[-0.01em]">
-            {selected.propertyTitle ?? 'Property'}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={selected.propertyTitle ?? 'Property'}
+        description={
+          <>
             For {selected.ownerName ?? 'the owner'} · {noticeSummary(selected)}
-          </p>
-        </div>
-        <Button variant="outline" href="/agency/mandates">
-          Manage mandates
-        </Button>
-      </header>
+          </>
+        }
+        actions={
+          <Button variant="outline" href="/agency/mandates">
+            Manage mandates
+          </Button>
+        }
+      />
 
       {grantsNothing(selected) && (
         <Alert variant="neutral" icon={ShieldAlert}>
