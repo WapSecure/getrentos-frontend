@@ -78,6 +78,10 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
     setMessage(a.draft.message);
     setTouched({ rent: false, end: false, message: false });
   };
+  // Older leases store no period; the advice reads it from how the rent is billed.
+  const rentPeriod =
+    lease?.rentPeriod ??
+    (advice.data ? (advice.data.facts.lease.period === 'per month' ? 'month' : 'year') : undefined);
   const englishCopy =
     advice.data?.draft.messageInEnglish && message === advice.data.draft.message
       ? advice.data.draft.messageInEnglish
@@ -143,7 +147,7 @@ export const RenewalOfferModal = ({ lease, onClose, onSend }: RenewalOfferModalP
           </div>
 
           <Field
-            label={`New ${leaseRentLabel(lease.rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)`}
+            label={`New ${leaseRentLabel(rentPeriod, lease.leaseStart, lease.leaseEnd).toLowerCase()} (₦)`}
             required
             hint={`${Number(increasePct) >= 0 ? '+' : ''}${increasePct}% vs current rent`}
           >
