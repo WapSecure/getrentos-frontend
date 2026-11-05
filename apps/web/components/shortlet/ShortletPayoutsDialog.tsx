@@ -1,5 +1,7 @@
 'use client';
 
+import { SHORTLET_PAYOUT_STATUS_LABEL } from '@/types/shortlet';
+
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -274,7 +276,9 @@ export function ShortletPayoutsDialog({
                 {(payouts?.items ?? []).map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-3 p-3">
                     <div>
-                      <Badge variant={PAYOUT_STATUS_VARIANT[p.status]}>{p.status}</Badge>
+                      <Badge variant={PAYOUT_STATUS_VARIANT[p.status]}>
+                        {SHORTLET_PAYOUT_STATUS_LABEL[p.status] ?? p.status}
+                      </Badge>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {p.bookingCount} booking{p.bookingCount === 1 ? '' : 's'} ·{' '}
                         {formatDate(p.createdAt, 'short')}

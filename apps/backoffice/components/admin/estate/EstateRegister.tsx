@@ -33,7 +33,7 @@ import {
   SearchInput,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { cn, unwrap } from '@getrentos/shared';
+import { cn, unwrap, humaniseEnum } from '@getrentos/shared';
 import { formatCurrency, formatDate } from '@getrentos/shared';
 import { adminEstateService } from '@/services/adminEstateService';
 import { adminKeys } from '@/lib/queryKeys';
@@ -389,7 +389,9 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span>{h.residentName}</span>
                     {h.residentLinked && <Badge variant="success">Linked</Badge>}
-                    <Badge variant={householdStatusVariant(h.status)}>{h.status}</Badge>
+                    <Badge variant={householdStatusVariant(h.status)}>
+                      {humaniseEnum(h.status)}
+                    </Badge>
                   </div>
                 </div>
               ))}
@@ -412,7 +414,7 @@ function EstateCase360({ detail, onClose }: { detail: AdminEstateDetail; onClose
                       {formatCurrency(d.amount)}
                     </span>
                     <span>{formatDate(d.dueDate)}</span>
-                    <Badge variant={dueStatusVariant(d.status)}>{d.status}</Badge>
+                    <Badge variant={dueStatusVariant(d.status)}>{humaniseEnum(d.status)}</Badge>
                   </div>
                 </div>
               ))}

@@ -30,7 +30,7 @@ import {
   Select,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { cn } from '@getrentos/shared';
+import { cn, humaniseEnum } from '@getrentos/shared';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
@@ -434,7 +434,7 @@ function RealtorCase360({
                   >
                     <p className="font-medium">{c.clientName}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="neutral">{c.status}</Badge>
+                      <Badge variant="neutral">{humaniseEnum(c.status)}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
                       {canModerate && c.status === 'ACTIVE' && (
                         <Button
@@ -477,7 +477,7 @@ function RealtorCase360({
                   >
                     <p className="truncate font-medium">{l.title}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="neutral">{l.status}</Badge>
+                      <Badge variant="neutral">{humaniseEnum(l.status)}</Badge>
                       <span>{formatCurrency(l.price, { compact: true })}</span>
                     </div>
                   </div>

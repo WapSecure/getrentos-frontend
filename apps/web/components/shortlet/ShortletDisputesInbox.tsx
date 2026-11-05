@@ -18,6 +18,7 @@ import { shortletService } from '@/services/shortletService';
 import { shortletKeys } from '@/lib/queryKeys';
 import { formatDate } from '@/lib/format';
 import type { ShortletDisputeStatus } from '@/types/shortlet';
+import { SHORTLET_DISPUTE_STATUS_LABEL } from '@/types/shortlet';
 
 const STATUS_VARIANT: Record<ShortletDisputeStatus, BadgeVariant> = {
   OPEN: 'danger',
@@ -97,7 +98,9 @@ export function ShortletDisputesInbox() {
               >
                 <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-sm font-medium">{d.title}</p>
-                  <Badge variant={STATUS_VARIANT[d.status]}>{d.status}</Badge>
+                  <Badge variant={STATUS_VARIANT[d.status]}>
+                    {SHORTLET_DISPUTE_STATUS_LABEL[d.status]}
+                  </Badge>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {d.listingTitle ?? 'Shortlet'} · {d.raisedBy} → {d.against}

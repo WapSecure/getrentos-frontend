@@ -46,6 +46,7 @@ import type {
   ShortletBookingStatus,
   ShortletCancellationPolicy,
 } from '@/types/shortlet';
+import { SHORTLET_BOOKING_STATUS_LABEL } from '@/types/shortlet';
 
 const PAGE_SIZE = 10;
 
@@ -320,7 +321,9 @@ export const GuestBookingsWorkspace = () => {
                   )}
                 </div>
                 <div className="text-right">
-                  <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
+                  <Badge variant={STATUS_VARIANT[b.status]}>
+                    {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
+                  </Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
                   {b.paymentStatus && b.paymentStatus !== 'UNPAID' && (
                     <Badge

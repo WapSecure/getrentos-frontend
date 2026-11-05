@@ -17,7 +17,7 @@ import {
 
 import { useState } from 'react';
 import { CheckCircle2, ArrowUpCircle, Search, RotateCcw, Send } from 'lucide-react';
-import { cn, formatCurrency } from '@getrentos/shared';
+import { cn, formatCurrency, humaniseEnum } from '@getrentos/shared';
 import { EvidencePanel } from '@/components/shared/EvidencePanel';
 import type { Dispute, DisputeDetail, DisputeMessage, DisputeResolveOutcome } from '@/types/admin';
 
@@ -274,7 +274,7 @@ export const DisputeCaseModal = ({
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary/60 shrink-0" />
                       <span className="text-foreground font-medium">{event.eventType}</span>
-                      <span className="text-muted-foreground">{event.status}</span>
+                      <span className="text-muted-foreground">{humaniseEnum(event.status)}</span>
                       <span className="text-muted-foreground ml-auto">
                         {new Date(event.createdAt).toLocaleString()}
                       </span>

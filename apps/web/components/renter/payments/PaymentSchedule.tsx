@@ -1,5 +1,6 @@
 'use client';
 
+import { humaniseEnum } from '@getrentos/shared';
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Button, Card, EmptyState } from '@getrentos/ui';
@@ -124,7 +125,9 @@ export const PaymentSchedule = ({
               </div>
               <div className="flex items-center gap-2">
                 <StatusIcon className={`w-4 h-4 ${statusColor}`} />
-                <span className={`text-xs font-medium ${statusColor}`}>{payment.status}</span>
+                <span className={`text-xs font-medium ${statusColor}`}>
+                  {humaniseEnum(payment.status)}
+                </span>
               </div>
             </motion.div>
           );
