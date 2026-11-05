@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Wallet, CreditCard, Banknote } from 'lucide-react';
-import { Badge } from '@getrentos/ui';
-import { formatCurrency, formatDate, getInitials } from '@/lib/format';
+import { Badge, Button } from '@getrentos/ui';
+import { formatAskingDifference, formatCurrency, formatDate, getInitials } from '@/lib/format';
 import { offerStatusBadges } from '@/lib/statusBadge';
 import type { SaleOffer, FinancingType } from '@/types/owner';
 
@@ -60,13 +60,12 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
 
       <div className="grid grid-cols-2 gap-3 mt-4">
         <div>
-          <p className="text-xs text-muted-foreground">Offer Amount</p>
+          <p className="text-xs text-muted-foreground">Offer amount</p>
           <p className="text-sm font-bold text-foreground">
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
           <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {diffPct >= 0 ? '+' : ''}
-            {diffPct.toFixed(1)}% vs asking
+            {formatAskingDifference(diffPct)}
           </p>
         </div>
         <div>
@@ -78,9 +77,21 @@ export const OfferCard = ({ offer, onClick, delay = 0 }: OfferCardProps) => {
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
-        Submitted {formatDate(offer.submittedAt)}
-      </p>
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
+        <p className="text-xs text-muted-foreground">Submitted {formatDate(offer.submittedAt)}</p>
+        {/* The whole card opens the offer, but a card alone does not say so:
+            the button is the visible way in, and names the decision waiting. */}
+        <Button
+          variant={
+            offer.status === 'submitted' || offer.status === 'countered' ? 'primary' : 'outline'
+          }
+          size="sm"
+          className="relative z-20"
+          onClick={onClick}
+        >
+          {offer.status === 'submitted' || offer.status === 'countered' ? 'Respond' : 'View'}
+        </Button>
+      </div>
     </motion.div>
   );
 };

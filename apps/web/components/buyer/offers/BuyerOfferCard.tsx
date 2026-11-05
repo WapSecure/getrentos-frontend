@@ -12,7 +12,7 @@ import {
   Archive,
 } from 'lucide-react';
 import { Badge, type BadgeVariant } from '@getrentos/ui';
-import { formatCurrency, formatDate } from '@/lib/format';
+import { formatCurrency, formatDate, formatAskingDifference } from '@/lib/format';
 import type { BuyerOffer, BuyerOfferStatus, FinancingType } from '@/types/buyer';
 
 const statusConfig: Record<
@@ -113,9 +113,7 @@ export const BuyerOfferCard = ({ offer, onClick, delay = 0 }: BuyerOfferCardProp
             {formatCurrency(offer.offerAmount, { compact: true })}
           </p>
           <p className={`text-xs ${diffPct >= 0 ? 'text-success' : 'text-destructive'}`}>
-            {diffPct === 0
-              ? 'At the asking price'
-              : `${Math.abs(diffPct).toFixed(Number.isInteger(diffPct) ? 0 : 1)}% ${diffPct > 0 ? 'above' : 'below'} asking`}
+            {formatAskingDifference(diffPct)}
           </p>
         </div>
         <div>

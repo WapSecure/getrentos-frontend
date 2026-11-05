@@ -71,3 +71,13 @@ export const pluralize = (
   singular: string,
   plural: string = `${singular}s`
 ): string => `${count} ${count === 1 ? singular : plural}`;
+
+/**
+ * How an offer sits against the asking price, in words: "6% below asking",
+ * "2.5% above asking", "At the asking price". Whole numbers drop the decimal.
+ */
+export const formatAskingDifference = (diffPct: number): string => {
+  if (diffPct === 0) return 'At the asking price';
+  const size = Math.abs(diffPct);
+  return `${size.toFixed(Number.isInteger(size) ? 0 : 1)}% ${diffPct > 0 ? 'above' : 'below'} asking`;
+};
