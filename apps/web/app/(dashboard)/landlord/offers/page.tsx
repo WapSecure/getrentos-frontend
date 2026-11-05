@@ -14,9 +14,10 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Handshake } from 'lucide-react';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
+import { OfferComparisonPanel } from '@/components/shared/offers/OfferComparisonPanel';
 import { landlordService } from '@/services/landlordService';
 import { unwrap } from '@/lib/apiHelpers';
-import { landlordKeys } from '@/lib/queryKeys';
+import { landlordKeys, sellerOfferKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { LandlordOffer, LandlordOfferStatus } from '@/types/landlord';
@@ -75,6 +76,7 @@ export default function LandlordOffersPage() {
 
   const invalidate = (offerId?: string) => {
     queryClient.invalidateQueries({ queryKey: landlordKeys.offers() });
+    queryClient.invalidateQueries({ queryKey: sellerOfferKeys.comparison });
     if (offerId) queryClient.invalidateQueries({ queryKey: landlordKeys.offerThread(offerId) });
   };
 
@@ -158,6 +160,8 @@ export default function LandlordOffersPage() {
         </div>
       </div>
 
+      <OfferComparisonPanel />
+
       {/* Accepting an offer opens an escrow/payout obligation: financially verified (tier 3) landlords only. */}
       {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (
         <div className="mb-6">
@@ -177,7 +181,11 @@ export default function LandlordOffersPage() {
           label="Search offers"
           className="flex-1 max-w-sm"
         />
-        <div className="flex gap-2 overflow-x-auto" role="group" aria-label="Filter offers by status">
+        <div
+          className="flex gap-2 overflow-x-auto"
+          role="group"
+          aria-label="Filter offers by status"
+        >
           {filterOptions.map((option) => (
             <ToggleChip
               key={option.value}

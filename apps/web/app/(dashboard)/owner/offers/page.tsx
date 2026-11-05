@@ -14,9 +14,10 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Handshake } from 'lucide-react';
 import { OfferCard } from '@/components/owner/offers/OfferCard';
 import { OfferNegotiationModal } from '@/components/owner/offers/OfferNegotiationModal';
+import { OfferComparisonPanel } from '@/components/shared/offers/OfferComparisonPanel';
 import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
-import { ownerKeys } from '@/lib/queryKeys';
+import { ownerKeys, sellerOfferKeys } from '@/lib/queryKeys';
 import { ROUTES } from '@/lib/constants/auth';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import type { OfferStatus, OfferMessage } from '@/types/owner';
@@ -74,6 +75,7 @@ export default function OwnerOffersPage() {
 
   const invalidate = (offerId?: string) => {
     queryClient.invalidateQueries({ queryKey: ownerKeys.offers });
+    queryClient.invalidateQueries({ queryKey: sellerOfferKeys.comparison });
     if (offerId) queryClient.invalidateQueries({ queryKey: ownerKeys.offerThread(offerId) });
   };
 
@@ -156,6 +158,8 @@ export default function OwnerOffersPage() {
           )}
         </div>
       </div>
+
+      <OfferComparisonPanel />
 
       {/* Accepting an offer opens an escrow/payout obligation: financially verified (tier 3) owners only. */}
       {(acceptMutation.error || rejectMutation.error || counterMutation.error) && (

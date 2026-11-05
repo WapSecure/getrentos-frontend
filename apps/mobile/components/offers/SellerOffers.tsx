@@ -20,6 +20,7 @@ import {
 import { offerGap, OWNER_OFFER_LABEL, OWNER_OFFER_TONE, type OwnerOffer } from '@/lib/api/owner';
 import { sellerOffers, type OfferSide } from '@/lib/api/sellerOffers';
 import { formatDate } from '@/lib/format';
+import { OfferComparisonCard } from './OfferComparisonCard';
 
 type Filter = 'open' | 'accepted' | 'closed' | 'all';
 const FILTERS: { value: Filter; label: string; match: (o: OwnerOffer) => boolean }[] = [
@@ -133,6 +134,11 @@ export function SellerOffers({
               paddingBottom: insets.bottom + spacing['3xl'],
             }}
             ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+            ListHeaderComponent={
+              <View style={{ marginBottom: spacing.md }}>
+                <OfferComparisonCard side={side} />
+              </View>
+            }
             refreshControl={refresh}
             renderItem={({ item: o }: { item: OwnerOffer }) => (
               <PressableScale
