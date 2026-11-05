@@ -31,7 +31,7 @@ import {
   useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { formatDate, unwrap } from '@getrentos/shared';
+import { formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import { useProfessionalActions, downloadBlob } from './useProfessionalActions';
 import type { AdminAgent, AdminAgentDetail, AdminAgentTask } from '@/types/marketplace';
@@ -362,7 +362,7 @@ function AgentCase360({
                   >
                     <p className="font-medium">{c.clientName}</p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="neutral">{c.status}</Badge>
+                      <Badge variant="neutral">{humaniseEnum(c.status)}</Badge>
                       <span>{c.propertyCount ?? 0} props</span>
                       {canModerate && c.status === 'ACTIVE' && (
                         <Button
@@ -398,7 +398,9 @@ function AgentCase360({
                   <div key={t.id} className="rounded-lg border border-border p-2.5 text-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="font-medium">{t.title}</p>
-                      <Badge variant={TASK_STATUS_VARIANT[t.status] ?? 'neutral'}>{t.status}</Badge>
+                      <Badge variant={TASK_STATUS_VARIANT[t.status] ?? 'neutral'}>
+                        {humaniseEnum(t.status)}
+                      </Badge>
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {t.type} · {t.propertyTitle ?? 'No property'}

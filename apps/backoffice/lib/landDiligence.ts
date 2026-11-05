@@ -34,14 +34,7 @@ export const landQueryKeys = {
   fraudParcel: (propertyId: string) => ['admin', 'land', 'fraud', propertyId] as const,
 };
 
-/** `sentence-case` for enum values: `GOVERNORS_CONSENT` → "Governors consent". */
-export const humaniseEnum = (value: string | null | undefined): string =>
-  value
-    ? value
-        .replaceAll('_', ' ')
-        .toLowerCase()
-        .replace(/^\w/, (character) => character.toUpperCase())
-    : '';
+export { humaniseEnum } from '@getrentos/shared';
 
 export interface SlaState {
   label: string;

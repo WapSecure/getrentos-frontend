@@ -74,6 +74,7 @@ import type {
   ShortletCancellationPolicy,
   ShortletListing,
 } from '@/types/shortlet';
+import { SHORTLET_BOOKING_STATUS_LABEL } from '@/types/shortlet';
 
 const PAGE_SIZE = 10;
 type Tab = 'listings' | 'bookings';
@@ -410,7 +411,9 @@ export const HostShortletWorkspace = ({ role }: { role: HostRole }) => {
                   {b.notes && <p className="mt-1 text-sm text-muted-foreground">“{b.notes}”</p>}
                 </div>
                 <div className="shrink-0 text-right">
-                  <Badge variant={STATUS_VARIANT[b.status]}>{b.status}</Badge>
+                  <Badge variant={STATUS_VARIANT[b.status]}>
+                    {SHORTLET_BOOKING_STATUS_LABEL[b.status]}
+                  </Badge>
                   <p className="mt-1 font-semibold">{formatCurrency(b.total)}</p>
                   {b.platformFee != null && b.platformFee > 0 && (
                     <p className="mt-0.5 text-xs text-muted-foreground">

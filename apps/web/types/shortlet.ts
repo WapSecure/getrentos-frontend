@@ -628,3 +628,25 @@ export interface FairPrice {
   city: string;
   bedrooms: number;
 }
+
+/** What a person reads for each status; badges never show the raw code. */
+export const SHORTLET_BOOKING_STATUS_LABEL: Record<ShortletBookingStatus, string> = {
+  REQUESTED: 'Requested',
+  CONFIRMED: 'Confirmed',
+  DECLINED: 'Declined',
+  CANCELLED: 'Cancelled',
+  COMPLETED: 'Completed',
+};
+
+export const SHORTLET_DISPUTE_STATUS_LABEL: Record<ShortletDisputeStatus, string> = {
+  OPEN: 'Open',
+  UNDER_REVIEW: 'Under review',
+  ESCALATED: 'Escalated',
+  RESOLVED: 'Resolved',
+};
+
+export const SHORTLET_PAYOUT_STATUS_LABEL: Record<string, string> = {
+  SUCCESS: 'Paid',
+  PENDING: 'Processing',
+  FAILED: 'Failed',
+};

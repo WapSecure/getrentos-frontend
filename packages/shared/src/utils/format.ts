@@ -66,3 +66,12 @@ export const getInitials = (fullName: string): string => {
   const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
   return `${first}${last}`.toUpperCase() || 'U';
 };
+
+/** Sentence case for an enum value: `UNDER_REVIEW` → "Under review". Never show the raw code. */
+export const humaniseEnum = (value: string | null | undefined): string =>
+  value
+    ? value
+        .replaceAll('_', ' ')
+        .toLowerCase()
+        .replace(/^\w/, (character) => character.toUpperCase())
+    : '';

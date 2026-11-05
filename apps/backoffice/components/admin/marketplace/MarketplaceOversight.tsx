@@ -42,7 +42,7 @@ import {
   useToast,
   type BadgeVariant,
 } from '@getrentos/ui';
-import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
+import { formatCurrency, formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
 import type {
   AdminMarketplaceOffer,
@@ -406,7 +406,9 @@ function SaleListingsPanel() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium">{l.title}</p>
-                    <Badge variant={LISTING_STATUS_VARIANT[l.status]}>{l.status}</Badge>
+                    <Badge variant={LISTING_STATUS_VARIANT[l.status]}>
+                      {humaniseEnum(l.status)}
+                    </Badge>
                   </div>
                   <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                     <Building2 className="h-3.5 w-3.5" /> {l.city}, {l.state}
