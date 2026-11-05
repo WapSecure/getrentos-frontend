@@ -15,6 +15,7 @@ import {
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService } from '@/services/agentService';
+import { InspectionDraftPanel, applyDraftToRooms } from './InspectionDraftPanel';
 import type {
   AgentTask,
   InspectionPhoto,
@@ -299,6 +300,15 @@ export const NewInspectionModal = ({
               ))}
             </div>
             {photoError && <p className="mt-2 text-xs text-destructive">{photoError}</p>}
+            <div className="mt-3">
+              <InspectionDraftPanel
+                taskId={taskId}
+                type={type}
+                rooms={rooms}
+                photoCount={photos.length}
+                onApply={(draft) => setRooms((prev) => applyDraftToRooms(prev, draft))}
+              />
+            </div>
           </div>
         </div>
 
