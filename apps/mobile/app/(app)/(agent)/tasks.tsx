@@ -44,7 +44,7 @@ export default function AgentTasks() {
         <DashboardHeader
           eyebrow="Field operations"
           title="Tasks"
-          subtitle="Assignments organized by status and deadline"
+          subtitle="Assignments organised by status and deadline"
         />
         <ScrollView
           horizontal

@@ -35,7 +35,7 @@ export const DiscoverApplicationAssistant = () => {
           <h3 className="font-semibold text-foreground">Application assistant</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          Get personalized help with your rental applications
+          Get personalised help with your rental applications
         </p>
       </div>
 

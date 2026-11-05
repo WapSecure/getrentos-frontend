@@ -70,7 +70,7 @@ export default function MoveChecklist() {
       <DetailScreenHeader
         eyebrow="Moving journey"
         title="Move checklist"
-        subtitle="Stay organized before and after moving day"
+        subtitle="Stay organised before and after moving day"
         onBack={() => goBack()}
       />
 

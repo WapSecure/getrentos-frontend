@@ -93,7 +93,7 @@ export const WishlistManager = ({
         <div className="flex justify-between items-center gap-2">
           <div className="min-w-0">
             <h2 className="font-semibold text-foreground">Wishlists</h2>
-            <p className="text-xs text-muted-foreground">Organize your saved properties</p>
+            <p className="text-xs text-muted-foreground">Organise your saved properties</p>
           </div>
           <IconButton
             size="sm"

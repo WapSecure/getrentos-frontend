@@ -18,7 +18,7 @@ interface ReportViolationModalProps {
 
 const categoryOptions = [
   { value: 'NOISE', label: 'Noise' },
-  { value: 'UNAUTHORIZED_PARKING', label: 'Unauthorized parking' },
+  { value: 'UNAUTHORIZED_PARKING', label: 'Unauthorised parking' },
   { value: 'PET_VIOLATION', label: 'Pet violation' },
   { value: 'PROPERTY_MAINTENANCE', label: 'Property maintenance' },
   { value: 'OTHER', label: 'Other' },
