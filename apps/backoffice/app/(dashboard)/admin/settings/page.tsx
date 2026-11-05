@@ -6,7 +6,7 @@ import { ProfileSettings } from '@/components/admin/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/admin/settings/NotificationSettings';
 import { PlatformConfigSettings } from '@/components/admin/settings/PlatformConfigSettings';
 import { cn } from '@getrentos/shared';
-import { ConfirmDialog } from '@getrentos/ui';
+import { ConfirmDialog, PageHeader } from '@getrentos/ui';
 
 type SettingsTab = 'profile' | 'notifications' | 'platform';
 
@@ -51,10 +51,7 @@ export default function AdminSettingsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account and platform preferences</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account and platform preferences" />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">

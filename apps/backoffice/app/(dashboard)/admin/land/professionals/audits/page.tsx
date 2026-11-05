@@ -12,6 +12,7 @@ import {
   Toast,
   type ToastVariant,
   Card,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -141,13 +142,10 @@ export default function AdminLandReviewAuditsPage() {
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Land professionals
       </Link>
-      <div className="mb-6">
-        <h1 className="type-title">Review audits</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          About one in five completed reports is picked for a second look. Re-check the sources the
-          professional relied on; repeated findings or a failure are grounds to suspend.
-        </p>
-      </div>
+      <PageHeader
+        title="Review audits"
+        description="About one in five completed reports is picked for a second look. Re-check the sources the professional relied on; repeated findings or a failure are grounds to suspend."
+      />
       {query.isLoading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
       ) : items.length === 0 ? (

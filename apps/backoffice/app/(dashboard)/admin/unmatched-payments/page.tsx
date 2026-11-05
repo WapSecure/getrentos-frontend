@@ -15,6 +15,7 @@ import {
   TabsTrigger,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -74,16 +75,10 @@ export default function UnmatchedPaymentsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <CircleAlert className="h-6 w-6 text-primary" aria-hidden />
-          Unmatched payments
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Payments the gateway confirmed for an amount that did not match what they were for. The
-          payer has paid; refund it or apply it by hand, then record what you did.
-        </p>
-      </div>
+      <PageHeader
+        title="Unmatched payments"
+        description="Payments the gateway confirmed for an amount that did not match what they were for. The payer has paid; refund it or apply it by hand, then record what you did."
+      />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList className="mb-4">

@@ -32,6 +32,7 @@ import {
   Pagination,
   SearchInput,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { cn, unwrap, humaniseEnum } from '@getrentos/shared';
 import { formatCurrency, formatDate } from '@getrentos/shared';
@@ -81,18 +82,11 @@ export const EstateRegister = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-            <Landmark className="h-3 w-3" />
-            Estates
-          </span>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Estate register</h1>
-          <p className="mt-1 text-muted-foreground">
-            Every gated community with its organization, manager and community health.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Estates"
+        title="Estate register"
+        description="Every gated community with its organization, manager and community health."
+      />
 
       <Card className="shadow-sm">
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">

@@ -13,6 +13,7 @@ import {
   Textarea,
   Toast,
   type ToastVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../../layout';
@@ -135,13 +136,17 @@ export default function AdminLandProfessionalPage() {
       >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Land professionals
       </Link>
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="type-title">{p.name}</h1>
-        <Badge variant="info">{LAND_PROFESSIONAL_ROLE_LABELS[p.role]}</Badge>
-        <Badge variant={LAND_PROFESSIONAL_STATUS_VARIANT[p.status]}>
-          {LAND_PROFESSIONAL_STATUS_LABELS[p.status]}
-        </Badge>
-      </div>
+      <PageHeader
+        title={p.name}
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="info">{LAND_PROFESSIONAL_ROLE_LABELS[p.role]}</Badge>
+            <Badge variant={LAND_PROFESSIONAL_STATUS_VARIANT[p.status]}>
+              {LAND_PROFESSIONAL_STATUS_LABELS[p.status]}
+            </Badge>
+          </div>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0 space-y-6">

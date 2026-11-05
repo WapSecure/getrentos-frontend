@@ -2,7 +2,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare } from 'lucide-react';
-import { Badge, Card, EmptyState, PageErrorState, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Badge,
+  Card,
+  EmptyState,
+  PageErrorState,
+  StatGridSkeleton,
+  PageHeader,
+} from '@getrentos/ui';
 import { authFetch, safeCall, unwrap } from '@getrentos/shared';
 
 interface TextSummary {
@@ -50,17 +57,10 @@ export default function TextMessagingPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <MessageSquare className="h-6 w-6 text-primary" aria-hidden />
-          Text messaging
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          SMS and WhatsApp for urgent notifications, only to people who opted in, through Termii.
-          Quiet from 9pm to 7am Lagos except emergencies, at most 8 non-urgent texts a person a day,
-          and never a link.
-        </p>
-      </div>
+      <PageHeader
+        title="Text messaging"
+        description="SMS and WhatsApp for urgent notifications, only to people who opted in, through Termii. Quiet from 9pm to 7am Lagos except emergencies, at most 8 non-urgent texts a person a day, and never a link."
+      />
       {!s ? (
         summary.isError ? (
           <PageErrorState

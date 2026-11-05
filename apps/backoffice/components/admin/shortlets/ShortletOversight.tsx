@@ -33,6 +33,7 @@ import {
   Textarea,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   BedDouble,
@@ -661,12 +662,10 @@ export const ShortletOversight = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Shortlet Oversight</h1>
-        <p className="mt-1 text-muted-foreground">
-          Platform-wide view of shortlet listings and bookings.
-        </p>
-      </div>
+      <PageHeader
+        title="Shortlet Oversight"
+        description="Platform-wide view of shortlet listings and bookings."
+      />
 
       {/* Overview cards */}
       {overviewError && !overview ? (

@@ -15,6 +15,7 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, unwrap } from '@getrentos/shared';
 
@@ -130,16 +131,10 @@ export default function ImpersonationReportsPage() {
   });
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <ShieldAlert className="h-6 w-6 text-primary" aria-hidden />
-          Impersonation reports
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Tenants reporting someone posing as their landlord, manager or GetRentos, usually to take
-          rent outside the app. The property’s landlord and managers have already been warned.
-        </p>
-      </div>
+      <PageHeader
+        title="Impersonation reports"
+        description="Tenants reporting someone posing as their landlord, manager or GetRentos, usually to take rent outside the app. The property’s landlord and managers have already been warned."
+      />
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList>
           <TabsTrigger value="OPEN">Open</TabsTrigger>

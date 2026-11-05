@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, CircleAlert, ScrollText } from 'lucide-react';
-import { Badge, Button, EmptyState, Textarea, Toast, type ToastVariant, Card } from '@getrentos/ui';
+import {
+  Badge,
+  Button,
+  EmptyState,
+  Textarea,
+  Toast,
+  type ToastVariant,
+  Card,
+  PageHeader,
+} from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -175,14 +184,10 @@ export default function AdminLandResalesPage() {
   const items = query.data ?? [];
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Land resale conditions</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Whole-parcel sales held in escrow with a condition still open or failed. The money is not
-          released while any is open; a failed condition lets the buyer take a full refund. Decide a
-          condition here when the buyer and seller disagree or a check needs GetRentos.
-        </p>
-      </div>
+      <PageHeader
+        title="Land resale conditions"
+        description="Whole-parcel sales held in escrow with a condition still open or failed. The money is not released while any is open; a failed condition lets the buyer take a full refund. Decide a condition here when the buyer and seller disagree or a check needs GetRentos."
+      />
       {query.isLoading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
       ) : items.length === 0 ? (

@@ -10,6 +10,7 @@ import {
   ListSkeleton,
   PageErrorState,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -58,17 +59,10 @@ export default function ManagerChangesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <ArrowRightLeft className="h-6 w-6 text-primary" aria-hidden />
-          Manager changes
-        </h1>
-        <p className="mt-1 max-w-2xl text-muted-foreground">
-          Owners moving a property between managers. Each switches on its effective time on its own:
-          the outgoing engagement ends, the incoming one starts, deposits move and tenants are told.
-          Anything that did not go through is listed here.
-        </p>
-      </div>
+      <PageHeader
+        title="Manager changes"
+        description="Owners moving a property between managers. Each switches on its effective time on its own: the outgoing engagement ends, the incoming one starts, deposits move and tenants are told. Anything that did not go through is listed here."
+      />
 
       {list.isLoading ? (
         <ListSkeleton variant="cards" />

@@ -28,6 +28,7 @@ import {
   Skeleton,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   formatDate,
@@ -136,10 +137,10 @@ export default function AdminLandAuthorityPage() {
         <ArrowLeft className="h-4 w-4" /> Seller authority
       </Link>
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="type-title">{authority.property.title}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={authority.property.title}
+        description={
+          <>
             {authority.capacityLabel} · {authority.claimant.legalName} ·{' '}
             <Link
               href={`/admin/land/diligence/${encodeURIComponent(authority.propertyId)}`}
@@ -147,12 +148,14 @@ export default function AdminLandAuthorityPage() {
             >
               Diligence case
             </Link>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+          </>
+        }
+        meta={
           <Badge variant={landAuthorityTone(authority.status)}>
             {LAND_AUTHORITY_STATUS_LABELS[authority.status]}
           </Badge>
+        }
+        actions={
           <Button
             variant="outline"
             size="sm"
@@ -162,8 +165,8 @@ export default function AdminLandAuthorityPage() {
           >
             Reload
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-5">

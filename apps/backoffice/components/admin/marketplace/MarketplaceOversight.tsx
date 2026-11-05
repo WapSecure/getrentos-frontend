@@ -41,6 +41,7 @@ import {
   TabsTrigger,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap, humaniseEnum } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
@@ -178,22 +179,20 @@ function MarketplaceOverviewView({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Marketplace sales</h1>
-          <p className="mt-1 text-muted-foreground">
-            For-sale listings, offer negotiations and escrow deals across the marketplace.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" icon={<Handshake className="h-4 w-4" />} onClick={onOffers}>
-            Offer queue
-          </Button>
-          <Button variant="outline" icon={<Store className="h-4 w-4" />} onClick={onListings}>
-            Sale listings
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Marketplace sales"
+        description="For-sale listings, offer negotiations and escrow deals across the marketplace."
+        actions={
+          <>
+            <Button variant="outline" icon={<Handshake className="h-4 w-4" />} onClick={onOffers}>
+              Offer queue
+            </Button>
+            <Button variant="outline" icon={<Store className="h-4 w-4" />} onClick={onListings}>
+              Sale listings
+            </Button>
+          </>
+        }
+      />
 
       {error && !data ? (
         <PageErrorState
@@ -302,24 +301,22 @@ function MarketplaceQueueView({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {view === 'listings' ? 'Sale listings' : 'Offer negotiations'}
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            {view === 'listings'
-              ? 'Every for-sale listing with its seller and offer activity.'
-              : 'Buyer offers across the marketplace with counter-offers and escrow links.'}
-          </p>
-        </div>
-        <Tabs value={view} onValueChange={(v) => onView(v as 'listings' | 'offers')}>
-          <TabsList>
-            <TabsTrigger value="listings">Listings</TabsTrigger>
-            <TabsTrigger value="offers">Offers</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      <PageHeader
+        title={view === 'listings' ? 'Sale listings' : 'Offer negotiations'}
+        description={
+          view === 'listings'
+            ? 'Every for-sale listing with its seller and offer activity.'
+            : 'Buyer offers across the marketplace with counter-offers and escrow links.'
+        }
+        actions={
+          <Tabs value={view} onValueChange={(v) => onView(v as 'listings' | 'offers')}>
+            <TabsList>
+              <TabsTrigger value="listings">Listings</TabsTrigger>
+              <TabsTrigger value="offers">Offers</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
       {view === 'listings' ? <SaleListingsPanel /> : <OfferQueuePanel />}
     </div>
   );

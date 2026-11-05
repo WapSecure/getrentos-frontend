@@ -17,6 +17,7 @@ import {
   Textarea,
   useToast,
   type PendingUpload,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -120,18 +121,10 @@ export default function RentReconciliationPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <GitCompareArrows className="h-6 w-6 text-primary" aria-hidden />
-          Rent reconciliation
-        </h1>
-        <p className="mt-1 max-w-2xl text-muted-foreground">
-          Match what the payment gateway says came in and went back out against the rent books,
-          month by month. Upload the gateway&apos;s transactions export (it needs Reference and
-          Amount columns; Status, Type and Paid At are used when present), or pull it from the
-          gateway directly.
-        </p>
-      </div>
+      <PageHeader
+        title="Rent reconciliation"
+        description="Match what the payment gateway says came in and went back out against the rent books, month by month. Upload the gateway's transactions export (it needs Reference and Amount columns; Status, Type and Paid At are used when present), or pull it from the gateway directly."
+      />
 
       {canAct && (
         <Card className="mb-6 space-y-4 p-5">

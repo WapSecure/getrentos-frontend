@@ -14,6 +14,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
@@ -99,31 +100,22 @@ export default function AdminLandDiligencePage() {
 
   return (
     <>
-      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-accent p-2.5 text-primary">
-            <ClipboardCheck className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="type-title">Land diligence</h1>
-            <p className="mt-1 max-w-2xl text-muted-foreground">
-              The work queue for land titles, surveys and the evidence behind them. Cases are
-              ordered by when their review is owed; open one to record checks, cite documents and
-              decide.
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => refetch()}
-          disabled={isFetching}
-          isLoading={isFetching && !isLoading}
-          icon={<RefreshCw className="h-4 w-4" />}
-        >
-          Refresh
-        </Button>
-      </div>
+      <PageHeader
+        title="Land diligence"
+        description="The work queue for land titles, surveys and the evidence behind them. Cases are ordered by when their review is owed; open one to record checks, cite documents and decide."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            isLoading={isFetching && !isLoading}
+            icon={<RefreshCw className="h-4 w-4" />}
+          >
+            Refresh
+          </Button>
+        }
+      />
 
       {!canApprove && (
         <Alert variant="warning" icon={ShieldCheck} className="mb-6">

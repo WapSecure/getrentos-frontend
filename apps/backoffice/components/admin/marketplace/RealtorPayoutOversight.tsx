@@ -14,6 +14,7 @@ import {
   Select,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { adminMarketplaceService } from '@/services/adminMarketplaceService';
@@ -88,29 +89,26 @@ export const RealtorPayoutOversight = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Realtor commission payouts</h1>
-          <p className="mt-1 text-muted-foreground">
-            Every transfer of commission to a broker&apos;s bank, and a way to re-send one the bank
-            rejected.
-          </p>
-        </div>
-        <Select
-          value={status}
-          ariaLabel="Filter by payout status"
-          onValueChange={(value) => {
-            setStatus(value as StatusFilter);
-            setPage(1);
-          }}
-          searchable={false}
-          className="w-full sm:w-52"
-          options={[
-            { value: 'all', label: 'All payouts' },
-            ...FILTER_ORDER.map((value) => ({ value, label: FILTER_LABEL[value] })),
-          ]}
-        />
-      </div>
+      <PageHeader
+        title="Realtor commission payouts"
+        description="Every transfer of commission to a broker's bank, and a way to re-send one the bank rejected."
+        actions={
+          <Select
+            value={status}
+            ariaLabel="Filter by payout status"
+            onValueChange={(value) => {
+              setStatus(value as StatusFilter);
+              setPage(1);
+            }}
+            searchable={false}
+            className="w-full sm:w-52"
+            options={[
+              { value: 'all', label: 'All payouts' },
+              ...FILTER_ORDER.map((value) => ({ value, label: FILTER_LABEL[value] })),
+            ]}
+          />
+        }
+      />
 
       <div className="rounded-xl border border-border bg-card shadow-sm">
         {isLoading ? (

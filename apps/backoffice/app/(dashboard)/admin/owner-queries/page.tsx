@@ -17,6 +17,7 @@ import {
   SuggestedDraft,
   TabsTrigger,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 
@@ -218,16 +219,10 @@ export default function AdminOwnerQueriesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <MessageSquareText className="h-6 w-6 text-primary" aria-hidden />
-          Owner questions
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Questions from owners on GetRentos Managed properties. A first reply is owed within 24
-          hours; overdue ones are flagged and the owner can see it.
-        </p>
-      </div>
+      <PageHeader
+        title="Owner questions"
+        description="Questions from owners on GetRentos Managed properties. A first reply is owed within 24 hours; overdue ones are flagged and the owner can see it."
+      />
       {openId ? (
         <Thread id={openId} canOperate={canOperate} onBack={() => setOpenId(null)} />
       ) : (

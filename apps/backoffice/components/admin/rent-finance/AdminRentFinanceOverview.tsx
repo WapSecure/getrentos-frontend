@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   Wallet,
 } from 'lucide-react';
-import { PageErrorState, PageLoadingState, StatCard } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, StatCard, PageHeader } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentFinanceService } from '@/services/adminRentFinanceService';
@@ -100,18 +100,11 @@ export const AdminRentFinanceOverview = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          <Wallet className="h-3 w-3" />
-          Rent Finance
-        </span>
-        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          Rent payments, escrow &amp; reconciliation
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Platform-wide rent collections, escrow holds, settlement readiness and landlord payouts.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Rent Finance"
+        title="Rent payments, escrow & reconciliation"
+        description="Platform-wide rent collections, escrow holds, settlement readiness and landlord payouts."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard

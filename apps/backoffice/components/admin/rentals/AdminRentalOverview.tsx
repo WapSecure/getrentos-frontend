@@ -13,7 +13,7 @@ import {
   Gavel,
   Landmark,
 } from 'lucide-react';
-import { PageErrorState, PageLoadingState, StatCard } from '@getrentos/ui';
+import { PageErrorState, PageLoadingState, StatCard, PageHeader } from '@getrentos/ui';
 import { unwrap } from '@getrentos/shared';
 import { adminKeys } from '@/lib/queryKeys';
 import { adminRentalService } from '@/services/adminRentalService';
@@ -98,18 +98,11 @@ export const AdminRentalsOverview = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-accent/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-foreground">
-          <Landmark className="h-3 w-3" />
-          Rentals
-        </span>
-        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          Long-term rental oversight
-        </h1>
-        <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-          Platform-wide listings, applications, viewings, leases and lifecycle cases.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Rentals"
+        title="Long-term rental oversight"
+        description="Platform-wide listings, applications, viewings, leases and lifecycle cases."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard

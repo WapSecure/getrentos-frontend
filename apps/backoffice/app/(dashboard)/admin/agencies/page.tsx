@@ -16,6 +16,7 @@ import {
   TabsTrigger,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -106,16 +107,10 @@ export default function AdminAgenciesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Briefcase className="h-6 w-6 text-primary" aria-hidden />
-          Agencies
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Verify property management firms’ CAC registration. Pending firms can set up, but cannot
-          receive payouts or appear to owners until verified.
-        </p>
-      </div>
+      <PageHeader
+        title="Agencies"
+        description="Verify property management firms’ CAC registration. Pending firms can set up, but cannot receive payouts or appear to owners until verified."
+      />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList className="mb-4">

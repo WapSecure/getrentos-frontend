@@ -25,6 +25,7 @@ import {
   useToast,
   DatePicker,
   Field,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   boundaryTone,
@@ -119,22 +120,24 @@ export default function AdminLandInspectionPage() {
       >
         <ArrowLeft className="h-4 w-4" /> Land Watch
       </Link>
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="type-title">{i.land.label}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <PageHeader
+        title={i.land.label}
+        description={
+          <>
             <span className="font-mono">{i.reference}</span> · {LAND_INSPECTION_KIND_LABELS[i.kind]}{' '}
             · {i.land.address}, {i.land.city}, {i.land.state}
-          </p>
-        </div>
-        <Badge
-          variant={
-            i.status === 'ESCALATED' ? 'danger' : i.status === 'ACCEPTED' ? 'success' : 'info'
-          }
-        >
-          {humaniseEnum(i.status)}
-        </Badge>
-      </div>
+          </>
+        }
+        meta={
+          <Badge
+            variant={
+              i.status === 'ESCALATED' ? 'danger' : i.status === 'ACCEPTED' ? 'success' : 'info'
+            }
+          >
+            {humaniseEnum(i.status)}
+          </Badge>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="space-y-5">

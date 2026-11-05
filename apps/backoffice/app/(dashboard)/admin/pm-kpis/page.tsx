@@ -2,8 +2,15 @@
 
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Gauge } from 'lucide-react';
-import { Button, Field, PageErrorState, PmKpiPack, Select, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Button,
+  Field,
+  PageErrorState,
+  PmKpiPack,
+  Select,
+  StatGridSkeleton,
+  PageHeader,
+} from '@getrentos/ui';
 import { recentMonthOptions, unwrap } from '@getrentos/shared';
 
 import { adminPmKpiService, type PmKpiScopeKind } from '@/services/adminManagedService';
@@ -36,18 +43,10 @@ export default function PmKpisPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Gauge className="h-6 w-6 text-primary" aria-hidden />
-          Management KPIs
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          How a book of managed properties is doing: rent collected, arrears, occupancy, repairs,
-          owner payouts and retention, and where trust checks failed. Figures for the months chosen
-          count only while each property was under that management; ones marked Today are
-          today&rsquo;s position.
-        </p>
-      </div>
+      <PageHeader
+        title="Management KPIs"
+        description="How a book of managed properties is doing: rent collected, arrears, occupancy, repairs, owner payouts and retention, and where trust checks failed. Figures for the months chosen count only while each property was under that management; ones marked Today are today’s position."
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
         <Field label="Whose book" className="sm:w-60">

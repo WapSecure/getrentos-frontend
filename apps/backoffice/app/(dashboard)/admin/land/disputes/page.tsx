@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, Gavel, PauseCircle } from 'lucide-react';
-import { Badge, Checkbox, EmptyState, Pagination, Select } from '@getrentos/ui';
+import { Badge, Checkbox, EmptyState, Pagination, Select, PageHeader } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -62,13 +62,10 @@ export default function AdminLandDisputesPage() {
   const items = query.data?.items ?? [];
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Land disputes</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Fraud reports, competing claims, boundary and title problems on land parcels. Held cases
-          come first: their land is off the market and payouts on it are paused.
-        </p>
-      </div>
+      <PageHeader
+        title="Land disputes"
+        description="Fraud reports, competing claims, boundary and title problems on land parcels. Held cases come first: their land is off the market and payouts on it are paused."
+      />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="w-56">

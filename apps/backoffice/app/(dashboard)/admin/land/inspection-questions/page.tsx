@@ -4,7 +4,16 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleAlert, MessageCircleQuestion } from 'lucide-react';
-import { Button, Card, EmptyState, Field, Textarea, Toast, type ToastVariant } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Textarea,
+  Toast,
+  type ToastVariant,
+  PageHeader,
+} from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../../layout';
 import { hasAdminPermission } from '@/lib/adminAccess';
@@ -101,13 +110,10 @@ export default function AdminLandInspectionQuestionsPage() {
   const items = query.data ?? [];
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Inspection questions</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Buyers asking about a pre-purchase inspection report. Answer from the report, or query the
-          inspector on the inspection and answer once they reply.
-        </p>
-      </div>
+      <PageHeader
+        title="Inspection questions"
+        description="Buyers asking about a pre-purchase inspection report. Answer from the report, or query the inspector on the inspection and answer once they reply."
+      />
       {query.isLoading ? (
         <div className="h-40 animate-pulse rounded-2xl bg-secondary" aria-busy="true" />
       ) : items.length === 0 ? (

@@ -16,6 +16,7 @@ import {
   TabsTrigger,
   Textarea,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate, unwrap } from '@getrentos/shared';
 import { useAdminUser } from '../layout';
@@ -90,17 +91,10 @@ export default function CreditRefundsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <RotateCcw className="h-6 w-6 text-primary" aria-hidden />
-          Credit refunds
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Tenants&apos; lease credit paid back to the card or account it came from. A refund the
-          gateway refuses goes back into the tenant&apos;s credit; retry it, or settle it by hand
-          and note what you did.
-        </p>
-      </div>
+      <PageHeader
+        title="Credit refunds"
+        description="Tenants' lease credit paid back to the card or account it came from. A refund the gateway refuses goes back into the tenant's credit; retry it, or settle it by hand and note what you did."
+      />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList className="mb-4">

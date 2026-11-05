@@ -19,6 +19,7 @@ import {
   Select,
   Textarea,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatDate, unwrap } from '@getrentos/shared';
 import { trustService } from '@/services/trustService';
@@ -155,17 +156,10 @@ export default function TierGrantsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <ShieldCheck className="h-6 w-6 text-primary" />
-          Tier 3 Grants
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Financial capability granted by hand, for hosts who cannot pass the automated bank name
-          enquiry. A grant counts exactly like a passing bank check, so it is audited, can carry an
-          expiry, and can be withdrawn at any time.
-        </p>
-      </div>
+      <PageHeader
+        title="Tier 3 Grants"
+        description="Financial capability granted by hand, for hosts who cannot pass the automated bank name enquiry. A grant counts exactly like a passing bank check, so it is audited, can carry an expiry, and can be withdrawn at any time."
+      />
 
       <Card static className="mb-6">
         <form className="p-6" onSubmit={submitGrant} noValidate>
