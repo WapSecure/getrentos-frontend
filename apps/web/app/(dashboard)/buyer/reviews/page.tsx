@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Star, PenLine } from 'lucide-react';
-import { Button, Card, ListSkeleton, Pagination, QueryState } from '@getrentos/ui';
+import { Button, Card, ListSkeleton, Pagination, QueryState, PageHeader } from '@getrentos/ui';
 import { getInitials, formatDate } from '@/lib/format';
 import { ROUTES } from '@/lib/constants/auth';
 import { buyerService, type BuyerReview } from '@/services/buyerService';
@@ -35,10 +35,7 @@ export default function BuyerReviewsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Reviews</h1>
-        <p className="text-muted-foreground mt-1">Reviews you&apos;ve left for property owners</p>
-      </div>
+      <PageHeader title="Reviews" description="Reviews you've left for property owners" />
 
       <div className="mb-6 bg-accent border border-primary/30 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

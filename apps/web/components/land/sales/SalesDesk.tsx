@@ -14,6 +14,7 @@ import {
   Pagination,
   Select,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { ReceiptText, Search } from 'lucide-react';
 import { unwrap } from '@/lib/apiHelpers';
@@ -213,13 +214,10 @@ export const SalesDesk = ({ initialPropertyId }: SalesDeskProps) => {
       {initialPropertyId && (
         <LandPropertyNav propertyId={initialPropertyId} active="sales" className="mb-5" />
       )}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-[-0.03em] text-foreground">Plot sales</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Every plot purchase on your estates: what buyers have paid, what is owed and what is
-          waiting on you to deliver.
-        </p>
-      </div>
+      <PageHeader
+        title="Plot sales"
+        description="Every plot purchase on your estates: what buyers have paid, what is owed and what is waiting on you to deliver."
+      />
 
       {initialPropertyId && layouts.isSuccess && !scopedLayout && (
         <p className="mb-4 rounded-xl border border-border bg-secondary/40 p-3 text-sm text-muted-foreground">

@@ -18,6 +18,7 @@ import {
   Textarea,
   useToast,
   type BadgeVariant,
+  PageHeader,
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentService, type AgentWorkOrder } from '@/services/agentService';
@@ -82,13 +83,10 @@ export default function AgentWorkOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">Work orders</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          On-site maintenance jobs assigned to you. Start a job, add photos, and report it done —
-          the property owner reviews and closes it.
-        </p>
-      </div>
+      <PageHeader
+        title="Work orders"
+        description="On-site maintenance jobs assigned to you. Start a job, add photos, and report it done — the property owner reviews and closes it."
+      />
 
       {isLoading ? (
         <ListSkeleton variant="cards" rows={3} label="Loading work orders" />

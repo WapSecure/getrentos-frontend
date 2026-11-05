@@ -13,6 +13,7 @@ import {
   Skeleton,
   type ToastVariant,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import {
   ArrowRight,
@@ -165,52 +166,47 @@ export const OwnerLandWorkspace = () => {
 
   return (
     <>
-      <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">Land v1</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-[-0.03em] text-foreground">
-            Land portfolio
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Register a parcel, submit title evidence, and keep it private until ownership and land
-            diligence are verified.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            href="/owner/land/tours"
-            variant="ghost"
-            rounded="lg"
-            icon={<Video className="h-4 w-4" />}
-          >
-            Video tours
-          </Button>
-          <Button
-            href="/land/disputes"
-            variant="ghost"
-            rounded="lg"
-            icon={<Gavel className="h-4 w-4" />}
-          >
-            Disputes
-          </Button>
-          <Button
-            href={LAND_DEVELOPER_ROUTES.purchases()}
-            variant="outline"
-            rounded="lg"
-            icon={<ReceiptText className="h-4 w-4" />}
-          >
-            Plot sales
-          </Button>
-          <Button
-            variant="primary"
-            rounded="lg"
-            onClick={() => setRegistrationOpen(true)}
-            icon={<Plus className="h-4 w-4" />}
-          >
-            Register land
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Land v1"
+        title="Land portfolio"
+        description="Register a parcel, submit title evidence, and keep it private until ownership and land diligence are verified."
+        actions={
+          <>
+            <Button
+              href="/owner/land/tours"
+              variant="ghost"
+              rounded="lg"
+              icon={<Video className="h-4 w-4" />}
+            >
+              Video tours
+            </Button>
+            <Button
+              href="/land/disputes"
+              variant="ghost"
+              rounded="lg"
+              icon={<Gavel className="h-4 w-4" />}
+            >
+              Disputes
+            </Button>
+            <Button
+              href={LAND_DEVELOPER_ROUTES.purchases()}
+              variant="outline"
+              rounded="lg"
+              icon={<ReceiptText className="h-4 w-4" />}
+            >
+              Plot sales
+            </Button>
+            <Button
+              variant="primary"
+              rounded="lg"
+              onClick={() => setRegistrationOpen(true)}
+              icon={<Plus className="h-4 w-4" />}
+            >
+              Register land
+            </Button>
+          </>
+        }
+      />
 
       <section className="mb-6 grid gap-4 md:grid-cols-3">
         <Card static className="p-4">

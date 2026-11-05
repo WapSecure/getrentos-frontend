@@ -15,6 +15,7 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
+  PageHeader,
 } from '@getrentos/ui';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TaskCard } from '@/components/agent/tasks/TaskCard';
@@ -107,12 +108,14 @@ export default function AgentTasksPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Tasks</h1>
-        <p className="text-muted-foreground mt-1">
-          {total} task{total === 1 ? '' : 's'} assigned to you
-        </p>
-      </div>
+      <PageHeader
+        title="Tasks"
+        description={
+          <>
+            {total} task{total === 1 ? '' : 's'} assigned to you
+          </>
+        }
+      />
 
       {updateStatus.error && (
         <Alert variant="danger" className="mb-4">

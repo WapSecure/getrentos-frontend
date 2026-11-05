@@ -14,6 +14,7 @@ import {
   Select,
   StatCard,
   StatGridSkeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateMarketplaceService } from '@/services/estateMarketplaceService';
@@ -187,13 +188,15 @@ export default function EstateLeadsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Enquiries</h1>
-        <p className="text-muted-foreground mt-1">
-          Everyone who has responded to a property {estate?.name ?? 'this estate'} markets: rentals,
-          sales and shortlets in one place.
-        </p>
-      </div>
+      <PageHeader
+        title="Enquiries"
+        description={
+          <>
+            Everyone who has responded to a property {estate?.name ?? 'this estate'} markets:
+            rentals, sales and shortlets in one place.
+          </>
+        }
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

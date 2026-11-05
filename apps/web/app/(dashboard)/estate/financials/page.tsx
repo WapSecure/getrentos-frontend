@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { FileSpreadsheet, Check } from 'lucide-react';
-import { Button, CardSkeleton, SegmentedControl } from '@getrentos/ui';
+import { Button, CardSkeleton, SegmentedControl, PageHeader } from '@getrentos/ui';
 import { EstateFinancialStats } from '@/components/estate/financials/EstateFinancialStats';
 import { EstateFinancialsChart } from '@/components/estate/financials/EstateFinancialsChart';
 import {
@@ -68,31 +68,29 @@ export default function EstateFinancialsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Financials</h1>
-          <p className="text-muted-foreground mt-1">
-            Track dues collected, outstanding, and late fees for {estate.name}
-          </p>
-        </div>
-        {isPro && (
-          <Button
-            variant="primary"
-            size="sm"
-            icon={
-              exported ? (
-                <Check className="w-3.5 h-3.5" />
-              ) : (
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-              )
-            }
-            onClick={() => exportMutation.mutate()}
-            isLoading={exportMutation.isPending}
-          >
-            {exported ? 'Exported' : 'Export CSV'}
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Financials"
+        description={<>Track dues collected, outstanding, and late fees for {estate.name}</>}
+        actions={
+          isPro && (
+            <Button
+              variant="primary"
+              size="sm"
+              icon={
+                exported ? (
+                  <Check className="w-3.5 h-3.5" />
+                ) : (
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                )
+              }
+              onClick={() => exportMutation.mutate()}
+              isLoading={exportMutation.isPending}
+            >
+              {exported ? 'Exported' : 'Export CSV'}
+            </Button>
+          )
+        }
+      />
 
       <ProFeatureGate
         entitled={isPro}

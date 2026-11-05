@@ -6,7 +6,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { Plus, CalendarClock } from 'lucide-react';
 import { ViewingRequestCard } from '@/components/buyer/viewings/ViewingRequestCard';
 import { RequestViewingModal } from '@/components/buyer/viewings/RequestViewingModal';
-import { Button, Pagination, QueryState, Skeleton, useToast } from '@getrentos/ui';
+import { Button, Pagination, QueryState, Skeleton, useToast, PageHeader } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
@@ -75,26 +75,26 @@ function BuyerViewingsPageContent() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Viewing Requests</h1>
-          <p className="text-muted-foreground mt-1">
-            {viewingsQuery.isLoading ? (
-              <Skeleton className="inline-block h-4 w-24 align-middle" />
-            ) : (
-              `${total} request${total === 1 ? '' : 's'}`
-            )}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Plus className="w-4 h-4" />}
-          className="w-fit"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Request Viewing
-        </Button>
-      </div>
+      <PageHeader
+        title="Viewing Requests"
+        description={
+          viewingsQuery.isLoading ? (
+            <Skeleton className="inline-block h-4 w-24 align-middle" />
+          ) : (
+            `${total} request${total === 1 ? '' : 's'}`
+          )
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Plus className="w-4 h-4" />}
+            className="w-fit"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Request Viewing
+          </Button>
+        }
+      />
 
       <QueryState
         isLoading={viewingsQuery.isLoading}

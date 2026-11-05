@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { TriangleAlert } from 'lucide-react';
-import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -43,12 +43,10 @@ export default function ResidentViolationsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Violations</h1>
-        <p className="text-muted-foreground mt-1">
-          {violations?.length ?? 0} violations reported against your household
-        </p>
-      </div>
+      <PageHeader
+        title="Violations"
+        description={<>{violations?.length ?? 0} violations reported against your household</>}
+      />
 
       {isLoading ? (
         <ListSkeleton rows={3} />

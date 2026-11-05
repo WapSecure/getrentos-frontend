@@ -13,6 +13,7 @@ import {
   type PendingUpload,
   Select,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -60,12 +61,10 @@ export default function ResidentMaintenancePage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Maintenance</h1>
-        <p className="text-muted-foreground mt-1">
-          Report an issue with your unit or a shared area
-        </p>
-      </div>
+      <PageHeader
+        title="Maintenance"
+        description="Report an issue with your unit or a shared area"
+      />
 
       <Card className="p-6 space-y-4 mb-8">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

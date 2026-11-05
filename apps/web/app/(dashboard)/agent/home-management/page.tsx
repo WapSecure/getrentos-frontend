@@ -1,6 +1,7 @@
 'use client';
 
 import { HomeManagementWorkspace } from '@/components/home-management/HomeManagementWorkspace';
+import { PageHeader } from '@getrentos/ui';
 
 /**
  * A field agent granted an ACTIVE manage mandate operates the property here.
@@ -14,12 +15,10 @@ import { HomeManagementWorkspace } from '@/components/home-management/HomeManage
 export default function AgentHomeManagementPage() {
   return (
     <div className="p-6">
-      <div className="mb-2">
-        <h1 className="text-2xl font-bold text-foreground">Home management</h1>
-        <p className="mt-1 text-muted-foreground">
-          Assets, care plans, work orders and vendors for the properties you manage.
-        </p>
-      </div>
+      <PageHeader
+        title="Home management"
+        description="Assets, care plans, work orders and vendors for the properties you manage."
+      />
       <HomeManagementWorkspace role="manager" />
     </div>
   );

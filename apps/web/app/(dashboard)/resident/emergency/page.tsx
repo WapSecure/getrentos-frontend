@@ -13,6 +13,7 @@ import {
   RadioGroup,
   type RadioOption,
   Textarea,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap, unwrapOptional } from '@/lib/apiHelpers';
@@ -75,11 +76,17 @@ export default function ResidentEmergencyPage() {
 
   if (!data) {
     return (
-      <EmptyState
-        icon={ShieldCheck}
-        title="Your estate is not calling the roll"
-        description="Nothing is happening right now. If the alarm is raised, this page becomes the way you tell the estate office whether your household is safe."
-      />
+      <>
+        <PageHeader
+          title="Emergency"
+          description="Tell the estate office whether your household is safe when the alarm is raised."
+        />
+        <EmptyState
+          icon={ShieldCheck}
+          title="Your estate is not calling the roll"
+          description="Nothing is happening right now. If the alarm is raised, this page becomes the way you tell the estate office whether your household is safe."
+        />
+      </>
     );
   }
 
@@ -136,27 +143,29 @@ export default function ResidentEmergencyPage() {
             setSelected(state);
             setNote('');
           }}
-          options={MUSTER_ANSWER_OPTIONS.map((option): RadioOption<MusterSelfAnswer> => ({
-            value: option.state,
-            tone: option.urgent ? 'destructive' : 'primary',
-            label: (
-              <span
-                className={
-                  option.urgent && selected === option.state ? 'text-destructive' : undefined
-                }
-              >
-                {option.label}
-              </span>
-            ),
-            description: option.description,
-            aside:
-              answered && states.every((state) => state === option.state) ? (
-                <span className="inline-flex items-center gap-1 text-xs font-normal text-success">
-                  <Check className="w-3.5 h-3.5" aria-hidden />
-                  Your answer
+          options={MUSTER_ANSWER_OPTIONS.map(
+            (option): RadioOption<MusterSelfAnswer> => ({
+              value: option.state,
+              tone: option.urgent ? 'destructive' : 'primary',
+              label: (
+                <span
+                  className={
+                    option.urgent && selected === option.state ? 'text-destructive' : undefined
+                  }
+                >
+                  {option.label}
                 </span>
-              ) : undefined,
-          }))}
+              ),
+              description: option.description,
+              aside:
+                answered && states.every((state) => state === option.state) ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-normal text-success">
+                    <Check className="w-3.5 h-3.5" aria-hidden />
+                    Your answer
+                  </span>
+                ) : undefined,
+            })
+          )}
         />
 
         {selected && (

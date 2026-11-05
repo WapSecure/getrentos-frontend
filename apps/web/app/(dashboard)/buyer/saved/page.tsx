@@ -12,6 +12,7 @@ import {
   QueryState,
   Skeleton,
   useOptimisticMutation,
+  PageHeader,
 } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -43,7 +44,11 @@ export default function BuyerSavedPage() {
         update: (old, listingId) => {
           const current = old as { items: BuyerPropertyListing[]; total: number };
           const items = current.items.filter((item) => item.id !== listingId);
-          return { ...current, items, total: current.total - (current.items.length - items.length) };
+          return {
+            ...current,
+            items,
+            total: current.total - (current.items.length - items.length),
+          };
         },
       },
     ],
@@ -58,16 +63,16 @@ export default function BuyerSavedPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Saved Properties</h1>
-        <p className="text-muted-foreground mt-1">
-          {isLoading ? (
+      <PageHeader
+        title="Saved Properties"
+        description={
+          isLoading ? (
             <Skeleton className="inline-block h-4 w-48 align-middle" />
           ) : (
             `${total} propert${total === 1 ? 'y' : 'ies'} in your shortlist`
-          )}
-        </p>
-      </div>
+          )
+        }
+      />
 
       <QueryState
         isLoading={isLoading}

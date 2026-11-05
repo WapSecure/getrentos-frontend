@@ -19,6 +19,7 @@ import {
   PageErrorState,
   type BadgeVariant,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { unwrap } from '@/lib/apiHelpers';
@@ -106,23 +107,17 @@ export function AgencyProtectionView() {
         All clients
       </Link>
 
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-            <ShieldCheck className="h-6 w-6 text-primary" />
-            Client-money protection
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            How your firm protects the money it holds for clients. Clients see this on their money
-            view.
-          </p>
-        </div>
-        {!adding && (
-          <Button onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" />}>
-            Add attestation
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Client-money protection"
+        description="How your firm protects the money it holds for clients. Clients see this on their money view."
+        actions={
+          !adding && (
+            <Button onClick={() => setAdding(true)} icon={<Plus className="h-4 w-4" />}>
+              Add attestation
+            </Button>
+          )
+        }
+      />
 
       {adding && (
         <Card className="mb-6 rounded-2xl p-5">

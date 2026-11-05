@@ -12,6 +12,7 @@ import {
   IconButton,
   ListSkeleton,
   Select,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -100,12 +101,10 @@ export default function EstateCommitteePage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Committee</h1>
-        <p className="text-muted-foreground mt-1">
-          The board running {estate.name}: appoint households to a seat and title.
-        </p>
-      </div>
+      <PageHeader
+        title="Committee"
+        description={<>The board running {estate.name}: appoint households to a seat and title.</>}
+      />
 
       <div className="bg-card rounded-2xl border border-border p-4 mb-8">
         <h2 className="text-sm font-semibold text-foreground mb-3">Appoint a household</h2>

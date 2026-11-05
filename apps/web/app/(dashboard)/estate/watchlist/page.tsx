@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, ShieldAlert } from 'lucide-react';
-import { Alert, Button, CardSkeleton, EmptyState, ListSkeleton, Pagination, ToggleChip } from '@getrentos/ui';
+import {
+  Alert,
+  Button,
+  CardSkeleton,
+  EmptyState,
+  ListSkeleton,
+  Pagination,
+  ToggleChip,
+  PageHeader,
+} from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -91,25 +100,27 @@ export default function EstateWatchlistPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Watch list</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Watch list"
+        description={
+          <>
             {total} {total === 1 ? 'entry' : 'entries'} at {estate.name}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            addEntry.reset();
-            setIsAddOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Add to list
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              addEntry.reset();
+              setIsAddOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Add to list
+          </Button>
+        }
+      />
 
       {/* Says what the list does, because a manager who assumes it is only a note
           would never rely on it: and one who assumes a WATCH entry stops
@@ -131,7 +142,11 @@ export default function EstateWatchlistPage() {
         </p>
       </Alert>
 
-      <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter watchlist by status">
+      <div
+        className="flex flex-wrap gap-2 mb-6"
+        role="group"
+        aria-label="Filter watchlist by status"
+      >
         {statusFilters.map((filter) => (
           <ToggleChip
             key={filter.value}

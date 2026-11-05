@@ -22,6 +22,7 @@ import {
   Pagination,
   Textarea,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -131,25 +132,27 @@ export default function EstateContractorPassesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Regular visitors</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Regular visitors"
+        description={
+          <>
             {total} {total === 1 ? 'authorisation' : 'authorisations'} at {estate.name}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            createPass.reset();
-            setIsAddOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Authorise somebody
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              createPass.reset();
+              setIsAddOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Authorise somebody
+          </Button>
+        }
+      />
 
       {/* The distinction the whole feature rests on, said plainly, because a
           manager who thinks this replaces the visitor passes would stop expecting
@@ -212,7 +215,11 @@ export default function EstateContractorPassesPage() {
         </Card>
       )}
 
-      <div className="flex gap-2 mb-4 overflow-x-auto" role="group" aria-label="Filter contractors by status">
+      <div
+        className="flex gap-2 mb-4 overflow-x-auto"
+        role="group"
+        aria-label="Filter contractors by status"
+      >
         {statusFilters.map((filter) => (
           <ToggleChip
             key={filter.value}

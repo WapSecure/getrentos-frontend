@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Package } from 'lucide-react';
-import { Badge, EmptyState, ListSkeleton } from '@getrentos/ui';
+import { Badge, EmptyState, ListSkeleton, PageHeader } from '@getrentos/ui';
 import { estateResidentService } from '@/services/estateResidentService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateResidentKeys } from '@/lib/queryKeys';
@@ -36,12 +36,10 @@ export default function ResidentDeliveriesPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Deliveries</h1>
-        <p className="text-muted-foreground mt-1">
-          {data?.total ?? 0} deliveries for your household
-        </p>
-      </div>
+      <PageHeader
+        title="Deliveries"
+        description={<>{data?.total ?? 0} deliveries for your household</>}
+      />
 
       <div className="mb-8">
         <ExpectedDeliveriesPanel />
