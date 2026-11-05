@@ -193,7 +193,7 @@ function BuyerOffersPageContent() {
             className="w-fit"
             onClick={() => setIsMakeOfferOpen(true)}
           >
-            Make an Offer
+            Make an offer
           </Button>
         }
       />

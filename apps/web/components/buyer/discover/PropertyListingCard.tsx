@@ -39,7 +39,7 @@ export const PropertyListingCard = ({
             icon={<ShieldCheck className="w-3 h-3" />}
             className="absolute top-3 left-3"
           >
-            Verified Owner
+            Verified owner
           </Badge>
         )}
         {listing.acceptingOffers === false && (
