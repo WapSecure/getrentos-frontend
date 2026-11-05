@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, FileCheck } from 'lucide-react';
 import { LeaseCard } from '@/components/landlord/leases/LeaseCard';
@@ -34,11 +35,13 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 
 const PAGE_SIZE = 10;
 
-export default function LandlordLeasesPage() {
+function LandlordLeasesPageContent() {
+  // Arriving from an approval (?unit=…) opens the lease form on that unit.
+  const initialUnitId = useSearchParams().get('unit') || undefined;
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(Boolean(initialUnitId));
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [billingLease, setBillingLease] = useState<Lease | null>(null);
@@ -290,6 +293,7 @@ export default function LandlordLeasesPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         vacantUnits={vacantUnits}
+        initialUnitId={initialUnitId}
         onSave={handleCreateLease}
       />
 
@@ -314,5 +318,13 @@ export default function LandlordLeasesPage() {
         isPending={signLeaseMutation.isPending}
       />
     </>
+  );
+}
+
+export default function LandlordLeasesPage() {
+  return (
+    <Suspense fallback={null}>
+      <LandlordLeasesPageContent />
+    </Suspense>
   );
 }

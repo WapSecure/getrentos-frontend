@@ -9,9 +9,6 @@ import { VirtualTourBadge } from './features/VirtualTourBadge';
 import { PropertyScore } from './features/PropertyScore';
 import { TrustChainBadge } from '@/components/shared/trust/TrustChainBadge';
 import { LandlordMetrics } from './features/LandlordMetrics';
-import { CommuteCalculator } from './features/CommuteCalculator';
-import { RentVsBuyCalculator } from './features/RentVsBuyCalculator';
-import { NeighborhoodCompare } from './features/NeighborhoodCompare';
 
 interface DiscoverPropertyCardProps {
   property: Property;
@@ -199,18 +196,6 @@ export const DiscoverPropertyCard = ({
             title="Compare with another property"
             icon={<GitCompare />}
           />
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-          <CommuteCalculator listingId={property.id} propertyLocation={property.location} />
-          {/* The calculator compares against a monthly mortgage payment, so the
-              rent is normalised to a month first. Dividing an already-monthly
-              price by 12 understated it twelvefold. */}
-          <RentVsBuyCalculator
-            propertyPrice={property.price}
-            monthlyRent={property.period === 'year' ? property.price / 12 : property.price}
-          />
-          <NeighborhoodCompare listingId={property.id} propertyLocation={property.location} />
         </div>
 
         <Button

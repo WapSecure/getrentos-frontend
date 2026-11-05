@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/constants/auth';
 import { keepPreviousData, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText } from 'lucide-react';
 import { Pagination, EmptyState, ToggleChip, useToast, PageHeader } from '@getrentos/ui';
@@ -30,6 +32,7 @@ export default function LandlordApplicationsPage() {
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
   const [requestingInfo, setRequestingInfo] = useState<RentalApplication | null>(null);
   const toast = useToast();
+  const router = useRouter();
 
   const { data, isPending, isError, refetch } = useQuery({
     queryKey: [
@@ -68,11 +71,18 @@ export default function LandlordApplicationsPage() {
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['landlord', 'applications'] });
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
-      toast.success(
-        updated.status === 'approved'
-          ? `${updated.applicantName}'s application approved.`
-          : `${updated.applicantName}'s application rejected.`
-      );
+      if (updated.status === 'approved') {
+        // Approval is half the job: the tenancy starts with a lease.
+        toast.success(`${updated.applicantName}'s application approved. Next, send them a lease.`, {
+          action: {
+            label: 'Create lease',
+            onClick: () =>
+              router.push(`${ROUTES.LANDLORD_LEASES}?unit=${encodeURIComponent(updated.unitId)}`),
+          },
+        });
+      } else {
+        toast.success(`${updated.applicantName}'s application rejected.`);
+      }
     },
     // A refused change (say, the unit is already let) must say why, not fail silently.
     onError: (error: Error) => toast.error(error.message || 'That change was not saved.'),
