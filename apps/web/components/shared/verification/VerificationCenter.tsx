@@ -759,7 +759,7 @@ export const VerificationCenter = ({
               )}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Verification centre</h2>
+              <h2 className="text-lg font-bold text-foreground">Verification center</h2>
               <p className="text-sm text-muted-foreground">
                 {description ??
                   'Verify your identity to unlock renting, payments and higher trust limits.'}

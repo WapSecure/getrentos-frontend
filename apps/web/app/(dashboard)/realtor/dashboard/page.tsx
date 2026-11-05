@@ -7,7 +7,7 @@ import { RealtorStatsCards } from '@/components/realtor/dashboard/RealtorStatsCa
 import { RealtorActivityFeed } from '@/components/realtor/dashboard/RealtorActivityFeed';
 import { RealtorQuickActions } from '@/components/realtor/dashboard/RealtorQuickActions';
 import { useQuery } from '@tanstack/react-query';
-import { Skeleton } from '@getrentos/ui';
+import { PageErrorState, Skeleton, StatGridSkeleton } from '@getrentos/ui';
 import { realtorService } from '@/services/realtorService';
 import { realtorKeys } from '@/lib/queryKeys';
 import { unwrap } from '@/lib/apiHelpers';
@@ -32,7 +32,12 @@ const RealtorCommissionChart = dynamic(
 export default function RealtorDashboardPage() {
   const user = useRealtorUser();
   const { isPro } = usePlanTier();
-  const { data: stats } = useQuery({
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    isError: statsError,
+    refetch: refetchStats,
+  } = useQuery({
     queryKey: realtorKeys.dashboard,
     queryFn: () => unwrap(realtorService.getDashboard()),
   });
@@ -66,14 +71,26 @@ export default function RealtorDashboardPage() {
       />
       <AttentionFeed persona="realtor" />
 
-      <RealtorStatsCards
-        activeClients={stats?.activeClients ?? 0}
-        activeListings={stats?.publishedListings ?? 0}
-        activeLeads={stats?.activeLeads ?? 0}
-        upcomingViewings={stats?.upcomingViewings ?? 0}
-        pendingOffers={stats?.offerCount ?? 0}
-        commissionYtd={isPro ? (commissionSummary?.totalEarned ?? 0) : null}
-      />
+      {/* Zeros while the numbers load (or after they fail) told a busy
+          realtor they had no clients and no listings. */}
+      {statsLoading ? (
+        <StatGridSkeleton count={6} className="mb-8" />
+      ) : statsError && !stats ? (
+        <PageErrorState
+          headingLevel="h2"
+          title="We couldn't load your numbers"
+          onRetry={() => void refetchStats()}
+        />
+      ) : (
+        <RealtorStatsCards
+          activeClients={stats?.activeClients ?? 0}
+          activeListings={stats?.publishedListings ?? 0}
+          activeLeads={stats?.activeLeads ?? 0}
+          upcomingViewings={stats?.upcomingViewings ?? 0}
+          pendingOffers={stats?.offerCount ?? 0}
+          commissionYtd={isPro ? (commissionSummary?.totalEarned ?? 0) : null}
+        />
+      )}
 
       <div className="grid gap-6 xl:grid-cols-12">
         <div className="space-y-6 xl:col-span-8">
