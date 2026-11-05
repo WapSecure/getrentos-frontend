@@ -65,6 +65,10 @@ export default function LandlordApplicationsPage() {
     },
   });
 
+  // Approval drafts the lease on the server (unit, tenant, rent, a standard
+  // term); what is left is to review it and send it.
+  const openDraftLeases = () => router.push(`${ROUTES.LANDLORD_LEASES}?status=draft`);
+
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: ApplicationStatus }) =>
       unwrap(landlordService.updateApplicationStatus(id, status)),
@@ -73,13 +77,12 @@ export default function LandlordApplicationsPage() {
       setSelectedApplication((prev) => (prev && prev.id === updated.id ? updated : prev));
       if (updated.status === 'approved') {
         // Approval is half the job: the tenancy starts with a lease.
-        toast.success(`${updated.applicantName}'s application approved. Next, send them a lease.`, {
-          action: {
-            label: 'Create lease',
-            onClick: () =>
-              router.push(`${ROUTES.LANDLORD_LEASES}?unit=${encodeURIComponent(updated.unitId)}`),
-          },
-        });
+        // Long enough to act on; the approved application also keeps a
+        // Review lease button, so the next step never depends on this toast.
+        toast.success(
+          `${updated.applicantName}'s application approved. We've drafted their lease: review and send it.`,
+          { duration: 12_000, action: { label: 'Review lease', onClick: openDraftLeases } }
+        );
       } else {
         toast.success(`${updated.applicantName}'s application rejected.`);
       }
@@ -169,6 +172,7 @@ export default function LandlordApplicationsPage() {
         onApprove={handleApprove}
         onReject={handleReject}
         onRequestInfo={handleRequestInfo}
+        onReviewLease={openDraftLeases}
         unitHeldBy={
           selectedApplication
             ? (applications.find(

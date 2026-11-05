@@ -23,8 +23,6 @@ interface CreateLeaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   vacantUnits: Unit[];
-  /** Opened from an approval: start with this unit (and its approved applicant) chosen. */
-  initialUnitId?: string;
   onSave: (
     lease: Omit<Lease, 'id' | 'status' | 'createdAt' | 'tenantSigned' | 'landlordSigned'>,
     sendImmediately: boolean
@@ -35,7 +33,6 @@ export const CreateLeaseModal = ({
   isOpen,
   onClose,
   vacantUnits,
-  initialUnitId,
   onSave,
 }: CreateLeaseModalProps) => {
   const [unitId, setUnitId] = useState('');
@@ -53,7 +50,7 @@ export const CreateLeaseModal = ({
     [vacantUnits, unitId]
   );
 
-  function handleUnitChange(id: string) {
+  const handleUnitChange = (id: string) => {
     setUnitId(id);
     const unit = vacantUnits.find((u) => u.id === id);
     // The unit's asking rent: the price the landlord set and the advert
@@ -71,20 +68,7 @@ export const CreateLeaseModal = ({
       if (!leaseStart) setLeaseStart(format(today, 'yyyy-MM-dd'));
       if (!leaseEnd) setLeaseEnd(format(subDays(addYears(today, 1), 1), 'yyyy-MM-dd'));
     }
-  }
-
-  // Seed the unit once, when the dialog opens with one and the units have
-  // loaded (adjusting state during render, so no extra effect pass).
-  const [seededFor, setSeededFor] = useState<string | null>(null);
-  if (
-    isOpen &&
-    initialUnitId &&
-    seededFor !== initialUnitId &&
-    vacantUnits.some((u) => u.id === initialUnitId)
-  ) {
-    setSeededFor(initialUnitId);
-    handleUnitChange(initialUnitId);
-  }
+  };
 
   const reset = () => {
     setUnitId('');

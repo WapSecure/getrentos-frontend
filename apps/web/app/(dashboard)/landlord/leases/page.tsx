@@ -36,12 +36,15 @@ const statusFilters: { value: 'all' | LeaseStatus; label: string }[] = [
 const PAGE_SIZE = 10;
 
 function LandlordLeasesPageContent() {
-  // Arriving from an approval (?unit=…) opens the lease form on that unit.
-  const initialUnitId = useSearchParams().get('unit') || undefined;
+  // Arriving from an approval (?status=draft) shows the lease the backend
+  // drafted for the approved applicant, ready to review and send.
+  const statusParam = useSearchParams().get('status');
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState<'all' | LeaseStatus>('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(Boolean(initialUnitId));
+  const [filter, setFilter] = useState<'all' | LeaseStatus>(
+    statusParam === 'draft' ? 'draft' : 'all'
+  );
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [renewingLease, setRenewingLease] = useState<Lease | null>(null);
   const [signingLease, setSigningLease] = useState<Lease | null>(null);
   const [billingLease, setBillingLease] = useState<Lease | null>(null);
@@ -293,7 +296,6 @@ function LandlordLeasesPageContent() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         vacantUnits={vacantUnits}
-        initialUnitId={initialUnitId}
         onSave={handleCreateLease}
       />
 

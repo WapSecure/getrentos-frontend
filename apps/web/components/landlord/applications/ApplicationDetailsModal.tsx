@@ -17,6 +17,8 @@ interface ApplicationDetailsModalProps {
    * knows. Approving would be refused, so say so here instead of after.
    */
   unitHeldBy?: string | null;
+  /** The next step once approved: the lease drafted for them, to review and send. */
+  onReviewLease?: () => void;
 }
 
 export const ApplicationDetailsModal = ({
@@ -26,6 +28,7 @@ export const ApplicationDetailsModal = ({
   onReject,
   onRequestInfo,
   unitHeldBy = null,
+  onReviewLease,
 }: ApplicationDetailsModalProps) => {
   // Only an open application can be decided; withdrawn ones are closed like approved and rejected.
   const isDecided = application?.status !== 'pending' && application?.status !== 'under_review';
@@ -86,6 +89,16 @@ export const ApplicationDetailsModal = ({
             </p>
           </div>
 
+          {application.status === 'approved' && onReviewLease && (
+            <div className="p-4 border-t border-border flex items-center justify-between gap-3 shrink-0">
+              <p className="text-xs text-muted-foreground">
+                Approved. Their lease is drafted and waiting for you to send.
+              </p>
+              <Button variant="primary" size="sm" onClick={onReviewLease}>
+                Review lease
+              </Button>
+            </div>
+          )}
           {!isDecided && (
             <div className="p-4 border-t border-border flex flex-wrap gap-2 shrink-0 sm:flex-nowrap">
               {unitHeldBy && (
