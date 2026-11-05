@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hammer } from 'lucide-react';
-import { CardSkeleton, EmptyState, ListSkeleton, ToggleChip } from '@getrentos/ui';
+import { CardSkeleton, EmptyState, ListSkeleton, ToggleChip, PageHeader } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
@@ -93,19 +93,21 @@ export default function EstateMaintenancePage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Maintenance</h1>
-        <p className="text-muted-foreground mt-1">
-          {isTicketsLoading ? (
-            'Loading…'
-          ) : (
-            <>
-              {tickets.length} ticket{tickets.length === 1 ? '' : 's'}
-            </>
-          )}{' '}
-          in {estate.name}
-        </p>
-      </div>
+      <PageHeader
+        title="Maintenance"
+        description={
+          <>
+            {isTicketsLoading ? (
+              'Loading…'
+            ) : (
+              <>
+                {tickets.length} ticket{tickets.length === 1 ? '' : 's'}
+              </>
+            )}{' '}
+            in {estate.name}
+          </>
+        }
+      />
 
       <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter tickets by status">
         {statusFilters.map((filter) => (

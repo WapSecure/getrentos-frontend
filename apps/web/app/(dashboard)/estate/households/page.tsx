@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   Pagination,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -160,10 +161,10 @@ export default function EstateHouseholdsPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Households</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Households"
+        description={
+          <>
             {isHouseholdsLoading ? (
               'Loading…'
             ) : (
@@ -172,32 +173,34 @@ export default function EstateHouseholdsPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
-            <Upload className="w-4 h-4" />
-            Import CSV
-            {!isPro && (
-              <Lock
-                className="h-3.5 w-3.5 text-muted-foreground/70"
-                aria-label="Pro plan feature"
-              />
-            )}
-          </Button>
-          <Button
-            variant="primary"
-            className="gap-2"
-            onClick={() => {
-              setEditingHousehold(null);
-              setIsModalOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Add Household
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <Button variant="outline" className="gap-2" onClick={() => setIsImportOpen(true)}>
+              <Upload className="w-4 h-4" />
+              Import CSV
+              {!isPro && (
+                <Lock
+                  className="h-3.5 w-3.5 text-muted-foreground/70"
+                  aria-label="Pro plan feature"
+                />
+              )}
+            </Button>
+            <Button
+              variant="primary"
+              className="gap-2"
+              onClick={() => {
+                setEditingHousehold(null);
+                setIsModalOpen(true);
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Household
+            </Button>
+          </>
+        }
+      />
 
       {isHouseholdsLoading ? (
         <ListSkeleton rows={3} />

@@ -15,6 +15,7 @@ import {
   Input,
   ListSkeleton,
   PageErrorState,
+  PageHeader,
   Select,
   Tabs,
   TabsList,
@@ -548,16 +549,10 @@ export default function FieldOperationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <Navigation className="h-6 w-6 text-primary" aria-hidden />
-          Field operations
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Site visits for GetRentos Managed: who is going where, proof they were there, and what is
-          overdue.
-        </p>
-      </div>
+      <PageHeader
+        title="Field operations"
+        description="Site visits for GetRentos Managed: who is going where, proof they were there, and what is overdue."
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList>

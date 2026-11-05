@@ -14,6 +14,7 @@ import {
   Field,
   ListSkeleton,
   PageErrorState,
+  PageHeader,
   Select,
   Tabs,
   TabsList,
@@ -508,17 +509,10 @@ export default function AdminManagedIntakesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-foreground">
-          <ClipboardCheck className="h-6 w-6 text-primary" aria-hidden />
-          Managed intake
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Owners asking GetRentos to manage their property. Book the visit, record the assessment,
-          send the proposal and confirm the opening position. Nothing activates until all of it is
-          on record.
-        </p>
-      </div>
+      <PageHeader
+        title="Managed intake"
+        description="Owners asking GetRentos to manage their property. Book the visit, record the assessment, send the proposal and confirm the opening position. Nothing activates until all of it is on record."
+      />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
         <TabsList className="max-w-full">

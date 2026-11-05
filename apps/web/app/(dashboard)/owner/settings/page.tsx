@@ -9,6 +9,7 @@ import { NotificationSettings } from '@/components/owner/settings/NotificationSe
 import { SellerPayoutSettings } from '@/components/shared/payouts/SellerPayoutSettings';
 import { PreferencesSettings } from '@/components/owner/settings/PreferencesSettings';
 import { DataExport } from '@/components/shared/settings/DataExport';
+import { PageHeader } from '@getrentos/ui';
 
 type SettingsTab = 'profile' | 'notifications' | 'payouts' | 'preferences' | 'data';
 
@@ -49,10 +50,7 @@ export default function OwnerSettingsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account preferences</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account preferences" />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">

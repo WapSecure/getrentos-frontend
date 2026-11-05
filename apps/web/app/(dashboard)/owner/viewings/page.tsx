@@ -16,6 +16,7 @@ import {
   Alert,
   ListSkeleton,
   Skeleton,
+  PageHeader,
 } from '@getrentos/ui';
 import { ownerService, type OwnerViewing } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -107,13 +108,15 @@ export default function OwnerViewingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Viewings</h1>
-        <p className="text-muted-foreground mt-1">
-          Buyers who want to see a property you are selling. Confirm their time, offer another, or
-          decline.
-        </p>
-      </div>
+      <PageHeader
+        title="Viewings"
+        description={
+          <>
+            Buyers who want to see a property you are selling. Confirm their time, offer another, or
+            decline.
+          </>
+        }
+      />
 
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (

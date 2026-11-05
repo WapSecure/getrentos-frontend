@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   Pagination,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -100,10 +101,10 @@ export default function EstateVehiclesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Vehicles</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Vehicles"
+        description={
+          <>
             {isLogsLoading ? (
               'Loading…'
             ) : (
@@ -112,19 +113,21 @@ export default function EstateVehiclesPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
-            <Settings2 className="w-4 h-4" />
-            Manage Gates
-          </Button>
-          <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Log Vehicle
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <Button variant="outline" className="gap-2" onClick={() => setIsGatesModalOpen(true)}>
+              <Settings2 className="w-4 h-4" />
+              Manage Gates
+            </Button>
+            <Button variant="primary" className="gap-2" onClick={() => setIsModalOpen(true)}>
+              <Plus className="w-4 h-4" />
+              Log Vehicle
+            </Button>
+          </>
+        }
+      />
 
       <div
         className="flex flex-wrap gap-2 mb-6"

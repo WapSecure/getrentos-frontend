@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   ToggleChip,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -109,10 +110,10 @@ export default function EstateGovernancePage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Governance</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Governance"
+        description={
+          <>
             {isRecordsLoading ? (
               'Loading…'
             ) : (
@@ -121,20 +122,22 @@ export default function EstateGovernancePage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            setNewVersionOf(null);
-            setIsUploadOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Upload Record
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              setNewVersionOf(null);
+              setIsUploadOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Upload Record
+          </Button>
+        }
+      />
 
       <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter records by type">
         {typeFilters.map((filter) => (

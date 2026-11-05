@@ -6,6 +6,7 @@ import { Landmark, Flag, Send, Undo2 } from 'lucide-react';
 import {
   DataTable,
   IconButton,
+  PageHeader,
   SearchInput,
   Tabs,
   TabsList,
@@ -239,13 +240,15 @@ export default function AdminEscrowPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Escrow Oversight</h1>
-        <p className="text-muted-foreground mt-1">
-          Platform-wide monitoring of escrow transactions ·{' '}
-          {flaggedCountError ? 'flagged count unavailable' : `${flaggedCount} flagged for review`}
-        </p>
-      </div>
+      <PageHeader
+        title="Escrow Oversight"
+        description={
+          <>
+            Platform-wide monitoring of escrow transactions ·{' '}
+            {flaggedCountError ? 'flagged count unavailable' : `${flaggedCount} flagged for review`}
+          </>
+        }
+      />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <SearchInput

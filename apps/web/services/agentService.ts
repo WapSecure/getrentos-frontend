@@ -106,10 +106,26 @@ export interface AgentClientListOptions extends AgentPageOptions {
   status?: 'pending' | 'active' | 'revoked';
 }
 
+export const AGENT_WORKING_DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const;
+export type AgentWorkingDay = (typeof AGENT_WORKING_DAYS)[number];
+
+/** Where and when an agent takes field work. Empty days / null cap mean no limit. */
+export interface AgentFieldPreferences {
+  serviceAreas: string[];
+  workingDays: AgentWorkingDay[];
+  maxTasksPerDay: number | null;
+}
+
 export interface AgentClientAssignment {
   id: string;
   status: string;
-  agent?: { id: string; legalName: string; email: string; companyName?: string | null };
+  agent?: {
+    id: string;
+    legalName: string;
+    email: string;
+    companyName?: string | null;
+    agentFieldPreference?: AgentFieldPreferences | null;
+  };
   client?: { id: string; legalName: string; email?: string; phone?: string | null };
 }
 
@@ -555,6 +571,15 @@ export const agentService = {
     safeCall(() => authFetch(`/agent/notifications/${id}/read`, { method: 'PATCH' })),
   markAllNotificationsRead: () =>
     safeCall(() => authFetch('/agent/notifications/read-all', { method: 'POST' })),
+  getFieldPreferences: () =>
+    safeCall(() => authFetch<AgentFieldPreferences>('/agent/settings/field-preferences')),
+  updateFieldPreferences: (preferences: AgentFieldPreferences) =>
+    safeCall(() =>
+      authFetch<AgentFieldPreferences>('/agent/settings/field-preferences', {
+        method: 'PUT',
+        body: JSON.stringify(preferences),
+      })
+    ),
   getNotificationPreferences: () =>
     safeCall(() =>
       authFetch<{ id: string; email: boolean; push: boolean }[]>('/agent/settings/notifications')

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { HelpCircle, ChevronDown, Mail, Phone, Clock, ScrollText } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { ChevronDown, Mail, Phone, Clock, ScrollText } from 'lucide-react';
+import { Card, PageHeader } from '@getrentos/ui';
+import { OPS_CONTACT, telLink } from '@/lib/opsContact';
 
 interface FAQItem {
   question: string;
@@ -41,15 +42,10 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
 
   return (
     <>
-      <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Staff Help Center</h1>
-        </div>
-        <p className="text-muted-foreground mt-1">
-          Operating guidance and escalation paths for GetRentos backoffice staff
-        </p>
-      </div>
+      <PageHeader
+        title="Staff Help Center"
+        description="Operating guidance and escalation paths for GetRentos backoffice staff"
+      />
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">
@@ -86,32 +82,36 @@ export const HelpCenterContent = ({ messagesHref = '/admin/messages' }: HelpCent
             <h3 className="text-sm font-semibold text-foreground mb-3">Internal Escalation</h3>
             <div className="space-y-3">
               <a
-                href="mailto:platform-ops@getrentos.test"
+                href={`mailto:${OPS_CONTACT.email}`}
                 className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
               >
                 <Mail className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                 <span>
                   <span className="block text-foreground font-medium">Platform Ops</span>
-                  <span className="text-muted-foreground">platform-ops@getrentos.test</span>
+                  <span className="text-muted-foreground">{OPS_CONTACT.email}</span>
                 </span>
               </a>
-              <a
-                href="tel:+2348000000001"
-                className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
-              >
-                <Phone className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <span>
-                  <span className="block text-foreground font-medium">On-call escalation</span>
-                  <span className="text-muted-foreground">+234 800 000 0001</span>
-                </span>
-              </a>
-              <div className="flex items-start gap-2.5 text-sm">
-                <Clock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                <span>
-                  <span className="block text-foreground font-medium">Coverage</span>
-                  <span className="text-muted-foreground">24/7 for critical/fraud cases</span>
-                </span>
-              </div>
+              {OPS_CONTACT.phone && (
+                <a
+                  href={telLink(OPS_CONTACT.phone)}
+                  className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
+                >
+                  <Phone className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span>
+                    <span className="block text-foreground font-medium">On-call escalation</span>
+                    <span className="text-muted-foreground">{OPS_CONTACT.phone}</span>
+                  </span>
+                </a>
+              )}
+              {OPS_CONTACT.phone && OPS_CONTACT.hours && (
+                <div className="flex items-start gap-2.5 text-sm">
+                  <Clock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span>
+                    <span className="block text-foreground font-medium">Coverage</span>
+                    <span className="text-muted-foreground">{OPS_CONTACT.hours}</span>
+                  </span>
+                </div>
+              )}
               <a
                 href={messagesHref}
                 className="flex items-start gap-2.5 text-sm hover:text-primary transition-colors"
