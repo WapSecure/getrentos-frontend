@@ -23,7 +23,12 @@ import {
   type DossierTarget,
   type LandDossier,
 } from '@/lib/api/landDossier';
-import { LAND_TITLE_TYPE_LABEL, type LandTitleType } from '@/lib/api/land';
+import {
+  formatLandArea,
+  LAND_TITLE_TYPE_LABEL,
+  type LandAreaUnit,
+  type LandTitleType,
+} from '@/lib/api/land';
 import { formatDate, formatNaira } from '@/lib/format';
 import { TrustChecks } from '@/components/land/TrustChecks';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -192,7 +197,10 @@ function TheLand({ d }: { d: LandDossier }) {
       />
       <Fact
         label="Area"
-        value={`${(s.plot?.areaValue ?? p.areaValue).toLocaleString('en-NG')} ${words(s.plot?.areaUnit ?? p.areaUnit)}`}
+        value={formatLandArea(
+          s.plot?.areaValue ?? p.areaValue,
+          (s.plot?.areaUnit ?? p.areaUnit) as LandAreaUnit
+        )}
       />
       {s.plot ? (
         <Fact

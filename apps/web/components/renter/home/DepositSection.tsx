@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PiggyBank, ShieldCheck } from 'lucide-react';
 import { Alert, Badge, Button, Card, CardSkeleton, EmptyState, Textarea } from '@getrentos/ui';
 
+import { depositHolderText, noDeductionsText } from '@getrentos/shared';
 import { unwrap } from '@/lib/apiHelpers';
 import { formatCurrency, formatDate } from '@/lib/format';
 import {
@@ -100,11 +101,7 @@ const DeductionItem = ({ d }: { d: TenantDeduction }) => {
             {error && <Alert variant="danger">{error}</Alert>}
           </div>
         ) : (
-          <Button
-            variant="link"
-            onClick={() => setOpen(true)}
-            className="mt-1 font-medium"
-          >
+          <Button variant="link" onClick={() => setOpen(true)} className="mt-1 font-medium">
             Dispute this
           </Button>
         ))}
@@ -184,9 +181,7 @@ const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
           )}
           <p className="mt-3 flex items-start gap-1.5 text-sm text-muted-foreground">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
-            {hold.heldByGetRentos
-              ? 'Held by GetRentos under GetRentos Payment Protection, not by your landlord. It is only paid out as recorded here.'
-              : `Held by ${hold.heldBy ?? 'your landlord'}. GetRentos keeps the record of it, and every deduction shows here.`}
+            {depositHolderText(hold)}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Recorded {formatDate(hold.takenAt)}
@@ -196,7 +191,7 @@ const DepositCard = ({ deposit }: { deposit: TenantDeposit }) => {
           <h4 className="mt-4 text-sm font-semibold text-foreground">Deductions</h4>
           {hold.deductions.length === 0 ? (
             <p className="mt-1 text-sm text-muted-foreground">
-              None. Your full deposit is due back to you.
+              {noDeductionsText(hold.status === 'RETURNED')}
             </p>
           ) : (
             <ul className="divide-y divide-border">
