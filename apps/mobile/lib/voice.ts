@@ -139,3 +139,9 @@ export function useReadAloud() {
 
   return { canRead, speaking, toggle };
 }
+
+/** Say a short line now, interrupting anything already being read. */
+export function speakNow(text: string, language: ReplyLanguage = 'en') {
+  void Speech.stop();
+  Speech.speak(text, { language: SPEECH_LOCALE[language] });
+}

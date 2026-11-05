@@ -1,6 +1,6 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Megaphone } from 'lucide-react-native';
+import { Megaphone, Square, Volume2 } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -14,9 +14,12 @@ import { residentApi } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { relativeTime } from '@/lib/format';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import { useReadAloud } from '@/lib/voice';
 
 export default function ResidentAnnouncements() {
   const { colors, spacing } = useTheme();
+  // Listen to an update instead of reading it, on the phone's own voice.
+  const readAloud = useReadAloud();
   const query = useQuery({
     queryKey: qk.resident.announcements(1, 50),
     queryFn: () => residentApi.listAnnouncements(1, 50),
@@ -40,7 +43,7 @@ export default function ResidentAnnouncements() {
           description: "Your estate manager's updates will show up here.",
         }}
       >
-        {query.data?.items.map((a) => (
+        {query.data?.items.map((a, i) => (
           <Card key={a.id} elevated>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
               <View style={{ flex: 1, gap: 4 }}>
@@ -52,7 +55,23 @@ export default function ResidentAnnouncements() {
                   {relativeTime(a.createdAt)}
                 </Text>
               </View>
-              {a.priority === 'urgent' ? <Badge label="Urgent" tone="danger" /> : null}
+              <View style={{ alignItems: 'flex-end', gap: spacing.xs }}>
+                {a.priority === 'urgent' ? <Badge label="Urgent" tone="danger" /> : null}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    readAloud.speaking === i ? 'Stop reading' : `Listen to ${a.title}`
+                  }
+                  onPress={() => readAloud.toggle(i, `${a.title}. ${a.body}`, 'en')}
+                  hitSlop={8}
+                >
+                  {readAloud.speaking === i ? (
+                    <Square size={18} color={colors.primary} />
+                  ) : (
+                    <Volume2 size={18} color={colors.primary} />
+                  )}
+                </Pressable>
+              </View>
             </View>
           </Card>
         ))}

@@ -154,3 +154,12 @@ export function useReadAloud() {
 
   return { canRead, speaking, toggle };
 }
+
+/** Say a short line now in the browser, interrupting anything already being read. */
+export function speakNow(text: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = SPEECH_LOCALE.en;
+  window.speechSynthesis.speak(u);
+}
