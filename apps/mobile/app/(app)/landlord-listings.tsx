@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
-import { router } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Pause, Play, ShieldAlert, Tag, Video, Plus } from 'lucide-react-native';
+import { Pause, Play, Tag, Video, Plus } from 'lucide-react-native';
 import {
   Badge,
   Card,
@@ -29,6 +28,7 @@ import {
 import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
+import { IdentityNudge } from '@/components/trust/IdentityNudge';
 import { goBack } from '@/lib/goBack';
 
 export default function LandlordListings() {
@@ -96,28 +96,9 @@ export default function LandlordListings() {
         />
       </View>
 
-      {gateBlocked ? (
-        <Pressable
-          onPress={() => router.push('/(app)/verify-identity')}
-          accessibilityRole="button"
-          accessibilityLabel="Verify your identity to publish listings"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.sm,
-            marginHorizontal: spacing.xl,
-            marginBottom: spacing.sm,
-            padding: spacing.md,
-            borderRadius: radius.md,
-            backgroundColor: colors.warningSubtle,
-          }}
-        >
-          <ShieldAlert size={16} color={colors.warning} />
-          <Text variant="caption" style={{ flex: 1, color: colors.warning }}>
-            Verify your identity to publish listings
-          </Text>
-        </Pressable>
-      ) : null}
+      <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.sm }}>
+        <IdentityNudge unlocks="publishing listings" force={gateBlocked} />
+      </View>
 
       <QueryState
         query={query}

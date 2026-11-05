@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Banknote,
   Bell,
@@ -16,7 +16,6 @@ import {
   MessageCircle,
   MessageCircleQuestion,
   Search,
-  ShieldAlert,
   ShieldCheck,
   Wrench,
   type LucideIcon,
@@ -39,11 +38,7 @@ import {
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
 import { MetricGrid } from '@/components/dashboard/MetricGrid';
-import {
-  AttentionCard,
-  QuickActions,
-  dashboardGreeting,
-} from '@/components/dashboard/DashboardParts';
+import { QuickActions, dashboardGreeting } from '@/components/dashboard/DashboardParts';
 import { qk } from '@/lib/query/keys';
 import { renterApi, type RenterDashboardStats } from '@/lib/api/renter';
 import type { RenterProperty } from '@/lib/api/properties';
@@ -52,7 +47,7 @@ import {
   APPLICATION_STATUS_LABEL,
   APPLICATION_STATUS_TONE,
 } from '@/lib/api/applications';
-import { kycApi } from '@/lib/api/kyc';
+import { IdentityNudge, useIdentityVerified } from '@/components/trust/IdentityNudge';
 import { notificationsApi } from '@/lib/api/notifications';
 import { useSavedListings } from '@/hooks/useSavedListings';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -100,10 +95,8 @@ export default function RenterHome() {
     (a) => a.status === 'pending' || a.status === 'under_review'
   );
 
-  const kyc = useQuery({ queryKey: ['kyc-status'], queryFn: kycApi.getStatus });
-  // The server's own answer (review or NIN); the old review row only as a fallback.
-  const identityVerified = kyc.data?.identityVerified ?? kyc.data?.identity?.status === 'APPROVED';
-  const showVerifyNudge = !!kyc.data && !identityVerified;
+  const qc = useQueryClient();
+  const showVerifyNudge = useIdentityVerified() === false;
 
   const moveInChecklist = useQuery({
     queryKey: qk.renter.moveInChecklist,
@@ -145,7 +138,7 @@ export default function RenterHome() {
     applications.refetch();
     moveInChecklist.refetch();
     notifications.refetch();
-    kyc.refetch();
+    qc.invalidateQueries({ queryKey: ['kyc-status'] });
   };
   // A refresh failed while older (or disk-cached) data is still on screen.
   const staleQueries = [stats, listings, applications, moveInChecklist].filter(
@@ -187,14 +180,7 @@ export default function RenterHome() {
 
       {/* What needs you first: identity, then an application in motion. */}
       {showVerifyNudge ? (
-        <AttentionCard
-          Icon={ShieldAlert}
-          tone="warning"
-          title="Verify your identity"
-          detail="Unlocks applications and offers: takes two minutes"
-          accessibilityLabel="Verify your identity. Unlocks applications and offers."
-          onPress={() => router.push('/(app)/verify-identity')}
-        />
+        <IdentityNudge unlocks="applications and offers" />
       ) : activeApplication ? (
         <Pressable
           onPress={() => router.push(`/(app)/application/${activeApplication.id}`)}
