@@ -22,6 +22,7 @@ import {
 import type { Listing, RentPeriod, Unit } from '@/types/landlord';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
+import { DraftAssist, SelfCheckPanel } from './ListingAssist';
 import { useFlexAvailability } from '@/hooks/useFlexAvailability';
 
 interface CreateListingModalProps {
@@ -209,6 +210,18 @@ export const CreateListingModal = ({
                 />
               </Field>
 
+              {unitId && (
+                <DraftAssist
+                  // A different unit is a different listing: start fresh.
+                  key={unitId}
+                  unitId={unitId}
+                  onApply={(d) => {
+                    setListingTitle(d.title);
+                    setAmenities((prev) => [...new Set([...prev, ...d.amenities])]);
+                  }}
+                />
+              )}
+
               <Field label="Listing Title" required>
                 <Input
                   type="text"
@@ -305,6 +318,15 @@ export const CreateListingModal = ({
                   label="Short-let enabled"
                 />
               </div>
+
+              {unitId && (
+                <SelfCheckPanel
+                  unitId={unitId}
+                  listingTitle={listingTitle}
+                  askingRent={Number(askingRent) || 0}
+                  rentPeriod={rentPeriod}
+                />
+              )}
             </>
           )}
         </div>
