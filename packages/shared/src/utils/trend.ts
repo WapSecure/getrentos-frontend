@@ -38,5 +38,10 @@ export function monthTrend(points: TrendPoint[], now = new Date()): MonthTrend |
 }
 
 /** "+12.5%" / "−4.0%" for a trend badge. */
-export const formatTrend = (change: number) =>
-  `${change >= 0 ? '+' : '−'}${Math.abs(change).toFixed(1)}%`;
+export const formatTrend = (change: number) => {
+  const size = Math.abs(change);
+  // One decimal keeps moves honest ("+12.3%"); a whole number reads better
+  // without it ("−100%", not "−100.0%").
+  const digits = Number.isInteger(size) ? 0 : 1;
+  return `${change >= 0 ? '+' : '−'}${size.toFixed(digits)}%`;
+};

@@ -71,7 +71,7 @@ export const DueRow = ({ due, onMarkPaid, isMarkingPaid }: DueRowProps) => {
         </Badge>
         {due.status !== 'paid' && due.status !== 'waived' && (
           <Button variant="outline" size="sm" disabled={isMarkingPaid} onClick={onMarkPaid}>
-            Mark Paid
+            Mark paid
           </Button>
         )}
       </div>

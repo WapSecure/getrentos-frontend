@@ -196,7 +196,7 @@ export default function EstateHouseholdsPage() {
               }}
             >
               <Plus className="w-4 h-4" />
-              Add Household
+              Add household
             </Button>
           </>
         }
