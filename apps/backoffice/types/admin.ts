@@ -517,3 +517,18 @@ export interface AiUsageSummary {
   /** Whether an ANTHROPIC_API_KEY is configured (live calls possible). */
   keyConfigured: boolean;
 }
+
+/** GET /admin/disputes/:id/summary: a neutral reading of the case for staff. */
+export interface DisputeSummary {
+  disputeId: string;
+  /** The record, worked out by GetRentos. */
+  facts: string[];
+  summary: string;
+  buyerSays: string | null;
+  sellerSays: string | null;
+  agreed: string[];
+  toVerify: string[];
+  missingEvidence: string[];
+  source: 'ai' | 'heuristic';
+  disclaimer: string;
+}

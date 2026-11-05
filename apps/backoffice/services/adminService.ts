@@ -8,6 +8,7 @@ import type {
   OwnershipDocCheck,
   Dispute,
   DisputeDetail,
+  DisputeSummary,
   DisputeMessage,
   DisputeResolveOutcome,
   EvidenceItem,
@@ -439,6 +440,11 @@ export const adminService = {
         body: JSON.stringify({ resolution, outcome }),
       })
     );
+  },
+
+  /** A neutral reading of the case: each side's position, what to verify. Never a decision. */
+  async getDisputeSummary(disputeId: string): Promise<ApiResponse<DisputeSummary>> {
+    return safeCall(() => authFetch<DisputeSummary>(`/admin/disputes/${disputeId}/summary`));
   },
 
   async getDisputeDetail(disputeId: string): Promise<ApiResponse<DisputeDetail>> {

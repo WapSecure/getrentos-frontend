@@ -59,6 +59,7 @@ export const adminKeys = {
       params?.pageSize ?? 20,
     ] as const,
   disputeMessages: (disputeId: string) => ['admin', 'disputes', disputeId, 'messages'] as const,
+  disputeSummary: (disputeId: string) => ['admin', 'disputes', disputeId, 'summary'] as const,
   disputeDetail: (disputeId: string) => ['admin', 'disputes', disputeId, 'detail'] as const,
   fraudAlerts: (params?: {
     search?: string;
