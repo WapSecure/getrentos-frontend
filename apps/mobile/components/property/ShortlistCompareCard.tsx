@@ -75,7 +75,7 @@ export function ShortlistCompareCard({ listingIds }: { listingIds: string[] }) {
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
                   <Text variant="label" style={{ flex: 1 }} numberOfLines={1}>
-                    {h.title}
+                    {h.label} · {h.title}
                   </Text>
                   <Badge label={CHECK[h.listingCheck].label} tone={CHECK[h.listingCheck].tone} />
                 </View>
