@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, UserPlus, User, Mail, Phone } from 'lucide-react';
 import { LeadCard } from '@/components/realtor/leads/LeadCard';
+import { FollowUpsPanel } from '@/components/realtor/leads/FollowUpsPanel';
 import type { LeadStage } from '@/types/realtor';
 import { ROUTES } from '@/lib/constants/auth';
 import {
@@ -178,6 +179,8 @@ export default function RealtorLeadsPage() {
           </Button>
         }
       />
+
+      <FollowUpsPanel />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput

@@ -21,3 +21,17 @@ export const hasSupportLine = () => Boolean(SUPPORT.phone || SUPPORT.whatsapp);
 /** wa.me wants digits only, country code first. */
 export const whatsappLink = (number: string, text?: string) =>
   `https://wa.me/${number.replace(/\D/g, '')}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
+
+/**
+ * A WhatsApp link for a Nigerian number as people type it (0803…, +234 803…,
+ * 234803…). Null when it isn't a usable mobile number. Mirrors the mobile helper.
+ */
+export function nigerianWhatsappLink(phone?: string | null, text?: string): string | null {
+  const digits = (phone ?? '').replace(/\D/g, '');
+  const intl = digits.startsWith('234')
+    ? digits
+    : digits.startsWith('0') && digits.length === 11
+      ? `234${digits.slice(1)}`
+      : null;
+  return intl && intl.length === 13 ? whatsappLink(intl, text) : null;
+}

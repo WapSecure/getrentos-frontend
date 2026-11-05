@@ -19,6 +19,7 @@ import type {
   OfferThreadMessage,
 } from '@/types/realtor';
 import type { TrustProfile } from '@/types/trust-score';
+import type { FollowUpPlan } from '@/types/followUps';
 
 export interface RealtorDashboardStats {
   totalListings: number;
@@ -369,6 +370,14 @@ export const realtorService = {
         body: JSON.stringify({ question, history, language }),
       })
     ),
+  /** Leads due a follow-up today, each with a drafted message in the chosen language. */
+  getFollowUps: (language: ReplyLanguage = 'en'): Promise<ApiResponse<FollowUpPlan>> =>
+    safeCall(() =>
+      authFetch(`/realtor/follow-ups${language === 'en' ? '' : `?language=${language}`}`)
+    ),
+  /** Record that the realtor just followed up with a lead. */
+  markLeadContacted: (leadId: string): Promise<ApiResponse<RealtorLeadApi>> =>
+    safeCall(() => authFetch(`/realtor/leads/${leadId}/contacted`, { method: 'POST' })),
   getDashboard: (): Promise<ApiResponse<RealtorDashboardStats>> =>
     safeCall(() => authFetch('/realtor/dashboard')),
   listClients: (params: RealtorClientsParams = {}) =>

@@ -167,6 +167,8 @@ export const realtorKeys = {
   clients: ['realtor', 'clients'] as const,
   listings: ['realtor', 'listings'] as const,
   leads: ['realtor', 'leads'] as const,
+  // Under leads, so marking a lead contacted or changing its stage refreshes the list.
+  followUps: (language: string) => ['realtor', 'leads', 'follow-ups', language] as const,
   viewings: ['realtor', 'viewings'] as const,
   offers: ['realtor', 'offers'] as const,
   documents: ['realtor', 'documents'] as const,
