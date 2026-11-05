@@ -14,7 +14,9 @@ const STARTERS = [
 /** Ask GetRentos for estate residents: their own dues, visitors, deliveries, repairs and estate news. */
 export const ResidentAssistant = () => (
   <AssistantChat
-    ask={(question, history) => unwrap(estateResidentService.askAssistant(question, history))}
+    ask={(question, history, language) =>
+      unwrap(estateResidentService.askAssistant(question, history, language))
+    }
     starters={STARTERS}
     scope="Questions about your household: dues, visitors, deliveries, repairs, announcements, polls and bookings."
     placeholder="Ask about dues, visitors or deliveries"

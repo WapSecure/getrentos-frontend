@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authDownload, authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
 import type { ApiResponse } from '@/lib/apiHelpers';
@@ -955,12 +956,13 @@ export const landlordService = {
 
   async askAssistant(
     question: string,
-    history: AssistantTurn[]
+    history: AssistantTurn[],
+    language?: ReplyLanguage
   ): Promise<ApiResponse<AssistantReply>> {
     return safeCall(() =>
       authFetch('/landlord/assistant/ask', {
         method: 'POST',
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, language }),
       })
     );
   },

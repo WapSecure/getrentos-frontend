@@ -14,10 +14,19 @@ import {
   Textarea,
 } from '@getrentos/ui';
 import type { AssistantLink, AssistantReply, AssistantTurn } from '@/types/assistant';
+import {
+  REPLY_LANGUAGES,
+  languageLabel,
+  saveReplyLanguage,
+  savedReplyLanguage,
+  type ReplyLanguage,
+} from '@/lib/replyLanguage';
 
 interface ChatMessage extends AssistantTurn {
   links?: AssistantLink[];
   suggestions?: string[];
+  /** Set when the answer could not be given in the language asked for. */
+  fellBackFrom?: ReplyLanguage;
 }
 
 const MAX_QUESTION = 500;
@@ -25,7 +34,11 @@ const HISTORY_TURNS = 6;
 
 export interface AssistantChatProps {
   /** Sends a question with the recent turns; resolves to the reply or throws. */
-  ask: (question: string, history: AssistantTurn[]) => Promise<AssistantReply>;
+  ask: (
+    question: string,
+    history: AssistantTurn[],
+    language: ReplyLanguage
+  ) => Promise<AssistantReply>;
   starters: string[];
   /** What the assistant covers, shown under the title. */
   scope: string;
@@ -37,15 +50,25 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [language, setLanguage] = useState<ReplyLanguage>(savedReplyLanguage);
   const logRef = useRef<HTMLDivElement>(null);
 
   const ask = useMutation({
     mutationFn: ({ question, history }: { question: string; history: AssistantTurn[] }) =>
-      askFn(question, history),
+      askFn(question, history, language),
     onSuccess: (reply) =>
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: reply.answer, links: reply.links, suggestions: reply.suggestions },
+        {
+          role: 'assistant',
+          content: reply.answer,
+          links: reply.links,
+          suggestions: reply.suggestions,
+          fellBackFrom:
+            reply.requestedLanguage && reply.language !== reply.requestedLanguage
+              ? reply.requestedLanguage
+              : undefined,
+        },
       ]),
   });
 
@@ -85,12 +108,37 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
         aria-haspopup="dialog"
       />
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent size="lg" padded={false} closeOnOutsideClick={false} className="flex flex-col">
+        <DialogContent
+          size="lg"
+          padded={false}
+          closeOnOutsideClick={false}
+          className="flex flex-col"
+        >
           <div className="border-b border-border p-5 pr-12">
-            <DialogTitle className="text-base font-semibold text-foreground">Ask GetRentos</DialogTitle>
+            <DialogTitle className="text-base font-semibold text-foreground">
+              Ask GetRentos
+            </DialogTitle>
             <DialogDescription className="mt-1 text-sm text-muted-foreground">
               {scope} Answers come from your account, and nothing is changed for you.
             </DialogDescription>
+            <label className="mt-3 inline-flex items-center gap-2 text-xs text-muted-foreground">
+              Reply in
+              <select
+                value={language}
+                onChange={(e) => {
+                  const next = e.target.value as ReplyLanguage;
+                  setLanguage(next);
+                  saveReplyLanguage(next);
+                }}
+                className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {REPLY_LANGUAGES.map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div
@@ -126,6 +174,12 @@ export const AssistantChat = ({ ask: askFn, starters, scope, placeholder }: Assi
                   <p className="whitespace-pre-wrap rounded-2xl rounded-bl-sm bg-secondary px-3.5 py-2 text-sm text-foreground">
                     {m.content}
                   </p>
+                  {m.fellBackFrom && (
+                    <p className="text-xs text-muted-foreground">
+                      Answered in English: replies in {languageLabel(m.fellBackFrom)} are not
+                      available right now.
+                    </p>
+                  )}
                   {!!m.links?.length && (
                     <div className="flex flex-wrap gap-2">
                       {m.links.map((link) => (

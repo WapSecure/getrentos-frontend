@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronDown, Copy, ListChecks } from 'lucide-react';
 import { Button, Card, Skeleton } from '@getrentos/ui';
 import { authFetch, safeCall, unwrap } from '@/lib/apiHelpers';
+import { REPLY_LANGUAGES, languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
 type Stage = 'reminder' | 'instalments' | 'formal_demand';
 
@@ -23,6 +24,8 @@ interface DebtorPlan {
   instalments: { amount: string; due: string }[] | null;
   nextNotice: string | null;
   message: string;
+  messageLanguage?: ReplyLanguage;
+  messageInEnglish?: string | null;
 }
 
 interface CollectionPlan {
@@ -30,6 +33,7 @@ interface CollectionPlan {
   overview: string;
   totals: { owed: string; debtors: number; byStage: Record<Stage, number> };
   debtors: DebtorPlan[];
+  language?: ReplyLanguage;
   source: 'ai' | 'heuristic';
   disclaimer: string;
 }
@@ -54,9 +58,13 @@ export function CollectionPlanPanel({
   /** Rent only: where the notice ladder lives. */
   noticesHref?: string;
 }) {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['collection-plan', path],
-    queryFn: () => unwrap(safeCall(() => authFetch<CollectionPlan>(path))),
+  // The tenant's or household's language, for the messages; the plan itself stays in English.
+  const [language, setLanguage] = useState<ReplyLanguage>('en');
+  const url = language === 'en' ? path : `${path}?language=${language}`;
+  const { data, isLoading, isError, isFetching } = useQuery({
+    queryKey: ['collection-plan', path, language],
+    queryFn: () => unwrap(safeCall(() => authFetch<CollectionPlan>(url))),
+    placeholderData: (previous) => previous,
     staleTime: 5 * 60_000,
     retry: false,
   });
@@ -84,11 +92,30 @@ export function CollectionPlanPanel({
 
   return (
     <Card className="mb-6 p-5" aria-labelledby="collection-plan-title">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <ListChecks className="h-4 w-4 text-primary" aria-hidden="true" />
         <h2 id="collection-plan-title" className="text-sm font-semibold text-foreground">
           Collection plan
         </h2>
+        <label className="ml-auto inline-flex items-center gap-2 text-xs text-muted-foreground">
+          Messages in
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as ReplyLanguage)}
+            className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {REPLY_LANGUAGES.map((l) => (
+              <option key={l.value} value={l.value}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {isFetching && (
+          <span role="status" className="text-xs text-muted-foreground">
+            Writing messages…
+          </span>
+        )}
       </div>
       <p className="mt-1 text-sm text-foreground">{data.overview}</p>
       <p className="mt-1 text-xs text-muted-foreground">
@@ -161,6 +188,18 @@ export function CollectionPlanPanel({
                   <div className="rounded-md border border-border bg-muted/30 p-3">
                     <p className="font-medium text-foreground">Message to send</p>
                     <p className="mt-1 whitespace-pre-line text-foreground">{d.message}</p>
+                    {d.messageInEnglish && (
+                      <p className="mt-2 text-muted-foreground">
+                        <span className="font-medium">In English: </span>
+                        {d.messageInEnglish}
+                      </p>
+                    )}
+                    {data.language && data.language !== 'en' && d.messageLanguage === 'en' && (
+                      <p className="mt-2 text-muted-foreground">
+                        Written in English: a {languageLabel(data.language)} version is not
+                        available for this one right now.
+                      </p>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"

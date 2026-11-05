@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse } from '@/lib/apiHelpers';
 import type { Paginated } from '@/lib/apiHelpers';
@@ -212,11 +213,11 @@ export interface AgentWorkOrder {
 }
 
 export const agentService = {
-  askAssistant: (question: string, history: AssistantTurn[]) =>
+  askAssistant: (question: string, history: AssistantTurn[], language?: ReplyLanguage) =>
     safeCall<AssistantReply>(() =>
       authFetch('/agent/assistant/ask', {
         method: 'POST',
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, language }),
       })
     ),
   listClientAssignments: (options: AgentClientListOptions = {}) =>

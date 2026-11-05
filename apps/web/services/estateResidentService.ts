@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery } from '@/lib/apiHelpers';
 import type { ApiResponse, Paginated } from '@/lib/apiHelpers';
 import type { AssistantReply, AssistantTurn } from '@/types/assistant';
@@ -26,11 +27,11 @@ type PageQuery = { page?: number; pageSize?: number };
 
 export const estateResidentService = {
   /** Read-only answers about the resident's own household. */
-  askAssistant: (question: string, history: AssistantTurn[]) =>
+  askAssistant: (question: string, history: AssistantTurn[], language?: ReplyLanguage) =>
     safeCall<AssistantReply>(() =>
       authFetch('/resident/assistant/ask', {
         method: 'POST',
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, language }),
       })
     ),
 

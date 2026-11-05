@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { Pressable, Share, View } from 'react-native';
+import { Pressable, ScrollView, Share, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ListChecks, Send } from 'lucide-react-native';
 import {
   Badge,
   Button,
   Card,
+  Chip,
   Skeleton,
   Text,
   useTheme,
   type BadgeTone,
 } from '@getrentos/ui-native';
 import { apiFetch } from '@/lib/api/client';
+import { REPLY_LANGUAGES, languageLabel, type ReplyLanguage } from '@/lib/replyLanguage';
 
 type Stage = 'reminder' | 'instalments' | 'formal_demand';
 
@@ -28,11 +30,14 @@ interface DebtorPlan {
   instalments: { amount: string; due: string }[] | null;
   nextNotice: string | null;
   message: string;
+  messageLanguage?: ReplyLanguage;
+  messageInEnglish?: string | null;
 }
 
 interface CollectionPlan {
   overview: string;
   debtors: DebtorPlan[];
+  language?: ReplyLanguage;
   disclaimer: string;
 }
 
@@ -49,9 +54,13 @@ const STAGE: Record<Stage, { label: string; tone: BadgeTone }> = {
 export function CollectionPlanCard({ path }: { path: string }) {
   const { colors, spacing, radius } = useTheme();
   const [open, setOpen] = useState<string | null>(null);
+  // The tenant's or household's language, for the messages; the plan itself stays in English.
+  const [language, setLanguage] = useState<ReplyLanguage>('en');
   const q = useQuery({
-    queryKey: ['collection-plan', path],
-    queryFn: () => apiFetch<CollectionPlan>(path),
+    queryKey: ['collection-plan', path, language],
+    queryFn: () =>
+      apiFetch<CollectionPlan>(language === 'en' ? path : `${path}?language=${language}`),
+    placeholderData: (previous) => previous,
     staleTime: 5 * 60_000,
     retry: false,
   });
@@ -69,6 +78,25 @@ export function CollectionPlanCard({ path }: { path: string }) {
           </Text>
         </View>
         <Text variant="callout">{plan.overview}</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing.xs, alignItems: 'center' }}
+          accessibilityLabel="Language for the messages"
+        >
+          <Text variant="caption" color="mutedForeground">
+            {q.isFetching ? 'Writing messages…' : 'Messages in'}
+          </Text>
+          {REPLY_LANGUAGES.map((l) => (
+            <Chip
+              key={l.value}
+              size="sm"
+              label={l.label}
+              selected={language === l.value}
+              onPress={() => setLanguage(l.value)}
+            />
+          ))}
+        </ScrollView>
 
         {plan.debtors.map((d, i) => {
           const isOpen = open === d.ref;
@@ -133,6 +161,16 @@ export function CollectionPlanCard({ path }: { path: string }) {
                       Message to send
                     </Text>
                     <Text variant="caption">{d.message}</Text>
+                    {d.messageInEnglish ? (
+                      <Text variant="caption" color="mutedForeground">
+                        In English: {d.messageInEnglish}
+                      </Text>
+                    ) : plan.language && plan.language !== 'en' && d.messageLanguage === 'en' ? (
+                      <Text variant="caption" color="mutedForeground">
+                        Written in English: a {languageLabel(plan.language)} version is not
+                        available for this one right now.
+                      </Text>
+                    ) : null}
                     <Button
                       label="Send…"
                       size="sm"

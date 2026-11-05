@@ -20,7 +20,9 @@ export const EstateAssistant = () => {
     <AssistantChat
       // Remount on switching estate, so one estate's conversation never carries into another's.
       key={estate.id}
-      ask={(question, history) => unwrap(estateService.askAssistant(estate.id, question, history))}
+      ask={(question, history, language) =>
+        unwrap(estateService.askAssistant(estate.id, question, history, language))
+      }
       starters={STARTERS}
       scope={`Questions about ${estate.name}: households, dues, incidents, maintenance, violations, visitors and deliveries.`}
       placeholder="Ask about dues, incidents or visitors"

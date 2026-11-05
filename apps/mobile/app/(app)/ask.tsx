@@ -13,6 +13,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowRight, ChevronLeft, Send } from 'lucide-react-native';
 import { Chip, Text, TextField, useTheme } from '@getrentos/ui-native';
 import {
+  REPLY_LANGUAGES,
+  languageLabel,
+  loadReplyLanguage,
+  saveReplyLanguage,
+  type ReplyLanguage,
+} from '@/lib/replyLanguage';
+import {
   assistantApi,
   mobileRouteFor,
   type AssistantPersona,
@@ -21,6 +28,8 @@ import {
 } from '@/lib/api/assistant';
 
 interface ChatMessage extends AssistantTurn {
+  /** Set when the answer could not be given in the language asked for. */
+  fellBackFrom?: ReplyLanguage;
   links?: AssistantLink[];
   suggestions?: string[];
 }
@@ -142,10 +151,18 @@ export default function AskScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [language, setLanguage] = useState<ReplyLanguage>('en');
+  useEffect(() => {
+    void loadReplyLanguage().then(setLanguage);
+  }, []);
+  const chooseLanguage = (next: ReplyLanguage) => {
+    setLanguage(next);
+    void saveReplyLanguage(next);
+  };
 
   const ask = useMutation({
     mutationFn: ({ question, history }: { question: string; history: AssistantTurn[] }) =>
-      assistantApi.ask(question, history, persona, params.estateId),
+      assistantApi.ask(question, history, persona, params.estateId, language),
     onSuccess: (reply) =>
       setMessages((prev) => [
         ...prev,
@@ -154,6 +171,10 @@ export default function AskScreen() {
           content: reply.answer,
           links: reply.links,
           suggestions: reply.suggestions,
+          fellBackFrom:
+            reply.requestedLanguage && reply.language !== reply.requestedLanguage
+              ? reply.requestedLanguage
+              : undefined,
         },
       ]),
   });
@@ -207,6 +228,31 @@ export default function AskScreen() {
           </Text>
         </View>
       </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
+        contentContainerStyle={{
+          gap: spacing.xs,
+          paddingHorizontal: spacing.xl,
+          paddingVertical: spacing.sm,
+          alignItems: 'center',
+        }}
+        accessibilityLabel="Reply language"
+      >
+        <Text variant="caption" color="mutedForeground">
+          Reply in
+        </Text>
+        {REPLY_LANGUAGES.map((l) => (
+          <Chip
+            key={l.value}
+            size="sm"
+            label={l.label}
+            selected={language === l.value}
+            onPress={() => chooseLanguage(l.value)}
+          />
+        ))}
+      </ScrollView>
 
       <ScrollView
         ref={scrollRef}
@@ -255,6 +301,12 @@ export default function AskScreen() {
                   {m.content}
                 </Text>
               </View>
+              {m.fellBackFrom ? (
+                <Text variant="caption" color="mutedForeground">
+                  Answered in English: replies in {languageLabel(m.fellBackFrom)} are not available
+                  right now.
+                </Text>
+              ) : null}
               {m.links?.length ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
                   {m.links.map((link) => {

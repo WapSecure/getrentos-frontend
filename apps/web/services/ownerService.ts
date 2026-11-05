@@ -1,3 +1,4 @@
+import type { ReplyLanguage } from '@/lib/replyLanguage';
 import { authFetch, safeCall, toQuery, type Paginated } from '@/lib/apiHelpers';
 import type {
   OwnerProperty,
@@ -162,11 +163,11 @@ export interface OwnerViewing {
 }
 
 export const ownerService = {
-  askAssistant: (question: string, history: AssistantTurn[]) =>
+  askAssistant: (question: string, history: AssistantTurn[], language?: ReplyLanguage) =>
     safeCall<AssistantReply>(() =>
       authFetch('/owner/assistant/ask', {
         method: 'POST',
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question, history, language }),
       })
     ),
   // Dashboard
