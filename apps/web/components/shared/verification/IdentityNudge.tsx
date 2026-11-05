@@ -16,11 +16,14 @@ import { unwrap } from '@/lib/apiHelpers';
 export function IdentityNudge({
   verificationHref,
   unlocks,
+  requirement = 'identity',
   className,
 }: {
   verificationHref: string;
   /** What verification unlocks for this workspace, e.g. "publish listings, sign leases and receive payouts". */
   unlocks: string;
+  /** Realtors and agents are also gated on a verified licence. */
+  requirement?: 'identity' | 'licence';
   className?: string;
 }) {
   const { data } = useQuery({
@@ -29,23 +32,30 @@ export function IdentityNudge({
     staleTime: 60_000,
   });
   if (!data) return null;
-  const verified = data.identityVerified ?? ((data.tier ?? 0) >= 2 || data.isVerified);
+  const licence = requirement === 'licence';
+  const verified = licence
+    ? data.license?.status === 'APPROVED'
+    : (data.identityVerified ?? ((data.tier ?? 0) >= 2 || data.isVerified));
   if (verified) return null;
-  const inReview = data.identity && data.identity.status === 'PENDING';
+  const row = licence ? data.license : data.identity;
+  const inReview = row?.status === 'PENDING' || row?.status === 'PENDING_REVIEW';
+  const what = licence ? 'licence' : 'identity';
 
   return (
     <Alert variant="warning" icon={ShieldAlert} className={className}>
       <p>
         {inReview
-          ? `Your identity check is being reviewed. Once it clears you can ${unlocks}.`
-          : `Verify your identity to ${unlocks}. It takes a few minutes.`}
+          ? `Your ${what} check is being reviewed. Once it clears you can ${unlocks}.`
+          : licence
+            ? `Verify your licence to ${unlocks}.`
+            : `Verify your identity to ${unlocks}. It takes a few minutes.`}
       </p>
       {!inReview && (
         <Link
           href={verificationHref}
           className="inline-block mt-1 font-medium text-foreground underline hover:no-underline"
         >
-          Verify identity
+          {licence ? 'Verify licence' : 'Verify identity'}
         </Link>
       )}
     </Alert>

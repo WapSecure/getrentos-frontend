@@ -20,6 +20,7 @@ import { ownerService } from '@/services/ownerService';
 import { unwrap } from '@/lib/apiHelpers';
 import { ownerKeys } from '@/lib/queryKeys';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 import { ROUTES } from '@/lib/constants/auth';
 
 // recharts is heavy: load it only when this dashboard mounts.
@@ -57,6 +58,11 @@ export default function OwnerDashboardPage() {
   return (
     <>
       <OwnerDashboardHeader greeting={greeting} firstName={firstName} />
+      <IdentityNudge
+        verificationHref={ROUTES.OWNER_VERIFICATION}
+        unlocks="publish sale listings and accept offers"
+        className="mb-6"
+      />
       <AttentionFeed persona="owner" />
 
       {isLoading ? (

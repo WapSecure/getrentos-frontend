@@ -27,6 +27,7 @@ import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorClient, realtorService } from '@/services/realtorService';
 import { usePlanGateModal } from '@/hooks/usePlanGateModal';
 import { UpgradeToProModal } from '@/components/shared/subscription/UpgradeToProModal';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
 
 type RoleFilter = 'all' | ClientRole;
 
@@ -113,6 +114,12 @@ export default function RealtorClientsPage() {
             Add client
           </Button>
         }
+      />
+
+      <IdentityNudge
+        verificationHref={ROUTES.REALTOR_VERIFICATION}
+        unlocks="add clients and represent them"
+        className="mb-6"
       />
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">

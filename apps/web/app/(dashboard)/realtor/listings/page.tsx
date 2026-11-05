@@ -27,6 +27,8 @@ import { unwrap, VerificationRequiredError } from '@/lib/apiHelpers';
 import { realtorKeys } from '@/lib/queryKeys';
 import { mapRealtorListing, realtorService } from '@/services/realtorService';
 import type { CreateRealtorListingInput } from '@/components/realtor/listings/CreateListingModal';
+import { IdentityNudge } from '@/components/shared/verification/IdentityNudge';
+import { ROUTES } from '@/lib/constants/auth';
 
 type StatusFilter = 'all' | RealtorListingStatus;
 
@@ -133,6 +135,18 @@ export default function RealtorListingsPage() {
           Add listing
         </Button>
       </div>
+
+      <IdentityNudge
+        verificationHref={ROUTES.REALTOR_VERIFICATION}
+        unlocks="publish listings for your clients"
+        className="mb-6"
+      />
+      <IdentityNudge
+        requirement="licence"
+        verificationHref={ROUTES.REALTOR_VERIFICATION}
+        unlocks="publish listings"
+        className="mb-6"
+      />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput
