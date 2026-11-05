@@ -57,10 +57,12 @@ export const OwnerNavbar = ({ user }: OwnerNavbarProps) => {
           <div className="flex justify-between items-center h-16">
             <Logo size="md" />
 
-            <div className="hidden md:flex items-center gap-6">
+            {/* Tablet only: the sidebar is off-screen there and these two are the
+                workspace's front doors; wider screens have the sidebar itself. */}
+            <div className="hidden md:flex lg:hidden items-center gap-6">
               <Link
                 href={ROUTES.OWNER_DASHBOARD}
-                className="text-foreground font-medium hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-primary transition-colors"
               >
                 Dashboard
               </Link>
