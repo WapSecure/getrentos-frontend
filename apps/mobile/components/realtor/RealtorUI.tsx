@@ -186,8 +186,16 @@ export function OfferCard({ o }: { o: RealtorOffer }) {
               {title}
             </Text>
             <StatusPill
-              label={yourCounter !== null ? "Buyer's turn" : s.label}
-              tone={yourCounter !== null ? 'neutral' : s.tone}
+              label={
+                yourCounter !== null
+                  ? "Buyer's turn"
+                  : o.status === 'COUNTERED'
+                    ? 'Your turn'
+                    : s.label
+              }
+              tone={
+                yourCounter !== null ? 'neutral' : o.status === 'COUNTERED' ? 'warning' : s.tone
+              }
             />
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
