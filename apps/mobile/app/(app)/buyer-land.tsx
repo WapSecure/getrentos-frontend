@@ -1,0 +1,176 @@
+import { useState } from 'react';
+import { RefreshControl, View } from 'react-native';
+import { router } from 'expo-router';
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { FlashList } from '@shopify/flash-list';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AlertTriangle, LandPlot } from 'lucide-react-native';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  ListSkeleton,
+  PressableScale,
+  Text,
+  useTheme,
+} from '@getrentos/ui-native';
+import { qk } from '@/lib/query/keys';
+import {
+  BUYER_PURCHASE_STATUS,
+  landBuyerApi,
+  plotLabel,
+  PURCHASE_STATUSES,
+  type BuyerPurchaseSummary,
+  type PurchaseStatus,
+} from '@/lib/api/landBuyer';
+import { formatDate, formatNaira } from '@/lib/format';
+import { ChipSelect } from '@/components/landlord/ChipSelect';
+import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
+import { goBack } from '@/lib/goBack';
+
+const ALL = 'all';
+const PAGE_SIZE = 10;
+
+/** The buyer's land: plots on hold and plot purchases, paid through GetRentos. */
+export default function BuyerLand() {
+  const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+  const [status, setStatus] = useState<PurchaseStatus | typeof ALL>(ALL);
+  // Captured once: render must not read the clock.
+  const [now] = useState(() => Date.now());
+  const filter = status === ALL ? undefined : status;
+  const list = useInfiniteQuery({
+    queryKey: qk.buyerLand.purchases(filter ?? ''),
+    queryFn: ({ pageParam }) => landBuyerApi.purchases(pageParam, PAGE_SIZE, filter),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.page < last.totalPages ? last.page + 1 : undefined),
+    placeholderData: keepPreviousData,
+  });
+  const holds = useQuery({
+    queryKey: qk.buyerLand.reservations,
+    queryFn: landBuyerApi.reservationCount,
+    retry: false,
+  });
+  const onHold = (holds.data ?? []).filter(
+    (r) => r.status === 'ACTIVE' && Date.parse(r.expiresAt) > now
+  ).length;
+  const purchases = list.data?.pages.flatMap((p) => p.items) ?? [];
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <DetailScreenHeader
+        eyebrow="Buying"
+        title="My land"
+        subtitle="Plots you hold and plots you are paying for"
+        onBack={() => goBack()}
+      />
+      {list.isError && !list.data ? (
+        <ErrorState onRetry={() => list.refetch()} />
+      ) : (
+        <FlashList
+          data={purchases}
+          keyExtractor={(p) => p.id}
+          ListHeaderComponent={
+            <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
+              {holds.data ? (
+                <Card padding={spacing.md}>
+                  <Text variant="callout">
+                    {onHold
+                      ? `${onHold} plot${onHold === 1 ? '' : 's'} on hold`
+                      : 'No plot on hold right now'}
+                  </Text>
+                </Card>
+              ) : null}
+              <ChipSelect
+                options={[
+                  { value: ALL, label: 'All purchases' },
+                  ...PURCHASE_STATUSES.map((s) => ({
+                    value: s,
+                    label: BUYER_PURCHASE_STATUS[s].label,
+                  })),
+                ]}
+                value={status}
+                onChange={setStatus}
+              />
+            </View>
+          }
+          renderItem={({ item }: { item: BuyerPurchaseSummary }) => <PurchaseRow purchase={item} />}
+          onEndReached={() => {
+            if (list.hasNextPage && !list.isFetchingNextPage) list.fetchNextPage();
+          }}
+          onEndReachedThreshold={0.4}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.xl,
+            paddingBottom: insets.bottom + spacing['3xl'],
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={list.isRefetching && !list.isFetchingNextPage}
+              onRefresh={() => {
+                list.refetch();
+                holds.refetch();
+              }}
+              tintColor={colors.mutedForeground}
+            />
+          }
+          ListEmptyComponent={
+            list.isLoading ? (
+              <ListSkeleton rows={3} variant="card" height={110} />
+            ) : (
+              <EmptyState
+                icon={<LandPlot size={32} color={colors.mutedForeground} />}
+                title={filter ? 'No purchases with this status' : 'No plot purchases yet'}
+                description="Reserve a plot in a verified estate, then start a purchase on one of its payment plans."
+                action={<Button label="Browse land" onPress={() => router.push('/(app)/land')} />}
+              />
+            )
+          }
+        />
+      )}
+    </View>
+  );
+}
+
+function PurchaseRow({ purchase: p }: { purchase: BuyerPurchaseSummary }) {
+  const { colors, spacing } = useTheme();
+  const status = BUYER_PURCHASE_STATUS[p.status];
+  return (
+    <PressableScale
+      onPress={() => router.push(`/(app)/buyer-land-purchase/${p.id}`)}
+      accessibilityRole="button"
+      accessibilityLabel={`${plotLabel(p)}, ${p.layoutName}, ${status.label}`}
+      style={{ marginBottom: spacing.sm }}
+    >
+      <Card padding={spacing.lg} style={{ gap: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
+            {plotLabel(p)} · {p.layoutName}
+          </Text>
+          <Badge label={status.label} tone={status.tone} />
+        </View>
+        <Text variant="caption" color="mutedForeground">
+          {p.reference} · {p.planName} · started {formatDate(p.startedAt ?? p.createdAt, 'short')}
+        </Text>
+        <Text variant="callout">
+          {formatNaira(p.amountPaid)} paid of {formatNaira(p.totalPrice)} ·{' '}
+          {formatNaira(p.outstandingBalance)} outstanding
+        </Text>
+        {p.nextDue ? (
+          <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+            {p.nextDue.overdue ? <AlertTriangle size={13} color={colors.destructive} /> : null}
+            <Text
+              variant="caption"
+              style={{ color: p.nextDue.overdue ? colors.destructive : colors.mutedForeground }}
+            >
+              {p.nextDue.overdue ? 'Overdue: ' : 'Next: '}
+              {p.nextDue.label}, {formatNaira(p.nextDue.amount)} on{' '}
+              {formatDate(p.nextDue.dueDate, 'short')}
+            </Text>
+          </View>
+        ) : null}
+      </Card>
+    </PressableScale>
+  );
+}

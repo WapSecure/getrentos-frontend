@@ -36,6 +36,8 @@ export interface BuyerTransaction {
   offerId: string;
   propertyId: string;
   propertyTitle: string;
+  /** What was bought; a land sale has conveyance steps the buyer confirms. */
+  propertyType?: string;
   ownerName: string;
   purchasePrice: number;
   escrowStatus: BuyerEscrowStatus;

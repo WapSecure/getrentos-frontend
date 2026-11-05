@@ -346,6 +346,13 @@ function TransactionCard({
         </View>
       ) : null}
 
+      {tx.propertyType === 'LAND' ? (
+        <LinkButton
+          label="Land conveyance: confirm the deed, survey and possession"
+          onPress={() => router.push(`/(app)/buyer-land-resale/${tx.id}`)}
+        />
+      ) : null}
+
       <Divider />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
