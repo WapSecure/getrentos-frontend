@@ -31,9 +31,19 @@ export function MandateStatusBadge({ status }: { status: MandateStatus }) {
  * agreement but grants nothing enforceable yet — FINANCE is the case that made
  * this necessary.
  */
+const CAPABILITY_MEANING: Record<string, string> = {
+  list: 'Advertise and let the property',
+  manage: 'Run the tenancy, repairs and inspections',
+  money: "Collect and pay out the owner's money",
+};
+
 export function CapabilityChip({ on, label }: { on: boolean; label: string }) {
+  const meaning = CAPABILITY_MEANING[label] ?? label;
+  const description = `${meaning}: ${on ? 'allowed' : 'not allowed under this agreement'}`;
   return (
     <span
+      title={description}
+      aria-label={description}
       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
         on ? 'bg-success-subtle text-success' : 'bg-muted text-muted-foreground line-through'
       }`}
