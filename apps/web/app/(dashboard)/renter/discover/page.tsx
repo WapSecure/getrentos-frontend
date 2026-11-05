@@ -149,7 +149,8 @@ export default function DiscoverPage() {
       />
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <main className="min-w-0 space-y-5">
+        {/* Not a second <main>: the page already has one; this is the results column. */}
+        <section aria-label="Search results" className="min-w-0 space-y-5">
           <PlainLanguageSearch
             onApply={(values) => setFilterOptions((prev) => ({ ...prev, ...values }))}
           />
@@ -211,7 +212,7 @@ export default function DiscoverPage() {
           ) : (
             <DiscoverMapView filters={filters} />
           )}
-        </main>
+        </section>
 
         <aside
           className="space-y-5 xl:sticky xl:top-24 xl:self-start"

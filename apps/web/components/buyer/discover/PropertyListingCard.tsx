@@ -103,7 +103,7 @@ export const PropertyListingCard = ({
             onViewDetails();
           }}
         >
-          View Details
+          View details
         </Button>
       </div>
     </motion.div>

@@ -115,6 +115,22 @@ const EMPLOYMENT_OPTIONS = ['Employed', 'Self-employed', 'Business owner', 'Stud
 const LEASE_TERM_OPTIONS = ['6 months', '12 months', '24 months'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** The API's refusal as a sentence that says what to change and where. */
+function refusalMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    const body = (error as { details?: unknown }).details as
+      | { message?: string | string[] }
+      | undefined;
+    const messages = Array.isArray(body?.message) ? body.message : [];
+    if (messages.some((m) => /^references\./.test(m)))
+      return 'Your reference needs a name and a phone number. Go back to References and complete them, or clear the reference.';
+    if (messages.some((m) => /^nextOfKin/.test(m)))
+      return 'Your next of kin needs a name and a phone number. Go back to References and complete them, or clear the entry.';
+    if (error.message) return error.message;
+  }
+  return 'Could not submit your application. Please try again.';
+}
+
 function validateStep(step: number, data: FormState): FieldErrors {
   const errors: FieldErrors = {};
   if (step === 0) {
@@ -126,6 +142,24 @@ function validateStep(step: number, data: FormState): FieldErrors {
     if (!data.currentAddress.trim()) errors.currentAddress = 'Enter your current address';
   } else if (step === 2) {
     if (!data.monthlyIncome.trim()) errors.monthlyIncome = 'Enter your monthly income';
+  } else if (step === 3) {
+    // Both contacts are optional as a whole, but a half-filled one is refused
+    // by the API (a reference needs a phone number), and that refusal used to
+    // land on the review step with nothing to point at.
+    type TextKey = {
+      [K in keyof FormState]: FormState[K] extends string ? K : never;
+    }[keyof FormState];
+    const contact = (who: string, name: TextKey, phone: TextKey) => {
+      if (!data[name].trim() && !data[phone].trim()) return;
+      if (!data[name].trim())
+        errors[name] = `Enter your ${who}'s name, or clear their phone number`;
+      if (!data[phone].trim())
+        errors[phone] = `Enter a phone number for your ${who}, or clear their name`;
+      else if (data[phone].replace(/\D/g, '').length < 10)
+        errors[phone] = 'Enter a phone number with at least 10 digits';
+    };
+    contact('next of kin', 'nextOfKinName', 'nextOfKinPhone');
+    contact('reference', 'referenceName', 'referencePhone');
   } else if (step === 4) {
     if (data.documents.some((d) => d.required && !d.uploaded)) {
       errors.documents = 'Upload every required document to continue';
@@ -436,7 +470,9 @@ export default function ApplyToRent() {
           {step === 2 ? (
             <IncomeStep data={data} update={update} errors={attempted ? stepErrors : {}} />
           ) : null}
-          {step === 3 ? <ReferencesStep data={data} update={update} /> : null}
+          {step === 3 ? (
+            <ReferencesStep data={data} update={update} errors={attempted ? stepErrors : {}} />
+          ) : null}
           {step === 4 ? (
             <DocumentsStep
               data={data}
@@ -654,9 +690,11 @@ function IncomeStep({
 function ReferencesStep({
   data,
   update,
+  errors,
 }: {
   data: FormState;
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
+  errors: FieldErrors;
 }) {
   const { spacing } = useTheme();
   const kinPhoneRef = useRef<TextInput>(null);
@@ -673,6 +711,7 @@ function ReferencesStep({
           placeholder="e.g. Ngozi Okoro"
           returnKeyType="next"
           value={data.nextOfKinName}
+          error={errors.nextOfKinName}
           onChangeText={(v) => update('nextOfKinName', v)}
           onSubmitEditing={() => kinPhoneRef.current?.focus()}
         />
@@ -683,6 +722,7 @@ function ReferencesStep({
           keyboardType="phone-pad"
           returnKeyType="next"
           value={data.nextOfKinPhone}
+          error={errors.nextOfKinPhone}
           onChangeText={(v) => update('nextOfKinPhone', v.replace(/(?!^\+)\D/g, ''))}
           onSubmitEditing={() => kinRelRef.current?.focus()}
         />
@@ -705,6 +745,7 @@ function ReferencesStep({
           placeholder="e.g. Previous landlord"
           returnKeyType="next"
           value={data.referenceName}
+          error={errors.referenceName}
           onChangeText={(v) => update('referenceName', v)}
           onSubmitEditing={() => refPhoneRef.current?.focus()}
         />
@@ -715,6 +756,7 @@ function ReferencesStep({
           keyboardType="phone-pad"
           returnKeyType="next"
           value={data.referencePhone}
+          error={errors.referencePhone}
           onChangeText={(v) => update('referencePhone', v.replace(/(?!^\+)\D/g, ''))}
           onSubmitEditing={() => refRelRef.current?.focus()}
         />
@@ -952,9 +994,7 @@ function ReviewStep({
           <ShieldAlert size={16} color={colors.warning} style={{ marginTop: 1 }} />
           <View style={{ flex: 1, gap: 4 }}>
             <Text variant="callout" style={{ color: colors.warning }}>
-              {error instanceof ApiError
-                ? error.message
-                : 'Could not submit your application. Please try again.'}
+              {refusalMessage(error)}
             </Text>
             {readGate(error) ? (
               <VerificationGateNotice error={error} scoreHref="/(app)/trust-score" />

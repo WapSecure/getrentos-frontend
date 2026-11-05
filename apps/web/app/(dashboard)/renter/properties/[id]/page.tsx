@@ -43,7 +43,7 @@ import { formatPrice, monthlyEquivalent } from '@/types/renter';
 import type { TourModalMode } from '@/types/virtual-tour';
 import { ROUTES, buildRoute } from '@/lib/constants/auth';
 import { renterService, type SavedListingItem } from '@/services/renterService';
-import { unwrap, type Paginated } from '@/lib/apiHelpers';
+import { unwrap, ApiError, type Paginated } from '@/lib/apiHelpers';
 import { renterKeys } from '@/lib/queryKeys';
 import { trustChainLabel } from '@getrentos/shared';
 import { useFlexAvailability } from '@/hooks/useFlexAvailability';
@@ -67,9 +67,16 @@ export default function PropertyDetailPage() {
   const propertyQuery = useQuery({
     queryKey: renterKeys.listing(params.id),
     queryFn: async () => {
-      const data = await unwrap(renterService.getListing(params.id));
-      renterService.recordListingView(params.id).catch(() => {});
-      return data;
+      try {
+        const data = await unwrap(renterService.getListing(params.id));
+        renterService.recordListingView(params.id).catch(() => {});
+        return data;
+      } catch (error) {
+        // A home that has been let or withdrawn is gone, not a connection
+        // problem: null renders the "not found" state below.
+        if (error instanceof ApiError && error.status === 404) return null;
+        throw error;
+      }
     },
   });
   const property = propertyQuery.data ?? null;

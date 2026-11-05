@@ -85,7 +85,7 @@ export const PropertyLandlordCard = ({ property }: PropertyLandlordCardProps) =>
         disabled={startConversationMutation.isPending}
       >
         <MessageCircle className="w-4 h-4" />
-        Message Landlord
+        Message landlord
       </Button>
     </Card>
   );
