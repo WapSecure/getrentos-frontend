@@ -49,6 +49,7 @@ import { qk } from '@/lib/query/keys';
 import { realtorApi, viewingBuckets } from '@/lib/api/realtor';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { firstName } from '@/lib/format';
+import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
 type SheetKind = 'lead' | 'viewing' | 'invite' | null;
 
@@ -273,6 +274,10 @@ export default function RealtorHome() {
         showMoney={showMoney}
         onToggle={toggleMoney}
       />
+
+      {/* Before the numbers: what an unverified realtor cannot do yet. */}
+      <IdentityNudge unlocks="listings, clients and commissions" />
+      <IdentityNudge requirement="licence" unlocks="listings and clients" />
 
       <QueryState
         query={dashboard}

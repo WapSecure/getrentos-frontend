@@ -40,6 +40,7 @@ import {
 } from '@/lib/api/agent';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate, firstName } from '@/lib/format';
+import { IdentityNudge } from '@/components/trust/IdentityNudge';
 
 export default function AgentHome() {
   const { profile } = useAuth();
@@ -132,6 +133,8 @@ export default function AgentHome() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Check your connection and try again. Your assigned work is safe."
       >
+        {/* Before anything else: an unverified agent cannot run visits or be paid. */}
+        <IdentityNudge unlocks="verification visits and payouts" />
         {/* What needs you first: work past its deadline. */}
         {dashboard.data && dashboard.data.overdueTasks > 0 ? (
           <AttentionCard
