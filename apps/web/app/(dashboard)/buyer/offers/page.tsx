@@ -22,6 +22,7 @@ import { unwrap } from '@/lib/apiHelpers';
 import { buyerKeys } from '@/lib/queryKeys';
 import { VerificationRequiredNotice } from '@/components/shared/verification/VerificationRequiredNotice';
 import { ROUTES } from '@/lib/constants/auth';
+import { getStoredUser } from '@/lib/authStorage';
 import type { BuyerOffer, BuyerOfferStatus, BuyerOfferMessage } from '@/types/buyer';
 
 type StatusFilter = 'all' | BuyerOfferStatus;
@@ -146,13 +147,15 @@ function BuyerOffersPageContent() {
     }
   };
 
+  const myId = getStoredUser<{ id?: string }>()?.id;
   const activeOffer = offers.find((o) => o.id === activeOfferId) || null;
 
   const messages: BuyerOfferMessage[] = activeOfferId
     ? thread.map((m) => ({
         id: m.id,
         offerId: m.offerId,
-        senderId: (m.senderId === 'buyer' ? 'buyer' : 'owner') as 'buyer' | 'owner',
+        senderId: (m.senderId === 'buyer' || (myId && m.senderId === myId) ? 'buyer' : 'owner') as
+          'buyer' | 'owner',
         senderName: m.senderName,
         type: m.type as BuyerOfferMessage['type'],
         amount: m.amount,
