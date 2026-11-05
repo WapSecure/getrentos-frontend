@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Alert } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import { useOverTheAirUpdates } from '@/hooks/useOverTheAirUpdates';
 import { portalHref } from '@/lib/roles';
 import { LISTING_AUDIENCE, portalForPendingListing, takeListingIntent } from '@/lib/pendingListing';
 import { HydrateThemePreference, persistThemePreference } from '@/lib/theme/preference';
+import { BRAND_FONT_SOURCES, BRAND_FONTS } from '@/lib/theme/fonts';
 import { useOnboardingSeen } from '@/lib/onboarding';
 import { SplashReveal } from '@/components/SplashReveal';
 import { AppLockGate } from '@/components/AppLockGate';
@@ -155,11 +157,20 @@ function Gate() {
 }
 
 function RootLayout() {
+  // The native splash stays up (Gate hides it) until the typeface is in, so
+  // the first frame is already in the brand face. If it fails to load, the
+  // platform face stands in rather than holding the app.
+  const [fontsLoaded, fontError] = useFonts(BRAND_FONT_SOURCES);
+  if (!fontsLoaded && !fontError) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <PersistQueryClientProvider client={queryClient} persistOptions={queryPersistenceOptions}>
-          <ThemeProvider onPreferenceChange={persistThemePreference}>
+          <ThemeProvider
+            onPreferenceChange={persistThemePreference}
+            fonts={fontsLoaded ? BRAND_FONTS : undefined}
+          >
             <HydrateThemePreference />
             <ToastProvider>
               <AuthProvider>
