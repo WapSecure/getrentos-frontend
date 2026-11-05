@@ -82,6 +82,7 @@ export function OfferComparisonPanel() {
                 <p className="text-muted-foreground">
                   {o.pricePosition}
                   {o.originalAmount && ` First offer ${o.originalAmount}.`}
+                  {o.yourCounter && ` You countered ${o.yourCounter}; waiting on the buyer.`}
                 </p>
                 <ul className="space-y-0.5 text-muted-foreground">
                   <li>

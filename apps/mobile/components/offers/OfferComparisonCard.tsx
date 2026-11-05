@@ -96,6 +96,11 @@ export function OfferComparisonCard({ side }: { side: OfferSide }) {
                         )}
                       </View>
                       <Text variant="callout">{o.amount}</Text>
+                      {o.yourCounter ? (
+                        <Text variant="caption" color="mutedForeground">
+                          You countered {o.yourCounter}; waiting on the buyer.
+                        </Text>
+                      ) : null}
                       <Text variant="caption" color="mutedForeground">
                         {o.pricePosition} {o.financing}. Deposit {o.deposit ?? 'none stated'}.{' '}
                         {o.expiry}
