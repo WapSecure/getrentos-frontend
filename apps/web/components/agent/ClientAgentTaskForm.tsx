@@ -16,9 +16,23 @@ import {
 } from '@getrentos/ui';
 import { unwrap } from '@/lib/apiHelpers';
 import { agentKeys } from '@/lib/queryKeys';
-import { agentService } from '@/services/agentService';
+import {
+  AGENT_WORKING_DAYS,
+  agentService,
+  type AgentFieldPreferences,
+} from '@/services/agentService';
 
-type Assignment = { id: string; status: string; agent: { id: string; legalName: string } };
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+/** Weekday code of a YYYY-MM-DD date (the date the client picked, as a calendar day). */
+const weekdayOf = (day: string) =>
+  AGENT_WORKING_DAYS[(new Date(`${day}T12:00:00Z`).getUTCDay() + 6) % 7];
+
+type Assignment = {
+  id: string;
+  status: string;
+  agent: { id: string; legalName: string; agentFieldPreference?: AgentFieldPreferences | null };
+};
 type Property = { id: string; title: string; city: string; state: string };
 
 const TASK_TYPES = ['INSPECTION', 'VERIFICATION', 'VALUATION', 'DOCUMENT_PICKUP'] as const;
@@ -55,6 +69,14 @@ export function ClientAgentTaskForm() {
   const assignments = (assignmentsData?.items ?? []) as Assignment[];
   const assignmentTotal = assignmentsData?.total ?? 0;
   const selected = assignments.find((item) => item.id === assignmentId);
+  const prefs = selected?.agent?.agentFieldPreference ?? null;
+  const offDay =
+    prefs &&
+    dueDate &&
+    prefs.workingDays.length > 0 &&
+    !prefs.workingDays.includes(weekdayOf(dueDate))
+      ? DAY_NAMES[AGENT_WORKING_DAYS.indexOf(weekdayOf(dueDate))]
+      : null;
   const { data: propertiesData } = useQuery({
     enabled: Boolean(assignmentId),
     queryKey: [
@@ -174,8 +196,35 @@ export function ClientAgentTaskForm() {
             placeholder="Task title"
           />
         </Field>
+        {prefs &&
+          (prefs.serviceAreas.length > 0 ||
+            prefs.workingDays.length > 0 ||
+            prefs.maxTasksPerDay !== null) && (
+            <div className="sm:col-span-2 rounded-lg border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">{selected?.agent?.legalName} works</p>
+              <ul className="mt-1 space-y-0.5">
+                {prefs.serviceAreas.length > 0 && <li>In {prefs.serviceAreas.join(', ')}</li>}
+                {prefs.workingDays.length > 0 && (
+                  <li>
+                    On{' '}
+                    {prefs.workingDays
+                      .map((d) => DAY_NAMES[AGENT_WORKING_DAYS.indexOf(d)].slice(0, 3))
+                      .join(', ')}
+                  </li>
+                )}
+                {prefs.maxTasksPerDay !== null && (
+                  <li>
+                    Up to {prefs.maxTasksPerDay} task{prefs.maxTasksPerDay === 1 ? '' : 's'} a day
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Due date">
+          <Field
+            label="Due date"
+            error={offDay ? `This agent doesn't take field work on ${offDay}s.` : undefined}
+          >
             <DatePicker value={dueDate} onChange={setDueDate} />
           </Field>
           <Field label="Due time">
@@ -207,7 +256,7 @@ export function ClientAgentTaskForm() {
       <Button
         className="mt-4"
         isLoading={create.isPending}
-        disabled={!selected || !propertyId || !title || !dueDate || !dueTime}
+        disabled={!selected || !propertyId || !title || !dueDate || !dueTime || Boolean(offDay)}
         onClick={() => create.mutate()}
       >
         Create task

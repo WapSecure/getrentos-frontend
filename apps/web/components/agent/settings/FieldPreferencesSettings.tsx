@@ -1,85 +1,206 @@
 'use client';
 
-import { useState } from 'react';
-import { Field, NumberInput, SaveButton, Switch, ToggleChip } from '@getrentos/ui';
+import { useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
+import { Button, Field, Input, NumberInput, Skeleton, ToggleChip, useToast } from '@getrentos/ui';
+import { unwrap } from '@/lib/apiHelpers';
+import { agentKeys } from '@/lib/queryKeys';
+import {
+  AGENT_WORKING_DAYS,
+  agentService,
+  type AgentFieldPreferences,
+  type AgentWorkingDay,
+} from '@/services/agentService';
 
-const serviceAreaOptions = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
-const dayOptions = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+// Starting suggestions only; an agent can add any area they cover.
+const SUGGESTED_AREAS = ['Victoria Island', 'Lekki', 'Ikoyi', 'Ikeja', 'Surulere', 'Yaba'];
+
+const DAY_LABELS: Record<AgentWorkingDay, string> = {
+  MON: 'Mon',
+  TUE: 'Tue',
+  WED: 'Wed',
+  THU: 'Thu',
+  FRI: 'Fri',
+  SAT: 'Sat',
+  SUN: 'Sun',
+};
 
 export const FieldPreferencesSettings = () => {
-  const [serviceAreas, setServiceAreas] = useState<string[]>(['Ikeja', 'Surulere']);
-  const [availableDays, setAvailableDays] = useState<string[]>(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
-  const [maxDailyTasks, setMaxDailyTasks] = useState('4');
-  const [syncOnCellular, setSyncOnCellular] = useState(false);
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [areas, setAreas] = useState<string[]>([]);
+  const [days, setDays] = useState<AgentWorkingDay[]>([]);
+  const [cap, setCap] = useState('');
+  const [newArea, setNewArea] = useState('');
 
-  const toggleArea = (area: string) => {
-    setServiceAreas((prev) =>
-      prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: agentKeys.settingsFieldPreferences,
+    queryFn: () => unwrap(agentService.getFieldPreferences()),
+  });
+
+  useEffect(() => {
+    if (!data) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAreas(data.serviceAreas);
+    setDays(data.workingDays);
+    setCap(data.maxTasksPerDay ? String(data.maxTasksPerDay) : '');
+  }, [data]);
+
+  const save = useMutation({
+    mutationFn: (prefs: AgentFieldPreferences) =>
+      unwrap(agentService.updateFieldPreferences(prefs)),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(agentKeys.settingsFieldPreferences, saved);
+      toast.success('Field preferences saved.');
+    },
+    onError: (error) => toast.error(error.message || 'Unable to save your field preferences.'),
+  });
+
+  const areaOptions = [...SUGGESTED_AREAS, ...areas.filter((a) => !SUGGESTED_AREAS.includes(a))];
+  const toggleArea = (area: string) =>
+    setAreas((prev) => (prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]));
+  const toggleDay = (day: AgentWorkingDay) =>
+    setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]));
+
+  const trimmedArea = newArea.trim();
+  const addArea = () => {
+    if (trimmedArea.length < 2) return;
+    const existing = areaOptions.find((a) => a.toLowerCase() === trimmedArea.toLowerCase());
+    setAreas((prev) =>
+      prev.includes(existing ?? trimmedArea) ? prev : [...prev, existing ?? trimmedArea]
     );
+    setNewArea('');
   };
 
-  const toggleDay = (day: string) => {
-    setAvailableDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
+  const capNumber = cap.trim() === '' ? null : Number(cap);
+  const capInvalid =
+    capNumber !== null && (!Number.isInteger(capNumber) || capNumber < 1 || capNumber > 20);
 
   return (
     <div>
       <h2 className="text-xl font-semibold text-foreground mb-4">Field Preferences</h2>
       <p className="text-sm text-muted-foreground mb-6">
-        Availability and offline behavior for field work
+        Where and when you take field work. Clients see these when they assign you a task, and tasks
+        can&apos;t be booked on a day you don&apos;t work or beyond your daily limit.
       </p>
 
-      <div className="space-y-4">
-        <div>
-          <p id="field-service-areas" className="block text-sm font-medium text-foreground mb-2">
-            Service Areas
-          </p>
-          <div role="group" aria-labelledby="field-service-areas" className="flex flex-wrap gap-2">
-            {serviceAreaOptions.map((area) => (
-              <ToggleChip
-                key={area}
-                pressed={serviceAreas.includes(area)}
-                onPressedChange={() => toggleArea(area)}
-              >
-                {area}
-              </ToggleChip>
-            ))}
-          </div>
+      {isLoading ? (
+        <div className="space-y-4" aria-busy="true">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-12 w-40" />
         </div>
-
-        <div>
-          <p id="field-available-days" className="block text-sm font-medium text-foreground mb-2">
-            Available Days
+      ) : isError ? (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            We couldn&apos;t load your field preferences.
           </p>
-          <div role="group" aria-labelledby="field-available-days" className="flex flex-wrap gap-2">
-            {dayOptions.map((day) => (
-              <ToggleChip
-                key={day}
-                pressed={availableDays.includes(day)}
-                onPressedChange={() => toggleDay(day)}
-              >
-                {day}
-              </ToggleChip>
-            ))}
-          </div>
+          <Button variant="outline" onClick={() => refetch()}>
+            Try again
+          </Button>
         </div>
+      ) : (
+        <>
+          <div className="space-y-6">
+            <div>
+              <p
+                id="field-service-areas"
+                className="block text-sm font-medium text-foreground mb-1"
+              >
+                Service areas
+              </p>
+              <p className="text-xs text-muted-foreground mb-2">
+                Leave all off if you cover anywhere.
+              </p>
+              <div
+                role="group"
+                aria-labelledby="field-service-areas"
+                className="flex flex-wrap gap-2"
+              >
+                {areaOptions.map((area) => (
+                  <ToggleChip
+                    key={area}
+                    pressed={areas.includes(area)}
+                    onPressedChange={() => toggleArea(area)}
+                  >
+                    {area}
+                  </ToggleChip>
+                ))}
+              </div>
+              <form
+                className="mt-3 flex max-w-md items-end gap-2"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addArea();
+                }}
+              >
+                <Field label="Add an area" className="flex-1">
+                  <Input
+                    value={newArea}
+                    maxLength={60}
+                    placeholder="For example: Gbagada"
+                    onChange={(e) => setNewArea(e.target.value)}
+                  />
+                </Field>
+                <Button type="submit" variant="outline" disabled={trimmedArea.length < 2}>
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Add
+                </Button>
+              </form>
+            </div>
 
-        <Field label="Max Tasks Per Day">
-          <NumberInput min={1} max={20} value={maxDailyTasks} onValueChange={setMaxDailyTasks} />
-        </Field>
+            <div>
+              <p id="field-working-days" className="block text-sm font-medium text-foreground mb-1">
+                Working days
+              </p>
+              <p className="text-xs text-muted-foreground mb-2">
+                Leave all off if you work every day.
+              </p>
+              <div
+                role="group"
+                aria-labelledby="field-working-days"
+                className="flex flex-wrap gap-2"
+              >
+                {AGENT_WORKING_DAYS.map((day) => (
+                  <ToggleChip
+                    key={day}
+                    pressed={days.includes(day)}
+                    onPressedChange={() => toggleDay(day)}
+                  >
+                    {DAY_LABELS[day]}
+                  </ToggleChip>
+                ))}
+              </div>
+            </div>
 
-        <Switch
-          checked={syncOnCellular}
-          onCheckedChange={setSyncOnCellular}
-          label="Sync photos over cellular data"
-          description="By default, large inspection photos wait for Wi-Fi to sync and save your data"
-          className="p-3 rounded-lg border border-border"
-        />
-      </div>
+            <Field
+              label="Most tasks due in one day"
+              hint="Leave empty for no limit."
+              error={capInvalid ? 'Enter a whole number from 1 to 20.' : undefined}
+              className="max-w-xs"
+            >
+              <NumberInput min={1} max={20} value={cap} onValueChange={setCap} />
+            </Field>
+          </div>
 
-      <SaveButton label="Save Preferences" className="mt-6" />
+          <Button
+            variant="primary"
+            className="mt-6"
+            isLoading={save.isPending}
+            disabled={capInvalid}
+            onClick={() =>
+              save.mutate({
+                serviceAreas: areas,
+                workingDays: AGENT_WORKING_DAYS.filter((d) => days.includes(d)),
+                maxTasksPerDay: capNumber,
+              })
+            }
+          >
+            Save Preferences
+          </Button>
+        </>
+      )}
     </div>
   );
 };

@@ -199,6 +199,7 @@ export const agentKeys = {
   trustProfile: ['agent', 'trust-profile'] as const,
   reviews: ['agent', 'reviews'] as const,
   settingsNotifications: ['agent', 'settings', 'notifications'] as const,
+  settingsFieldPreferences: ['agent', 'settings', 'field-preferences'] as const,
   notifications: ['agent', 'notifications'] as const,
   sync: ['agent', 'sync'] as const,
 };
