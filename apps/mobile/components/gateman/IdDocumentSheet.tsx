@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Camera, CheckCircle2, Images, RefreshCw, ShieldAlert } from 'lucide-react-native';
 import { Button, Card, Chip, Text, useTheme, useToast } from '@getrentos/ui-native';
@@ -16,6 +16,7 @@ import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import type { PickedFile } from '@/lib/api/documents';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
+import { Image as ExpoImage } from 'expo-image';
 
 /**
  * Recording the identity document a guard was shown.
@@ -152,10 +153,11 @@ export function IdDocumentSheet({
                 {recorded.checkedByName ? ` by ${recorded.checkedByName}` : ''}
               </Text>
               {recorded.documentUrl ? (
-                <Image
+                <ExpoImage
                   source={{ uri: recorded.documentUrl }}
                   style={{ width: '100%', height: 180, borderRadius: 12 }}
-                  resizeMode="contain"
+                  contentFit="contain"
+                  cachePolicy="memory-disk"
                 />
               ) : null}
               <Text variant="caption" color="mutedForeground">

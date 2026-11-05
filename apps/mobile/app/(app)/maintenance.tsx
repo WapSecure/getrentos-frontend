@@ -30,6 +30,7 @@ import {
 } from '@/lib/api/resident';
 import { qk } from '@/lib/query/keys';
 import { formatDate } from '@/lib/format';
+import { Image as ExpoImage } from 'expo-image';
 
 const CATEGORY_LABEL: Record<MaintenanceTicketCategory, string> = {
   plumbing: 'Plumbing',
@@ -150,7 +151,7 @@ export default function ResidentMaintenance() {
             <Card key={t.id} elevated>
               <View style={{ flexDirection: 'row', gap: spacing.md }}>
                 {t.photoUrl ? (
-                  <Image
+                  <ExpoImage
                     source={{ uri: t.photoUrl }}
                     style={{
                       width: 52,
@@ -158,6 +159,8 @@ export default function ResidentMaintenance() {
                       borderRadius: radius.md,
                       backgroundColor: colors.secondary,
                     }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
                   />
                 ) : (
                   <View
