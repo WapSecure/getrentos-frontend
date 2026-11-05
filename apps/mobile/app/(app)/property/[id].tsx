@@ -24,7 +24,6 @@ import {
   Card,
   Chip,
   Divider,
-  EmptyState,
   IconButton,
   LinkButton,
   Price,
@@ -107,11 +106,20 @@ export default function PropertyDetail() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
       >
-        <PropertyGallery images={toGallery(p?.image, p?.images)} height={300} />
+        {query.data === null ? null : (
+          <PropertyGallery images={toGallery(p?.image, p?.images)} height={300} />
+        )}
 
         <View style={{ padding: spacing.xl, gap: spacing.lg }}>
           <QueryState
             query={query}
+            isEmpty={query.data === null}
+            empty={{
+              icon: <Search size={34} color={colors.mutedForeground} />,
+              title: 'This home is no longer listed',
+              description: 'It may have been let or taken down. Keep browsing for homes like it.',
+              action: <Button label="Back to Discover" onPress={() => router.back()} />,
+            }}
             skeleton={
               <View style={{ gap: spacing.md }}>
                 <Skeleton height={26} width="55%" />
@@ -138,13 +146,6 @@ export default function PropertyDetail() {
                       />
                     ) : p.verified ? (
                       <Badge label="Verified" tone="success" />
-                    ) : query.data === null ? (
-                      <EmptyState
-                        icon={<Search size={34} color={colors.mutedForeground} />}
-                        title="This home is no longer listed"
-                        description="It may have been let or taken down. Keep browsing for homes like it."
-                        action={<Button label="Back to Discover" onPress={() => router.back()} />}
-                      />
                     ) : null}
                   </View>
                   <Text variant="heading" headingLevel={1}>
