@@ -32,7 +32,6 @@ import { unwrap } from '@/lib/apiHelpers';
 import { getStoredUser } from '@/lib/authStorage';
 import { formatDate } from '@/lib/format';
 import { homeManagementKeys } from '@/lib/queryKeys';
-import { InvoiceCheckPanel } from './InvoiceCheckPanel';
 import {
   homeManagementService,
   type CreateHomeManagementWorkOrderInvoiceInput,
@@ -40,6 +39,7 @@ import {
   type HomeManagementWorkOrderInvoice,
   type HomeManagementWorkOrderInvoiceStatus,
 } from '@/services/homeManagementService';
+import { InvoiceCheckPanel } from './InvoiceCheckPanel';
 
 type InvoiceLineItemForm = {
   id: string;
