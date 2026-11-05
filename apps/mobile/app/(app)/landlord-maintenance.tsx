@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { humaniseEnum } from '@getrentos/shared';
 import { Alert, Pressable, RefreshControl, View } from 'react-native';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -192,7 +193,7 @@ function RequestCard({
           <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
             {m.issueTitle}
           </Text>
-          <Badge label={m.priority} tone={PRIORITY_TONE[m.priority]} />
+          <Badge label={humaniseEnum(m.priority)} tone={PRIORITY_TONE[m.priority]} />
           <Badge
             label={MAINTENANCE_STATUS_LABEL[m.status]}
             tone={MAINTENANCE_STATUS_TONE[m.status]}

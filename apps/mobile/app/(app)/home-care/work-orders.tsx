@@ -41,7 +41,7 @@ export default function WorkOrders() {
     enabled: view === 'open',
   });
   const closed = useInfiniteQuery({
-    queryKey: qk.homeCare.workOrders(view),
+    queryKey: qk.homeCare.closedWorkOrders(view),
     queryFn: ({ pageParam }) =>
       homeCareApi.workOrders(view === 'resolved' ? 'RESOLVED' : 'CANCELLED', pageParam),
     initialPageParam: 1,
