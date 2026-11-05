@@ -149,10 +149,13 @@ export interface Document {
 }
 
 export interface LandlordInfo {
+  /** The landlord's user id, for starting a conversation. */
+  id?: string;
   name: string;
   email: string;
   phone: string;
-  responseRate: number;
+  /** Only when GetRentos actually measures it; never a placeholder. */
+  responseRate?: number;
   rating?: number;
 }
 

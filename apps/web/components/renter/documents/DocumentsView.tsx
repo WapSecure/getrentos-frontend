@@ -236,7 +236,18 @@ export const DocumentsView = () => {
 
       <DocumentsStats summary={documentSummary} />
 
-      <DocumentExpiryAlerts documents={documents} summary={documentSummary} />
+      <DocumentExpiryAlerts
+        documents={documents}
+        summary={documentSummary}
+        onReview={() =>
+          resetPageAndSet(
+            setFilterStatus,
+            documentSummary && documentSummary.expiring === 0 && documentSummary.expired > 0
+              ? 'expired'
+              : 'expiring'
+          )
+        }
+      />
 
       <div className="grid lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-6">

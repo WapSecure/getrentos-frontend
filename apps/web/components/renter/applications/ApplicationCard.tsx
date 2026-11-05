@@ -99,10 +99,12 @@ export const ApplicationCard = ({
                 <Calendar className="w-3 h-3" />
                 <span>Applied {formatDate(application.applicationDate)}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                <span>{application.landlord.responseRate}% response</span>
-              </div>
+              {application.landlord.responseRate !== undefined && (
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  <span>{application.landlord.responseRate}% response</span>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-wrap justify-between items-center gap-2 mt-3">

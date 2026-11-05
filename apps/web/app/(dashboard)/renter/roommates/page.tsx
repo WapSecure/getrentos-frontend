@@ -162,6 +162,7 @@ export default function RoommatesPage() {
             roommates={roommates}
             onRemove={handleRemoveRoommate}
             onUpdateShare={handleUpdateShare}
+            onInvite={() => setShowInviteModal(true)}
           />
           <ExpenseTracker
             expenses={expenses}

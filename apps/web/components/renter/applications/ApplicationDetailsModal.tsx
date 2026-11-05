@@ -1,6 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { unwrap } from '@/lib/apiHelpers';
+import { renterKeys } from '@/lib/queryKeys';
+import { ROUTES } from '@/lib/constants/auth';
+import { renterService } from '@/services/renterService';
 import {
   X,
   MapPin,
@@ -10,7 +16,6 @@ import {
   FileText,
   Clock,
   MessageCircle,
-  Download,
   Trash2,
   Shield,
 } from 'lucide-react';
@@ -25,6 +30,7 @@ import {
   TabsList,
   TabsTrigger,
   type BadgeVariant,
+  useToast,
 } from '@getrentos/ui';
 import { Application } from '@/types/renter';
 import { pluralize } from '@/lib/format';
@@ -62,6 +68,19 @@ export const ApplicationDetailsModal = ({
   notes = [],
 }: ApplicationDetailsModalProps) => {
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const contactLandlord = useMutation({
+    mutationFn: () =>
+      unwrap(renterService.startConversation(application.landlord.id!, application.propertyId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: renterKeys.conversations });
+      router.push(ROUTES.RENTER_MESSAGES);
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : 'Could not open a conversation.'),
+  });
   const [activeTab, setActiveTab] = useState<'details' | 'timeline' | 'notes'>('details');
 
   const formatDate = (dateString: string) => {
@@ -237,10 +256,12 @@ export const ApplicationDetailsModal = ({
                             <Phone className="w-3 h-3" />
                             <span>{application.landlord.phone}</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{application.landlord.responseRate}% response rate</span>
-                          </div>
+                          {application.landlord.responseRate !== undefined && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{application.landlord.responseRate}% response rate</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -312,22 +333,19 @@ export const ApplicationDetailsModal = ({
                 )}
 
                 {/* Actions */}
-                <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-                  <Button
-                    variant="primary"
-                    className="flex-1"
-                    icon={<MessageCircle className="w-4 h-4" />}
-                  >
-                    Contact landlord
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    icon={<Download className="w-4 h-4" />}
-                  >
-                    Download application
-                  </Button>
-                </div>
+                {application.landlord.id && (
+                  <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                    <Button
+                      variant="primary"
+                      className="flex-1"
+                      icon={<MessageCircle className="w-4 h-4" />}
+                      isLoading={contactLandlord.isPending}
+                      onClick={() => contactLandlord.mutate()}
+                    >
+                      Contact landlord
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
