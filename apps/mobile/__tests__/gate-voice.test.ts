@@ -1,5 +1,4 @@
-import { digitsFromSpeech } from '../lib/voice';
-import { spokenOutcome } from '../components/gateman/useGateVoice';
+import { digitsFromSpeech, spokenGateOutcome as spokenOutcome } from '@getrentos/shared';
 
 jest.mock('expo-speech', () => ({
   speak: jest.fn(),
@@ -37,7 +36,7 @@ describe('what the gate phone says', () => {
     expect(spokenOutcome({ pass }, 'This person is barred from the estate.')).toBe(
       'Stop. This person is barred from the estate.'
     );
-    expect(spokenOutcome({ queued: 'PIN 409221' }, null)).toContain('Saved on this phone');
+    expect(spokenOutcome({ queued: 'PIN 409221' }, null)).toContain('Saved on this device');
     expect(spokenOutcome(null, null)).toBeNull();
   });
 });

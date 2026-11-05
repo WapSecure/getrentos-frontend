@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import jsQR from 'jsqr';
-import { CheckCircle2, CloudOff, LogOut, QrCode, UserPlus, XCircle } from 'lucide-react';
+import { CheckCircle2, CloudOff, LogOut, Mic, QrCode, UserPlus, XCircle } from 'lucide-react';
 import {
   Alert,
   Button,
@@ -14,10 +14,14 @@ import {
   PageHeader,
   Pagination,
   SearchInput,
+  Switch,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { WalkInDialog } from '@/components/gateman/WalkInDialog';
+import { useGateVoice } from '@/components/gateman/useGateVoice';
+import { digitsFromSpeech } from '@getrentos/shared';
+import { useVoiceInput } from '@/lib/voice';
 import { WatchlistBlockedNotice } from '@/components/gateman/WatchlistBlockedNotice';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
@@ -110,6 +114,16 @@ export default function GatemanVerifyPage() {
   } | null>(null);
   /** A failed override attempt, kept separate so the guard's typed reason survives it. */
   const [overrideError, setOverrideError] = useState<string | null>(null);
+
+  // Voice at the gate: say the PIN, and hear each outcome while watching the visitor.
+  const gateVoice = useGateVoice(result, blocked?.refusal.message ?? null);
+  const checkInRef = useRef<((code: string) => void) | null>(null);
+  const voicePin = useVoiceInput('en', (heard) => {
+    const digits = digitsFromSpeech(heard).slice(0, 6);
+    setResult(null);
+    setPin(digits);
+    if (digits.length === 6) checkInRef.current?.(digits);
+  });
   const scanInputRef = useRef<HTMLInputElement>(null);
   const pinInputRef = useRef<HTMLInputElement>(null);
 
@@ -289,6 +303,14 @@ export default function GatemanVerifyPage() {
       setResult({ error: message });
     },
   });
+
+  useEffect(() => {
+    checkInRef.current = (code) => {
+      if (verify.isPending) return;
+      setBlocked(null);
+      verify.mutate({ code }, { onSettled: () => pinInputRef.current?.focus() });
+    };
+  }, [verify]);
 
   const checkOut = useMutation({
     mutationFn: (pass: VisitorPass) =>
@@ -522,6 +544,19 @@ export default function GatemanVerifyPage() {
               aria-label="Visitor PIN"
               inputClassName="text-center text-3xl tracking-[0.3em] font-bold"
             />
+            {voicePin.available && (
+              <Button
+                type="button"
+                variant="ghost"
+                fullWidth
+                className="gap-2"
+                onClick={() => (voicePin.listening ? voicePin.stop() : voicePin.start())}
+              >
+                <Mic className={`w-4 h-4 ${voicePin.listening ? 'text-destructive' : ''}`} />
+                {voicePin.listening ? 'Listening… say the PIN' : 'Say the PIN'}
+              </Button>
+            )}
+            {voicePin.error && <p className="text-xs text-muted-foreground">{voicePin.error}</p>}
             <Button
               type="submit"
               variant="primary"
@@ -534,6 +569,13 @@ export default function GatemanVerifyPage() {
               Check in
             </Button>
           </form>
+
+          <Switch
+            checked={gateVoice.enabled}
+            onCheckedChange={gateVoice.toggle}
+            label="Speak results"
+            description="Hear who is checked in, or why not, while you watch the visitor."
+          />
 
           {/* The visitor who has nothing arranged. Raising a request is not the
               same as letting them in: the household is asked first. */}
