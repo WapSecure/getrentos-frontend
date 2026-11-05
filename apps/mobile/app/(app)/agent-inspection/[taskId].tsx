@@ -17,6 +17,8 @@ import {
 import { ApiError } from '@/lib/api/client';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { goBack } from '@/lib/goBack';
+import { InspectionDraftPanel } from '@/components/agent/InspectionDraftPanel';
+import { roomKey, type InspectionDraft } from '@/lib/api/inspectionDraft';
 
 const TYPES: { value: AgentInspectionType; label: string }[] = [
   { value: 'MOVE_IN', label: 'Move-in' },
@@ -119,6 +121,24 @@ export default function SubmitInspection() {
 
   const removeRoom = (key: number) => {
     setRooms((prev) => prev.filter((r) => r.key !== key));
+  };
+
+  // Fill each matching room from the draft; the agent's own notes are kept and
+  // the suggestion is added below them. Everything stays editable until submit.
+  const applyDraft = (draft: InspectionDraft) => {
+    const byKey = new Map(draft.rooms.map((r) => [roomKey(r.room), r]));
+    setRooms((prev) =>
+      prev.map((r) => {
+        const s = byKey.get(roomKey(r.room));
+        if (!s) return r;
+        const mine = r.notes?.trim() ?? '';
+        const notes = !mine || mine.includes(s.notes) ? s.notes : `${mine}\n${s.notes}`;
+        return { ...r, condition: s.condition ?? r.condition, notes };
+      })
+    );
+    if (!overallCondition.trim() && draft.overallCondition)
+      setOverallCondition(draft.overallCondition);
+    toast.show('Suggestions added. Check each room before you submit.', 'success');
   };
 
   const mutation = useMutation({
@@ -327,6 +347,14 @@ export default function SubmitInspection() {
             <Chip label="+ Custom room" onPress={() => addRoom('')} size="sm" />
           </View>
         </View>
+
+        <InspectionDraftPanel
+          taskId={taskId}
+          type={type}
+          rooms={rooms}
+          photoCount={photos.length}
+          onApply={applyDraft}
+        />
 
         <TextField
           label="Overall condition (optional)"
