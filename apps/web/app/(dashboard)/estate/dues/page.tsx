@@ -21,6 +21,7 @@ import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { CreateDuesModal } from '@/components/estate/dues/CreateDuesModal';
 import { DueRow } from '@/components/estate/dues/DueRow';
 import { DueSettingsModal } from '@/components/estate/dues/DueSettingsModal';
+import { CollectionPlanPanel } from '@/components/shared/collections/CollectionPlanPanel';
 import type { DueStatus } from '@/types/estate';
 
 const statusFilters: { value: DueStatus | 'all'; label: string }[] = [
@@ -169,6 +170,8 @@ export default function EstateDuesPage() {
           </Button>
         </div>
       </div>
+
+      <CollectionPlanPanel path={`/estate/${estate.id}/collections/plan`} />
 
       <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter dues by status">
         {statusFilters.map((filter) => (
