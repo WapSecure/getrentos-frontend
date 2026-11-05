@@ -81,6 +81,9 @@ export function PropertyGallery({
             recyclingKey={uri}
             transition={200}
             accessible={false}
+            // On the web build expo-image renders an <img>; alt keeps it from
+            // being read as an unnamed image. The scroll view announces the page.
+            alt={`Photo ${i + 1} of ${images.length}`}
             style={{ width, height }}
           />
         ))}

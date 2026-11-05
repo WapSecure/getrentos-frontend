@@ -64,7 +64,7 @@ export function HubTabs({ tabs, activeTab, onChange, className }: HubTabsProps) 
             onClick={() => onChange(tab.id)}
             className={`flex min-h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15 ${
               isActive
-                ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/10'
+                ? 'bg-accent text-accent-foreground shadow-sm ring-1 ring-primary/10'
                 : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
             }`}
           >

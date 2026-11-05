@@ -73,7 +73,7 @@ export const TenantCard = ({ tenant, delay = 0 }: TenantCardProps) => {
         {tenant.propertyName} • {tenant.unitName}
       </div>
       <div className="flex items-center justify-between mt-2">
-        <p className="text-xs text-muted-foreground/60">
+        <p className="text-xs text-muted-foreground">
           {moveInLabel} {formatDate(tenant.moveInDate)}
         </p>
         <div className="flex items-center gap-1">

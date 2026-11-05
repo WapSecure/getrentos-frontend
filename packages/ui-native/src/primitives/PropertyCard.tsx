@@ -173,6 +173,8 @@ function PropertyCardBase({
           transition={200}
           recyclingKey={property.id}
           accessible={false}
+          // Decorative on the web build: the card's title names the home.
+          alt=""
           style={StyleSheet.absoluteFill}
         />
       ) : (
