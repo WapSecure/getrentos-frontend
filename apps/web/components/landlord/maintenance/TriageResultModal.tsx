@@ -5,6 +5,7 @@ import { Check, Pencil, Sparkles, UserCog, X } from 'lucide-react';
 import {
   Badge,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -211,15 +212,11 @@ const TriageBody = ({
       )}
 
       {canDecide && offerAssign && mode !== 'reject' && (
-        <label className="flex items-center gap-2 text-sm text-foreground">
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-primary"
-            checked={alsoAssign}
-            onChange={(e) => setAlsoAssign(e.target.checked)}
-          />
-          Also assign {triage.suggestedVendor?.name}
-        </label>
+        <Checkbox
+          checked={alsoAssign}
+          onCheckedChange={setAlsoAssign}
+          label={<>Also assign {triage.suggestedVendor?.name}</>}
+        />
       )}
 
       {canDecide && (

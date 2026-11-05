@@ -16,6 +16,7 @@ import {
   Skeleton,
   hasSessionDraft,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { buyerService } from '@/services/buyerService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -155,7 +156,8 @@ function BuyerOffersPageContent() {
         id: m.id,
         offerId: m.offerId,
         senderId: (m.senderId === 'buyer' || (myId && m.senderId === myId) ? 'buyer' : 'owner') as
-          'buyer' | 'owner',
+          | 'buyer'
+          | 'owner',
         senderName: m.senderName,
         type: m.type as BuyerOfferMessage['type'],
         amount: m.amount,
@@ -177,22 +179,24 @@ function BuyerOffersPageContent() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Offers</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Offers"
+        description={
+          <>
             {total} offer{total === 1 ? '' : 's'} you&apos;ve made
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          icon={<Plus className="w-4 h-4" />}
-          className="w-fit"
-          onClick={() => setIsMakeOfferOpen(true)}
-        >
-          Make an Offer
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            icon={<Plus className="w-4 h-4" />}
+            className="w-fit"
+            onClick={() => setIsMakeOfferOpen(true)}
+          >
+            Make an Offer
+          </Button>
+        }
+      />
 
       {createMutation.error && (
         <div className="mb-6">

@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  ShieldCheck,
   LockKeyhole,
   Plus,
   KeyRound,
@@ -16,7 +15,7 @@ import { CreateStaffModal } from '@/components/admin/access/CreateStaffModal';
 import { ResetPasswordModal } from '@/components/admin/access/ResetPasswordModal';
 import { StaffApprovalsPanel } from '@/components/admin/access/StaffApprovalsPanel';
 import { StaffStatusBadge } from '@/components/admin/access/StaffStatusBadge';
-import { Alert, Badge } from '@getrentos/ui';
+import { Alert, Badge, PageHeader } from '@getrentos/ui';
 import { Button } from '@getrentos/ui';
 import { ConfirmDialog } from '@getrentos/ui';
 import { Select } from '@getrentos/ui';
@@ -126,24 +125,17 @@ export default function AdminAccessPage() {
 
   return (
     <>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-accent p-2.5 text-primary">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="type-title">Access & Roles</h1>
-            <p className="mt-1 text-muted-foreground">
-              Manage internal staff, their roles, and the approval workflow.
-            </p>
-          </div>
-        </div>
-        {canCreate && (
-          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
-            Add staff member
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Access & Roles"
+        description="Manage internal staff, their roles, and the approval workflow."
+        actions={
+          canCreate ? (
+            <Button icon={<Plus className="h-4 w-4" />} onClick={() => setCreateOpen(true)}>
+              Add staff member
+            </Button>
+          ) : null
+        }
+      />
 
       <Alert variant="warning" icon={LockKeyhole} className="mb-6">
         <p>

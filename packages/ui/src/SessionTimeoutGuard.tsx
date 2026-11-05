@@ -62,7 +62,7 @@ export function SessionTimeoutGuard({
           )}
         >
           <div className="flex items-start gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-warning-subtle text-warning">
               <Clock className="h-5 w-5" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">

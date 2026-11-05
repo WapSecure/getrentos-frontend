@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Card } from '@getrentos/ui';
+import { Card, PageHeader } from '@getrentos/ui';
 import { useSearchParams } from 'next/navigation';
 import { useRealtorUser } from '../layout';
 import { User, Bell, Landmark, SlidersHorizontal, ShieldCheck, Download } from 'lucide-react';
@@ -58,10 +58,7 @@ export default function RealtorSettingsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account preferences</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account preferences" />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">

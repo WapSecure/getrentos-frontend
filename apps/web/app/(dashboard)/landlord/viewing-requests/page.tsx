@@ -17,6 +17,7 @@ import {
   ListSkeleton,
   Skeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { landlordService } from '@/services/landlordService';
 import { VideoCallButton } from '@/components/shared/VideoCallButton';
@@ -116,12 +117,10 @@ export default function LandlordViewingRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Viewing requests</h1>
-        <p className="text-muted-foreground mt-1">
-          Renters who want to see a property before applying. Confirm a time or decline.
-        </p>
-      </div>
+      <PageHeader
+        title="Viewing requests"
+        description="Renters who want to see a property before applying. Confirm a time or decline."
+      />
 
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (

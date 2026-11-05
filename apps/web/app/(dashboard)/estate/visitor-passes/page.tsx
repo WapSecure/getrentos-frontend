@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   Pagination,
   ToggleChip,
+  PageHeader,
 } from '@getrentos/ui';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
@@ -131,10 +132,10 @@ export default function EstateVisitorPassesPage() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Visitor Passes</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Visitor Passes"
+        description={
+          <>
             {isPassesLoading ? (
               'Loading…'
             ) : (
@@ -143,20 +144,22 @@ export default function EstateVisitorPassesPage() {
               </>
             )}{' '}
             in {estate.name}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          className="gap-2"
-          onClick={() => {
-            setHouseholdPage(1);
-            setIsModalOpen(true);
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          Issue Pass
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={() => {
+              setHouseholdPage(1);
+              setIsModalOpen(true);
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Issue Pass
+          </Button>
+        }
+      />
 
       <div className="flex flex-wrap gap-2 mb-6" role="group" aria-label="Filter passes by status">
         {statusFilters.map((filter) => (

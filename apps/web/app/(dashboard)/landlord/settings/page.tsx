@@ -3,7 +3,7 @@
 import { useLandlordUser } from '../layout';
 import { useState } from 'react';
 import { User, Bell, Landmark, Zap, Download } from 'lucide-react';
-import { Card } from '@getrentos/ui';
+import { Card, PageHeader } from '@getrentos/ui';
 import { ProfileSettings } from '@/components/landlord/settings/ProfileSettings';
 import { NotificationSettings } from '@/components/landlord/settings/NotificationSettings';
 import { PayoutSettings } from '@/components/landlord/settings/PayoutSettings';
@@ -43,10 +43,7 @@ export default function LandlordSettingsPage() {
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account preferences and automation</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account preferences and automation" />
 
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="lg:w-64 shrink-0">

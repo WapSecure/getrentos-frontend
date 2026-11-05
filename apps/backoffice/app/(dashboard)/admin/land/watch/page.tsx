@@ -9,6 +9,7 @@ import {
   Button,
   EmptyState,
   ListSkeleton,
+  PageHeader,
   QueryState,
   Select,
   Tabs,
@@ -60,13 +61,10 @@ export default function AdminLandWatchPage() {
   }
   return (
     <>
-      <div className="mb-6">
-        <h1 className="type-title">Land Watch</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Field inspections of watched land and of land before purchase, and the incidents owners
-          and inspectors report. Reports with doubtful GPS or media come first.
-        </p>
-      </div>
+      <PageHeader
+        title="Land Watch"
+        description="Field inspections of watched land and of land before purchase, and the incidents owners and inspectors report. Reports with doubtful GPS or media come first."
+      />
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)} className="mb-5">
         <TabsList aria-label="Land Watch view">
           <TabsTrigger value="inspections">Inspections</TabsTrigger>

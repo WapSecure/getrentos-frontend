@@ -21,6 +21,7 @@ import {
   SearchInput,
   ToggleChip,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { PaginatedSelect } from '@/components/ui/PaginatedSelect';
 import { unwrap } from '@/lib/apiHelpers';
@@ -164,17 +165,19 @@ export default function RealtorLeadsPage() {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Leads</h1>
-          <p className="text-muted-foreground mt-1">
+      <PageHeader
+        title="Leads"
+        description={
+          <>
             {total} lead{total === 1 ? '' : 's'} across your listings
-          </p>
-        </div>
-        <Button icon={<Plus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
-          Add lead
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button icon={<Plus className="h-4 w-4" />} onClick={() => setIsCreateOpen(true)}>
+            Add lead
+          </Button>
+        }
+      />
 
       <div className="mb-6 flex min-w-0 flex-col gap-3 sm:flex-row">
         <SearchInput

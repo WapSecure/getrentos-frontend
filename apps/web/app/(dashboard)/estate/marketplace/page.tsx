@@ -33,6 +33,7 @@ import {
   StatCard,
   StatGridSkeleton,
   useToast,
+  PageHeader,
 } from '@getrentos/ui';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { ListingMediaPanel } from '@/components/estate/marketplace/ListingMediaPanel';
@@ -513,13 +514,15 @@ export default function EstateMarketplacePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-      <header>
-        <h1 className="text-2xl font-bold text-foreground">Marketplace</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Advertise the properties inside {estate?.name}. Owners keep their property; this estate
-          gains the right to market it.
-        </p>
-      </header>
+      <PageHeader
+        title="Marketplace"
+        description={
+          <>
+            Advertise the properties inside {estate?.name}. Owners keep their property; this estate
+            gains the right to market it.
+          </>
+        }
+      />
 
       {inventory.isLoading ? (
         <StatGridSkeleton />
