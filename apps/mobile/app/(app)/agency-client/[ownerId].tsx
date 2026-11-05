@@ -9,8 +9,8 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -26,7 +26,7 @@ import {
   type AgencyClient,
   type ClientStage,
 } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { formatNaira } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -52,57 +52,52 @@ export default function AgencyClientScreen() {
         subtitle={c?.companyName ?? undefined}
         onBack={() => goBack()}
       />
-      {!c ? (
-        q.isError ? (
-          <ErrorState
-            title="This client did not load"
-            description={q.error instanceof ApiError ? q.error.message : undefined}
-            onRetry={() => q.refetch()}
-          />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl
-              refreshing={q.isRefetching}
-              onRefresh={() => q.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <Contact client={c} />
-          <Stage client={c} />
-          <Card style={{ gap: spacing.sm }}>
-            <Text variant="heading">Properties</Text>
-            {c.properties.map((p) => (
-              <View
-                key={p.propertyId}
-                style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}
-              >
-                <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
-                  {p.title}
-                </Text>
-                <Badge
-                  label={MANDATE_STATUS[p.mandateStatus]?.label ?? p.mandateStatus}
-                  tone={MANDATE_STATUS[p.mandateStatus]?.tone ?? 'neutral'}
-                />
-              </View>
-            ))}
-          </Card>
-          <Notes client={c} />
-          <ClientMoneyCard ownerId={c.ownerId} />
-        </ScrollView>
-      )}
+      <QueryState
+        query={q}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This client did not load"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {c ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={q.isRefetching}
+                onRefresh={() => q.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            <Contact client={c} />
+            <Stage client={c} />
+            <Card style={{ gap: spacing.sm }}>
+              <Text variant="heading">Properties</Text>
+              {c.properties.map((p) => (
+                <View
+                  key={p.propertyId}
+                  style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}
+                >
+                  <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
+                    {p.title}
+                  </Text>
+                  <Badge
+                    label={MANDATE_STATUS[p.mandateStatus]?.label ?? p.mandateStatus}
+                    tone={MANDATE_STATUS[p.mandateStatus]?.tone ?? 'neutral'}
+                  />
+                </View>
+              ))}
+            </Card>
+            <Notes client={c} />
+            <ClientMoneyCard ownerId={c.ownerId} />
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }
@@ -147,21 +142,16 @@ function Contact({ client: c }: { client: AgencyClient }) {
 }
 
 function Stage({ client: c }: { client: AgencyClient }) {
-  const qc = useQueryClient();
-  const toast = useToast();
-  const key = qk.agency.client(c.ownerId);
-  const set = useMutation({
+  const set = useOptimisticMutation({
     mutationFn: (stage: ClientStage) => agencyApi.setClientStage(c.ownerId, stage),
-    onMutate: async (stage) => {
-      const previous = qc.getQueryData<AgencyClient>(key);
-      qc.setQueryData<AgencyClient>(key, (old) => (old ? { ...old, stage } : old));
-      return { previous };
-    },
-    onSuccess: () => toast.show('Stage updated.', 'success'),
-    onError: (_e, _v, ctx) => {
-      if (ctx?.previous) qc.setQueryData(key, ctx.previous);
-      toast.show('Could not update stage.', 'error');
-    },
+    patches: () => [
+      {
+        queryKey: qk.agency.client(c.ownerId),
+        update: (old, s) => ({ ...(old as AgencyClient), stage: s }),
+      },
+    ],
+    errorMessage: 'Could not update stage.',
+    successMessage: 'Stage updated.',
   });
   return (
     <ChipSelect

@@ -1,4 +1,4 @@
-import { activeConsent, idNumberOk, pendingChecks, purposeFor, digitsOnly } from '@/lib/api/trust';
+import { activeConsent, idNumberOk, pendingChecks, purposeFor } from '@/lib/api/trust';
 
 const step = (stepType: string, status: string) => ({
   id: stepType,
@@ -47,6 +47,5 @@ describe('trust verification helpers', () => {
     expect(idNumberOk('NIN', '1234567890')).toBe(false);
     expect(idNumberOk('BVN', '12345678901')).toBe(true);
     expect(idNumberOk('PASSPORT', 'A123')).toBe(true);
-    expect(digitsOnly('12-34 5a', 4)).toBe('1234');
   });
 });

@@ -101,6 +101,31 @@ export const IMPERSONATION_CHANNELS: { value: ImpersonationChannel; label: strin
   { value: 'OTHER', label: 'Something else' },
 ];
 
+/** What to tell the tenant about a contact they checked, and how loudly. */
+export function verdictAlert(r: ContactVerdict): { tone: 'success' | 'error'; message: string } {
+  switch (r.verdict) {
+    case 'VERIFIED':
+      return {
+        tone: 'success',
+        message: `This is ${r.name}, ${r.role.toLowerCase()} for ${r.propertyTitle}. Even so, only pay rent in GetRentos.`,
+      };
+    case 'NEVER_PAY_OUTSIDE':
+      return {
+        tone: 'error',
+        message:
+          'Do not pay into any bank account, whoever asks. Your landlord and manager are paid by GetRentos; you pay only in GetRentos. If someone asked you to pay this account, report it below.',
+      };
+    case 'INVALID':
+      return { tone: 'error', message: r.message };
+    default:
+      return {
+        tone: 'error',
+        message:
+          'This is not anyone who manages your home. Do not pay them or share codes or documents. Report it below.',
+      };
+  }
+}
+
 export const reportReady = (claimedToBe: string, description: string) =>
   claimedToBe.trim().length >= 2 && description.trim().length >= 10;
 

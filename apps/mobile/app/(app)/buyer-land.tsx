@@ -10,9 +10,9 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
@@ -66,9 +66,11 @@ export default function BuyerLand() {
         subtitle="Plots you hold and plots you are paying for"
         onBack={() => goBack()}
       />
-      {list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
-      ) : (
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={3} variant="card" height={110} />}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={purchases}
           keyExtractor={(p) => p.id}
@@ -157,24 +159,17 @@ export default function BuyerLand() {
             />
           }
           ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={110} />
-            ) : (
-              <EmptyState
-                icon={<LandPlot size={32} color={colors.mutedForeground} />}
-                title={filter ? 'No purchases with this status' : 'No plot purchases yet'}
-                description="Reserve a plot in a verified estate, then start a purchase on one of its payment plans."
-                action={
-                  <Button
-                    label="Browse estates"
-                    onPress={() => router.push('/(app)/land-estates')}
-                  />
-                }
-              />
-            )
+            <EmptyState
+              icon={<LandPlot size={32} color={colors.mutedForeground} />}
+              title={filter ? 'No purchases with this status' : 'No plot purchases yet'}
+              description="Reserve a plot in a verified estate, then start a purchase on one of its payment plans."
+              action={
+                <Button label="Browse estates" onPress={() => router.push('/(app)/land-estates')} />
+              }
+            />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

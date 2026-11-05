@@ -9,9 +9,9 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
   ListSkeleton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -56,16 +56,20 @@ export default function LandlordArrears() {
         subtitle="Overdue rent, oldest first"
         onBack={() => goBack()}
       />
-      {list.isError && !list.data ? (
-        <ErrorState
-          title="Arrears are unavailable"
-          description="We could not load overdue balances. No tenant status has been changed."
-          onRetry={() => {
+      <QueryState
+        query={{
+          data: list.data,
+          isError: list.isError,
+          refetch: () => {
             list.refetch();
             summary.refetch();
-          }}
-        />
-      ) : (
+          },
+        }}
+        skeleton={<ListSkeleton rows={4} />}
+        errorTitle="Arrears are unavailable"
+        errorDescription="We could not load overdue balances. No tenant status has been changed."
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(p) => p.id}
@@ -115,18 +119,14 @@ export default function LandlordArrears() {
             />
           }
           ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={4} />
-            ) : (
-              <EmptyState
-                icon={<AlertTriangle size={32} color={colors.mutedForeground} />}
-                title="Nothing in arrears"
-                description="Overdue rent appears here automatically once it passes its due date."
-              />
-            )
+            <EmptyState
+              icon={<AlertTriangle size={32} color={colors.mutedForeground} />}
+              title="Nothing in arrears"
+              description="Overdue rent appears here automatically once it passes its due date."
+            />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

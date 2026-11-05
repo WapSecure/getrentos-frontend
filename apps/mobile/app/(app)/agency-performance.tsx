@@ -2,10 +2,9 @@ import { useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Card, ErrorState, FormAlert, ListSkeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, FormAlert, ListSkeleton, QueryState, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { agencyFirmApi, ARREARS_BUCKET, recentMonths, type KpiReport } from '@/lib/api/agencyFirm';
-import { ApiError } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
@@ -54,15 +53,10 @@ export default function AgencyPerformance() {
         <ChipSelect label="To" options={[...months].reverse()} value={to} onChange={setTo} />
         {!valid ? (
           <FormAlert tone="warning" message="The first month must not be after the last." />
-        ) : q.isLoading ? (
-          <ListSkeleton rows={4} variant="card" height={100} />
-        ) : !q.data ? (
-          <ErrorState
-            description={q.error instanceof ApiError ? q.error.message : undefined}
-            onRetry={() => q.refetch()}
-          />
         ) : (
-          <Report r={q.data} />
+          <QueryState query={q} skeleton={<ListSkeleton rows={4} variant="card" height={100} />}>
+            <Report r={q.data!} />
+          </QueryState>
         )}
       </ScrollView>
     </View>

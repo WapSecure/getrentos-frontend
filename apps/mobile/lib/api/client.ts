@@ -51,6 +51,14 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * What to tell the person when a request fails: the API's own message when it
+ * sent one (it is written for people), otherwise the screen's fallback.
+ */
+export function errorMessage(e: unknown, fallback: string): string {
+  return e instanceof ApiError && e.message ? e.message : fallback;
+}
+
 export interface ApiRequest extends Omit<RequestInit, 'body' | 'headers'> {
   body?: unknown;
   headers?: Record<string, string>;

@@ -18,10 +18,10 @@ import {
   Card,
   DateField,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
   NumberField,
   Price,
+  QueryState,
   Text,
   TextField,
   toISODate,
@@ -45,14 +45,12 @@ import {
   type LegalCaseOutcome,
   type LegalCaseStatus,
 } from '@/lib/api/legalCases';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 type SheetKind = 'advocate' | 'cost' | null;
 
@@ -85,13 +83,13 @@ export default function LegalCaseScreen() {
   const close = useMutation({
     mutationFn: () => legalCasesApi.close(id),
     onSuccess: settle('Case closed.'),
-    onError: (e) => toast.show(errorText(e, 'Could not close the case.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not close the case.'), 'error'),
   });
   const withdraw = useMutation({
     mutationFn: () =>
       legalCasesApi.withdraw(id, 'Withdrawn by the owner after the tenant settled directly.'),
     onSuccess: settle('Case withdrawn.'),
-    onError: (e) => toast.show(errorText(e, 'Could not withdraw the case.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw the case.'), 'error'),
   });
 
   const confirmClose = () =>
@@ -123,107 +121,107 @@ export default function LegalCaseScreen() {
         }
         onBack={() => goBack()}
       />
-      {!c ? (
-        query.isError ? (
-          <ErrorState
-            title="This case did not load"
-            description="It may not be one you can read."
-            onRetry={() => query.refetch()}
-          />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <StageTrack status={c.status} />
-
-          {c.court ? (
-            <Fact icon={Landmark}>
-              {c.court}
-              {c.suitNumber ? ` · ${c.suitNumber}` : ''}
-            </Fact>
-          ) : null}
-          {c.advocateName ? (
-            <Fact icon={Briefcase}>
-              {[c.advocateName, c.advocateFirm, c.advocateContact].filter(Boolean).join(' · ')}
-              {c.advocateFeeAgreement ? `\n${c.advocateFeeAgreement}` : ''}
-            </Fact>
-          ) : null}
-
-          <NextAction legalCase={c} onSaved={settle} />
-
-          {c.status === 'DECIDED' && c.enforcementAt ? (
-            <FormAlert
-              tone="info"
-              title="Enforcement recorded"
-              message="Close the case once nothing further is expected on it."
-            />
-          ) : null}
-
-          {c.costs.items.length > 0 ? <Costs legalCase={c} /> : null}
-
-          <Timeline legalCase={c} />
-
-          {isDone(c) ? (
-            <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-              <Lock size={14} color={colors.mutedForeground} style={{ marginTop: 2 }} />
-              <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                {c.status === 'WITHDRAWN'
-                  ? 'Withdrawn. It stops being evidence of anything, and it does not unblock anything the way a closed case does.'
-                  : 'Closed. Nothing further is expected.'}
-              </Text>
-            </View>
-          ) : (
-            <View style={{ gap: spacing.sm }}>
-              <Button
-                label={c.advocateName ? 'Update advocate' : 'Record advocate'}
-                variant="secondary"
-                onPress={() => setSheet('advocate')}
+      <QueryState
+        query={query}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This case did not load"
+        errorDescription="It may not be one you can read."
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {c ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
               />
-              <Button label="Record a cost" variant="secondary" onPress={() => setSheet('cost')} />
+            }
+          >
+            <StageTrack status={c.status} />
+
+            {c.court ? (
+              <Fact icon={Landmark}>
+                {c.court}
+                {c.suitNumber ? ` · ${c.suitNumber}` : ''}
+              </Fact>
+            ) : null}
+            {c.advocateName ? (
+              <Fact icon={Briefcase}>
+                {[c.advocateName, c.advocateFirm, c.advocateContact].filter(Boolean).join(' · ')}
+                {c.advocateFeeAgreement ? `\n${c.advocateFeeAgreement}` : ''}
+              </Fact>
+            ) : null}
+
+            <NextAction legalCase={c} onSaved={settle} />
+
+            {c.status === 'DECIDED' && c.enforcementAt ? (
+              <FormAlert
+                tone="info"
+                title="Enforcement recorded"
+                message="Close the case once nothing further is expected on it."
+              />
+            ) : null}
+
+            {c.costs.items.length > 0 ? <Costs legalCase={c} /> : null}
+
+            <Timeline legalCase={c} />
+
+            {isDone(c) ? (
+              <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
+                <Lock size={14} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                  {c.status === 'WITHDRAWN'
+                    ? 'Withdrawn. It stops being evidence of anything, and it does not unblock anything the way a closed case does.'
+                    : 'Closed. Nothing further is expected.'}
+                </Text>
+              </View>
+            ) : (
+              <View style={{ gap: spacing.sm }}>
+                <Button
+                  label={c.advocateName ? 'Update advocate' : 'Record advocate'}
+                  variant="secondary"
+                  onPress={() => setSheet('advocate')}
+                />
+                <Button
+                  label="Record a cost"
+                  variant="secondary"
+                  onPress={() => setSheet('cost')}
+                />
+                <Button
+                  label="Close case"
+                  variant="ghost"
+                  loading={close.isPending}
+                  onPress={confirmClose}
+                />
+                <Button
+                  label="Withdraw case"
+                  variant="ghost"
+                  loading={withdraw.isPending}
+                  onPress={confirmWithdraw}
+                />
+              </View>
+            )}
+
+            {c.leaseId ? (
               <Button
-                label="Close case"
+                label="Open the tenancy's notices"
                 variant="ghost"
-                loading={close.isPending}
-                onPress={confirmClose}
+                onPress={() => router.push(`/(app)/notice-ladder/${c.leaseId}`)}
               />
-              <Button
-                label="Withdraw case"
-                variant="ghost"
-                loading={withdraw.isPending}
-                onPress={confirmWithdraw}
-              />
-            </View>
-          )}
+            ) : null}
 
-          {c.leaseId ? (
-            <Button
-              label="Open the tenancy's notices"
-              variant="ghost"
-              onPress={() => router.push(`/(app)/notice-ladder/${c.leaseId}`)}
-            />
-          ) : null}
-
-          <Text variant="caption" color="mutedForeground">
-            Opened by {c.openedByName ?? 'unknown'} on {formatDate(c.createdAt)}
-          </Text>
-        </ScrollView>
-      )}
+            <Text variant="caption" color="mutedForeground">
+              Opened by {c.openedByName ?? 'unknown'} on {formatDate(c.createdAt)}
+            </Text>
+          </ScrollView>
+        ) : null}
+      </QueryState>
 
       <Sheet
         open={sheet === 'advocate'}
@@ -372,7 +370,7 @@ function useCaseMutation<T>(
     mutationFn: fn,
     onSuccess: onSaved,
     // Shown verbatim: a refusal to file early is the server explaining why.
-    onError: (e) => toast.show(errorText(e, fallback), 'error'),
+    onError: (e) => toast.show(errorMessage(e, fallback), 'error'),
   });
 }
 

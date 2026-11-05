@@ -9,8 +9,8 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -27,14 +27,12 @@ import {
   type SetupForm,
 } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { pickDocument } from '@/lib/filePicker';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** The firm's details and its CAC verification (KYB), or starting a firm. */
 export default function AgencySetup() {
@@ -64,13 +62,7 @@ export default function AgencySetup() {
         }
         onBack={() => goBack()}
       />
-      {q.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl }}>
-          <DetailSkeleton />
-        </View>
-      ) : q.isError ? (
-        <ErrorState description={errorText(q.error, '')} onRetry={() => q.refetch()} />
-      ) : (
+      <QueryState query={q} skeleton={<DetailSkeleton />} style={{ paddingHorizontal: spacing.xl }}>
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: spacing.xl,
@@ -105,7 +97,7 @@ export default function AgencySetup() {
           <Details key={firm?.organizationId ?? 'new'} firm={firm} />
           {firm && setupEditable(firm) ? <Verification firm={firm} /> : null}
         </ScrollView>
-      )}
+      </QueryState>
     </View>
   );
 }
@@ -168,7 +160,7 @@ function Details({ firm }: { firm: Onboarding | null }) {
         switchWorkspace('manager');
       }
     },
-    onError: (e) => toast.show(errorText(e, 'Could not save the firm’s details.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save the firm’s details.'), 'error'),
   });
 
   return (
@@ -270,7 +262,7 @@ function Verification({ firm }: { firm: Onboarding }) {
       qc.invalidateQueries({ queryKey: qk.agency.onboarding });
       toast.show('Certificate uploaded.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not upload the certificate.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not upload the certificate.'), 'error'),
   });
   const submit = useMutation({
     mutationFn: agencyFirmApi.submitFirm,
@@ -278,7 +270,7 @@ function Verification({ firm }: { firm: Onboarding }) {
       qc.setQueryData(qk.agency.onboarding, updated);
       toast.show('Sent to GetRentos for verification.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not submit for verification.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not submit for verification.'), 'error'),
   });
   const certificate = firm.profile.certificateFileName;
   return (

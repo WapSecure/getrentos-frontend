@@ -10,10 +10,10 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
   NumberField,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -32,14 +32,12 @@ import {
   type InspectionItem,
 } from '@/lib/api/management';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { capturePhoto, pickPhoto } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** Camera or library, as the person prefers. Resolves null when they back out. */
 function choosePhoto(): Promise<PickedFile | null> {
@@ -77,7 +75,7 @@ export default function PropertyInspectionDetail() {
       refresh();
       toast.show('Inspection completed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not complete the inspection.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not complete the inspection.'), 'error'),
   });
   const share = useMutation({
     mutationFn: () => managementApi.shareInspection(id),
@@ -85,7 +83,7 @@ export default function PropertyInspectionDetail() {
       refresh();
       toast.show('Shared with the owner.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not share the report.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not share the report.'), 'error'),
   });
 
   const i = query.data;
@@ -119,110 +117,112 @@ export default function PropertyInspectionDetail() {
         }
         onBack={() => goBack()}
       />
-      {!i ? (
-        query.isError ? (
-          <ErrorState title="This inspection did not load" onRetry={() => query.refetch()} />
-        ) : (
+      <QueryState
+        query={query}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl }}>
             <DetailSkeleton />
           </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <Badge
-              label={INSPECTION_STATUS_LABEL[i.status]}
-              tone={INSPECTION_STATUS_TONE[i.status]}
-            />
-            <View style={{ flex: 1 }} />
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text variant="caption" color="mutedForeground">
-                Estimated remedial
-              </Text>
-              <Price amount={i.summary.estimatedRemedialCost} variant="bodyStrong" />
+        }
+        errorTitle="This inspection did not load"
+      >
+        {i ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Badge
+                label={INSPECTION_STATUS_LABEL[i.status]}
+                tone={INSPECTION_STATUS_TONE[i.status]}
+              />
+              <View style={{ flex: 1 }} />
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text variant="caption" color="mutedForeground">
+                  Estimated remedial
+                </Text>
+                <Price amount={i.summary.estimatedRemedialCost} variant="bodyStrong" />
+              </View>
             </View>
-          </View>
 
-          {i.summaryNotes ? (
-            <Card padding={spacing.lg}>
-              <Text variant="callout" color="mutedForeground">
-                {i.summaryNotes}
+            {i.summaryNotes ? (
+              <Card padding={spacing.lg}>
+                <Text variant="callout" color="mutedForeground">
+                  {i.summaryNotes}
+                </Text>
+              </Card>
+            ) : null}
+
+            {i.leaseId && !isDraft ? (
+              <Text variant="caption" color="mutedForeground">
+                {i.tenantAcknowledgedAt
+                  ? `The tenant acknowledged this report on ${formatDate(i.tenantAcknowledgedAt, 'short')}${
+                      i.tenantComment ? `: “${i.tenantComment}”` : '.'
+                    }`
+                  : 'Waiting for the tenant to acknowledge this report.'}
               </Text>
-            </Card>
-          ) : null}
+            ) : null}
 
-          {i.leaseId && !isDraft ? (
-            <Text variant="caption" color="mutedForeground">
-              {i.tenantAcknowledgedAt
-                ? `The tenant acknowledged this report on ${formatDate(i.tenantAcknowledgedAt, 'short')}${
-                    i.tenantComment ? `: “${i.tenantComment}”` : '.'
-                  }`
-                : 'Waiting for the tenant to acknowledge this report.'}
+            <Text variant="bodyStrong" accessibilityRole="header">
+              Areas
             </Text>
-          ) : null}
+            {i.items.length === 0 ? (
+              <Text variant="callout" color="mutedForeground">
+                No areas recorded yet.
+              </Text>
+            ) : (
+              i.items.map((item) => (
+                <AreaCard key={item.id} inspectionId={i.id} item={item} editable={isDraft} />
+              ))
+            )}
 
-          <Text variant="bodyStrong" accessibilityRole="header">
-            Areas
-          </Text>
-          {i.items.length === 0 ? (
-            <Text variant="callout" color="mutedForeground">
-              No areas recorded yet.
-            </Text>
-          ) : (
-            i.items.map((item) => (
-              <AreaCard key={item.id} inspectionId={i.id} item={item} editable={isDraft} />
-            ))
-          )}
+            {isDraft ? <AddAreaForm inspectionId={i.id} /> : null}
 
-          {isDraft ? <AddAreaForm inspectionId={i.id} /> : null}
+            {isDraft ? (
+              <Button
+                label="Complete inspection"
+                icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
+                loading={complete.isPending}
+                disabled={i.items.length === 0 || complete.isPending}
+                onPress={confirmComplete}
+              />
+            ) : null}
+            {isDraft && i.items.length === 0 ? (
+              <Text variant="caption" color="mutedForeground" center>
+                Add at least one area before completing.
+              </Text>
+            ) : null}
 
-          {isDraft ? (
-            <Button
-              label="Complete inspection"
-              icon={<CheckCircle2 size={16} color={colors.primaryForeground} />}
-              loading={complete.isPending}
-              disabled={i.items.length === 0 || complete.isPending}
-              onPress={confirmComplete}
-            />
-          ) : null}
-          {isDraft && i.items.length === 0 ? (
-            <Text variant="caption" color="mutedForeground" center>
-              Add at least one area before completing.
-            </Text>
-          ) : null}
-
-          {i.status === 'COMPLETED' && i.canShareWithOwner ? (
-            <Button
-              label="Share with the owner"
-              variant="secondary"
-              icon={<Send size={16} color={colors.secondaryForeground} />}
-              loading={share.isPending}
-              disabled={share.isPending}
-              onPress={() => share.mutate()}
-            />
-          ) : null}
-          {i.sharedAt ? (
-            <FormAlert
-              tone="info"
-              message={`Shared with the owner on ${formatDate(i.sharedAt)}.`}
-            />
-          ) : null}
-        </ScrollView>
-      )}
+            {i.status === 'COMPLETED' && i.canShareWithOwner ? (
+              <Button
+                label="Share with the owner"
+                variant="secondary"
+                icon={<Send size={16} color={colors.secondaryForeground} />}
+                loading={share.isPending}
+                disabled={share.isPending}
+                onPress={() => share.mutate()}
+              />
+            ) : null}
+            {i.sharedAt ? (
+              <FormAlert
+                tone="info"
+                message={`Shared with the owner on ${formatDate(i.sharedAt)}.`}
+              />
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }
@@ -246,7 +246,7 @@ function AreaCard({
       qc.invalidateQueries({ queryKey: ['management', 'inspections'] });
       toast.show('Photo added.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'That photo did not upload.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'That photo did not upload.'), 'error'),
   });
 
   const addPhoto = async () => {
@@ -326,7 +326,7 @@ function AddAreaForm({ inspectionId }: { inspectionId: string }) {
       qc.invalidateQueries({ queryKey: ['management', 'inspections'] });
       toast.show('Area added.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not add that area.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not add that area.'), 'error'),
   });
 
   return (

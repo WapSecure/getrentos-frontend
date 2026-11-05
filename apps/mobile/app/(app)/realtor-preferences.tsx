@@ -5,8 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Button,
   Chip,
-  ErrorState,
   NumberField,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -20,7 +20,7 @@ import {
   SERVICE_AREA_OPTIONS,
   type RealtorBusinessPreferences,
 } from '@/lib/api/realtor';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -48,13 +48,9 @@ export default function RealtorPreferences() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {q.isLoading ? (
-          <Skeleton height={260} />
-        ) : q.isError || !q.data ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (
-          <PreferencesForm initial={q.data} />
-        )}
+        <QueryState query={q} skeleton={<Skeleton height={260} />}>
+          {q.data ? <PreferencesForm initial={q.data} /> : null}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -83,8 +79,7 @@ function PreferencesForm({ initial }: { initial: RealtorBusinessPreferences }) {
       qc.invalidateQueries({ queryKey: qk.realtor.businessPreferences });
       toast.show('Preferences saved.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not save your preferences.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save your preferences.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>

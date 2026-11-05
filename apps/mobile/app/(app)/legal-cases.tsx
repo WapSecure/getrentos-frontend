@@ -10,11 +10,11 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
   PressableScale,
+  QueryState,
   SegmentedControl,
   Text,
   TextField,
@@ -34,7 +34,7 @@ import {
   type LegalCaseKind,
 } from '@/lib/api/legalCases';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { Sheet } from '@/components/Sheet';
@@ -59,8 +59,6 @@ const FILTER_TEST: Record<Filter, (c: LegalCase) => boolean> = {
 
 /** Tenancies a case can be brought on: signed at some point. */
 const CASEABLE = new Set(['signed', 'active', 'expired', 'terminated']);
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Legal cases, arranged around what needs doing: a claim that cannot be filed
@@ -103,9 +101,12 @@ export default function LegalCases() {
         }
       />
 
-      {list.isError && !list.data ? (
-        <ErrorState title="We couldn't load your cases" onRetry={() => list.refetch()} />
-      ) : (
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={3} variant="card" height={104} />}
+        errorTitle="We couldn't load your cases"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={visible}
           keyExtractor={(c) => c.id}
@@ -142,28 +143,24 @@ export default function LegalCases() {
             ) : null
           }
           ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={104} />
-            ) : (
-              <EmptyState
-                icon={<Scale size={32} color={colors.mutedForeground} />}
-                title={
-                  filter === 'attention'
-                    ? 'Nothing needs attention'
-                    : cases.length
-                      ? 'No cases here'
-                      : 'No cases yet'
-                }
-                description={
-                  filter === 'attention'
-                    ? 'Every case has a next step.'
-                    : 'Open a case when a matter is heading to court.'
-                }
-              />
-            )
+            <EmptyState
+              icon={<Scale size={32} color={colors.mutedForeground} />}
+              title={
+                filter === 'attention'
+                  ? 'Nothing needs attention'
+                  : cases.length
+                    ? 'No cases here'
+                    : 'No cases yet'
+              }
+              description={
+                filter === 'attention'
+                  ? 'Every case has a next step.'
+                  : 'Open a case when a matter is heading to court.'
+              }
+            />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={opening} onClose={() => setOpening(false)} title="Open a case">
         <OpenCaseForm
@@ -250,7 +247,7 @@ function OpenCaseForm({ onDone }: { onDone: (id: string) => void }) {
       toast.show('Case opened.', 'success');
       onDone(c.id);
     },
-    onError: (e) => toast.show(errorText(e, 'Could not open the case.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not open the case.'), 'error'),
   });
 
   return (

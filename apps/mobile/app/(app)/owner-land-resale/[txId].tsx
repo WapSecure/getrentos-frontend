@@ -6,21 +6,19 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
+  QueryState,
   Text,
   useTheme,
   useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { confirmedProgress, landSalesApi, type Milestone } from '@/lib/api/landSales';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { Sheet } from '@/components/Sheet';
 import { ConditionsList, DeliverForm, MilestoneList } from '@/components/land/Conveyance';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Conveyance on a land resale. The seller marks each step delivered; the buyer
@@ -60,7 +58,7 @@ export default function OwnerLandResale() {
         'success'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Could not mark that step delivered.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not mark that step delivered.'), 'error'),
   });
   const deliverCondition = useMutation({
     mutationFn: ({ key, note }: { key: string; note: string }) =>
@@ -69,7 +67,7 @@ export default function OwnerLandResale() {
       qc.setQueryData(qk.owner.resaleConditions(txId), next);
       toast.show('Marked met. The buyer has been asked to confirm.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not mark the condition met.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not mark the condition met.'), 'error'),
   });
 
   const progress = confirmedProgress(steps.data ?? []);
@@ -123,27 +121,23 @@ export default function OwnerLandResale() {
           </Card>
         ) : null}
 
-        {steps.isLoading ? (
-          <DetailSkeleton />
-        ) : !steps.data ? (
-          <ErrorState
-            title="The conveyance steps could not be loaded"
-            description={errorText(steps.error, 'Nothing has changed.')}
-            onRetry={() => steps.refetch()}
-          />
-        ) : (
+        <QueryState
+          query={steps}
+          skeleton={<DetailSkeleton />}
+          errorTitle="The conveyance steps could not be loaded"
+        >
           <Card style={{ gap: spacing.md }}>
             <FormAlert
               tone="info"
               message={`${progress.done} of ${progress.required} required steps confirmed by the buyer. Governor’s Consent can take months, so it is tracked but does not hold up the payment.`}
             />
             <MilestoneList
-              milestones={steps.data}
+              milestones={steps.data ?? []}
               deliverability={() => ({ allowed: true })}
               onDeliver={setDelivering}
             />
           </Card>
-        )}
+        </QueryState>
       </ScrollView>
 
       <Sheet

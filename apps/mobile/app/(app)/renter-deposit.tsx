@@ -7,10 +7,10 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  Divider,
   ListSkeleton,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -25,7 +25,7 @@ import {
   type TenantDeduction,
   type TenantDeposit,
 } from '@/lib/api/renterHome';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -62,19 +62,20 @@ export default function RenterDeposit() {
           />
         }
       >
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={160} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (q.data ?? []).length === 0 ? (
-          <EmptyState
-            icon={<PiggyBank size={32} color={colors.mutedForeground} />}
-            title="No deposit on record"
-            description="When a lease sets a deposit, it shows here."
-          />
-        ) : (
-          sortDeposits(q.data!).map((d) => <DepositCard key={d.leaseId} deposit={d} />)
-        )}
+        <QueryState
+          query={q}
+          skeleton={<ListSkeleton rows={2} variant="card" height={160} />}
+          isEmpty={(q.data ?? []).length === 0}
+          empty={{
+            icon: <PiggyBank size={32} color={colors.mutedForeground} />,
+            title: 'No deposit on record',
+            description: 'When a lease sets a deposit, it shows here.',
+          }}
+        >
+          {sortDeposits(q.data ?? []).map((d) => (
+            <DepositCard key={d.leaseId} deposit={d} />
+          ))}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -192,19 +193,12 @@ function Deduction({ d }: { d: TenantDeduction }) {
         'success'
       );
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send your dispute.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send your dispute.'), 'error'),
   });
   const status = DEDUCTION_STATUS[d.status];
   return (
-    <View
-      style={{
-        gap: spacing.xs,
-        paddingTop: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-      }}
-    >
+    <View style={{ gap: spacing.xs }}>
+      <Divider style={{ marginBottom: spacing.xs }} />
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
         <View style={{ flex: 1 }}>
           <Text variant="callout" style={{ fontWeight: '600' }}>

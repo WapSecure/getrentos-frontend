@@ -9,11 +9,10 @@ import {
   Card,
   Checkbox,
   DateField,
-  EmptyState,
-  ErrorState,
   IconButton,
   ListSkeleton,
   NumberField,
+  QueryState,
   Text,
   TextField,
   toISODate,
@@ -28,13 +27,11 @@ import {
   type ProtectionAttestation,
 } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** The firm's client-money protection: the scheme it belongs to and its cover. */
 export default function AgencyProtection() {
@@ -72,20 +69,21 @@ export default function AgencyProtection() {
           />
         }
       >
-        {list.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={110} />
-        ) : list.isError ? (
-          <ErrorState description={errorText(list.error, '')} onRetry={() => list.refetch()} />
-        ) : (list.data ?? []).length === 0 ? (
-          <EmptyState
-            icon={<ShieldCheck size={32} color={colors.mutedForeground} />}
-            title="No protection attestations yet."
-            description="Record the client-money protection scheme your firm belongs to."
-            action={<Button label="Add attestation" onPress={() => setAdding(true)} />}
-          />
-        ) : (
-          list.data!.map((a) => <AttestationCard key={a.id} attestation={a} />)
-        )}
+        <QueryState
+          query={list}
+          skeleton={<ListSkeleton rows={2} variant="card" height={110} />}
+          isEmpty={!list.data?.length}
+          empty={{
+            icon: <ShieldCheck size={32} color={colors.mutedForeground} />,
+            title: 'No protection attestations yet.',
+            description: 'Record the client-money protection scheme your firm belongs to.',
+            action: <Button label="Add attestation" onPress={() => setAdding(true)} />,
+          }}
+        >
+          {(list.data ?? []).map((a) => (
+            <AttestationCard key={a.id} attestation={a} />
+          ))}
+        </QueryState>
       </ScrollView>
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add attestation">
         <AttestForm key={adding ? 'open' : 'closed'} onDone={() => setAdding(false)} />
@@ -104,7 +102,7 @@ function AttestationCard({ attestation: a }: { attestation: ProtectionAttestatio
       qc.invalidateQueries({ queryKey: qk.agency.protection });
       toast.show('Attestation revoked.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not revoke it.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not revoke it.'), 'error'),
   });
   const status = ATTESTATION_STATUS[a.status];
   return (
@@ -174,7 +172,7 @@ function AttestForm({ onDone }: { onDone: () => void }) {
       toast.show('Attestation recorded.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not record it.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record it.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>

@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Check, FileText } from 'lucide-react-native';
 import {
   Badge,
   Button,
   Card,
-  FormAlert,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -17,9 +16,10 @@ import {
 } from '@getrentos/ui-native';
 import { kycApi, type KycStatus } from '@/lib/api/kyc';
 import type { PickedFile } from '@/lib/api/documents';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { pickDocument } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -32,7 +32,7 @@ const STATUS: Record<KycStatus, { label: string; tone: BadgeTone }> = {
 
 /** A realtor's or agent's licence, sent for human review (web: LicenseVerificationSettings). */
 export default function LicenseVerification() {
-  const { colors, spacing, radius } = useTheme();
+  const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const toast = useToast();
@@ -51,8 +51,7 @@ export default function LicenseVerification() {
       qc.invalidateQueries({ queryKey: ['kyc-status'] });
       toast.show('Sent for review. We’ll let you know once it’s decided.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send your licence.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send your licence.'), 'error'),
   });
   const license = status.data?.license;
   const canSubmit =
@@ -74,91 +73,62 @@ export default function LicenseVerification() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        {status.isLoading ? (
-          <Skeleton height={80} />
-        ) : status.isError ? (
-          <FormAlert message="Could not load your verification status. Pull back and try again." />
-        ) : (
-          <>
-            {license ? (
-              <Card style={{ gap: spacing.xs }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Text variant="bodyStrong" style={{ flex: 1 }}>
-                    {license.licenseNumber}
-                  </Text>
-                  <Badge
-                    label={STATUS[license.status]?.label ?? license.status}
-                    tone={STATUS[license.status]?.tone ?? 'neutral'}
-                  />
-                </View>
-                <Text variant="caption" color="mutedForeground">
-                  Sent {formatDate(license.submittedAt, 'short')}
+        <QueryState query={status} skeleton={<Skeleton height={80} />}>
+          {license ? (
+            <Card style={{ gap: spacing.xs }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <Text variant="bodyStrong" style={{ flex: 1 }}>
+                  {license.licenseNumber}
                 </Text>
-                {license.rejectionReason ? (
-                  <Text variant="callout" color="mutedForeground">
-                    {license.rejectionReason}
-                  </Text>
-                ) : null}
-              </Card>
-            ) : (
-              <Text variant="callout" color="mutedForeground">
-                Verify your realtor or agent licence so owners and landlords can trust your
-                invitations.
-              </Text>
-            )}
-
-            {canSubmit ? (
-              <View style={{ gap: spacing.md }}>
-                <TextField
-                  label="Licence number"
-                  placeholder="RC-2024-001234"
-                  value={licenseNumber}
-                  onChangeText={setLicenseNumber}
-                  autoCapitalize="characters"
-                />
-                <Text variant="callout" color="mutedForeground" style={{ fontWeight: '600' }}>
-                  Licence document (optional)
-                </Text>
-                <Pressable
-                  onPress={async () => {
-                    const file = await pickDocument();
-                    if (file) setDocument(file);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    document ? `Licence document: ${document.name}` : 'Add a licence document'
-                  }
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: spacing.sm,
-                    padding: spacing.md,
-                    borderRadius: radius.md,
-                    borderWidth: 1,
-                    borderStyle: document ? 'solid' : 'dashed',
-                    borderColor: document ? colors.success : colors.border,
-                    backgroundColor: document ? colors.successSubtle : colors.card,
-                  }}
-                >
-                  {document ? (
-                    <Check size={18} color={colors.success} />
-                  ) : (
-                    <FileText size={18} color={colors.mutedForeground} />
-                  )}
-                  <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
-                    {document ? document.name : 'PDF or photo: tap to add'}
-                  </Text>
-                </Pressable>
-                <Button
-                  label={license ? 'Send again' : 'Send for verification'}
-                  loading={submit.isPending}
-                  disabled={!licenseNumber.trim() || submit.isPending}
-                  onPress={() => submit.mutate()}
+                <Badge
+                  label={STATUS[license.status]?.label ?? license.status}
+                  tone={STATUS[license.status]?.tone ?? 'neutral'}
                 />
               </View>
-            ) : null}
-          </>
-        )}
+              <Text variant="caption" color="mutedForeground">
+                Sent {formatDate(license.submittedAt, 'short')}
+              </Text>
+              {license.rejectionReason ? (
+                <Text variant="callout" color="mutedForeground">
+                  {license.rejectionReason}
+                </Text>
+              ) : null}
+            </Card>
+          ) : (
+            <Text variant="callout" color="mutedForeground">
+              Verify your realtor or agent licence so owners and landlords can trust your
+              invitations.
+            </Text>
+          )}
+
+          {canSubmit ? (
+            <View style={{ gap: spacing.md }}>
+              <TextField
+                label="Licence number"
+                placeholder="RC-2024-001234"
+                value={licenseNumber}
+                onChangeText={setLicenseNumber}
+                autoCapitalize="characters"
+              />
+              <FilePickRow
+                label="Licence document (optional)"
+                file={document}
+                emptyText="PDF or photo: tap to add"
+                onPick={async () => {
+                  const file = await pickDocument();
+                  if (file) setDocument(file);
+                }}
+                onClear={() => setDocument(null)}
+              />
+              <Button
+                label={license ? 'Send again' : 'Send for verification'}
+                loading={submit.isPending}
+                disabled={!licenseNumber.trim() || submit.isPending}
+                onPress={() => submit.mutate()}
+              />
+            </View>
+          ) : null}
+        </QueryState>
       </ScrollView>
     </View>
   );

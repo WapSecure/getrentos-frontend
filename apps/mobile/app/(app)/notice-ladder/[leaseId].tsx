@@ -10,9 +10,9 @@ import {
   Card,
   DateField,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
   NumberField,
+  QueryState,
   SwitchRow,
   Text,
   TextField,
@@ -34,14 +34,12 @@ import {
   type NoticeServiceMethod,
   type TenancyNotice,
 } from '@/lib/api/tenancyNotices';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Where one tenancy stands on the escalation ladder. Raising is always "the
@@ -78,81 +76,82 @@ export default function NoticeLadderScreen() {
         }
         onBack={() => goBack()}
       />
-      {!l ? (
-        ladder.isError ? (
-          <ErrorState
-            title="This tenancy did not load"
-            description="It may not be one you can read."
-            onRetry={() => ladder.refetch()}
-          />
-        ) : (
+      <QueryState
+        query={ladder}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl }}>
             <DetailSkeleton />
           </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={ladder.isRefetching}
-              onRefresh={() => ladder.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          {l.next && l.nextBlockedReason ? (
-            <FormAlert
-              tone="warning"
-              title={`${NOTICE_KIND_LABEL[l.next.kind]} is not available yet`}
-              message={
-                l.next.blockedUntil
-                  ? `${l.nextBlockedReason} Available from ${formatDate(l.next.blockedUntil)}.`
-                  : l.nextBlockedReason
-              }
-            />
-          ) : null}
+        }
+        errorTitle="This tenancy did not load"
+        errorDescription="It may not be one you can read."
+      >
+        {l ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={ladder.isRefetching}
+                onRefresh={() => ladder.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            {l.next && l.nextBlockedReason ? (
+              <FormAlert
+                tone="warning"
+                title={`${NOTICE_KIND_LABEL[l.next.kind]} is not available yet`}
+                message={
+                  l.next.blockedUntil
+                    ? `${l.nextBlockedReason} Available from ${formatDate(l.next.blockedUntil)}.`
+                    : l.nextBlockedReason
+                }
+              />
+            ) : null}
 
-          {l.jurisdictionFellBack ? (
-            <FormAlert
-              tone="warning"
-              message={`The property's state is recorded as "${l.jurisdictionDerivedFrom}", which does not match a jurisdiction, so this tenancy is read against ${l.jurisdiction}. Check the property before relying on any period here.`}
-            />
-          ) : null}
+            {l.jurisdictionFellBack ? (
+              <FormAlert
+                tone="warning"
+                message={`The property's state is recorded as "${l.jurisdictionDerivedFrom}", which does not match a jurisdiction, so this tenancy is read against ${l.jurisdiction}. Check the property before relying on any period here.`}
+              />
+            ) : null}
 
-          {l.next && !l.nextBlockedReason ? (
-            <Button
-              label={`Raise ${NOTICE_KIND_LABEL[l.next.kind].toLowerCase()}`}
-              icon={<Plus size={16} color={colors.primaryForeground} />}
-              onPress={() => setRaising(true)}
-            />
-          ) : null}
+            {l.next && !l.nextBlockedReason ? (
+              <Button
+                label={`Raise ${NOTICE_KIND_LABEL[l.next.kind].toLowerCase()}`}
+                icon={<Plus size={16} color={colors.primaryForeground} />}
+                onPress={() => setRaising(true)}
+              />
+            ) : null}
 
-          {l.notices.length === 0 ? (
-            <Card padding={spacing.lg} style={{ gap: 4 }}>
-              <Text variant="bodyStrong">Nothing has been served yet</Text>
-              <Text variant="callout" color="mutedForeground">
-                {l.next
-                  ? `The first step is the ${NOTICE_KIND_LABEL[l.next.kind].toLowerCase()}.`
-                  : 'This tenancy is at the top of the ladder.'}
+            {l.notices.length === 0 ? (
+              <Card padding={spacing.lg} style={{ gap: 4 }}>
+                <Text variant="bodyStrong">Nothing has been served yet</Text>
+                <Text variant="callout" color="mutedForeground">
+                  {l.next
+                    ? `The first step is the ${NOTICE_KIND_LABEL[l.next.kind].toLowerCase()}.`
+                    : 'This tenancy is at the top of the ladder.'}
+                </Text>
+              </Card>
+            ) : (
+              l.notices.map((n) => (
+                <NoticeStep key={n.id} notice={n} onServe={() => setServing(n)} />
+              ))
+            )}
+
+            {l.next && !l.nextBlockedReason ? (
+              <Text variant="caption" color="mutedForeground">
+                Next step: {NOTICE_KIND_LABEL[l.next.kind]}. Its period comes from your register for{' '}
+                {l.jurisdiction}.
               </Text>
-            </Card>
-          ) : (
-            l.notices.map((n) => <NoticeStep key={n.id} notice={n} onServe={() => setServing(n)} />)
-          )}
-
-          {l.next && !l.nextBlockedReason ? (
-            <Text variant="caption" color="mutedForeground">
-              Next step: {NOTICE_KIND_LABEL[l.next.kind]}. Its period comes from your register for{' '}
-              {l.jurisdiction}.
-            </Text>
-          ) : null}
-        </ScrollView>
-      )}
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
 
       <Sheet open={raising} onClose={() => setRaising(false)} title="Raise a notice">
         {l?.next ? (
@@ -286,7 +285,7 @@ function RaiseForm({
       toast.show('Notice raised. It is a draft until you record service.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not raise the notice.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not raise the notice.'), 'error'),
   });
 
   return (
@@ -401,7 +400,7 @@ function ServeForm({
       toast.show('Service recorded. The period now runs from the date you gave.', 'success');
       onDone();
     },
-    onError: (e) => toast.show(errorText(e, 'Could not record service.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record service.'), 'error'),
   });
 
   const source =

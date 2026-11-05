@@ -12,10 +12,9 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -28,12 +27,10 @@ import {
   landBuyerExtrasApi,
   type PrePurchaseInspection,
 } from '@/lib/api/landBuyerExtras';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** Independent inspections the buyer commissioned before buying. */
 export default function BuyerLandInspections() {
@@ -66,19 +63,20 @@ export default function BuyerLandInspections() {
           />
         }
       >
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={140} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (q.data ?? []).length === 0 ? (
-          <EmptyState
-            icon={<ClipboardCheck size={32} color={colors.mutedForeground} />}
-            title="No inspections yet"
-            description="Commission one from a land listing or an estate plot."
-          />
-        ) : (
-          q.data!.map((i) => <InspectionCard key={i.id} inspection={i} />)
-        )}
+        <QueryState
+          query={q}
+          skeleton={<ListSkeleton rows={2} variant="card" height={140} />}
+          isEmpty={!q.data?.length}
+          empty={{
+            icon: <ClipboardCheck size={32} color={colors.mutedForeground} />,
+            title: 'No inspections yet',
+            description: 'Commission one from a land listing or an estate plot.',
+          }}
+        >
+          {(q.data ?? []).map((i) => (
+            <InspectionCard key={i.id} inspection={i} />
+          ))}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -106,7 +104,7 @@ function InspectionCard({ inspection: i }: { inspection: PrePurchaseInspection }
       setMode(null);
       setText('');
     },
-    onError: (e) => toast.show(errorText(e, 'That did not go through.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'That did not go through.'), 'error'),
   });
   const statusLabel =
     LAND_INSPECTION_STATUS_LABELS[i.status as keyof typeof LAND_INSPECTION_STATUS_LABELS] ??

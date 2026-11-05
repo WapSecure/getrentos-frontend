@@ -8,13 +8,12 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
   NumberField,
   PressableScale,
+  QueryState,
   SegmentedControl,
   Text,
   TextField,
@@ -32,7 +31,7 @@ import {
   type TenancyNotice,
 } from '@/lib/api/tenancyNotices';
 import { landlordApi } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
@@ -43,8 +42,6 @@ type Tab = 'running' | 'periods';
 
 /** Tenancies far enough along to receive a notice. */
 const NOTICEABLE = new Set(['signed', 'active', 'expired']);
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Tenancy notices. The daily view is what is running and what runs out next;
@@ -138,31 +135,32 @@ export default function LandlordNotices() {
               </PressableScale>
             ) : null}
 
-            {running.isLoading ? (
-              <ListSkeleton rows={3} variant="card" height={88} />
-            ) : running.isError && !running.data ? (
-              <ErrorState title="We couldn't load your notices" onRetry={() => running.refetch()} />
-            ) : notices.length === 0 ? (
-              <EmptyState
-                icon={<BellRing size={32} color={colors.mutedForeground} />}
-                title="Nothing is running"
-                description="Open a tenancy to raise its first step."
-                action={<Button label="Open a tenancy" onPress={() => setPicking(true)} />}
-              />
-            ) : (
-              notices.map((n) => <RunningRow key={n.id} notice={n} />)
-            )}
+            <QueryState
+              query={running}
+              skeleton={<ListSkeleton rows={3} variant="card" height={88} />}
+              errorTitle="We couldn't load your notices"
+              isEmpty={notices.length === 0}
+              empty={{
+                icon: <BellRing size={32} color={colors.mutedForeground} />,
+                title: 'Nothing is running',
+                description: 'Open a tenancy to raise its first step.',
+                action: <Button label="Open a tenancy" onPress={() => setPicking(true)} />,
+              }}
+            >
+              {notices.map((n) => (
+                <RunningRow key={n.id} notice={n} />
+              ))}
+            </QueryState>
           </>
-        ) : periods.isLoading ? (
-          <ListSkeleton rows={3} variant="card" height={120} />
-        ) : !periods.data ? (
-          <ErrorState
-            title="We couldn't load your notice periods"
-            description="Nothing was changed. Try again."
-            onRetry={() => periods.refetch()}
-          />
         ) : (
-          <PeriodRegister settings={periods.data} />
+          <QueryState
+            query={periods}
+            skeleton={<ListSkeleton rows={3} variant="card" height={120} />}
+            errorTitle="We couldn't load your notice periods"
+            errorDescription="Nothing was changed. Try again."
+          >
+            {periods.data ? <PeriodRegister settings={periods.data} /> : null}
+          </QueryState>
         )}
       </ScrollView>
 
@@ -270,7 +268,7 @@ function PeriodRegister({ settings }: { settings: NoticePeriodSettings }) {
       refresh();
       toast.show('Period recorded.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not record the period.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record the period.'), 'error'),
   });
   const clear = useMutation({
     mutationFn: (input: { jurisdiction: string; kind: NoticeKind }) =>
@@ -279,7 +277,7 @@ function PeriodRegister({ settings }: { settings: NoticePeriodSettings }) {
       refresh();
       toast.show('Your period was removed.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not remove the period.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove the period.'), 'error'),
   });
 
   const daysNumber = Number(days);

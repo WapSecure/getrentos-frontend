@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageSquareText } from 'lucide-react-native';
-import { EmptyState, ErrorState, ListSkeleton, useTheme } from '@getrentos/ui-native';
+import { ListSkeleton, QueryState, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { managementApi, type QuerySummary } from '@/lib/api/management';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
@@ -41,9 +41,17 @@ export default function AgencyQuestions() {
           }
         />
       </View>
-      {list.isError && !list.data ? (
-        <ErrorState onRetry={() => list.refetch()} />
-      ) : (
+      <QueryState
+        query={list}
+        skeleton={<ListSkeleton rows={4} />}
+        isEmpty={!list.data?.length}
+        empty={{
+          icon: <MessageSquareText size={32} color={colors.mutedForeground} />,
+          title: 'No questions yet',
+          description: 'When an owner asks about rent, statements or repairs, it shows here.',
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={list.data ?? []}
           keyExtractor={(q) => q.id}
@@ -59,19 +67,8 @@ export default function AgencyQuestions() {
               tintColor={colors.mutedForeground}
             />
           }
-          ListEmptyComponent={
-            list.isLoading ? (
-              <ListSkeleton rows={4} />
-            ) : (
-              <EmptyState
-                icon={<MessageSquareText size={32} color={colors.mutedForeground} />}
-                title="No questions yet"
-                description="When an owner asks about rent, statements or repairs, it shows here."
-              />
-            )
-          }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

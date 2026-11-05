@@ -9,8 +9,8 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   ListSkeleton,
+  QueryState,
   SegmentedControl,
   Text,
   useTheme,
@@ -95,9 +95,11 @@ export default function PropertyActivity() {
         onBack={() => goBack()}
       />
 
-      {feed.isError && !feed.data ? (
-        <ErrorState onRetry={() => feed.refetch()} />
-      ) : (
+      <QueryState
+        query={feed}
+        skeleton={<ListSkeleton rows={5} />}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}
@@ -124,16 +126,13 @@ export default function PropertyActivity() {
               tintColor={colors.mutedForeground}
             />
           }
+          // The filters live in the header, so an empty result stays inside the list.
           ListEmptyComponent={
-            feed.isLoading ? (
-              <ListSkeleton rows={5} />
-            ) : (
-              <EmptyState
-                icon={<History size={32} color={colors.mutedForeground} />}
-                title="Nothing yet"
-                description="When someone acts on your properties, it shows up here."
-              />
-            )
+            <EmptyState
+              icon={<History size={32} color={colors.mutedForeground} />}
+              title="Nothing yet"
+              description="When someone acts on your properties, it shows up here."
+            />
           }
           ListFooterComponent={
             feed.hasNextPage ? (
@@ -147,7 +146,7 @@ export default function PropertyActivity() {
             ) : null
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

@@ -26,6 +26,16 @@ export async function shareDownloadedFile(
   }
 }
 
+/** Shares text made on the device (a CSV template, say) as a file. */
+export function shareTextFile(
+  text: string,
+  fileName: string,
+  mimeType: string,
+  dialogTitle: string
+): Promise<void> {
+  return shareDownloadedFile(new TextEncoder().encode(text), fileName, mimeType, dialogTitle);
+}
+
 /** UTI hints the iOS share sheet uses to offer sensible destinations. */
 export const PDF_MIME = 'application/pdf';
 export const CSV_MIME = 'text/csv';

@@ -7,10 +7,10 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  Divider,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -22,7 +22,7 @@ import {
   REP_STATUS,
   type Appointment,
 } from '@/lib/api/landBuyerExtras';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -57,19 +57,21 @@ export default function LandRepresenting() {
           />
         }
       >
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={110} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (q.data ?? []).length === 0 ? (
-          <EmptyState
-            icon={<Users size={32} color={colors.mutedForeground} />}
-            title="No one has appointed you"
-            description="When a buyer appoints you as their representative, it appears here for you to accept."
-          />
-        ) : (
-          q.data!.map((a) => <Principal key={a.id} appointment={a} />)
-        )}
+        <QueryState
+          query={q}
+          skeleton={<ListSkeleton rows={2} variant="card" height={110} />}
+          isEmpty={(q.data ?? []).length === 0}
+          empty={{
+            icon: <Users size={32} color={colors.mutedForeground} />,
+            title: 'No one has appointed you',
+            description:
+              'When a buyer appoints you as their representative, it appears here for you to accept.',
+          }}
+        >
+          {(q.data ?? []).map((a) => (
+            <Principal key={a.id} appointment={a} />
+          ))}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -88,8 +90,7 @@ function Principal({ appointment: a }: { appointment: Appointment }) {
         'success'
       );
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'That did not go through.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'That did not go through.'), 'error'),
   });
   const deals = useQuery({
     queryKey: qk.buyerLand.principalDeals(a.principalId),
@@ -180,17 +181,11 @@ function DealRow({
   approves: boolean;
   onPress: () => void;
 }) {
-  const { colors, spacing } = useTheme();
+  const { spacing } = useTheme();
   return (
     <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={title}>
-      <View
-        style={{
-          paddingVertical: spacing.sm,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          gap: 2,
-        }}
-      >
+      <View style={{ paddingBottom: spacing.sm, gap: 2 }}>
+        <Divider style={{ marginBottom: spacing.sm }} />
         <Text variant="callout" style={{ fontWeight: '600' }}>
           {title}
         </Text>

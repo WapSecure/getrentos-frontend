@@ -5,10 +5,10 @@ import { AlertTriangle, Building2, Info, MessageCircleQuestion } from 'lucide-re
 import {
   Button,
   Card,
-  ErrorState,
   FormAlert,
   IconButton,
   PressableScale,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -69,15 +69,14 @@ export default function AgencyHome() {
         <CustodyBar />
         <Workspace />
         <Attention items={attention.data?.items ?? []} />
-        {dashboard.isError && !dashboard.data ? (
-          <ErrorState
-            title="Firm figures did not load"
-            description="Your clients and engagements are unaffected."
-            onRetry={() => dashboard.refetch()}
-          />
-        ) : (
+        <QueryState
+          query={dashboard}
+          skeleton={<Skeleton height={160} />}
+          errorTitle="Firm figures did not load"
+          errorDescription="Your clients and engagements are unaffected."
+        >
           <FirmFigures />
-        )}
+        </QueryState>
       </View>
     </Screen>
   );

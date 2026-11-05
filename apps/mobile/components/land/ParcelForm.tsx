@@ -23,7 +23,7 @@ import {
   type LandTitleType,
   type OwnerLandRecord,
 } from '@/lib/api/ownerLand';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { PropertyMapView } from '@/components/property/PropertyMapView';
 import {
   boundaryAreaMismatch,
@@ -237,11 +237,7 @@ export function ParcelForm({ r, onDone }: { r: OwnerLandRecord; onDone: () => vo
         multiline
       />
       {save.error ? (
-        <FormAlert
-          message={
-            save.error instanceof ApiError ? save.error.message : 'Could not save the parcel.'
-          }
-        />
+        <FormAlert message={errorMessage(save.error, 'Could not save the parcel.')} />
       ) : null}
       <Button
         label="Save parcel"

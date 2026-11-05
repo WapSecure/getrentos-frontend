@@ -7,10 +7,9 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -24,11 +23,9 @@ import {
   tourReasonOk,
   type BuyerTour,
 } from '@/lib/api/landBuyerExtras';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /** Live video tours of land the buyer asked for. */
 export default function BuyerLandTours() {
@@ -61,19 +58,20 @@ export default function BuyerLandTours() {
         <Text variant="callout" color="mutedForeground">
           The seller shows you the land live on a video call. A tour is never a search or a survey.
         </Text>
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={140} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (q.data ?? []).length === 0 ? (
-          <EmptyState
-            icon={<Video size={32} color={colors.mutedForeground} />}
-            title="No video tours yet"
-            description="Ask for one from a land listing or an estate plot."
-          />
-        ) : (
-          q.data!.map((t) => <TourCard key={t.id} tour={t} />)
-        )}
+        <QueryState
+          query={q}
+          skeleton={<ListSkeleton rows={2} variant="card" height={140} />}
+          isEmpty={!q.data?.length}
+          empty={{
+            icon: <Video size={32} color={colors.mutedForeground} />,
+            title: 'No video tours yet',
+            description: 'Ask for one from a land listing or an estate plot.',
+          }}
+        >
+          {(q.data ?? []).map((t) => (
+            <TourCard key={t.id} tour={t} />
+          ))}
+        </QueryState>
       </ScrollView>
     </View>
   );
@@ -98,7 +96,7 @@ function TourCard({ tour: t }: { tour: BuyerTour }) {
     setReason('');
     toast.show(message, 'success');
   };
-  const fail = (e: unknown) => toast.show(errorText(e, 'That did not go through.'), 'error');
+  const fail = (e: unknown) => toast.show(errorMessage(e, 'That did not go through.'), 'error');
   const choose = useMutation({
     mutationFn: (slot: string) => landBuyerExtrasApi.chooseSlot(t.id, slot),
     onSuccess: settle('Booked. You will be reminded a day and an hour before.'),

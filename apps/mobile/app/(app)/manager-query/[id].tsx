@@ -9,7 +9,7 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -22,7 +22,7 @@ import {
   queryStatusBadge,
   querySlaText,
 } from '@/lib/api/management';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDateTime } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
@@ -43,8 +43,7 @@ export default function ManagerQueryThread() {
   });
 
   const refresh = () => qc.invalidateQueries({ queryKey: ['management', 'queries'] });
-  const fail = (e: unknown) =>
-    toast.show(e instanceof ApiError ? e.message : 'That did not go through.', 'error');
+  const fail = (e: unknown) => toast.show(errorMessage(e, 'That did not go through.'), 'error');
 
   const send = useMutation({
     mutationFn: () => managementApi.replyQuery(id, reply.trim()),
@@ -91,103 +90,105 @@ export default function ManagerQueryThread() {
         onBack={() => goBack()}
       />
 
-      {!q ? (
-        thread.isError ? (
-          <ErrorState title="This question did not load" onRetry={() => thread.refetch()} />
-        ) : (
+      <QueryState
+        query={thread}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl }}>
             <DetailSkeleton />
           </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.md,
-          }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl
-              refreshing={thread.isRefetching}
-              onRefresh={() => thread.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <Badge label={queryStatusBadge(q).label} tone={queryStatusBadge(q).tone} />
-            <Clock size={14} color={q.late ? colors.destructive : colors.mutedForeground} />
-            <Text
-              variant="caption"
-              style={{ flex: 1, color: q.late ? colors.destructive : colors.mutedForeground }}
-            >
-              {querySlaText(q, (iso) => formatDateTime(iso))}
-            </Text>
-          </View>
-
-          {q.messages.map((m) => {
-            const mine = m.side === q.viewerSide;
-            return (
-              <View
-                key={m.id}
-                style={{
-                  alignSelf: mine ? 'flex-end' : 'flex-start',
-                  maxWidth: '85%',
-                  backgroundColor: mine ? colors.infoSubtle : colors.secondary,
-                  borderRadius: radius.lg,
-                  paddingHorizontal: spacing.lg,
-                  paddingVertical: spacing.md,
-                  gap: 4,
-                }}
+        }
+        errorTitle="This question did not load"
+      >
+        {q ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.md,
+            }}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={thread.isRefetching}
+                onRefresh={() => thread.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <Badge label={queryStatusBadge(q).label} tone={queryStatusBadge(q).tone} />
+              <Clock size={14} color={q.late ? colors.destructive : colors.mutedForeground} />
+              <Text
+                variant="caption"
+                style={{ flex: 1, color: q.late ? colors.destructive : colors.mutedForeground }}
               >
-                <Text variant="body">{m.body}</Text>
-                <Text variant="caption" color="mutedForeground">
-                  {m.author}
-                  {m.onBehalfOf ? ` for ${m.onBehalfOf}` : ''} · {formatDateTime(m.at)}
-                </Text>
-              </View>
-            );
-          })}
+                {querySlaText(q, (iso) => formatDateTime(iso))}
+              </Text>
+            </View>
 
-          {!resolved || isOwner ? (
-            <Card padding={spacing.lg} style={{ gap: spacing.md }}>
-              <TextField
-                label="Reply"
-                placeholder={resolved ? 'Write to reopen this question' : 'Write a reply'}
-                value={reply}
-                onChangeText={setReply}
-                multiline
-                numberOfLines={3}
-                editable={!busy}
-              />
-              <Button
-                label="Send"
-                loading={send.isPending}
-                disabled={reply.trim().length < 2 || busy}
-                onPress={() => send.mutate()}
-              />
-              {!resolved ? (
-                <Button
-                  label="Mark resolved"
-                  variant="outline"
-                  loading={resolve.isPending}
-                  disabled={busy}
-                  onPress={() => resolve.mutate()}
+            {q.messages.map((m) => {
+              const mine = m.side === q.viewerSide;
+              return (
+                <View
+                  key={m.id}
+                  style={{
+                    alignSelf: mine ? 'flex-end' : 'flex-start',
+                    maxWidth: '85%',
+                    backgroundColor: mine ? colors.infoSubtle : colors.secondary,
+                    borderRadius: radius.lg,
+                    paddingHorizontal: spacing.lg,
+                    paddingVertical: spacing.md,
+                    gap: 4,
+                  }}
+                >
+                  <Text variant="body">{m.body}</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    {m.author}
+                    {m.onBehalfOf ? ` for ${m.onBehalfOf}` : ''} · {formatDateTime(m.at)}
+                  </Text>
+                </View>
+              );
+            })}
+
+            {!resolved || isOwner ? (
+              <Card padding={spacing.lg} style={{ gap: spacing.md }}>
+                <TextField
+                  label="Reply"
+                  placeholder={resolved ? 'Write to reopen this question' : 'Write a reply'}
+                  value={reply}
+                  onChangeText={setReply}
+                  multiline
+                  numberOfLines={3}
+                  editable={!busy}
                 />
-              ) : (
                 <Button
-                  label="Reopen"
-                  variant="outline"
-                  loading={reopen.isPending}
-                  disabled={busy}
-                  onPress={() => reopen.mutate()}
+                  label="Send"
+                  loading={send.isPending}
+                  disabled={reply.trim().length < 2 || busy}
+                  onPress={() => send.mutate()}
                 />
-              )}
-            </Card>
-          ) : null}
-        </ScrollView>
-      )}
+                {!resolved ? (
+                  <Button
+                    label="Mark resolved"
+                    variant="outline"
+                    loading={resolve.isPending}
+                    disabled={busy}
+                    onPress={() => resolve.mutate()}
+                  />
+                ) : (
+                  <Button
+                    label="Reopen"
+                    variant="outline"
+                    loading={reopen.isPending}
+                    disabled={busy}
+                    onPress={() => reopen.mutate()}
+                  />
+                )}
+              </Card>
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </KeyboardAvoidingView>
   );
 }

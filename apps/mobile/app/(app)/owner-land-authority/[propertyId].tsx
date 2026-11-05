@@ -27,8 +27,8 @@ import {
   Card,
   DateField,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -36,14 +36,12 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { declareBlocker, isClaim, isEditable, landAuthorityApi } from '@/lib/api/landAuthority';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { LandDocumentChooser } from '@/components/land/LandDocumentChooser';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 type Saved = (view: LandAuthorityView, message: string) => void;
 
@@ -80,57 +78,55 @@ export default function OwnerLandAuthority() {
         subtitle={claim ? claim.authority.property.title : 'Show you can sell this land'}
         onBack={() => goBack()}
       />
-      {!view ? (
-        query.isError ? (
-          <ErrorState
-            title="We could not load your authority to sell"
-            description={errorText(query.error, 'Nothing has changed.')}
-            onRetry={() => query.refetch()}
-          />
-        ) : (
+      <QueryState
+        query={query}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl }}>
             <DetailSkeleton />
           </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <Status view={claim} />
-          <Declaration
-            key={claim ? `${claim.authority.id}:${claim.authority.status}` : 'new'}
-            propertyId={propertyId}
-            view={claim}
-            rules={view.rules}
-            onSaved={saved}
-          />
-          {claim ? <Signatories propertyId={propertyId} view={claim} onSaved={saved} /> : null}
-          {claim ? (
-            <Actions
+        }
+        errorTitle="We could not load your authority to sell"
+      >
+        {view ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            <Status view={claim} />
+            <Declaration
+              key={claim ? `${claim.authority.id}:${claim.authority.status}` : 'new'}
               propertyId={propertyId}
               view={claim}
+              rules={view.rules}
               onSaved={saved}
-              onWithdrawn={() => {
-                qc.invalidateQueries({ queryKey: key });
-                qc.invalidateQueries({ queryKey: qk.owner.land });
-                toast.show('Claim withdrawn.', 'success');
-              }}
             />
-          ) : null}
-        </ScrollView>
-      )}
+            {claim ? <Signatories propertyId={propertyId} view={claim} onSaved={saved} /> : null}
+            {claim ? (
+              <Actions
+                propertyId={propertyId}
+                view={claim}
+                onSaved={saved}
+                onWithdrawn={() => {
+                  qc.invalidateQueries({ queryKey: key });
+                  qc.invalidateQueries({ queryKey: qk.owner.land });
+                  toast.show('Claim withdrawn.', 'success');
+                }}
+              />
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }
@@ -251,7 +247,7 @@ function Declaration({
           ? 'Saved. A change to a verified claim goes back to review.'
           : 'Saved.'
       ),
-    onError: (e) => toast.show(errorText(e, 'Could not save your authority.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not save your authority.'), 'error'),
   });
 
   return (
@@ -364,7 +360,7 @@ function Signatories({
           : 'Added.'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Could not add that person.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not add that person.'), 'error'),
   });
 
   if (requirements.consentRoles.length === 0 && a.signatories.length === 0) {
@@ -480,12 +476,12 @@ function SignatoryRow({
       setRecording(false);
       onSaved(updated, 'Consent recorded. It counts once GetRentos has checked it.');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not record that consent.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record that consent.'), 'error'),
   });
   const remove = useMutation({
     mutationFn: () => landAuthorityApi.removeSignatory(propertyId, s.id),
     onSuccess: (updated) => onSaved(updated, 'Removed.'),
-    onError: (e) => toast.show(errorText(e, 'Could not remove that person.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not remove that person.'), 'error'),
   });
 
   const status =
@@ -600,7 +596,7 @@ function Actions({
     mutationFn: () => landAuthorityApi.submit(propertyId),
     onSuccess: (updated) =>
       onSaved(updated, 'Sent for review. We will tell you when it is decided.'),
-    onError: (e) => toast.show(errorText(e, 'Could not send it for review.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send it for review.'), 'error'),
   });
   const appeal = useMutation({
     mutationFn: () => landAuthorityApi.appeal(propertyId, appealNote.trim()),
@@ -608,12 +604,12 @@ function Actions({
       setAppealNote('');
       onSaved(updated, 'Appeal sent. A reviewer will look at the claim again.');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send the appeal.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send the appeal.'), 'error'),
   });
   const withdraw = useMutation({
     mutationFn: () => landAuthorityApi.withdraw(propertyId),
     onSuccess: onWithdrawn,
-    onError: (e) => toast.show(errorText(e, 'Could not withdraw the claim.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw the claim.'), 'error'),
   });
 
   return (

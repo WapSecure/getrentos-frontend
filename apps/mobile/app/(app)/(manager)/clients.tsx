@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, UserPlus, Users } from 'lucide-react-native';
 import {
   Badge,
+  Divider,
   Button,
   Card,
   EmptyState,
@@ -28,7 +29,7 @@ import {
   MANDATE_STATUS,
   type OwnerInvite,
 } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { Sheet } from '@/components/Sheet';
 
@@ -104,14 +105,13 @@ export default function AgencyClients() {
                   accessibilityRole="button"
                   accessibilityLabel={`Act for ${c.ownerName} on ${m.propertyTitle ?? 'property'}`}
                 >
+                  <Divider />
                   <View
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
                       gap: spacing.sm,
                       paddingVertical: 6,
-                      borderTopWidth: 1,
-                      borderTopColor: colors.border,
                     }}
                   >
                     <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
@@ -161,8 +161,7 @@ function InviteRow({ invite: i }: { invite: OwnerInvite }) {
       qc.invalidateQueries({ queryKey: qk.agency.ownerInvites });
       toast.show('Invitation withdrawn.', 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not withdraw the invite.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not withdraw the invite.'), 'error'),
   });
   const status = INVITE_STATUS[i.status];
   return (
@@ -223,8 +222,7 @@ function InviteForm({ onDone }: { onDone: () => void }) {
       toast.show('Invitation sent.', 'success');
       onDone();
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not send the invite.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send the invite.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.lg }}>

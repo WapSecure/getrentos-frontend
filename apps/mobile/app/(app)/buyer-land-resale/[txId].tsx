@@ -6,9 +6,8 @@ import { Lock } from 'lucide-react-native';
 import {
   Card,
   DetailSkeleton,
-  EmptyState,
-  ErrorState,
   FormAlert,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -16,13 +15,11 @@ import {
 import { qk } from '@/lib/query/keys';
 import { landBuyerApi } from '@/lib/api/landBuyer';
 import { conditionOpen, confirmedProgress, type Milestone } from '@/lib/api/landSales';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { BuyerConditions, BuyerMilestones } from '@/components/land/BuyerConveyance';
 import { CoApprovalCard } from '@/components/land/LandRequests';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * Conveyance on a land resale: the buyer's payment is held until every
@@ -60,7 +57,7 @@ export default function BuyerLandResale() {
         'success'
       );
     },
-    onError: (e) => toast.show(errorText(e, 'Could not confirm that step.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not confirm that step.'), 'error'),
   });
   const dispute = useMutation({
     mutationFn: ({ key, reason }: { key: string; reason: string }) =>
@@ -69,7 +66,7 @@ export default function BuyerLandResale() {
       qc.invalidateQueries({ queryKey: qk.buyerLand.resaleMilestones(txId) });
       toast.show('Dispute sent to the seller.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not send the dispute.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not send the dispute.'), 'error'),
   });
   const settle = useMutation({
     mutationFn: ({ key, how }: { key: string; how: 'confirm' | 'waive' }) =>
@@ -78,7 +75,7 @@ export default function BuyerLandResale() {
       qc.setQueryData(qk.buyerLand.resaleConditions(txId), next);
       toast.show(how === 'confirm' ? 'Condition confirmed.' : 'Condition waived.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not update the condition.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update the condition.'), 'error'),
   });
 
   const progress = confirmedProgress(steps.data ?? []);
@@ -94,18 +91,17 @@ export default function BuyerLandResale() {
         subtitle="Confirm each step once it is done"
         onBack={() => goBack()}
       />
-      {steps.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl }}>
-          <DetailSkeleton />
-        </View>
-      ) : steps.isError ? (
-        <ErrorState description={errorText(steps.error, '')} onRetry={() => steps.refetch()} />
-      ) : !hasSteps ? (
-        <EmptyState
-          title="No conveyance steps"
-          description="This transaction is not a land sale, so payment follows the usual purchase steps."
-        />
-      ) : (
+      <QueryState
+        query={steps}
+        skeleton={<DetailSkeleton />}
+        isEmpty={!hasSteps}
+        empty={{
+          title: 'No conveyance steps',
+          description:
+            'This transaction is not a land sale, so payment follows the usual purchase steps.',
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: spacing.xl,
@@ -180,7 +176,7 @@ export default function BuyerLandResale() {
             refund needs a failed condition above, or a reported problem with the land.
           </Text>
         </ScrollView>
-      )}
+      </QueryState>
     </View>
   );
 }

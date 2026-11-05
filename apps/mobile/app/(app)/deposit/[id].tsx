@@ -9,10 +9,10 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
   NumberField,
   Price,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -29,12 +29,10 @@ import {
   returnBlocker,
   type DepositDeduction,
 } from '@/lib/api/management';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatNaira } from '@/lib/format';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /**
  * One deposit: balances, each deduction with what the owner can do about it,
@@ -67,7 +65,7 @@ export default function DepositDetail() {
       afterChange();
       toast.show('Deduction recorded.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not record the deduction.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not record the deduction.'), 'error'),
   });
   const giveBack = useMutation({
     mutationFn: () => managementApi.returnDeposit(id),
@@ -75,7 +73,7 @@ export default function DepositDetail() {
       afterChange();
       toast.show('Deposit returned.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not return the deposit.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not return the deposit.'), 'error'),
   });
 
   const d = query.data;
@@ -102,129 +100,128 @@ export default function DepositDetail() {
         subtitle={d ? `Taken ${formatDate(d.takenAt, 'short')}` : undefined}
         onBack={() => goBack()}
       />
-      {!d ? (
-        query.isError ? (
-          <ErrorState title="This deposit did not load" onRetry={() => query.refetch()} />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={
-            <RefreshControl
-              refreshing={query.isRefetching}
-              onRefresh={() => query.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <View style={{ flexDirection: 'row' }}>
-            <Badge label={DEPOSIT_STATUS_LABEL[d.status]} tone={DEPOSIT_STATUS_TONE[d.status]} />
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              backgroundColor: colors.secondary,
-              borderRadius: radius.md,
-              padding: spacing.lg,
-              rowGap: spacing.md,
+      <QueryState
+        query={query}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This deposit did not load"
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {d ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
             }}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={
+              <RefreshControl
+                refreshing={query.isRefetching}
+                onRefresh={() => query.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
           >
-            {[
-              { label: 'Held', value: d.summary.held },
-              { label: 'Approved', value: d.summary.approvedDeductions },
-              { label: 'Proposed', value: d.summary.proposedDeductions },
-              { label: 'Returnable', value: d.summary.returnable },
-            ].map((s) => (
-              <View key={s.label} style={{ width: '50%' }}>
-                <Text variant="caption" color="mutedForeground">
-                  {s.label}
-                </Text>
-                <Price amount={s.value} variant="bodyStrong" />
-              </View>
-            ))}
-          </View>
-
-          {d.returnedAt && d.returnedAmount != null ? (
-            <FormAlert
-              tone="success"
-              message={`${formatNaira(d.returnedAmount)} returned to the tenant on ${formatDate(d.returnedAt)}.`}
-            />
-          ) : null}
-
-          <Text variant="bodyStrong" accessibilityRole="header">
-            Deductions
-          </Text>
-          {d.deductions.length === 0 ? (
-            <Text variant="callout" color="mutedForeground">
-              No deductions.
-            </Text>
-          ) : (
-            d.deductions.map((x) => (
-              <DeductionCard key={x.id} depositId={d.id} deduction={x} open={open} />
-            ))
-          )}
-
-          {open ? (
-            <Card padding={spacing.lg} style={{ gap: spacing.md }}>
-              <Text variant="bodyStrong" accessibilityRole="header">
-                Record a deduction
-              </Text>
-              <NumberField
-                currency
-                label="Amount"
-                value={amount}
-                onValueChange={setAmount}
-                editable={!deduct.isPending}
-              />
-              <TextField
-                label="Reason"
-                placeholder="e.g. repaint, cleaning"
-                value={reason}
-                onChangeText={setReason}
-                multiline
-                editable={!deduct.isPending}
-              />
-              <Button
-                label="Add deduction"
-                variant="secondary"
-                icon={<Plus size={14} color={colors.secondaryForeground} />}
-                loading={deduct.isPending}
-                disabled={!(Number(amount) > 0) || !reason.trim() || deduct.isPending}
-                onPress={() => deduct.mutate()}
-              />
-            </Card>
-          ) : null}
-
-          {open ? (
-            <View style={{ gap: spacing.sm }}>
-              <Button
-                label="Return deposit"
-                icon={<Undo2 size={16} color={colors.primaryForeground} />}
-                loading={giveBack.isPending}
-                loadingLabel="Returning…"
-                disabled={!!blocker || giveBack.isPending}
-                onPress={confirmReturn}
-              />
-              {blocker ? (
-                <Text variant="caption" color="mutedForeground" center>
-                  {blocker}
-                </Text>
-              ) : null}
+            <View style={{ flexDirection: 'row' }}>
+              <Badge label={DEPOSIT_STATUS_LABEL[d.status]} tone={DEPOSIT_STATUS_TONE[d.status]} />
             </View>
-          ) : null}
-        </ScrollView>
-      )}
+
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                backgroundColor: colors.secondary,
+                borderRadius: radius.md,
+                padding: spacing.lg,
+                rowGap: spacing.md,
+              }}
+            >
+              {[
+                { label: 'Held', value: d.summary.held },
+                { label: 'Approved', value: d.summary.approvedDeductions },
+                { label: 'Proposed', value: d.summary.proposedDeductions },
+                { label: 'Returnable', value: d.summary.returnable },
+              ].map((s) => (
+                <View key={s.label} style={{ width: '50%' }}>
+                  <Text variant="caption" color="mutedForeground">
+                    {s.label}
+                  </Text>
+                  <Price amount={s.value} variant="bodyStrong" />
+                </View>
+              ))}
+            </View>
+
+            {d.returnedAt && d.returnedAmount != null ? (
+              <FormAlert
+                tone="success"
+                message={`${formatNaira(d.returnedAmount)} returned to the tenant on ${formatDate(d.returnedAt)}.`}
+              />
+            ) : null}
+
+            <Text variant="bodyStrong" accessibilityRole="header">
+              Deductions
+            </Text>
+            {d.deductions.length === 0 ? (
+              <Text variant="callout" color="mutedForeground">
+                No deductions.
+              </Text>
+            ) : (
+              d.deductions.map((x) => (
+                <DeductionCard key={x.id} depositId={d.id} deduction={x} open={open} />
+              ))
+            )}
+
+            {open ? (
+              <Card padding={spacing.lg} style={{ gap: spacing.md }}>
+                <Text variant="bodyStrong" accessibilityRole="header">
+                  Record a deduction
+                </Text>
+                <NumberField
+                  currency
+                  label="Amount"
+                  value={amount}
+                  onValueChange={setAmount}
+                  editable={!deduct.isPending}
+                />
+                <TextField
+                  label="Reason"
+                  placeholder="e.g. repaint, cleaning"
+                  value={reason}
+                  onChangeText={setReason}
+                  multiline
+                  editable={!deduct.isPending}
+                />
+                <Button
+                  label="Add deduction"
+                  variant="secondary"
+                  icon={<Plus size={14} color={colors.secondaryForeground} />}
+                  loading={deduct.isPending}
+                  disabled={!(Number(amount) > 0) || !reason.trim() || deduct.isPending}
+                  onPress={() => deduct.mutate()}
+                />
+              </Card>
+            ) : null}
+
+            {open ? (
+              <View style={{ gap: spacing.sm }}>
+                <Button
+                  label="Return deposit"
+                  icon={<Undo2 size={16} color={colors.primaryForeground} />}
+                  loading={giveBack.isPending}
+                  loadingLabel="Returning…"
+                  disabled={!!blocker || giveBack.isPending}
+                  onPress={confirmReturn}
+                />
+                {blocker ? (
+                  <Text variant="caption" color="mutedForeground" center>
+                    {blocker}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
+          </ScrollView>
+        ) : null}
+      </QueryState>
     </View>
   );
 }
@@ -251,7 +248,7 @@ function DeductionCard({
     qc.invalidateQueries({ queryKey: ['management', 'deposits'] });
     toast.show(msg, 'success');
   };
-  const fail = (e: unknown) => toast.show(errorText(e, 'That did not go through.'), 'error');
+  const fail = (e: unknown) => toast.show(errorMessage(e, 'That did not go through.'), 'error');
 
   const approve = useMutation({
     mutationFn: () => managementApi.approveDeduction(depositId, x.id, text.trim() || undefined),

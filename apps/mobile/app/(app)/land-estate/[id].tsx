@@ -9,9 +9,9 @@ import {
   Card,
   Checkbox,
   DetailSkeleton,
-  ErrorState,
   FormAlert,
   PressableScale,
+  QueryState,
   SwitchRow,
   Text,
   useTheme,
@@ -31,7 +31,7 @@ import {
   type Reservation,
 } from '@/lib/api/landBuyer';
 import { accountRolesApi } from '@/lib/api/accountRoles';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { formatDate, formatDateTime, formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
@@ -72,107 +72,107 @@ export default function LandEstate() {
         subtitle={e ? `${e.city}, ${e.state}` : undefined}
         onBack={() => goBack()}
       />
-      {!e ? (
-        q.isError ? (
-          <ErrorState
-            title="This estate is not available"
-            description="It may have closed or its land is no longer verified."
-            onRetry={() => q.refetch()}
-          />
-        ) : (
-          <View style={{ paddingHorizontal: spacing.xl }}>
-            <DetailSkeleton />
-          </View>
-        )
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={q.isRefetching}
-              onRefresh={() => q.refetch()}
-              tintColor={colors.mutedForeground}
-            />
-          }
-        >
-          <Summary e={e} />
-          {(e.openConditions ?? []).length ? (
-            <FormAlert
-              tone="warning"
-              title="Verified with conditions"
-              message={`Plot reservations open once they are met.\n${e
-                .openConditions!.map(
-                  (c) => `• ${c.text}${c.dueAt ? ` (expected by ${formatDate(c.dueAt)})` : ''}`
-                )
-                .join('\n')}`}
-            />
-          ) : null}
-
-          <View style={{ gap: spacing.md }}>
-            <Text variant="heading">Plots</Text>
-            <ChipSelect options={PLOT_FILTERS} value={status} onChange={setStatus} />
-            {blocks.length > 1 ? (
-              <ChipSelect
-                options={[
-                  { value: ALL, label: 'All blocks' },
-                  ...blocks.map((b) => ({ value: b, label: `Block ${b}` })),
-                ]}
-                value={block}
-                onChange={setBlock}
+      <QueryState
+        query={q}
+        skeleton={<DetailSkeleton />}
+        errorTitle="This estate is not available"
+        errorDescription="It may have closed or its land is no longer verified."
+        style={{ paddingHorizontal: spacing.xl }}
+      >
+        {e ? (
+          <ScrollView
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+            refreshControl={
+              <RefreshControl
+                refreshing={q.isRefetching}
+                onRefresh={() => q.refetch()}
+                tintColor={colors.mutedForeground}
+              />
+            }
+          >
+            <Summary e={e} />
+            {(e.openConditions ?? []).length ? (
+              <FormAlert
+                tone="warning"
+                title="Verified with conditions"
+                message={`Plot reservations open once they are met.\n${e
+                  .openConditions!.map(
+                    (c) => `• ${c.text}${c.dueAt ? ` (expected by ${formatDate(c.dueAt)})` : ''}`
+                  )
+                  .join('\n')}`}
               />
             ) : null}
-            <SwitchRow label="Corner plots only" value={cornerOnly} onValueChange={setCornerOnly} />
-            <Text variant="caption" color="mutedForeground">
-              {plots.length} of {e.plots.length} plots
-            </Text>
-            {plots.length === 0 ? (
-              <Text variant="callout" color="mutedForeground">
-                No plots match these filters.
-              </Text>
-            ) : (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                {plots.map((p) => (
-                  <PlotCell
-                    key={p.id}
-                    plot={p}
-                    selected={p.id === selectedId}
-                    onPress={() => setSelectedId(p.id)}
-                  />
-                ))}
-              </View>
-            )}
-          </View>
 
-          <View style={{ gap: spacing.md }}>
-            <Text variant="heading">Payment plans</Text>
-            <Text variant="caption" color="mutedForeground">
-              {selected
-                ? `Priced for ${plotLabel(selected)}.`
-                : 'An example price; choose a plot to see its own.'}
-            </Text>
-            {e.paymentPlans.filter((p) => p.active).length === 0 ? (
-              <Text variant="callout" color="mutedForeground">
-                No payment plan is open on this estate.
+            <View style={{ gap: spacing.md }}>
+              <Text variant="heading">Plots</Text>
+              <ChipSelect options={PLOT_FILTERS} value={status} onChange={setStatus} />
+              {blocks.length > 1 ? (
+                <ChipSelect
+                  options={[
+                    { value: ALL, label: 'All blocks' },
+                    ...blocks.map((b) => ({ value: b, label: `Block ${b}` })),
+                  ]}
+                  value={block}
+                  onChange={setBlock}
+                />
+              ) : null}
+              <SwitchRow
+                label="Corner plots only"
+                value={cornerOnly}
+                onValueChange={setCornerOnly}
+              />
+              <Text variant="caption" color="mutedForeground">
+                {plots.length} of {e.plots.length} plots
               </Text>
-            ) : (
-              e.paymentPlans
-                .filter((p) => p.active)
-                .map((p) => (
-                  <PlanCard
-                    key={p.id}
-                    plan={p}
-                    plotPrice={selected?.price ?? e.priceFrom ?? 0}
-                    fees={e.fees.total}
-                  />
-                ))
-            )}
-          </View>
-        </ScrollView>
-      )}
+              {plots.length === 0 ? (
+                <Text variant="callout" color="mutedForeground">
+                  No plots match these filters.
+                </Text>
+              ) : (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                  {plots.map((p) => (
+                    <PlotCell
+                      key={p.id}
+                      plot={p}
+                      selected={p.id === selectedId}
+                      onPress={() => setSelectedId(p.id)}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
+
+            <View style={{ gap: spacing.md }}>
+              <Text variant="heading">Payment plans</Text>
+              <Text variant="caption" color="mutedForeground">
+                {selected
+                  ? `Priced for ${plotLabel(selected)}.`
+                  : 'An example price; choose a plot to see its own.'}
+              </Text>
+              {e.paymentPlans.filter((p) => p.active).length === 0 ? (
+                <Text variant="callout" color="mutedForeground">
+                  No payment plan is open on this estate.
+                </Text>
+              ) : (
+                e.paymentPlans
+                  .filter((p) => p.active)
+                  .map((p) => (
+                    <PlanCard
+                      key={p.id}
+                      plan={p}
+                      plotPrice={selected?.price ?? e.priceFrom ?? 0}
+                      fees={e.fees.total}
+                    />
+                  ))
+              )}
+            </View>
+          </ScrollView>
+        ) : null}
+      </QueryState>
 
       <Sheet
         open={!!selected && !starting}
@@ -364,8 +364,7 @@ function ReservePanel({
       toast.show(`${plotLabel(p)} is held for you.`, 'success');
       onReserved(r);
     },
-    onError: (err) =>
-      setError(err instanceof ApiError ? err.message : 'Could not reserve the plot.'),
+    onError: (err) => setError(errorMessage(err, 'Could not reserve the plot.')),
   });
   const addBuyer = useMutation({
     mutationFn: () => accountRolesApi.add('buyer'),
@@ -373,8 +372,7 @@ function ReservePanel({
       await refreshProfile();
       toast.show('Buyer account added. You can reserve now.', 'success');
     },
-    onError: (err) =>
-      toast.show(err instanceof ApiError ? err.message : 'Could not add a buyer account.', 'error'),
+    onError: (err) => toast.show(errorMessage(err, 'Could not add a buyer account.'), 'error'),
   });
 
   return (

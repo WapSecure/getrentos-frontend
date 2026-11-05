@@ -7,10 +7,10 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
   ListSkeleton,
   NumberField,
   Price,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -24,14 +24,12 @@ import {
   type CommissionTeam,
 } from '@/lib/api/agencyFirm';
 import { formatDay } from '@/lib/api/agency';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { goBack } from '@/lib/goBack';
-
-const errorText = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 const STATUS = {
   EARNED: { label: 'Earned', tone: 'info' as const },
@@ -77,83 +75,82 @@ export default function AgencyCommissions() {
           />
         }
       >
-        {summary.isLoading ? (
-          <ListSkeleton rows={3} variant="card" height={90} />
-        ) : !s ? (
-          <ErrorState
-            description={errorText(summary.error, 'Commissions did not load.')}
-            onRetry={() => summary.refetch()}
-          />
-        ) : (
-          <>
-            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-              <Card padding={spacing.md} style={{ flex: 1, gap: 2 }}>
-                <Text variant="caption" color="mutedForeground">
-                  Earned
-                </Text>
-                <Price amount={s.totals.earned} variant="bodyStrong" />
-                <Text variant="caption" color="mutedForeground">
-                  {s.totals.count} deal{s.totals.count === 1 ? '' : 's'}
-                </Text>
-              </Card>
-              <Card padding={spacing.md} style={{ flex: 1, gap: 2 }}>
-                <Text variant="caption" color="mutedForeground">
-                  Paid
-                </Text>
-                <Price amount={s.totals.paid} variant="bodyStrong" />
-              </Card>
-            </View>
-            <Button
-              label="Payouts"
-              variant="secondary"
-              onPress={() => router.push('/(app)/agency-payouts')}
-            />
-            <RateCard letting={s.config.lettingPct} renewal={s.config.renewalPct} />
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading">Ledger</Text>
-              {s.commissions.length === 0 ? (
-                <Text variant="callout" color="mutedForeground">
-                  No commissions earned yet.
-                </Text>
-              ) : (
-                s.commissions.map((c) => (
-                  <Card key={c.id} padding={spacing.md} style={{ gap: 4 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <Text
-                        variant="callout"
-                        style={{ flex: 1, fontWeight: '600' }}
-                        numberOfLines={1}
-                      >
-                        {c.type === 'LETTING' ? 'Letting' : 'Renewal'} ·{' '}
-                        {c.propertyTitle ?? 'Property'}
+        <QueryState
+          query={summary}
+          skeleton={<ListSkeleton rows={3} variant="card" height={90} />}
+          errorTitle="Commissions did not load"
+        >
+          {s ? (
+            <>
+              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                <Card padding={spacing.md} style={{ flex: 1, gap: 2 }}>
+                  <Text variant="caption" color="mutedForeground">
+                    Earned
+                  </Text>
+                  <Price amount={s.totals.earned} variant="bodyStrong" />
+                  <Text variant="caption" color="mutedForeground">
+                    {s.totals.count} deal{s.totals.count === 1 ? '' : 's'}
+                  </Text>
+                </Card>
+                <Card padding={spacing.md} style={{ flex: 1, gap: 2 }}>
+                  <Text variant="caption" color="mutedForeground">
+                    Paid
+                  </Text>
+                  <Price amount={s.totals.paid} variant="bodyStrong" />
+                </Card>
+              </View>
+              <Button
+                label="Payouts"
+                variant="secondary"
+                onPress={() => router.push('/(app)/agency-payouts')}
+              />
+              <RateCard letting={s.config.lettingPct} renewal={s.config.renewalPct} />
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading">Ledger</Text>
+                {s.commissions.length === 0 ? (
+                  <Text variant="callout" color="mutedForeground">
+                    No commissions earned yet.
+                  </Text>
+                ) : (
+                  s.commissions.map((c) => (
+                    <Card key={c.id} padding={spacing.md} style={{ gap: 4 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                        <Text
+                          variant="callout"
+                          style={{ flex: 1, fontWeight: '600' }}
+                          numberOfLines={1}
+                        >
+                          {c.type === 'LETTING' ? 'Letting' : 'Renewal'} ·{' '}
+                          {c.propertyTitle ?? 'Property'}
+                        </Text>
+                        <Badge label={STATUS[c.status].label} tone={STATUS[c.status].tone} />
+                      </View>
+                      <Text variant="caption" color="mutedForeground">
+                        {c.ownerName ?? 'Owner'} · {formatDay(c.earnedAt)} · {c.ratePct}% of{' '}
+                        {formatNaira(c.baseAmount)} = {formatNaira(c.amount)}
                       </Text>
-                      <Badge label={STATUS[c.status].label} tone={STATUS[c.status].tone} />
-                    </View>
-                    <Text variant="caption" color="mutedForeground">
-                      {c.ownerName ?? 'Owner'} · {formatDay(c.earnedAt)} · {c.ratePct}% of{' '}
-                      {formatNaira(c.baseAmount)} = {formatNaira(c.amount)}
-                    </Text>
-                    <Text variant="caption" color="mutedForeground">
-                      Credited to {c.attributedName ?? 'nobody'}
-                      {c.agentShareAmount
-                        ? ` · agent share ${formatNaira(c.agentShareAmount)}`
-                        : ''}
-                    </Text>
-                    {c.status === 'EARNED' ? (
-                      <Button
-                        label="Credit an agent"
-                        size="sm"
-                        variant="ghost"
-                        onPress={() => setCrediting(c)}
-                        style={{ alignSelf: 'flex-start' }}
-                      />
-                    ) : null}
-                  </Card>
-                ))
-              )}
-            </View>
-          </>
-        )}
+                      <Text variant="caption" color="mutedForeground">
+                        Credited to {c.attributedName ?? 'nobody'}
+                        {c.agentShareAmount
+                          ? ` · agent share ${formatNaira(c.agentShareAmount)}`
+                          : ''}
+                      </Text>
+                      {c.status === 'EARNED' ? (
+                        <Button
+                          label="Credit an agent"
+                          size="sm"
+                          variant="ghost"
+                          onPress={() => setCrediting(c)}
+                          style={{ alignSelf: 'flex-start' }}
+                        />
+                      ) : null}
+                    </Card>
+                  ))
+                )}
+              </View>
+            </>
+          ) : null}
+        </QueryState>
         {team.data ? <Splits team={team.data} /> : null}
       </ScrollView>
       <Sheet open={!!crediting} onClose={() => setCrediting(null)} title="Credit an agent">
@@ -185,7 +182,7 @@ function RateCard({ letting, renewal }: { letting: number; renewal: number }) {
       toast.show('Rate card updated.', 'success');
       setEditing(false);
     },
-    onError: (e) => toast.show(errorText(e, 'Could not update the rate card.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update the rate card.'), 'error'),
   });
   return (
     <Card style={{ gap: spacing.md }}>
@@ -309,7 +306,7 @@ function SplitRow({ member: m }: { member: CommissionTeam['members'][number] }) 
       qc.invalidateQueries({ queryKey: qk.agency.commissionTeam });
       toast.show('Split updated.', 'success');
     },
-    onError: (e) => toast.show(errorText(e, 'Could not update the split.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not update the split.'), 'error'),
   });
   return (
     <View style={{ gap: spacing.xs }}>

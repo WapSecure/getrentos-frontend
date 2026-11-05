@@ -28,7 +28,7 @@ import {
   type Incoming,
   type ManagementTransfer,
 } from '@/lib/api/managementTransfers';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { formatDate } from '@/lib/format';
 import { useMyHomes } from '@/hooks/useMyHomes';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
@@ -105,15 +105,13 @@ export default function ChangeManager() {
       setAcknowledged(false);
       invalidate();
     },
-    onError: (e) =>
-      setMessage({ ok: false, text: e instanceof ApiError ? e.message : 'Could not schedule it.' }),
+    onError: (e) => setMessage({ ok: false, text: errorMessage(e, 'Could not schedule it.') }),
   });
 
   const cancel = useMutation({
     mutationFn: (id: string) => managementTransfersApi.cancel(id),
     onSuccess: invalidate,
-    onError: (e) =>
-      setMessage({ ok: false, text: e instanceof ApiError ? e.message : 'Could not call it off.' }),
+    onError: (e) => setMessage({ ok: false, text: errorMessage(e, 'Could not call it off.') }),
   });
 
   const pickProperty = (id: string) => {

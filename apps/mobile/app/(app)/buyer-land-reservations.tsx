@@ -8,10 +8,9 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -25,7 +24,7 @@ import {
   splitReservations,
   type Reservation,
 } from '@/lib/api/landBuyer';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { formatDate, formatDateTime, formatNaira } from '@/lib/format';
 import { Sheet } from '@/components/Sheet';
 import { StartPurchase } from '@/components/land/StartPurchase';
@@ -76,20 +75,20 @@ export default function BuyerLandReservations() {
         <Text variant="callout" color="mutedForeground">
           A hold that runs out puts the plot back on sale.
         </Text>
-        {q.isLoading ? (
-          <ListSkeleton rows={2} variant="card" height={120} />
-        ) : q.isError ? (
-          <ErrorState onRetry={() => q.refetch()} />
-        ) : (q.data ?? []).length === 0 ? (
-          <EmptyState
-            icon={<Timer size={32} color={colors.mutedForeground} />}
-            title="No reservations yet"
-            description="Reserve a plot in a verified estate to hold it free while you choose a payment plan."
-            action={
+        <QueryState
+          query={q}
+          skeleton={<ListSkeleton rows={2} variant="card" height={120} />}
+          isEmpty={!q.data?.length}
+          empty={{
+            icon: <Timer size={32} color={colors.mutedForeground} />,
+            title: 'No reservations yet',
+            description:
+              'Reserve a plot in a verified estate to hold it free while you choose a payment plan.',
+            action: (
               <Button label="Browse estates" onPress={() => router.push('/(app)/land-estates')} />
-            }
-          />
-        ) : (
+            ),
+          }}
+        >
           <>
             {live.length === 0 ? (
               <Card style={{ gap: spacing.sm }}>
@@ -139,7 +138,7 @@ export default function BuyerLandReservations() {
               </View>
             ) : null}
           </>
-        )}
+        </QueryState>
       </ScrollView>
       <Sheet open={!!starting} onClose={() => setStarting(null)} title="Start your purchase">
         {starting ? (
@@ -161,8 +160,7 @@ function LiveHold({ r, now, onStart }: { r: Reservation; now: number; onStart: (
       qc.invalidateQueries({ queryKey: qk.buyerLand.all });
       toast.show(`${plotLabel(r)} released.`, 'success');
     },
-    onError: (e) =>
-      toast.show(e instanceof ApiError ? e.message : 'Could not release the plot.', 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not release the plot.'), 'error'),
   });
   return (
     <Card style={{ gap: spacing.sm }}>
