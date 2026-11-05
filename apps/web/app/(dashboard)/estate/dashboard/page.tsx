@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -18,17 +19,36 @@ import {
   Users,
   Wallet,
 } from 'lucide-react';
-import { Button, Card, CardSkeleton, PageHeader, StatCard, StatGridSkeleton } from '@getrentos/ui';
+import {
+  Button,
+  Card,
+  CardSkeleton,
+  PageHeader,
+  StatCard,
+  StatGridSkeleton,
+  Skeleton,
+} from '@getrentos/ui';
 import { ROUTES } from '@/lib/constants/auth';
 import { useSelectedEstate } from '@/app/(dashboard)/estate/layout';
 import { estateService } from '@/services/estateService';
 import { unwrap } from '@/lib/apiHelpers';
 import { estateKeys } from '@/lib/queryKeys';
 import { formatCurrency } from '@/lib/format';
-import { EstateDuesTrendChart } from '@/components/estate/dashboard/EstateDuesTrendChart';
 import { useEstatePlan } from '@/hooks/useEstatePlan';
 import { AttentionFeed } from '@/components/shared/attention/AttentionFeed';
 import { ProFeatureGate } from '@/components/shared/subscription/ProFeatureGate';
+
+// Charts pull in recharts; load them after the page so it opens faster.
+const EstateDuesTrendChart = dynamic(
+  () =>
+    import('@/components/estate/dashboard/EstateDuesTrendChart').then(
+      (m) => m.EstateDuesTrendChart
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-72 rounded-xl" />,
+  }
+);
 
 const modules = [
   {

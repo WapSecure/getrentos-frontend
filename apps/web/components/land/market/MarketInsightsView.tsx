@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { Button, PageErrorState, Select, Skeleton } from '@getrentos/ui';
@@ -17,7 +18,13 @@ import { estateStorefrontService } from '@/services/estateMarketplaceService';
 import { landMarketService } from '@/services/landMarketService';
 import { LAND_TITLE_TYPE_LABELS, type LandTitleType } from '@/types/land';
 import type { LandMarketInsightsParams } from '@/types/landMarket';
-import { DistributionStrip, PriceTrendChart, TitleTypeBars, monthLabel } from './InsightsCharts';
+import { DistributionStrip, TitleTypeBars, monthLabel } from './InsightsCharts';
+
+// The trend chart pulls in recharts; it loads after the rest of the page.
+const PriceTrendChart = dynamic(() => import('./PriceTrendChart').then((m) => m.PriceTrendChart), {
+  ssr: false,
+  loading: () => <Skeleton className="h-56 w-full rounded-xl" />,
+});
 
 const TITLE_OPTIONS = [
   { value: '', label: 'Any title document' },
