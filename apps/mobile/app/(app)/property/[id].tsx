@@ -16,6 +16,7 @@ import {
   PlayCircle,
   Share2,
   ShieldCheck,
+  Search,
 } from 'lucide-react-native';
 import {
   Badge,
@@ -23,6 +24,7 @@ import {
   Card,
   Chip,
   Divider,
+  EmptyState,
   IconButton,
   LinkButton,
   Price,
@@ -36,7 +38,7 @@ import { useSavedListings } from '@/hooks/useSavedListings';
 import { qk } from '@/lib/query/keys';
 import { propertiesApi } from '@/lib/api/properties';
 import { messagesApi } from '@/lib/api/messages';
-import { errorMessage } from '@/lib/api/client';
+import { errorMessage, ApiError } from '@/lib/api/client';
 import { track } from '@/lib/analytics';
 import { recentlyViewedApi } from '@/lib/api/recentlyViewed';
 import { formatDate } from '@/lib/format';
@@ -65,7 +67,16 @@ export default function PropertyDetail() {
 
   const query = useQuery({
     queryKey: qk.listings.detail(id),
-    queryFn: () => propertiesApi.getById(id),
+    queryFn: async () => {
+      try {
+        return await propertiesApi.getById(id);
+      } catch (e) {
+        // A home that has been let or withdrawn is gone, not a connection
+        // problem: null renders the "no longer listed" state below.
+        if (e instanceof ApiError && e.status === 404) return null;
+        throw e;
+      }
+    },
     enabled: !!id,
   });
 
@@ -127,6 +138,13 @@ export default function PropertyDetail() {
                       />
                     ) : p.verified ? (
                       <Badge label="Verified" tone="success" />
+                    ) : query.data === null ? (
+                      <EmptyState
+                        icon={<Search size={34} color={colors.mutedForeground} />}
+                        title="This home is no longer listed"
+                        description="It may have been let or taken down. Keep browsing for homes like it."
+                        action={<Button label="Back to Discover" onPress={() => router.back()} />}
+                      />
                     ) : null}
                   </View>
                   <Text variant="heading" headingLevel={1}>
