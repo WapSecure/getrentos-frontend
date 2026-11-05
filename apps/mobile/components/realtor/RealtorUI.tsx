@@ -29,7 +29,8 @@ import { qk } from '@/lib/query/keys';
 import {
   OFFER_STATUS,
   VIEWING_STATUS,
-  currentAmount,
+  buyerAmount,
+  pendingCounter,
   leadStage,
   listingTitle,
   localInstant,
@@ -41,7 +42,7 @@ import {
   type RealtorViewing,
 } from '@/lib/api/realtor';
 import { ApiError, errorMessage } from '@/lib/api/client';
-import { formatDate, formatTime, relativeTime } from '@/lib/format';
+import { formatDate, formatNaira, formatTime, relativeTime } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
 import { StatusPill, isUpgradeError } from '@/components/host/HostUI';
@@ -162,7 +163,10 @@ export function ViewingRow({
 export function OfferCard({ o }: { o: RealtorOffer }) {
   const { colors, spacing } = useTheme();
   const s = OFFER_STATUS[o.status] ?? OFFER_STATUS.CLOSED;
-  const amount = currentAmount(o);
+  // The buyer's figure, with your own pending counter shown beside it, so a
+  // number you proposed is never read as the buyer's offer.
+  const amount = buyerAmount(o);
+  const yourCounter = pendingCounter(o);
   const gap = vsAsking(amount, o.listing.price);
   const title = o.listing.listingTitle || o.listing.property.title;
   const buyer = o.buyer.legalName || o.buyer.email;
@@ -173,7 +177,7 @@ export function OfferCard({ o }: { o: RealtorOffer }) {
         router.push({ pathname: '/(app)/realtor-offer/[id]', params: { id: o.id } });
       }}
       accessibilityRole="button"
-      accessibilityLabel={`${buyer} on ${title}, ${Math.round(amount).toLocaleString('en-NG')} naira${gap ? `, ${gap}` : ''}, ${s.label}`}
+      accessibilityLabel={`${buyer} offered ${Math.round(amount).toLocaleString('en-NG')} naira on ${title}${gap ? `, ${gap}` : ''}${yourCounter !== null ? `, you countered ${Math.round(yourCounter).toLocaleString('en-NG')} naira, waiting on the buyer` : `, ${s.label}`}`}
     >
       {({ pressed }) => (
         <Card elevated style={{ gap: spacing.sm, opacity: pressed ? 0.92 : 1 }}>
@@ -181,7 +185,10 @@ export function OfferCard({ o }: { o: RealtorOffer }) {
             <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
               {title}
             </Text>
-            <StatusPill label={s.label} tone={s.tone} />
+            <StatusPill
+              label={yourCounter !== null ? "Buyer's turn" : s.label}
+              tone={yourCounter !== null ? 'neutral' : s.tone}
+            />
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
             <Price amount={amount} variant="heading" />
@@ -191,6 +198,11 @@ export function OfferCard({ o }: { o: RealtorOffer }) {
               </Text>
             ) : null}
           </View>
+          {yourCounter !== null ? (
+            <Text variant="caption" color="mutedForeground">
+              You countered {formatNaira(yourCounter)}; waiting on the buyer
+            </Text>
+          ) : null}
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text variant="caption" color="mutedForeground" style={{ flex: 1 }} numberOfLines={1}>
               {buyer} · {relativeTime(o.createdAt)}
