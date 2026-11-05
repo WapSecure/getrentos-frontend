@@ -33,6 +33,7 @@ import {
   QuickActions,
   dashboardGreeting,
 } from '@/components/dashboard/DashboardParts';
+import { IdentityNudge } from '@/components/trust/IdentityNudge';
 import { useMonetaryVisibility } from '@/hooks/useMonetaryVisibility';
 
 const ACTIVITY_ICON: Record<LandlordActivity['type'], LucideIcon> = {
@@ -177,6 +178,9 @@ export default function LandlordOverview() {
         errorTitle="We couldn't load your dashboard"
         errorDescription="Your property and payment data is safe. Check your connection and try again."
       >
+        {/* Before anything else: an unverified landlord cannot publish, sign or
+            be paid, and should hear that here, not when a form is refused. */}
+        <IdentityNudge unlocks="listings, leases and payouts" />
         {/* What needs you first: rent that hasn't come in, then repairs waiting. */}
         {s && s.outstandingPayments > 0 ? (
           <AttentionCard
