@@ -17,18 +17,26 @@ import {
   Text,
   useTheme,
 } from '@getrentos/ui-native';
-import { offerGap, OWNER_OFFER_LABEL, OWNER_OFFER_TONE, type OwnerOffer } from '@/lib/api/owner';
+import {
+  awaitingOwner,
+  offerGap,
+  OWNER_OFFER_LABEL,
+  OWNER_OFFER_TONE,
+  type OwnerOffer,
+} from '@/lib/api/owner';
 import { sellerOffers, type OfferSide } from '@/lib/api/sellerOffers';
 import { formatDate } from '@/lib/format';
 import { OfferComparisonCard } from './OfferComparisonCard';
 
-type Filter = 'open' | 'accepted' | 'closed' | 'all';
+type Filter = 'open' | 'waiting' | 'accepted' | 'closed' | 'all';
 const FILTERS: { value: Filter; label: string; match: (o: OwnerOffer) => boolean }[] = [
   {
     value: 'open',
     label: 'Needs you',
-    match: (o) => o.status === 'submitted' || o.status === 'countered',
+    match: awaitingOwner,
   },
+  // Countered by the owner: open, but the buyer's move.
+  { value: 'waiting', label: "Buyer's turn", match: (o) => o.awaiting === 'buyer' },
   { value: 'accepted', label: 'Accepted', match: (o) => o.status === 'accepted' },
   {
     value: 'closed',
@@ -157,7 +165,10 @@ export function SellerOffers({
                         {o.buyerName} · {formatDate(o.submittedAt, 'short')}
                       </Text>
                     </View>
-                    <Badge label={OWNER_OFFER_LABEL[o.status]} tone={OWNER_OFFER_TONE[o.status]} />
+                    <Badge
+                      label={o.awaiting === 'buyer' ? "Buyer's turn" : OWNER_OFFER_LABEL[o.status]}
+                      tone={o.awaiting === 'buyer' ? 'neutral' : OWNER_OFFER_TONE[o.status]}
+                    />
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
                     <Price amount={o.offerAmount} variant="subheading" />

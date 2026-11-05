@@ -170,6 +170,32 @@ export const CONSENT_COPY: Record<ConsentType, { title: string; body: string; pu
 
 const ACTIONABLE = ['NOT_STARTED', 'FAILED', 'REVIEW_REQUIRED'];
 
+/** Every check this verification asks for, in the order the policy lists them. */
+export function checkKinds(steps: TrustStep[]): CheckKind[] {
+  const out: CheckKind[] = [];
+  for (const s of steps) {
+    const kind = KIND_OF_STEP[s.stepType];
+    if (kind && !out.includes(kind)) out.push(kind);
+  }
+  return out;
+}
+
+export type CheckState = 'done' | 'todo' | 'failed' | 'review' | 'waiting';
+
+/**
+ * Where one check stands, from its steps: a selfie is one check to the person
+ * even though the policy runs capture, liveness and face match as three steps.
+ */
+export function checkState(steps: TrustStep[], kind: CheckKind): CheckState {
+  const own = steps.filter((s) => KIND_OF_STEP[s.stepType] === kind);
+  if (own.every((s) => s.status === 'PASSED' || s.status === 'SKIPPED')) return 'done';
+  if (own.some((s) => s.status === 'FAILED')) return 'failed';
+  if (own.some((s) => s.status === 'REVIEW_REQUIRED')) return 'review';
+  if (own.some((s) => s.status === 'WAITING_FOR_PROVIDER' || s.status === 'IN_PROGRESS'))
+    return 'waiting';
+  return 'todo';
+}
+
 /** Checks still to run, in the order the policy lists their first step. */
 export function pendingChecks(steps: TrustStep[]): CheckKind[] {
   const out: CheckKind[] = [];

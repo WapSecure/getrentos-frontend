@@ -1,4 +1,11 @@
-import { activeConsent, idNumberOk, pendingChecks, purposeFor } from '@/lib/api/trust';
+import {
+  activeConsent,
+  checkKinds,
+  checkState,
+  idNumberOk,
+  pendingChecks,
+  purposeFor,
+} from '@/lib/api/trust';
 
 const step = (stepType: string, status: string) => ({
   id: stepType,
@@ -47,5 +54,26 @@ describe('trust verification helpers', () => {
     expect(idNumberOk('NIN', '1234567890')).toBe(false);
     expect(idNumberOk('BVN', '12345678901')).toBe(true);
     expect(idNumberOk('PASSPORT', 'A123')).toBe(true);
+  });
+
+  it('groups the policy steps into the checks a person does', () => {
+    const steps = [
+      step('PHONE_OTP', 'PASSED'),
+      step('NIN_CHECK', 'NOT_STARTED'),
+      step('SELFIE_CAPTURE', 'PASSED'),
+      step('LIVENESS_CHECK', 'NOT_STARTED'),
+      step('FACE_MATCH', 'NOT_STARTED'),
+      step('BANK_ACCOUNT_CHECK', 'NOT_STARTED'),
+    ];
+    expect(checkKinds(steps)).toEqual(['phone', 'identity', 'biometric', 'bank']);
+    expect(checkState(steps, 'phone')).toBe('done');
+    // Half the selfie steps passed is still a selfie to take.
+    expect(checkState(steps, 'biometric')).toBe('todo');
+  });
+
+  it('reads failed, review and waiting before todo', () => {
+    expect(checkState([step('NIN_CHECK', 'FAILED')], 'identity')).toBe('failed');
+    expect(checkState([step('NIN_CHECK', 'REVIEW_REQUIRED')], 'identity')).toBe('review');
+    expect(checkState([step('NIN_CHECK', 'WAITING_FOR_PROVIDER')], 'identity')).toBe('waiting');
   });
 });

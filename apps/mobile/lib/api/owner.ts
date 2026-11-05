@@ -176,8 +176,16 @@ export interface OwnerOffer {
   depositAmount?: number;
   message?: string;
   status: OwnerOfferStatus;
+  /** Whose answer it waits on; absent from older APIs (then: open means the owner). */
+  awaiting?: 'owner' | 'buyer' | null;
   submittedAt: string;
 }
+
+/** True when an offer is waiting on the owner's answer. */
+export const awaitingOwner = (o: Pick<OwnerOffer, 'status' | 'awaiting'>) =>
+  o.awaiting !== undefined
+    ? o.awaiting === 'owner'
+    : o.status === 'submitted' || o.status === 'countered';
 
 export interface OwnerOfferThreadMessage {
   id: string;

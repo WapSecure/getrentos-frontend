@@ -253,6 +253,30 @@ export default function ApplyToRent() {
   const removeDocument = (name: string) =>
     setDocument(name, { uploaded: false, documentId: undefined, url: undefined });
 
+  // Files already in the renter's documents can be attached instead of picked
+  // and uploaded again (the API accepts any document the applicant owns).
+  // Newest first, so a same-named match is the latest copy; expired ones skipped.
+  const library = useQuery({
+    queryKey: [...qk.renter.documents, 'application-library'],
+    queryFn: () => documentsApi.list(1, 100),
+  });
+  const sameName = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+  const savedMatches = data.documents
+    .filter((d) => !d.uploaded)
+    .map((d) => ({
+      doc: d,
+      file: (library.data?.items ?? []).find(
+        (f) => f.status !== 'expired' && sameName(f.name, d.name)
+      ),
+    }))
+    .filter((m) => !!m.file);
+  const attachSavedDocuments = () => {
+    savedMatches.forEach(({ doc, file }) =>
+      setDocument(doc.name, { uploaded: true, documentId: file!.id, url: file!.url })
+    );
+    haptics.tap();
+  };
+
   const submitMutation = useMutation({
     mutationFn: () =>
       applicationsApi.submit({
@@ -479,6 +503,8 @@ export default function ApplyToRent() {
               update={update}
               onUpload={(doc) => uploadDocMutation.mutate(doc)}
               onRemove={removeDocument}
+              savedCount={savedMatches.length}
+              onUseSaved={attachSavedDocuments}
               uploadingName={
                 uploadDocMutation.isPending ? uploadDocMutation.variables?.name : undefined
               }
@@ -778,6 +804,8 @@ function DocumentsStep({
   update,
   onUpload,
   onRemove,
+  savedCount,
+  onUseSaved,
   uploadingName,
   error,
 }: {
@@ -785,12 +813,23 @@ function DocumentsStep({
   update: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   onUpload: (doc: ApplicationDocument) => void;
   onRemove: (name: string) => void;
+  /** How many still-missing documents have a saved copy in the renter's documents. */
+  savedCount: number;
+  onUseSaved: () => void;
   uploadingName?: string;
   error: string | null;
 }) {
   const { colors, spacing, radius } = useTheme();
   return (
     <View style={{ gap: spacing.lg }}>
+      {savedCount > 0 ? (
+        <Button
+          variant="outline"
+          label={`Use ${savedCount} saved ${savedCount === 1 ? 'document' : 'documents'}`}
+          onPress={onUseSaved}
+          accessibilityHint="Attaches matching files from your documents instead of uploading them again"
+        />
+      ) : null}
       <Card elevated padding="none">
         {data.documents.map((doc, i) => {
           const uploading = uploadingName === doc.name;

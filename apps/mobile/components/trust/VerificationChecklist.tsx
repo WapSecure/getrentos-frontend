@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Camera, CheckCircle2, Circle, Gavel } from 'lucide-react-native';
+import { Camera, CheckCircle2, Gavel } from 'lucide-react-native';
 import {
   Badge,
   Button,
   Card,
   NumberField,
   OtpInput,
+  PressableScale,
+  Progress,
   Skeleton,
   Text,
   TextField,
@@ -20,14 +22,14 @@ import {
   APPEAL_STATUS,
   CONSENT_COPY,
   CONSENT_FOR,
+  checkKinds,
+  checkState,
   idNumberOk,
-  pendingChecks,
   PROFESSIONAL_DOCUMENT_TYPES,
-  STEP_LABEL,
-  STEP_STATUS,
   TRUST_ID_TYPES,
   trustApi,
   type CheckKind,
+  type CheckState,
   type ConsentType,
   type TrustConsent,
   type TrustIdType,
@@ -39,7 +41,6 @@ import { captureSelfie } from '@/lib/filePicker';
 import { formatDate } from '@/lib/format';
 import { ChipSelect } from '@/components/landlord/ChipSelect';
 import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
-
 
 /**
  * The instant identity checks (phone code, NIN/BVN, selfie, bank account,
@@ -56,6 +57,8 @@ export function VerificationChecklist({
   const { spacing } = useTheme();
   const qc = useQueryClient();
   const [verificationId, setVerificationId] = useState<string | null>(null);
+  // undefined: follow the next check that needs the person; null: all folded.
+  const [opened, setOpened] = useState<CheckKind | null | undefined>(undefined);
   const started = useRef(false);
   const start = useMutation({
     mutationFn: () => trustApi.start(subjectId, purpose),
@@ -97,7 +100,15 @@ export function VerificationChecklist({
   if (!detail.data) return <Skeleton height={180} />;
 
   const v = detail.data;
-  const checks = pendingChecks(v.steps);
+  const kinds = checkKinds(v.steps);
+  const states = kinds.map((k) => checkState(v.steps, k));
+  const done = states.filter((st) => st === 'done').length;
+  // The first check that needs the person opens; the rest fold to one line.
+  const current =
+    kinds.find((_, i) => states[i] === 'todo' || states[i] === 'failed') ??
+    kinds.find((_, i) => states[i] === 'review' || states[i] === 'waiting') ??
+    null;
+  const openKind = opened === undefined ? current : opened;
   return (
     <View style={{ gap: spacing.md }}>
       <Card style={{ gap: spacing.sm }}>
@@ -106,22 +117,42 @@ export function VerificationChecklist({
             Your checks
           </Text>
           <Text variant="caption" color="mutedForeground">
-            {v.passedSteps} of {v.stepCount} done
+            {done} of {kinds.length} done
           </Text>
         </View>
-        {v.steps.map((s) => (
-          <StepRow key={s.id} type={s.stepType} status={s.status} provider={s.provider} />
-        ))}
+        <Progress
+          value={kinds.length ? done / kinds.length : 0}
+          accessibilityLabel={`${done} of ${kinds.length} checks done`}
+        />
       </Card>
 
-      {checks.map((kind) => (
-        <CheckRunner
+      {kinds.map((kind, i) => (
+        <CheckStage
           key={kind}
+          index={i + 1}
           kind={kind}
-          verificationId={v.id}
-          consents={consents.data}
-          onDone={refresh}
-        />
+          state={states[i]}
+          open={openKind === kind && states[i] !== 'done'}
+          onToggle={() => setOpened(openKind === kind ? null : kind)}
+        >
+          {states[i] === 'todo' || states[i] === 'failed' ? (
+            <CheckRunner
+              kind={kind}
+              verificationId={v.id}
+              consents={consents.data}
+              onDone={() => {
+                setOpened(undefined);
+                refresh();
+              }}
+            />
+          ) : (
+            <Text variant="callout" color="mutedForeground">
+              {states[i] === 'review'
+                ? 'A reviewer is looking at this. You can carry on with the other checks.'
+                : 'We are checking this now.'}
+            </Text>
+          )}
+        </CheckStage>
       ))}
 
       {v.decision === 'REJECT' ? <AppealCard verificationId={v.id} /> : null}
@@ -131,31 +162,80 @@ export function VerificationChecklist({
   );
 }
 
-function StepRow({
-  type,
-  status,
-  provider,
+const STATE_BADGE: Record<
+  CheckState,
+  { label: string; tone: 'success' | 'info' | 'danger' | 'warning' | 'neutral' }
+> = {
+  done: { label: 'Done', tone: 'success' },
+  todo: { label: 'Needs you', tone: 'info' },
+  failed: { label: 'Did not pass', tone: 'danger' },
+  review: { label: 'In review', tone: 'warning' },
+  waiting: { label: 'Checking', tone: 'neutral' },
+};
+
+/** One numbered check: a line that opens to its form when it needs the person. */
+function CheckStage({
+  index,
+  kind,
+  state,
+  open,
+  onToggle,
+  children,
 }: {
-  type: string;
-  status: string;
-  provider?: string | null;
+  index: number;
+  kind: CheckKind;
+  state: CheckState;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
 }) {
-  const { colors, spacing } = useTheme();
-  const meta = STEP_STATUS[status] ?? { label: status, tone: 'neutral' as const };
-  const Icon = status === 'PASSED' ? CheckCircle2 : Circle;
+  const { colors, spacing, radius } = useTheme();
+  const badge = STATE_BADGE[state];
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-      <Icon size={16} color={status === 'PASSED' ? colors.success : colors.mutedForeground} />
-      <View style={{ flex: 1 }}>
-        <Text variant="callout">{STEP_LABEL[type] ?? type}</Text>
-        {provider ? (
-          <Text variant="caption" color="mutedForeground">
-            via {provider}
+    <Card padding="none" style={{ overflow: 'hidden' }}>
+      <PressableScale
+        onPress={state === 'done' ? undefined : onToggle}
+        disabled={state === 'done'}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open, disabled: state === 'done' }}
+        accessibilityLabel={`Step ${index}: ${RUNNER_TITLE[kind]}, ${badge.label}`}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing.md,
+            padding: spacing.lg,
+          }}
+        >
+          <View
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: radius.full,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: state === 'done' ? colors.successSubtle : colors.accent,
+            }}
+          >
+            {state === 'done' ? (
+              <CheckCircle2 size={16} color={colors.success} />
+            ) : (
+              <Text variant="label" color="primary">
+                {index}
+              </Text>
+            )}
+          </View>
+          <Text variant="bodyStrong" style={{ flex: 1 }}>
+            {RUNNER_TITLE[kind]}
           </Text>
-        ) : null}
-      </View>
-      <Badge label={meta.label} tone={meta.tone} />
-    </View>
+          <Badge label={badge.label} tone={badge.tone} />
+        </View>
+      </PressableScale>
+      {open ? (
+        <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg }}>{children}</View>
+      ) : null}
+    </Card>
   );
 }
 

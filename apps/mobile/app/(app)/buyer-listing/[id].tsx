@@ -33,8 +33,9 @@ import { PropertyMapView } from '@/components/property/PropertyMapView';
 import { PropertyGallery, toGallery } from '@/components/property/PropertyGallery';
 import { RequestViewingSheet } from '@/components/buyer/RequestViewingSheet';
 import { MakeOfferSheet } from '@/components/buyer/MakeOfferSheet';
+import { buyerOffersApi } from '@/lib/api/buyerOffers';
 import { DiligenceCard } from '@/components/buyer/DiligenceCard';
-import { formatDate } from '@/lib/format';
+import { formatDate, formatNaira } from '@/lib/format';
 import { VideoTourSheet } from '@/components/video/VideoTourSheet';
 import { useAskSeller } from '@/hooks/useAskSeller';
 import { FilmedOnSite } from '@/components/video/FilmedOnSite';
@@ -54,6 +55,15 @@ export default function BuyerListingDetail() {
     queryFn: () => buyerApi.getListing(id),
   });
   const listing = query.data;
+  // An offer still in play on this home: the button should lead back to it,
+  // not start a second one beside a counter the seller is waiting on.
+  const myOffers = useQuery({
+    queryKey: qk.buyer.offers(1, 100),
+    queryFn: () => buyerOffersApi.list(1, 100),
+  });
+  const openOffer = myOffers.data?.items.find(
+    (o) => o.listingId === id && (o.status === 'submitted' || o.status === 'countered')
+  );
   const isSaved = listing ? savedIds.has(listing.id) : false;
   // The cover key is usually repeated in the gallery, and a repeated URI would collide as a list key.
   const gallery = listing ? toGallery(listing.image, listing.images) : [];
@@ -274,6 +284,17 @@ export default function BuyerListingDetail() {
               }}
             >
               <Divider />
+              {openOffer ? (
+                <Text
+                  variant="caption"
+                  color="mutedForeground"
+                  style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.md }}
+                >
+                  {openOffer.status === 'countered'
+                    ? `Your offer of ${formatNaira(openOffer.offerAmount)} has a counter waiting.`
+                    : `You offered ${formatNaira(openOffer.offerAmount)}. Waiting for the seller.`}
+                </Text>
+              ) : null}
               <View
                 style={{
                   flexDirection: 'row',
@@ -290,10 +311,17 @@ export default function BuyerListingDetail() {
                   onPress={() => setViewingOpen(true)}
                 />
                 <Button
-                  label="Make offer"
+                  label={openOffer ? 'View your offer' : 'Make offer'}
                   icon={<FileSignature size={16} color={colors.primaryForeground} />}
                   style={{ flex: 1 }}
-                  onPress={() => setOfferOpen(true)}
+                  onPress={() =>
+                    openOffer
+                      ? router.push({
+                          pathname: '/(app)/buyer-offer/[id]',
+                          params: { id: openOffer.id },
+                        })
+                      : setOfferOpen(true)
+                  }
                 />
               </View>
             </View>
