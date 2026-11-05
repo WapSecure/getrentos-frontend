@@ -185,7 +185,7 @@ export function HomeManagementOperationsCommandCenter({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-primary">Operations command center</p>
+            <p className="text-sm font-medium text-primary">Operations command centre</p>
             {!isLoading && (
               <Badge
                 variant={attentionSignalCount > 0 ? 'warning' : hasRecords ? 'success' : 'neutral'}

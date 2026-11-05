@@ -56,7 +56,7 @@ export const HelpCenterContent = ({ roleLabel, messagesHref }: HelpCenterContent
       <div className="mb-6">
         <div className="flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Help center</h1>
+          <h1 className="text-2xl font-bold text-foreground">Help centre</h1>
         </div>
         <p className="text-muted-foreground mt-1">
           Answers and support for your GetRentos {roleLabel} account
