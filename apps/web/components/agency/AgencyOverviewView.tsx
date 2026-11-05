@@ -55,9 +55,7 @@ export function AgencyOverviewView() {
         }
       />
 
-      <div className="mb-6">
-        <AttentionFeed persona="manager" />
-      </div>
+      <AttentionFeed persona="manager" />
 
       {!d ? (
         <>
