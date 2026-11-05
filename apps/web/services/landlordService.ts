@@ -553,6 +553,19 @@ export const landlordService = {
     return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening`));
   },
 
+  /** Ask the applicant for more information by message; a pending application moves to under review. */
+  async requestApplicationInfo(
+    applicationId: string,
+    message: string
+  ): Promise<ApiResponse<{ conversationId: string; status: 'under_review' }>> {
+    return safeCall(() =>
+      authFetch(`/landlord/applications/${applicationId}/request-info`, {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+      })
+    );
+  },
+
   /** The screening facts in plain words, with questions and checks. Never a ranking or a decision. */
   async getApplicantSummary(applicationId: string): Promise<ApiResponse<ApplicantSummary>> {
     return safeCall(() => authFetch(`/landlord/applications/${applicationId}/screening/summary`));
