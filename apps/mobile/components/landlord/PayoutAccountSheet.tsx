@@ -1,19 +1,11 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  Button,
-  Chip,
-  FormAlert,
-  NumberField,
-  Text,
-  useTheme,
-  useToast,
-} from '@getrentos/ui-native';
+import { Button, FormAlert, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
 import { landlordApi, type PayoutAccount } from '@/lib/api/landlord';
 import { payoutAccountValid } from '@/lib/api/estateGovernance';
-import { COMMON_BANKS } from '@/lib/api/sellerPayout';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
 import { qk } from '@/lib/query/keys';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -45,7 +37,6 @@ function PayoutAccountForm({ account, onDone }: { account?: PayoutAccount; onDon
   const qc = useQueryClient();
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
-  const [other, setOther] = useState(false);
   const [accountNumber, setAccountNumber] = useState('');
 
   const save = useMutation({
@@ -75,51 +66,15 @@ function PayoutAccountForm({ account, onDone }: { account?: PayoutAccount; onDon
           message="The current account isn’t verified. Save it again to check it against the bank."
         />
       ) : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-        {COMMON_BANKS.map((b) => (
-          <Chip
-            key={b.code}
-            label={b.name}
-            size="sm"
-            selected={!other && bankCode === b.code}
-            onPress={() => {
-              setOther(false);
-              setBankCode(b.code);
-            }}
-          />
-        ))}
-        <Chip
-          label="Other bank"
-          size="sm"
-          selected={other}
-          onPress={() => {
-            setOther(true);
-            setBankCode('');
-          }}
-        />
-      </View>
-      {other ? (
-        <NumberField
-          label="Bank code"
-          required
-          code
-          value={bankCode}
-          onValueChange={setBankCode}
-          maxLength={6}
-          hint="Your bank’s code, e.g. 058 for GTBank"
-        />
-      ) : null}
-      <NumberField
-        label="Account number"
-        required
-        code
-        value={accountNumber}
-        onValueChange={setAccountNumber}
-        maxLength={10}
-        hint="We check the name on the account with the bank"
+      <BankAccountFields
+        bankCode={bankCode}
+        onBankCode={setBankCode}
+        accountNumber={accountNumber}
+        onAccountNumber={setAccountNumber}
       />
       <Text variant="caption" color="mutedForeground">
-        You’ll be asked to confirm it’s you: this decides where your rent goes.
+        We check the name on the account with the bank. You’ll be asked to confirm it’s you: this
+        decides where your rent goes.
       </Text>
       {save.error ? (
         <FormAlert

@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ReanimatedSwipeable, {
@@ -20,26 +20,20 @@ import {
 import {
   Avatar,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
   useReducedMotion,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { messagesApi, type Conversation } from '@/lib/api/messages';
 import { relativeTime } from '@/lib/format';
-import { errorMessage } from '@/lib/api/client';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import {
-  patchConversation,
-  updateInboxConversation,
-  type ConversationPages,
-} from '@/lib/conversationCache';
-import { RefreshFailedNotice } from '@/components/RefreshFailedNotice';
+import { patchConversation, type ConversationPages } from '@/lib/conversationCache';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 
 const PAGE_SIZE = 20;
 
@@ -179,23 +173,17 @@ export default function Messages() {
         ) : null}
       </View>
 
-      {query.isRefetchError && all.length > 0 ? (
-        <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.sm }}>
-          <RefreshFailedNotice onRetry={() => query.refetch()} retrying={query.isFetching} />
-        </View>
-      ) : null}
-
-      {query.isError && all.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2, 3].map((i) => (
-            <ConversationRowSkeleton key={i} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2, 3].map((i) => (
+              <ConversationRowSkeleton key={i} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -237,7 +225,7 @@ export default function Messages() {
           }
           refreshControl={refresh}
         />
-      )}
+      </QueryState>
     </View>
   );
 }
@@ -262,19 +250,24 @@ function useConversationToggle(
   flip: (c: Conversation) => Conversation
 ) {
   const qc = useQueryClient();
-  const toast = useToast();
-  return useMutation({
+  return useOptimisticMutation({
     mutationFn: call,
-    onMutate: async (id: string) => {
-      await qc.cancelQueries({ queryKey: qk.renter.conversations, exact: true });
-      const previous = qc.getQueryData<ConversationPages>(qk.renter.conversations);
-      updateInboxConversation(qc, id, flip);
-      return { previous };
-    },
-    onError: (err, _id, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.renter.conversations, ctx.previous);
-      toast.show(errorMessage(err, 'Could not update that conversation.'), 'error');
-    },
+    patches: (id: string) => [
+      {
+        queryKey: qk.renter.conversations,
+        update: (old) => {
+          const pages = old as ConversationPages;
+          return {
+            ...pages,
+            pages: pages.pages.map((p) => ({
+              ...p,
+              items: p.items.map((c) => (c.id === id ? flip(c) : c)),
+            })),
+          };
+        },
+      },
+    ],
+    errorMessage: 'Could not update that conversation.',
     onSuccess: (updated) => patchConversation(qc, updated),
   });
 }

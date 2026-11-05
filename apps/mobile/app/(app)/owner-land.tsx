@@ -8,10 +8,9 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -80,53 +79,51 @@ export default function OwnerLand() {
           }
         />
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <Skeleton height={140} radius={radius.lg} />
-        ) : !records.length ? (
-          <EmptyState
-            icon={<LandPlot size={34} color={colors.mutedForeground} />}
-            title="No land yet"
-            description="Register a parcel with its title document. Compliance verifies it before buyers can see it."
-            action={
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={140} radius={radius.lg} />}
+          isEmpty={!records.length}
+          empty={{
+            icon: <LandPlot size={34} color={colors.mutedForeground} />,
+            title: 'No land yet',
+            description:
+              'Register a parcel with its title document. Compliance verifies it before buyers can see it.',
+            action: (
               <Button
                 label="Register land"
                 onPress={() => router.push('/(app)/owner-add-property?type=LAND')}
               />
-            }
+            ),
+          }}
+        >
+          <Button
+            label="Plot sales"
+            size="sm"
+            variant="secondary"
+            icon={<ReceiptText size={14} color={colors.foreground} />}
+            onPress={() => router.push('/(app)/owner-land-sales')}
+            style={{ alignSelf: 'flex-start' }}
           />
-        ) : (
-          <>
-            <Button
-              label="Plot sales"
-              size="sm"
-              variant="secondary"
-              icon={<ReceiptText size={14} color={colors.foreground} />}
-              onPress={() => router.push('/(app)/owner-land-sales')}
-              style={{ alignSelf: 'flex-start' }}
+          <Button
+            label="Video tours buyers asked for"
+            size="sm"
+            variant="secondary"
+            icon={<Video size={14} color={colors.foreground} />}
+            onPress={() => router.push('/(app)/owner-land-tours')}
+            style={{ alignSelf: 'flex-start' }}
+          />
+          <Text variant="callout" color="mutedForeground">
+            {records.length} parcel{records.length === 1 ? '' : 's'} · {verified} verified
+            {needsYou ? ` · ${needsYou} need${needsYou === 1 ? 's' : ''} you` : ''}
+          </Text>
+          {records.map((r) => (
+            <LandCard
+              key={r.propertyId}
+              r={r}
+              onPress={() => router.push(`/(app)/owner-land-parcel/${r.propertyId}`)}
             />
-            <Button
-              label="Video tours buyers asked for"
-              size="sm"
-              variant="secondary"
-              icon={<Video size={14} color={colors.foreground} />}
-              onPress={() => router.push('/(app)/owner-land-tours')}
-              style={{ alignSelf: 'flex-start' }}
-            />
-            <Text variant="callout" color="mutedForeground">
-              {records.length} parcel{records.length === 1 ? '' : 's'} · {verified} verified
-              {needsYou ? ` · ${needsYou} need${needsYou === 1 ? 's' : ''} you` : ''}
-            </Text>
-            {records.map((r) => (
-              <LandCard
-                key={r.propertyId}
-                r={r}
-                onPress={() => router.push(`/(app)/owner-land-parcel/${r.propertyId}`)}
-              />
-            ))}
-          </>
-        )}
+          ))}
+        </QueryState>
       </ScrollView>
 
       <Sheet

@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Chip,
+  Divider,
   Skeleton,
   Text,
   useTheme,
@@ -82,85 +83,81 @@ export function CollectionPlanCard({ source }: { source: CollectionPlanSource })
         {plan.debtors.map((d, i) => {
           const isOpen = open === d.ref;
           return (
-            <View
-              key={d.ref}
-              style={{
-                borderTopWidth: 1,
-                borderTopColor: colors.border,
-                paddingTop: spacing.sm,
-                gap: spacing.xs,
-              }}
-            >
-              <Pressable
-                onPress={() => setOpen(isOpen ? null : d.ref)}
-                accessibilityRole="button"
-                accessibilityState={{ expanded: isOpen }}
-                accessibilityLabel={`${i + 1}. ${d.label}, ${d.owed}, ${d.daysOverdue} days, ${STAGE[d.stage].label}`}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-              >
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={2}>
-                    {i + 1}. {d.label}
-                  </Text>
-                  <Text variant="caption" color="mutedForeground">
-                    {d.owed} · {d.daysOverdue} days
-                  </Text>
-                </View>
-                <Badge label={STAGE[d.stage].label} tone={STAGE[d.stage].tone} />
-                <ChevronDown
-                  size={16}
-                  color={colors.mutedForeground}
-                  style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
-                />
-              </Pressable>
-              {isOpen ? (
-                <View style={{ gap: spacing.xs }}>
-                  <Text variant="caption" color="mutedForeground">
-                    {d.charges} unpaid charge{d.charges === 1 ? '' : 's'}, oldest due {d.oldestDue}.{' '}
-                    {d.paymentPattern}
-                  </Text>
-                  {d.reasons.map((r) => (
-                    <Text key={r} variant="caption" color="mutedForeground">
-                      {r}
+            <View key={d.ref}>
+              <Divider />
+              <View style={{ paddingTop: spacing.sm, gap: spacing.xs }}>
+                <Pressable
+                  onPress={() => setOpen(isOpen ? null : d.ref)}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: isOpen }}
+                  accessibilityLabel={`${i + 1}. ${d.label}, ${d.owed}, ${d.daysOverdue} days, ${STAGE[d.stage].label}`}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                >
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text variant="callout" style={{ fontWeight: '600' }} numberOfLines={2}>
+                      {i + 1}. {d.label}
                     </Text>
-                  ))}
-                  {d.instalments ? (
-                    <Text variant="caption">
-                      Instalments: {d.instalments.map((p) => `${p.amount} by ${p.due}`).join(', ')}
+                    <Text variant="caption" color="mutedForeground">
+                      {d.owed} · {d.daysOverdue} days
                     </Text>
-                  ) : null}
-                  {d.nextNotice ? <Text variant="caption">{d.nextNotice}</Text> : null}
-                  <View
-                    style={{
-                      backgroundColor: colors.secondary,
-                      borderRadius: radius.md,
-                      padding: spacing.sm,
-                      gap: spacing.xs,
-                    }}
-                  >
-                    <Text variant="label">Message to send</Text>
-                    <Text variant="caption">{d.message}</Text>
-                    {d.messageInEnglish ? (
-                      <Text variant="caption" color="mutedForeground">
-                        In English: {d.messageInEnglish}
+                  </View>
+                  <Badge label={STAGE[d.stage].label} tone={STAGE[d.stage].tone} />
+                  <ChevronDown
+                    size={16}
+                    color={colors.mutedForeground}
+                    style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
+                  />
+                </Pressable>
+                {isOpen ? (
+                  <View style={{ gap: spacing.xs }}>
+                    <Text variant="caption" color="mutedForeground">
+                      {d.charges} unpaid charge{d.charges === 1 ? '' : 's'}, oldest due{' '}
+                      {d.oldestDue}. {d.paymentPattern}
+                    </Text>
+                    {d.reasons.map((r) => (
+                      <Text key={r} variant="caption" color="mutedForeground">
+                        {r}
                       </Text>
-                    ) : plan.language && plan.language !== 'en' && d.messageLanguage === 'en' ? (
-                      <Text variant="caption" color="mutedForeground">
-                        Written in English: a {languageLabel(plan.language)} version is not
-                        available for this one right now.
+                    ))}
+                    {d.instalments ? (
+                      <Text variant="caption">
+                        Instalments:{' '}
+                        {d.instalments.map((p) => `${p.amount} by ${p.due}`).join(', ')}
                       </Text>
                     ) : null}
-                    <Button
-                      label="Send…"
-                      size="sm"
-                      variant="secondary"
-                      icon={<Send size={14} color={colors.foreground} />}
-                      onPress={() => void Share.share({ message: d.message })}
-                      accessibilityLabel={`Send the message to ${d.label}`}
-                    />
+                    {d.nextNotice ? <Text variant="caption">{d.nextNotice}</Text> : null}
+                    <View
+                      style={{
+                        backgroundColor: colors.secondary,
+                        borderRadius: radius.md,
+                        padding: spacing.sm,
+                        gap: spacing.xs,
+                      }}
+                    >
+                      <Text variant="label">Message to send</Text>
+                      <Text variant="caption">{d.message}</Text>
+                      {d.messageInEnglish ? (
+                        <Text variant="caption" color="mutedForeground">
+                          In English: {d.messageInEnglish}
+                        </Text>
+                      ) : plan.language && plan.language !== 'en' && d.messageLanguage === 'en' ? (
+                        <Text variant="caption" color="mutedForeground">
+                          Written in English: a {languageLabel(plan.language)} version is not
+                          available for this one right now.
+                        </Text>
+                      ) : null}
+                      <Button
+                        label="Send…"
+                        size="sm"
+                        variant="secondary"
+                        icon={<Send size={14} color={colors.foreground} />}
+                        onPress={() => void Share.share({ message: d.message })}
+                        accessibilityLabel={`Send the message to ${d.label}`}
+                      />
+                    </View>
                   </View>
-                </View>
-              ) : null}
+                ) : null}
+              </View>
             </View>
           );
         })}

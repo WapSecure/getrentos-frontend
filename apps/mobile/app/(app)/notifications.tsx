@@ -20,7 +20,7 @@ import {
 import {
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -284,18 +284,16 @@ export default function Notifications() {
         </View>
       ) : null}
 
-      {/* Cached notifications stay on screen if a refresh fails. */}
-      {query.data === undefined ? (
-        query.isError ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : (
+      <QueryState
+        query={query}
+        skeleton={
           <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
             {[0, 1, 2, 3].map((i) => (
               <Skeleton key={i} height={92} radius={radius.lg} />
             ))}
           </View>
-        )
-      ) : (
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -320,7 +318,7 @@ export default function Notifications() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

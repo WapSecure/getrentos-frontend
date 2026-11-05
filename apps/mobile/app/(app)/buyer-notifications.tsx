@@ -1,23 +1,15 @@
 import { ScrollView, View } from 'react-native';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Card,
-  QueryState,
-  Skeleton,
-  SwitchRow,
-  Text,
-  useTheme,
-  useToast,
-} from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, SwitchRow, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   buyerSettingsApi,
   BUYER_NOTIFICATION_CATEGORY_LABEL,
   type BuyerNotificationPreference,
 } from '@/lib/api/buyerSettings';
-import { errorMessage } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
 import { goBack } from '@/lib/goBack';
@@ -26,28 +18,17 @@ export default function BuyerNotificationSettings() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const toast = useToast();
 
   const query = useQuery({
     queryKey: qk.buyer.notificationPreferences,
     queryFn: buyerSettingsApi.getNotificationPreferences,
   });
 
-  const mutation = useMutation({
+  const mutation = useOptimisticMutation({
     mutationFn: (next: BuyerNotificationPreference[]) =>
       buyerSettingsApi.updateNotificationPreferences(next),
-    onMutate: async (next) => {
-      await qc.cancelQueries({ queryKey: qk.buyer.notificationPreferences });
-      const previous = qc.getQueryData<BuyerNotificationPreference[]>(
-        qk.buyer.notificationPreferences
-      );
-      qc.setQueryData(qk.buyer.notificationPreferences, next);
-      return { previous };
-    },
-    onError: (err, _vars, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.buyer.notificationPreferences, ctx.previous);
-      toast.show(errorMessage(err, 'Could not update that preference.'), 'error');
-    },
+    patches: (next) => [{ queryKey: qk.buyer.notificationPreferences, update: () => next }],
+    errorMessage: 'Could not update that preference.',
     onSuccess: (updated) => qc.setQueryData(qk.buyer.notificationPreferences, updated),
   });
 

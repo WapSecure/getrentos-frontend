@@ -9,11 +9,10 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -112,21 +111,22 @@ export default function Payments() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={96} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Wallet size={34} color={colors.mutedForeground} />}
-          title="No payments yet"
-          description="Rent payments will appear here once your lease is active."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={96} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Wallet size={34} color={colors.mutedForeground} />,
+          title: 'No payments yet',
+          description: 'Rent payments will appear here once your lease is active.',
+        }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -154,7 +154,7 @@ export default function Payments() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <PayAmountSheet
         payment={payPayment}

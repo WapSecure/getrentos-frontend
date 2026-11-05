@@ -5,7 +5,6 @@ import { Plus, Trash2 } from 'lucide-react-native';
 import {
   Button,
   Card,
-  Chip,
   DateField,
   Divider,
   FormAlert,
@@ -29,8 +28,8 @@ import {
   type Quote,
   type WorkOrder,
 } from '@/lib/api/homeCare';
-import { COMMON_BANKS } from '@/lib/api/sellerPayout';
-import { apiFetch, ApiError } from '@/lib/api/client';
+import { apiFetch, errorMessage } from '@/lib/api/client';
+import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { Sheet } from '@/components/Sheet';
@@ -39,7 +38,6 @@ import { VendorPicker } from './VendorPicker';
 import { ReasonSheet } from './ReasonSheet';
 
 const naira = (n: number) => `₦${Math.round(n).toLocaleString('en-NG')}`;
-const err = (e: unknown, fallback: string) => (e instanceof ApiError ? e.message : fallback);
 
 /* --------------------------------- quotes --------------------------------- */
 
@@ -72,7 +70,7 @@ export function QuotesSection({ w }: { w: WorkOrder }) {
       refresh();
       toast.show('Quote approved. The job’s budget is set.', 'success');
     },
-    onError: (e) => toast.show(err(e, 'Could not approve it.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not approve it.'), 'error'),
   });
   const reject = useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
@@ -82,7 +80,7 @@ export function QuotesSection({ w }: { w: WorkOrder }) {
       setRejecting(null);
       toast.show('Quote rejected.', 'success');
     },
-    onError: (e) => toast.show(err(e, 'Could not reject it.'), 'error'),
+    onError: (e) => toast.show(errorMessage(e, 'Could not reject it.'), 'error'),
   });
 
   return (
@@ -217,7 +215,9 @@ function QuoteForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
           onChange={setValidUntil}
           min={toISODate(new Date())}
         />
-        {add.error ? <FormAlert message={err(add.error, 'Could not record the quote.')} /> : null}
+        {add.error ? (
+          <FormAlert message={errorMessage(add.error, 'Could not record the quote.')} />
+        ) : null}
         <Button
           label="Record quote"
           disabled={!vendorId || !value || scope.trim().length < 3}
@@ -292,7 +292,7 @@ export function InvoicesSection({ w }: { w: WorkOrder }) {
     },
     onError: (e, v) => {
       void haptics.error();
-      const message = err(e, 'That didn’t go through.');
+      const message = errorMessage(e, 'That didn’t go through.');
       // The API names the missing payout account; offer to add it right here.
       if (v.kind === 'pay' && /payout account/i.test(message)) {
         const inv = invoices.data?.items.find((i) => i.id === v.id);
@@ -569,7 +569,9 @@ function InvoiceForm({ w, onDone }: { w: WorkOrder; onDone: () => void }) {
           />
         ) : null}
         <TextField label="Completion note" optional value={note} onChangeText={setNote} multiline />
-        {add.error ? <FormAlert message={err(add.error, 'Could not save the invoice.')} /> : null}
+        {add.error ? (
+          <FormAlert message={errorMessage(add.error, 'Could not save the invoice.')} />
+        ) : null}
         <Button
           label="Save draft"
           disabled={!valid || !total}
@@ -605,31 +607,18 @@ function VendorPayoutForm({ vendorId, onDone }: { vendorId: string; onDone: () =
         <Text variant="callout" color="mutedForeground">
           This vendor has no bank account on file yet. Add it to pay them.
         </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          {COMMON_BANKS.map((b) => (
-            <Chip
-              key={b.code}
-              label={b.name}
-              size="sm"
-              selected={bankCode === b.code}
-              onPress={() => setBankCode(b.code)}
-            />
-          ))}
-        </View>
-        <NumberField
-          label="Account number"
-          required
-          code
-          maxLength={10}
-          value={accountNumber}
-          onValueChange={setAccountNumber}
+        <BankAccountFields
+          bankCode={bankCode}
+          onBankCode={setBankCode}
+          accountNumber={accountNumber}
+          onAccountNumber={setAccountNumber}
         />
         {save.error ? (
-          <FormAlert message={err(save.error, 'We couldn’t check that account.')} />
+          <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
         ) : null}
         <Button
           label="Save account"
-          disabled={!bankCode || accountNumber.length !== 10}
+          disabled={!bankCode || !accountNumberOk(accountNumber)}
           loading={save.isPending}
           onPress={() => save.mutate()}
         />

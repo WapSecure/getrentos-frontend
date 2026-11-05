@@ -16,10 +16,9 @@ import {
   Button,
   Card,
   Chip,
-  ErrorState,
   FormAlert,
-  NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -27,8 +26,8 @@ import {
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { realtorApi, type RealtorPayout, type RealtorPayoutSummary } from '@/lib/api/realtor';
-import { COMMON_BANKS } from '@/lib/api/sellerPayout';
 import { errorMessage } from '@/lib/api/client';
+import { BankAccountFields, accountNumberOk } from '@/components/forms/BankAccountFields';
 import { formatDate } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { withdrawBlocker } from '@/lib/withdrawal';
@@ -101,97 +100,97 @@ export default function RealtorCommissions() {
 
         {isUpgradeError(summary.error) ? (
           <ProGate />
-        ) : summary.isError && !summary.data ? (
-          <ErrorState onRetry={() => summary.refetch()} />
-        ) : !summary.data ? (
-          <Skeleton height={200} radius={radius.xl} />
         ) : (
-          <>
-            <Withdraw s={summary.data} onSetAccount={() => setAccountOpen(true)} />
+          <QueryState query={summary} skeleton={<Skeleton height={200} radius={radius.xl} />}>
+            {summary.data ? (
+              <>
+                <Withdraw s={summary.data} onSetAccount={() => setAccountOpen(true)} />
 
-            <Card elevated style={{ gap: spacing.md }}>
-              {(
-                [
-                  ['On its way', summary.data.pending, 'Yours once the sale completes'],
-                  ['Paid to your bank', summary.data.paid, 'Settled so far'],
-                  [
-                    'Earned in total',
-                    summary.data.totalEarned,
-                    `${summary.data.dealsClosed} ${summary.data.dealsClosed === 1 ? 'deal' : 'deals'} closed`,
-                  ],
-                ] as const
-              ).map(([label, amount, note]) => (
-                <View key={label} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{ flex: 1 }}>
-                    <Text variant="callout">{label}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {note}
-                    </Text>
-                  </View>
-                  <Price amount={amount} variant="bodyStrong" />
-                </View>
-              ))}
-              {(trend.data?.length ?? 0) > 1 && trend.data!.some((p) => p.value > 0) ? (
-                <RevenueTrendChart points={trend.data!} />
-              ) : null}
-            </Card>
-
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" headingLevel={2}>
-                Payout account
-              </Text>
-              <Pressable
-                onPress={() => setAccountOpen(true)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  account.data
-                    ? `${account.data.bankName}, ${account.data.accountNumber}, ${account.data.accountName}. Change`
-                    : 'Add a payout account'
-                }
-              >
-                <Card
-                  elevated
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-                >
-                  <Landmark size={22} color={colors.primary} />
-                  <View style={{ flex: 1 }}>
-                    {account.isPending ? (
-                      <Skeleton height={20} width="60%" />
-                    ) : account.data ? (
-                      <>
-                        <Text variant="bodyStrong">{account.data.bankName}</Text>
+                <Card elevated style={{ gap: spacing.md }}>
+                  {(
+                    [
+                      ['On its way', summary.data.pending, 'Yours once the sale completes'],
+                      ['Paid to your bank', summary.data.paid, 'Settled so far'],
+                      [
+                        'Earned in total',
+                        summary.data.totalEarned,
+                        `${summary.data.dealsClosed} ${summary.data.dealsClosed === 1 ? 'deal' : 'deals'} closed`,
+                      ],
+                    ] as const
+                  ).map(([label, amount, note]) => (
+                    <View key={label} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={{ flex: 1 }}>
+                        <Text variant="callout">{label}</Text>
                         <Text variant="caption" color="mutedForeground">
-                          {account.data.accountNumber} · {account.data.accountName}
+                          {note}
                         </Text>
-                      </>
-                    ) : (
-                      <Text variant="bodyStrong">Add where commission is paid</Text>
-                    )}
-                  </View>
-                  <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
-                    {account.data ? 'Change' : 'Add'}
-                  </Text>
+                      </View>
+                      <Price amount={amount} variant="bodyStrong" />
+                    </View>
+                  ))}
+                  {(trend.data?.length ?? 0) > 1 && (trend.data ?? []).some((p) => p.value > 0) ? (
+                    <RevenueTrendChart points={trend.data!} />
+                  ) : null}
                 </Card>
-              </Pressable>
-            </View>
 
-            <Ledger />
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    Payout account
+                  </Text>
+                  <Pressable
+                    onPress={() => setAccountOpen(true)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      account.data
+                        ? `${account.data.bankName}, ${account.data.accountNumber}, ${account.data.accountName}. Change`
+                        : 'Add a payout account'
+                    }
+                  >
+                    <Card
+                      elevated
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+                    >
+                      <Landmark size={22} color={colors.primary} />
+                      <View style={{ flex: 1 }}>
+                        {account.isPending ? (
+                          <Skeleton height={20} width="60%" />
+                        ) : account.data ? (
+                          <>
+                            <Text variant="bodyStrong">{account.data.bankName}</Text>
+                            <Text variant="caption" color="mutedForeground">
+                              {account.data.accountNumber} · {account.data.accountName}
+                            </Text>
+                          </>
+                        ) : (
+                          <Text variant="bodyStrong">Add where commission is paid</Text>
+                        )}
+                      </View>
+                      <Text variant="callout" color="primary" style={{ fontWeight: '700' }}>
+                        {account.data ? 'Change' : 'Add'}
+                      </Text>
+                    </Card>
+                  </Pressable>
+                </View>
 
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" headingLevel={2}>
-                Payouts
-              </Text>
-              {payouts.isPending ? (
-                <Skeleton height={64} radius={radius.lg} />
-              ) : !payouts.data?.items.length ? (
-                <Text variant="callout" color="mutedForeground">
-                  No withdrawals yet.
-                </Text>
-              ) : (
-                payouts.data.items.map((p) => <PayoutRow key={p.id} p={p} />)
-              )}
-            </View>
-          </>
+                <Ledger />
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    Payouts
+                  </Text>
+                  {payouts.isPending ? (
+                    <Skeleton height={64} radius={radius.lg} />
+                  ) : !payouts.data?.items.length ? (
+                    <Text variant="callout" color="mutedForeground">
+                      No withdrawals yet.
+                    </Text>
+                  ) : (
+                    payouts.data.items.map((p) => <PayoutRow key={p.id} p={p} />)
+                  )}
+                </View>
+              </>
+            ) : null}
+          </QueryState>
         )}
       </ScrollView>
       <Sheet open={accountOpen} onClose={() => setAccountOpen(false)} title="Payout account">
@@ -339,19 +338,17 @@ function Ledger() {
           />
         ))}
       </ScrollView>
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !query.data ? (
-        <Skeleton height={72} radius={radius.lg} />
-      ) : !query.data.items.length ? (
-        <Text variant="callout" color="mutedForeground">
-          {filter === 'all'
-            ? 'Commission appears here when a sale you worked on completes.'
-            : 'Nothing here.'}
-        </Text>
-      ) : (
-        query.data.items.map((c) => <CommissionRow key={c.id} c={c} />)
-      )}
+      <QueryState query={query} skeleton={<Skeleton height={72} radius={radius.lg} />}>
+        {query.data && !query.data.items.length ? (
+          <Text variant="callout" color="mutedForeground">
+            {filter === 'all'
+              ? 'Commission appears here when a sale you worked on completes.'
+              : 'Nothing here.'}
+          </Text>
+        ) : (
+          (query.data?.items ?? []).map((c) => <CommissionRow key={c.id} c={c} />)
+        )}
+      </QueryState>
     </View>
   );
 }
@@ -392,7 +389,6 @@ function AccountForm({ onDone }: { onDone: () => void }) {
   const qc = useQueryClient();
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
-  const [other, setOther] = useState(false);
   const [accountNumber, setAccountNumber] = useState('');
   // Behind "confirm it's you": apiFetch prompts for it automatically.
   const save = useMutation({
@@ -407,55 +403,21 @@ function AccountForm({ onDone }: { onDone: () => void }) {
   });
   return (
     <View style={{ gap: spacing.md }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-        {COMMON_BANKS.map((b) => (
-          <Chip
-            key={b.code}
-            label={b.name}
-            size="sm"
-            selected={!other && bankCode === b.code}
-            onPress={() => {
-              setOther(false);
-              setBankCode(b.code);
-            }}
-          />
-        ))}
-        <Chip
-          label="Other bank"
-          size="sm"
-          selected={other}
-          onPress={() => {
-            setOther(true);
-            setBankCode('');
-          }}
-        />
-      </View>
-      {other ? (
-        <NumberField
-          label="Bank code"
-          code
-          required
-          value={bankCode}
-          onValueChange={setBankCode}
-          maxLength={6}
-          hint="Your bank’s code, e.g. 058 for GTBank"
-        />
-      ) : null}
-      <NumberField
-        label="Account number"
-        code
-        required
-        value={accountNumber}
-        onValueChange={setAccountNumber}
-        maxLength={10}
-        hint="We check the name on the account with your bank"
+      <BankAccountFields
+        bankCode={bankCode}
+        onBankCode={setBankCode}
+        accountNumber={accountNumber}
+        onAccountNumber={setAccountNumber}
       />
+      <Text variant="caption" color="mutedForeground">
+        We check the name on the account with your bank
+      </Text>
       {save.error ? (
         <FormAlert message={errorMessage(save.error, 'We couldn’t check that account.')} />
       ) : null}
       <Button
         label="Save payout account"
-        disabled={!bankCode || accountNumber.length !== 10}
+        disabled={!bankCode || !accountNumberOk(accountNumber)}
         loading={save.isPending}
         onPress={() => save.mutate()}
       />

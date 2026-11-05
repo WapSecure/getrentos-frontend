@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
@@ -10,10 +10,10 @@ import {
   Badge,
   Button,
   EmptyState,
-  ErrorState,
   IconButton,
   Price,
   PressableScale,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -89,31 +89,16 @@ export default function OwnerProperties() {
         />
       </View>
 
-      {properties.isError && items.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => properties.refetch()} />
-        </ScrollView>
-      ) : properties.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={104} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <EmptyState
-            icon={<Building2 size={34} color={colors.mutedForeground} />}
-            title="Add your first property"
-            description="Record a property you own, verify ownership, then list it for sale."
-            action={
-              <Button
-                label="Add property"
-                onPress={() => router.push('/(app)/owner-add-property')}
-              />
-            }
-          />
-        </ScrollView>
-      ) : (
+      <QueryState
+        query={properties}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={104} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(p) => p.id}
@@ -126,8 +111,21 @@ export default function OwnerProperties() {
           renderItem={({ item }: { item: OwnerProperty }) => (
             <PropertyRow property={item} listing={listingFor.get(item.id)} />
           )}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<Building2 size={34} color={colors.mutedForeground} />}
+              title="Add your first property"
+              description="Record a property you own, verify ownership, then list it for sale."
+              action={
+                <Button
+                  label="Add property"
+                  onPress={() => router.push('/(app)/owner-add-property')}
+                />
+              }
+            />
+          }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

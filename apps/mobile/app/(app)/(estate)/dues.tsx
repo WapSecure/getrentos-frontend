@@ -14,10 +14,10 @@ import {
   Button,
   Chip,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   NumberField,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -149,78 +149,82 @@ export default function EstateDues() {
           title="No estate yet"
           description="Dues appear here once your estate is set up."
         />
-      ) : query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={104} radius={radius.lg} />
-          ))}
-        </View>
       ) : (
-        <FlashList
-          maintainVisibleContentPosition={{ disabled: true }}
-          data={items}
-          keyExtractor={(d) => d.id}
-          refreshControl={refresh}
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
-          }}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ListHeaderComponent={
-            <View style={{ marginBottom: spacing.md }}>
-              <CollectionPlanCard source={{ kind: 'dues', estateId }} />
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={104} radius={radius.lg} />
+              ))}
             </View>
           }
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          renderItem={({ item }: { item: Due }) => (
-            <DueRow
-              d={item}
-              paying={pay.isPending && pay.variables?.id === item.id}
-              onPaid={() => confirmPaid(item, () => pay.mutate(item))}
-            />
-          )}
-          ListFooterComponent={
-            query.isFetchingNextPage ? (
-              <View style={{ paddingTop: spacing.md }}>
-                <Skeleton height={104} radius={radius.lg} />
+        >
+          <FlashList
+            maintainVisibleContentPosition={{ disabled: true }}
+            data={items}
+            keyExtractor={(d) => d.id}
+            refreshControl={refresh}
+            onEndReached={() => {
+              if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+            }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            ListHeaderComponent={
+              <View style={{ marginBottom: spacing.md }}>
+                <CollectionPlanCard source={{ kind: 'dues', estateId }} />
               </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            <EmptyState
-              icon={<WalletCards size={34} color={colors.mutedForeground} />}
-              title={
-                view === 'OVERDUE'
-                  ? 'Nothing overdue'
-                  : view === 'PENDING'
-                    ? 'Nothing waiting to be paid'
-                    : view === 'PAID'
-                      ? 'No payments yet'
-                      : view === 'PROCESSING'
-                        ? 'No payments going through'
-                        : 'No charges yet'
-              }
-              description={
-                view === 'OVERDUE'
-                  ? 'Every household is up to date.'
-                  : view === 'PROCESSING'
-                    ? 'Dues a resident is paying online show here until the payment clears.'
-                    : 'Charge a service fee or levy to every home, or to the ones you pick.'
-              }
-              action={
-                view === 'OVERDUE' || view === 'PAID' || view === 'PROCESSING' ? undefined : (
-                  <Button label="Charge dues" onPress={() => router.push('/(app)/estate-charge')} />
-                )
-              }
-            />
-          }
-        />
+            }
+            ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+            renderItem={({ item }: { item: Due }) => (
+              <DueRow
+                d={item}
+                paying={pay.isPending && pay.variables?.id === item.id}
+                onPaid={() => confirmPaid(item, () => pay.mutate(item))}
+              />
+            )}
+            ListFooterComponent={
+              query.isFetchingNextPage ? (
+                <View style={{ paddingTop: spacing.md }}>
+                  <Skeleton height={104} radius={radius.lg} />
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              <EmptyState
+                icon={<WalletCards size={34} color={colors.mutedForeground} />}
+                title={
+                  view === 'OVERDUE'
+                    ? 'Nothing overdue'
+                    : view === 'PENDING'
+                      ? 'Nothing waiting to be paid'
+                      : view === 'PAID'
+                        ? 'No payments yet'
+                        : view === 'PROCESSING'
+                          ? 'No payments going through'
+                          : 'No charges yet'
+                }
+                description={
+                  view === 'OVERDUE'
+                    ? 'Every household is up to date.'
+                    : view === 'PROCESSING'
+                      ? 'Dues a resident is paying online show here until the payment clears.'
+                      : 'Charge a service fee or levy to every home, or to the ones you pick.'
+                }
+                action={
+                  view === 'OVERDUE' || view === 'PAID' || view === 'PROCESSING' ? undefined : (
+                    <Button
+                      label="Charge dues"
+                      onPress={() => router.push('/(app)/estate-charge')}
+                    />
+                  )
+                }
+              />
+            }
+          />
+        </QueryState>
       )}
 
       <Sheet open={settingsOpen} onClose={() => setSettingsOpen(false)} title="Late fee rules">

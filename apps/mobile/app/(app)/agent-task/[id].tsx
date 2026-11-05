@@ -7,7 +7,7 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -78,108 +78,111 @@ export default function AgentTaskDetail() {
         <Text variant="title">Task</Text>
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={140} radius={16} />
-        </View>
-      ) : !task ? (
-        <Text variant="body" color="mutedForeground" style={{ padding: spacing.xl }}>
-          This task could not be found.
-        </Text>
-      ) : (
-        <ScrollView
-          contentContainerStyle={{
-            padding: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-            gap: spacing.lg,
-          }}
-        >
-          <Card elevated>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: spacing.sm,
-              }}
-            >
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="heading">{task.title}</Text>
-                <Text variant="callout" color="mutedForeground">
-                  {AGENT_TASK_TYPE_LABEL[task.type]}
-                </Text>
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={140} radius={16} />
+          </View>
+        }
+      >
+        {!task ? (
+          <Text variant="body" color="mutedForeground" style={{ padding: spacing.xl }}>
+            This task could not be found.
+          </Text>
+        ) : (
+          <ScrollView
+            contentContainerStyle={{
+              padding: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+              gap: spacing.lg,
+            }}
+          >
+            <Card elevated>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: spacing.sm,
+                }}
+              >
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="heading">{task.title}</Text>
+                  <Text variant="callout" color="mutedForeground">
+                    {AGENT_TASK_TYPE_LABEL[task.type]}
+                  </Text>
+                </View>
+                <Badge
+                  label={AGENT_TASK_STATUS_LABEL[task.status]}
+                  tone={AGENT_TASK_STATUS_TONE[task.status]}
+                />
               </View>
-              <Badge
-                label={AGENT_TASK_STATUS_LABEL[task.status]}
-                tone={AGENT_TASK_STATUS_TONE[task.status]}
-              />
-            </View>
 
-            {task.notes ? (
-              <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.md }}>
-                {task.notes}
-              </Text>
+              {task.notes ? (
+                <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.md }}>
+                  {task.notes}
+                </Text>
+              ) : null}
+
+              <View style={{ gap: spacing.sm, marginTop: spacing.lg }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Building2 size={15} color={colors.mutedForeground} />
+                  <Text variant="callout" color="mutedForeground">
+                    {task.property.title} · {task.property.address}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Calendar size={15} color={colors.mutedForeground} />
+                  <Text variant="callout" color="mutedForeground">
+                    Due {formatDate(task.dueAt, 'short')}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <User size={15} color={colors.mutedForeground} />
+                  <Text variant="callout" color="mutedForeground">
+                    Assigned by {task.assignedBy.legalName}
+                  </Text>
+                </View>
+              </View>
+            </Card>
+
+            {task.status !== 'COMPLETED' && task.status !== 'CANCELLED' ? (
+              <View style={{ gap: spacing.sm }}>
+                {task.type === 'INSPECTION' ? (
+                  <Button
+                    label="Submit inspection"
+                    onPress={() => router.push(`/(app)/agent-inspection/${task.id}`)}
+                  />
+                ) : task.type === 'VERIFICATION' ? (
+                  <Button
+                    label="Submit verification"
+                    onPress={() => router.push(`/(app)/agent-verification/${task.id}`)}
+                  />
+                ) : (
+                  <>
+                    {task.status === 'ASSIGNED' ? (
+                      <Button
+                        label="Start task"
+                        loading={statusMutation.isPending}
+                        onPress={() => statusMutation.mutate('IN_PROGRESS')}
+                      />
+                    ) : null}
+                    {task.status === 'IN_PROGRESS' ? (
+                      <Button
+                        label="Mark complete"
+                        loading={statusMutation.isPending}
+                        onPress={() => statusMutation.mutate('COMPLETED')}
+                      />
+                    ) : null}
+                  </>
+                )}
+                <Button label="Cancel task" variant="ghost" onPress={confirmCancel} />
+              </View>
             ) : null}
-
-            <View style={{ gap: spacing.sm, marginTop: spacing.lg }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Building2 size={15} color={colors.mutedForeground} />
-                <Text variant="callout" color="mutedForeground">
-                  {task.property.title} · {task.property.address}
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Calendar size={15} color={colors.mutedForeground} />
-                <Text variant="callout" color="mutedForeground">
-                  Due {formatDate(task.dueAt, 'short')}
-                </Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <User size={15} color={colors.mutedForeground} />
-                <Text variant="callout" color="mutedForeground">
-                  Assigned by {task.assignedBy.legalName}
-                </Text>
-              </View>
-            </View>
-          </Card>
-
-          {task.status !== 'COMPLETED' && task.status !== 'CANCELLED' ? (
-            <View style={{ gap: spacing.sm }}>
-              {task.type === 'INSPECTION' ? (
-                <Button
-                  label="Submit inspection"
-                  onPress={() => router.push(`/(app)/agent-inspection/${task.id}`)}
-                />
-              ) : task.type === 'VERIFICATION' ? (
-                <Button
-                  label="Submit verification"
-                  onPress={() => router.push(`/(app)/agent-verification/${task.id}`)}
-                />
-              ) : (
-                <>
-                  {task.status === 'ASSIGNED' ? (
-                    <Button
-                      label="Start task"
-                      loading={statusMutation.isPending}
-                      onPress={() => statusMutation.mutate('IN_PROGRESS')}
-                    />
-                  ) : null}
-                  {task.status === 'IN_PROGRESS' ? (
-                    <Button
-                      label="Mark complete"
-                      loading={statusMutation.isPending}
-                      onPress={() => statusMutation.mutate('COMPLETED')}
-                    />
-                  ) : null}
-                </>
-              )}
-              <Button label="Cancel task" variant="ghost" onPress={confirmCancel} />
-            </View>
-          ) : null}
-        </ScrollView>
-      )}
+          </ScrollView>
+        )}
+      </QueryState>
     </View>
   );
 }

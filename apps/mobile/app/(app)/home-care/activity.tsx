@@ -4,7 +4,7 @@ import { RefreshControl, SectionList, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { History } from 'lucide-react-native';
-import { EmptyState, ErrorState, ListSkeleton, Text, useTheme } from '@getrentos/ui-native';
+import { EmptyState, ListSkeleton, QueryState, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { homeCareApi, type TimelineEvent } from '@/lib/api/homeCare';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
@@ -58,13 +58,14 @@ export default function Activity() {
       >
         <DetailHeader eyebrow="Home care" title="Activity" onBack={() => goBack()} />
       </View>
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl }}>
-          <ListSkeleton rows={5} />
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl }}>
+            <ListSkeleton rows={5} />
+          </View>
+        }
+      >
         <SectionList
           sections={sections}
           keyExtractor={(e) => e.id}
@@ -128,7 +129,7 @@ export default function Activity() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

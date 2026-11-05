@@ -8,11 +8,11 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
   FormAlert,
   LinkButton,
   NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -160,187 +160,187 @@ export default function OwnerPropertyDetail() {
             onBack={() => goBack()}
           />
 
-          {property.isError && !p ? (
-            <ErrorState onRetry={() => property.refetch()} />
-          ) : !p ? (
-            <Skeleton height={160} radius={radius.lg} />
-          ) : (
-            <>
-              <View style={{ gap: spacing.xs }}>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
-                  <MapPin size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
-                  <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                    {p.address}, {p.city}, {p.state}
-                  </Text>
-                </View>
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  <Badge
-                    label={OWNER_VERIFICATION_LABEL[p.verificationStatus]}
-                    tone={OWNER_VERIFICATION_TONE[p.verificationStatus]}
-                  />
-                  <Badge label={p.propertyType.replace(/_/g, ' ').toLowerCase()} tone="neutral" />
-                </View>
-              </View>
-
-              <VerificationState property={p} />
-              {p.verificationStatus !== 'verified' ? (
-                <Button
-                  label={
-                    p.verificationStatus === 'pending_review'
-                      ? 'Add another ownership document'
-                      : 'Upload ownership document'
-                  }
-                  variant={p.verificationStatus === 'pending_review' ? 'ghost' : 'secondary'}
-                  onPress={() => setProofOpen(true)}
-                />
-              ) : null}
-
-              <Card elevated style={{ gap: spacing.sm }}>
-                <Fact
-                  label="Estimated value"
-                  value={<Price amount={p.estimatedValue} variant="callout" />}
-                />
-                {p.purchasePrice ? (
-                  <Fact
-                    label="Bought for"
-                    value={<Price amount={p.purchasePrice} variant="callout" />}
-                  />
-                ) : null}
-                {p.purchaseDate ? (
-                  <Fact label="Bought on" value={formatDate(p.purchaseDate, 'medium')} />
-                ) : null}
-                <Fact label="Added" value={formatDate(p.createdAt, 'medium')} />
-              </Card>
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" headingLevel={2}>
-                  Photos
-                </Text>
-                <OwnerPhotosField property={p} onChanged={refresh} />
-              </View>
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" headingLevel={2}>
-                  Video tour
-                </Text>
-                <VideoTourField
-                  title={p.name}
-                  hasVideo={!!p.videoTourKey}
-                  filmedOnSite={p.videoTourFilmedOnSite}
-                  videoUrl={p.videoTourUrl}
-                  onUpload={attachVideo}
-                  onRemove={removeVideo}
-                  onExpired={() => property.refetch()}
-                />
-              </View>
-
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="heading" headingLevel={2}>
-                  Sale listing
-                </Text>
-                {listings.isError && !listings.data ? (
-                  <ErrorState
-                    title="We couldn't load this property's listing"
-                    description="Your property is safe. Try loading its sale status again."
-                    onRetry={() => listings.refetch()}
-                  />
-                ) : listings.isPending ? (
-                  <Skeleton height={90} radius={radius.lg} />
-                ) : listing && listing.status !== 'closed' ? (
-                  <Card elevated style={{ gap: spacing.sm }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={2}>
-                        {listing.listingTitle}
-                      </Text>
-                      <Badge
-                        label={OWNER_LISTING_LABEL[listing.status]}
-                        tone={OWNER_LISTING_TONE[listing.status]}
-                      />
-                    </View>
-                    <Price amount={listing.askingPrice} variant="heading" />
-                    <View
-                      style={{ flexDirection: stackActions ? 'column' : 'row', gap: spacing.sm }}
-                    >
-                      {listing.status === 'published' ? (
-                        <Button
-                          label="Pause"
-                          variant="outline"
-                          size="sm"
-                          style={{ flex: 1 }}
-                          loading={setStatus.isPending && setStatus.variables === 'PAUSED'}
-                          disabled={setStatus.isPending}
-                          onPress={() => setStatus.mutate('PAUSED')}
-                        />
-                      ) : listing.status === 'paused' ? (
-                        <Button
-                          label="Relist"
-                          size="sm"
-                          style={{ flex: 1 }}
-                          loading={setStatus.isPending && setStatus.variables === 'PUBLISHED'}
-                          disabled={setStatus.isPending}
-                          onPress={() => setStatus.mutate('PUBLISHED')}
-                        />
-                      ) : null}
-                      <Button
-                        label="Close listing"
-                        variant="secondary"
-                        size="sm"
-                        style={{ flex: 1 }}
-                        loading={setStatus.isPending && setStatus.variables === 'CLOSED'}
-                        disabled={setStatus.isPending}
-                        onPress={() =>
-                          Alert.alert(
-                            'Close this listing?',
-                            'Buyers will no longer see it or be able to make offers.',
-                            [
-                              { text: 'Cancel', style: 'cancel' },
-                              {
-                                text: 'Close listing',
-                                style: 'destructive',
-                                onPress: () => setStatus.mutate('CLOSED'),
-                              },
-                            ]
-                          )
-                        }
-                      />
-                    </View>
-                  </Card>
-                ) : (
-                  <Card style={{ gap: spacing.sm }}>
-                    <Text variant="callout" color="mutedForeground">
-                      {canList
-                        ? 'Not listed for sale. List it to start receiving offers from verified buyers.'
-                        : 'You can list this property once its ownership has been verified.'}
+          <QueryState query={property} skeleton={<Skeleton height={160} radius={radius.lg} />}>
+            {p ? (
+              <>
+                <View style={{ gap: spacing.xs }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
+                    <MapPin size={15} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+                    <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+                      {p.address}, {p.city}, {p.state}
                     </Text>
-                    <Button
-                      label="List for sale"
-                      disabled={!canList}
-                      onPress={() => setListOpen(true)}
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    <Badge
+                      label={OWNER_VERIFICATION_LABEL[p.verificationStatus]}
+                      tone={OWNER_VERIFICATION_TONE[p.verificationStatus]}
                     />
-                  </Card>
-                )}
-              </View>
-              <Card elevated style={{ gap: spacing.sm }}>
-                <Text variant="bodyStrong">Rent it out instead</Text>
-                <Text variant="caption" color="mutedForeground">
-                  Manage this property as a rental: units, tenants and rent: from the landlord
-                  workspace.
-                </Text>
-                <Button
-                  label="Rent it out"
-                  variant="secondary"
-                  loading={rentOut.isPending}
-                  onPress={confirmRentOut}
-                />
-              </Card>
-            </>
-          )}
+                    <Badge label={p.propertyType.replace(/_/g, ' ').toLowerCase()} tone="neutral" />
+                  </View>
+                </View>
+
+                <VerificationState property={p} />
+                {p.verificationStatus !== 'verified' ? (
+                  <Button
+                    label={
+                      p.verificationStatus === 'pending_review'
+                        ? 'Add another ownership document'
+                        : 'Upload ownership document'
+                    }
+                    variant={p.verificationStatus === 'pending_review' ? 'ghost' : 'secondary'}
+                    onPress={() => setProofOpen(true)}
+                  />
+                ) : null}
+
+                <Card elevated style={{ gap: spacing.sm }}>
+                  <Fact
+                    label="Estimated value"
+                    value={<Price amount={p.estimatedValue} variant="callout" />}
+                  />
+                  {p.purchasePrice ? (
+                    <Fact
+                      label="Bought for"
+                      value={<Price amount={p.purchasePrice} variant="callout" />}
+                    />
+                  ) : null}
+                  {p.purchaseDate ? (
+                    <Fact label="Bought on" value={formatDate(p.purchaseDate, 'medium')} />
+                  ) : null}
+                  <Fact label="Added" value={formatDate(p.createdAt, 'medium')} />
+                </Card>
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    Photos
+                  </Text>
+                  <OwnerPhotosField property={p} onChanged={refresh} />
+                </View>
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    Video tour
+                  </Text>
+                  <VideoTourField
+                    title={p.name}
+                    hasVideo={!!p.videoTourKey}
+                    filmedOnSite={p.videoTourFilmedOnSite}
+                    videoUrl={p.videoTourUrl}
+                    onUpload={attachVideo}
+                    onRemove={removeVideo}
+                    onExpired={() => property.refetch()}
+                  />
+                </View>
+
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="heading" headingLevel={2}>
+                    Sale listing
+                  </Text>
+                  <QueryState
+                    query={listings}
+                    skeleton={<Skeleton height={90} radius={radius.lg} />}
+                    errorTitle="We couldn't load this property's listing"
+                    errorDescription="Your property is safe. Try loading its sale status again."
+                  >
+                    {listing && listing.status !== 'closed' ? (
+                      <Card elevated style={{ gap: spacing.sm }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                        >
+                          <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={2}>
+                            {listing.listingTitle}
+                          </Text>
+                          <Badge
+                            label={OWNER_LISTING_LABEL[listing.status]}
+                            tone={OWNER_LISTING_TONE[listing.status]}
+                          />
+                        </View>
+                        <Price amount={listing.askingPrice} variant="heading" />
+                        <View
+                          style={{
+                            flexDirection: stackActions ? 'column' : 'row',
+                            gap: spacing.sm,
+                          }}
+                        >
+                          {listing.status === 'published' ? (
+                            <Button
+                              label="Pause"
+                              variant="outline"
+                              size="sm"
+                              style={{ flex: 1 }}
+                              loading={setStatus.isPending && setStatus.variables === 'PAUSED'}
+                              disabled={setStatus.isPending}
+                              onPress={() => setStatus.mutate('PAUSED')}
+                            />
+                          ) : listing.status === 'paused' ? (
+                            <Button
+                              label="Relist"
+                              size="sm"
+                              style={{ flex: 1 }}
+                              loading={setStatus.isPending && setStatus.variables === 'PUBLISHED'}
+                              disabled={setStatus.isPending}
+                              onPress={() => setStatus.mutate('PUBLISHED')}
+                            />
+                          ) : null}
+                          <Button
+                            label="Close listing"
+                            variant="secondary"
+                            size="sm"
+                            style={{ flex: 1 }}
+                            loading={setStatus.isPending && setStatus.variables === 'CLOSED'}
+                            disabled={setStatus.isPending}
+                            onPress={() =>
+                              Alert.alert(
+                                'Close this listing?',
+                                'Buyers will no longer see it or be able to make offers.',
+                                [
+                                  { text: 'Cancel', style: 'cancel' },
+                                  {
+                                    text: 'Close listing',
+                                    style: 'destructive',
+                                    onPress: () => setStatus.mutate('CLOSED'),
+                                  },
+                                ]
+                              )
+                            }
+                          />
+                        </View>
+                      </Card>
+                    ) : (
+                      <Card style={{ gap: spacing.sm }}>
+                        <Text variant="callout" color="mutedForeground">
+                          {canList
+                            ? 'Not listed for sale. List it to start receiving offers from verified buyers.'
+                            : 'You can list this property once its ownership has been verified.'}
+                        </Text>
+                        <Button
+                          label="List for sale"
+                          disabled={!canList}
+                          onPress={() => setListOpen(true)}
+                        />
+                      </Card>
+                    )}
+                  </QueryState>
+                </View>
+                <Card elevated style={{ gap: spacing.sm }}>
+                  <Text variant="bodyStrong">Rent it out instead</Text>
+                  <Text variant="caption" color="mutedForeground">
+                    Manage this property as a rental: units, tenants and rent: from the landlord
+                    workspace.
+                  </Text>
+                  <Button
+                    label="Rent it out"
+                    variant="secondary"
+                    loading={rentOut.isPending}
+                    onPress={confirmRentOut}
+                  />
+                </Card>
+              </>
+            ) : null}
+          </QueryState>
         </View>
       </ScrollView>
 

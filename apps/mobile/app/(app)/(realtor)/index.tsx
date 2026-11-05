@@ -18,11 +18,11 @@ import {
 } from 'lucide-react-native';
 import {
   Card,
-  ErrorState,
   IconButton,
   LinkButton,
   Price,
   PressableScale,
+  QueryState,
   Screen,
   SectionHeader,
   Skeleton,
@@ -137,19 +137,6 @@ export default function RealtorHome() {
       }
     />
   );
-
-  if (dashboard.isError && !d) {
-    return (
-      <Screen refreshing={dashboard.isRefetching} onRefresh={refresh}>
-        {header}
-        <ErrorState
-          title="We couldn't load your dashboard"
-          description="Check your connection and try again."
-          onRetry={refresh}
-        />
-      </Screen>
-    );
-  }
 
   const metrics = d
     ? [
@@ -287,7 +274,14 @@ export default function RealtorHome() {
         onToggle={toggleMoney}
       />
 
-      <MetricGrid metrics={metrics} loading={dashboard.isPending} />
+      <QueryState
+        query={dashboard}
+        skeleton={<MetricGrid metrics={[]} loading />}
+        errorTitle="We couldn't load your dashboard"
+        errorDescription="Check your connection and try again."
+      >
+        <MetricGrid metrics={metrics} loading={false} />
+      </QueryState>
 
       <QuickActions
         actions={[

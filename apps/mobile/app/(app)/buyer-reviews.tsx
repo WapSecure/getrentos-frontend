@@ -4,15 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Star } from 'lucide-react-native';
-import {
-  Card,
-  Divider,
-  EmptyState,
-  ErrorState,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Card, Divider, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { buyerReviewsApi, type BuyerReview } from '@/lib/api/buyerReviews';
 import { formatDate } from '@/lib/format';
@@ -38,21 +30,22 @@ export default function BuyerReviews() {
         onBack={() => goBack()}
       />
 
-      {listQuery.isError && !listQuery.data ? (
-        <ErrorState onRetry={() => listQuery.refetch()} />
-      ) : listQuery.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={80} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <EmptyState
-          icon={<Star size={34} color={colors.mutedForeground} />}
-          title="No reviews yet"
-          description="Reviews you leave will appear here."
-        />
-      ) : (
+      <QueryState
+        query={listQuery}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={80} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <Star size={34} color={colors.mutedForeground} />,
+          title: 'No reviews yet',
+          description: 'Reviews you leave will appear here.',
+        }}
+      >
         <FlashList
           data={items}
           keyExtractor={(item) => item.id}
@@ -105,7 +98,7 @@ export default function BuyerReviews() {
             />
           }
         />
-      )}
+      </QueryState>
     </View>
   );
 }

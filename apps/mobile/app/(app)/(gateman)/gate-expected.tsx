@@ -5,7 +5,7 @@ import { Briefcase, Lock, Package, UserCheck } from 'lucide-react-native';
 import {
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Screen,
   SectionHeader,
   Skeleton,
@@ -57,6 +57,18 @@ export default function GatemanExpected() {
   const board = boardQuery.data;
   const total = board ? board.visitors.length + board.contractors.length + board.parcels.length : 0;
 
+  const skeleton = (
+    <View style={{ gap: spacing.md }}>
+      <Skeleton height={72} radius={12} />
+      <Skeleton height={120} radius={12} />
+    </View>
+  );
+  const nobodyExpected = {
+    icon: <UserCheck size={28} />,
+    title: 'Nobody expected',
+    description: 'No invitation outstanding, nobody authorised for today, and no parcel waiting.',
+  };
+
   return (
     <Screen>
       <DashboardHeader eyebrow="Gate console" title="Expected today" />
@@ -66,85 +78,83 @@ export default function GatemanExpected() {
           pass, and you can always turn somebody away whatever this says.
         </Text>
 
-        {isPostLoading || boardQuery.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={72} radius={12} />
-            <Skeleton height={120} radius={12} />
-          </View>
+        {isPostLoading ? (
+          skeleton
         ) : notOnPlan && !board ? (
           <EmptyState
             icon={<Lock size={28} />}
             title="Expected today isn’t on your estate’s plan"
             description="Check visitors in by their pass as usual. The estate office can tell you more."
           />
-        ) : boardQuery.isError && !board ? (
-          <ErrorState
-            title="Could not read the board"
-            description="This does not affect visitor access. Check visitors in by their pass as usual."
-            onRetry={() => void boardQuery.refetch()}
-          />
-        ) : !board || total === 0 ? (
-          <EmptyState
-            icon={<UserCheck size={28} />}
-            title="Nobody expected"
-            description="No invitation outstanding, nobody authorised for today, and no parcel waiting."
-          />
+        ) : !estate ? (
+          <EmptyState {...nobodyExpected} />
         ) : (
-          <>
-            <Card>
-              <View style={{ gap: 4 }}>
-                <Text variant="bodyStrong">{board.tally.label}</Text>
-                <Text variant="caption" color="mutedForeground">
-                  Counted at {formatTime(board.asOf)}.
-                </Text>
-              </View>
-            </Card>
+          <QueryState
+            query={boardQuery}
+            skeleton={skeleton}
+            errorTitle="Could not read the board"
+            errorDescription="This does not affect visitor access. Check visitors in by their pass as usual."
+            isEmpty={total === 0}
+            empty={nobodyExpected}
+          >
+            {board ? (
+              <>
+                <Card>
+                  <View style={{ gap: 4 }}>
+                    <Text variant="bodyStrong">{board.tally.label}</Text>
+                    <Text variant="caption" color="mutedForeground">
+                      Counted at {formatTime(board.asOf)}.
+                    </Text>
+                  </View>
+                </Card>
 
-            <Block
-              title="Invitations"
-              icon={<UserCheck size={16} />}
-              rows={board.visitors.map((visitor) => ({
-                id: visitor.id,
-                title: visitor.visitorName,
-                subtitle: `${visitor.unitLabel} · ${visitor.sourceLabel}`,
-                deadline: visitor.deadlineLabel,
-                deadlineToday: visitor.deadlineToday,
-              }))}
-              emptyLabel="No invitation outstanding."
-            />
+                <Block
+                  title="Invitations"
+                  icon={<UserCheck size={16} />}
+                  rows={board.visitors.map((visitor) => ({
+                    id: visitor.id,
+                    title: visitor.visitorName,
+                    subtitle: `${visitor.unitLabel} · ${visitor.sourceLabel}`,
+                    deadline: visitor.deadlineLabel,
+                    deadlineToday: visitor.deadlineToday,
+                  }))}
+                  emptyLabel="No invitation outstanding."
+                />
 
-            <Block
-              title="Regular visitors"
-              icon={<Briefcase size={16} />}
-              rows={board.contractors.map((contractor) => ({
-                id: contractor.id,
-                title: contractor.name,
-                subtitle: [
-                  contractor.trade ?? contractor.company,
-                  contractor.unitLabel ?? 'Common areas',
-                  contractor.hoursLabel,
-                ]
-                  .filter(Boolean)
-                  .join(' · '),
-                deadline: contractor.deadlineLabel,
-                deadlineToday: contractor.deadlineToday,
-              }))}
-              emptyLabel="Nobody authorised for today."
-            />
+                <Block
+                  title="Regular visitors"
+                  icon={<Briefcase size={16} />}
+                  rows={board.contractors.map((contractor) => ({
+                    id: contractor.id,
+                    title: contractor.name,
+                    subtitle: [
+                      contractor.trade ?? contractor.company,
+                      contractor.unitLabel ?? 'Common areas',
+                      contractor.hoursLabel,
+                    ]
+                      .filter(Boolean)
+                      .join(' · '),
+                    deadline: contractor.deadlineLabel,
+                    deadlineToday: contractor.deadlineToday,
+                  }))}
+                  emptyLabel="Nobody authorised for today."
+                />
 
-            <Block
-              title="Parcels"
-              icon={<Package size={16} />}
-              rows={board.parcels.map((parcel) => ({
-                id: parcel.id,
-                title: `${parcel.courier}${parcel.description ? ` — ${parcel.description}` : ''}`,
-                subtitle: `${parcel.unitLabel} · ${parcel.residentName}`,
-                deadline: parcel.deadlineLabel,
-                deadlineToday: parcel.deadlineToday,
-              }))}
-              emptyLabel="Nothing waiting."
-            />
-          </>
+                <Block
+                  title="Parcels"
+                  icon={<Package size={16} />}
+                  rows={board.parcels.map((parcel) => ({
+                    id: parcel.id,
+                    title: `${parcel.courier}${parcel.description ? ` — ${parcel.description}` : ''}`,
+                    subtitle: `${parcel.unitLabel} · ${parcel.residentName}`,
+                    deadline: parcel.deadlineLabel,
+                    deadlineToday: parcel.deadlineToday,
+                  }))}
+                  emptyLabel="Nothing waiting."
+                />
+              </>
+            ) : null}
+          </QueryState>
         )}
       </View>
     </Screen>

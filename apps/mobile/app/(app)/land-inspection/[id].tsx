@@ -18,8 +18,8 @@ import {
   Button,
   Card,
   Chip,
-  ErrorState,
   NumberField,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -139,122 +139,120 @@ export default function LandInspectionJob() {
           subtitle={job ? `${LAND_INSPECTION_KIND_LABELS[job.kind]} · ${job.land.city}` : undefined}
           onBack={() => goBack()}
         />
-        {query.isError && !job ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !job ? (
-          <Skeleton height={220} radius={radius.lg} />
-        ) : (
-          <>
-            {job.staffNote ? (
-              <Card style={{ backgroundColor: colors.secondary }}>
-                <Text variant="callout">GetRentos asks: {job.staffNote}</Text>
-              </Card>
-            ) : null}
-            <Card elevated style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'center' }}>
-                <MapPin size={16} color={colors.mutedForeground} />
-                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  {job.land.address}, {job.land.city}, {job.land.state}
-                </Text>
-              </View>
-              {job.instructions ? <Text variant="callout">“{job.instructions}”</Text> : null}
-              {job.dueBy ? (
-                <Text variant="caption" color="mutedForeground">
-                  Due {formatDate(job.dueBy, 'short')}
-                </Text>
+        <QueryState query={query} skeleton={<Skeleton height={220} radius={radius.lg} />}>
+          {job ? (
+            <>
+              {job.staffNote ? (
+                <Card style={{ backgroundColor: colors.secondary }}>
+                  <Text variant="callout">GetRentos asks: {job.staffNote}</Text>
+                </Card>
               ) : null}
-              {point ? (
-                <Button
-                  label="Directions to the land"
-                  variant="secondary"
-                  icon={<Navigation size={16} color={colors.foreground} />}
-                  onPress={() =>
-                    Linking.openURL(
-                      `https://www.google.com/maps/dir/?api=1&destination=${point.lat},${point.lng}`
-                    )
-                  }
-                />
-              ) : null}
-            </Card>
-
-            <Card elevated style={{ gap: spacing.sm }}>
-              <Text variant="heading">Photos</Text>
-              <Text variant="caption" color="mutedForeground">
-                Take them on the land with location on. With no signal they wait on this phone and
-                upload when you are back online.
-              </Text>
-              {job.evidence?.length ? (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                  {job.evidence.map((e) => (
-                    <View key={e.id} style={{ width: 92, gap: 2 }}>
-                      {e.mimeType.startsWith('image/') ? (
-                        <Image
-                          source={{ uri: e.url }}
-                          style={{ width: 92, height: 92, borderRadius: radius.md }}
-                        />
-                      ) : null}
-                      <Text variant="caption" color="mutedForeground">
-                        {describeDistance(e.distanceM)}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-              {waiting.length ? (
+              <Card elevated style={{ gap: spacing.sm }}>
                 <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'center' }}>
-                  <CloudOff size={16} color={colors.mutedForeground} />
-                  <Text variant="caption" color="mutedForeground">
-                    {waiting.length} waiting to upload
+                  <MapPin size={16} color={colors.mutedForeground} />
+                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                    {job.land.address}, {job.land.city}, {job.land.state}
                   </Text>
                 </View>
-              ) : null}
-              {pending
-                .filter((p) => p.error)
-                .map((p) => (
-                  <View
-                    key={p.clientRef}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-                  >
-                    <Text variant="caption" color="destructive" style={{ flex: 1 }}>
-                      Not accepted: {p.error}
-                    </Text>
-                    <Button
-                      label="Discard"
-                      variant="ghost"
-                      size="sm"
-                      icon={<Trash2 size={14} color={colors.foreground} />}
-                      onPress={() => void discardCapture(p.clientRef)}
-                    />
-                  </View>
-                ))}
-              {open ? (
-                <Button
-                  label="Take a photo"
-                  icon={<Camera size={16} color={colors.primaryForeground} />}
-                  loading={capturing}
-                  onPress={capture}
-                />
-              ) : null}
-            </Card>
-
-            {open ? (
-              <ReportForm id={id} waiting={waiting.length} onFiled={refresh} />
-            ) : job.report ? (
-              <Card elevated style={{ gap: spacing.xs }}>
-                <Text variant="heading">Your report</Text>
-                <Badge
-                  label={
-                    job.report.boundaryCondition
-                      ? LAND_BOUNDARY_LABELS[job.report.boundaryCondition]
-                      : 'Filed'
-                  }
-                  tone="info"
-                />
-                <Text variant="callout">{job.report.summary}</Text>
+                {job.instructions ? <Text variant="callout">“{job.instructions}”</Text> : null}
+                {job.dueBy ? (
+                  <Text variant="caption" color="mutedForeground">
+                    Due {formatDate(job.dueBy, 'short')}
+                  </Text>
+                ) : null}
+                {point ? (
+                  <Button
+                    label="Directions to the land"
+                    variant="secondary"
+                    icon={<Navigation size={16} color={colors.foreground} />}
+                    onPress={() =>
+                      Linking.openURL(
+                        `https://www.google.com/maps/dir/?api=1&destination=${point.lat},${point.lng}`
+                      )
+                    }
+                  />
+                ) : null}
               </Card>
-            ) : null}
-          </>
-        )}
+
+              <Card elevated style={{ gap: spacing.sm }}>
+                <Text variant="heading">Photos</Text>
+                <Text variant="caption" color="mutedForeground">
+                  Take them on the land with location on. With no signal they wait on this phone and
+                  upload when you are back online.
+                </Text>
+                {job.evidence?.length ? (
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+                    {job.evidence.map((e) => (
+                      <View key={e.id} style={{ width: 92, gap: 2 }}>
+                        {e.mimeType.startsWith('image/') ? (
+                          <Image
+                            source={{ uri: e.url }}
+                            style={{ width: 92, height: 92, borderRadius: radius.md }}
+                          />
+                        ) : null}
+                        <Text variant="caption" color="mutedForeground">
+                          {describeDistance(e.distanceM)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+                {waiting.length ? (
+                  <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'center' }}>
+                    <CloudOff size={16} color={colors.mutedForeground} />
+                    <Text variant="caption" color="mutedForeground">
+                      {waiting.length} waiting to upload
+                    </Text>
+                  </View>
+                ) : null}
+                {pending
+                  .filter((p) => p.error)
+                  .map((p) => (
+                    <View
+                      key={p.clientRef}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                    >
+                      <Text variant="caption" color="destructive" style={{ flex: 1 }}>
+                        Not accepted: {p.error}
+                      </Text>
+                      <Button
+                        label="Discard"
+                        variant="ghost"
+                        size="sm"
+                        icon={<Trash2 size={14} color={colors.foreground} />}
+                        onPress={() => void discardCapture(p.clientRef)}
+                      />
+                    </View>
+                  ))}
+                {open ? (
+                  <Button
+                    label="Take a photo"
+                    icon={<Camera size={16} color={colors.primaryForeground} />}
+                    loading={capturing}
+                    onPress={capture}
+                  />
+                ) : null}
+              </Card>
+
+              {open ? (
+                <ReportForm id={id} waiting={waiting.length} onFiled={refresh} />
+              ) : job.report ? (
+                <Card elevated style={{ gap: spacing.xs }}>
+                  <Text variant="heading">Your report</Text>
+                  <Badge
+                    label={
+                      job.report.boundaryCondition
+                        ? LAND_BOUNDARY_LABELS[job.report.boundaryCondition]
+                        : 'Filed'
+                    }
+                    tone="info"
+                  />
+                  <Text variant="callout">{job.report.summary}</Text>
+                </Card>
+              ) : null}
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
     </View>
   );

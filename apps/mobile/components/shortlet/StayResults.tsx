@@ -5,7 +5,7 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BedDouble } from 'lucide-react-native';
-import { EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { EmptyState, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { shortletsApi, type ShortletFilters, type ShortletListing } from '@/lib/api/shortlets';
@@ -116,22 +116,24 @@ export function StayResults({
         </View>
       )}
       ListHeaderComponent={listHeader}
+      // The states sit under the header so the caller's filters stay usable.
       ListEmptyComponent={
-        query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-            {[0, 1].map((i) => (
-              <Skeleton key={i} height={290} radius={radius.lg} />
-            ))}
-          </View>
-        ) : (
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={290} radius={radius.lg} />
+              ))}
+            </View>
+          }
+        >
           <EmptyState
             icon={<BedDouble size={34} color={colors.mutedForeground} />}
             title={emptyTitle}
             description={emptyDescription}
           />
-        )
+        </QueryState>
       }
       onEndReached={() => {
         if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();

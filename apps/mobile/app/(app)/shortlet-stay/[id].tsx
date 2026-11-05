@@ -24,10 +24,9 @@ import {
   Card,
   DetailSkeleton,
   Divider,
-  EmptyState,
-  ErrorState,
   PressableScale,
   Price,
+  QueryState,
   Text,
   useTheme,
   useToast,
@@ -130,16 +129,17 @@ export default function StayDetail() {
         }}
       >
         <DetailHeader eyebrow="Your stay" title="Stay" onBack={() => goBack()} />
-        {stays.isPending ? (
-          <DetailSkeleton />
-        ) : stays.isError && !stays.data ? (
-          <ErrorState onRetry={() => stays.refetch()} />
-        ) : (
-          <EmptyState
-            title="Stay not found"
-            description="It may have been removed. Your other stays are in My stays."
-          />
-        )}
+        <QueryState
+          query={stays}
+          skeleton={<DetailSkeleton />}
+          isEmpty
+          empty={{
+            title: 'Stay not found',
+            description: 'It may have been removed. Your other stays are in My stays.',
+          }}
+        >
+          {null}
+        </QueryState>
       </View>
     );
   }

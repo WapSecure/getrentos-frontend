@@ -17,7 +17,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
-import { ErrorState, IconButton, Price, Screen, Text, useTheme } from '@getrentos/ui-native';
+import { IconButton, Price, QueryState, Screen, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { landlordApi, type LandlordActivity } from '@/lib/api/landlord';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -45,7 +45,7 @@ const ACTIVITY_ICON: Record<LandlordActivity['type'], LucideIcon> = {
 };
 
 export default function LandlordOverview() {
-  const { colors } = useTheme();
+  const { colors, spacing } = useTheme();
   const { profile } = useAuth();
   const { visible: showMoney, toggle: toggleMoney } = useMonetaryVisibility();
   const [adding, setAdding] = useState(false);
@@ -97,19 +97,6 @@ export default function LandlordOverview() {
     />
   );
 
-  if (stats.isError && !s) {
-    return (
-      <Screen refreshing={stats.isRefetching} onRefresh={refresh}>
-        {header}
-        <ErrorState
-          title="We couldn't load your dashboard"
-          description="Your property and payment data is safe. Check your connection and try again."
-          onRetry={() => stats.refetch()}
-        />
-      </Screen>
-    );
-  }
-
   const units = s ? s.occupiedUnits + s.vacantUnits + s.reservedUnits : 0;
   const occupancy = s && units > 0 ? Math.round((s.occupiedUnits / units) * 100) : 0;
 
@@ -142,72 +129,96 @@ export default function LandlordOverview() {
       ]
     : [];
 
+  const quickActions = (
+    <QuickActions
+      actions={[
+        { label: 'Add property', Icon: Plus, onPress: () => setAdding(true) },
+        {
+          label: 'Applications',
+          Icon: FileText,
+          onPress: () => router.push('/(app)/landlord-applications'),
+        },
+        {
+          label: 'Rent payments',
+          Icon: Banknote,
+          onPress: () => router.push('/(app)/landlord-payments'),
+          badge: s?.outstandingPayments,
+        },
+        {
+          label: 'Maintenance',
+          Icon: Wrench,
+          onPress: () => router.push('/(app)/landlord-maintenance'),
+          badge: s?.activeMaintenanceRequests,
+        },
+      ]}
+    />
+  );
+
   return (
     <Screen refreshing={stats.isRefetching || activity.isRefetching} onRefresh={refresh}>
       {header}
 
-      {/* What needs you first: rent that hasn't come in, then repairs waiting. */}
-      {s && s.outstandingPayments > 0 ? (
-        <AttentionCard
-          Icon={TriangleAlert}
-          tone="danger"
-          title={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment' : 'payments'} outstanding`}
-          detail={
-            <Text variant="caption" color="mutedForeground">
-              {showMoney ? <Price amount={s.outstandingAmount} variant="caption" /> : '••••••'}{' '}
-              still to collect
-            </Text>
-          }
-          accessibilityLabel={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment is' : 'payments are'} outstanding. Open payments`}
-          onPress={() => router.push('/(app)/landlord-payments')}
-        />
-      ) : null}
-      {s && s.activeMaintenanceRequests > 0 ? (
-        <AttentionCard
-          Icon={Wrench}
-          tone="warning"
-          title={`${s.activeMaintenanceRequests} open maintenance ${s.activeMaintenanceRequests === 1 ? 'request' : 'requests'}`}
-          detail="Assign a vendor or mark them resolved"
-          onPress={() => router.push('/(app)/landlord-maintenance')}
-        />
-      ) : null}
-
-      <PortfolioCard
-        label="Annual rent roll"
-        amount={s?.annualRentRoll ?? 0}
-        hint="A year of rent from your signed leases"
-        loading={stats.isPending}
-        visible={showMoney}
-        onToggle={toggleMoney}
+      <QueryState
+        query={stats}
+        skeleton={
+          <View style={{ gap: spacing.lg }}>
+            <PortfolioCard
+              label="Annual rent roll"
+              amount={0}
+              hint="A year of rent from your signed leases"
+              loading
+              visible={showMoney}
+              onToggle={toggleMoney}
+            />
+            <MetricGrid metrics={[]} loading />
+            {quickActions}
+          </View>
+        }
+        errorTitle="We couldn't load your dashboard"
+        errorDescription="Your property and payment data is safe. Check your connection and try again."
       >
-        {/* A single point isn't a trend, so the chart waits for two. */}
-        {(revenue.data?.length ?? 0) > 1 ? <RevenueTrendChart points={revenue.data!} /> : null}
-      </PortfolioCard>
+        {/* What needs you first: rent that hasn't come in, then repairs waiting. */}
+        {s && s.outstandingPayments > 0 ? (
+          <AttentionCard
+            Icon={TriangleAlert}
+            tone="danger"
+            title={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment' : 'payments'} outstanding`}
+            detail={
+              <Text variant="caption" color="mutedForeground">
+                {showMoney ? <Price amount={s.outstandingAmount} variant="caption" /> : '••••••'}{' '}
+                still to collect
+              </Text>
+            }
+            accessibilityLabel={`${s.outstandingPayments} rent ${s.outstandingPayments === 1 ? 'payment is' : 'payments are'} outstanding. Open payments`}
+            onPress={() => router.push('/(app)/landlord-payments')}
+          />
+        ) : null}
+        {s && s.activeMaintenanceRequests > 0 ? (
+          <AttentionCard
+            Icon={Wrench}
+            tone="warning"
+            title={`${s.activeMaintenanceRequests} open maintenance ${s.activeMaintenanceRequests === 1 ? 'request' : 'requests'}`}
+            detail="Assign a vendor or mark them resolved"
+            onPress={() => router.push('/(app)/landlord-maintenance')}
+          />
+        ) : null}
 
-      <MetricGrid metrics={metrics} loading={stats.isPending} />
+        <PortfolioCard
+          label="Annual rent roll"
+          amount={s?.annualRentRoll ?? 0}
+          hint="A year of rent from your signed leases"
+          loading={false}
+          visible={showMoney}
+          onToggle={toggleMoney}
+        >
+          {/* A single point isn't a trend, so the chart waits for two. */}
+          {(revenue.data?.length ?? 0) > 1 ? <RevenueTrendChart points={revenue.data!} /> : null}
+        </PortfolioCard>
 
-      <QuickActions
-        actions={[
-          { label: 'Add property', Icon: Plus, onPress: () => setAdding(true) },
-          {
-            label: 'Applications',
-            Icon: FileText,
-            onPress: () => router.push('/(app)/landlord-applications'),
-          },
-          {
-            label: 'Rent payments',
-            Icon: Banknote,
-            onPress: () => router.push('/(app)/landlord-payments'),
-            badge: s?.outstandingPayments,
-          },
-          {
-            label: 'Maintenance',
-            Icon: Wrench,
-            onPress: () => router.push('/(app)/landlord-maintenance'),
-            badge: s?.activeMaintenanceRequests,
-          },
-        ]}
-      />
+        <MetricGrid metrics={metrics} loading={false} />
+
+        {quickActions}
+      </QueryState>
 
       <ActivityFeed
         description="The latest movement across your portfolio"

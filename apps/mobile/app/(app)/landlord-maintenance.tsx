@@ -10,7 +10,7 @@ import {
   Button,
   Card,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -24,7 +24,7 @@ import {
   PRIORITY_TONE,
   type LandlordMaintenance,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { relativeTime } from '@/lib/format';
 import { AssignVendorSheet } from '@/components/landlord/AssignVendorSheet';
 import { TriageSheet } from '@/components/landlord/TriageSheet';
@@ -53,8 +53,7 @@ export default function LandlordMaintenanceScreen() {
     qc.invalidateQueries({ queryKey: qk.landlord.dashboardStats });
   };
 
-  const fail = (e: unknown, fallback: string) =>
-    toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+  const fail = (e: unknown, fallback: string) => toast.show(errorMessage(e, fallback), 'error');
 
   const resolve = useMutation({
     mutationFn: (id: string) => landlordApi.resolveMaintenance(id),
@@ -104,15 +103,17 @@ export default function LandlordMaintenanceScreen() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.sm }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={128} radius={radius.md} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={128} radius={radius.md} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(m) => m.id}
@@ -151,7 +152,7 @@ export default function LandlordMaintenanceScreen() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <AssignVendorSheet
         open={!!assigning}

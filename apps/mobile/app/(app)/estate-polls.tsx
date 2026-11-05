@@ -7,11 +7,10 @@ import { Plus, Vote, X } from 'lucide-react-native';
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   Progress,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -114,27 +113,30 @@ export default function EstatePolls() {
             { value: 'closed', label: 'Closed' },
           ]}
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          [0, 1].map((i) => <Skeleton key={i} height={190} radius={radius.lg} />)
-        ) : !items.length ? (
-          <EmptyState
-            icon={<Vote size={34} color={colors.mutedForeground} />}
-            title={view === 'open' ? 'No open polls' : 'No closed polls yet'}
-            description={
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={190} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={!items.length}
+          empty={{
+            icon: <Vote size={34} color={colors.mutedForeground} />,
+            title: view === 'open' ? 'No open polls' : 'No closed polls yet',
+            description:
               view === 'open'
                 ? 'Put a decision to the estate: a levy, a rule, a contractor.'
-                : 'Polls you close are kept here with their final result.'
-            }
-            action={
+                : 'Polls you close are kept here with their final result.',
+            action:
               view === 'open' ? (
                 <Button label="Start a poll" onPress={() => setCreating(true)} />
-              ) : undefined
-            }
-          />
-        ) : (
-          items.map((p) => (
+              ) : undefined,
+          }}
+        >
+          {items.map((p) => (
             <PollCard
               key={p.id}
               p={p}
@@ -151,8 +153,8 @@ export default function EstatePolls() {
                 )
               }
             />
-          ))
-        )}
+          ))}
+        </QueryState>
       </ScrollView>
       <Sheet open={creating} onClose={() => setCreating(false)} title="New poll">
         {creating ? (

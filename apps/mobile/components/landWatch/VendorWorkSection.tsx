@@ -6,9 +6,9 @@ import {
   Badge,
   Button,
   Card,
-  ErrorState,
   ListSkeleton,
   PressableScale,
+  QueryState,
   Text,
   useTheme,
 } from '@getrentos/ui-native';
@@ -65,55 +65,54 @@ export function VendorWorkSection({
   return (
     <View style={{ gap: spacing.sm }}>
       <Text variant="heading">Vendor work</Text>
-      {jobs.isError && !jobs.data ? (
-        <ErrorState
-          title="Couldn’t load vendor work"
-          description="Check your connection and try again."
-          onRetry={() => jobs.refetch()}
-        />
-      ) : jobs.isPending ? (
-        <ListSkeleton rows={2} variant="card" height={72} />
-      ) : !list.length ? (
-        <Text variant="callout" color="mutedForeground">
-          Ask for fencing, clearing or other work. We find vendors and post their quotes here; you
-          choose one and pay them directly.
-        </Text>
-      ) : (
-        list.map((j) => {
-          const s = LAND_WATCH_JOB_STATUS_LABELS[j.status];
-          const kind = LAND_WATCH_JOB_KIND_LABELS[j.kind];
-          return (
-            <PressableScale
-              key={j.id}
-              accessibilityRole="button"
-              accessibilityLabel={`${kind}, ${j.reference}, ${s.label}`}
-              accessibilityHint="Opens the job"
-              onPress={() =>
-                router.push({
-                  pathname: '/(app)/land-watch-job/[id]',
-                  params: { id: j.id, watchId },
-                })
-              }
-            >
-              <Card style={{ gap: spacing.xs }}>
-                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text variant="bodyStrong">{kind}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {j.reference}
-                    </Text>
+      <QueryState
+        query={jobs}
+        errorTitle="Couldn’t load vendor work"
+        errorDescription="Check your connection and try again."
+        skeleton={<ListSkeleton rows={2} variant="card" height={72} />}
+      >
+        {!list.length ? (
+          <Text variant="callout" color="mutedForeground">
+            Ask for fencing, clearing or other work. We find vendors and post their quotes here; you
+            choose one and pay them directly.
+          </Text>
+        ) : (
+          list.map((j) => {
+            const s = LAND_WATCH_JOB_STATUS_LABELS[j.status];
+            const kind = LAND_WATCH_JOB_KIND_LABELS[j.kind];
+            return (
+              <PressableScale
+                key={j.id}
+                accessibilityRole="button"
+                accessibilityLabel={`${kind}, ${j.reference}, ${s.label}`}
+                accessibilityHint="Opens the job"
+                onPress={() =>
+                  router.push({
+                    pathname: '/(app)/land-watch-job/[id]',
+                    params: { id: j.id, watchId },
+                  })
+                }
+              >
+                <Card style={{ gap: spacing.xs }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{kind}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {j.reference}
+                      </Text>
+                    </View>
+                    <Badge label={s.label} tone={s.tone} />
+                    <ChevronRight size={18} color={colors.mutedForeground} />
                   </View>
-                  <Badge label={s.label} tone={s.tone} />
-                  <ChevronRight size={18} color={colors.mutedForeground} />
-                </View>
-                <Text variant="callout" color="mutedForeground" numberOfLines={2}>
-                  {j.description}
-                </Text>
-              </Card>
-            </PressableScale>
-          );
-        })
-      )}
+                  <Text variant="callout" color="mutedForeground" numberOfLines={2}>
+                    {j.description}
+                  </Text>
+                </Card>
+              </PressableScale>
+            );
+          })
+        )}
+      </QueryState>
       {status === 'ACTIVE' ? (
         <>
           <Button

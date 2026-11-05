@@ -19,6 +19,7 @@ import {
   ErrorState,
   IconButton,
   Price,
+  QueryState,
   SectionHeader,
   SegmentedControl,
   Skeleton,
@@ -270,33 +271,40 @@ export default function EstateFinancials() {
               onPress={() => setGenerating(true)}
             />
           </View>
-          {statements.isError && !statements.data ? (
-            <ErrorState onRetry={() => statements.refetch()} />
-          ) : statements.isPending ? (
-            [0, 1].map((i) => <Skeleton key={i} height={72} radius={radius.lg} />)
-          ) : !items.length ? (
-            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <FileBarChart size={20} color={colors.mutedForeground} />
-              <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                No statements yet. Generate one for a period to see what was collected and pay it
-                out to the estate.
-              </Text>
-            </Card>
-          ) : (
-            <>
-              {items.map((st) => (
-                <StatementRow key={st.id} s={st} onPress={() => setOpenId(st.id)} />
-              ))}
-              {statements.hasNextPage ? (
-                <Button
-                  label="Show older statements"
-                  variant="ghost"
-                  loading={statements.isFetchingNextPage}
-                  onPress={() => statements.fetchNextPage()}
-                />
-              ) : null}
-            </>
-          )}
+          <QueryState
+            query={statements}
+            skeleton={
+              <View style={{ gap: spacing.md }}>
+                {[0, 1].map((i) => (
+                  <Skeleton key={i} height={72} radius={radius.lg} />
+                ))}
+              </View>
+            }
+          >
+            {!items.length ? (
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <FileBarChart size={20} color={colors.mutedForeground} />
+                <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+                  No statements yet. Generate one for a period to see what was collected and pay it
+                  out to the estate.
+                </Text>
+              </Card>
+            ) : (
+              <>
+                {items.map((st) => (
+                  <StatementRow key={st.id} s={st} onPress={() => setOpenId(st.id)} />
+                ))}
+                {statements.hasNextPage ? (
+                  <Button
+                    label="Show older statements"
+                    variant="ghost"
+                    loading={statements.isFetchingNextPage}
+                    onPress={() => statements.fetchNextPage()}
+                  />
+                ) : null}
+              </>
+            )}
+          </QueryState>
         </View>
       </ScrollView>
 

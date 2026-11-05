@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileText } from 'lucide-react-native';
 import { Button, Chip, Text, TextField, useTheme, useToast } from '@getrentos/ui-native';
 import { Sheet } from '@/components/Sheet';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, OWNER_DOCUMENT_TYPES, type OwnerDocumentType } from '@/lib/api/owner';
 import { pickDocument } from '@/lib/filePicker';
@@ -34,7 +34,7 @@ function UploadForm({
   onClose,
   onSubmittingChange,
 }: Omit<Props, 'open'> & { onSubmittingChange: (submitting: boolean) => void }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -68,34 +68,14 @@ function UploadForm({
 
   return (
     <View style={{ gap: spacing.lg }}>
-      <Pressable
-        onPress={pick}
-        disabled={mutation.isPending}
-        accessibilityRole="button"
-        accessibilityState={{ disabled: mutation.isPending }}
-        accessibilityLabel={file ? `Chosen file ${file.name}. Choose another` : 'Choose a file'}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.lg,
-          minHeight: 44,
-          borderRadius: radius.md,
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: colors.border,
+      <FilePickRow
+        label="File"
+        file={file}
+        emptyText="Choose a PDF or photo (up to 10 MB)"
+        onPick={() => {
+          if (!mutation.isPending) void pick();
         }}
-      >
-        <FileText size={18} color={colors.mutedForeground} />
-        <Text
-          variant="callout"
-          color={file ? 'foreground' : 'mutedForeground'}
-          numberOfLines={1}
-          style={{ flex: 1 }}
-        >
-          {file ? file.name : 'Choose a PDF or photo (up to 10 MB)'}
-        </Text>
-      </Pressable>
+      />
 
       <TextField
         label="Name"

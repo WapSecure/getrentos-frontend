@@ -7,8 +7,8 @@ import { Camera } from 'lucide-react-native';
 import {
   Avatar,
   Button,
-  ErrorState,
   LinkButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -50,17 +50,18 @@ export default function EditProfile() {
         />
       </View>
 
-      {!query.data && query.isError ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !query.data ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={80} width={80} radius={40} />
-          <Skeleton height={44} />
-          <Skeleton height={44} />
-        </View>
-      ) : (
-        <ProfileForm profile={query.data} />
-      )}
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={80} width={80} radius={40} />
+            <Skeleton height={44} />
+            <Skeleton height={44} />
+          </View>
+        }
+      >
+        {query.data ? <ProfileForm profile={query.data} /> : null}
+      </QueryState>
     </View>
   );
 }

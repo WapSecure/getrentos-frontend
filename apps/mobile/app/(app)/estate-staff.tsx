@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, RefreshControl, ScrollView, View } from 'react-native';
+import { Alert, RefreshControl, View } from 'react-native';
 import { router } from 'expo-router';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -8,8 +8,8 @@ import { Building2, Plus, ShieldCheck } from 'lucide-react-native';
 import {
   Button,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -115,60 +115,66 @@ export default function EstateStaff() {
             <Button label="Set up your estate" onPress={() => router.push('/(app)/estate-setup')} />
           }
         />
-      ) : query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState title="We couldn’t load your staff" onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={84} radius={radius.lg} />
-          ))}
-        </View>
       ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(m) => m.userId}
-          refreshControl={refresh}
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
-          }}
-          contentContainerStyle={{
-            paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
-          ListHeaderComponent={
-            items.length ? (
-              <Text variant="caption" color="mutedForeground" style={{ marginBottom: spacing.md }}>
-                Gatemen verify visitor passes and log arrivals at your gates using their own
-                GetRentos account.
-              </Text>
-            ) : null
+        <QueryState
+          query={query}
+          errorTitle="We couldn’t load your staff"
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={84} radius={radius.lg} />
+              ))}
+            </View>
           }
-          renderItem={({ item }: { item: StaffMember }) => (
-            <StaffRow
-              member={item}
-              removing={remove.isPending && remove.variables?.userId === item.userId}
-              onRemove={() => confirmRemove(item)}
-            />
-          )}
-          ListFooterComponent={
-            query.isFetchingNextPage ? (
-              <View style={{ marginTop: spacing.md }}>
-                <Skeleton height={84} radius={radius.lg} />
-              </View>
-            ) : null
-          }
-          ListEmptyComponent={
-            <EmptyState
-              icon={<ShieldCheck size={34} color={colors.mutedForeground} />}
-              title="No gatemen yet"
-              description="Add the people who run your gates. They need a GetRentos account, then they can verify visitor passes from their phone."
-              action={<Button label="Add a gateman" onPress={() => setAdding(true)} />}
-            />
-          }
-        />
+        >
+          <FlashList
+            data={items}
+            keyExtractor={(m) => m.userId}
+            refreshControl={refresh}
+            onEndReached={() => {
+              if (query.hasNextPage && !query.isFetchingNextPage) void query.fetchNextPage();
+            }}
+            contentContainerStyle={{
+              paddingHorizontal: spacing.xl,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            ItemSeparatorComponent={() => <View style={{ height: spacing.md }} />}
+            ListHeaderComponent={
+              items.length ? (
+                <Text
+                  variant="caption"
+                  color="mutedForeground"
+                  style={{ marginBottom: spacing.md }}
+                >
+                  Gatemen verify visitor passes and log arrivals at your gates using their own
+                  GetRentos account.
+                </Text>
+              ) : null
+            }
+            renderItem={({ item }: { item: StaffMember }) => (
+              <StaffRow
+                member={item}
+                removing={remove.isPending && remove.variables?.userId === item.userId}
+                onRemove={() => confirmRemove(item)}
+              />
+            )}
+            ListFooterComponent={
+              query.isFetchingNextPage ? (
+                <View style={{ marginTop: spacing.md }}>
+                  <Skeleton height={84} radius={radius.lg} />
+                </View>
+              ) : null
+            }
+            ListEmptyComponent={
+              <EmptyState
+                icon={<ShieldCheck size={34} color={colors.mutedForeground} />}
+                title="No gatemen yet"
+                description="Add the people who run your gates. They need a GetRentos account, then they can verify visitor passes from their phone."
+                action={<Button label="Add a gateman" onPress={() => setAdding(true)} />}
+              />
+            }
+          />
+        </QueryState>
       )}
 
       <AddGatemanSheet

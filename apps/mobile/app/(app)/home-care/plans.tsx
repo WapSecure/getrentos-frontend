@@ -16,11 +16,10 @@ import {
   Card,
   Chip,
   DateField,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
+  QueryState,
   Text,
   TextField,
   toISODate,
@@ -106,19 +105,19 @@ export default function Plans() {
             />
           }
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <ListSkeleton variant="card" rows={3} height={120} />
-        ) : !plans.length ? (
-          <EmptyState
-            icon={<CalendarClock size={34} color={colors.mutedForeground} />}
-            title="No plans yet"
-            description="Service the AC every 3 months, the generator monthly: set it once and it’s tracked."
-            action={<Button label="Add a plan" onPress={() => setAdding(true)} />}
-          />
-        ) : (
-          plans.map((p) => {
+        <QueryState
+          query={query}
+          skeleton={<ListSkeleton variant="card" rows={3} height={120} />}
+          isEmpty={!plans.length}
+          empty={{
+            icon: <CalendarClock size={34} color={colors.mutedForeground} />,
+            title: 'No plans yet',
+            description:
+              'Service the AC every 3 months, the generator monthly: set it once and it’s tracked.',
+            action: <Button label="Add a plan" onPress={() => setAdding(true)} />,
+          }}
+        >
+          {plans.map((p) => {
             const days = daysUntil(p.nextDueAt);
             const due =
               days < 0
@@ -172,8 +171,8 @@ export default function Plans() {
                 ) : null}
               </Card>
             );
-          })
-        )}
+          })}
+        </QueryState>
       </ScrollView>
       <Sheet open={adding} onClose={() => setAdding(false)} title="New maintenance plan">
         {adding ? <AddPlan onDone={() => setAdding(false)} /> : null}

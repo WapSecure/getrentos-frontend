@@ -4,15 +4,7 @@ import { router } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BadgeCheck, CalendarCheck, Sparkles, Upload } from 'lucide-react-native';
-import {
-  Button,
-  Card,
-  EmptyState,
-  ErrorState,
-  Skeleton,
-  Text,
-  useTheme,
-} from '@getrentos/ui-native';
+import { Button, Card, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { isUpgradeError } from '@/components/host/HostUI';
 import { useEstate } from '@/hooks/useEstate';
@@ -94,55 +86,59 @@ export default function EstateExpected() {
           ))}
           <Button label="See plans" onPress={() => router.push('/(app)/billing')} />
         </Card>
-      ) : query.isError && !d ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !d ? (
-        <Skeleton height={220} radius={radius.lg} />
-      ) : empty ? (
-        <EmptyState
-          icon={<CalendarCheck size={34} color={colors.mutedForeground} />}
-          title="Nobody expected today"
-          description="Visitors residents invite, contractors on a standing pass and parcels on the way show up here."
-        />
       ) : (
-        <>
-          <Group
-            title="Visitors"
-            rows={d.visitors.map((v) => ({
-              id: v.id,
-              title: v.visitorName,
-              where: `${v.unitLabel} · ${v.residentName}`,
-              note: [v.purpose, v.sourceLabel].filter(Boolean).join(' · '),
-              deadline: v.deadlineLabel,
-              today: v.deadlineToday,
-            }))}
-          />
-          <Group
-            title="Contractors"
-            rows={d.contractors.map((c) => ({
-              id: c.id,
-              title: [c.name, c.company].filter(Boolean).join(', '),
-              where: c.unitLabel ?? 'Estate-wide',
-              note: [c.trade, c.hoursLabel, c.daysLabel].filter(Boolean).join(' · '),
-              deadline: c.deadlineLabel,
-              today: c.deadlineToday,
-            }))}
-          />
-          <Group
-            title="Parcels"
-            rows={d.parcels.map((p) => ({
-              id: p.id,
-              title: p.courier,
-              where: `${p.unitLabel} · ${p.residentName}`,
-              note: p.description ?? '',
-              deadline: p.deadlineLabel,
-              today: p.deadlineToday,
-            }))}
-          />
-          <Text variant="caption" color="mutedForeground" center>
-            A planning list. Nothing here lets anyone in; the pass code at the gate does.
-          </Text>
-        </>
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={220} radius={radius.lg} />}
+          isEmpty={!!empty}
+          empty={{
+            icon: <CalendarCheck size={34} color={colors.mutedForeground} />,
+            title: 'Nobody expected today',
+            description:
+              'Visitors residents invite, contractors on a standing pass and parcels on the way show up here.',
+          }}
+        >
+          {d ? (
+            <>
+              <Group
+                title="Visitors"
+                rows={d.visitors.map((v) => ({
+                  id: v.id,
+                  title: v.visitorName,
+                  where: `${v.unitLabel} · ${v.residentName}`,
+                  note: [v.purpose, v.sourceLabel].filter(Boolean).join(' · '),
+                  deadline: v.deadlineLabel,
+                  today: v.deadlineToday,
+                }))}
+              />
+              <Group
+                title="Contractors"
+                rows={d.contractors.map((c) => ({
+                  id: c.id,
+                  title: [c.name, c.company].filter(Boolean).join(', '),
+                  where: c.unitLabel ?? 'Estate-wide',
+                  note: [c.trade, c.hoursLabel, c.daysLabel].filter(Boolean).join(' · '),
+                  deadline: c.deadlineLabel,
+                  today: c.deadlineToday,
+                }))}
+              />
+              <Group
+                title="Parcels"
+                rows={d.parcels.map((p) => ({
+                  id: p.id,
+                  title: p.courier,
+                  where: `${p.unitLabel} · ${p.residentName}`,
+                  note: p.description ?? '',
+                  deadline: p.deadlineLabel,
+                  today: p.deadlineToday,
+                }))}
+              />
+              <Text variant="caption" color="mutedForeground" center>
+                A planning list. Nothing here lets anyone in; the pass code at the gate does.
+              </Text>
+            </>
+          ) : null}
+        </QueryState>
       )}
       <GuestListSheet open={guestList} onClose={() => setGuestList(false)} estateId={estateId} />
     </ScrollView>

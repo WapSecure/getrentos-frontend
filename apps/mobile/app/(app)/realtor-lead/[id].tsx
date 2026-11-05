@@ -4,7 +4,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CalendarClock, Check, RotateCcw } from 'lucide-react-native';
-import { Button, Card, ErrorState, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
+import { Button, Card, QueryState, Skeleton, Text, useTheme, useToast } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
   LEAD_STAGES,
@@ -97,126 +97,124 @@ export default function RealtorLead() {
           onBack={() => goBack()}
         />
 
-        {lead.isError && !l ? (
-          <ErrorState onRetry={() => lead.refetch()} />
-        ) : !l ? (
-          <Skeleton height={220} radius={radius.lg} />
-        ) : (
-          <>
-            <Card elevated style={{ gap: spacing.md }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <StatusPill label={leadStage(l.status).label} tone={leadStage(l.status).tone} />
-                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  {l.listing?.listingTitle ?? 'Not linked to a listing'}
-                </Text>
-              </View>
-              <ContactActions phone={l.phone} email={l.email} name={l.fullName} />
-              {l.phone || l.email ? (
-                <Text variant="caption" color="mutedForeground" selectable>
-                  {[l.phone, l.email].filter(Boolean).join(' · ')}
-                </Text>
-              ) : null}
-            </Card>
-
-            {l.status !== 'LOST' ? (
-              <View
-                accessible
-                accessibilityLabel={`Stage ${stageIndex + 1} of ${TRACK.length}: ${leadStage(l.status).label}`}
-                style={{ flexDirection: 'row', gap: spacing.xs }}
-              >
-                {TRACK.map((s, i) => {
-                  const done = i <= stageIndex;
-                  return (
-                    <View key={s.value} style={{ flex: 1, gap: 6 }}>
-                      <View
-                        style={{
-                          height: 6,
-                          borderRadius: radius.full,
-                          backgroundColor: done ? colors.primary : colors.secondary,
-                        }}
-                      />
-                      <Text
-                        variant="caption"
-                        color={done ? 'foreground' : 'mutedForeground'}
-                        style={{ fontWeight: i === stageIndex ? '700' : '400' }}
-                      >
-                        {s.label}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-            ) : null}
-
-            {l.notes ? (
-              <Card style={{ gap: spacing.xs }}>
-                <Text variant="label" uppercase color="mutedForeground">
-                  Notes
-                </Text>
-                <Text variant="callout">{l.notes}</Text>
-              </Card>
-            ) : null}
-
-            {open ? (
-              <View style={{ gap: spacing.sm }}>
-                {next ? (
-                  <Button
-                    label={next.label}
-                    icon={<Check size={16} color={colors.primaryForeground} />}
-                    onPress={() => move.mutate(next.to)}
-                  />
+        <QueryState query={lead} skeleton={<Skeleton height={220} radius={radius.lg} />}>
+          {l ? (
+            <>
+              <Card elevated style={{ gap: spacing.md }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <StatusPill label={leadStage(l.status).label} tone={leadStage(l.status).tone} />
+                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                    {l.listing?.listingTitle ?? 'Not linked to a listing'}
+                  </Text>
+                </View>
+                <ContactActions phone={l.phone} email={l.email} name={l.fullName} />
+                {l.phone || l.email ? (
+                  <Text variant="caption" color="mutedForeground" selectable>
+                    {[l.phone, l.email].filter(Boolean).join(' · ')}
+                  </Text>
                 ) : null}
-                <Button
-                  label="Book a viewing"
-                  variant="secondary"
-                  icon={<CalendarClock size={16} color={colors.foreground} />}
-                  onPress={() => setBooking(true)}
-                />
-                <Button
-                  label="Mark as lost"
-                  variant="ghost"
-                  onPress={() =>
-                    Alert.alert(`Mark ${l.fullName} as lost?`, 'You can reopen the lead later.', [
-                      { text: 'Keep open', style: 'cancel' },
-                      {
-                        text: 'Mark as lost',
-                        style: 'destructive',
-                        onPress: () => move.mutate('LOST'),
-                      },
-                    ])
-                  }
-                />
-              </View>
-            ) : (
-              <Button
-                label="Reopen lead"
-                variant="secondary"
-                icon={<RotateCcw size={16} color={colors.foreground} />}
-                onPress={() => move.mutate('CONTACTED')}
-              />
-            )}
+              </Card>
 
-            <View style={{ gap: spacing.sm }}>
-              <Text variant="heading" headingLevel={2}>
-                Viewings
-              </Text>
-              {viewings.isPending ? (
-                <Skeleton height={84} radius={radius.lg} />
-              ) : theirs.length ? (
-                theirs.map((v) => <ViewingRow key={v.id} v={v} />)
+              {l.status !== 'LOST' ? (
+                <View
+                  accessible
+                  accessibilityLabel={`Stage ${stageIndex + 1} of ${TRACK.length}: ${leadStage(l.status).label}`}
+                  style={{ flexDirection: 'row', gap: spacing.xs }}
+                >
+                  {TRACK.map((s, i) => {
+                    const done = i <= stageIndex;
+                    return (
+                      <View key={s.value} style={{ flex: 1, gap: 6 }}>
+                        <View
+                          style={{
+                            height: 6,
+                            borderRadius: radius.full,
+                            backgroundColor: done ? colors.primary : colors.secondary,
+                          }}
+                        />
+                        <Text
+                          variant="caption"
+                          color={done ? 'foreground' : 'mutedForeground'}
+                          style={{ fontWeight: i === stageIndex ? '700' : '400' }}
+                        >
+                          {s.label}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              ) : null}
+
+              {l.notes ? (
+                <Card style={{ gap: spacing.xs }}>
+                  <Text variant="label" uppercase color="mutedForeground">
+                    Notes
+                  </Text>
+                  <Text variant="callout">{l.notes}</Text>
+                </Card>
+              ) : null}
+
+              {open ? (
+                <View style={{ gap: spacing.sm }}>
+                  {next ? (
+                    <Button
+                      label={next.label}
+                      icon={<Check size={16} color={colors.primaryForeground} />}
+                      onPress={() => move.mutate(next.to)}
+                    />
+                  ) : null}
+                  <Button
+                    label="Book a viewing"
+                    variant="secondary"
+                    icon={<CalendarClock size={16} color={colors.foreground} />}
+                    onPress={() => setBooking(true)}
+                  />
+                  <Button
+                    label="Mark as lost"
+                    variant="ghost"
+                    onPress={() =>
+                      Alert.alert(`Mark ${l.fullName} as lost?`, 'You can reopen the lead later.', [
+                        { text: 'Keep open', style: 'cancel' },
+                        {
+                          text: 'Mark as lost',
+                          style: 'destructive',
+                          onPress: () => move.mutate('LOST'),
+                        },
+                      ])
+                    }
+                  />
+                </View>
               ) : (
-                <Text variant="callout" color="mutedForeground">
-                  None booked yet.
-                </Text>
+                <Button
+                  label="Reopen lead"
+                  variant="secondary"
+                  icon={<RotateCcw size={16} color={colors.foreground} />}
+                  onPress={() => move.mutate('CONTACTED')}
+                />
               )}
-            </View>
 
-            <Text variant="caption" color="mutedForeground" center>
-              Added {formatDate(l.createdAt, 'medium')}
-              {l.source ? ` · via ${l.source}` : ''}
-            </Text>
-          </>
-        )}
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading" headingLevel={2}>
+                  Viewings
+                </Text>
+                {viewings.isPending ? (
+                  <Skeleton height={84} radius={radius.lg} />
+                ) : theirs.length ? (
+                  theirs.map((v) => <ViewingRow key={v.id} v={v} />)
+                ) : (
+                  <Text variant="callout" color="mutedForeground">
+                    None booked yet.
+                  </Text>
+                )}
+              </View>
+
+              <Text variant="caption" color="mutedForeground" center>
+                Added {formatDate(l.createdAt, 'medium')}
+                {l.source ? ` · via ${l.source}` : ''}
+              </Text>
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
       <ScheduleViewingSheet open={booking} onClose={() => setBooking(false)} lead={l} />
     </View>

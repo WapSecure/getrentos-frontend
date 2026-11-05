@@ -16,9 +16,9 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import {
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   StatSkeleton,
   Text,
@@ -103,102 +103,107 @@ export default function HomeCare() {
       />
       {gated ? (
         <HomeCareProGate />
-      ) : dashboard.isError && !d ? (
-        <ErrorState onRetry={() => dashboard.refetch()} />
-      ) : !d ? (
-        <>
-          <StatSkeleton />
-          <Skeleton height={120} radius={radius.lg} />
-        </>
       ) : (
-        <>
-          <MetricGrid
-            loading={false}
-            metrics={[
-              {
-                label: 'Open jobs',
-                value: d.openWorkOrders,
-                Icon: Wrench,
-                onPress: () => router.push('/(app)/home-care/work-orders'),
-              },
-              {
-                label: 'Overdue',
-                value: d.overdue,
-                Icon: AlertTriangle,
-                onPress: () => router.push('/(app)/home-care/work-orders'),
-              },
-              {
-                label: 'Awaiting approval',
-                value: d.approvalQueue,
-                Icon: BadgeCheck,
-                onPress: () => router.push('/(app)/home-care/work-orders'),
-              },
-              {
-                label: 'Emergencies',
-                value: d.unacknowledgedEmergencies,
-                Icon: Siren,
-                onPress: () => router.push('/(app)/home-care/work-orders'),
-              },
-            ]}
-          />
-
-          <View style={{ gap: spacing.md }}>
-            <Text variant="heading" headingLevel={2}>
-              Needs you
-            </Text>
-            {open.isPending ? (
-              <Skeleton height={110} radius={radius.lg} />
-            ) : attention.length ? (
-              attention.map((w) => <WorkOrderCard key={w.id} w={w} />)
-            ) : (
-              <Text variant="callout" color="mutedForeground">
-                Nothing waiting on you. Every open job has a vendor and a budget.
-              </Text>
-            )}
-          </View>
-
-          <View style={{ gap: spacing.sm }}>
-            <Tile
-              Icon={Wrench}
-              label="Work orders"
-              hint={`${d.openWorkOrders} open`}
-              onPress={() => router.push('/(app)/home-care/work-orders')}
-            />
-            <Tile
-              Icon={Boxes}
-              label="Assets"
-              hint={`${d.totalAssets} tracked${d.assetsNeedingService ? ` · ${d.assetsNeedingService} need service` : ''}`}
-              onPress={() => router.push('/(app)/home-care/assets')}
-            />
-            <Tile
-              Icon={CalendarClock}
-              label="Preventive maintenance"
-              hint={d.plansDue ? `${d.plansDue} due` : 'Servicing on a schedule'}
-              onPress={() => router.push('/(app)/home-care/plans')}
-            />
-            <Tile
-              Icon={Timer}
-              label="Response times"
-              hint="How fast each priority must be handled"
-              onPress={() => router.push('/(app)/home-care/service-targets')}
-            />
-            <Tile
-              Icon={History}
-              label="Activity"
-              hint="Everything that happened, newest first"
-              onPress={() => router.push('/(app)/home-care/activity')}
-            />
-          </View>
-
-          {d.approvedSpend ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
-                Approved spend so far
-              </Text>
-              <Price amount={d.approvedSpend} variant="bodyStrong" />
+        <QueryState
+          query={dashboard}
+          skeleton={
+            <View style={{ gap: spacing.xl }}>
+              <StatSkeleton />
+              <Skeleton height={120} radius={radius.lg} />
             </View>
+          }
+        >
+          {d ? (
+            <>
+              <MetricGrid
+                loading={false}
+                metrics={[
+                  {
+                    label: 'Open jobs',
+                    value: d.openWorkOrders,
+                    Icon: Wrench,
+                    onPress: () => router.push('/(app)/home-care/work-orders'),
+                  },
+                  {
+                    label: 'Overdue',
+                    value: d.overdue,
+                    Icon: AlertTriangle,
+                    onPress: () => router.push('/(app)/home-care/work-orders'),
+                  },
+                  {
+                    label: 'Awaiting approval',
+                    value: d.approvalQueue,
+                    Icon: BadgeCheck,
+                    onPress: () => router.push('/(app)/home-care/work-orders'),
+                  },
+                  {
+                    label: 'Emergencies',
+                    value: d.unacknowledgedEmergencies,
+                    Icon: Siren,
+                    onPress: () => router.push('/(app)/home-care/work-orders'),
+                  },
+                ]}
+              />
+
+              <View style={{ gap: spacing.md }}>
+                <Text variant="heading" headingLevel={2}>
+                  Needs you
+                </Text>
+                {open.isPending ? (
+                  <Skeleton height={110} radius={radius.lg} />
+                ) : attention.length ? (
+                  attention.map((w) => <WorkOrderCard key={w.id} w={w} />)
+                ) : (
+                  <Text variant="callout" color="mutedForeground">
+                    Nothing waiting on you. Every open job has a vendor and a budget.
+                  </Text>
+                )}
+              </View>
+
+              <View style={{ gap: spacing.sm }}>
+                <Tile
+                  Icon={Wrench}
+                  label="Work orders"
+                  hint={`${d.openWorkOrders} open`}
+                  onPress={() => router.push('/(app)/home-care/work-orders')}
+                />
+                <Tile
+                  Icon={Boxes}
+                  label="Assets"
+                  hint={`${d.totalAssets} tracked${d.assetsNeedingService ? ` · ${d.assetsNeedingService} need service` : ''}`}
+                  onPress={() => router.push('/(app)/home-care/assets')}
+                />
+                <Tile
+                  Icon={CalendarClock}
+                  label="Preventive maintenance"
+                  hint={d.plansDue ? `${d.plansDue} due` : 'Servicing on a schedule'}
+                  onPress={() => router.push('/(app)/home-care/plans')}
+                />
+                <Tile
+                  Icon={Timer}
+                  label="Response times"
+                  hint="How fast each priority must be handled"
+                  onPress={() => router.push('/(app)/home-care/service-targets')}
+                />
+                <Tile
+                  Icon={History}
+                  label="Activity"
+                  hint="Everything that happened, newest first"
+                  onPress={() => router.push('/(app)/home-care/activity')}
+                />
+              </View>
+
+              {d.approvedSpend ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="callout" color="mutedForeground" style={{ flex: 1 }}>
+                    Approved spend so far
+                  </Text>
+                  <Price amount={d.approvedSpend} variant="bodyStrong" />
+                </View>
+              ) : null}
+            </>
           ) : null}
-        </>
+        </QueryState>
       )}
     </ScrollView>
   );

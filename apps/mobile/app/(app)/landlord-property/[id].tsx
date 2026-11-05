@@ -24,10 +24,9 @@ import {
   Badge,
   Card,
   Divider,
-  EmptyState,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -41,7 +40,7 @@ import {
   VERIFICATION_TONE,
   type LandlordUnit,
 } from '@/lib/api/landlord';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { EditPropertySheet } from '@/components/landlord/EditPropertySheet';
 import { RecordOccupierSheet } from '@/components/landlord/RecordOccupierSheet';
 import { AddUnitSheet } from '@/components/landlord/AddUnitSheet';
@@ -84,8 +83,7 @@ export default function LandlordPropertyDetail() {
     qc.invalidateQueries({ queryKey: ['landlord', 'properties'] });
     qc.invalidateQueries({ queryKey: ['landlord', 'units'] });
   };
-  const fail = (e: unknown, fallback: string) =>
-    toast.show(e instanceof ApiError ? e.message : fallback, 'error');
+  const fail = (e: unknown, fallback: string) => toast.show(errorMessage(e, fallback), 'error');
 
   const archive = useMutation({
     mutationFn: () => landlordApi.archiveProperty(id),
@@ -204,15 +202,17 @@ export default function LandlordPropertyDetail() {
         ) : null}
       </View>
 
-      {property.isError && !property.data ? (
-        <ErrorState onRetry={() => property.refetch()} />
-      ) : !property.isLoading && !p ? (
-        <EmptyState
-          icon={<Building2 size={30} color={colors.mutedForeground} />}
-          title="Property not found"
-          description="It may have been archived or removed since this screen was opened."
-        />
-      ) : (
+      <QueryState
+        query={property}
+        skeleton={<Skeleton height={170} radius={radius.lg} />}
+        isEmpty={!p}
+        empty={{
+          icon: <Building2 size={30} color={colors.mutedForeground} />,
+          title: 'Property not found',
+          description: 'It may have been archived or removed since this screen was opened.',
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: spacing.xl,
@@ -220,33 +220,29 @@ export default function LandlordPropertyDetail() {
             gap: spacing.lg,
           }}
         >
-          {property.isLoading ? (
-            <Skeleton height={170} radius={radius.lg} />
-          ) : (
-            <View
-              style={{
-                height: 170,
-                borderRadius: radius.lg,
-                overflow: 'hidden',
-                backgroundColor: colors.secondary,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {p?.coverImage ? (
-                <Image
-                  source={{ uri: p.coverImage }}
-                  style={{ width: '100%', height: '100%' }}
-                  contentFit="cover"
-                  cachePolicy="memory-disk"
-                  recyclingKey={p.id}
-                  accessible={false}
-                />
-              ) : (
-                <Building2 size={30} color={colors.mutedForeground} />
-              )}
-            </View>
-          )}
+          <View
+            style={{
+              height: 170,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
+              backgroundColor: colors.secondary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {p?.coverImage ? (
+              <Image
+                source={{ uri: p.coverImage }}
+                style={{ width: '100%', height: '100%' }}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                recyclingKey={p.id}
+                accessible={false}
+              />
+            ) : (
+              <Building2 size={30} color={colors.mutedForeground} />
+            )}
+          </View>
 
           {p ? (
             <View style={{ gap: spacing.sm }}>
@@ -494,7 +490,7 @@ export default function LandlordPropertyDetail() {
             </Pressable>
           ) : null}
         </ScrollView>
-      )}
+      </QueryState>
 
       <EditPropertySheet open={editing} onClose={() => setEditing(false)} property={p ?? null} />
       <RecordOccupierSheet open={!!assigning} onClose={() => setAssigning(null)} unit={assigning} />

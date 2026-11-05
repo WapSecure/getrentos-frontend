@@ -19,8 +19,7 @@ import {
   Button,
   Card,
   DetailSkeleton,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Text,
   TextField,
   useTheme,
@@ -174,254 +173,256 @@ export default function LandWatchJobScreen() {
           onBack={() => goBack()}
         />
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <DetailSkeleton />
-        ) : !job || !status ? (
-          <EmptyState
-            title="Job not found"
-            description="It may have been removed. Go back to the watch to see its jobs."
-          />
-        ) : (
-          <>
-            <Card style={{ gap: spacing.sm }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                  Asked {date(job.createdAt)}
-                </Text>
-                <Badge label={status.label} tone={status.tone} />
-              </View>
-              <Text variant="callout">{job.description}</Text>
-              {job.status === 'CANCELLED' && job.cancelReason ? (
-                <Text variant="callout" color="mutedForeground">
-                  Cancelled{job.cancelledAt ? ` ${date(job.cancelledAt)}` : ''}: {job.cancelReason}
-                </Text>
-              ) : null}
-            </Card>
-
-            {accepted ? (
-              <Card elevated style={{ gap: spacing.sm }}>
-                <Text variant="heading">Your vendor</Text>
-                <Text variant="bodyStrong">
-                  {accepted.vendorName} · {formatNaira(accepted.amountNaira)}
-                </Text>
-                {accepted.vendorPhone ? (
-                  <Button
-                    label={`Call ${accepted.vendorPhone}`}
-                    variant="secondary"
-                    accessibilityLabel={`Call ${accepted.vendorName} on ${accepted.vendorPhone}`}
-                    icon={<Phone size={18} color={colors.foreground} />}
-                    onPress={() =>
-                      Linking.openURL(`tel:${accepted.vendorPhone!.replace(/\s+/g, '')}`).catch(
-                        () => toast.show('This device can’t make calls.', 'error')
-                      )
-                    }
-                  />
+        <QueryState
+          query={query}
+          skeleton={<DetailSkeleton />}
+          isEmpty={!job || !status}
+          empty={{
+            title: 'Job not found',
+            description: 'It may have been removed. Go back to the watch to see its jobs.',
+          }}
+        >
+          {job && status ? (
+            <>
+              <Card style={{ gap: spacing.sm }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                    Asked {date(job.createdAt)}
+                  </Text>
+                  <Badge label={status.label} tone={status.tone} />
+                </View>
+                <Text variant="callout">{job.description}</Text>
+                {job.status === 'CANCELLED' && job.cancelReason ? (
+                  <Text variant="callout" color="mutedForeground">
+                    Cancelled{job.cancelledAt ? ` ${date(job.cancelledAt)}` : ''}:{' '}
+                    {job.cancelReason}
+                  </Text>
                 ) : null}
-                <Text variant="caption" color="mutedForeground">
-                  {LAND_WATCH_JOB_PAYMENT_NOTE}
-                </Text>
               </Card>
-            ) : null}
 
-            <Text variant="heading">Quotes</Text>
-            {!job.quotes.length ? (
-              <Text variant="callout" color="mutedForeground">
-                {job.status === 'CANCELLED'
-                  ? 'No quotes came in.'
-                  : 'We’re finding vendors. Their quotes will appear here.'}
-              </Text>
-            ) : (
-              job.quotes.map((q) => {
-                const qs = QUOTE_STATUS[q.status];
-                const old = expired(q);
-                const choosable = job.status === 'QUOTED' && q.status === 'OFFERED';
-                return (
-                  <Card key={q.id} style={{ gap: spacing.xs }}>
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}
-                    >
-                      <View style={{ flex: 1, gap: 2 }}>
-                        <Text variant="bodyStrong">{q.vendorName}</Text>
-                        <Text variant="subheading">{formatNaira(q.amountNaira)}</Text>
+              {accepted ? (
+                <Card elevated style={{ gap: spacing.sm }}>
+                  <Text variant="heading">Your vendor</Text>
+                  <Text variant="bodyStrong">
+                    {accepted.vendorName} · {formatNaira(accepted.amountNaira)}
+                  </Text>
+                  {accepted.vendorPhone ? (
+                    <Button
+                      label={`Call ${accepted.vendorPhone}`}
+                      variant="secondary"
+                      accessibilityLabel={`Call ${accepted.vendorName} on ${accepted.vendorPhone}`}
+                      icon={<Phone size={18} color={colors.foreground} />}
+                      onPress={() =>
+                        Linking.openURL(`tel:${accepted.vendorPhone!.replace(/\s+/g, '')}`).catch(
+                          () => toast.show('This device can’t make calls.', 'error')
+                        )
+                      }
+                    />
+                  ) : null}
+                  <Text variant="caption" color="mutedForeground">
+                    {LAND_WATCH_JOB_PAYMENT_NOTE}
+                  </Text>
+                </Card>
+              ) : null}
+
+              <Text variant="heading">Quotes</Text>
+              {!job.quotes.length ? (
+                <Text variant="callout" color="mutedForeground">
+                  {job.status === 'CANCELLED'
+                    ? 'No quotes came in.'
+                    : 'We’re finding vendors. Their quotes will appear here.'}
+                </Text>
+              ) : (
+                job.quotes.map((q) => {
+                  const qs = QUOTE_STATUS[q.status];
+                  const old = expired(q);
+                  const choosable = job.status === 'QUOTED' && q.status === 'OFFERED';
+                  return (
+                    <Card key={q.id} style={{ gap: spacing.xs }}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}
+                      >
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text variant="bodyStrong">{q.vendorName}</Text>
+                          <Text variant="subheading">{formatNaira(q.amountNaira)}</Text>
+                        </View>
+                        <Badge
+                          label={old && q.status === 'OFFERED' ? 'Expired' : qs.label}
+                          tone={old && q.status === 'OFFERED' ? 'neutral' : qs.tone}
+                        />
                       </View>
-                      <Badge
-                        label={old && q.status === 'OFFERED' ? 'Expired' : qs.label}
-                        tone={old && q.status === 'OFFERED' ? 'neutral' : qs.tone}
+                      <Text variant="callout">{q.scope}</Text>
+                      {q.validUntil ? (
+                        <Text variant="caption" color="mutedForeground">
+                          {old ? 'Expired' : 'Valid until'} {date(q.validUntil)}
+                        </Text>
+                      ) : null}
+                      {choosable ? (
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            gap: spacing.sm,
+                            marginTop: spacing.xs,
+                          }}
+                        >
+                          <Button
+                            label="Accept"
+                            size="sm"
+                            fullWidth={false}
+                            style={{ flexGrow: 1 }}
+                            accessibilityLabel={`Accept ${q.vendorName}’s quote of ${formatNaira(q.amountNaira)}`}
+                            disabled={old || act.isPending}
+                            loading={pending('accept', q.id)}
+                            onPress={() => confirmAccept(q)}
+                          />
+                          <Button
+                            label="Decline"
+                            size="sm"
+                            variant="outline"
+                            fullWidth={false}
+                            style={{ flexGrow: 1 }}
+                            accessibilityLabel={`Decline ${q.vendorName}’s quote`}
+                            disabled={act.isPending}
+                            loading={pending('decline', q.id)}
+                            onPress={() => confirmDecline(q)}
+                          />
+                        </View>
+                      ) : null}
+                    </Card>
+                  );
+                })
+              )}
+
+              {job.proof.length || job.completionNote ? (
+                <>
+                  <Text variant="heading">Proof of work</Text>
+                  {images.length ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                      {images.map((p) => (
+                        <Pressable
+                          key={p.id}
+                          accessibilityRole="imagebutton"
+                          accessibilityLabel={`Open photo ${p.fileName}${p.note ? `: ${p.note}` : ''}`}
+                          onPress={() => Linking.openURL(p.url)}
+                        >
+                          <Image
+                            source={{ uri: p.url }}
+                            contentFit="cover"
+                            style={{
+                              width: 96,
+                              height: 96,
+                              borderRadius: radius.md,
+                              backgroundColor: colors.secondary,
+                            }}
+                          />
+                        </Pressable>
+                      ))}
+                    </View>
+                  ) : null}
+                  {files.map((p) => (
+                    <Pressable
+                      key={p.id}
+                      accessibilityRole="link"
+                      accessibilityLabel={`Open ${p.fileName}`}
+                      onPress={() => Linking.openURL(p.url)}
+                    >
+                      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                        <FileText size={20} color={colors.mutedForeground} />
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text variant="bodyStrong" numberOfLines={1}>
+                            {p.fileName}
+                          </Text>
+                          <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+                            {p.note ? `${p.note} · ` : ''}
+                            {date(p.createdAt)}
+                          </Text>
+                        </View>
+                      </Card>
+                    </Pressable>
+                  ))}
+                  {job.completionNote ? (
+                    <Text variant="callout">
+                      Completed{job.completedAt ? ` ${date(job.completedAt)}` : ''}:{' '}
+                      {job.completionNote}
+                    </Text>
+                  ) : null}
+                </>
+              ) : null}
+
+              {job.status === 'COMPLETED' ? (
+                job.checkInspectionId ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <Badge label="Check booked" tone="success" />
+                    <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
+                      An inspector will look at the work. The report appears under Inspections.
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={{ gap: spacing.xs }}>
+                    <Button
+                      label="Ask for an independent check"
+                      variant="secondary"
+                      icon={<SearchCheck size={18} color={colors.foreground} />}
+                      loading={pending('check')}
+                      disabled={act.isPending}
+                      onPress={() => act.mutate({ type: 'check' })}
+                    />
+                    <Text variant="caption" color="mutedForeground">
+                      A GetRentos inspector, not the vendor, visits to confirm the work was done.
+                    </Text>
+                  </View>
+                )
+              ) : null}
+
+              {CANCELLABLE.has(job.status) ? (
+                cancelling ? (
+                  <Card style={{ gap: spacing.md }}>
+                    <TextField
+                      label="Why are you cancelling?"
+                      value={reason}
+                      onChangeText={setReason}
+                      multiline
+                      required
+                      maxLength={1000}
+                      hint={
+                        reason.trim().length < MIN_REASON
+                          ? `At least ${MIN_REASON} characters`
+                          : undefined
+                      }
+                    />
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                      <Button
+                        label="Keep the job"
+                        variant="outline"
+                        fullWidth={false}
+                        style={{ flexGrow: 1 }}
+                        disabled={pending('cancel')}
+                        onPress={() => setCancelling(false)}
+                      />
+                      <Button
+                        label="Cancel job"
+                        variant="destructive"
+                        fullWidth={false}
+                        style={{ flexGrow: 1 }}
+                        loading={pending('cancel')}
+                        disabled={reason.trim().length < MIN_REASON || act.isPending}
+                        onPress={() => act.mutate({ type: 'cancel', reason: reason.trim() })}
                       />
                     </View>
-                    <Text variant="callout">{q.scope}</Text>
-                    {q.validUntil ? (
-                      <Text variant="caption" color="mutedForeground">
-                        {old ? 'Expired' : 'Valid until'} {date(q.validUntil)}
-                      </Text>
-                    ) : null}
-                    {choosable ? (
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          flexWrap: 'wrap',
-                          gap: spacing.sm,
-                          marginTop: spacing.xs,
-                        }}
-                      >
-                        <Button
-                          label="Accept"
-                          size="sm"
-                          fullWidth={false}
-                          style={{ flexGrow: 1 }}
-                          accessibilityLabel={`Accept ${q.vendorName}’s quote of ${formatNaira(q.amountNaira)}`}
-                          disabled={old || act.isPending}
-                          loading={pending('accept', q.id)}
-                          onPress={() => confirmAccept(q)}
-                        />
-                        <Button
-                          label="Decline"
-                          size="sm"
-                          variant="outline"
-                          fullWidth={false}
-                          style={{ flexGrow: 1 }}
-                          accessibilityLabel={`Decline ${q.vendorName}’s quote`}
-                          disabled={act.isPending}
-                          loading={pending('decline', q.id)}
-                          onPress={() => confirmDecline(q)}
-                        />
-                      </View>
-                    ) : null}
                   </Card>
-                );
-              })
-            )}
-
-            {job.proof.length || job.completionNote ? (
-              <>
-                <Text variant="heading">Proof of work</Text>
-                {images.length ? (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                    {images.map((p) => (
-                      <Pressable
-                        key={p.id}
-                        accessibilityRole="imagebutton"
-                        accessibilityLabel={`Open photo ${p.fileName}${p.note ? `: ${p.note}` : ''}`}
-                        onPress={() => Linking.openURL(p.url)}
-                      >
-                        <Image
-                          source={{ uri: p.url }}
-                          contentFit="cover"
-                          style={{
-                            width: 96,
-                            height: 96,
-                            borderRadius: radius.md,
-                            backgroundColor: colors.secondary,
-                          }}
-                        />
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : null}
-                {files.map((p) => (
-                  <Pressable
-                    key={p.id}
-                    accessibilityRole="link"
-                    accessibilityLabel={`Open ${p.fileName}`}
-                    onPress={() => Linking.openURL(p.url)}
-                  >
-                    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <FileText size={20} color={colors.mutedForeground} />
-                      <View style={{ flex: 1, gap: 2 }}>
-                        <Text variant="bodyStrong" numberOfLines={1}>
-                          {p.fileName}
-                        </Text>
-                        <Text variant="caption" color="mutedForeground" numberOfLines={2}>
-                          {p.note ? `${p.note} · ` : ''}
-                          {date(p.createdAt)}
-                        </Text>
-                      </View>
-                    </Card>
-                  </Pressable>
-                ))}
-                {job.completionNote ? (
-                  <Text variant="callout">
-                    Completed{job.completedAt ? ` ${date(job.completedAt)}` : ''}:{' '}
-                    {job.completionNote}
-                  </Text>
-                ) : null}
-              </>
-            ) : null}
-
-            {job.status === 'COMPLETED' ? (
-              job.checkInspectionId ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                  <Badge label="Check booked" tone="success" />
-                  <Text variant="caption" color="mutedForeground" style={{ flex: 1 }}>
-                    An inspector will look at the work. The report appears under Inspections.
-                  </Text>
-                </View>
-              ) : (
-                <View style={{ gap: spacing.xs }}>
+                ) : (
                   <Button
-                    label="Ask for an independent check"
-                    variant="secondary"
-                    icon={<SearchCheck size={18} color={colors.foreground} />}
-                    loading={pending('check')}
+                    label="Cancel this job"
+                    variant="ghost"
                     disabled={act.isPending}
-                    onPress={() => act.mutate({ type: 'check' })}
+                    onPress={() => setCancelling(true)}
                   />
-                  <Text variant="caption" color="mutedForeground">
-                    A GetRentos inspector, not the vendor, visits to confirm the work was done.
-                  </Text>
-                </View>
-              )
-            ) : null}
-
-            {CANCELLABLE.has(job.status) ? (
-              cancelling ? (
-                <Card style={{ gap: spacing.md }}>
-                  <TextField
-                    label="Why are you cancelling?"
-                    value={reason}
-                    onChangeText={setReason}
-                    multiline
-                    required
-                    maxLength={1000}
-                    hint={
-                      reason.trim().length < MIN_REASON
-                        ? `At least ${MIN_REASON} characters`
-                        : undefined
-                    }
-                  />
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                    <Button
-                      label="Keep the job"
-                      variant="outline"
-                      fullWidth={false}
-                      style={{ flexGrow: 1 }}
-                      disabled={pending('cancel')}
-                      onPress={() => setCancelling(false)}
-                    />
-                    <Button
-                      label="Cancel job"
-                      variant="destructive"
-                      fullWidth={false}
-                      style={{ flexGrow: 1 }}
-                      loading={pending('cancel')}
-                      disabled={reason.trim().length < MIN_REASON || act.isPending}
-                      onPress={() => act.mutate({ type: 'cancel', reason: reason.trim() })}
-                    />
-                  </View>
-                </Card>
-              ) : (
-                <Button
-                  label="Cancel this job"
-                  variant="ghost"
-                  disabled={act.isPending}
-                  onPress={() => setCancelling(true)}
-                />
-              )
-            ) : null}
-          </>
-        )}
+                )
+              ) : null}
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
     </KeyboardAvoidingView>
   );

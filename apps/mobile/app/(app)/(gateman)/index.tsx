@@ -31,7 +31,7 @@ import { WalkInSheet } from '@/components/gateman/WalkInSheet';
 import { IdDocumentSheet } from '@/components/gateman/IdDocumentSheet';
 import { WatchlistBlockedSheet } from '@/components/gateman/WatchlistBlockedSheet';
 import { WatchlistWarning } from '@/components/gateman/WatchlistWarning';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, errorMessage } from '@/lib/api/client';
 import { readWatchlistRefusal, type WatchlistRefusal } from '@/lib/gateman/watchlistRefusal';
 import { describeStandingPass } from '@/lib/gateman/standingPass';
 import { useGatemanPost } from '@/lib/gateman/GatemanPostProvider';
@@ -173,7 +173,7 @@ export default function GatemanCheckIn() {
         return;
       }
 
-      const message = error instanceof Error ? error.message : 'Could not verify that code.';
+      const message = errorMessage(error, 'Could not verify that code.');
       if (input.overrideReason) {
         setOverrideError(message);
         return;
@@ -205,10 +205,7 @@ export default function GatemanCheckIn() {
         return;
       }
       void haptics.error();
-      toast.show(
-        error instanceof Error ? error.message : 'Could not check that visitor out.',
-        'error'
-      );
+      toast.show(errorMessage(error, 'Could not check that visitor out.'), 'error');
     },
   });
 
@@ -257,7 +254,7 @@ export default function GatemanCheckIn() {
         return;
       }
 
-      const message = error instanceof Error ? error.message : 'Could not admit that visitor.';
+      const message = errorMessage(error, 'Could not admit that visitor.');
       if (input.overrideReason) {
         setOverrideError(message);
         return;
@@ -273,10 +270,7 @@ export default function GatemanCheckIn() {
       if (estate) void qc.invalidateQueries({ queryKey: qk.gateman.walkIns(estate.id) });
     },
     onError: (error) => {
-      toast.show(
-        error instanceof Error ? error.message : 'Could not cancel that request.',
-        'error'
-      );
+      toast.show(errorMessage(error, 'Could not cancel that request.'), 'error');
     },
   });
 

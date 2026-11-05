@@ -7,8 +7,8 @@ import { ShieldCheck } from 'lucide-react-native';
 import {
   Button,
   Card,
-  ErrorState,
   NumberField,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -40,15 +40,16 @@ export default function BuyerPaymentMethod() {
         onBack={() => goBack()}
       />
 
-      {query.data ? (
-        <PaymentMethodForm data={query.data} />
-      ) : query.isLoading ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={200} radius={16} />
-        </View>
-      ) : (
-        <ErrorState onRetry={() => query.refetch()} />
-      )}
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={200} radius={16} />
+          </View>
+        }
+      >
+        {query.data ? <PaymentMethodForm data={query.data} /> : null}
+      </QueryState>
     </View>
   );
 }

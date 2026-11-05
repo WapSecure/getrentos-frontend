@@ -15,8 +15,7 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -101,19 +100,25 @@ export default function PaymentMethods() {
           />
         }
       >
-        {query.isLoading ? (
-          [0, 1].map((i) => <Skeleton key={i} height={84} radius={radius.lg} />)
-        ) : query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : methods.length === 0 ? (
-          <EmptyState
-            icon={<CreditCard size={30} color={colors.mutedForeground} />}
-            title="No payment methods"
-            description="Add a card, bank account or wallet to pay rent without re-entering details."
-            action={<Button label="Add a method" onPress={() => setAdding(true)} />}
-          />
-        ) : (
-          methods.map((m) => {
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.sm }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={84} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={methods.length === 0}
+          empty={{
+            icon: <CreditCard size={30} color={colors.mutedForeground} />,
+            title: 'No payment methods',
+            description:
+              'Add a card, bank account or wallet to pay rent without re-entering details.',
+            action: <Button label="Add a method" onPress={() => setAdding(true)} />,
+          }}
+        >
+          {methods.map((m) => {
             const Icon = TYPE_ICON[m.type] ?? CreditCard;
             return (
               <Card key={m.id} padding={spacing.lg}>
@@ -169,8 +174,8 @@ export default function PaymentMethods() {
                 )}
               </Card>
             );
-          })
-        )}
+          })}
+        </QueryState>
 
         {methods.length > 0 ? (
           <Pressable

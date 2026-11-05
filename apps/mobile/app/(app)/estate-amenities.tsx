@@ -7,10 +7,9 @@ import { CalendarClock, Plus, Trash2, Waves } from 'lucide-react-native';
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -142,22 +141,35 @@ export default function EstateAmenities() {
           ]}
         />
 
-        {active.isError && !active.data ? (
-          <ErrorState onRetry={() => active.refetch()} />
-        ) : active.isPending ? (
-          [0, 1].map((i) => <Skeleton key={i} height={96} radius={radius.lg} />)
-        ) : view === 'bookings' ? (
-          !bookings.data?.length ? (
-            <EmptyState
-              icon={<CalendarClock size={34} color={colors.mutedForeground} />}
-              title="No bookings yet"
-              description={
-                amenities.data?.length
-                  ? 'When a resident books a shared space, it appears here.'
-                  : 'Add an amenity first. Residents then book it from their app.'
-              }
-            />
-          ) : (
+        <QueryState
+          query={active}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={96} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={view === 'bookings' ? !bookings.data?.length : !amenities.data?.length}
+          empty={
+            view === 'bookings'
+              ? {
+                  icon: <CalendarClock size={34} color={colors.mutedForeground} />,
+                  title: 'No bookings yet',
+                  description: amenities.data?.length
+                    ? 'When a resident books a shared space, it appears here.'
+                    : 'Add an amenity first. Residents then book it from their app.',
+                }
+              : {
+                  icon: <Waves size={34} color={colors.mutedForeground} />,
+                  title: 'No amenities yet',
+                  description:
+                    'Add the pool, the hall, the court. Residents book them from their app.',
+                  action: <Button label="Add an amenity" onPress={() => setAdding(true)} />,
+                }
+          }
+        >
+          {view === 'bookings' ? (
             <>
               {buckets.upcoming.length ? (
                 <View style={{ gap: spacing.sm }}>
@@ -202,61 +214,62 @@ export default function EstateAmenities() {
                 </View>
               ) : null}
             </>
-          )
-        ) : !amenities.data?.length ? (
-          <EmptyState
-            icon={<Waves size={34} color={colors.mutedForeground} />}
-            title="No amenities yet"
-            description="Add the pool, the hall, the court. Residents book them from their app."
-            action={<Button label="Add an amenity" onPress={() => setAdding(true)} />}
-          />
-        ) : (
-          amenities.data.map((a) => {
-            const ahead = buckets.upcoming.filter((b) => b.amenityId === a.id).length;
-            return (
-              <Card
-                key={a.id}
-                elevated
-                style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
-              >
-                <View
-                  style={{ flex: 1, gap: 2 }}
-                  accessible
-                  accessibilityLabel={`${a.name}${a.description ? `. ${a.description}` : ''}. ${ahead} upcoming ${ahead === 1 ? 'booking' : 'bookings'}`}
+          ) : (
+            (amenities.data ?? []).map((a) => {
+              const ahead = buckets.upcoming.filter((b) => b.amenityId === a.id).length;
+              return (
+                <Card
+                  key={a.id}
+                  elevated
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
                 >
-                  <Text variant="bodyStrong">{a.name}</Text>
-                  {a.description ? (
-                    <Text variant="caption" color="mutedForeground" numberOfLines={2}>
-                      {a.description}
+                  <View
+                    style={{ flex: 1, gap: 2 }}
+                    accessible
+                    accessibilityLabel={`${a.name}${a.description ? `. ${a.description}` : ''}. ${ahead} upcoming ${ahead === 1 ? 'booking' : 'bookings'}`}
+                  >
+                    <Text variant="bodyStrong">{a.name}</Text>
+                    {a.description ? (
+                      <Text variant="caption" color="mutedForeground" numberOfLines={2}>
+                        {a.description}
+                      </Text>
+                    ) : null}
+                    <Text variant="caption" color="mutedForeground">
+                      {ahead
+                        ? `${ahead} upcoming ${ahead === 1 ? 'booking' : 'bookings'}`
+                        : 'Nothing booked ahead'}
                     </Text>
-                  ) : null}
-                  <Text variant="caption" color="mutedForeground">
-                    {ahead
-                      ? `${ahead} upcoming ${ahead === 1 ? 'booking' : 'bookings'}`
-                      : 'Nothing booked ahead'}
-                  </Text>
-                </View>
-                <IconButton
-                  accessibilityLabel={`Remove ${a.name}`}
-                  disabled={remove.isPending && remove.variables?.id === a.id}
-                  icon={<Trash2 size={17} color={colors.mutedForeground} />}
-                  onPress={() =>
-                    ahead
-                      ? Alert.alert(
-                          `${a.name} has bookings ahead`,
-                          `Cancel its ${ahead} upcoming ${ahead === 1 ? 'booking' : 'bookings'} first, so the residents are told.`,
-                          [{ text: 'OK', onPress: () => setView('bookings') }]
-                        )
-                      : Alert.alert(`Remove ${a.name}?`, 'Its past bookings are removed with it.', [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Remove', style: 'destructive', onPress: () => remove.mutate(a) },
-                        ])
-                  }
-                />
-              </Card>
-            );
-          })
-        )}
+                  </View>
+                  <IconButton
+                    accessibilityLabel={`Remove ${a.name}`}
+                    disabled={remove.isPending && remove.variables?.id === a.id}
+                    icon={<Trash2 size={17} color={colors.mutedForeground} />}
+                    onPress={() =>
+                      ahead
+                        ? Alert.alert(
+                            `${a.name} has bookings ahead`,
+                            `Cancel its ${ahead} upcoming ${ahead === 1 ? 'booking' : 'bookings'} first, so the residents are told.`,
+                            [{ text: 'OK', onPress: () => setView('bookings') }]
+                          )
+                        : Alert.alert(
+                            `Remove ${a.name}?`,
+                            'Its past bookings are removed with it.',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Remove',
+                                style: 'destructive',
+                                onPress: () => remove.mutate(a),
+                              },
+                            ]
+                          )
+                    }
+                  />
+                </Card>
+              );
+            })
+          )}
+        </QueryState>
       </ScrollView>
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add an amenity">
         {adding ? (

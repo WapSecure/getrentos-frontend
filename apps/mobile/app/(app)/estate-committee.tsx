@@ -10,10 +10,9 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -95,24 +94,30 @@ export default function EstateCommittee() {
           }
         />
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          [0, 1, 2].map((i) => <Skeleton key={i} height={72} radius={radius.lg} />)
-        ) : !members.length ? (
-          <EmptyState
-            icon={<Landmark size={34} color={colors.mutedForeground} />}
-            title="No committee yet"
-            description="Give households a seat and a title. Committee members can sign the estate’s bylaws and minutes from their app."
-            action={
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={72} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={!members.length}
+          empty={{
+            icon: <Landmark size={34} color={colors.mutedForeground} />,
+            title: 'No committee yet',
+            description:
+              'Give households a seat and a title. Committee members can sign the estate’s bylaws and minutes from their app.',
+            action: (
               <Button label="Appoint a household" onPress={() => setPanel({ kind: 'appoint' })} />
-            }
-          />
-        ) : (
-          members.map((m) => (
+            ),
+          }}
+        >
+          {members.map((m) => (
             <MemberRow key={m.id} m={m} onPress={() => setPanel({ kind: 'edit', member: m })} />
-          ))
-        )}
+          ))}
+        </QueryState>
       </ScrollView>
 
       <Sheet

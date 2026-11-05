@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageCircle, Pin, Search, X } from 'lucide-react-native';
 import {
   Avatar,
   EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -114,17 +114,17 @@ export function Inbox({
         ) : null}
       </View>
 
-      {error && !conversations ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={onRefresh} />
-        </ScrollView>
-      ) : loading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={64} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={{ data: conversations, isPending: loading, isError: error, refetch: onRefresh }}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={64} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(c) => c.id}
@@ -144,7 +144,7 @@ export function Inbox({
             <Row c={item} onPress={() => onOpen(item)} />
           )}
         />
-      )}
+      </QueryState>
     </View>
   );
 }

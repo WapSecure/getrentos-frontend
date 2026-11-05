@@ -13,8 +13,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft, Send } from 'lucide-react-native';
 import {
   Badge,
-  ErrorState,
   LinkButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -138,24 +138,25 @@ export default function SupportThreadScreen() {
         ) : null}
       </View>
 
-      {messagesQuery.isError && !messagesQuery.data ? (
-        <ErrorState onRetry={() => messagesQuery.refetch()} />
-      ) : !messagesQuery.data ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={40} width="60%" />
-          <Skeleton height={40} width="75%" />
-        </View>
-      ) : (
+      <QueryState
+        query={messagesQuery}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={40} width="60%" />
+            <Skeleton height={40} width="75%" />
+          </View>
+        }
+      >
         <ScrollView
           ref={scrollRef}
           contentContainerStyle={{ padding: spacing.xl, gap: spacing.sm }}
           keyboardShouldPersistTaps="handled"
         >
-          {messagesQuery.data.map((m) => (
+          {(messagesQuery.data ?? []).map((m) => (
             <MessageBubble key={m.id} message={m} />
           ))}
         </ScrollView>
-      )}
+      </QueryState>
 
       <View
         style={{

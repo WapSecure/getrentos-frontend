@@ -9,10 +9,10 @@ import {
   Button,
   Card,
   Divider,
-  ErrorState,
   FormAlert,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -99,16 +99,14 @@ export default function Billing() {
         onBack={() => goBack()}
       />
 
-      {mine.isError && !mine.data ? (
-        <ErrorState onRetry={() => mine.refetch()} />
-      ) : !mine.data ? (
-        <Skeleton height={120} radius={radius.lg} />
-      ) : (
-        <>
-          <PlanCard billing={mine.data} />
-          {!mine.data.isActive && purchasesAvailable() ? <BuyPro /> : null}
-        </>
-      )}
+      <QueryState query={mine} skeleton={<Skeleton height={120} radius={radius.lg} />}>
+        {mine.data ? (
+          <>
+            <PlanCard billing={mine.data} />
+            {!mine.data.isActive && purchasesAvailable() ? <BuyPro /> : null}
+          </>
+        ) : null}
+      </QueryState>
 
       {pricing.data?.entitlements[persona]?.length ? (
         <Comparison rows={pricing.data.entitlements[persona]} />
@@ -120,24 +118,22 @@ export default function Billing() {
         <Text variant="heading" headingLevel={2}>
           Receipts
         </Text>
-        {invoices.isError && !invoices.data ? (
-          <ErrorState onRetry={() => invoices.refetch()} />
-        ) : invoices.isPending ? (
-          <Skeleton height={64} radius={radius.lg} />
-        ) : !invoices.data?.items.length ? (
-          <Text variant="callout" color="mutedForeground">
-            No charges yet.
-          </Text>
-        ) : (
-          <Card elevated padding="none">
-            {invoices.data.items.map((inv, i) => (
-              <View key={inv.id}>
-                {i > 0 ? <Divider /> : null}
-                <InvoiceRow inv={inv} />
-              </View>
-            ))}
-          </Card>
-        )}
+        <QueryState query={invoices} skeleton={<Skeleton height={64} radius={radius.lg} />}>
+          {!invoices.data?.items.length ? (
+            <Text variant="callout" color="mutedForeground">
+              No charges yet.
+            </Text>
+          ) : (
+            <Card elevated padding="none">
+              {invoices.data.items.map((inv, i) => (
+                <View key={inv.id}>
+                  {i > 0 ? <Divider /> : null}
+                  <InvoiceRow inv={inv} />
+                </View>
+              ))}
+            </Card>
+          )}
+        </QueryState>
       </View>
     </ScrollView>
   );

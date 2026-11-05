@@ -7,7 +7,7 @@ import {
   Button,
   Card,
   Chip,
-  ErrorState,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -43,13 +43,9 @@ export default function OwnerSettings() {
         subtitle="How offers reach you"
         onBack={() => goBack()}
       />
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : !query.data ? (
-        <Skeleton height={220} radius={radius.lg} />
-      ) : (
-        <Form key={JSON.stringify(query.data)} initial={query.data} />
-      )}
+      <QueryState query={query} skeleton={<Skeleton height={220} radius={radius.lg} />}>
+        {query.data ? <Form key={JSON.stringify(query.data)} initial={query.data} /> : null}
+      </QueryState>
     </ScrollView>
   );
 }

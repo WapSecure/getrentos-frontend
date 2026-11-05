@@ -17,9 +17,9 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -192,17 +192,16 @@ export default function EstateVisitors() {
         </ScrollView>
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={104} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={104} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -308,7 +307,7 @@ export default function EstateVisitors() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={issuing} onClose={() => setIssuing(false)} title="Issue a visitor pass">
         {issuing ? <IssueForm estateId={estateId} onDone={() => setIssuing(false)} /> : null}

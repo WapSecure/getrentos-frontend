@@ -6,10 +6,9 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -90,20 +89,19 @@ export function PatrolRoutes({ estateId }: { estateId: string }) {
           Add a checkpoint first: a round is a list of places to reach.
         </Text>
       ) : null}
-      {routes.isError && !routes.data ? (
-        <ErrorState onRetry={() => routes.refetch()} />
-      ) : !routes.data ? (
-        <Skeleton height={160} radius={radius.lg} />
-      ) : !routes.data.length ? (
-        active.length ? (
-          <EmptyState
-            icon={<RouteIcon size={34} color={colors.mutedForeground} />}
-            title="No rounds yet"
-            description="A round is when the patrol goes out and how long it should take. Without one there’s nothing to be late for."
-          />
-        ) : null
-      ) : (
-        routes.data.map((r) => (
+      <QueryState
+        query={routes}
+        skeleton={<Skeleton height={160} radius={radius.lg} />}
+        // With no checkpoints in use the hint above says what to do instead.
+        isEmpty={!routes.data?.length && active.length > 0}
+        empty={{
+          icon: <RouteIcon size={34} color={colors.mutedForeground} />,
+          title: 'No rounds yet',
+          description:
+            'A round is when the patrol goes out and how long it should take. Without one there’s nothing to be late for.',
+        }}
+      >
+        {(routes.data ?? []).map((r) => (
           <Card key={r.id} elevated style={{ gap: spacing.sm }}>
             <View
               accessible
@@ -164,8 +162,8 @@ export function PatrolRoutes({ estateId }: { estateId: string }) {
               />
             </View>
           </Card>
-        ))
-      )}
+        ))}
+      </QueryState>
 
       <Sheet
         open={!!editing}

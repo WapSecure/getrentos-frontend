@@ -6,10 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Send } from 'lucide-react-native';
 import {
   Card,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -90,85 +89,86 @@ export function DisputeThread({
           subtitle={d?.listingTitle}
           onBack={() => goBack()}
         />
-        {disputes.isPending ? (
-          <Skeleton height={140} radius={radius.lg} />
-        ) : disputes.isError && !disputes.data ? (
-          <ErrorState onRetry={() => disputes.refetch()} />
-        ) : !d ? (
-          <EmptyState title="Dispute not found" />
-        ) : (
-          <>
-            <Card elevated style={{ gap: spacing.sm }}>
-              <Text variant="caption" color="mutedForeground">
-                {d.guestPromise ? 'Guest Promise' : categoryLabel(d.category)} · opened{' '}
-                {formatDate(d.createdAt, 'medium')}
+        <QueryState
+          query={disputes}
+          skeleton={<Skeleton height={140} radius={radius.lg} />}
+          isEmpty={!d}
+          empty={{ title: 'Dispute not found' }}
+        >
+          {d ? (
+            <>
+              <Card elevated style={{ gap: spacing.sm }}>
+                <Text variant="caption" color="mutedForeground">
+                  {d.guestPromise ? 'Guest Promise' : categoryLabel(d.category)} · opened{' '}
+                  {formatDate(d.createdAt, 'medium')}
+                </Text>
+                <Text variant="body">{d.description}</Text>
+              </Card>
+              {resolved ? (
+                <FormAlert
+                  tone="success"
+                  title="Resolved"
+                  message={`${d.resolution ?? 'Support closed this dispute.'}${d.refundAmount ? ` ${refundText(d.refundAmount)}` : ''}`}
+                />
+              ) : (
+                <FormAlert
+                  tone="info"
+                  message="Support reads every message here. Add photos or details by replying."
+                />
+              )}
+              <Text variant="heading" headingLevel={2}>
+                Messages
               </Text>
-              <Text variant="body">{d.description}</Text>
-            </Card>
-            {resolved ? (
-              <FormAlert
-                tone="success"
-                title="Resolved"
-                message={`${d.resolution ?? 'Support closed this dispute.'}${d.refundAmount ? ` ${refundText(d.refundAmount)}` : ''}`}
-              />
-            ) : (
-              <FormAlert
-                tone="info"
-                message="Support reads every message here. Add photos or details by replying."
-              />
-            )}
-            <Text variant="heading" headingLevel={2}>
-              Messages
-            </Text>
-            {messages.isPending ? (
-              <Skeleton height={60} radius={radius.md} />
-            ) : !messages.data?.length ? (
-              <Text variant="callout" color="mutedForeground">
-                No messages yet.
-              </Text>
-            ) : (
-              messages.data.map((m) => {
-                const mine = m.senderId === profile?.id;
-                return (
-                  <View
-                    key={m.id}
-                    style={{ maxWidth: '85%', alignSelf: mine ? 'flex-end' : 'flex-start' }}
-                    accessible
-                    accessibilityLabel={`${mine ? 'You' : m.senderName}, ${m.text}, ${relativeTime(m.timestamp)}`}
-                  >
-                    {!mine ? (
-                      <Text variant="caption" color="mutedForeground" style={{ marginBottom: 2 }}>
-                        {m.senderName}
-                      </Text>
-                    ) : null}
+              {messages.isPending ? (
+                <Skeleton height={60} radius={radius.md} />
+              ) : !messages.data?.length ? (
+                <Text variant="callout" color="mutedForeground">
+                  No messages yet.
+                </Text>
+              ) : (
+                messages.data.map((m) => {
+                  const mine = m.senderId === profile?.id;
+                  return (
                     <View
-                      style={{
-                        paddingVertical: 9,
-                        paddingHorizontal: 13,
-                        borderRadius: radius.lg,
-                        backgroundColor: mine ? colors.primary : colors.secondary,
-                      }}
+                      key={m.id}
+                      style={{ maxWidth: '85%', alignSelf: mine ? 'flex-end' : 'flex-start' }}
+                      accessible
+                      accessibilityLabel={`${mine ? 'You' : m.senderName}, ${m.text}, ${relativeTime(m.timestamp)}`}
                     >
-                      <Text
-                        variant="callout"
-                        style={{ color: mine ? colors.primaryForeground : colors.foreground }}
+                      {!mine ? (
+                        <Text variant="caption" color="mutedForeground" style={{ marginBottom: 2 }}>
+                          {m.senderName}
+                        </Text>
+                      ) : null}
+                      <View
+                        style={{
+                          paddingVertical: 9,
+                          paddingHorizontal: 13,
+                          borderRadius: radius.lg,
+                          backgroundColor: mine ? colors.primary : colors.secondary,
+                        }}
                       >
-                        {m.text}
+                        <Text
+                          variant="callout"
+                          style={{ color: mine ? colors.primaryForeground : colors.foreground }}
+                        >
+                          {m.text}
+                        </Text>
+                      </View>
+                      <Text
+                        variant="caption"
+                        color="mutedForeground"
+                        style={{ marginTop: 2, alignSelf: mine ? 'flex-end' : 'flex-start' }}
+                      >
+                        {relativeTime(m.timestamp)}
                       </Text>
                     </View>
-                    <Text
-                      variant="caption"
-                      color="mutedForeground"
-                      style={{ marginTop: 2, alignSelf: mine ? 'flex-end' : 'flex-start' }}
-                    >
-                      {relativeTime(m.timestamp)}
-                    </Text>
-                  </View>
-                );
-              })
-            )}
-          </>
-        )}
+                  );
+                })
+              )}
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
       {d && !resolved ? (
         <View

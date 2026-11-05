@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import {
@@ -16,9 +16,9 @@ import {
   Card,
   DateField,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -31,6 +31,7 @@ import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { ReasonSheet } from '@/components/homecare/ReasonSheet';
 import { StatusPill } from '@/components/host/HostUI';
 import { Sheet } from '@/components/Sheet';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 import { useEstate } from '@/hooks/useEstate';
 import {
   estateManagerApi,
@@ -134,17 +135,17 @@ export default function EstateWatchlist() {
         />
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={132} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={132} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -260,7 +261,7 @@ export default function EstateWatchlist() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Add to the watch list">
         {adding ? <AddForm estateId={estateId} onDone={() => setAdding(false)} /> : null}
@@ -280,7 +281,7 @@ export default function EstateWatchlist() {
 }
 
 function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void }) {
-  const { colors, spacing, radius } = useTheme();
+  const { spacing } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const [subjectType, setSubjectType] = useState<WatchlistSubjectType>('PERSON');
@@ -381,30 +382,13 @@ function AddForm({ estateId, onDone }: { estateId: string; onDone: () => void })
         onChange={setExpires}
         min={toISODate(new Date())}
       />
-      <Pressable
-        onPress={async () => setPhoto((await pickPhoto()) ?? photo)}
-        accessibilityRole="button"
-        accessibilityLabel={photo ? 'Photo attached. Choose another' : 'Add a photo, optional'}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.md,
-          borderRadius: radius.md,
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: colors.border,
-        }}
-      >
-        <Camera size={18} color={colors.mutedForeground} />
-        <Text
-          variant="callout"
-          color={photo ? 'foreground' : 'mutedForeground'}
-          style={{ flex: 1 }}
-        >
-          {photo ? 'Photo attached' : 'Add a photo (optional)'}
-        </Text>
-      </Pressable>
+      <FilePickRow
+        label="Photo (optional)"
+        file={photo}
+        onPick={async () => setPhoto((await pickPhoto()) ?? photo)}
+        icon={Camera}
+        emptyText="Add a photo"
+      />
       <FormAlert
         tone="warning"
         message="This affects a real person at your gate. Add someone only on something you can stand behind, and say why plainly."

@@ -16,11 +16,10 @@ import {
   Card,
   Chip,
   DateField,
-  EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   ListSkeleton,
+  QueryState,
   SegmentedControl,
   Text,
   TextField,
@@ -122,7 +121,7 @@ export default function Assets() {
             contentContainerStyle={{ gap: spacing.sm }}
           >
             <Chip label="All homes" selected={!propertyId} onPress={() => setPropertyId('')} />
-            {homes.data!.map((h) => (
+            {(homes.data ?? []).map((h) => (
               <Chip
                 key={h.id}
                 label={h.name}
@@ -143,19 +142,19 @@ export default function Assets() {
             { value: 'RETIRED', label: 'Retired' },
           ]}
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <ListSkeleton variant="card" rows={3} height={100} />
-        ) : !items.length ? (
-          <EmptyState
-            icon={<Boxes size={34} color={colors.mutedForeground} />}
-            title={query.data?.items.length ? 'Nothing here' : 'No assets yet'}
-            description="Record the AC, generator and pumps in each home to track warranties and service them on time."
-            action={<Button label="Add an asset" onPress={() => setAdding(true)} />}
-          />
-        ) : (
-          items.map((a) => {
+        <QueryState
+          query={query}
+          skeleton={<ListSkeleton variant="card" rows={3} height={100} />}
+          isEmpty={!items.length}
+          empty={{
+            icon: <Boxes size={34} color={colors.mutedForeground} />,
+            title: query.data?.items.length ? 'Nothing here' : 'No assets yet',
+            description:
+              'Record the AC, generator and pumps in each home to track warranties and service them on time.',
+            action: <Button label="Add an asset" onPress={() => setAdding(true)} />,
+          }}
+        >
+          {items.map((a) => {
             const s = STATUS[a.status];
             const wty = warranty(a);
             const next = a.preventivePlans?.[0]?.nextDueAt;
@@ -208,8 +207,8 @@ export default function Assets() {
                 )}
               </Pressable>
             );
-          })
-        )}
+          })}
+        </QueryState>
       </ScrollView>
 
       <Sheet open={!!selected} onClose={() => setSelected(null)} title={selected?.name}>

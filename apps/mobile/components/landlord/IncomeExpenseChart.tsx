@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Text, useTheme } from '@getrentos/ui-native';
+import { Divider, Text, useTheme } from '@getrentos/ui-native';
 import type { FinancialsPoint } from '@/lib/api/landlord';
 import { formatNaira } from '@/lib/format';
 import { seriesColor } from './chartPalette';
@@ -18,7 +18,7 @@ const PLOT_HEIGHT = 110;
  * tooltip.
  */
 export function IncomeExpenseChart({ points }: Props) {
-  const { colors, spacing, radius, scheme } = useTheme();
+  const { spacing, radius, scheme } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
 
   const income = seriesColor('income', scheme === 'dark' ? 'dark' : 'light');
@@ -106,17 +106,12 @@ export function IncomeExpenseChart({ points }: Props) {
       </View>
 
       {/* Two series, so a legend is always present: identity is never colour alone. */}
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: spacing.lg,
-          paddingTop: spacing.xs,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-        }}
-      >
-        <LegendItem color={income} label="Income" />
-        <LegendItem color={expenses} label="Expenses" />
+      <View style={{ gap: spacing.xs }}>
+        <Divider />
+        <View style={{ flexDirection: 'row', gap: spacing.lg }}>
+          <LegendItem color={income} label="Income" />
+          <LegendItem color={expenses} label="Expenses" />
+        </View>
       </View>
     </View>
   );

@@ -7,8 +7,8 @@ import { Check, ChevronLeft, ShieldCheck, Siren } from 'lucide-react-native';
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  Divider,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -105,203 +105,164 @@ export default function ResidentEmergency() {
       </View>
 
       <Screen refreshing={query.isRefetching} onRefresh={query.refetch}>
-        {query.isLoading ? (
-          <View style={{ gap: spacing.md }}>
-            <Skeleton height={140} radius={16} />
-            <Skeleton height={200} radius={16} />
-          </View>
-        ) : !data && query.isError ? (
-          // Never fall through to "not calling the roll" when we simply could not ask.
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !data ? (
-          <EmptyState
-            icon={<ShieldCheck size={34} color={colors.mutedForeground} />}
-            title="Your estate is not calling the roll"
-            description="Nothing is happening right now. If the alarm is raised, this screen becomes the way you tell the estate office whether your household is safe."
-          />
-        ) : (
-          <>
-            <Card
-              elevated
-              style={{
-                borderWidth: 1,
-                borderColor: colors.destructive,
-                backgroundColor: colors.destructive + '14',
-              }}
-            >
-              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <Siren size={22} color={colors.destructive} />
-                <View style={{ flex: 1 }}>
-                  <Text variant="bodyStrong">
-                    {data.muster.kindLabel}: the estate has raised the alarm
-                  </Text>
-                  <Text variant="body" style={{ marginTop: spacing.xs }}>
-                    {data.muster.assemblyInstruction}
-                  </Text>
-                  {data.muster.assemblyPoint ? (
-                    <Text
-                      variant="caption"
-                      color="mutedForeground"
-                      style={{ marginTop: spacing.xs }}
-                    >
-                      Gather at: {data.muster.assemblyPoint}
+        {/* A failed load shows an error, never "not calling the roll": that is only
+            for a loaded null. */}
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.md }}>
+              <Skeleton height={140} radius={16} />
+              <Skeleton height={200} radius={16} />
+            </View>
+          }
+          isEmpty={data === null}
+          empty={{
+            icon: <ShieldCheck size={34} color={colors.mutedForeground} />,
+            title: 'Your estate is not calling the roll',
+            description:
+              'Nothing is happening right now. If the alarm is raised, this screen becomes the way you tell the estate office whether your household is safe.',
+          }}
+        >
+          {data ? (
+            <>
+              <Card
+                elevated
+                style={{
+                  borderWidth: 1,
+                  borderColor: colors.destructive,
+                  backgroundColor: colors.destructive + '14',
+                }}
+              >
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Siren size={22} color={colors.destructive} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="bodyStrong">
+                      {data.muster.kindLabel}: the estate has raised the alarm
                     </Text>
-                  ) : null}
-                  <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.sm }}>
-                    {data.muster.statusLabel} · raised {formatTime(data.muster.declaredAt)}
-                  </Text>
-                </View>
-              </View>
-            </Card>
-
-            {/* The one action this screen exists for. */}
-            <Card elevated>
-              <Text variant="bodyStrong">
-                {answered ? 'Is this still right?' : 'Where is your household?'}
-              </Text>
-              <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.xs }}>
-                {answered
-                  ? `${describeMyHouseholdAnswer(states[0] ?? 'UNACCOUNTED')}. You can change it: an answer given in a hurry is worth correcting.`
-                  : someAnswered
-                    ? 'Some of your household has answered. Answering again covers everybody who lives here.'
-                    : 'One answer covers everybody who lives here. Tell a marshal anything you cannot say here.'}
-              </Text>
-
-              <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-                {MUSTER_ANSWER_OPTIONS.map((option) => {
-                  const isCurrent = answered && states.every((state) => state === option.state);
-                  const isSelected = selected === option.state;
-                  const accent = option.urgent ? colors.destructive : colors.primary;
-                  return (
-                    <Pressable
-                      key={option.state}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected, disabled: answer.isPending }}
-                      disabled={answer.isPending}
-                      onPress={() => {
-                        setSelected(option.state);
-                        setNote('');
-                      }}
-                      style={{
-                        borderWidth: 1,
-                        borderColor: isSelected ? accent : colors.border,
-                        backgroundColor: isSelected ? accent + '14' : colors.card,
-                        borderRadius: 14,
-                        padding: spacing.md,
-                      }}
-                    >
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                        <Text variant="bodyStrong">{option.label}</Text>
-                        {isCurrent ? (
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                            <Check size={14} color={colors.success ?? colors.primary} />
-                            <Text variant="caption" color="mutedForeground">
-                              Your answer
-                            </Text>
-                          </View>
-                        ) : null}
-                      </View>
+                    <Text variant="body" style={{ marginTop: spacing.xs }}>
+                      {data.muster.assemblyInstruction}
+                    </Text>
+                    {data.muster.assemblyPoint ? (
                       <Text
                         variant="caption"
                         color="mutedForeground"
                         style={{ marginTop: spacing.xs }}
                       >
-                        {option.description}
+                        Gather at: {data.muster.assemblyPoint}
                       </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              {selected ? (
-                <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
-                  <TextField
-                    label="Anything to add? (optional)"
-                    value={note}
-                    onChangeText={setNote}
-                    placeholder={notePlaceholder(selected)}
-                    multiline
-                    numberOfLines={3}
-                    editable={!answer.isPending}
-                  />
-                  <Button
-                    label={answer.isPending ? 'Sending…' : 'Send to the estate office'}
-                    loading={answer.isPending}
-                    onPress={() =>
-                      answer.mutate({ state: selected, stateNote: note.trim() || undefined })
-                    }
-                  />
-                  <Button
-                    variant="ghost"
-                    label="Cancel"
-                    disabled={answer.isPending}
-                    onPress={() => {
-                      setSelected(null);
-                      setNote('');
-                    }}
-                  />
-                </View>
-              ) : null}
-            </Card>
-
-            {/* Your own lines, and the estate's numbers. Never the estate's roll. */}
-            <Card elevated>
-              <Text variant="bodyStrong">Your household</Text>
-              {(data.myEntries ?? []).length === 0 ? (
-                <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.xs }}>
-                  Your household is not on this roll call. Tell a marshal where you are.
-                </Text>
-              ) : (
-                mine.map((entry) => (
-                  <View
-                    key={entry.id}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      justifyContent: 'space-between',
-                      gap: spacing.sm,
-                      marginTop: spacing.sm,
-                    }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text variant="body">{entry.personName}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {entry.basisLabel}
-                      </Text>
-                      {entry.stateNote ? (
-                        <Text variant="caption" color="mutedForeground">
-                          Note: {entry.stateNote}
-                        </Text>
-                      ) : null}
-                    </View>
-                    <Text variant="caption" color="mutedForeground">
-                      {entry.stateLabel}
+                    ) : null}
+                    <Text
+                      variant="caption"
+                      color="mutedForeground"
+                      style={{ marginTop: spacing.sm }}
+                    >
+                      {data.muster.statusLabel} · raised {formatTime(data.muster.declaredAt)}
                     </Text>
                   </View>
-                ))
-              )}
+                </View>
+              </Card>
 
-              {/* Visitors this household was admitted are on the roll and this
-                  household cannot answer for them, so they are named rather than
-                  hidden: a resident who does not see them has no way to tell a
-                  marshal that somebody is still inside. */}
-              {visitorEntries.length > 0 ? (
-                <View
-                  style={{
-                    marginTop: spacing.md,
-                    paddingTop: spacing.sm,
-                    borderTopWidth: 1,
-                    borderTopColor: colors.border,
-                  }}
-                >
-                  <Text variant="body">Visitors the estate admitted to your household</Text>
-                  <Text variant="caption" color="mutedForeground" style={{ marginTop: 2 }}>
-                    {visitorEntries.length === 1
-                      ? 'One visitor is still on site. A marshal answers for them'
-                      : `${visitorEntries.length} visitors are still on site. A marshal answers for them`}
-                    {': the person who let them in is not always the person holding this phone.'}
+              {/* The one action this screen exists for. */}
+              <Card elevated>
+                <Text variant="bodyStrong">
+                  {answered ? 'Is this still right?' : 'Where is your household?'}
+                </Text>
+                <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.xs }}>
+                  {answered
+                    ? `${describeMyHouseholdAnswer(states[0] ?? 'UNACCOUNTED')}. You can change it: an answer given in a hurry is worth correcting.`
+                    : someAnswered
+                      ? 'Some of your household has answered. Answering again covers everybody who lives here.'
+                      : 'One answer covers everybody who lives here. Tell a marshal anything you cannot say here.'}
+                </Text>
+
+                <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+                  {MUSTER_ANSWER_OPTIONS.map((option) => {
+                    const isCurrent = answered && states.every((state) => state === option.state);
+                    const isSelected = selected === option.state;
+                    const accent = option.urgent ? colors.destructive : colors.primary;
+                    return (
+                      <Pressable
+                        key={option.state}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected, disabled: answer.isPending }}
+                        disabled={answer.isPending}
+                        onPress={() => {
+                          setSelected(option.state);
+                          setNote('');
+                        }}
+                        style={{
+                          borderWidth: 1,
+                          borderColor: isSelected ? accent : colors.border,
+                          backgroundColor: isSelected ? accent + '14' : colors.card,
+                          borderRadius: 14,
+                          padding: spacing.md,
+                        }}
+                      >
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                        >
+                          <Text variant="bodyStrong">{option.label}</Text>
+                          {isCurrent ? (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                              <Check size={14} color={colors.success ?? colors.primary} />
+                              <Text variant="caption" color="mutedForeground">
+                                Your answer
+                              </Text>
+                            </View>
+                          ) : null}
+                        </View>
+                        <Text
+                          variant="caption"
+                          color="mutedForeground"
+                          style={{ marginTop: spacing.xs }}
+                        >
+                          {option.description}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+
+                {selected ? (
+                  <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
+                    <TextField
+                      label="Anything to add? (optional)"
+                      value={note}
+                      onChangeText={setNote}
+                      placeholder={notePlaceholder(selected)}
+                      multiline
+                      numberOfLines={3}
+                      editable={!answer.isPending}
+                    />
+                    <Button
+                      label={answer.isPending ? 'Sending…' : 'Send to the estate office'}
+                      loading={answer.isPending}
+                      onPress={() =>
+                        answer.mutate({ state: selected, stateNote: note.trim() || undefined })
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      label="Cancel"
+                      disabled={answer.isPending}
+                      onPress={() => {
+                        setSelected(null);
+                        setNote('');
+                      }}
+                    />
+                  </View>
+                ) : null}
+              </Card>
+
+              {/* Your own lines, and the estate's numbers. Never the estate's roll. */}
+              <Card elevated>
+                <Text variant="bodyStrong">Your household</Text>
+                {(data.myEntries ?? []).length === 0 ? (
+                  <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.xs }}>
+                    Your household is not on this roll call. Tell a marshal where you are.
                   </Text>
-                  {visitorEntries.map((entry) => (
+                ) : (
+                  mine.map((entry) => (
                     <View
                       key={entry.id}
                       style={{
@@ -317,51 +278,99 @@ export default function ResidentEmergency() {
                         <Text variant="caption" color="mutedForeground">
                           {entry.basisLabel}
                         </Text>
+                        {entry.stateNote ? (
+                          <Text variant="caption" color="mutedForeground">
+                            Note: {entry.stateNote}
+                          </Text>
+                        ) : null}
                       </View>
                       <Text variant="caption" color="mutedForeground">
                         {entry.stateLabel}
                       </Text>
                     </View>
+                  ))
+                )}
+
+                {/* Visitors this household was admitted are on the roll and this
+                  household cannot answer for them, so they are named rather than
+                  hidden: a resident who does not see them has no way to tell a
+                  marshal that somebody is still inside. */}
+                {visitorEntries.length > 0 ? (
+                  <>
+                    <Divider style={{ marginTop: spacing.md }} />
+                    <View style={{ paddingTop: spacing.sm }}>
+                      <Text variant="body">Visitors the estate admitted to your household</Text>
+                      <Text variant="caption" color="mutedForeground" style={{ marginTop: 2 }}>
+                        {visitorEntries.length === 1
+                          ? 'One visitor is still on site. A marshal answers for them'
+                          : `${visitorEntries.length} visitors are still on site. A marshal answers for them`}
+                        {
+                          ': the person who let them in is not always the person holding this phone.'
+                        }
+                      </Text>
+                      {visitorEntries.map((entry) => (
+                        <View
+                          key={entry.id}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'flex-start',
+                            justifyContent: 'space-between',
+                            gap: spacing.sm,
+                            marginTop: spacing.sm,
+                          }}
+                        >
+                          <View style={{ flex: 1 }}>
+                            <Text variant="body">{entry.personName}</Text>
+                            <Text variant="caption" color="mutedForeground">
+                              {entry.basisLabel}
+                            </Text>
+                          </View>
+                          <Text variant="caption" color="mutedForeground">
+                            {entry.stateLabel}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                ) : null}
+              </Card>
+
+              <Card elevated>
+                <Text variant="bodyStrong">How the estate is doing</Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: spacing.md,
+                    marginTop: spacing.sm,
+                  }}
+                >
+                  {[
+                    { label: 'Accounted for', value: data.muster.tally.accountedFor },
+                    { label: 'Not on site', value: data.muster.tally.notOnSite },
+                    { label: 'Needs help', value: data.muster.tally.needsHelp },
+                    { label: 'Unanswered', value: data.muster.tally.unaccounted },
+                  ].map((tile) => (
+                    <View key={tile.label} style={{ minWidth: 96 }}>
+                      <Text variant="title">{tile.value}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {tile.label}
+                      </Text>
+                    </View>
                   ))}
                 </View>
-              ) : null}
-            </Card>
-
-            <Card elevated>
-              <Text variant="bodyStrong">How the estate is doing</Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  gap: spacing.md,
-                  marginTop: spacing.sm,
-                }}
-              >
-                {[
-                  { label: 'Accounted for', value: data.muster.tally.accountedFor },
-                  { label: 'Not on site', value: data.muster.tally.notOnSite },
-                  { label: 'Needs help', value: data.muster.tally.needsHelp },
-                  { label: 'Unanswered', value: data.muster.tally.unaccounted },
-                ].map((tile) => (
-                  <View key={tile.label} style={{ minWidth: 96 }}>
-                    <Text variant="title">{tile.value}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {tile.label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-              <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.md }}>
-                {data.muster.tallyLabel}
-              </Text>
-              {data.muster.tally.settled ? (
-                <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.xs }}>
-                  Every name on the roll has an answer.
+                <Text variant="body" color="mutedForeground" style={{ marginTop: spacing.md }}>
+                  {data.muster.tallyLabel}
                 </Text>
-              ) : null}
-            </Card>
-          </>
-        )}
+                {data.muster.tally.settled ? (
+                  <Text variant="caption" color="mutedForeground" style={{ marginTop: spacing.xs }}>
+                    Every name on the roll has an answer.
+                  </Text>
+                ) : null}
+              </Card>
+            </>
+          ) : null}
+        </QueryState>
       </Screen>
     </View>
   );

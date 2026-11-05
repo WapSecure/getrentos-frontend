@@ -1,4 +1,4 @@
-import { Pressable, Share, View } from 'react-native';
+import { Share, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { BadgeCheck, Camera, KeyRound, Share2, Sparkles } from 'lucide-react-native';
@@ -8,6 +8,7 @@ import type { PickedFile } from '@/lib/api/documents';
 import type { Gate } from '@/lib/api/estateGate';
 import type { PlanTier } from '@/lib/api/estateManager';
 import { pickPhoto } from '@/lib/filePicker';
+import { FilePickRow } from '@/components/forms/FilePickRow';
 
 /**
  * What an estate below Enterprise sees instead of a feature it hasn't bought.
@@ -89,28 +90,15 @@ export function PhotoField({
   value: PickedFile | null;
   onChange: (file: PickedFile | null) => void;
 }) {
-  const { colors, spacing, radius } = useTheme();
   return (
-    <Pressable
-      onPress={async () => onChange((await pickPhoto()) ?? value)}
-      accessibilityRole="button"
-      accessibilityLabel={value ? 'Photo attached. Choose another' : 'Add a photo, optional'}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        padding: spacing.md,
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderStyle: 'dashed',
-        borderColor: colors.border,
-      }}
-    >
-      <Camera size={18} color={colors.mutedForeground} />
-      <Text variant="callout" color={value ? 'foreground' : 'mutedForeground'} style={{ flex: 1 }}>
-        {value ? 'Photo attached' : 'Add a photo (optional)'}
-      </Text>
-    </Pressable>
+    <FilePickRow
+      label="Photo (optional)"
+      file={value}
+      icon={Camera}
+      emptyText="Add a photo"
+      onPick={async () => onChange((await pickPhoto()) ?? value)}
+      onClear={() => onChange(null)}
+    />
   );
 }
 

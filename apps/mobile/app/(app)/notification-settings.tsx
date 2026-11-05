@@ -1,6 +1,6 @@
 import { ScrollView, View } from 'react-native';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
@@ -10,7 +10,6 @@ import {
   SwitchRow,
   Text,
   useTheme,
-  useToast,
 } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import {
@@ -21,7 +20,7 @@ import {
   type NotificationCategory,
   type NotificationPreference,
 } from '@/lib/api/notificationPreferences';
-import { errorMessage } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
 import { goBack } from '@/lib/goBack';
@@ -36,14 +35,13 @@ export default function NotificationSettings() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const toast = useToast();
 
   const query = useQuery({
     queryKey: qk.renter.notificationPreferences,
     queryFn: notificationPreferencesApi.list,
   });
 
-  const mutation = useMutation({
+  const mutation = useOptimisticMutation({
     mutationFn: ({
       category,
       patch,
@@ -51,18 +49,16 @@ export default function NotificationSettings() {
       category: NotificationCategory;
       patch: Partial<Pick<NotificationPreference, 'email' | 'push' | 'inApp'>>;
     }) => notificationPreferencesApi.update(category, patch),
-    onMutate: async ({ category, patch }) => {
-      await qc.cancelQueries({ queryKey: qk.renter.notificationPreferences });
-      const previous = qc.getQueryData<NotificationPreference[]>(qk.renter.notificationPreferences);
-      qc.setQueryData<NotificationPreference[]>(qk.renter.notificationPreferences, (old) =>
-        old?.map((p) => (p.category === category ? { ...p, ...patch } : p))
-      );
-      return { previous };
-    },
-    onError: (err, _vars, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.renter.notificationPreferences, ctx.previous);
-      toast.show(errorMessage(err, 'Could not update that preference.'), 'error');
-    },
+    patches: ({ category, patch }) => [
+      {
+        queryKey: qk.renter.notificationPreferences,
+        update: (old) =>
+          (old as NotificationPreference[]).map((p) =>
+            p.category === category ? { ...p, ...patch } : p
+          ),
+      },
+    ],
+    errorMessage: 'Could not update that preference.',
     onSuccess: (updated) => {
       qc.setQueryData<NotificationPreference[]>(qk.renter.notificationPreferences, (old) =>
         old?.map((p) => (p.category === updated.category ? updated : p))

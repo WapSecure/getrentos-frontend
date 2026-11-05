@@ -8,9 +8,8 @@ import { HardHat, Phone, Plus, Trash2 } from 'lucide-react-native';
 import {
   Badge,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -65,9 +64,24 @@ export default function LandlordVendors() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={84} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={items.length === 0}
+        empty={{
+          icon: <HardHat size={32} color={colors.mutedForeground} />,
+          title: 'No vendors yet',
+          description:
+            'Add the tradespeople you use so you can assign them to maintenance requests.',
+        }}
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(v) => v.id}
@@ -98,23 +112,8 @@ export default function LandlordVendors() {
               tintColor={colors.mutedForeground}
             />
           }
-          ListEmptyComponent={
-            query.isLoading ? (
-              <View style={{ gap: spacing.sm }}>
-                {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} height={84} radius={radius.lg} />
-                ))}
-              </View>
-            ) : (
-              <EmptyState
-                icon={<HardHat size={32} color={colors.mutedForeground} />}
-                title="No vendors yet"
-                description="Add the tradespeople you use so you can assign them to maintenance requests."
-              />
-            )
-          }
         />
-      )}
+      </QueryState>
 
       <AddVendorSheet open={adding} onClose={() => setAdding(false)} />
     </View>

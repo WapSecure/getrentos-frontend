@@ -6,7 +6,8 @@ import { FlashList } from '@shopify/flash-list';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Button,
-  ErrorState,
+  Divider,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -162,7 +163,12 @@ export default function HostCalendar() {
   );
 
   const count = selStart ? nightsBetween(selStart, selEnd ?? selStart).length : 0;
-  const loading = blocked.isPending || stays.isPending;
+  // The calendar waits for both the blocks and the stays; only the blocks can fail it.
+  const calendarQuery = {
+    data: stays.isPending ? undefined : blocked.data,
+    isError: blocked.isError,
+    refetch: blocked.refetch,
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -181,13 +187,14 @@ export default function HostCalendar() {
         />
         <CalendarLegend />
       </View>
-      {blocked.isError && !blocked.data ? (
-        <ErrorState onRetry={() => blocked.refetch()} />
-      ) : loading ? (
-        <View style={{ padding: spacing.xl }}>
-          <Skeleton height={320} radius={radius.lg} />
-        </View>
-      ) : (
+      <QueryState
+        query={calendarQuery}
+        skeleton={
+          <View style={{ padding: spacing.xl }}>
+            <Skeleton height={320} radius={radius.lg} />
+          </View>
+        }
+      >
         <FlashList
           data={months}
           keyExtractor={(m) => m.toISOString()}
@@ -205,45 +212,48 @@ export default function HostCalendar() {
             />
           )}
         />
-      )}
+      </QueryState>
       {selStart ? (
-        <View
-          style={{
-            gap: spacing.sm,
-            paddingHorizontal: spacing.xl,
-            paddingTop: spacing.md,
-            paddingBottom: insets.bottom + spacing.md,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-            backgroundColor: colors.card,
-          }}
-        >
-          <Text variant="bodyStrong">
-            {selEnd ? `${count} night${count === 1 ? '' : 's'} selected` : 'Now tap the last night'}
-          </Text>
-          <TextField
-            label="Reason (only you see it)"
-            value={reason}
-            onChangeText={setReason}
-            maxLength={120}
-          />
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <Button
-              label="Clear"
-              variant="ghost"
-              onPress={() => {
-                setSelStart(null);
-                setSelEnd(null);
-              }}
+        <>
+          <Divider />
+          <View
+            style={{
+              gap: spacing.sm,
+              paddingHorizontal: spacing.xl,
+              paddingTop: spacing.md,
+              paddingBottom: insets.bottom + spacing.md,
+              backgroundColor: colors.card,
+            }}
+          >
+            <Text variant="bodyStrong">
+              {selEnd
+                ? `${count} night${count === 1 ? '' : 's'} selected`
+                : 'Now tap the last night'}
+            </Text>
+            <TextField
+              label="Reason (only you see it)"
+              value={reason}
+              onChangeText={setReason}
+              maxLength={120}
             />
-            <Button
-              label={`Block ${count} night${count === 1 ? '' : 's'}`}
-              style={{ flex: 1 }}
-              loading={block.isPending}
-              onPress={() => block.mutate()}
-            />
+            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+              <Button
+                label="Clear"
+                variant="ghost"
+                onPress={() => {
+                  setSelStart(null);
+                  setSelEnd(null);
+                }}
+              />
+              <Button
+                label={`Block ${count} night${count === 1 ? '' : 's'}`}
+                style={{ flex: 1 }}
+                loading={block.isPending}
+                onPress={() => block.mutate()}
+              />
+            </View>
           </View>
-        </View>
+        </>
       ) : null}
     </View>
   );

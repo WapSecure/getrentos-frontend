@@ -1,6 +1,6 @@
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CalendarDays,
@@ -16,10 +16,9 @@ import {
   Button,
   Card,
   Divider,
-  EmptyState,
-  ErrorState,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -34,7 +33,7 @@ import {
   rulesSummary,
   type HostListing,
 } from '@/lib/api/hostShortlets';
-import { errorMessage } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { haptics } from '@/lib/haptics';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
@@ -46,7 +45,6 @@ export default function HostListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
-  const qc = useQueryClient();
   const toast = useToast();
   const listings = useQuery({
     queryKey: qk.host.listings,
@@ -59,18 +57,20 @@ export default function HostListingDetail() {
     enabled: !!l,
   });
 
-  const setStatus = useMutation({
+  // The switch moves at once; it goes back if the API says no.
+  const setStatus = useOptimisticMutation({
     mutationFn: (status: 'PUBLISHED' | 'PAUSED' | 'CLOSED') =>
       hostShortletsApi.setStatus(id, status),
-    onMutate: async (status) => {
-      // The switch moves at once; put it back if the API says no.
-      await qc.cancelQueries({ queryKey: qk.host.listings });
-      const previous = qc.getQueryData<typeof listings.data>(qk.host.listings);
-      qc.setQueryData<typeof listings.data>(qk.host.listings, (old) =>
-        old ? { ...old, items: old.items.map((x) => (x.id === id ? { ...x, status } : x)) } : old
-      );
-      return { previous };
-    },
+    patches: (status) => [
+      {
+        queryKey: qk.host.listings,
+        update: (old) => {
+          const o = old as NonNullable<typeof listings.data>;
+          return { ...o, items: o.items.map((x) => (x.id === id ? { ...x, status } : x)) };
+        },
+      },
+    ],
+    errorMessage: 'Could not change the status.',
     onSuccess: (_d, status) => {
       void haptics.success();
       toast.show(
@@ -82,11 +82,6 @@ export default function HostListingDetail() {
         'success'
       );
     },
-    onError: (err, _s, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.host.listings, ctx.previous);
-      toast.show(errorMessage(err, 'Could not change the status.'), 'error');
-    },
-    onSettled: () => qc.invalidateQueries({ queryKey: qk.host.listings }),
   });
 
   const confirmClose = () =>
@@ -123,80 +118,85 @@ export default function HostListingDetail() {
         />
       </View>
 
-      {listings.isError && !listings.data ? (
-        <ErrorState onRetry={() => listings.refetch()} />
-      ) : listings.isPending ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={220} radius={radius.xl} />
-          <Skeleton height={120} radius={radius.lg} />
-        </View>
-      ) : !l ? (
-        <EmptyState title="Listing not found" description="It may have been closed or moved." />
-      ) : (
-        <View style={{ gap: spacing.lg }}>
-          <PropertyGallery images={l.images} height={240} emptyLabel="Add photos to go live" />
-          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
-            <LiveCard l={l} busy={setStatus.isPending} onChange={(s) => setStatus.mutate(s)} />
-            <PriceCard l={l} upcoming={stays.data?.items.length} />
-
-            <Card elevated padding="none">
-              <ToolRow
-                Icon={CalendarDays}
-                label="Calendar"
-                hint={
-                  stays.data?.items.length
-                    ? `${stays.data.items.length} upcoming stay${stays.data.items.length === 1 ? '' : 's'} · block dates`
-                    : 'Block dates you can’t host'
-                }
-                onPress={() =>
-                  router.push({ pathname: '/(app)/host/calendar/[id]', params: { id } })
-                }
-              />
-              <Divider />
-              <ToolRow
-                Icon={Tags}
-                label="Pricing rules & seasons"
-                hint={rulesSummary(l) ?? 'Discounts, peak seasons, notice and prep days'}
-                onPress={() =>
-                  router.push({ pathname: '/(app)/host/pricing/[id]', params: { id } })
-                }
-              />
-              <Divider />
-              <ToolRow
-                Icon={ShieldCheck}
-                label="House rules & essentials"
-                hint={essentialsHint(l)}
-                onPress={() =>
-                  router.push({ pathname: '/(app)/host/essentials/[id]', params: { id } })
-                }
-              />
-              <Divider />
-              <ToolRow
-                Icon={Images}
-                label="Photos"
-                hint={`${l.imageKeys.length} photo${l.imageKeys.length === 1 ? '' : 's'} · first is the cover`}
-                onPress={() => router.push({ pathname: '/(app)/host/photos/[id]', params: { id } })}
-              />
-              <Divider />
-              <ToolRow
-                Icon={CalendarSync}
-                label="Sync with Airbnb & others"
-                hint="Keep calendars in step, no double bookings"
-                onPress={() => router.push({ pathname: '/(app)/host/sync/[id]', params: { id } })}
-              />
-            </Card>
-
-            {l.status !== 'CLOSED' ? (
-              <Button
-                label="Close listing"
-                variant="ghost"
-                onPress={confirmClose}
-                disabled={setStatus.isPending}
-              />
-            ) : null}
+      <QueryState
+        query={listings}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={220} radius={radius.xl} />
+            <Skeleton height={120} radius={radius.lg} />
           </View>
-        </View>
-      )}
+        }
+        isEmpty={!l}
+        empty={{ title: 'Listing not found', description: 'It may have been closed or moved.' }}
+      >
+        {l ? (
+          <View style={{ gap: spacing.lg }}>
+            <PropertyGallery images={l.images} height={240} emptyLabel="Add photos to go live" />
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.lg }}>
+              <LiveCard l={l} busy={setStatus.isPending} onChange={(s) => setStatus.mutate(s)} />
+              <PriceCard l={l} upcoming={stays.data?.items.length} />
+
+              <Card elevated padding="none">
+                <ToolRow
+                  Icon={CalendarDays}
+                  label="Calendar"
+                  hint={
+                    stays.data?.items.length
+                      ? `${stays.data.items.length} upcoming stay${stays.data.items.length === 1 ? '' : 's'} · block dates`
+                      : 'Block dates you can’t host'
+                  }
+                  onPress={() =>
+                    router.push({ pathname: '/(app)/host/calendar/[id]', params: { id } })
+                  }
+                />
+                <Divider />
+                <ToolRow
+                  Icon={Tags}
+                  label="Pricing rules & seasons"
+                  hint={rulesSummary(l) ?? 'Discounts, peak seasons, notice and prep days'}
+                  onPress={() =>
+                    router.push({ pathname: '/(app)/host/pricing/[id]', params: { id } })
+                  }
+                />
+                <Divider />
+                <ToolRow
+                  Icon={ShieldCheck}
+                  label="House rules & essentials"
+                  hint={essentialsHint(l)}
+                  onPress={() =>
+                    router.push({ pathname: '/(app)/host/essentials/[id]', params: { id } })
+                  }
+                />
+                <Divider />
+                <ToolRow
+                  Icon={Images}
+                  label="Photos"
+                  hint={`${l.imageKeys.length} photo${l.imageKeys.length === 1 ? '' : 's'} · first is the cover`}
+                  onPress={() =>
+                    router.push({ pathname: '/(app)/host/photos/[id]', params: { id } })
+                  }
+                />
+                <Divider />
+                <ToolRow
+                  Icon={CalendarSync}
+                  label="Sync with Airbnb & others"
+                  hint="Keep calendars in step, no double bookings"
+                  onPress={() => router.push({ pathname: '/(app)/host/sync/[id]', params: { id } })}
+                />
+              </Card>
+
+              {l.status !== 'CLOSED' ? (
+                <Button
+                  label="Close listing"
+                  variant="ghost"
+                  onPress={confirmClose}
+                  disabled={setStatus.isPending}
+                />
+              ) : null}
+            </View>
+          </View>
+        ) : null}
+      </QueryState>
     </ScrollView>
   );
 }

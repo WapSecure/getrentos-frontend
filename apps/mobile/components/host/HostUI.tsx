@@ -11,7 +11,7 @@ import {
   ReceiptText,
   Star,
 } from 'lucide-react-native';
-import { Card, Price, Text, useTheme } from '@getrentos/ui-native';
+import { Card, Divider, Price, Text, useTheme } from '@getrentos/ui-native';
 import { ApiError } from '@/lib/api/client';
 import { qk } from '@/lib/query/keys';
 import {
@@ -204,24 +204,18 @@ export function GuestLine({ g }: { g: NonNullable<HostBooking['guestSummary']> }
   ].filter(Boolean);
   const flagged = g.cancellations12m > 1 || g.damageClaimsUpheld > 0;
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-        paddingTop: spacing.sm,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-      }}
-    >
-      <Star size={13} color={flagged ? colors.warning : colors.mutedForeground} />
-      <Text
-        variant="caption"
-        style={{ flex: 1, color: flagged ? colors.warning : colors.mutedForeground }}
-        numberOfLines={2}
-      >
-        {bits.join(' · ')}
-      </Text>
+    <View style={{ gap: spacing.sm }}>
+      <Divider />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+        <Star size={13} color={flagged ? colors.warning : colors.mutedForeground} />
+        <Text
+          variant="caption"
+          style={{ flex: 1, color: flagged ? colors.warning : colors.mutedForeground }}
+          numberOfLines={2}
+        >
+          {bits.join(' · ')}
+        </Text>
+      </View>
     </View>
   );
 }

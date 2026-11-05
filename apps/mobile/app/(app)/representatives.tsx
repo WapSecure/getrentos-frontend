@@ -10,8 +10,7 @@ import {
   Card,
   Chip,
   DateField,
-  EmptyState,
-  ErrorState,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -91,18 +90,17 @@ export default function Representatives() {
           ]}
         />
 
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          <Skeleton height={120} radius={radius.lg} />
-        ) : !query.data.items.length ? (
-          <EmptyState
-            icon={<UserCheck size={34} color={colors.mutedForeground} />}
-            title={`No ${noun}s yet`}
-            description={`When a ${noun} asks to represent you, you’ll approve them here.`}
-          />
-        ) : (
-          query.data.items.map((rep) => (
+        <QueryState
+          query={query}
+          skeleton={<Skeleton height={120} radius={radius.lg} />}
+          isEmpty={!query.data?.items.length}
+          empty={{
+            icon: <UserCheck size={34} color={colors.mutedForeground} />,
+            title: `No ${noun}s yet`,
+            description: `When a ${noun} asks to represent you, you’ll approve them here.`,
+          }}
+        >
+          {(query.data?.items ?? []).map((rep) => (
             <RepCard
               key={rep.id}
               kind={kind}
@@ -110,8 +108,8 @@ export default function Representatives() {
               onChooseProperties={() => setPropertiesFor(rep)}
               onAssignTask={() => setTaskFor(rep)}
             />
-          ))
-        )}
+          ))}
+        </QueryState>
       </ScrollView>
 
       <Sheet

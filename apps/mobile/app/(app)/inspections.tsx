@@ -10,8 +10,7 @@ import {
   Button,
   Card,
   Divider,
-  EmptyState,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -47,23 +46,25 @@ export default function Inspections() {
         onBack={() => goBack()}
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={90} radius={radius.lg} />
-          ))}
-        </View>
-      ) : !query.data?.length ? (
-        <EmptyState
-          icon={<ClipboardCheck size={34} color={colors.mutedForeground} />}
-          title="No inspection reports"
-          description="Move-in, move-out and periodic inspection reports from your landlord's agent will appear here."
-        />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={90} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        isEmpty={!query.data?.length}
+        empty={{
+          icon: <ClipboardCheck size={34} color={colors.mutedForeground} />,
+          title: 'No inspection reports',
+          description:
+            "Move-in, move-out and periodic inspection reports from your landlord's agent will appear here.",
+        }}
+      >
         <FlashList
-          data={query.data}
+          data={query.data ?? []}
           keyExtractor={(item) => item.id}
           renderItem={({ item }: { item: Inspection }) => (
             <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
@@ -111,7 +112,7 @@ export default function Inspections() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <InspectionDetailSheet inspection={selected} onClose={() => setSelected(null)} />
     </View>

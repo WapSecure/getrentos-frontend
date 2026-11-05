@@ -22,7 +22,7 @@ import {
   WalletCards,
   Waves,
 } from 'lucide-react-native';
-import { Avatar, Button, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
+import { Avatar, Button, Divider, Screen, Text, ThemeToggle, useTheme } from '@getrentos/ui-native';
 import { SettingsGroup, type SettingsItem } from '@/components/account/SettingsList';
 import { WorkspaceSwitcher } from '@/components/account/WorkspaceSwitcher';
 import { EstateSwitcherSheet } from '@/components/estate/EstateUI';
@@ -207,17 +207,13 @@ export default function EstateAccount() {
         title="Settings"
         items={settings}
         footer={
-          <View
-            style={{
-              padding: spacing.lg,
-              gap: spacing.sm,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
-            }}
-          >
-            <Text variant="bodyStrong">Appearance</Text>
-            <ThemeToggle variant="segmented" />
-          </View>
+          <>
+            <Divider />
+            <View style={{ padding: spacing.lg, gap: spacing.sm }}>
+              <Text variant="bodyStrong">Appearance</Text>
+              <ThemeToggle variant="segmented" />
+            </View>
+          </>
         }
       />
 

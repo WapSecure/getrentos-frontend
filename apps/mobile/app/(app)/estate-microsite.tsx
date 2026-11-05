@@ -17,8 +17,8 @@ import { Camera, ExternalLink, Globe, ImageIcon, Share2 } from 'lucide-react-nat
 import {
   Button,
   Card,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   SwitchRow,
   Text,
@@ -113,17 +113,22 @@ export default function EstateMicrosite() {
               'Homes for rent or sale in the estate, listed on it',
             ]}
           />
-        ) : query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !query.data ? (
-          <>
-            <Skeleton height={150} radius={radius.lg} />
-            <Skeleton height={72} radius={radius.lg} />
-            <Skeleton height={160} radius={radius.lg} />
-          </>
         ) : (
-          /* Mounted once settings arrive, so the form seeds from them. */
-          <MicrositeForm key={estateId} estateId={estateId} initial={query.data} />
+          <QueryState
+            query={query}
+            skeleton={
+              <View style={{ gap: spacing.lg }}>
+                <Skeleton height={150} radius={radius.lg} />
+                <Skeleton height={72} radius={radius.lg} />
+                <Skeleton height={160} radius={radius.lg} />
+              </View>
+            }
+          >
+            {/* Mounted once settings arrive, so the form seeds from them. */}
+            {query.data ? (
+              <MicrositeForm key={estateId} estateId={estateId} initial={query.data} />
+            ) : null}
+          </QueryState>
         )}
       </ScrollView>
     </KeyboardAvoidingView>

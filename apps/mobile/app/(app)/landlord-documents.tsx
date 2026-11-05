@@ -9,8 +9,8 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -97,9 +97,17 @@ export default function LandlordDocuments() {
         </View>
       </View>
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={74} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           maintainVisibleContentPosition={{ disabled: true }}
           data={items}
@@ -119,26 +127,18 @@ export default function LandlordDocuments() {
             />
           }
           ListEmptyComponent={
-            query.isLoading ? (
-              <View style={{ gap: spacing.sm }}>
-                {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} height={74} radius={radius.lg} />
-                ))}
-              </View>
-            ) : (
-              <EmptyState
-                icon={<FileText size={32} color={colors.mutedForeground} />}
-                title={search || category ? 'Nothing matches' : 'No documents yet'}
-                description={
-                  search || category
-                    ? 'Try a different search or category.'
-                    : 'Leases, ownership papers and inspection reports are kept here.'
-                }
-              />
-            )
+            <EmptyState
+              icon={<FileText size={32} color={colors.mutedForeground} />}
+              title={search || category ? 'Nothing matches' : 'No documents yet'}
+              description={
+                search || category
+                  ? 'Try a different search or category.'
+                  : 'Leases, ownership papers and inspection reports are kept here.'
+              }
+            />
           }
         />
-      )}
+      </QueryState>
 
       <UploadDocumentSheet open={creating} onClose={() => setCreating(false)} />
     </View>

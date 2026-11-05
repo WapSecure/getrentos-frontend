@@ -1,4 +1,4 @@
-import { Linking, RefreshControl, ScrollView, View } from 'react-native';
+import { Linking, RefreshControl, View } from 'react-native';
 
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
@@ -8,9 +8,9 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -49,17 +49,16 @@ export default function OwnerLeads() {
           onBack={() => goBack()}
         />
       </View>
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={110} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1].map((i) => (
+              <Skeleton key={i} height={110} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={query.data?.items ?? []}
           keyExtractor={(l) => l.id}
@@ -124,7 +123,7 @@ export default function OwnerLeads() {
             </Card>
           )}
         />
-      )}
+      </QueryState>
     </View>
   );
 }

@@ -7,8 +7,9 @@ import { Image } from 'expo-image';
 import { ImagePlus, Star, X } from 'lucide-react-native';
 import {
   Button,
-  EmptyState,
+  Divider,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -47,21 +48,26 @@ export default function HostPhotos() {
   });
   const l = listings.data?.items.find((x) => x.id === id);
 
-  return listings.isPending ? (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-        padding: spacing.xl,
-        paddingTop: insets.top + spacing['4xl'],
-      }}
+  return (
+    <QueryState
+      query={listings}
+      skeleton={
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: colors.background,
+            padding: spacing.xl,
+            paddingTop: insets.top + spacing['4xl'],
+          }}
+        >
+          <Skeleton height={300} radius={radius.lg} />
+        </View>
+      }
+      isEmpty={!l}
+      empty={{ title: 'Listing not found' }}
     >
-      <Skeleton height={300} radius={radius.lg} />
-    </View>
-  ) : !l ? (
-    <EmptyState title="Listing not found" />
-  ) : (
-    <Gallery listing={l} key={l.id} />
+      {l ? <Gallery listing={l} key={l.id} /> : null}
+    </QueryState>
   );
 }
 
@@ -312,13 +318,12 @@ function Gallery({ listing: l }: { listing: HostListing }) {
         </View>
         {save.error ? <FormAlert message={errorMessage(save.error, 'Could not save.')} /> : null}
       </ScrollView>
+      <Divider />
       <View
         style={{
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.md,
           paddingBottom: insets.bottom + spacing.md,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
           backgroundColor: colors.card,
         }}
       >

@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CheckSquare } from 'lucide-react-native';
-import { EmptyState, ErrorState, Skeleton, useTheme } from '@getrentos/ui-native';
+import { QueryState, Skeleton, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { renterApi, type MoveInChecklistItem } from '@/lib/api/renter';
@@ -53,10 +53,15 @@ export default function MoveChecklist() {
     },
   });
 
-  const isLoading = moveInQuery.isLoading || moveOutQuery.isLoading;
-  // A failed refresh keeps the saved checklist on screen.
-  const isError =
-    (moveInQuery.isError && !moveInQuery.data) || (moveOutQuery.isError && !moveOutQuery.data);
+  // Both lists load together; a failed refresh keeps the saved checklist on screen.
+  const checklists = {
+    data: moveInQuery.data && moveOutQuery.data ? true : undefined,
+    isError: moveInQuery.isError || moveOutQuery.isError,
+    refetch: () => {
+      void moveInQuery.refetch();
+      void moveOutQuery.refetch();
+    },
+  };
   const hasMoveIn = (moveInQuery.data?.length ?? 0) > 0;
   const hasMoveOut = (moveOutQuery.data?.length ?? 0) > 0;
 
@@ -69,24 +74,21 @@ export default function MoveChecklist() {
         onBack={() => goBack()}
       />
 
-      {isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={200} radius={16} />
-        </View>
-      ) : isError ? (
-        <ErrorState
-          onRetry={() => {
-            moveInQuery.refetch();
-            moveOutQuery.refetch();
-          }}
-        />
-      ) : !hasMoveIn && !hasMoveOut ? (
-        <EmptyState
-          icon={<CheckSquare size={34} color={colors.mutedForeground} />}
-          title="Nothing to check off right now"
-          description="This shows up around your move-in date, and again when it's time to move out."
-        />
-      ) : (
+      <QueryState
+        query={checklists}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={200} radius={16} />
+          </View>
+        }
+        isEmpty={!hasMoveIn && !hasMoveOut}
+        empty={{
+          icon: <CheckSquare size={34} color={colors.mutedForeground} />,
+          title: 'Nothing to check off right now',
+          description:
+            "This shows up around your move-in date, and again when it's time to move out.",
+        }}
+      >
         <ScrollView
           contentContainerStyle={{
             padding: spacing.xl,
@@ -109,7 +111,7 @@ export default function MoveChecklist() {
             />
           ) : null}
         </ScrollView>
-      )}
+      </QueryState>
     </View>
   );
 }

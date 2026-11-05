@@ -6,13 +6,11 @@ import {
   Badge,
   Button,
   Card,
-  Chip,
   DateField,
   Divider,
-  ErrorState,
   FormAlert,
-  NumberField,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -33,7 +31,7 @@ import {
   type EstatePayoutAccount,
   type EstateStatement,
 } from '@/lib/api/estateGovernance';
-import { COMMON_BANKS } from '@/lib/api/sellerPayout';
+import { BankAccountFields } from '@/components/forms/BankAccountFields';
 import { formatDate, formatNaira } from '@/lib/format';
 import { haptics } from '@/lib/haptics';
 import { errorMessage } from '@/lib/api/client';
@@ -139,7 +137,6 @@ function PayoutAccountForm({
   const qc = useQueryClient();
   const toast = useToast();
   const [bankCode, setBankCode] = useState('');
-  const [other, setOther] = useState(false);
   const [accountNumber, setAccountNumber] = useState('');
 
   const save = useMutation({
@@ -169,51 +166,15 @@ function PayoutAccountForm({
           message="The current account isn’t verified. Save it again to check it against the bank."
         />
       ) : null}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-        {COMMON_BANKS.map((b) => (
-          <Chip
-            key={b.code}
-            label={b.name}
-            size="sm"
-            selected={!other && bankCode === b.code}
-            onPress={() => {
-              setOther(false);
-              setBankCode(b.code);
-            }}
-          />
-        ))}
-        <Chip
-          label="Other bank"
-          size="sm"
-          selected={other}
-          onPress={() => {
-            setOther(true);
-            setBankCode('');
-          }}
-        />
-      </View>
-      {other ? (
-        <NumberField
-          label="Bank code"
-          required
-          code
-          value={bankCode}
-          onValueChange={setBankCode}
-          maxLength={6}
-          hint="Your bank’s code, e.g. 058 for GTBank"
-        />
-      ) : null}
-      <NumberField
-        label="Account number"
-        required
-        code
-        value={accountNumber}
-        onValueChange={setAccountNumber}
-        maxLength={10}
-        hint="We check the name on the account with the bank"
+      <BankAccountFields
+        bankCode={bankCode}
+        onBankCode={setBankCode}
+        accountNumber={accountNumber}
+        onAccountNumber={setAccountNumber}
       />
       <Text variant="caption" color="mutedForeground">
-        You’ll be asked to confirm it’s you: this decides where the estate’s money goes.
+        We check the name on the account with the bank. You’ll be asked to confirm it’s you: this
+        decides where the estate’s money goes.
       </Text>
       {save.error ? (
         <FormAlert
@@ -375,7 +336,7 @@ function StatementDetail({
   statementId: string;
   account?: EstatePayoutAccount;
 }) {
-  const { colors, spacing, radius } = useTheme();
+  const { radius } = useTheme();
   const qc = useQueryClient();
   const toast = useToast();
   const query = useQuery({
@@ -404,10 +365,38 @@ function StatementDetail({
     onError: (e) => toast.show(errorMessage(e, 'Could not retry this payout.'), 'error'),
   });
 
-  if (query.isError && !query.data) return <ErrorState onRetry={() => query.refetch()} />;
-  if (query.isPending) return <Skeleton height={260} radius={radius.lg} />;
+  return (
+    <QueryState query={query} skeleton={<Skeleton height={260} radius={radius.lg} />}>
+      {query.data ? (
+        <StatementBody
+          s={query.data}
+          account={account}
+          issuing={issue.isPending}
+          retrying={retry.isPending}
+          onIssue={() => issue.mutate()}
+          onRetry={() => retry.mutate()}
+        />
+      ) : null}
+    </QueryState>
+  );
+}
 
-  const s = query.data;
+function StatementBody({
+  s,
+  account,
+  issuing,
+  retrying,
+  onIssue,
+  onRetry,
+}: {
+  s: EstateStatement;
+  account?: EstatePayoutAccount;
+  issuing: boolean;
+  retrying: boolean;
+  onIssue: () => void;
+  onRetry: () => void;
+}) {
+  const { colors, spacing } = useTheme();
   const badge = statementBadge(s);
   const hold = payoutHold(s);
   const wht = s.whtAmount ?? 0;
@@ -544,7 +533,7 @@ function StatementDetail({
         <Button
           label="Issue statement"
           icon={<Send size={16} color={colors.primaryForeground} />}
-          loading={issue.isPending}
+          loading={issuing}
           onPress={() =>
             Alert.alert(
               'Issue this statement?',
@@ -553,7 +542,7 @@ function StatementDetail({
                 : 'It can’t be changed once issued. There’s nothing to pay out for this period.',
               [
                 { text: 'Not yet', style: 'cancel' },
-                { text: 'Issue', onPress: () => issue.mutate() },
+                { text: 'Issue', onPress: onIssue },
               ]
             )
           }
@@ -563,7 +552,7 @@ function StatementDetail({
           label={s.payoutStatus === 'REJECTED' ? 'Send for approval again' : 'Retry payout'}
           variant="secondary"
           icon={<RotateCcw size={16} color={colors.foreground} />}
-          loading={retry.isPending}
+          loading={retrying}
           onPress={() =>
             Alert.alert(
               s.payoutStatus === 'REJECTED' ? 'Send it for approval again?' : 'Retry the payout?',
@@ -574,7 +563,7 @@ function StatementDetail({
                 { text: 'Cancel', style: 'cancel' },
                 {
                   text: s.payoutStatus === 'REJECTED' ? 'Send again' : 'Retry',
-                  onPress: () => retry.mutate(),
+                  onPress: onRetry,
                 },
               ]
             )

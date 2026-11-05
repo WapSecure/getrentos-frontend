@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Star } from 'lucide-react-native';
-import { Card, EmptyState, ErrorState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi } from '@/lib/api/owner';
 import { formatDate } from '@/lib/format';
@@ -72,18 +72,17 @@ export default function OwnerReviews() {
         <Skeleton height={90} radius={radius.lg} />
       ) : null}
 
-      {reviews.isError && !reviews.data ? (
-        <ErrorState onRetry={() => reviews.refetch()} />
-      ) : reviews.isPending ? (
-        <Skeleton height={120} radius={radius.lg} />
-      ) : !reviews.data?.items.length ? (
-        <EmptyState
-          icon={<Star size={34} color={colors.mutedForeground} />}
-          title="No reviews yet"
-          description="Buyers can review you after a completed sale."
-        />
-      ) : (
-        reviews.data.items.map((r) => (
+      <QueryState
+        query={reviews}
+        skeleton={<Skeleton height={120} radius={radius.lg} />}
+        isEmpty={!reviews.data?.items.length}
+        empty={{
+          icon: <Star size={34} color={colors.mutedForeground} />,
+          title: 'No reviews yet',
+          description: 'Buyers can review you after a completed sale.',
+        }}
+      >
+        {(reviews.data?.items ?? []).map((r) => (
           <Card
             key={r.id}
             elevated
@@ -109,8 +108,8 @@ export default function OwnerReviews() {
             </View>
             {r.comment ? <Text variant="callout">{r.comment}</Text> : null}
           </Card>
-        ))
-      )}
+        ))}
+      </QueryState>
     </ScrollView>
   );
 }

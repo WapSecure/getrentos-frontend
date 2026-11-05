@@ -9,7 +9,7 @@ import {
   Button,
   Card,
   Chip,
-  ErrorState,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -88,141 +88,143 @@ export default function LandWatchDetail() {
           subtitle={w ? `${w.land.city}, ${w.land.state}` : undefined}
           onBack={() => goBack()}
         />
-        {query.isError && !w ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : !w ? (
-          <Skeleton height={240} radius={radius.lg} />
-        ) : (
-          <>
-            <Text variant="caption" color="mutedForeground">
-              {w.disclaimer}
-            </Text>
-            <Text variant="heading">Inspections</Text>
-            {!w.inspections.length ? (
-              <Text variant="callout" color="mutedForeground">
-                {w.tier === 'ESSENTIAL'
-                  ? 'Essential has no routine inspections.'
-                  : 'Your first inspection is being arranged.'}
+        <QueryState query={query} skeleton={<Skeleton height={240} radius={radius.lg} />}>
+          {w ? (
+            <>
+              <Text variant="caption" color="mutedForeground">
+                {w.disclaimer}
               </Text>
-            ) : (
-              w.inspections.map((i) => (
-                <Card key={i.id} elevated style={{ gap: spacing.xs }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}>
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text variant="bodyStrong">{LAND_INSPECTION_KIND_LABELS[i.kind]}</Text>
-                      <Text variant="caption" color="mutedForeground">
-                        {i.reference}
-                        {i.inspector ? ` · ${i.inspector.name}` : ''}
-                        {i.report?.submittedAt ? ` · ${date(i.report.submittedAt)}` : ''}
-                      </Text>
-                    </View>
-                    {i.report?.boundaryCondition ? (
-                      <Badge
-                        label={LAND_BOUNDARY_LABELS[i.report.boundaryCondition]}
-                        tone={boundaryTone(i.report.boundaryCondition) as BadgeTone}
-                      />
-                    ) : (
-                      <Badge label={LAND_INSPECTION_STATUS_LABELS[i.status]} tone="neutral" />
-                    )}
-                  </View>
-                  {i.report ? (
-                    <>
-                      {i.report.beaconsExpected != null ? (
-                        <Text variant="callout">
-                          Beacons found: {i.report.beaconsFound ?? '—'} of{' '}
-                          {i.report.beaconsExpected}
+              <Text variant="heading">Inspections</Text>
+              {!w.inspections.length ? (
+                <Text variant="callout" color="mutedForeground">
+                  {w.tier === 'ESSENTIAL'
+                    ? 'Essential has no routine inspections.'
+                    : 'Your first inspection is being arranged.'}
+                </Text>
+              ) : (
+                w.inspections.map((i) => (
+                  <Card key={i.id} elevated style={{ gap: spacing.xs }}>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm }}
+                    >
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text variant="bodyStrong">{LAND_INSPECTION_KIND_LABELS[i.kind]}</Text>
+                        <Text variant="caption" color="mutedForeground">
+                          {i.reference}
+                          {i.inspector ? ` · ${i.inspector.name}` : ''}
+                          {i.report?.submittedAt ? ` · ${date(i.report.submittedAt)}` : ''}
                         </Text>
-                      ) : null}
-                      <Text variant="callout">{i.report.summary}</Text>
-                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-                        {i.report.evidence
-                          .filter((e) => e.mimeType.startsWith('image/'))
-                          .map((e) => (
-                            <View key={e.id} style={{ width: 96, gap: 2 }}>
-                              <Image
-                                source={{ uri: e.url }}
-                                style={{ width: 96, height: 96, borderRadius: radius.md }}
-                                accessibilityLabel={`Photo taken ${date(e.capturedAt)}`}
-                              />
-                              <Text variant="caption" color="mutedForeground">
-                                {describeDistance(e.distanceM)}
-                              </Text>
-                            </View>
-                          ))}
                       </View>
-                    </>
+                      {i.report?.boundaryCondition ? (
+                        <Badge
+                          label={LAND_BOUNDARY_LABELS[i.report.boundaryCondition]}
+                          tone={boundaryTone(i.report.boundaryCondition) as BadgeTone}
+                        />
+                      ) : (
+                        <Badge label={LAND_INSPECTION_STATUS_LABELS[i.status]} tone="neutral" />
+                      )}
+                    </View>
+                    {i.report ? (
+                      <>
+                        {i.report.beaconsExpected != null ? (
+                          <Text variant="callout">
+                            Beacons found: {i.report.beaconsFound ?? '—'} of{' '}
+                            {i.report.beaconsExpected}
+                          </Text>
+                        ) : null}
+                        <Text variant="callout">{i.report.summary}</Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+                          {i.report.evidence
+                            .filter((e) => e.mimeType.startsWith('image/'))
+                            .map((e) => (
+                              <View key={e.id} style={{ width: 96, gap: 2 }}>
+                                <Image
+                                  source={{ uri: e.url }}
+                                  style={{ width: 96, height: 96, borderRadius: radius.md }}
+                                  accessibilityLabel={`Photo taken ${date(e.capturedAt)}`}
+                                />
+                                <Text variant="caption" color="mutedForeground">
+                                  {describeDistance(e.distanceM)}
+                                </Text>
+                              </View>
+                            ))}
+                        </View>
+                      </>
+                    ) : null}
+                  </Card>
+                ))
+              )}
+
+              <Text variant="heading">Incidents</Text>
+              {w.incidents.map((i) => (
+                <Card key={i.id} style={{ gap: spacing.xs }}>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
+                    <Text variant="bodyStrong" style={{ flex: 1 }}>
+                      {LAND_INCIDENT_KIND_LABELS[i.kind]}
+                    </Text>
+                    <Badge
+                      label={LAND_INCIDENT_STATUS_LABELS[i.status]}
+                      tone={
+                        i.status === 'OPEN'
+                          ? 'warning'
+                          : i.status === 'DISMISSED'
+                            ? 'neutral'
+                            : 'danger'
+                      }
+                    />
+                  </View>
+                  <Text variant="callout" color="mutedForeground">
+                    {i.description}
+                  </Text>
+                  {i.resolutionNote ? (
+                    <Text variant="callout">GetRentos: {i.resolutionNote}</Text>
                   ) : null}
                 </Card>
-              ))
-            )}
+              ))}
+              {w.status !== 'CANCELLED' ? (
+                <Button
+                  label="Report a problem"
+                  variant="secondary"
+                  onPress={() => setReporting(true)}
+                />
+              ) : null}
 
-            <Text variant="heading">Incidents</Text>
-            {w.incidents.map((i) => (
-              <Card key={i.id} style={{ gap: spacing.xs }}>
-                <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-                  <Text variant="bodyStrong" style={{ flex: 1 }}>
-                    {LAND_INCIDENT_KIND_LABELS[i.kind]}
-                  </Text>
-                  <Badge
-                    label={LAND_INCIDENT_STATUS_LABELS[i.status]}
-                    tone={
-                      i.status === 'OPEN'
-                        ? 'warning'
-                        : i.status === 'DISMISSED'
-                          ? 'neutral'
-                          : 'danger'
-                    }
-                  />
-                </View>
+              <VendorWorkSection watchId={w.id} tier={w.tier} status={w.status} />
+
+              <Text variant="heading">Reminders</Text>
+              {!w.reminders.length ? (
                 <Text variant="callout" color="mutedForeground">
-                  {i.description}
+                  Add land use charge or ground rent dates on the website.
                 </Text>
-                {i.resolutionNote ? (
-                  <Text variant="callout">GetRentos: {i.resolutionNote}</Text>
-                ) : null}
-              </Card>
-            ))}
-            {w.status !== 'CANCELLED' ? (
-              <Button
-                label="Report a problem"
-                variant="secondary"
-                onPress={() => setReporting(true)}
-              />
-            ) : null}
-
-            <VendorWorkSection watchId={w.id} tier={w.tier} status={w.status} />
-
-            <Text variant="heading">Reminders</Text>
-            {!w.reminders.length ? (
-              <Text variant="callout" color="mutedForeground">
-                Add land use charge or ground rent dates on the website.
-              </Text>
-            ) : (
-              w.reminders.map((r) => (
-                <Card
-                  key={r.id}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
-                >
-                  <View style={{ flex: 1, gap: 2 }}>
-                    <Text variant="bodyStrong">{r.label}</Text>
-                    <Text variant="caption" color="mutedForeground">
-                      {date(r.dueDate)}
-                      {r.annual ? ' · yearly' : ''}
-                      {r.amountNaira != null ? ` · ₦${r.amountNaira.toLocaleString('en-NG')}` : ''}
-                    </Text>
-                  </View>
-                  <Button
-                    label="Paid"
-                    size="sm"
-                    variant="secondary"
-                    loading={paid.isPending && paid.variables === r.id}
-                    onPress={() => paid.mutate(r.id)}
-                  />
-                </Card>
-              ))
-            )}
-          </>
-        )}
+              ) : (
+                w.reminders.map((r) => (
+                  <Card
+                    key={r.id}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                  >
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text variant="bodyStrong">{r.label}</Text>
+                      <Text variant="caption" color="mutedForeground">
+                        {date(r.dueDate)}
+                        {r.annual ? ' · yearly' : ''}
+                        {r.amountNaira != null
+                          ? ` · ₦${r.amountNaira.toLocaleString('en-NG')}`
+                          : ''}
+                      </Text>
+                    </View>
+                    <Button
+                      label="Paid"
+                      size="sm"
+                      variant="secondary"
+                      loading={paid.isPending && paid.variables === r.id}
+                      onPress={() => paid.mutate(r.id)}
+                    />
+                  </Card>
+                ))
+              )}
+            </>
+          ) : null}
+        </QueryState>
       </ScrollView>
       <Sheet open={reporting} onClose={() => setReporting(false)} title="Report a problem">
         {reporting ? <IncidentForm id={id} onDone={() => setReporting(false)} /> : null}

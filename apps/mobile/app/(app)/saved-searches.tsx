@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Bookmark, ChevronRight, Trash2 } from 'lucide-react-native';
 import {
   Card,
+  Divider,
   IconButton,
   QueryState,
   Skeleton,
@@ -129,15 +130,13 @@ export default function SavedSearches() {
                     </View>
                     <ChevronRight size={18} color={colors.mutedForeground} />
                   </Pressable>
+                  <Divider style={{ marginTop: spacing.md }} />
                   <View
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      marginTop: spacing.md,
                       paddingTop: spacing.md,
-                      borderTopWidth: 1,
-                      borderTopColor: colors.border,
                     }}
                   >
                     <SwitchRow

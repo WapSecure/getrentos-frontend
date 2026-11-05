@@ -22,8 +22,8 @@ import {
 import {
   Avatar,
   EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -197,14 +197,16 @@ export function MessageThread({
         {headerAccessory}
       </View>
 
-      {messages.isError && !messages.data ? (
-        <ErrorState onRetry={() => messages.refetch()} />
-      ) : messages.isPending ? (
-        <View style={{ padding: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={40} width="60%" />
-          <Skeleton height={40} width="75%" />
-        </View>
-      ) : (
+      <QueryState
+        query={messages}
+        style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}
+        skeleton={
+          <View style={{ padding: spacing.xl, gap: spacing.md }}>
+            <Skeleton height={40} width="60%" />
+            <Skeleton height={40} width="75%" />
+          </View>
+        }
+      >
         <FlatList
           data={rows}
           inverted
@@ -355,7 +357,7 @@ export function MessageThread({
             );
           }}
         />
-      )}
+      </QueryState>
 
       {file ? (
         <View

@@ -8,9 +8,8 @@ import {
   Avatar,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -75,19 +74,25 @@ export default function RealtorClients() {
             />
           }
         />
-        {query.isError && !query.data ? (
-          <ErrorState onRetry={() => query.refetch()} />
-        ) : query.isPending ? (
-          [0, 1, 2].map((i) => <Skeleton key={i} height={76} radius={radius.lg} />)
-        ) : !items.length ? (
-          <EmptyState
-            icon={<Handshake size={34} color={colors.mutedForeground} />}
-            title="No clients yet"
-            description="Invite an owner or landlord by email. Once they approve, they choose which properties you handle."
-            action={<Button label="Invite a client" onPress={() => setInviting(true)} />}
-          />
-        ) : (
-          GROUPS.map((g) => {
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={76} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={!items.length}
+          empty={{
+            icon: <Handshake size={34} color={colors.mutedForeground} />,
+            title: 'No clients yet',
+            description:
+              'Invite an owner or landlord by email. Once they approve, they choose which properties you handle.',
+            action: <Button label="Invite a client" onPress={() => setInviting(true)} />,
+          }}
+        >
+          {GROUPS.map((g) => {
             const list = items.filter((c) => c.status === g.status);
             if (!list.length) return null;
             return (
@@ -100,8 +105,8 @@ export default function RealtorClients() {
                 ))}
               </View>
             );
-          })
-        )}
+          })}
+        </QueryState>
       </ScrollView>
       <InviteClientSheet open={inviting} onClose={() => setInviting(false)} />
     </View>

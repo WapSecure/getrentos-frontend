@@ -14,11 +14,10 @@ import {
 import {
   Button,
   Card,
-  EmptyState,
-  ErrorState,
   IconButton,
   PressableScale,
   Price,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -122,28 +121,34 @@ export default function MyStays() {
           onChange={setTab}
         />
 
-        {stays.isError && !stays.data ? (
-          <ErrorState onRetry={() => stays.refetch()} />
-        ) : stays.isPending ? (
-          [0, 1].map((i) => <Skeleton key={i} height={150} radius={radius.lg} />)
-        ) : items.length === 0 ? (
-          <EmptyState
-            icon={<CalendarCheck size={34} color={colors.mutedForeground} />}
-            title={EMPTY[tab].title}
-            description={EMPTY[tab].description}
-            action={
+        <QueryState
+          query={stays}
+          skeleton={
+            <View style={{ gap: spacing.lg }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={150} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={items.length === 0}
+          empty={{
+            icon: <CalendarCheck size={34} color={colors.mutedForeground} />,
+            title: EMPTY[tab].title,
+            description: EMPTY[tab].description,
+            action:
               tab === 'upcoming' ? (
                 <Button
                   label="Find a stay"
                   fullWidth={false}
                   onPress={() => router.push('/(app)/shortlets')}
                 />
-              ) : undefined
-            }
-          />
-        ) : (
-          items.map((b) => <StayRow key={b.id} b={b} today={today} />)
-        )}
+              ) : undefined,
+          }}
+        >
+          {items.map((b) => (
+            <StayRow key={b.id} b={b} today={today} />
+          ))}
+        </QueryState>
 
         {tab === 'past' ? <HostsOnYou /> : null}
       </ScrollView>

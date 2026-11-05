@@ -12,9 +12,9 @@ import {
   Chip,
   Divider,
   EmptyState,
-  ErrorState,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -29,7 +29,7 @@ import {
   type BuyerTransaction,
 } from '@/lib/api/buyerTransactions';
 import { formatDate } from '@/lib/format';
-import { ApiError } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/client';
 import { DetailHeader } from '@/components/dashboard/DetailHeader';
 import { goBack } from '@/lib/goBack';
 
@@ -98,7 +98,7 @@ export default function BuyerTransactions() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['buyer', 'transactions'] });
   const fail = (fallback: string) => (err: unknown) =>
-    toast.show(err instanceof ApiError ? err.message : fallback, 'error');
+    toast.show(errorMessage(err, fallback), 'error');
 
   const depositMutation = useMutation({
     mutationFn: (id: string) => buyerTransactionsApi.deposit(id),
@@ -194,57 +194,57 @@ export default function BuyerTransactions() {
         ) : null}
       </View>
 
-      {query.isError && all.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1].map((i) => (
-            <Skeleton key={i} height={220} radius={radius.lg} />
-          ))}
-        </View>
-      ) : items.length === 0 ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <EmptyState
-            icon={<Wallet size={34} color={colors.mutedForeground} />}
-            title={all.length ? 'Nothing here' : 'No transactions yet'}
-            description={
-              all.length
-                ? 'No transactions match this filter.'
-                : 'Once an offer is accepted, its payment progress will appear here.'
-            }
-            action={
-              all.length ? (
-                <Button label="Show all" variant="outline" onPress={() => setFilter('all')} />
-              ) : undefined
+      <View style={{ flex: 1 }}>
+        <QueryState
+          query={query}
+          skeleton={
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} height={220} radius={radius.lg} />
+              ))}
+            </View>
+          }
+        >
+          <FlashList
+            data={items}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }: { item: BuyerTransaction }) => (
+              <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
+                <TransactionCard
+                  tx={item}
+                  depositing={busy(depositMutation, item.id)}
+                  releasing={busy(releaseMutation, item.id)}
+                  refunding={busy(refundMutation, item.id)}
+                  onDeposit={() => depositMutation.mutate(item.id)}
+                  onRelease={() => confirmRelease(item)}
+                  onRefund={() => confirmRefund(item)}
+                />
+              </View>
+            )}
+            contentContainerStyle={{
+              paddingTop: spacing.sm,
+              paddingBottom: insets.bottom + spacing['3xl'],
+            }}
+            refreshControl={refresh}
+            ListEmptyComponent={
+              <EmptyState
+                icon={<Wallet size={34} color={colors.mutedForeground} />}
+                title={all.length ? 'Nothing here' : 'No transactions yet'}
+                description={
+                  all.length
+                    ? 'No transactions match this filter.'
+                    : 'Once an offer is accepted, its payment progress will appear here.'
+                }
+                action={
+                  all.length ? (
+                    <Button label="Show all" variant="outline" onPress={() => setFilter('all')} />
+                  ) : undefined
+                }
+              />
             }
           />
-        </ScrollView>
-      ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }: { item: BuyerTransaction }) => (
-            <View style={{ paddingHorizontal: spacing.xl, paddingBottom: spacing.md }}>
-              <TransactionCard
-                tx={item}
-                depositing={busy(depositMutation, item.id)}
-                releasing={busy(releaseMutation, item.id)}
-                refunding={busy(refundMutation, item.id)}
-                onDeposit={() => depositMutation.mutate(item.id)}
-                onRelease={() => confirmRelease(item)}
-                onRefund={() => confirmRefund(item)}
-              />
-            </View>
-          )}
-          contentContainerStyle={{
-            paddingTop: spacing.sm,
-            paddingBottom: insets.bottom + spacing['3xl'],
-          }}
-          refreshControl={refresh}
-        />
-      )}
+        </QueryState>
+      </View>
     </View>
   );
 }

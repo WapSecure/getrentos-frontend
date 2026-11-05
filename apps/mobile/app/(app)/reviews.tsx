@@ -8,8 +8,7 @@ import {
   Badge,
   Button,
   Card,
-  EmptyState,
-  ErrorState,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -28,6 +27,22 @@ const TABS: { value: Tab; label: string }[] = [
   { value: 'written', label: 'Written' },
   { value: 'about-you', label: 'About you' },
 ];
+
+const EMPTY: Record<Tab, { title: string; description: string }> = {
+  pending: {
+    title: 'Nothing to review',
+    description: 'When a tenancy ends you can rate the landlord and the property here.',
+  },
+  written: {
+    title: 'No reviews yet',
+    description: 'Reviews you write about landlords and properties appear here.',
+  },
+  'about-you': {
+    title: 'No reviews about you',
+    description:
+      'Landlords and agents can review you after a tenancy: these feed your trust score.',
+  },
+};
 
 export default function Reviews() {
   const { colors, spacing, radius } = useTheme();
@@ -123,61 +138,55 @@ export default function Reviews() {
           />
         }
       >
-        {active.isLoading ? (
-          [0, 1, 2].map((i) => <Skeleton key={i} height={96} radius={radius.lg} />)
-        ) : active.isError && !active.data ? (
-          <ErrorState onRetry={() => active.refetch()} />
-        ) : tab === 'pending' ? (
-          (pending.data ?? []).length === 0 ? (
-            <EmptyState
-              icon={<Star size={30} color={colors.mutedForeground} />}
-              title="Nothing to review"
-              description="When a tenancy ends you can rate the landlord and the property here."
-            />
-          ) : (
-            (pending.data ?? []).map((p) => (
-              <Card key={p.id} padding={spacing.lg}>
-                <View style={{ gap: spacing.sm }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                    <Text variant="bodyStrong" style={{ flex: 1 }}>
-                      {p.type === 'landlord'
-                        ? (p.landlord ?? 'Your landlord')
-                        : (p.property ?? 'Your home')}
+        <QueryState
+          query={active}
+          skeleton={
+            <View style={{ gap: spacing.sm }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} height={96} radius={radius.lg} />
+              ))}
+            </View>
+          }
+          isEmpty={
+            tab === 'pending'
+              ? (pending.data ?? []).length === 0
+              : tab === 'written'
+                ? (written.data?.items ?? []).length === 0
+                : (received.data?.items ?? []).length === 0
+          }
+          empty={{
+            icon: <Star size={30} color={colors.mutedForeground} />,
+            ...EMPTY[tab],
+          }}
+        >
+          {tab === 'pending'
+            ? (pending.data ?? []).map((p) => (
+                <Card key={p.id} padding={spacing.lg}>
+                  <View style={{ gap: spacing.sm }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                      <Text variant="bodyStrong" style={{ flex: 1 }}>
+                        {p.type === 'landlord'
+                          ? (p.landlord ?? 'Your landlord')
+                          : (p.property ?? 'Your home')}
+                      </Text>
+                      <Badge label={p.type === 'landlord' ? 'Landlord' : 'Property'} tone="info" />
+                    </View>
+                    <Text variant="caption" color="mutedForeground">
+                      Tenancy ended {formatDate(p.moveOutDate)}
                     </Text>
-                    <Badge label={p.type === 'landlord' ? 'Landlord' : 'Property'} tone="info" />
+                    <Button
+                      label="Write a review"
+                      size="sm"
+                      onPress={() => setReviewing(p)}
+                      style={{ marginTop: spacing.xs }}
+                    />
                   </View>
-                  <Text variant="caption" color="mutedForeground">
-                    Tenancy ended {formatDate(p.moveOutDate)}
-                  </Text>
-                  <Button
-                    label="Write a review"
-                    size="sm"
-                    onPress={() => setReviewing(p)}
-                    style={{ marginTop: spacing.xs }}
-                  />
-                </View>
-              </Card>
-            ))
-          )
-        ) : tab === 'written' ? (
-          (written.data?.items ?? []).length === 0 ? (
-            <EmptyState
-              icon={<Star size={30} color={colors.mutedForeground} />}
-              title="No reviews yet"
-              description="Reviews you write about landlords and properties appear here."
-            />
-          ) : (
-            (written.data?.items ?? []).map(renderReview)
-          )
-        ) : (received.data?.items ?? []).length === 0 ? (
-          <EmptyState
-            icon={<Star size={30} color={colors.mutedForeground} />}
-            title="No reviews about you"
-            description="Landlords and agents can review you after a tenancy: these feed your trust score."
-          />
-        ) : (
-          (received.data?.items ?? []).map(renderReview)
-        )}
+                </Card>
+              ))
+            : tab === 'written'
+              ? (written.data?.items ?? []).map(renderReview)
+              : (received.data?.items ?? []).map(renderReview)}
+        </QueryState>
       </ScrollView>
 
       <SubmitReviewSheet

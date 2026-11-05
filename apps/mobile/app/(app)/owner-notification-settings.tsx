@@ -1,19 +1,11 @@
 import { ScrollView, View } from 'react-native';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  Card,
-  QueryState,
-  Skeleton,
-  SwitchRow,
-  Text,
-  useTheme,
-  useToast,
-} from '@getrentos/ui-native';
+import { Card, QueryState, Skeleton, SwitchRow, Text, useTheme } from '@getrentos/ui-native';
 import { qk } from '@/lib/query/keys';
 import { ownerApi, type OwnerNotificationPreference } from '@/lib/api/owner';
-import { errorMessage } from '@/lib/api/client';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 import { DetailScreenHeader } from '@/components/dashboard/DetailScreenHeader';
 import { categorySendsEmail } from '@getrentos/shared';
 import { goBack } from '@/lib/goBack';
@@ -30,28 +22,17 @@ export default function OwnerNotificationSettings() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const toast = useToast();
 
   const query = useQuery({
     queryKey: qk.owner.notificationPreferences,
     queryFn: ownerApi.notificationPreferences,
   });
 
-  const mutation = useMutation({
+  const mutation = useOptimisticMutation({
     mutationFn: (next: OwnerNotificationPreference[]) =>
       ownerApi.updateNotificationPreferences(next),
-    onMutate: async (next) => {
-      await qc.cancelQueries({ queryKey: qk.owner.notificationPreferences });
-      const previous = qc.getQueryData<OwnerNotificationPreference[]>(
-        qk.owner.notificationPreferences
-      );
-      qc.setQueryData(qk.owner.notificationPreferences, next);
-      return { previous };
-    },
-    onError: (err, _vars, ctx) => {
-      if (ctx?.previous) qc.setQueryData(qk.owner.notificationPreferences, ctx.previous);
-      toast.show(errorMessage(err, 'Could not update that preference.'), 'error');
-    },
+    patches: (next) => [{ queryKey: qk.owner.notificationPreferences, update: () => next }],
+    errorMessage: 'Could not update that preference.',
     onSuccess: (updated) => qc.setQueryData(qk.owner.notificationPreferences, updated),
   });
 

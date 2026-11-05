@@ -17,9 +17,9 @@ import {
   Card,
   Chip,
   Divider,
-  ErrorState,
   LinkButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -153,371 +153,392 @@ export default function ShortletDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {query.isError && !listing ? (
-        <View style={{ flex: 1, paddingTop: insets.top + 56 }}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </View>
-      ) : !listing ? (
-        <View style={{ gap: spacing.lg }}>
-          <Skeleton height={300 + insets.top} radius={0} />
-          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-            <Skeleton height={30} width="80%" />
-            <Skeleton height={18} width="50%" />
-            <Skeleton height={120} radius={radius.lg} />
-          </View>
-        </View>
-      ) : (
-        <>
-          <ScrollView
-            style={{ flex: 1 }}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
-            showsVerticalScrollIndicator={false}
-            scrollEventThrottle={32}
-            onScroll={(e) =>
-              setSolidHeader(e.nativeEvent.contentOffset.y > galleryHeight - insets.top - 64)
-            }
-          >
-            <PropertyGallery
-              images={toGallery(listing.coverImageUrl, listing.images)}
-              height={galleryHeight}
-              emptyLabel="No photos for this stay yet"
-            />
-
-            <View
-              style={{ paddingHorizontal: spacing.xl, paddingTop: spacing.xl, gap: spacing['2xl'] }}
-            >
-              {/* Title and trust */}
-              <View style={{ gap: spacing.sm }}>
-                <Text variant="title" headingLevel={1}>
-                  {listing.title}
-                </Text>
-                <Text variant="body" color="mutedForeground">
-                  {listing.city}, {listing.state} · sleeps {listing.maxGuests}
-                  {listing.bedrooms
-                    ? ` · ${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`
-                    : ''}
-                  {listing.bathrooms
-                    ? ` · ${listing.bathrooms} bath${listing.bathrooms === 1 ? '' : 's'}`
-                    : ''}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                  <Star size={15} color={colors.foreground} fill={colors.foreground} />
-                  <Text variant="bodyStrong">
-                    {listing.reviewCount > 0 && listing.ratingAverage
-                      ? listing.ratingAverage.toFixed(1)
-                      : 'New'}
-                  </Text>
-                  {listing.reviewCount > 0 ? (
-                    <Text variant="body" color="mutedForeground">
-                      · {listing.reviewCount} {listing.reviewCount === 1 ? 'review' : 'reviews'}
-                    </Text>
-                  ) : null}
-                </View>
-                <View style={{ marginTop: spacing.xs }}>
-                  <TrustChips listing={listing} />
-                </View>
-              </View>
-
-              <Divider />
-              <HostBlock listing={listing} onMessage={() => setSheet('message')} />
-              <Divider />
-
-              {/* The facts that decide a stay */}
-              <View style={{ gap: spacing.lg }}>
-                <InfoRow
-                  icon={Clock}
-                  title={`Check in ${listing.checkInTime ? `from ${listing.checkInTime}` : 'time set by host'}`}
-                  detail={listing.checkOutTime ? `Check out by ${listing.checkOutTime}` : undefined}
-                />
-                <InfoRow
-                  icon={CalendarClock}
-                  title={`Minimum ${nightsLabel(listing.minNights)}`}
-                  detail={
-                    listing.seasons?.some((s) => s.minNights)
-                      ? 'Longer minimums apply in peak season'
-                      : undefined
-                  }
-                />
-                <InfoRow
-                  icon={Undo2}
-                  title={`${policy?.label ?? 'Flexible'} cancellation`}
-                  detail={policy?.hint}
-                />
-              </View>
-
-              {listing.description ? (
-                <Section title="About this stay">
-                  <Text
-                    variant="body"
-                    color="mutedForeground"
-                    numberOfLines={aboutOpen ? undefined : 5}
-                  >
-                    {listing.description}
-                  </Text>
-                  {listing.description.length > 240 ? (
-                    <LinkButton
-                      label={aboutOpen ? 'Show less' : 'Read more'}
-                      onPress={() => setAboutOpen((o) => !o)}
-                      style={{ alignSelf: 'flex-start' }}
-                    />
-                  ) : null}
-                </Section>
-              ) : null}
-
-              {listing.videoUrl || listing.tourUrl ? (
-                <Pressable onPress={() => setTouring(true)} accessibilityRole="button">
-                  <Card elevated>
-                    <InfoRow
-                      icon={PlayCircle}
-                      title={listing.videoUrl ? 'Watch the video tour' : 'Take the virtual tour'}
-                      detail="See the space before you book"
-                    />
-                    {listing.videoUrl && listing.videoFilmedOnSite ? <FilmedOnSite /> : null}
-                  </Card>
-                </Pressable>
-              ) : null}
-
-              <EssentialsBlock listing={listing} />
-              <RulesBlock listing={listing} />
-
-              {listing.amenities?.length ? (
-                <Section title="Amenities">
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-                    {listing.amenities.map((a) => (
-                      <Chip key={a} label={a} />
-                    ))}
-                  </View>
-                </Section>
-              ) : null}
-
-              <PricingBlock listing={listing} />
-              <FairPriceNote listing={listing} />
-              <InspectionBlock listing={listing} />
-
-              <GuestPromiseCard>
-                <SupportContact context={`Question about ${listing.title}`} />
-              </GuestPromiseCard>
-
-              {listing.latitude != null && listing.longitude != null ? (
-                <Section
-                  title="Where you'll be"
-                  caption={`${listing.city}, ${listing.state} · exact address after you book`}
-                >
-                  <PropertyMapView
-                    markers={[
-                      { id: listing.id, latitude: listing.latitude, longitude: listing.longitude },
-                    ]}
-                    // The area of the stay; the address comes with the booking.
-                    variant="area"
-                    zoom={14}
-                    height={200}
-                  />
-                </Section>
-              ) : null}
-
-              {reviews.data?.items.length ? (
-                <Section title="Reviews">
-                  {reviews.data.items.map((r) => (
-                    <Card key={r.id} elevated style={{ gap: spacing.sm }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                        <Text variant="bodyStrong" style={{ flex: 1 }}>
-                          {r.authorName}
-                        </Text>
-                        <View style={{ flexDirection: 'row', gap: 1 }}>
-                          {[1, 2, 3, 4, 5].map((n) => (
-                            <Star
-                              key={n}
-                              size={12}
-                              color={colors.foreground}
-                              fill={n <= r.rating ? colors.foreground : 'transparent'}
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <Text variant="caption" color="mutedForeground">
-                        {formatDate(r.createdAt, 'short')}
-                      </Text>
-                      {r.comment ? (
-                        <Text variant="body" color="mutedForeground">
-                          {r.comment}
-                        </Text>
-                      ) : null}
-                    </Card>
-                  ))}
-                </Section>
-              ) : null}
+      <QueryState
+        query={query}
+        // The page runs under the status bar; the error page and the refresh notice must not.
+        style={
+          query.isError
+            ? { paddingTop: insets.top + spacing.md, paddingHorizontal: spacing.xl }
+            : undefined
+        }
+        skeleton={
+          <View style={{ gap: spacing.lg }}>
+            <Skeleton height={300 + insets.top} radius={0} />
+            <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+              <Skeleton height={30} width="80%" />
+              <Skeleton height={18} width="50%" />
+              <Skeleton height={120} radius={radius.lg} />
             </View>
-          </ScrollView>
-
-          {/* Floating controls over the gallery; a solid bar once scrolled past it */}
-          <View
-            pointerEvents="box-none"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              paddingTop: insets.top + spacing.sm,
-              paddingBottom: spacing.sm,
-              paddingHorizontal: spacing.lg,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.sm,
-              backgroundColor: solidHeader ? colors.card : 'transparent',
-              borderBottomWidth: solidHeader ? StyleSheet.hairlineWidth : 0,
-              borderBottomColor: colors.border,
-            }}
-          >
-            <Pressable
-              onPress={() => router.back()}
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              hitSlop={6}
-              style={roundButton}
-            >
-              <ChevronLeft size={22} color={iconColor} />
-            </Pressable>
-            <Text
-              variant="bodyStrong"
-              numberOfLines={1}
-              style={{ flex: 1, textAlign: 'center', opacity: solidHeader ? 1 : 0 }}
-              importantForAccessibility="no"
-            >
-              {listing.title}
-            </Text>
-            <Pressable
-              onPress={() => {
-                void haptics.tap();
-                wishlist.mutate(!saved);
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={saved ? 'Remove from wishlist' : 'Save to wishlist'}
-              hitSlop={6}
-              style={roundButton}
-            >
-              <Heart
-                size={19}
-                color={saved ? colors.destructive : iconColor}
-                fill={saved ? colors.destructive : 'transparent'}
-              />
-            </Pressable>
           </View>
-
-          {/* The total, always in reach */}
-          <View
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing.md,
-              paddingHorizontal: spacing.xl,
-              paddingTop: spacing.md,
-              paddingBottom: insets.bottom + spacing.md,
-              borderTopWidth: 1,
-              borderTopColor: colors.border,
-              backgroundColor: colors.card,
-            }}
-          >
-            <Pressable
+        }
+      >
+        {listing ? (
+          <>
+            <ScrollView
               style={{ flex: 1 }}
-              onPress={() => openDates(false)}
-              accessibilityRole="button"
-              accessibilityLabel={dates ? 'Change dates' : 'Add dates'}
-            >
-              {dates && q?.available && q.estimatedTotal != null ? (
-                <>
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
-                    <Price amount={q.estimatedTotal} variant="subheading" />
-                    <Text variant="callout" color="mutedForeground">
-                      total
-                    </Text>
-                  </View>
-                  <Text variant="caption" style={{ textDecorationLine: 'underline' }}>
-                    {seasonRange(dates.checkIn, dates.checkOut)} ·{' '}
-                    {nightsLabel(q.estimatedNights ?? 0)}
-                  </Text>
-                </>
-              ) : dates && q && !q.available ? (
-                <>
-                  <Text variant="callout" style={{ color: colors.warning }} numberOfLines={2}>
-                    {q.reason ?? 'Those dates are taken.'}
-                  </Text>
-                  <Text variant="caption" style={{ textDecorationLine: 'underline' }}>
-                    Change dates
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
-                    <Price amount={listing.nightlyRate} variant="subheading" />
-                    <Text variant="callout" color="mutedForeground">
-                      / night
-                    </Text>
-                  </View>
-                  <Text variant="caption" style={{ textDecorationLine: 'underline' }}>
-                    {dates && quote.isFetching ? 'Pricing your dates…' : 'Add dates for the total'}
-                  </Text>
-                </>
-              )}
-            </Pressable>
-            <Button
-              label={
-                !dates || (q && !q.available)
-                  ? 'Check dates'
-                  : listing.instantBooking
-                    ? 'Book now'
-                    : 'Request'
+              contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
+              showsVerticalScrollIndicator={false}
+              scrollEventThrottle={32}
+              onScroll={(e) =>
+                setSolidHeader(e.nativeEvent.contentOffset.y > galleryHeight - insets.top - 64)
               }
-              fullWidth={false}
-              size="lg"
-              onPress={() => (dates && q?.available ? setSheet('book') : openDates(true))}
-            />
-          </View>
+            >
+              <PropertyGallery
+                images={toGallery(listing.coverImageUrl, listing.images)}
+                height={galleryHeight}
+                emptyLabel="No photos for this stay yet"
+              />
 
-          <StayDatesSheet
-            open={sheet === 'dates'}
-            onClose={() => setSheet(null)}
-            value={dates}
-            unavailable={taken.data?.unavailableDates}
-            minNights={listing.minNights}
-            onChange={(d) => {
-              setDates(d);
-              if (d && bookAfterDates) setTimeout(() => setSheet('book'), 250);
-            }}
-          />
-          {dates ? (
-            <BookStaySheet
-              open={sheet === 'book'}
+              <View
+                style={{
+                  paddingHorizontal: spacing.xl,
+                  paddingTop: spacing.xl,
+                  gap: spacing['2xl'],
+                }}
+              >
+                {/* Title and trust */}
+                <View style={{ gap: spacing.sm }}>
+                  <Text variant="title" headingLevel={1}>
+                    {listing.title}
+                  </Text>
+                  <Text variant="body" color="mutedForeground">
+                    {listing.city}, {listing.state} · sleeps {listing.maxGuests}
+                    {listing.bedrooms
+                      ? ` · ${listing.bedrooms} bed${listing.bedrooms === 1 ? '' : 's'}`
+                      : ''}
+                    {listing.bathrooms
+                      ? ` · ${listing.bathrooms} bath${listing.bathrooms === 1 ? '' : 's'}`
+                      : ''}
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <Star size={15} color={colors.foreground} fill={colors.foreground} />
+                    <Text variant="bodyStrong">
+                      {listing.reviewCount > 0 && listing.ratingAverage
+                        ? listing.ratingAverage.toFixed(1)
+                        : 'New'}
+                    </Text>
+                    {listing.reviewCount > 0 ? (
+                      <Text variant="body" color="mutedForeground">
+                        · {listing.reviewCount} {listing.reviewCount === 1 ? 'review' : 'reviews'}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <View style={{ marginTop: spacing.xs }}>
+                    <TrustChips listing={listing} />
+                  </View>
+                </View>
+
+                <Divider />
+                <HostBlock listing={listing} onMessage={() => setSheet('message')} />
+                <Divider />
+
+                {/* The facts that decide a stay */}
+                <View style={{ gap: spacing.lg }}>
+                  <InfoRow
+                    icon={Clock}
+                    title={`Check in ${listing.checkInTime ? `from ${listing.checkInTime}` : 'time set by host'}`}
+                    detail={
+                      listing.checkOutTime ? `Check out by ${listing.checkOutTime}` : undefined
+                    }
+                  />
+                  <InfoRow
+                    icon={CalendarClock}
+                    title={`Minimum ${nightsLabel(listing.minNights)}`}
+                    detail={
+                      listing.seasons?.some((s) => s.minNights)
+                        ? 'Longer minimums apply in peak season'
+                        : undefined
+                    }
+                  />
+                  <InfoRow
+                    icon={Undo2}
+                    title={`${policy?.label ?? 'Flexible'} cancellation`}
+                    detail={policy?.hint}
+                  />
+                </View>
+
+                {listing.description ? (
+                  <Section title="About this stay">
+                    <Text
+                      variant="body"
+                      color="mutedForeground"
+                      numberOfLines={aboutOpen ? undefined : 5}
+                    >
+                      {listing.description}
+                    </Text>
+                    {listing.description.length > 240 ? (
+                      <LinkButton
+                        label={aboutOpen ? 'Show less' : 'Read more'}
+                        onPress={() => setAboutOpen((o) => !o)}
+                        style={{ alignSelf: 'flex-start' }}
+                      />
+                    ) : null}
+                  </Section>
+                ) : null}
+
+                {listing.videoUrl || listing.tourUrl ? (
+                  <Pressable onPress={() => setTouring(true)} accessibilityRole="button">
+                    <Card elevated>
+                      <InfoRow
+                        icon={PlayCircle}
+                        title={listing.videoUrl ? 'Watch the video tour' : 'Take the virtual tour'}
+                        detail="See the space before you book"
+                      />
+                      {listing.videoUrl && listing.videoFilmedOnSite ? <FilmedOnSite /> : null}
+                    </Card>
+                  </Pressable>
+                ) : null}
+
+                <EssentialsBlock listing={listing} />
+                <RulesBlock listing={listing} />
+
+                {listing.amenities?.length ? (
+                  <Section title="Amenities">
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                      {listing.amenities.map((a) => (
+                        <Chip key={a} label={a} />
+                      ))}
+                    </View>
+                  </Section>
+                ) : null}
+
+                <PricingBlock listing={listing} />
+                <FairPriceNote listing={listing} />
+                <InspectionBlock listing={listing} />
+
+                <GuestPromiseCard>
+                  <SupportContact context={`Question about ${listing.title}`} />
+                </GuestPromiseCard>
+
+                {listing.latitude != null && listing.longitude != null ? (
+                  <Section
+                    title="Where you'll be"
+                    caption={`${listing.city}, ${listing.state} · exact address after you book`}
+                  >
+                    <PropertyMapView
+                      markers={[
+                        {
+                          id: listing.id,
+                          latitude: listing.latitude,
+                          longitude: listing.longitude,
+                        },
+                      ]}
+                      // The area of the stay; the address comes with the booking.
+                      variant="area"
+                      zoom={14}
+                      height={200}
+                    />
+                  </Section>
+                ) : null}
+
+                {reviews.data?.items.length ? (
+                  <Section title="Reviews">
+                    {reviews.data.items.map((r) => (
+                      <Card key={r.id} elevated style={{ gap: spacing.sm }}>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}
+                        >
+                          <Text variant="bodyStrong" style={{ flex: 1 }}>
+                            {r.authorName}
+                          </Text>
+                          <View style={{ flexDirection: 'row', gap: 1 }}>
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <Star
+                                key={n}
+                                size={12}
+                                color={colors.foreground}
+                                fill={n <= r.rating ? colors.foreground : 'transparent'}
+                              />
+                            ))}
+                          </View>
+                        </View>
+                        <Text variant="caption" color="mutedForeground">
+                          {formatDate(r.createdAt, 'short')}
+                        </Text>
+                        {r.comment ? (
+                          <Text variant="body" color="mutedForeground">
+                            {r.comment}
+                          </Text>
+                        ) : null}
+                      </Card>
+                    ))}
+                  </Section>
+                ) : null}
+              </View>
+            </ScrollView>
+
+            {/* Floating controls over the gallery; a solid bar once scrolled past it */}
+            <View
+              pointerEvents="box-none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                paddingTop: insets.top + spacing.sm,
+                paddingBottom: spacing.sm,
+                paddingHorizontal: spacing.lg,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.sm,
+                backgroundColor: solidHeader ? colors.card : 'transparent',
+                borderBottomWidth: solidHeader ? StyleSheet.hairlineWidth : 0,
+                borderBottomColor: colors.border,
+              }}
+            >
+              <Pressable
+                onPress={() => router.back()}
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+                hitSlop={6}
+                style={roundButton}
+              >
+                <ChevronLeft size={22} color={iconColor} />
+              </Pressable>
+              <Text
+                variant="bodyStrong"
+                numberOfLines={1}
+                style={{ flex: 1, textAlign: 'center', opacity: solidHeader ? 1 : 0 }}
+                importantForAccessibility="no"
+              >
+                {listing.title}
+              </Text>
+              <Pressable
+                onPress={() => {
+                  void haptics.tap();
+                  wishlist.mutate(!saved);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={saved ? 'Remove from wishlist' : 'Save to wishlist'}
+                hitSlop={6}
+                style={roundButton}
+              >
+                <Heart
+                  size={19}
+                  color={saved ? colors.destructive : iconColor}
+                  fill={saved ? colors.destructive : 'transparent'}
+                />
+              </Pressable>
+            </View>
+
+            {/* The total, always in reach */}
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.md,
+                paddingHorizontal: spacing.xl,
+                paddingTop: spacing.md,
+                paddingBottom: insets.bottom + spacing.md,
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+                backgroundColor: colors.card,
+              }}
+            >
+              <Pressable
+                style={{ flex: 1 }}
+                onPress={() => openDates(false)}
+                accessibilityRole="button"
+                accessibilityLabel={dates ? 'Change dates' : 'Add dates'}
+              >
+                {dates && q?.available && q.estimatedTotal != null ? (
+                  <>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+                      <Price amount={q.estimatedTotal} variant="subheading" />
+                      <Text variant="callout" color="mutedForeground">
+                        total
+                      </Text>
+                    </View>
+                    <Text variant="caption" style={{ textDecorationLine: 'underline' }}>
+                      {seasonRange(dates.checkIn, dates.checkOut)} ·{' '}
+                      {nightsLabel(q.estimatedNights ?? 0)}
+                    </Text>
+                  </>
+                ) : dates && q && !q.available ? (
+                  <>
+                    <Text variant="callout" style={{ color: colors.warning }} numberOfLines={2}>
+                      {q.reason ?? 'Those dates are taken.'}
+                    </Text>
+                    <Text variant="caption" style={{ textDecorationLine: 'underline' }}>
+                      Change dates
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+                      <Price amount={listing.nightlyRate} variant="subheading" />
+                      <Text variant="callout" color="mutedForeground">
+                        / night
+                      </Text>
+                    </View>
+                    <Text variant="caption" style={{ textDecorationLine: 'underline' }}>
+                      {dates && quote.isFetching
+                        ? 'Pricing your dates…'
+                        : 'Add dates for the total'}
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+              <Button
+                label={
+                  !dates || (q && !q.available)
+                    ? 'Check dates'
+                    : listing.instantBooking
+                      ? 'Book now'
+                      : 'Request'
+                }
+                fullWidth={false}
+                size="lg"
+                onPress={() => (dates && q?.available ? setSheet('book') : openDates(true))}
+              />
+            </View>
+
+            <StayDatesSheet
+              open={sheet === 'dates'}
+              onClose={() => setSheet(null)}
+              value={dates}
+              unavailable={taken.data?.unavailableDates}
+              minNights={listing.minNights}
+              onChange={(d) => {
+                setDates(d);
+                if (d && bookAfterDates) setTimeout(() => setSheet('book'), 250);
+              }}
+            />
+            {dates ? (
+              <BookStaySheet
+                open={sheet === 'book'}
+                onClose={() => setSheet(null)}
+                listing={listing}
+                dates={dates}
+                guests={Math.min(guests, listing.maxGuests)}
+                onGuestsChange={setGuests}
+                onChangeDates={() => {
+                  setSheet(null);
+                  setTimeout(() => openDates(true), 250);
+                }}
+              />
+            ) : null}
+            <MessageHostSheet
+              open={sheet === 'message'}
               onClose={() => setSheet(null)}
               listing={listing}
-              dates={dates}
-              guests={Math.min(guests, listing.maxGuests)}
-              onGuestsChange={setGuests}
-              onChangeDates={() => {
-                setSheet(null);
-                setTimeout(() => openDates(true), 250);
-              }}
             />
-          ) : null}
-          <MessageHostSheet
-            open={sheet === 'message'}
-            onClose={() => setSheet(null)}
-            listing={listing}
-          />
-          <VideoTourSheet
-            open={touring}
-            onClose={() => setTouring(false)}
-            title={listing.title}
-            videoUrl={listing.videoUrl}
-            videoStream={listing.videoStream}
-            tourUrl={listing.tourUrl}
-            onExpired={() => void query.refetch()}
-          />
-        </>
-      )}
+            <VideoTourSheet
+              open={touring}
+              onClose={() => setTouring(false)}
+              title={listing.title}
+              videoUrl={listing.videoUrl}
+              videoStream={listing.videoStream}
+              tourUrl={listing.tourUrl}
+              onExpired={() => void query.refetch()}
+            />
+          </>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

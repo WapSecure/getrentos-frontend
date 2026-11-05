@@ -15,9 +15,9 @@ import {
 import {
   Button,
   Card,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -112,90 +112,93 @@ export default function HostingHome() {
         }
       />
 
-      {listings.isError && !listings.data ? (
-        <ErrorState onRetry={() => listings.refetch()} />
-      ) : !listings.data ? (
-        <View style={{ gap: spacing.md }}>
-          <Skeleton height={148} radius={radius.xl} />
-          <Skeleton height={120} radius={radius.lg} />
-        </View>
-      ) : noListings ? (
-        <FirstListing />
-      ) : (
-        <>
-          <MoneyHero
-            available={summary.data?.available}
-            upcoming={summary.data?.upcoming}
-            nextRelease={summary.data?.nextReleaseAt ?? null}
-          />
+      <QueryState
+        query={listings}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            <Skeleton height={148} radius={radius.xl} />
+            <Skeleton height={120} radius={radius.lg} />
+          </View>
+        }
+      >
+        {noListings ? (
+          <FirstListing />
+        ) : (
+          <>
+            <MoneyHero
+              available={summary.data?.available}
+              upcoming={summary.data?.upcoming}
+              nextRelease={summary.data?.nextReleaseAt ?? null}
+            />
 
-          {pending ? (
+            {pending ? (
+              <Section
+                title="Needs your reply"
+                action={pending > 2 ? `All ${pending}` : undefined}
+                onAction={() =>
+                  router.push({ pathname: '/(app)/host/bookings', params: { view: 'requests' } })
+                }
+              >
+                {(requests.data?.items ?? []).slice(0, 2).map((b) => (
+                  <StayCard key={b.id} b={b} />
+                ))}
+              </Section>
+            ) : null}
+
             <Section
-              title="Needs your reply"
-              action={pending > 2 ? `All ${pending}` : undefined}
+              title="Coming up"
+              action={upcoming.data?.items.length ? 'All stays' : undefined}
               onAction={() =>
-                router.push({ pathname: '/(app)/host/bookings', params: { view: 'requests' } })
+                router.push({ pathname: '/(app)/host/bookings', params: { view: 'upcoming' } })
               }
             >
-              {requests.data!.items.slice(0, 2).map((b) => (
-                <StayCard key={b.id} b={b} />
-              ))}
+              {upcoming.isPending ? (
+                <Skeleton height={112} radius={radius.lg} />
+              ) : upcoming.data?.items.length ? (
+                upcoming.data.items.slice(0, 3).map((b) => <StayCard key={b.id} b={b} compact />)
+              ) : (
+                <Text variant="callout" color="mutedForeground">
+                  No confirmed stays yet. Keep your calendar open and prices sharp.
+                </Text>
+              )}
             </Section>
-          ) : null}
 
-          <Section
-            title="Coming up"
-            action={upcoming.data?.items.length ? 'All stays' : undefined}
-            onAction={() =>
-              router.push({ pathname: '/(app)/host/bookings', params: { view: 'upcoming' } })
-            }
-          >
-            {upcoming.isPending ? (
-              <Skeleton height={112} radius={radius.lg} />
-            ) : upcoming.data?.items.length ? (
-              upcoming.data.items.slice(0, 3).map((b) => <StayCard key={b.id} b={b} compact />)
-            ) : (
-              <Text variant="callout" color="mutedForeground">
-                No confirmed stays yet. Keep your calendar open and prices sharp.
-              </Text>
-            )}
-          </Section>
-
-          <View style={{ gap: spacing.sm }}>
-            <Tile
-              Icon={BedDouble}
-              label="Listings"
-              hint={`${listings.data.items.length} total · ${live} live`}
-              onPress={() => router.push('/(app)/host/listings')}
-            />
-            <Tile
-              Icon={CalendarDays}
-              label="Bookings"
-              hint="Requests, stays and history"
-              onPress={() => router.push('/(app)/host/bookings')}
-            />
-            <Tile
-              Icon={MessageCircle}
-              label="Guest messages"
-              hint={unread ? `${unread} unread` : 'Chats with guests'}
-              badge={unread}
-              onPress={() => router.push('/(app)/host/inbox')}
-            />
-            <Tile
-              Icon={Wallet}
-              label="Earnings & payouts"
-              hint="Withdraw, history and fees"
-              onPress={() => router.push('/(app)/host/earnings')}
-            />
-            <Tile
-              Icon={Gavel}
-              label="Disputes & claims"
-              hint="Damage claims and resolutions"
-              onPress={() => router.push('/(app)/host/disputes')}
-            />
-          </View>
-        </>
-      )}
+            <View style={{ gap: spacing.sm }}>
+              <Tile
+                Icon={BedDouble}
+                label="Listings"
+                hint={`${listings.data?.items.length ?? 0} total · ${live} live`}
+                onPress={() => router.push('/(app)/host/listings')}
+              />
+              <Tile
+                Icon={CalendarDays}
+                label="Bookings"
+                hint="Requests, stays and history"
+                onPress={() => router.push('/(app)/host/bookings')}
+              />
+              <Tile
+                Icon={MessageCircle}
+                label="Guest messages"
+                hint={unread ? `${unread} unread` : 'Chats with guests'}
+                badge={unread}
+                onPress={() => router.push('/(app)/host/inbox')}
+              />
+              <Tile
+                Icon={Wallet}
+                label="Earnings & payouts"
+                hint="Withdraw, history and fees"
+                onPress={() => router.push('/(app)/host/earnings')}
+              />
+              <Tile
+                Icon={Gavel}
+                label="Disputes & claims"
+                hint="Damage claims and resolutions"
+                onPress={() => router.push('/(app)/host/disputes')}
+              />
+            </View>
+          </>
+        )}
+      </QueryState>
     </ScrollView>
   );
 }

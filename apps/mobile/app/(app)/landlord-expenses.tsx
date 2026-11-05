@@ -9,9 +9,9 @@ import {
   Badge,
   Card,
   EmptyState,
-  ErrorState,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -70,9 +70,17 @@ export default function LandlordExpenses() {
         }
       />
 
-      {query.isError && !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ gap: spacing.sm }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={84} radius={radius.lg} />
+            ))}
+          </View>
+        }
+        style={{ paddingHorizontal: spacing.xl }}
+      >
         <FlashList
           data={items}
           keyExtractor={(e) => e.id}
@@ -115,22 +123,14 @@ export default function LandlordExpenses() {
             />
           }
           ListEmptyComponent={
-            query.isLoading ? (
-              <View style={{ gap: spacing.sm }}>
-                {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} height={84} radius={radius.lg} />
-                ))}
-              </View>
-            ) : (
-              <EmptyState
-                icon={<ReceiptText size={32} color={colors.mutedForeground} />}
-                title="No expenses logged"
-                description="Track what a property costs so your net profit reflects reality."
-              />
-            )
+            <EmptyState
+              icon={<ReceiptText size={32} color={colors.mutedForeground} />}
+              title="No expenses logged"
+              description="Track what a property costs so your net profit reflects reality."
+            />
           }
         />
-      )}
+      </QueryState>
 
       <AddExpenseSheet open={adding} onClose={() => setAdding(false)} />
     </View>

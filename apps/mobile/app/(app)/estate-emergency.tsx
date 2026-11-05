@@ -8,8 +8,8 @@ import {
   Button,
   Card,
   Chip,
-  ErrorState,
   FormAlert,
+  QueryState,
   Skeleton,
   Text,
   TextField,
@@ -103,18 +103,16 @@ export default function EstateEmergency() {
         onBack={() => goBack()}
       />
 
-      {query.isError && !muster ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : query.isPending ? (
-        <Skeleton height={260} radius={radius.lg} />
-      ) : muster ? (
-        <Roll estateId={estateId} muster={muster} />
-      ) : (
-        <>
-          <DeclareForm estateId={estateId} households={estate?.householdCount ?? 0} />
-          <History items={history.data?.items ?? []} loading={history.isPending} />
-        </>
-      )}
+      <QueryState query={query} skeleton={<Skeleton height={260} radius={radius.lg} />}>
+        {muster ? (
+          <Roll estateId={estateId} muster={muster} />
+        ) : (
+          <>
+            <DeclareForm estateId={estateId} households={estate?.householdCount ?? 0} />
+            <History items={history.data?.items ?? []} loading={history.isPending} />
+          </>
+        )}
+      </QueryState>
     </ScrollView>
   );
 }

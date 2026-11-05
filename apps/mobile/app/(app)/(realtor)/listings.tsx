@@ -19,10 +19,10 @@ import {
   Card,
   Chip,
   EmptyState,
-  ErrorState,
   FormAlert,
   IconButton,
   Price,
+  QueryState,
   Skeleton,
   Text,
   useTheme,
@@ -134,17 +134,16 @@ export default function RealtorListings() {
         ) : null}
       </View>
 
-      {query.isError && !query.data ? (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={refresh}>
-          <ErrorState onRetry={() => query.refetch()} />
-        </ScrollView>
-      ) : query.isPending ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} height={132} radius={radius.lg} />
-          ))}
-        </View>
-      ) : (
+      <QueryState
+        query={query}
+        skeleton={
+          <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} height={132} radius={radius.lg} />
+            ))}
+          </View>
+        }
+      >
         <FlashList
           data={items}
           keyExtractor={(l) => l.id}
@@ -177,7 +176,7 @@ export default function RealtorListings() {
             />
           }
         />
-      )}
+      </QueryState>
 
       <Sheet open={sheet === 'actions'} onClose={close} title="Listing">
         {selected ? (

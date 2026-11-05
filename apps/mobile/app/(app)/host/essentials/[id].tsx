@@ -8,9 +8,10 @@ import {
   Button,
   Card,
   Chip,
-  EmptyState,
+  Divider,
   FormAlert,
   NumberField,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -60,15 +61,18 @@ export default function HostEssentials() {
       style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {listings.isPending ? (
-        <View style={{ padding: spacing.xl, paddingTop: insets.top + spacing['4xl'] }}>
-          <Skeleton height={320} radius={radius.lg} />
-        </View>
-      ) : !l ? (
-        <EmptyState title="Listing not found" />
-      ) : (
-        <Form listing={l} key={l.id} />
-      )}
+      <QueryState
+        query={listings}
+        skeleton={
+          <View style={{ padding: spacing.xl, paddingTop: insets.top + spacing['4xl'] }}>
+            <Skeleton height={320} radius={radius.lg} />
+          </View>
+        }
+        isEmpty={!l}
+        empty={{ title: 'Listing not found' }}
+      >
+        {l ? <Form listing={l} key={l.id} /> : null}
+      </QueryState>
     </KeyboardAvoidingView>
   );
 }
@@ -255,13 +259,12 @@ function Form({ listing: l }: { listing: HostListing }) {
 
         {save.error ? <FormAlert message={errorMessage(save.error, 'Could not save.')} /> : null}
       </ScrollView>
+      <Divider />
       <View
         style={{
           paddingHorizontal: spacing.xl,
           paddingTop: spacing.md,
           paddingBottom: insets.bottom + spacing.md,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
           backgroundColor: colors.card,
         }}
       >

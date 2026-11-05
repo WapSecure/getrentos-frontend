@@ -7,9 +7,8 @@ import { Image } from 'expo-image';
 import { ChevronRight, Gavel, ShieldCheck } from 'lucide-react-native';
 import {
   Card,
-  EmptyState,
-  ErrorState,
   Price,
+  QueryState,
   SegmentedControl,
   Skeleton,
   Text,
@@ -86,29 +85,30 @@ export default function GuestDisputes() {
           { value: 'claims', label: 'Deposit claims' },
         ]}
       />
-      {active.isError && !active.data ? (
-        <ErrorState onRetry={() => active.refetch()} />
-      ) : active.isPending ? (
-        <Skeleton height={110} radius={radius.lg} />
-      ) : tab === 'disputes' ? (
-        disputes.data?.items.length ? (
-          disputes.data.items.map((d) => <DisputeRow key={d.id} d={d} />)
-        ) : (
-          <EmptyState
-            icon={<Gavel size={34} color={colors.mutedForeground} />}
-            title="No disputes"
-            description="If something goes wrong with a stay, raise it from the stay and support steps in."
-          />
-        )
-      ) : claims.data?.items.length ? (
-        claims.data.items.map((c) => <ClaimRow key={c.id} c={c} />)
-      ) : (
-        <EmptyState
-          icon={<ShieldCheck size={34} color={colors.mutedForeground} />}
-          title="No claims on your deposits"
-          description="Deposits come back to you after checkout unless a host reports damage."
-        />
-      )}
+      <QueryState
+        query={active}
+        skeleton={<Skeleton height={110} radius={radius.lg} />}
+        isEmpty={tab === 'disputes' ? !disputes.data?.items.length : !claims.data?.items.length}
+        empty={
+          tab === 'disputes'
+            ? {
+                icon: <Gavel size={34} color={colors.mutedForeground} />,
+                title: 'No disputes',
+                description:
+                  'If something goes wrong with a stay, raise it from the stay and support steps in.',
+              }
+            : {
+                icon: <ShieldCheck size={34} color={colors.mutedForeground} />,
+                title: 'No claims on your deposits',
+                description:
+                  'Deposits come back to you after checkout unless a host reports damage.',
+              }
+        }
+      >
+        {tab === 'disputes'
+          ? (disputes.data?.items ?? []).map((d) => <DisputeRow key={d.id} d={d} />)
+          : (claims.data?.items ?? []).map((c) => <ClaimRow key={c.id} c={c} />)}
+      </QueryState>
     </ScrollView>
   );
 }

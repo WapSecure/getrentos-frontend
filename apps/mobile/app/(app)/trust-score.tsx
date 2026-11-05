@@ -17,8 +17,8 @@ import {
 import {
   Card,
   Divider,
-  ErrorState,
   Progress,
+  QueryState,
   Screen,
   Skeleton,
   Text,
@@ -51,6 +51,7 @@ export default function TrustScore() {
   const insets = useSafeAreaInsets();
 
   const query = useQuery({ queryKey: qk.renter.trustScore, queryFn: trustScoreApi.getOverview });
+  const d = query.data;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -73,79 +74,83 @@ export default function TrustScore() {
         />
       </View>
 
-      {query.isLoading ? (
-        <View style={{ paddingHorizontal: spacing.xl, gap: spacing.md }}>
-          <Skeleton height={120} radius={16} />
-          <Skeleton height={200} radius={16} />
-        </View>
-      ) : !query.data ? (
-        <ErrorState onRetry={() => query.refetch()} />
-      ) : (
-        <Screen padded>
-          <ScoreCard trustScore={query.data.trustScore} averageScore={query.data.averageScore} />
-
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading">Verifications</Text>
-            <Card elevated padding="none">
-              {query.data.verifications.map((v, i) => (
-                <VerificationRow key={v.id} item={v} showDivider={i > 0} />
-              ))}
-            </Card>
+      <QueryState
+        query={query}
+        style={{ paddingHorizontal: spacing.xl }}
+        skeleton={
+          <View style={{ gap: spacing.md }}>
+            <Skeleton height={120} radius={16} />
+            <Skeleton height={200} radius={16} />
           </View>
+        }
+      >
+        {d ? (
+          <Screen padded>
+            <ScoreCard trustScore={d.trustScore} averageScore={d.averageScore} />
 
-          <View style={{ gap: spacing.sm }}>
-            <Text variant="heading">Badges</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-              {query.data.badges.map((b) => (
-                <BadgeTile key={b.id} badge={b} />
-              ))}
-            </View>
-          </View>
-
-          {query.data.history.length > 0 ? (
             <View style={{ gap: spacing.sm }}>
-              <Text variant="heading">History</Text>
+              <Text variant="heading">Verifications</Text>
               <Card elevated padding="none">
-                {query.data.history.map((h, i) => (
-                  <View key={`${h.date}-${h.reason}`}>
-                    {i > 0 ? <Divider /> : null}
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: spacing.sm,
-                        padding: spacing.lg,
-                      }}
-                    >
-                      {h.change >= 0 ? (
-                        <TrendingUp size={16} color={colors.success} />
-                      ) : (
-                        <TrendingDown size={16} color={colors.destructive} />
-                      )}
-                      <View style={{ flex: 1 }}>
-                        <Text variant="callout" numberOfLines={1}>
-                          {h.reason}
-                        </Text>
-                        <Text variant="caption" color="mutedForeground">
-                          {formatDate(h.date, 'short')}
-                        </Text>
-                      </View>
-                      <Text
-                        variant="callout"
-                        color={h.change >= 0 ? 'success' : 'destructive'}
-                        style={{ fontWeight: '700' }}
-                      >
-                        {h.change >= 0 ? '+' : ''}
-                        {h.change}
-                      </Text>
-                    </View>
-                  </View>
+                {d.verifications.map((v, i) => (
+                  <VerificationRow key={v.id} item={v} showDivider={i > 0} />
                 ))}
               </Card>
             </View>
-          ) : null}
-        </Screen>
-      )}
+
+            <View style={{ gap: spacing.sm }}>
+              <Text variant="heading">Badges</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                {d.badges.map((b) => (
+                  <BadgeTile key={b.id} badge={b} />
+                ))}
+              </View>
+            </View>
+
+            {d.history.length > 0 ? (
+              <View style={{ gap: spacing.sm }}>
+                <Text variant="heading">History</Text>
+                <Card elevated padding="none">
+                  {d.history.map((h, i) => (
+                    <View key={`${h.date}-${h.reason}`}>
+                      {i > 0 ? <Divider /> : null}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: spacing.sm,
+                          padding: spacing.lg,
+                        }}
+                      >
+                        {h.change >= 0 ? (
+                          <TrendingUp size={16} color={colors.success} />
+                        ) : (
+                          <TrendingDown size={16} color={colors.destructive} />
+                        )}
+                        <View style={{ flex: 1 }}>
+                          <Text variant="callout" numberOfLines={1}>
+                            {h.reason}
+                          </Text>
+                          <Text variant="caption" color="mutedForeground">
+                            {formatDate(h.date, 'short')}
+                          </Text>
+                        </View>
+                        <Text
+                          variant="callout"
+                          color={h.change >= 0 ? 'success' : 'destructive'}
+                          style={{ fontWeight: '700' }}
+                        >
+                          {h.change >= 0 ? '+' : ''}
+                          {h.change}
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              </View>
+            ) : null}
+          </Screen>
+        ) : null}
+      </QueryState>
     </View>
   );
 }

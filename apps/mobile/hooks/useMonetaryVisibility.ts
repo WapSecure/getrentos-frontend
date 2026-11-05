@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { preferencesApi, type RenterPreferences } from '@/lib/api/preferences';
+import { useOptimisticMutation } from '@/lib/query/optimistic';
 
 const KEY = ['account', 'preferences'] as const;
 
@@ -8,21 +9,15 @@ export function useMonetaryVisibility() {
   const query = useQuery({ queryKey: KEY, queryFn: preferencesApi.get });
   const visible = query.data?.hideMonetaryValues !== true;
 
-  const mutation = useMutation({
+  const mutation = useOptimisticMutation({
     mutationFn: (nextVisible: boolean) =>
       preferencesApi.update({ hideMonetaryValues: !nextVisible }),
-    onMutate: async (nextVisible) => {
-      await queryClient.cancelQueries({ queryKey: KEY });
-      const previous = queryClient.getQueryData<RenterPreferences>(KEY);
-      queryClient.setQueryData<RenterPreferences>(KEY, {
-        ...(previous ?? {}),
-        hideMonetaryValues: !nextVisible,
-      });
-      return { previous };
-    },
-    onError: (_error, _nextVisible, context) => {
-      queryClient.setQueryData(KEY, context?.previous);
-    },
+    patches: (nextVisible) => [
+      {
+        queryKey: KEY,
+        update: (old) => ({ ...(old as RenterPreferences), hideMonetaryValues: !nextVisible }),
+      },
+    ],
     onSuccess: (saved) => queryClient.setQueryData(KEY, saved),
   });
 
